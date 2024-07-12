@@ -1,0 +1,210 @@
+﻿@page "/modbustest"
+@attribute [Authorize(Roles = "Admin, User")]
+
+@using ProcessManagement.Services.Modbus
+@using Radzen.Blazor
+@using Radzen
+@using ProcessManagement.Commons
+
+@inject ModbusServices Modbus
+
+<RadzenCard Variant="Variant.Outlined" Style="height: 100%; width: 100%; padding: 10px; ">
+    <RadzenStack Style="width: 100%; height: 100%;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start">
+
+        <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style=" height: contain; width: 100%;" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start">
+            <RadzenStack Gap="20px" Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
+                <RadzenButton Style="width: 100px;"
+                              Click=@(() => OnStartServer()) Text="@((Modbus.IsServerRunning)? "Stop" : "Start")" Size="ButtonSize.Medium"
+                              ButtonStyle="@((Modbus.IsServerRunning)? ButtonStyle.Success : ButtonStyle.Primary)" Shade="Shade.Dark" Variant="Variant.Flat">
+                </RadzenButton>
+                <RadzenStack Style="width: contain; height: contain;" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
+                    <RadzenText Style="color: black; font-weight: 600; font-size: 16px; font-style: initial" Text="@($"Client connected: {Modbus.NumofConectedClient}")"></RadzenText>
+                </RadzenStack>
+            </RadzenStack>
+
+            <RadzenStack Style="width: 50%; height: contain;" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
+                <RadzenDropDown Value="@RegType" ValueChanged="@((args) => { RegType = args; })" TValue="string"
+                                Data=@(RegTypes) Style="width: 50%; border-radius: 5px; border-width: 1px; font-size: 14px; ">
+                </RadzenDropDown>
+                <RadzenStack Style="width: 50%; height: contain;" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
+                    <RadzenTextBox Placeholder="*Nhập địa chỉ reg" Value="@RegAddress?.ToString()" ValueChanged="@((args) => { RegAddress = args; })" Style="font-size: 14px; font-weight: 600; width: 100%; height: contain;"></RadzenTextBox>
+                </RadzenStack>
+                <RadzenStack Style="width: 50%; height: contain;" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
+                    <RadzenTextBox Placeholder="*Nhập giá trị reg" Value="@RegValue?.ToString()" ValueChanged="@((args) => { RegValue = args; })" Style="font-size: 14px; font-weight: 600; width: 100%; height: contain;"></RadzenTextBox>
+                </RadzenStack>
+            </RadzenStack>
+            <RadzenStack Gap="10px" Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
+                <RadzenButton Style="width: 100px;"
+                              Click=@(() => OnWriteRegValue()) Text="Write" Size="ButtonSize.Medium"
+                              ButtonStyle="ButtonStyle.Primary" Shade="Shade.Dark" Variant="Variant.Flat">
+                </RadzenButton>
+                <RadzenButton Style="width: contain;"
+                              Click=@(() => OnReadRegValue()) Text="Read from Client" Size="ButtonSize.Medium"
+                              ButtonStyle="ButtonStyle.Primary" Shade="Shade.Dark" Variant="Variant.Flat">
+                </RadzenButton>
+                <RadzenButton Style="width: contain;"
+                              Click=@(() => ResetAllHoldingRegisters()) Text="Reset HodlingRegs" Size="ButtonSize.Medium"
+                              ButtonStyle="ButtonStyle.Primary" Shade="Shade.Dark" Variant="Variant.Flat">
+                </RadzenButton>
+            </RadzenStack>
+
+            <RadzenStack Style="width: 100%; height: contain; border-top: var(--rz-grid-cell-border); padding-top: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start">
+                <RadzenText Style="color: black; font-weight: 500; font-size: 15px;" Text="@($"Mess from client:")"></RadzenText>
+                <RadzenText Style="color: darkgreen; font-weight: 600; font-size: 16px;" Text="@(string.IsNullOrEmpty(readingData)? "Empty" : readingData)"></RadzenText>
+            </RadzenStack>
+        </RadzenStack>
+
+        <RadzenRow Style=" height: 50%; width: 600px;">
+            <RadzenColumn Size="12" SizeMD="6" Style="width: 100%; height: 100%;">
+                <RadzenCard Variant="Variant.Outlined" Style="width: 100%; height: 100%; padding: 10px; padding-right: 0px">
+                    <RadzenStack Gap="5px" Orientation="Orientation.Vertical" Style="width: 100%; height: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                        <RadzenStack Gap="0" Style=" height: contain; width: 100%; overflow-y: scroll" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: 100%; padding: 5px;">
+                                <RadzenStack Style="width: 100%; height: contain" Gap="0" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                    <RadzenStack Style="width: 10%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                        <RadzenText Text="#" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                                    </RadzenStack>
+                                    <RadzenStack Style="width: 50%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                        <RadzenText Text="Address" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                                    </RadzenStack>
+                                    <RadzenStack Style="width: 40%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                        <RadzenText Text="Value" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                                    </RadzenStack>
+                                </RadzenStack>
+                            </RadzenCard>
+                        </RadzenStack>
+
+                        <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style=" height: 90%; width: 100%; overflow-y: scroll" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                            @if (Modbus.ModbusServer != null)
+                            {
+                                int index = -1;
+                                @foreach (var holdRegs in Modbus.ModbusServer.holdingRegisters.localArray.Take(150))
+                                {
+                                    index++;
+                                    int currentIndex = index;
+                                    <RadzenCard Variant="Variant.Outlined" Style="width: 100%; height: 100%; padding: 5px; background-color: white">
+                                        <RadzenStack Style="width: 100%; height: contain" Gap="10px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                            <RadzenStack Style="width: 15%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                <RadzenText Text="@(currentIndex.ToString())" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                                            </RadzenStack>
+                                            <RadzenStack Style="width: 55%; height: contain; background-color: beige" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                <RadzenText Text="@($"4x {currentIndex}")" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                                            </RadzenStack>
+                                            <RadzenStack Style="width: 30%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                <RadzenText Text="@(holdRegs.ToString())" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                                            </RadzenStack>
+                                        </RadzenStack>
+                                    </RadzenCard>
+                                }
+                            }
+                        </RadzenStack>
+                    </RadzenStack>
+                </RadzenCard>
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="6" Style="width: 100%; height: 100%;">
+                <RadzenCard Variant="Variant.Outlined" Style="width: 100%; height: 100%; padding: 10px; padding-right: 0px">
+                    <RadzenStack Gap="5px" Orientation="Orientation.Vertical" Style="width: 100%; height: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                        <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenText Text="Last 30 register (4x65506 - 4x65535)" Style="color: darkred; font-weight: 600; font-size: 14px"></RadzenText>
+                        </RadzenStack>
+                        <RadzenStack Gap="0" Style=" height: contain; width: 100%; overflow-y: scroll" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: 100%; padding: 5px;">
+                                <RadzenStack Style="width: 100%; height: contain; border-bottom: var(--rz-grid-cell-border)" Gap="0" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                    <RadzenStack Style="width: 15%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                        <RadzenText Text="#" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                                    </RadzenStack>
+                                    <RadzenStack Style="width: 55%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                        <RadzenText Text="Address" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                                    </RadzenStack>
+                                    <RadzenStack Style="width: 30%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                        <RadzenText Text="Value" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                                    </RadzenStack>
+                                </RadzenStack>
+                            </RadzenCard>
+                        </RadzenStack>
+
+                        <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style=" height: 90%; width: 100%; overflow-y: scroll; padding-top: 10px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                            @if (Modbus.ModbusServer != null)
+                            {
+                                var dataArray = Modbus.ModbusServer.holdingRegisters.localArray;
+                                var dataLenght = dataArray.Length;
+                                int index = dataLenght - 30;
+                                @foreach (var holdRegs in dataArray.Skip(dataLenght - 30).ToArray())
+                                {
+                                    index++;
+                                    int currentIndex = index;
+                                    <RadzenCard Variant="Variant.Outlined" Style="width: 100%; height: 100%; padding: 5px; background-color: white">
+                                        <RadzenStack Style="width: 100%; height: contain" Gap="10px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                            <RadzenStack Style="width: 15%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                <RadzenText Text="@(currentIndex.ToString())" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                                            </RadzenStack>
+                                            <RadzenStack Style="width: 55%; height: contain; background-color: beige" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                <RadzenText Text="@($"4x {currentIndex}")" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                                            </RadzenStack>
+                                            <RadzenStack Style="width: 30%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                <RadzenText Text="@(holdRegs.ToString())" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                                            </RadzenStack>
+                                        </RadzenStack>
+                                    </RadzenCard>
+                                }
+                            }
+                        </RadzenStack>
+                    </RadzenStack>
+                </RadzenCard>
+            </RadzenColumn>
+        </RadzenRow>
+    </RadzenStack>
+</RadzenCard>
+
+@code {
+    private object? RegValue = null;
+    private string RegAddress = string.Empty;
+    private List<string> RegTypes = new() { "Coil Outputs", "Digital Inputs", "Analogue Inputs", "Holding Registers", "Write String" };
+    private string RegType = string.Empty;
+    private string readingData = string.Empty;
+
+    protected override Task OnInitializedAsync()
+    {
+        if (!Modbus.Is_RequiredRenderEvent_Registered())
+        {
+            Modbus.RequiredRenderEvent += UpdateUI_Event;
+        }
+        return base.OnInitializedAsync();
+    }
+
+    private async void UpdateUI_Event(object? sender, object args)
+    {
+        await InvokeAsync(new Action(() => StateHasChanged()));
+    }
+
+    private void OnStartServer()
+    {
+        Modbus.StartServer();
+    }
+
+    private void OnWriteRegValue()
+    {
+        if (RegValue == null || RegAddress == string.Empty)
+        {
+            return;
+        }
+
+        Modbus.WriteRegData(RegAddress, RegType, RegValue?.ToString());
+    }
+
+    private void ResetAllHoldingRegisters()
+    {
+        Modbus.ResetAllHoldingRegisters();
+    }
+
+    private void OnReadRegValue()
+    {
+        int readLengh = (RegValue?.ToString()?.Length) ?? 0;
+
+        if (readLengh > 0)
+        {
+            int regstartPosition = int.TryParse(RegAddress, out int regs) ? regs : 0;
+            readingData = Modbus.ReadStringData(regstartPosition, readLengh); // skip register 0
+        }
+    }
+}

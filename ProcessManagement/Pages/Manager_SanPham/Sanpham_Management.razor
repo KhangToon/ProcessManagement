@@ -1,0 +1,574 @@
+﻿@page "/spmanagement"
+@attribute [Authorize(Roles = "Admin, User")]
+@* this limited access into page *@
+
+@using ProcessManagement.Commons
+@using ProcessManagement.Models
+@using ProcessManagement.Pages.Manager_NVL.Dialogs
+@using ProcessManagement.Pages.Manager_SanPham.Dialogs
+@using ProcessManagement.Services.SQLServer
+@using Radzen.Blazor
+@using Radzen
+
+@inject NotificationService NotificationService
+@inject DialogService DialogService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject SQLServerServices SQLServerServices
+
+<style>
+    .rowbackground-style {
+        background-color: white;
+        border-radius: 10px;
+    }
+
+    .rz-grid-table-fixed-2 {
+        /*width: unset;*/
+        table-layout: auto;
+        border-radius: 10px;
+        padding: 10px;
+    }
+</style>
+
+<RadzenRow class="rowbackground-style" Gap="10px" Style="height: 100%; width: 100%; padding: 10px; overflow-y: auto;">
+    <RadzenColumn Size="12" SizeMD="8" Style="height: 100%; width: 100%;">
+        <RadzenCard Variant="Variant.Outlined" Style="height: contain; width: 100%;">
+            <RadzenStack Gap="10" Style="height: contain; width: 100%;">
+                <RadzenStack Style="height: contain; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                    <!--Search area-->
+                    <RadzenStack Gap="15px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: 100%; width: 100%;">
+                        <RadzenTextBox @oninput="@((args) => FilterSanphamsTonkho(args.Value?.ToString()))" Placeholder="Tìm sản phẩm" Style="border-radius: 20px; padding-left: 20px; border-width: 2px; border-color: var(--rz-primary-light); width: 50% "></RadzenTextBox>
+                        <RadzenButton Icon="search" ButtonStyle="ButtonStyle.Primary" Style="border-radius: 20px;" />
+                        <RadzenButton Click="@(() => { OnSearchProductListFromDayRange(); })" Style="border-radius: 20px;" Icon="autorenew" ButtonStyle="ButtonStyle.Primary" />
+                        <RadzenStack></RadzenStack>
+                    </RadzenStack>
+                </RadzenStack>
+                <RadzenStack Gap="20px" Orientation="Orientation.Horizontal" Style="height: contain; width: 100%; padding-top: 10px; border-top: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                    <!--Search area-->
+                    <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" Style="height: contain; width: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                        <RadzenStack Style="height: 100%; width: contain; background-color: white; padding: 5px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenLabel Text="Lọc theo ngày" Component="CheckBoxSP" Style="font-size: 14px; color: black; font-weight: 600; cursor: pointer" />
+                            <RadzenCheckBox TValue="bool" @bind-Value="@(displaybyDay)" Name="CheckBoxSP" Change="@((args) => { displaybyDay = args; OnSearchProductListFromDayRange();  })" />
+                        </RadzenStack>
+                        <RadzenText Text="Từ ngày" Style="font-weight: 500; font-size: 14px; color: black;"></RadzenText>
+                        <RadzenDatePicker Disabled="@(!displaybyDay)" TValue="DateTime" Value="@startSearchDay"
+                                          ValueChanged="@((args) => { startSearchDay = args; OnSearchProductListFromDayRange(); })"
+                                          ShowTime="false" HourFormat="12" DateFormat="@Common.DayTimeFormatnoTime" AllowInput="false">
+                            <FooterTemplate>
+                                <RadzenStack Style="height: 100%; width: contain; padding: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                    @*<RadzenButton Style="height: 100%; width: 50%;" Text="Now" Click="@(() => { startSearchDay = DateTime.Now; OnSearchProductListFromDayRange(); })" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />*@
+                                    <RadzenButton Style="height: 100%; width: 50%;" Text="To day" Click="@(() => { startSearchDay = DateTime.Today; OnSearchProductListFromDayRange(); })" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />
+                                </RadzenStack>
+                            </FooterTemplate>
+                        </RadzenDatePicker>
+                    </RadzenStack>
+                    <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" Style="height: contain; width: contain; margin-right: 50px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                        <RadzenText Text="Đến ngày" Style="font-weight: 500; font-size: 14px; color: black;"></RadzenText>
+                        <RadzenDatePicker Disabled="@(!displaybyDay)" TValue="DateTime" Value="@endSearchDay"
+                                          ValueChanged="@((args) => { endSearchDay = args; OnSearchProductListFromDayRange(); })"
+                                          ShowTime="false" HourFormat="12" DateFormat="@Common.DayTimeFormatnoTime" AllowInput="false">
+                            <FooterTemplate>
+                                <RadzenStack Style="height: 100%; width: contain; padding: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                    @*<RadzenButton Style="height: 100%; width: 50%;" Text="Now" Click="@(() => { endSearchDay = DateTime.Now; OnSearchProductListFromDayRange(); })" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />*@
+                                    <RadzenButton Style="height: 100%; width: 50%;" Text="To day" Click="@(() => { endSearchDay = DateTime.Today; OnSearchProductListFromDayRange(); })" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />
+                                </RadzenStack>
+                            </FooterTemplate>
+                        </RadzenDatePicker>
+                    </RadzenStack>
+                </RadzenStack>
+                <RadzenRow Gap="10px" Style="height: 90%; width: 100%; overflow-y: scroll; padding: 0;">
+                    <RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: contain; width: 100%;">
+                        <RadzenCard Variant="Variant.Outlined" Style="height: 100%; width: 100%; padding: 10px;">
+                            <RadzenStack Gap="10px" Style="height: contain; width: 100%;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                <RadzenText Text="Tạo mới sản phẩm" Style="color: darkred; font-weight: 600; font-size: 16px; height: contain; width: contain"></RadzenText>
+                                <RadzenCard Variant="Variant.Flat" Style="height: contain; width: 100%; padding: 5px;">
+                                    <RadzenStack Style="height: 100%; width: 100%; padding: 10px;" Gap="15px" Orientation="Orientation.Horizontal">
+                                        @{
+                                            List<Propertyy>? sp_properties = NewSanpham.GetPropertiesValues();
+
+                                            if (sp_properties != null)
+                                            {
+                                                foreach (var property in sp_properties)
+                                                {
+                                                    if (property.Name != Common.SPID && property.Name != Common.SoLuong)
+                                                    {
+                                                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: contain; width: 25%; padding-right: 10px; border-right: var(--rz-grid-cell-border);">
+                                                            <RadzenStack Style="width: 30%; height: contain" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                <RadzenText Text="@property.Name" Style="font-size: 15px; font-weight: 600; height: contain; width: 100% "></RadzenText>
+                                                            </RadzenStack>
+                                                            <RadzenStack Style="width: 70%; height: contain" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                @if (!IsCreateSanphamOK)
+                                                                {
+                                                                    @if (property.Type == typeof(string))
+                                                                    {
+                                                                        <RadzenTextBox Placeholder="@($"*Nhập {property.Name}")" Value="@property.Value?.ToString()" ValueChanged="@((args) => { property.Value = args; } )"
+                                                                                       Style="font-size: 14px; height: contain; border-radius: 5px; border-width: 1px; width: 100% "></RadzenTextBox>
+                                                                    }
+                                                                    else if (property.Type == typeof(int))
+                                                                    {
+                                                                        <RadzenNumeric Placeholder="@($"*Nhập {property.Name}")" TValue="int" Value="@int.Parse(property.Value?.ToString()?? "0")" Min="0" Max="100000" ValueChanged="@((args) => { property.Value = args; })"
+                                                                                       Style="font-size: 14px; height: contain; border-radius: 5px; border-width: 1px; width: 100%" />
+                                                                    }
+                                                                    else if (property.Type == typeof(DateTime))
+                                                                    {
+                                                                        <RadzenDatePicker Placeholder="@($"*{property.Name}")" TValue="DateTime"
+                                                                                          ValueChanged="@((args) => { property.Value = args; })"
+                                                                                          ShowTime="false" HourFormat="12" DateFormat="@Common.DayTimeFormatnoTime" AllowInput="false"
+                                                                                          Name="DatePicker" Style="width: 100%; border-radius: 0; font-size: 14px"></RadzenDatePicker>
+                                                                    }
+                                                                }
+                                                                else
+                                                                {
+                                                                    <RadzenText Text="@property.Value?.ToString()" Style="font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
+                                                                }
+                                                            </RadzenStack>
+                                                        </RadzenStack>
+                                                    }
+                                                }
+                                            }
+                                            <RadzenStack Gap="10px" Style="height: contain; width: 25%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                <RadzenButton Visible="@(!IsCreateSanphamOK)" Click="@(() => OnCreateSanPham())" Style="width: contain; height: 50%; color: white; background-color: darkgreen" Icon="save" Text="Thêm sản phẩm" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Variant="Variant.Filled" />
+                                            </RadzenStack>
+                                        }
+                                    </RadzenStack>
+                                </RadzenCard>
+                            </RadzenStack>
+                        </RadzenCard>
+                    </RadzenStack>
+
+                    <RadzenStack Gap="10px" Style="height: contain; width: 100%;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                        <!--Table listSP-->
+                        <RadzenText Text="Danh sách sản phẩm" Style="color: darkred; font-weight: 600; height: contain; width: contain;"></RadzenText>
+                        <RadzenDataGrid class="rz-grid-table-fixed-2" Data="@(ListSanPhams)" TItem="SanPham" AllowFiltering="false"
+                                        AllowPaging="true" AllowSorting="false" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                        ShowPagingSummary="true" PagingSummaryFormat="@pagingSummaryFormat"
+                                        GridLines="DataGridGridLines.Both" PageSize="50"
+                                        HeaderCellRender="@(args => args.Attributes.Add("style", $"background-color: rgba(58, 71, 77)"))"
+                                        Value="@(new List<SanPham>(){SelectedSanPham?? new SanPham()})"
+                                        CellRender="@OnCellRender" RowSelect="@OnRowSelected" Density="Density.Default">
+
+                            <Columns>
+                                @if (ListSanPhams != null && ListSanPhams.Count > 0)
+                                {
+                                    List<Propertyy> columns = ListSanPhams.FirstOrDefault()?.GetPropertiesValues().Where(cl => cl.DispDatagrid == true).ToList() ?? new();
+
+                                    foreach (var column in columns)
+                                    {
+                                        string colName = column.Name ?? string.Empty;
+
+                                        @if (colName.Contains("ID"))
+                                        {
+                                            <RadzenDataGridColumn Width="50px" Frozen="true" FrozenPosition="FrozenColumnPosition.Left" Filterable="false"
+                                                                  TItem="SanPham" Title="#"
+                                                                  Property="@colName" TextAlign="TextAlign.Center">
+                                                <HeaderTemplate>
+                                                    <span style="font-weight: bold; font-size: 16px; color: white">#</span>
+                                                </HeaderTemplate>
+                                                <Template Context="sp">
+                                                    <span style="font-weight: bold;">@(ListSanPhams.IndexOf(sp) + 1)</span>
+                                                </Template>
+                                            </RadzenDataGridColumn>
+                                        }
+                                        else
+                                        {
+                                            <RadzenDataGridColumn Width="contain" TItem="SanPham" Title="@colName"
+                                                                  Property="@colName" TextAlign="TextAlign.Center">
+                                                <HeaderTemplate>
+                                                    <span style="font-weight: bold; font-size: 16px; color: white">@colName</span>
+                                                </HeaderTemplate>
+                                                <Template Context="sp">
+                                                    @if (colName.Contains(Common.MaSP))
+                                                    {
+                                                        <span style="color: darkred; font-weight: bolder;">@sp.MaSP.Value</span>
+                                                    }
+                                                    else if (colName == Common.NgayTao)
+                                                    {
+                                                        string dayvalue = string.Empty;
+
+                                                        if (column.Value != DBNull.Value && column.Value != null)
+                                                        {
+                                                            dayvalue = Convert.ToDateTime(sp.GetPropertyValue(colName)).ToString("dd-MM-yyyy");
+                                                        }
+
+                                                        <span style="color: black; font-weight: 500;">@(dayvalue)</span>
+                                                    }
+                                                    else if (colName == Common.SoLuong)
+                                                    {
+                                                        <span style="color: black; font-weight: 500;">@(sp.GetPropertyValue(colName) + "  (pcs)")</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span style="color: black; font-weight: 500;">@(sp.GetPropertyValue(colName))</span>
+                                                    }
+                                                </Template>
+                                            </RadzenDataGridColumn>
+                                        }
+                                    }
+                                    <RadzenDataGridColumn Width="contain" Frozen="true" FrozenPosition="FrozenColumnPosition.Left" Filterable="false"
+                                                          TItem="SanPham" Title="Danh sách NVL"
+                                                          Property="DSNVL" TextAlign="TextAlign.Center">
+                                        <HeaderTemplate>
+                                            <span style="font-weight: bold; font-size: 16px; color: white">Danh sách NVL</span>
+                                        </HeaderTemplate>
+                                        <Template Context="sp">
+                                            <RadzenButton Click="@(() => OnOpenDialogXemDSachNVL(sp))" Style=" background-color: white;" Size="ButtonSize.Small" Variant="Variant.Outlined" Text="Xem"></RadzenButton>
+                                        </Template>
+                                    </RadzenDataGridColumn>
+                                    <RadzenDataGridColumn Width="contain" Frozen="true" FrozenPosition="FrozenColumnPosition.Left" Filterable="false"
+                                                          TItem="SanPham" Title="THÊM NVL"
+                                                          Property="THÊM NVL" TextAlign="TextAlign.Center">
+                                        <HeaderTemplate>
+                                            <span style="font-weight: bold; font-size: 16px; color: white">THÊM NGUYÊN LIỆU</span>
+                                        </HeaderTemplate>
+                                        <Template Context="sp">
+                                            <RadzenButton Click="@(() => OnOpenDialogAddNVL(sp))" Style="background-color: Highlight;" Icon="add" ButtonStyle="ButtonStyle.Secondary" Size="ButtonSize.Small" Variant="Variant.Filled" Text="Thêm"></RadzenButton>
+                                        </Template>
+                                    </RadzenDataGridColumn>
+                                    <RadzenDataGridColumn Width="50px" Frozen="true" FrozenPosition="FrozenColumnPosition.Left" Filterable="false"
+                                                          TItem="SanPham" Title="Xóa SP"
+                                                          Property="Xóa SP" TextAlign="TextAlign.Center">
+                                        <HeaderTemplate>
+                                            <span style="font-weight: bold; font-size: 16px; color: white"></span>
+                                        </HeaderTemplate>
+                                        <Template Context="sp">
+                                            <RadzenButton Click="@(() => OnDeleteSanpham(sp))" Style="background-color: black;" Icon="delete" Size="ButtonSize.Small" Variant="Variant.Filled"></RadzenButton>
+                                        </Template>
+                                    </RadzenDataGridColumn>
+                                }
+                            </Columns>
+                        </RadzenDataGrid>
+                    </RadzenStack>
+                </RadzenRow>
+            </RadzenStack>
+        </RadzenCard>
+    </RadzenColumn>
+    <!--Product details-->
+    <RadzenColumn Size="12" SizeMD="4" Style="height: 100%; width: 100%; padding: 15px; border-left: var(--rz-grid-cell-border)">
+        <!--Boder-->
+        <RadzenStack Style="height: contain; width: 100%; padding: 10px; border-top: var(--rz-grid-cell-border); border-bottom: var(--rz-grid-cell-border)" AlignItems="AlignItems.Center">
+            <!--Select mode-->
+            <RadzenSelectBar @bind-Value=@mode TValue="int">
+                <Items>
+                    <RadzenSelectBarItem Icon="list" Text="Chi tiết" Value="1" />
+                    <AuthorizeView Roles="Admin">
+                        <Authorized>
+                            <RadzenSelectBarItem Icon="edit" Text="Sửa" Value="2" />
+                        </Authorized>
+                    </AuthorizeView>
+                </Items>
+            </RadzenSelectBar>
+        </RadzenStack>
+        <!--Display product informations-->
+        @if (mode == 1)
+        {
+            <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center" Style="width: 100%; height: contain; padding-top: 10px ">
+                <RadzenText Text="Thông tin chi tiết sản phẩm" Style="font-size: 16px; font-weight: 600; height: contain; color: darkred"></RadzenText>
+                <RadzenText Text="@SelectedSanPham?.MaSP.Value?.ToString()" Style="font-size: 18px; font-weight: 600; height: contain; color: darkblue"></RadzenText>
+            </RadzenStack>
+        }
+        else if (mode == 2)
+        {
+            <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center" Style="width: 100%; height: contain; padding-top: 10px">
+                <RadzenText Text="Sửa thông tin sản phẩm" Style="font-size: 16px; font-weight: 600; height: contain; color: darkred "></RadzenText>
+                <RadzenText Text="@SelectedSanPham?.TenSanPham.Value?.ToString()" Style="font-size: 16px; font-weight: 600; height: contain; color: darkblue"></RadzenText>
+            </RadzenStack>
+        }
+
+        <RadzenStack Visible="@(mode == 2 && SelectedSanPham != null)" Style="padding-top: 10px; padding-bottom: 10px" Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center">
+            <RadzenButton Style="width: contain; color: white; " Icon="add" Click="@(() => OpenDialogThemThongtinSanpham())" Text="Thêm thông tin" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Size="ButtonSize.Small" />
+            <RadzenButton Visible="@(mode == 2 && SelectedSanPham != null && SelectedSanPham.ChitietSanPhams?.Count > 0)" Style="width: contain; color: white; background-color: darkgreen" Icon="save" BusyText="Saving ..." IsBusy=@busy
+                          Click=@(() => OnUpdateThongtinSanpham(SelectedSanPham)) Text="Lưu thay đổi" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Success" Shade="Shade.Light" Variant="Variant.Filled" />
+            @*  <RadzenButton Visible="false" Style="width: contain; color: white; background-color: darkred;" Icon="delete" BusyText="Deleting ..."
+            Click=@(() => OnRemoveProduct(SelectedSanPham)) Text="Xóa sản phẩm" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Variant="Variant.Filled" /> *@
+        </RadzenStack>
+        <RadzenCard Variant="@((mode == 1)? Variant.Outlined : Variant.Flat)" Style="height: contain; width: 100%; padding: 10px; overflow: scroll ">
+            <RadzenStack Style="height: contain; width: 100%; padding: 10px;" Gap="15px" Orientation="Orientation.Vertical">
+                @if (SelectedSanPham != null && SelectedSanPham.ChitietSanPhams != null)
+                {
+                    foreach (var item in SelectedSanPham.ChitietSanPhams)
+                    {
+                        <RadzenStack Gap="10px" Style="height: 100%; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenStack Gap="0" Style="height: contain; width: 90%; padding-bottom: 5px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                <RadzenStack Style="width: 30%;">
+                                    <RadzenText Text="@item.PropertyName.Value?.ToString()" Style="font-size: 14px; font-weight: 600; height: contain; width: 100% "></RadzenText>
+                                </RadzenStack>
+                                @if (mode == 1) // detail mode
+                                {
+                                    <!--Mode 1-->
+                                    <RadzenStack Style="width: 70%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);">
+                                        @if (item.PropertyName.Value?.ToString() == Common.TenSanPham)
+                                        {
+                                            <RadzenText Text="@item.PropertyValue.Value?.ToString()" Style="color: darkblue; font-size: 14px; font-weight: bold; height: contain; width: 100%"></RadzenText>
+                                        }
+                                        else
+                                        {
+                                            <RadzenText Text="@item.PropertyValue.Value?.ToString()" Style="font-size: 14px; height: contain; width: 100%"></RadzenText>
+                                        }
+                                    </RadzenStack>
+                                }
+                                else if (mode == 2) // edit mode
+                                {
+                                    <RadzenStack Style="width: 70%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);">
+                                        @if (item.PropertyType.Value?.ToString() == "1")
+                                        {
+                                            @if (item.PropertyName.Value?.ToString() == Common.TenSanPham)
+                                            {
+                                                <RadzenText Text="@item.PropertyValue.Value?.ToString()" Style="color: darkblue; font-size: 16px; font-weight: bold; height: contain; width: 100%"></RadzenText>
+                                            }
+                                            else
+                                            {
+                                                <RadzenTextBox Placeholder="Enter value here" Value="@item.PropertyValue.Value?.ToString()" ValueChanged="@((args) => { item.PropertyValue.Value = args; } )"
+                                                               Style="font-size: 16px; height: contain; border-width: 1px; margin-bottom: 10px; width: 100% "></RadzenTextBox>
+                                            }
+                                        }
+                                        else if (item.PropertyType.Value?.ToString() == "2")
+                                        {
+                                            <RadzenNumeric Placeholder="Enter value here" TValue="int" Value="@int.Parse(item.PropertyValue.Value?.ToString()?? "0")" Min="0" Max="100000" ValueChanged="@((args) => { item.PropertyValue.Value = args; })"
+                                                           Style="font-size: 16px; height: contain; border-width: 1px; margin-bottom: 10px; width: 100%" />
+                                        }
+                                        else if (item.PropertyType.Value?.ToString() == "3")
+                                        {
+                                            <RadzenDatePicker TValue="DateTime" Value="Convert.ToDateTime(item.PropertyValue.Value?.ToString())"
+                                                              ValueChanged="@((args) => { item.PropertyValue.Value = args; })"
+                                                              ShowTime="false" HourFormat="12" DateFormat="@Common.DayTimeFormatnoTime" AllowInput="false"
+                                                              Name="DatePicker" Style="width: 100%;  font-size: 16px"></RadzenDatePicker>
+                                        }
+                                    </RadzenStack>
+                                }
+                            </RadzenStack>
+                            <RadzenStack Visible="@(mode == 2)" Style="width: 10%; height: 100%; padding-left: 10px; padding-bottom: 10px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenButton Style="background-color: black;" Icon="delete"
+                                              Click=@(() => OnRemoveThongtinSanpham(item)) ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Variant="Variant.Filled" />
+                            </RadzenStack>
+                        </RadzenStack>
+                    }
+                }
+            </RadzenStack>
+        </RadzenCard>
+    </RadzenColumn>
+</RadzenRow>
+
+@code {
+    private List<string>? UserRoles;
+    private List<SanPham>? ListSanPhams;
+    private SanPham? SelectedSanPham;
+    private bool displaybyDay = false;
+    private DateTime startSearchDay = DateTime.Today;
+    private DateTime endSearchDay = DateTime.Today;
+    private string pagingSummaryFormat = "Displaying page {0} of {1} <b>(total {2} records)</b>";
+    private int mode = 1;
+    private bool busy = false;
+    private SanPham NewSanpham = new();
+    private bool IsCreateSanphamOK = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+        var user = authState?.User;
+
+        if (user != null && user.Identity?.IsAuthenticated == true)
+        {
+            UserRoles = user.Claims.Where(c => c.Type == "role").Select(c => c.Value).ToList();
+        }
+
+        OnSearchProductListFromDayRange();
+
+        SelectedSanPham = ListSanPhams?.FirstOrDefault();
+
+        await base.OnInitializedAsync();
+    }
+
+    private async Task FilterSanphamsTonkho(string? keysearch)
+    {
+        if (string.IsNullOrEmpty(keysearch)) return;
+
+        OnSearchProductListFromDayRange();
+
+        await Task.Delay(100);
+
+        List<SanPham>? sanphamsFilter = ListSanPhams?.FindAll(cl => (cl.MaSP.Value?.ToString()?.IndexOf(keysearch, StringComparison.OrdinalIgnoreCase) >= 0
+                                                                    || cl.TenSanPham.Value?.ToString()?.IndexOf(keysearch, StringComparison.OrdinalIgnoreCase) >= 0));
+
+        ListSanPhams = sanphamsFilter;
+    }
+
+    private void OnSearchProductListFromDayRange()
+    {
+        DateTime offsetendDay = endSearchDay.AddDays(1);
+
+        if (displaybyDay)
+        {
+            ListSanPhams = SQLServerServices.GetlistSanphams().Where(sp => (startSearchDay <= Convert.ToDateTime(sp.NgayTao.Value) && Convert.ToDateTime(sp.NgayTao.Value) < offsetendDay)).ToList();
+        }
+        else ListSanPhams = SQLServerServices.GetlistSanphams();
+    }
+
+    private async Task OnCreateSanPham()
+    {
+        foreach (var property in NewSanpham.GetPropertiesValues())
+        {
+            if (property.Name != Common.SPID && property.Name != Common.SoLuong)
+            {
+                if (property.Value == null)
+                {
+                    ShowNotification("Hãy nhập đầy đủ thông tin!", NotificationSeverity.Warning, 2000);
+
+                    return;
+                }
+            }
+        }
+
+        bool? comfirm = await DialogService.Confirm("Thêm sản phẩm này?", "Xác nhận", new ConfirmOptions() { OkButtonText = "OK", CancelButtonText = "Hủy", ShowClose = false });
+
+        if (comfirm.Value)
+        {
+            (int result, string error) = SQLServerServices.InsertNewSanPham(NewSanpham);
+
+            if (result > 0)
+            {
+                ShowNotification("Thêm mới sản phẩm thành công!", NotificationSeverity.Success, 2000);
+
+                OnSearchProductListFromDayRange();
+            }
+            else
+            {
+                await DialogService.Alert($"{error}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+            }
+        }
+    }
+
+    private async Task OpenDialogThemThongtinSanpham()
+    {
+        if (SelectedSanPham != null)
+        {
+            string? productid = SelectedSanPham.SPID.Value?.ToString();
+
+            if (!string.IsNullOrEmpty(productid))
+            {
+                string tensanpham = SelectedSanPham.TenSanPham.Value?.ToString() ?? string.Empty;
+
+                int result = await DialogService.OpenAsync<DialogThemthongtinSanPham>(null, new Dictionary<string, object>() { { "Tensanpham", tensanpham }, { "ProductID", int.Parse(productid) } },
+                new DialogOptions() { ShowTitle = false, Width = "50%", Height = "contain", Resizable = false, Draggable = false, ShowClose = false, Style = "background-color: while; border-radius: 0px; padding: 0px" });
+
+                if (result > 0)
+                {
+                    OnSearchProductListFromDayRange();
+
+                    SelectedSanPham = ListSanPhams?.Find(sp => sp.SPID.Value?.ToString() == productid.ToString());
+                }
+            }
+        }
+    }
+
+    private async Task OnUpdateThongtinSanpham(SanPham? sanPham)
+    {
+        if (sanPham == null) return;
+
+        busy = true;
+
+        await Task.Delay(300);
+
+        (int result, string error) = SQLServerServices.UpdateDanhSachChitietSanpham(sanPham.ChitietSanPhams);
+
+        if (result == 1)
+        {
+            OnSearchProductListFromDayRange();
+
+            SelectedSanPham = ListSanPhams?.Find(sp => sp.SPID.Value?.ToString() == sanPham.SPID.Value?.ToString());
+
+            mode = 1;
+
+            ShowNotification("Cập nhật thành công!", NotificationSeverity.Success, 2000);
+        }
+        else await DialogService.Alert($"{error}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+
+        busy = false;
+    }
+
+    private async Task OnRemoveThongtinSanpham(SanPham.ChitietSanPham removeItem)
+    {
+        bool? comfirm = await DialogService.Confirm($"Xóa thông tin này khỏi sản phẩm?", "Xác nhận", new ConfirmOptions() { OkButtonText = "Đồng ý", CancelButtonText = "Hủy" });
+
+        if (comfirm.Value)
+        {
+            (int result, string error) = SQLServerServices.DeleteChitietSanPham(removeItem);
+
+            if (result == -1)
+            {
+                await DialogService.Alert($"{error}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true }); return;
+            }
+            else
+            {
+                OnSearchProductListFromDayRange();
+
+                SelectedSanPham = ListSanPhams?.Find(sp => sp.SPID.Value?.ToString() == removeItem.SPID.Value?.ToString());
+
+                ShowNotification("Xóa thành công!", NotificationSeverity.Success, 2000);
+            }
+        }
+    }
+
+    private async Task OnOpenDialogXemDSachNVL(SanPham? seletecSP)
+    {
+        List<NguyenLieu> DSNguyenlieus = SQLServerServices.GetlistNguyenLieuperSanPham(seletecSP);
+
+        await DialogService.OpenAsync<DialogXemDSNguyenLieu>(null, new Dictionary<string, object>() { { "DSNguyenlieus", DSNguyenlieus }, { "Sanpham", seletecSP ?? new SanPham() } },
+        new DialogOptions() { ShowTitle = false, Width = "50%", Height = "contain", Resizable = false, Draggable = false, ShowClose = false, Style = "background-color: while; border-radius: 0px; padding: 0px" });
+    }
+
+    private async Task OnOpenDialogAddNVL(SanPham? seletecSP)
+    {
+        await DialogService.OpenAsync<DialogAddNLforSanpham>(null, new Dictionary<string, object>() { { "SanPham", seletecSP ?? new SanPham() } },
+        new DialogOptions() { ShowTitle = false, Width = "50%", Height = "contain", Resizable = false, Draggable = false, ShowClose = false, Style = "background-color: while; border-radius: 0px; padding: 0px" });
+    }
+
+    private async Task OnDeleteSanpham(SanPham? seletecSP)
+    {
+        bool? comfirm = await DialogService.Confirm($"Xóa sản phẩm này?", "Xác nhận", new ConfirmOptions() { OkButtonText = "Đồng ý", CancelButtonText = "Hủy" });
+
+        if (comfirm.Value)
+        {
+            (int result, string error) = SQLServerServices.DeleteSanpham(seletecSP);
+
+            if (result == -1)
+            {
+                await DialogService.Alert($"{error}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true }); return;
+            }
+            else
+            {
+                OnSearchProductListFromDayRange();
+
+                ShowNotification("Xóa thành công!", NotificationSeverity.Success, 2000);
+            }
+        }
+    }
+
+    // SP Datagrid
+    private void OnRowSelected(SanPham selectedSP)
+    {
+        SelectedSanPham = selectedSP;
+    }
+
+    private void OnCellRender(DataGridCellRenderEventArgs<SanPham> args)
+    {
+        if (args.Column.Property.Contains("ID"))
+        {
+            args.Attributes.Add("style", $"font-weight: bold;");
+        }
+    }
+    // // //
+
+    // Notification
+    void ShowNotification(string message, NotificationSeverity notifytype, double time)
+    {
+        NotificationMessage notify = new NotificationMessage
+            {
+                Style = "position: fixed; top: 0; right: 0;",
+                Severity = notifytype,
+                Summary = message,
+                Duration = time
+            };
+
+        NotificationService.Notify(notify);
+    }
+}

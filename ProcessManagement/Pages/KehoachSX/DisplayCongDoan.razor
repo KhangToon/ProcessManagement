@@ -1,0 +1,233 @@
+﻿@using ParamountBed_Warehouse.Services.SocketService
+@using ProcessManagement.Commons
+@using ProcessManagement.Models
+@using ProcessManagement.Services.QRCodes
+@using ProcessManagement.Services.SQLServer
+@using Radzen.Blazor
+@using Radzen
+
+@inject NotificationService NotificationService
+@inject DialogService DialogService
+@inject SQLServerServices SQLServerServices
+@inject QRCodeServices QRCodeServices
+@inject ServerSocketAsync ServerSocketAsync
+
+<style>
+    .nvlmcdSelected {
+        border: solid;
+        border-width: 3px;
+        border-color: var(--rz-success-dark);
+    }
+
+    .nvlmcdUnSelected {
+        border: solid;
+        border-width: 3px;
+        border-color: white;
+        border-bottom: var(--rz-grid-cell-border);
+    }
+</style>
+
+<RadzenCard class="rz-shadow-5" Style="height: contain; width: 100%; background-color: white" Variant="Variant.Filled">
+    <RadzenCard Variant="Variant.Outlined" Style="height: contain; width: 100%; padding: 5px; margin-bottom: 10px">
+        <RadzenStack Style="height: 100%; width: 100%; padding: 10px;" Gap="30px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+            <RadzenStack Gap="15px" Style="width: contain; height: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                <RadzenStack Gap="15px" Style="width: contain; height: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                    <RadzenText Text="@($"{Common.MaSP}: ")" Style="font-size: 16px; color: black; font-weight: 500;"></RadzenText>
+                    <RadzenText Text="@($"{DSNVLmoiCongDoans?.FirstOrDefault()?.MaSP.Value?.ToString()}")" Style="font-size: 18px; color: darkred; font-weight: 600;"></RadzenText>
+                    <RadzenText Text="@($"{Common.LoaiNL}: ")" Style="font-size: 16px; color: black; font-weight: 500;"></RadzenText>
+                    <RadzenText Text="@($"{DSNVLmoiCongDoans?.FirstOrDefault()?.LoaiNVL.Value?.ToString()}")" Style="font-size: 16px; color: darkblue; font-weight: 600;"></RadzenText>
+                </RadzenStack>
+                <RadzenStack Gap="15px" Style="width: contain; height: 100%; padding-left: 100px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                    <RadzenText Text="@($"{Common.NguyenCong}: ")" Style="font-size: 16px; color: black; font-weight: 500;"></RadzenText>
+                    <RadzenText Text="@($"{DSNVLmoiCongDoans?.FirstOrDefault()?.TenCongDoan.Value?.ToString()}")" Style="font-size: 18px; color: red; font-weight: 600;"></RadzenText>
+                </RadzenStack>
+            </RadzenStack>
+        </RadzenStack>
+    </RadzenCard>
+    <RadzenStack Orientation="Orientation.Vertical" Style="height: contain; width: 100%; border-radius: 10px; background-color: white">
+        <RadzenStack Gap="0" Style="background-color: rgba(58, 71, 77); overflow-y: scroll; height: contain; width: 100%; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+            <RadzenStack Style="width: 3%; height: contain; padding: 5px;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                <RadzenText Text="STT" Style="font-size: 14px; color: white; font-weight: 500;"></RadzenText>
+            </RadzenStack>
+            <RadzenStack Style="width: 10%; height: contain; padding: 5px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                <RadzenText Text="@Common.MaQuanLy" Style="font-size: 14px; color: white; font-weight: 500;"></RadzenText>
+            </RadzenStack>
+            <RadzenStack Style="width: 5%; height: contain; padding: 5px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                <RadzenText Text="@Common.SoLuong" Style="font-size: 14px; color: white; font-weight: 500;"></RadzenText>
+            </RadzenStack>
+            <RadzenStack Style="width: 8%; height: contain; padding: 5px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                <RadzenText Text="@Common.NguyenCong" Style="font-size: 14px; color: white; font-weight: 500;"></RadzenText>
+            </RadzenStack>
+            <!--Ca ngay-->
+            <RadzenStack Style="width: 5%; height: contain; padding: 5px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                <RadzenText Text="@Common.Ca" Style="font-size: 14px; color: white; font-weight: 500;"></RadzenText>
+            </RadzenStack>
+            <RadzenStack Style="width: 8%; height: contain; padding: 5px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                <RadzenText Text="@Common.NgayGiaCong" Style="font-size: 14px; color: white; font-weight: 500;"></RadzenText>
+            </RadzenStack>
+            <RadzenStack Style="width: 6%; height: contain; padding: 5px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                <RadzenText Text="@Common.NhanVien" Style="font-size: 14px; color: white; font-weight: 500;"></RadzenText>
+            </RadzenStack>
+            <RadzenStack Style="width: 5%; height: contain; padding: 5px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                <RadzenText Text="@Common.OK" Style="font-size: 14px; color: white; font-weight: 500;"></RadzenText>
+            </RadzenStack>
+            <RadzenStack Style="width: 5%; height: contain; padding: 5px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                <RadzenText Text="@Common.NG" Style="font-size: 14px; color: white; font-weight: 500;"></RadzenText>
+            </RadzenStack>
+            <!--Ca dem-->
+            <RadzenStack Style="width: 5%; height: contain; padding: 5px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                <RadzenText Text="@Common.Ca" Style="font-size: 14px; color: white; font-weight: 500;"></RadzenText>
+            </RadzenStack>
+            <RadzenStack Style="width: 8%; height: contain; padding: 5px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                <RadzenText Text="@Common.NgayGiaCong" Style="font-size: 14px; color: white; font-weight: 500;"></RadzenText>
+            </RadzenStack>
+            <RadzenStack Style="width: 6%; height: contain; padding: 5px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                <RadzenText Text="@Common.NhanVien" Style="font-size: 14px; color: white; font-weight: 500;"></RadzenText>
+            </RadzenStack>
+            <RadzenStack Style="width: 5%; height: contain; padding: 5px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                <RadzenText Text="@Common.OK" Style="font-size: 14px; color: white; font-weight: 500;"></RadzenText>
+            </RadzenStack>
+            <RadzenStack Style="width: 5%; height: contain; padding: 5px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                <RadzenText Text="@Common.NG" Style="font-size: 14px; color: white; font-weight: 500;"></RadzenText>
+            </RadzenStack>
+
+            <RadzenStack Style="width: 5%; height: contain; padding: 5px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                <RadzenText Text="@Common.TongOK" Style="font-size: 14px; color: white; font-weight: 500;"></RadzenText>
+            </RadzenStack>
+            <RadzenStack Style="width: 5%; height: contain; padding: 5px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                <RadzenText Text="@Common.TongNG" Style="font-size: 14px; color: white; font-weight: 500;"></RadzenText>
+            </RadzenStack>
+            <RadzenStack Style="width: 5%; height: contain; padding: 5px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                <RadzenText Text="@Common.Danhgia" Style="font-size: 14px; color: white; font-weight: 500;"></RadzenText>
+            </RadzenStack>
+        </RadzenStack>
+        <RadzenStack Style="height: 92%; width: 100%; overflow-y: scroll" Gap="0" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+            @if (DSNVLmoiCongDoans != null)
+            {
+                @foreach (var nvlmcd in DSNVLmoiCongDoans)
+                {
+                    <RadzenStack class="@(IsNVLMCD_Selected(nvlmcd))" @onclick="@(() => OnNVLMCD_Click(nvlmcd))" Style="height: contain; width: 100%; padding-top: 5px; padding-bottom: 5px" Gap="0" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                        <RadzenStack Style="width: 3%; height: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenText Text="@((DSNVLmoiCongDoans.IndexOf(nvlmcd) + 1).ToString())" Style="color: darkgray; font-size: 12px; font-weight: 500;"></RadzenText>
+                        </RadzenStack>
+                        <RadzenStack Style="width: 10%; height: contain; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenText Text="@nvlmcd.MaQuanLy.Value?.ToString()" Style="font-size: 14px;color: darkblue; font-weight: 600;"></RadzenText>
+                        </RadzenStack>
+                        <RadzenStack Style="width: 5%; height: contain; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenText Text="@(nvlmcd.SLCanGiaCong.Value?.ToString())" Style="font-size: 14px; font-weight: 600;"></RadzenText>
+                        </RadzenStack>
+                        <RadzenStack Style="width: 8%; height: contain; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenText Text="@nvlmcd.TenCongDoan.Value?.ToString()" Style="font-size: 14px; color: darkred; font-weight: 600;"></RadzenText>
+                        </RadzenStack>
+                        <!--Ca ngay-->
+                        <RadzenStack Style="width: 5%; height: contain; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenText Text="@nvlmcd.CaNgay.Ca.Value?.ToString()" Style="font-size: 14px; color: black; font-weight: 500;"></RadzenText>
+                        </RadzenStack>
+                        <RadzenStack Style="width: 8%; height: contain; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            @if (nvlmcd.CaNgay.NgayGiaCong.Value != null && nvlmcd.CaNgay.NgayGiaCong.Value?.ToString() != string.Empty)
+                            {
+                                DateTime ngaygiacong = Convert.ToDateTime(nvlmcd.CaNgay.NgayGiaCong.Value?.ToString());
+
+                                <RadzenText Text="@ngaygiacong.ToString("dd-MM-yyyy")" Style="font-size: 14px; font-weight: 500;"></RadzenText>
+                            }
+                        </RadzenStack>
+                        <RadzenStack Style="width: 6%; height: contain; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenText Text="@nvlmcd.CaNgay.NhanVien.Value?.ToString()" Style="font-size: 14px; color: black; font-weight: 500;"></RadzenText>
+                        </RadzenStack>
+                        <RadzenStack Style="width: 5%; height: contain; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenText Text="@nvlmcd.CaNgay.OK.Value?.ToString()" Style="font-size: 14px; color: black; font-weight: 500;"></RadzenText>
+                        </RadzenStack>
+                        <RadzenStack Style="width: 5%; height: contain; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenText Text="@nvlmcd.CaNgay.NG.Value?.ToString()" Style="font-size: 14px; color: black; font-weight: 500;"></RadzenText>
+                        </RadzenStack>
+                        <!--Ca dem-->
+                        <RadzenStack Style="width: 5%; height: contain; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenText Text="@nvlmcd.CaDem.Ca.Value?.ToString()" Style="font-size: 14px; color: black; font-weight: 500;"></RadzenText>
+                        </RadzenStack>
+                        <RadzenStack Style="width: 8%; height: contain; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            @if (nvlmcd.CaDem.NgayGiaCong.Value != null && nvlmcd.CaDem.NgayGiaCong.Value?.ToString() != string.Empty)
+                            {
+                                DateTime ngaygiacong = Convert.ToDateTime(nvlmcd.CaDem.NgayGiaCong.Value?.ToString());
+
+                                <RadzenText Text="@ngaygiacong.ToString("dd-MM-yyyy")" Style="font-size: 14px; font-weight: 500;"></RadzenText>
+                            }
+                        </RadzenStack>
+                        <RadzenStack Style="width: 6%; height: contain; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenText Text="@nvlmcd.CaDem.NhanVien.Value?.ToString()" Style="font-size: 14px; color: black; font-weight: 500;"></RadzenText>
+                        </RadzenStack>
+                        <RadzenStack Style="width: 5%; height: contain; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenText Text="@nvlmcd.CaNgay.OK.Value?.ToString()" Style="font-size: 14px; color: black; font-weight: 500;"></RadzenText>
+                        </RadzenStack>
+                        <RadzenStack Style="width: 5%; height: contain; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenText Text="@nvlmcd.CaNgay.NG.Value?.ToString()" Style="font-size: 14px; color: black; font-weight: 500;"></RadzenText>
+                        </RadzenStack>
+
+                        <RadzenStack Style="width: 5%; height: contain; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenText Text="@nvlmcd.TongOK.Value?.ToString()" Style="font-size: 14px; color: black; font-weight: 500;"></RadzenText>
+                        </RadzenStack>
+                        <RadzenStack Style="width: 5%; height: contain; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenText Text="@nvlmcd.TongNG.Value?.ToString()" Style="font-size: 14px; color: black; font-weight: 500;"></RadzenText>
+                        </RadzenStack>
+                        <RadzenStack Style="width: 5%; height: contain; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenText Text="@nvlmcd.DanhGia.Value?.ToString()" Style="font-size: 14px; color: black; font-weight: 500;"></RadzenText>
+                        </RadzenStack>
+                    </RadzenStack>
+                    <RadzenCard Visible="@(nvlmcd.NVLMCDID.Value == SelectedNVLMCD?.NVLMCDID.Value)" Variant="Variant.Flat" Style="width: 100%; height: contain; padding: 10px; margin: 0; border-radius: 0">
+                        <RadzenStack Style="height: 100%; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            @if (nvlmcd.MaQuanLy.Value != null)
+                            {
+                                string qrBase64string = QRCodeServices.GenerateQRCode(nvlmcd.MaQuanLy.Value.ToString() ?? string.Empty, 150);
+                                <img style="border-radius: 10px;" src="@($"data:image/png;base64,{qrBase64string}")" alt="QR Code">
+                            }
+                        </RadzenStack>
+                    </RadzenCard>
+                }
+            }
+        </RadzenStack>
+    </RadzenStack>
+</RadzenCard>
+
+@code {
+    [Parameter]
+    public List<NVLmoiNguyenCong>? DSNVLmoiCongDoans { get; set; }
+
+    private NVLmoiNguyenCong? SelectedNVLMCD;
+
+    protected override Task OnInitializedAsync()
+    {
+        ServerSocketAsync.Im_Ex_Event += UpdateUI_IMEX_Mode;
+
+        return base.OnInitializedAsync();
+    }
+
+    private async void UpdateUI_IMEX_Mode(object? sender, object args)
+    {
+        SelectedNVLMCD = DSNVLmoiCongDoans?.FirstOrDefault(nvlmcd => nvlmcd.MaQuanLy.Value?.ToString() == args.ToString());
+
+        await InvokeAsync(new Action(() => StateHasChanged()));
+    }
+
+    private void OnNVLMCD_Click(NVLmoiNguyenCong selectedNVLMCD)
+    {
+        if (selectedNVLMCD.NVLMCDID.Value == SelectedNVLMCD?.NVLMCDID.Value)
+        {
+            SelectedNVLMCD = new();
+            Common.CurrentNVLMCDid = null;
+            Common.CurrentCDid = null;
+        }
+        else
+        {
+            SelectedNVLMCD = selectedNVLMCD;
+            Common.CurrentNVLMCDid = SelectedNVLMCD.NVLMCDID.Value;
+            Common.CurrentCDid = SelectedNVLMCD.CDID.Value;
+        }
+    }
+
+    public string IsNVLMCD_Selected(NVLmoiNguyenCong selectedNVLMCD)
+    {
+        if (selectedNVLMCD.NVLMCDID.Value == SelectedNVLMCD?.NVLMCDID.Value)
+            return "nvlmcdSelected";
+        else
+            return "nvlmcdUnSelected";
+    }
+}

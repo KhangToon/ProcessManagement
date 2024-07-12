@@ -1,0 +1,12 @@
+﻿
+@inject NavigationManager NavigationManager
+
+@code{
+
+    protected override async Task OnInitializedAsync()
+    {
+        var returnUrl = "~/" + NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        NavigationManager.NavigateTo($"Identity/Account/Login?returnUrl={returnUrl}", forceLoad: false);
+        await base.OnInitializedAsync();
+    }
+}

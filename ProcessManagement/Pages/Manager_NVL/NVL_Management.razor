@@ -1,0 +1,308 @@
+﻿@page "/nvlmanagement"
+@attribute [Authorize(Roles = "Admin, User")]
+@* this limited access into page *@
+
+@using ProcessManagement.Commons
+@using ProcessManagement.Models
+@using ProcessManagement.Services.SQLServer
+@using ProcessManagement.Pages.Manager_NVL.Dialogs
+@using Radzen.Blazor
+@using Radzen
+
+
+@inject NotificationService NotificationService
+@inject DialogService DialogService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject SQLServerServices SQLServerServices
+
+<style>
+    .rowbackground-style {
+        background-color: white;
+        border-radius: 10px;
+    }
+
+    .rz-grid-table-fixed-2 {
+        /*width: unset;*/
+        table-layout: auto;
+        border-radius: 10px;
+        padding: 10px;
+    }
+</style>
+
+
+<RadzenRow class="rowbackground-style" Gap="0" Style="height: 100%; width: 100%; overflow-y: auto;">
+    <RadzenColumn Size="12" SizeMD="12" Style="height: 100%; width: 100%;">
+        <RadzenTabs Style="width: 100%; height: 100%;">
+            <Tabs>
+                <RadzenTabsItem Text="Danh sách NVL">
+                    <RadzenCard Variant="Variant.Flat" Style="height: contain; width: 100%;">
+                        <RadzenStack Gap="10" Style="height: contain; width: 100%;">
+                            <!--Search by maquanly-->
+                            <RadzenStack Style="height: contain; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                <RadzenText Text="Danh sách nguyên vật liệu (NVL)" Style="color: Highlight; font-weight: 600; height: contain; min-width: 15%; width: contain"></RadzenText>
+                                <RadzenStack Gap="15px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: 100%; width: 85%;">
+                                    <RadzenTextBox @oninput="@((args) => FilterNVL(args?.Value))" Placeholder="Tìm theo mã quản lý" Style="border-radius: 20px; padding-left: 20px; border-width: 2px; border-color: var(--rz-primary-light); width: 50% "></RadzenTextBox>
+                                    <RadzenButton Icon="search" ButtonStyle="ButtonStyle.Primary" Style="border-radius: 20px;" />
+                                    <RadzenButton Click="@(() => { OnSearchNVLListFromDayRange(); })" Style="border-radius: 20px;" Icon="autorenew" ButtonStyle="ButtonStyle.Primary" />
+                                    <RadzenStack></RadzenStack>
+                                </RadzenStack>
+                            </RadzenStack>
+
+                            <!--Search by ngaynhap-->
+                            <RadzenStack Gap="20px" Orientation="Orientation.Horizontal" Style="height: contain; width: 100%; padding-top: 10px; border-top: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                <RadzenStack Gap="20px" Orientation="Orientation.Horizontal" Style="height: contain; width: contain; padding: 0;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                    <RadzenStack Style="height: 100%; width: contain; background-color: white; padding: 5px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                        <RadzenLabel Text="Lọc theo ngày" Component="CheckBox1" Style="font-size: 16px; color: darkred; font-weight: 600; cursor: pointer" />
+                                        <RadzenCheckBox TValue="bool" @bind-Value="@(displaybyDay)" Name="CheckBox1" Change="@((args) => { displaybyDay = args; OnSearchNVLListFromDayRange();  })" />
+                                    </RadzenStack>
+                                    <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" Style="height: contain; width: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                        <RadzenText Text="Từ ngày" Style="font-weight: 500; font-size: 14px; color: black;"></RadzenText>
+                                        <RadzenDatePicker Disabled="@(!displaybyDay)" TValue="DateTime" Value="@startSearchDay"
+                                                          ValueChanged="@((args) => { startSearchDay = args; OnSearchNVLListFromDayRange(); })"
+                                                          ShowTime="false" HourFormat="12" DateFormat="@Common.DayTimeFormatnoTime" AllowInput="false">
+                                            <FooterTemplate>
+                                                <RadzenStack Style="height: 100%; width: contain; padding: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                    @*<RadzenButton Style="height: 100%; width: 50%;" Text="Now" Click="@(() => { startSearchDay = DateTime.Now; OnSearchProductListFromDayRange(); })" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />*@
+                                                    <RadzenButton Style="height: 100%; width: 50%;" Text="To day" Click="@(() => { startSearchDay = DateTime.Today; OnSearchNVLListFromDayRange(); })" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />
+                                                </RadzenStack>
+                                            </FooterTemplate>
+                                        </RadzenDatePicker>
+                                    </RadzenStack>
+                                    <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" Style="height: contain; width: contain; margin-right: 50px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                        <RadzenText Text="Đến ngày" Style="font-weight: 500; font-size: 14px; color: black;"></RadzenText>
+                                        <RadzenDatePicker Disabled="@(!displaybyDay)" TValue="DateTime" Value="@endSearchDay"
+                                                          ValueChanged="@((args) => { endSearchDay = args; OnSearchNVLListFromDayRange(); })"
+                                                          ShowTime="false" HourFormat="12" DateFormat="@Common.DayTimeFormatnoTime" AllowInput="false">
+                                            <FooterTemplate>
+                                                <RadzenStack Style="height: 100%; width: contain; padding: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                    @*<RadzenButton Style="height: 100%; width: 50%;" Text="Now" Click="@(() => { endSearchDay = DateTime.Now; OnSearchProductListFromDayRange(); })" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />*@
+                                                    <RadzenButton Style="height: 100%; width: 50%;" Text="To day" Click="@(() => { endSearchDay = DateTime.Today; OnSearchNVLListFromDayRange(); })" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />
+                                                </RadzenStack>
+                                            </FooterTemplate>
+                                        </RadzenDatePicker>
+                                    </RadzenStack>
+                                </RadzenStack>
+
+                                <!--Search by Lot NVL-->
+                                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: 100%; width: contain; padding-left: 20px; padding-right: 20px; border-left: var(--rz-grid-cell-border); border-right: var(--rz-grid-cell-border);">
+                                    <RadzenLabel Text="Lọc theo loại NVL" Style="font-size: 16px; color: darkred; font-weight: 600" />
+                                    <RadzenDropDown Value="@currentSelectedLoaiNVL" ValueChanged="@((args) => { OnSelectLoaiNVLValueChanged(args);})" TValue="string"
+                                                    Data=@GetListLoaiNVL() Style="border-radius: 10px; border-width: 1px; font-size: 14px; ">
+                                    </RadzenDropDown>
+                                </RadzenStack>
+
+                                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: 100%; width: contain;">
+                                    <RadzenButton Click="OnThemNguyenVatLieu" Icon="add" Text="Thêm nguyên vật liệu" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled"
+                                                  Style="height: contain; width: contain; font-size: 14px; background-color: Highlight " />
+                                </RadzenStack>
+                            </RadzenStack>
+
+                            <RadzenRow Gap="10px" Style="height: contain%; width: 100%; border-top: var(--rz-grid-cell-border); padding: 0;">
+                                <RadzenColumn Size="12" SizeMD="12" Style="height: contain; width: 100%; padding-top: 10px; ">
+                                    <RadzenStack Gap="20px" Style="height: contain; width: 100%; padding-bottom: 5px; padding-left: 20px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                        <RadzenStack Visible="@(currentSelectedLoaiNVL != "Tất cả")" Gap="10px" Style="height: 100%; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                            <RadzenText Text="@($"Loại nguyên vật liệu:")" Style="color: black; height: contain; width: contain; font-size: 14px"></RadzenText>
+                                            <RadzenText Text="@($"{currentSelectedLoaiNVL}")" Style="color: darkblue; font-weight: 600; height: contain; width: contain"></RadzenText>
+                                        </RadzenStack>
+                                        <RadzenStack Gap="10px" Style="height: 100%; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                            <RadzenText Text="@($"Tổng số NVL: ")" Style="color: black;  height: contain; width: contain; font-size: 14px"></RadzenText>
+                                            <RadzenText Text="@($"{ListNVL?.Count?? 0}")" Style="color: black; font-weight: 600; height: contain; width: contain"></RadzenText>
+                                        </RadzenStack>
+                                    </RadzenStack>
+                                    <!--Table listNVL-->
+                                    <RadzenDataGrid class="rz-grid-table-fixed-2" Data="@(ListNVL)" TItem="NVL"
+                                                    AllowFiltering="false" FilterMode="FilterMode.Simple"
+                                                    AllowPaging="true" AllowSorting="false" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                                    ShowPagingSummary="true" PagingSummaryFormat="@pagingSummaryFormat"
+                                                    GridLines="DataGridGridLines.Both" PageSize="50"
+                                                    HeaderCellRender="@(args => args.Attributes.Add("style", $"background-color: rgba(58, 71, 77)"))"
+                                                    CellRender="@OnCellRender" RowSelect="@OnRowSelected" Density="Density.Default">
+                                        <Columns>
+                                            @if (ListNVL != null && ListNVL.Count > 0)
+                                            {
+                                                List<Propertyy> columns = ListNVL.FirstOrDefault()?.GetPropertiesValues() ?? new();
+
+                                                foreach (var column in columns)
+                                                {
+                                                    string colName = column.Name ?? string.Empty;
+
+                                                    @if (colName.Contains("ID"))
+                                                    {
+                                                        <RadzenDataGridColumn Width="50px" Frozen="true" FrozenPosition="FrozenColumnPosition.Left" Filterable="false"
+                                                                              TItem="NVL" Title="#"
+                                                                              Property="@colName" TextAlign="TextAlign.Center">
+                                                            <HeaderTemplate>
+                                                                <span style="font-weight: bold; font-size: 16px; color: white">#</span>
+                                                            </HeaderTemplate>
+                                                            <Template Context="nvl">
+                                                                <span style="font-weight: bold;">@(ListNVL.IndexOf(nvl) + 1)</span>
+                                                            </Template>
+                                                        </RadzenDataGridColumn>
+                                                    }
+                                                    else
+                                                    {
+                                                        <RadzenDataGridColumn Width="contain" TItem="NVL" Title="@colName"
+                                                                              Property="@colName" TextAlign="TextAlign.Center">
+                                                            <HeaderTemplate>
+                                                                <span style="font-weight: bold; font-size: 16px; color: white">@colName</span>
+                                                            </HeaderTemplate>
+                                                            <Template Context="nvl">
+                                                                @if (colName.Contains(Common.MaQuanLy))
+                                                                {
+                                                                    <span style="color: darkblue; font-weight: bolder;">@nvl.MaQuanLy.Value</span>
+                                                                }
+                                                                else if (colName == Common.NgayNhap || colName == Common.NgayXuat)
+                                                                {
+                                                                    string dayvalue = string.Empty;
+
+                                                                    if (column.Value != DBNull.Value && column.Value != null)
+                                                                    {
+                                                                        dayvalue = Convert.ToDateTime(nvl.GetPropertyValue(colName)).ToString("dd-MM-yyyy");
+                                                                    }
+
+                                                                    <span style="color: black; font-weight: 500;">@(dayvalue)</span>
+                                                                }
+                                                                else if (colName == Common.LotNVL)
+                                                                {
+                                                                    <span style="color: darkred; font-weight: 600;">@(nvl.GetPropertyValue(colName))</span>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <span style="color: black; font-weight: 500;">@(nvl.GetPropertyValue(colName))</span>
+                                                                }
+                                                            </Template>
+                                                        </RadzenDataGridColumn>
+                                                    }
+                                                }
+                                            }
+                                        </Columns>
+                                    </RadzenDataGrid>
+                                </RadzenColumn>
+                            </RadzenRow>
+                        </RadzenStack>
+                    </RadzenCard>
+                </RadzenTabsItem>
+            </Tabs>
+        </RadzenTabs>
+    </RadzenColumn>
+</RadzenRow>
+
+@code {
+    private List<string>? UserRoles;
+    private DateTime startSearchDay = DateTime.Today;
+    private DateTime endSearchDay = DateTime.Today;
+    private string pagingSummaryFormat = "Displaying page {0} of {1} <b>(total {2} records)</b>";
+    private List<NVL>? ListNVL;
+    private NVL? SelectedNVL;
+    private bool displaybyDay = false;
+    private string currentSelectedLoaiNVL = "Tất cả";
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+        var user = authState?.User;
+
+        if (user != null && user.Identity?.IsAuthenticated == true)
+        {
+            UserRoles = user.Claims.Where(c => c.Type == "role").Select(c => c.Value).ToList();
+        }
+
+        OnSearchNVLListFromDayRange();
+
+        await base.OnInitializedAsync();
+    }
+
+    // Searching
+    private async Task FilterNVL(object? args)
+    {
+        string maquanly = args?.ToString()?.Trim() ?? string.Empty;
+
+        OnSearchNVLListFromDayRange();
+
+        await Task.Delay(100);
+
+        List<NVL>? NVLsFilter = ListNVL?.FindAll(cl => cl.MaQuanLy.Value?.ToString()?.IndexOf(maquanly, StringComparison.OrdinalIgnoreCase) >= 0);
+
+        ListNVL = NVLsFilter;
+    }
+
+    private void OncheckDisplayAllchange(bool isDisplayAll)
+    {
+        OnSearchNVLListFromDayRange();
+    }
+
+    private void OnSearchNVLListFromDayRange()
+    {
+        DateTime offsetendDay = endSearchDay.AddDays(1);
+
+        if (currentSelectedLoaiNVL == "Tất cả")
+        {
+            if (displaybyDay)
+            {
+                ListNVL = SQLServerServices.GetlistNVL().Where(sp => (startSearchDay <= Convert.ToDateTime(sp.NgayNhap.Value) && Convert.ToDateTime(sp.NgayNhap.Value) < offsetendDay)).ToList();
+            }
+            else
+            {
+                ListNVL = SQLServerServices.GetlistNVL();
+            }
+        }
+        else
+        {
+            if (displaybyDay)
+            {
+                ListNVL = SQLServerServices.GetlistNVLbyLoaiNL(currentSelectedLoaiNVL).Where(nvl => (startSearchDay <= Convert.ToDateTime(nvl.NgayNhap.Value)
+                                                        && Convert.ToDateTime(nvl.NgayNhap.Value) < offsetendDay)).ToList();
+            }
+            else
+            {
+                ListNVL = SQLServerServices.GetlistNVLbyLoaiNL(currentSelectedLoaiNVL);
+            }
+        }
+    }
+    // Search by Lot NVL
+    public List<string> GetListLoaiNVL()
+    {
+        List<NVL> nvls = SQLServerServices.GetlistNVL();
+
+        List<string> loaiNVLs = nvls.Select(nvl => nvl.LoaiNVL?.Value?.ToString() ?? string.Empty).Distinct().Where(loainvl => (loainvl != string.Empty)).ToList();
+
+        loaiNVLs.Add("Tất cả");
+
+        return loaiNVLs;
+    }
+    private void OnSelectLoaiNVLValueChanged(string lotNVL)
+    {
+        currentSelectedLoaiNVL = lotNVL;
+
+        OnSearchNVLListFromDayRange();
+    }
+
+
+    // // //
+
+    // Them nguyen vat lieu
+    private async Task OnThemNguyenVatLieu()
+    {
+        await DialogService.OpenAsync<DialogAddNewNVL>(null, null,
+        new DialogOptions() { Width = "80%", Height = "95%", Resizable = false, Draggable = true, ShowTitle = false, ShowClose = false, Style = "background-color: while; border-radius: 0px; padding: 0px" });
+
+        OnSearchNVLListFromDayRange();
+    }
+
+    // NVL Datagrid
+    private void OnRowSelected(NVL selectednvl)
+    {
+        SelectedNVL = selectednvl;
+    }
+
+    private void OnCellRender(DataGridCellRenderEventArgs<NVL> args)
+    {
+        if (args.Column.Property.Contains("ID"))
+        {
+            args.Attributes.Add("style", $"font-weight: bold;");
+        }
+    }
+    // // //
+}

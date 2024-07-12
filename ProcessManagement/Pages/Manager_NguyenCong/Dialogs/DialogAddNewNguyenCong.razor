@@ -1,0 +1,125 @@
+﻿@using ProcessManagement.Services.SQLServer
+@using Radzen.Blazor
+@using Radzen
+@using ProcessManagement.Commons
+@using ProcessManagement.Models
+@using System.Text
+
+@inject DialogService DialogService
+@inject SQLServerServices SQLServerServices
+@inject NotificationService NotificationService
+
+<!--Add new item for product-->
+<RadzenCard Variant="Variant.Outlined" Style="height: contain; width: 100%; padding: 10px; margin-top: 15px; overflow: scroll ">
+    <RadzenStack AlignItems="AlignItems.Center" Style="width: 100%; height: 100%;">
+        <RadzenText Text="Thêm nguyên công mới" Style="font-size: 16px; font-weight: 600; height: contain;"></RadzenText>
+    </RadzenStack>
+    <RadzenStack Orientation="Orientation.Vertical" Gap="15px" Style="width: 100%; height: 100%; padding-left: 15px; padding-top: 10px">
+        <RadzenStack Style="height: 100%; width: 100%; padding: 10px;" Gap="15px" Orientation="Orientation.Vertical">
+
+            <!--Tên nguyên công-->
+            <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: contain">
+                <RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Start" Style="width: 100%;" Gap="10px">
+                    <RadzenText Text="Tên nguyên công" Style="font-size: 16px; font-weight: 600;"></RadzenText>
+                    <RadzenTextBox Value="@newNguyenCong.TenNguyenCong.Value?.ToString()" ValueChanged="@((args) => { newNguyenCong.TenNguyenCong.Value = args; } )"
+                                   Style="font-size: 16px; height: contain; border-color: Highlight; border-width: 1px; width: 100% "></RadzenTextBox>
+                    <RadzenText Text="*Nhập tên nguyên công mới" Style="color: green; font-style: italic; font-size: 13px"></RadzenText>
+                </RadzenStack>
+            </RadzenCard>
+
+            <!--Item Value-->
+            <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: contain">
+                <RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Start" Style="width: 100%;" Gap="10px">
+                    <RadzenText Text="Ghi chú" Style="font-size: 16px; font-weight: 600;"></RadzenText>
+                    <RadzenTextArea Value="@newNguyenCong.Ghichu.Value?.ToString()"
+                                    ValueChanged="@((args) => { newNguyenCong.Ghichu.Value = args; } )"
+                                    Style="font-size: 16px; height: contain; border-color: Highlight; border-width: 1px; width: 100% "></RadzenTextArea>
+                    <RadzenText Text="*Nhập ghi chú" Style="color: green; font-style: italic; font-size: 13px"></RadzenText>
+                </RadzenStack>
+            </RadzenCard>
+
+        </RadzenStack>
+
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="width: 100%; height: contain">
+            <RadzenButton Style="width: contain; background-color: darkgreen" Icon="save"
+                          Click=@(() => OnSubmitNewItems(newNguyenCong)) Text="Thêm" Size="ButtonSize.Small"
+                          ButtonStyle="ButtonStyle.Success" Shade="Shade.Light" Variant="Variant.Flat">
+            </RadzenButton>
+            <RadzenButton Style="width: contain; background-color: darkred " Icon="close"
+                          Click=@(() => { DialogService.Close(null); }) Text="Thoát" Size="ButtonSize.Small"
+                          ButtonStyle="ButtonStyle.Danger" Shade="Shade.Dark" Variant="Variant.Flat">
+            </RadzenButton>
+        </RadzenStack>
+    </RadzenStack>
+</RadzenCard>
+
+@code {
+
+    private NguyenCong newNguyenCong = new();
+
+    private async Task OnSubmitNewItems(NguyenCong newnguyencong)
+    {
+        foreach (var property in newnguyencong.GetPropertiesValues())
+        {
+            if (property.Name != Common.NCID)
+            {
+                if (property.Value == null)
+                {
+                    ShowNotification("Hãy nhập đầy đủ thông tin!", NotificationSeverity.Warning, 2000);
+
+                    return;
+                }
+            }
+        }
+
+        bool? comfirm = await DialogService.Confirm("Thêm mới nguyên công này?", "Xác nhận", new ConfirmOptions() { OkButtonText = "OK", CancelButtonText = "Hủy", ShowClose = false });
+
+        if (comfirm.Value)
+        {
+            // Check nguyen cong da ton tai
+
+            (int ncid, string errorMess) = SQLServerServices.NguyencongDatontai(newnguyencong);
+
+            if (ncid > 0 || ncid == -1)
+            {
+                await DialogService.Alert($"Nguyên công này đã tồn tại!", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+
+                return;
+            }
+            else if (errorMess != string.Empty)
+            {
+                await DialogService.Alert($"{errorMess}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+
+                return;
+            }
+
+            // Them moi nguyen cong
+            (int newncid, string error) = SQLServerServices.InsertNewNguyenCong(newnguyencong);
+
+            if (newncid > 0)
+            {
+                ShowNotification("Thêm mới thành công!", NotificationSeverity.Success, 2000);
+
+                newnguyencong.NCID.Value = newncid;
+
+                DialogService.Close(newnguyencong);
+            }
+            else
+            {
+                await DialogService.Alert($"{error}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+            }
+        }
+    }
+
+    void ShowNotification(string message, NotificationSeverity notifytype, double time)
+    {
+        NotificationMessage notify = new NotificationMessage
+            {
+                Style = "position: fixed; top: 0; right: 0;",
+                Severity = notifytype,
+                Summary = message,
+                Duration = time
+            };
+        NotificationService.Notify(notify);
+    }
+}

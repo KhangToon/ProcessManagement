@@ -1,0 +1,179 @@
+﻿@using ProcessManagement.Commons
+@using ProcessManagement.Services.SQLServer
+@using Radzen.Blazor
+@using Radzen
+@using ProcessManagement.Models
+
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject SQLServerServices SQLServerServices
+
+<RadzenStack Gap="0" Style="height: 100%; width: 100%; padding: 10px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+    <RadzenStack Style="height: 5%; width: 100%; padding: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+        <RadzenText Text="Danh sách nguyên vật liệu mới" Style="font-size: 18px; font-weight: 500; color: darkgreen"></RadzenText>
+    </RadzenStack>
+    <RadzenStack Style="width: 100%; height: 90%; overflow-y: scroll;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+        <!--Table listNVL-->
+        <RadzenDataGrid class="rz-grid-table-fixed-2" Data="@(DanhSachNVLs)" TItem="NVL"
+                        AllowFiltering="false" FilterMode="FilterMode.Simple"
+                        AllowPaging="false" AllowSorting="false" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                        ShowPagingSummary="false"
+                        GridLines="DataGridGridLines.Both"
+                        HeaderCellRender="@(args => args.Attributes.Add("style", $"background-color: rgba(58, 71, 77)"))"
+                        CellRender="@OnCellRender" Density="Density.Default">
+            <Columns>
+                @if (DanhSachNVLs != null && DanhSachNVLs.Count > 0)
+                {
+                    List<Propertyy> columns = DanhSachNVLs.FirstOrDefault()?.GetPropertiesValues() ?? new();
+
+                    foreach (var column in columns)
+                    {
+                        string colName = column.Name ?? string.Empty;
+
+                        @if (colName.Contains("ID"))
+                        {
+                            <RadzenDataGridColumn Width="50px" Frozen="true" FrozenPosition="FrozenColumnPosition.Left" Filterable="false"
+                                                  TItem="NVL" Title="#"
+                                                  Property="@colName" TextAlign="TextAlign.Center">
+                                <HeaderTemplate>
+                                    <span style="font-weight: bold; font-size: 16px; color: white">#</span>
+                                </HeaderTemplate>
+                                <Template Context="nvl">
+                                    <span style="font-weight: bold;">@(DanhSachNVLs.IndexOf(nvl) + 1)</span>
+                                </Template>
+                            </RadzenDataGridColumn>
+                        }
+                        else if (colName == Common.MaQuanLy)
+                        {
+                            <RadzenDataGridColumn Width="150px" TItem="NVL" Title="@colName"
+                                                  Property="@colName" TextAlign="TextAlign.Center">
+                                <HeaderTemplate>
+                                    <span style="font-weight: bold; font-size: 16px; color: white">@colName</span>
+                                </HeaderTemplate>
+                                <Template Context="nvl">
+                                    <span style="color: darkblue; font-weight: bolder;">@nvl.MaQuanLy.Value</span>
+                                </Template>
+                            </RadzenDataGridColumn>
+                        }
+                        else if (colName != Common.NgayXuat && colName != Common.SoLuongXuat && colName != Common.GhiChu)
+                        {
+                            <RadzenDataGridColumn Width="contain" TItem="NVL" Title="@colName"
+                                                  Property="@colName" TextAlign="TextAlign.Center">
+                                <HeaderTemplate>
+                                    <span style="font-weight: bold; font-size: 16px; color: white">@colName</span>
+                                </HeaderTemplate>
+                                <Template Context="nvl">
+                                    @if (colName == Common.NgayNhap || colName == Common.NgayXuat)
+                                    {
+                                        string dayvalue = string.Empty;
+
+                                        if (column.Value != DBNull.Value && column.Value != null)
+                                        {
+                                            dayvalue = Convert.ToDateTime(nvl.GetPropertyValue(colName)).ToString("dd-MM-yyyy");
+                                        }
+
+                                        <span style="color: black; font-weight: 500;">@(dayvalue)</span>
+                                    }
+                                    else
+                                    {
+                                        <span style="color: black; font-weight: 500;">@(nvl.GetPropertyValue(colName))</span>
+                                    }
+                                </Template>
+                            </RadzenDataGridColumn>
+                        }
+                    }
+                }
+            </Columns>
+        </RadzenDataGrid>
+    </RadzenStack>
+    <RadzenStack Gap="15px" Style="height: 5%; width: 100%; padding-top: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+        <RadzenButton Visible="@(DanhSachNVLs?.Count > 0)" Click="@(() => OnSaveListNVLtoDB())" Style="width: contain; height: 80%; color: white;" Icon="save" Text="Xác nhận thêm" ButtonStyle="ButtonStyle.Success" Shade="Shade.Default" Size="ButtonSize.Small" Variant="Variant.Flat" />
+    </RadzenStack>
+</RadzenStack>
+
+@code {
+    [Parameter]
+    public List<NVL>? DanhSachNVLs { get; set; }
+
+    protected async override Task OnInitializedAsync()
+    {
+        if (!Common.IsClickSaveEventRegistered())
+        {
+            //Common.ClickSaveEvent += OnEventClickSaveListNVLRaise;
+        }
+
+        await base.OnInitializedAsync();
+    }
+
+    private async void OnEventClickSaveListNVLRaise(object? sender, EventArgs args)
+    {
+        if (DanhSachNVLs != null && DanhSachNVLs.Count > 0)
+        {
+            await OnAddNewListNVLtoDB();
+        }
+        else await DialogService.Alert($"Danh sách NVL chưa được tạo!", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+    }
+
+    private async Task OnSaveListNVLtoDB()
+    {
+        if (DanhSachNVLs != null && DanhSachNVLs.Count > 0)
+        {
+            await OnAddNewListNVLtoDB();
+        }
+        else await DialogService.Alert($"Danh sách NVL chưa được tạo!", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+    }
+
+    private async Task OnAddNewListNVLtoDB()
+    {
+        bool? comfirm = await DialogService.Confirm("Lưu danh sách NVL này vào database?", "Xác nhận", new ConfirmOptions() { OkButtonText = "OK", CancelButtonText = "Hủy", ShowClose = false });
+
+        if (!comfirm.Value) { return; }
+
+        int result = -1; string error = string.Empty;
+
+        if (DanhSachNVLs != null)
+        {
+            foreach (var nvl in DanhSachNVLs)
+            {
+                (result, error) = SQLServerServices.InsertNewNguyenvatlieu(nvl);
+
+                if (result == -1)
+                {
+                    await DialogService.Alert($"{error}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+
+                    break;
+                }
+            }
+        }
+
+        if (result != -1)
+        {
+            ShowNotification("Thêm mới NVL thành công!", NotificationSeverity.Success, 2000);
+        }
+
+    }
+
+    // Notification
+    void ShowNotification(string message, NotificationSeverity notifytype, double time)
+    {
+        NotificationMessage notify = new NotificationMessage
+            {
+                Style = "position: fixed; top: 0; right: 0;",
+                Severity = notifytype,
+                Summary = message,
+                Duration = time
+            };
+
+        NotificationService.Notify(notify);
+    }
+
+    // NVL Datagrid
+    private void OnCellRender(DataGridCellRenderEventArgs<NVL> args)
+    {
+        if (args.Column.Property.Contains("ID"))
+        {
+            args.Attributes.Add("style", $"font-weight: bold;");
+        }
+    }
+
+}

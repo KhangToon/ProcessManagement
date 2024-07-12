@@ -1,0 +1,17 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using ProcessManagement.Areas.Identity.Pages
+
+<Router AppAssembly="@typeof(App).Assembly" PreferExactMatches="@true">
+    <Found Context="routeData">
+        <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
+            <NotAuthorized>
+                <RedirectToLogin />
+            </NotAuthorized>
+        </AuthorizeRouteView>
+    </Found>
+    <NotFound>
+        <CascadingAuthenticationState>
+            <LayoutView Layout="@typeof(MainLayout)"></LayoutView>
+        </CascadingAuthenticationState>
+    </NotFound>
+</Router>

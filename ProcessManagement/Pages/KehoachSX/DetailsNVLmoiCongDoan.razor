@@ -1,0 +1,344 @@
+﻿@using ProcessManagement.Commons
+@using ProcessManagement.Services.QRCodes
+@using ProcessManagement.Services.SQLServer
+@using Radzen.Blazor
+@using Radzen
+@using ProcessManagement.Models
+
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject SQLServerServices SQLServerServices
+@inject QRCodeServices QRCodeServices
+
+<RadzenCard Variant="Variant.Filled" Style="width: 100%; height: 100%; padding: 10px; margin: 0; border-radius: 0">
+    <RadzenStack Gap="10px" Style="height: 100%; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+        <RadzenStack Style="height: 100%; width: 15%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+            <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: 100%; padding: 10px; margin: 0; border-radius: 5px">
+                <RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="width: 100%; height: contain;">
+                    <RadzenText Text="@(_selectNVLmoiCD?.MaQuanLy.Value?.ToString() ?? string.Empty)" Style="font-size: 14px; font-weight: 600; color: black "></RadzenText>
+                </RadzenStack>
+                <RadzenStack Style="height: 100%; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                    @if (_selectNVLmoiCD?.MaQuanLy.Value != null)
+                    {
+                        string qrBase64string = QRCodeServices.GenerateQRCode(_selectNVLmoiCD.MaQuanLy.Value.ToString() ?? string.Empty, 150);
+                        <img style="border-radius: 10px;" src="@($"data:image/png;base64,{qrBase64string}")" alt="QR Code">
+                    }
+                </RadzenStack>
+            </RadzenCard>
+        </RadzenStack>
+        <RadzenStack Style="height: 100%; width: 85%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+            <RadzenStack Style="width: 100%; height: contain;" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
+                <RadzenCard Variant="Variant.Flat" Style="width: 90%; height: 100%; padding-top: 5px; padding-bottom: 5px; border-radius: 5px">
+                    <RadzenStack Style="width: 100%; height: contain; padding-bottom: 10px" Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                        <RadzenStack Style="width: contain; height: contain;" Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenText Text="Nguyên công: " Style="color: black; font-weight: 600; font-size: 16px; font-style: initial"></RadzenText>
+                            <RadzenText Text="@_selectNVLmoiCD?.TenCongDoan.Value?.ToString()" Style="color: darkred; font-weight: 600; font-size: 16px; font-style: initial"></RadzenText>
+                            <RadzenText Text="Số lượng cần gia công: " Style="color: black; font-weight: 600; font-size: 16px; font-style: initial"></RadzenText>
+                            <RadzenText Text="@($"{_selectNVLmoiCD?.SLCanGiaCong.Value?.ToString()} (pcs)")" Style="color: darkgreen; font-weight: 600; font-size: 16px; font-style: initial"></RadzenText>
+                        </RadzenStack>
+                        <RadzenStack Style="width: contain; height: contain;" Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenText Text="Mã quản lý: " Style="color: black; font-weight: 600; font-size: 16px; font-style: initial"></RadzenText>
+                            <RadzenText Text="@_selectNVLmoiCD?.MaQuanLy.Value?.ToString()" Style="color: darkblue; font-weight: 600; font-size: 16px; font-style: initial"></RadzenText>
+                        </RadzenStack>
+                        <RadzenStack Style="width: contain; height: contain;">
+                            @{
+                                int slconlaiCongdoan = CalculateSLconlaiCongDoan();
+
+                                if (slconlaiCongdoan > 0)
+                                {
+                                    <RadzenAlert Text="@($"Còn {slconlaiCongdoan} (pcs) chưa gia công")" Style="width: 100%; height: contain; font-size: 16px" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                                }
+                                else if (_selectNVLmoiCD?.SLCanGiaCong.Value?.ToString() == "0")
+                                {
+                                    <RadzenAlert Text="@($"Nguyên công chưa được phép gia công")" Style="width: 100%; height: contain; font-size: 16px" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                                }
+                                else if (slconlaiCongdoan == 0)
+                                {
+                                    <RadzenAlert Text="@($"Đã gia công đủ số lượng")" Style="width: 100%; height: contain; font-size: 16px" AlertStyle="AlertStyle.Success" Icon="check" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                                }
+                            }
+                        </RadzenStack>
+                    </RadzenStack>
+                    <RadzenStack Gap="0" Style="width: 100%; height: contain" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                        <!--Header-->
+                        <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="background-color: rgba(58, 71, 77); padding-top: 5px; padding-bottom: 5px; height: contain; width: 100%; border-bottom: var(--rz-grid-cell-border);">
+                            <RadzenStack Style="width: 20%; height: contain; border-right: var(--rz-grid-cell-border)" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenText Text="Ca" Style="font-size: 16px; color: white; font-weight: 500;"></RadzenText>
+                            </RadzenStack>
+                            <RadzenStack Style="width: 20%; height: contain; border-right: var(--rz-grid-cell-border)" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenText Text="Ngày gia công" Style="font-size: 16px; color: white; font-weight: 500;"></RadzenText>
+                            </RadzenStack>
+                            <RadzenStack Style="width: 20%; height: contain; border-right: var(--rz-grid-cell-border)" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenText Text="Nhân viên" Style="font-size: 16px; color: white; font-weight: 500;"></RadzenText>
+                            </RadzenStack>
+                            <RadzenStack Style="width: 20%; height: contain; border-right: var(--rz-grid-cell-border)" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenText Text="Số lượng OK" Style="font-size: 16px; color: white; font-weight: 500;"></RadzenText>
+                            </RadzenStack>
+                            <RadzenStack Style="width: 20%; height: contain; border-right: var(--rz-grid-cell-border)" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenText Text="Số lượng NG" Style="font-size: 16px; color: white; font-weight: 500;"></RadzenText>
+                            </RadzenStack>
+                            <RadzenStack Style="width: 20%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenText Text="" Style="font-size: 16px; color: white; font-weight: 500;"></RadzenText>
+                            </RadzenStack>
+                        </RadzenStack>
+                        <!--Ca ngay-->
+                        <RadzenStack Visible=@(!IsEditCaDem) Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="background-color: white; padding-top: 10px; padding-bottom: 10px; height: contain; width: 100%; border-bottom: var(--rz-grid-cell-border);">
+                            <RadzenStack Style="width: 20%; height: contain; border-right: var(--rz-grid-cell-border)" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenText Text="@_selectNVLmoiCD?.CaNgay.Ca.Value?.ToString()" Style="font-size: 16px; color: black; font-weight: 500;"></RadzenText>
+                            </RadzenStack>
+                            <RadzenStack Style="width: 20%; height: contain; border-right: var(--rz-grid-cell-border)" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                @if (_selectNVLmoiCD?.CaNgay.NgayGiaCong.Value?.ToString() != string.Empty)
+                                {
+                                    string ngaygiacong = Convert.ToDateTime(_selectNVLmoiCD?.CaNgay.NgayGiaCong.Value?.ToString()).ToString(Common.DayTimeFormatnoTime);
+                                    <RadzenText Visible="@(!IsEditCaNgay)" Text="@ngaygiacong" Style="font-size: 16px; color: black; font-weight: 500;"></RadzenText>
+                                }
+                                <RadzenDatePicker Visible="@(IsEditCaNgay)" Placeholder="*Ngày nhập" TValue="DateTime" Value=@CaNgayItems.ngayGC
+                                                  ValueChanged="@((args) => { CaNgayItems.ngayGC = args; })"
+                                                  ShowTime="false" HourFormat="12" DateFormat="@Common.DayTimeFormatnoTime" AllowInput="false"
+                                                  Style="width: 100%; border-radius: 10px; font-size: 14px">
+                                </RadzenDatePicker>
+                            </RadzenStack>
+                            <RadzenStack Style="width: 20%; height: contain; border-right: var(--rz-grid-cell-border)" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenText Visible="@(!IsEditCaNgay)" Text="@_selectNVLmoiCD?.CaNgay.NhanVien.Value?.ToString()" Style="font-size: 16px; color: black; font-weight: 500;"></RadzenText>
+                                <RadzenTextBox Visible="@(IsEditCaNgay)" @bind-Value="@CaNgayItems.tenNV" Style="font-size: 14px; font-weight: 600; width: 100%; height: contain;"></RadzenTextBox>
+                            </RadzenStack>
+                            <RadzenStack Style="width: 20%; height: contain; border-right: var(--rz-grid-cell-border)" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenText Visible="@(!IsEditCaNgay)" Text="@($"{_selectNVLmoiCD?.CaNgay.OK.Value?.ToString()} (pcs)")" Style="font-size: 16px; color: green; font-weight: 500;"></RadzenText>
+                                <RadzenNumeric Visible="@(IsEditCaNgay)" Placeholder="*Nhập số lượng OK" TValue="int" Min="0" Max="100000"
+                                               Value="@CaNgayItems.slOK" ValueChanged="@((args) => {CaNgayItems.slOK = args;})"
+                                               Style="font-size: 14px; height: contain; border-radius: 0; border-width: 1px; width: 100%" />
+                            </RadzenStack>
+                            <RadzenStack Style="width: 20%; height: contain; border-right: var(--rz-grid-cell-border)" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenText Visible="@(!IsEditCaNgay)" Text="@($"{_selectNVLmoiCD?.CaNgay.NG.Value?.ToString()} (pcs)")" Style="font-size: 16px; color: red; font-weight: 500;"></RadzenText>
+                                <RadzenNumeric Visible="@(IsEditCaNgay)" Placeholder="*Nhập số lượng NG" TValue="int" Min="0" Max="100000"
+                                               Value="@CaNgayItems.slNG" ValueChanged="@((args) => {CaNgayItems.slNG = args;})"
+                                               Style="font-size: 14px; height: contain; border-radius: 0; border-width: 1px; width: 100%" />
+                            </RadzenStack>
+                            <RadzenStack Visible=@(!IsEditCaNgay) Style="width: 20%; height: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenButton Click=@(() => OnOpenUpdateCaNgay()) Icon="edit" Text="Cập nhật" Size="ButtonSize.Small" Variant="Variant.Flat"
+                                              Style="height: 100%; width: contain; font-size: 14px; background-color: black" />
+                            </RadzenStack>
+                            <RadzenStack Visible=@(IsEditCaNgay) Style="width: 20%; height: contain;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenButton Click=@(() => OnOpenUpdateCaNgay()) Icon="check" Text="Lưu" Size="ButtonSize.Small" Variant="Variant.Flat"
+                                              Style="height: 100%; width: 80%; font-size: 14px; background-color: darkgreen" />
+                                <RadzenButton Click=@(() => { IsEditCaNgay = false;}) Icon="cancel" Text="Hủy" Size="ButtonSize.Small" Variant="Variant.Flat"
+                                              Style="height: 100%; width: 80%; font-size: 14px; background-color: darkred" />
+                            </RadzenStack>
+                        </RadzenStack>
+
+                        <!--Ca dem-->
+                        <RadzenStack Visible=@(!IsEditCaNgay) Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="background-color: white; padding-top: 10px; padding-bottom: 10px; height: contain; width: 100%; border-bottom: var(--rz-grid-cell-border);">
+                            <RadzenStack Style="width: 20%; height: contain; border-right: var(--rz-grid-cell-border)" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenText Text="@_selectNVLmoiCD?.CaDem.Ca.Value?.ToString()" Style="font-size: 16px; color: black; font-weight: 500;"></RadzenText>
+                            </RadzenStack>
+                            <RadzenStack Style="width: 20%; height: contain; border-right: var(--rz-grid-cell-border)" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                @if (_selectNVLmoiCD?.CaDem.NgayGiaCong.Value?.ToString() != string.Empty)
+                                {
+                                    string ngaygiacong = Convert.ToDateTime(_selectNVLmoiCD?.CaDem.NgayGiaCong.Value?.ToString()).ToString(Common.DayTimeFormatnoTime);
+                                    <RadzenText Visible="@(!IsEditCaDem)" Text="@ngaygiacong" Style="font-size: 16px; color: black; font-weight: 500;"></RadzenText>
+                                }
+                                <RadzenDatePicker Visible="@(IsEditCaDem)" Placeholder="*Ngày nhập" TValue="DateTime" Value=@CaDemItems.ngayGC
+                                                  ValueChanged="@((args) => { CaDemItems.ngayGC = args; })"
+                                                  ShowTime="false" HourFormat="12" DateFormat="@Common.DayTimeFormatnoTime" AllowInput="false"
+                                                  Style="width: 100%; border-radius: 10px; font-size: 14px">
+                                </RadzenDatePicker>
+                            </RadzenStack>
+                            <RadzenStack Style="width: 20%; height: contain; border-right: var(--rz-grid-cell-border)" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenText Visible="@(!IsEditCaDem)" Text="@_selectNVLmoiCD?.CaDem.NhanVien.Value?.ToString()" Style="font-size: 16px; color: black; font-weight: 500;"></RadzenText>
+                                <RadzenTextBox Visible="@(IsEditCaDem)" @bind-Value="@CaDemItems.tenNV" Style="font-size: 14px; font-weight: 600; width: 100%; height: contain;"></RadzenTextBox>
+                            </RadzenStack>
+                            <RadzenStack Style="width: 20%; height: contain; border-right: var(--rz-grid-cell-border)" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenText Visible="@(!IsEditCaDem)" Text="@($"{_selectNVLmoiCD?.CaDem.OK.Value?.ToString()} (pcs)")" Style="font-size: 16px; color: green; font-weight: 500;"></RadzenText>
+                                <RadzenNumeric Visible="@(IsEditCaDem)" Placeholder="*Nhập số lượng OK" TValue="int" Min="0" Max="100000"
+                                               Value="@CaDemItems.slOK" ValueChanged="@((args) => {CaDemItems.slOK = args;})"
+                                               Style="font-size: 14px; height: contain; border-radius: 0; border-width: 1px; width: 100%" />
+                            </RadzenStack>
+                            <RadzenStack Style="width: 20%; height: contain; border-right: var(--rz-grid-cell-border)" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenText Visible="@(!IsEditCaDem)" Text="@($"{_selectNVLmoiCD?.CaDem.NG.Value?.ToString()} (pcs)")" Style="font-size: 16px; color: red; font-weight: 500;"></RadzenText>
+                                <RadzenNumeric Visible="@(IsEditCaDem)" Placeholder="*Nhập số lượng NG" TValue="int" Min="0" Max="100000"
+                                               Value="@CaDemItems.slNG" ValueChanged="@((args) => {CaDemItems.slNG = args;})"
+                                               Style="font-size: 14px; height: contain; border-radius: 0; border-width: 1px; width: 100%" />
+                            </RadzenStack>
+                            <RadzenStack Visible=@(!IsEditCaDem) Style="width: 20%; height: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenButton Click=@(() => OnOpenUpdateCaDem()) Icon="edit" Text="Cập nhật" Size="ButtonSize.Small" Variant="Variant.Flat"
+                                              Style="height: 100%; width: contain; font-size: 14px; background-color: black" />
+                            </RadzenStack>
+                            <RadzenStack Visible=@(IsEditCaDem) Style="width: 20%; height: contain;" Orientation=Orientation.Vertical AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenButton Click=@(() => OnOpenUpdateCaDem()) Icon="check" Text="Lưu" Size="ButtonSize.Small" Variant="Variant.Flat"
+                                              Style="height: 100%; width: 80%; font-size: 14px; background-color: darkgreen" />
+                                <RadzenButton Click=@(() => {IsEditCaDem = false;}) Icon="cancel" Text="Hủy" Size="ButtonSize.Small" Variant="Variant.Flat"
+                                              Style="height: 100%; width: 80%; font-size: 14px; background-color: darkred" />
+                            </RadzenStack>
+                        </RadzenStack>
+                        <RadzenStack Style="width: 100%; height: contain;" Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                            @{
+                                int slloichophep = int.TryParse(_selectedNguyenCong?.SoluongNG.Value?.ToString(), out int sll) ? sll : 0;
+                                int sumslloihientai = _selectedNguyenCong?.CalculateTongSLNGnguyenCong() ?? 0;
+                            }
+                            @if (sumslloihientai > 0 && sumslloihientai >= slloichophep)
+                            {
+                                <RadzenAlert Text="@($"Cảnh báo số lượng lỗi nguyên công {_selectNVLmoiCD?.TenCongDoan.Value?.ToString()}: {sumslloihientai}/{slloichophep} (pcs)")" Style="width: 50%; height: contain; font-size: 16px; background-color: red; color: white; padding-left: 15px" IconColor="white" AlertStyle="AlertStyle.Danger" AllowClose="false" Variant="Variant.Filled" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                            }
+                            else
+                            {
+                                <RadzenAlert Text="@($"Số lượng lỗi hiện tại của nguyên công {_selectNVLmoiCD?.TenCongDoan.Value?.ToString()}: {sumslloihientai}/{slloichophep} (pcs)")" Style="width: 50%; height: contain; font-size: 16px; padding-top: 10px; padding-bottom: 5px; padding-left: 15px" AlertStyle="AlertStyle.Success" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                            }
+                        </RadzenStack>
+                    </RadzenStack>
+                </RadzenCard>
+            </RadzenStack>
+        </RadzenStack>
+    </RadzenStack>
+</RadzenCard>
+
+@code {
+
+
+    [Parameter]
+    public NVLmoiNguyenCong? _selectNVLmoiCD { get; set; }
+
+    [Parameter]
+    public NguyenCongofKHSX? _selectedNguyenCong { get; set; }
+
+    [Parameter]
+    public bool IsEditCaNgay { get; set; } = false;
+
+    [Parameter]
+    public bool IsEditCaDem { get; set; } = false;
+
+    private TemNVLMCDValues CaNgayItems = new("Ngày");
+    private TemNVLMCDValues CaDemItems = new("Đêm");
+    private NVLmoiNguyenCong TemSelectNVLmoiCD = new();
+
+    protected override Task OnInitializedAsync()
+    {
+        return base.OnInitializedAsync();
+    }
+
+    private int CalculateSLconlaiCongDoan()
+    {
+        int slokCangay = int.TryParse(_selectNVLmoiCD?.CaNgay.OK.Value?.ToString(), out int cnok) ? cnok : 0;
+        int slngCangay = int.TryParse(_selectNVLmoiCD?.CaNgay.NG.Value?.ToString(), out int cnng) ? cnng : 0;
+        int slokCadem = int.TryParse(_selectNVLmoiCD?.CaDem.OK.Value?.ToString(), out int cdok) ? cdok : 0;
+        int slngCadem = int.TryParse(_selectNVLmoiCD?.CaDem.NG.Value?.ToString(), out int cdng) ? cdng : 0;
+        int slcangiacong = int.TryParse(_selectNVLmoiCD?.SLCanGiaCong.Value?.ToString(), out int slcgc) ? slcgc : 0;
+
+        int slconlaiCD = slcangiacong - (slokCangay + slngCangay) - (slokCadem + slngCadem);
+
+        return slconlaiCD;
+    }
+
+    private int CalculateSLconlaiCongDoanbeforeSubmit()
+    {
+        int slcangiacong = int.TryParse(_selectNVLmoiCD?.SLCanGiaCong.Value?.ToString(), out int slcgc) ? slcgc : 0;
+
+        int slconlaiCD = slcangiacong - (CaNgayItems.slOK + CaNgayItems.slNG) - (CaDemItems.slOK + CaDemItems.slNG);
+
+        return slconlaiCD;
+    }
+
+    private async Task OnOpenUpdateCaNgay()
+    {
+        if (!IsEditCaNgay)
+        {
+            GetValuebeforeOpenEdit();
+
+            IsEditCaNgay = true;
+        }
+        else
+        {
+            int slconlaisaugiacong = CalculateSLconlaiCongDoanbeforeSubmit();
+
+            if (slconlaisaugiacong < 0 || (CaNgayItems.slOK + CaNgayItems.slNG) == 0)
+            {
+                await DialogService.Alert($"Nhập số lượng chưa phù hợp, hãy nhập lại", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+            }
+            else
+            {
+                (int updateResult, string errorMess) = SQLServerServices.UpdateCalamviec(_selectNVLmoiCD, CaNgayItems);
+
+                if (updateResult != 1)
+                {
+                    await DialogService.Alert($"Lỗi: {errorMess}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                }
+                else
+                {
+                    ShowNotification("Cập nhật thành công!", NotificationSeverity.Success, 2000);
+
+                    Common.RaiseCongdoanUpdatedEvent(_selectNVLmoiCD?.NVLMCDID.Value);
+                }
+
+                IsEditCaNgay = false;
+            }
+        }
+    }
+
+    private async Task OnOpenUpdateCaDem()
+    {
+        if (!IsEditCaDem)
+        {
+            GetValuebeforeOpenEdit();
+
+            IsEditCaDem = true;
+        }
+        else
+        {
+            if (CalculateSLconlaiCongDoanbeforeSubmit() < 0 || (CaDemItems.slOK + CaDemItems.slNG) == 0)
+            {
+                await DialogService.Alert($"Nhập số lượng chưa phù hợp, hãy nhập lại", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+            }
+            else
+            {
+                (int updateResult, string errorMess) = SQLServerServices.UpdateCalamviec(_selectNVLmoiCD, CaDemItems);
+
+                if (updateResult != 1)
+                {
+                    await DialogService.Alert($"Lỗi: {errorMess}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                }
+                else
+                {
+                    ShowNotification("Cập nhật thành công!", NotificationSeverity.Success, 2000);
+
+                    Common.RaiseCongdoanUpdatedEvent(_selectNVLmoiCD?.NVLMCDID.Value);
+                }
+
+                IsEditCaDem = false;
+            }
+        }
+    }
+
+    private void GetValuebeforeOpenEdit()
+    {
+        CaNgayItems.slOK = int.TryParse(_selectNVLmoiCD?.CaNgay.OK.Value?.ToString(), out int cnok) ? cnok : 0;
+        CaNgayItems.slNG = int.TryParse(_selectNVLmoiCD?.CaNgay.NG.Value?.ToString(), out int cnng) ? cnng : 0;
+        CaNgayItems.ngayGC = DateTime.TryParse(_selectNVLmoiCD?.CaNgay.NgayGiaCong.Value?.ToString(), out DateTime cnngc) ? cnngc : DateTime.Now;
+        var cnnv = _selectNVLmoiCD?.CaNgay.NhanVien.Value?.ToString();
+        CaNgayItems.tenNV = string.IsNullOrEmpty(cnnv) ? "Khang" : cnnv.Trim();
+
+        CaDemItems.slOK = int.TryParse(_selectNVLmoiCD?.CaDem.OK.Value?.ToString(), out int cdok) ? cdok : 0;
+        CaDemItems.slNG = int.TryParse(_selectNVLmoiCD?.CaDem.NG.Value?.ToString(), out int cdng) ? cdng : 0;
+        CaDemItems.ngayGC = DateTime.TryParse(_selectNVLmoiCD?.CaDem.NgayGiaCong.Value?.ToString(), out DateTime cdngc) ? cdngc : DateTime.Now;
+
+        var cdnv = _selectNVLmoiCD?.CaDem.NhanVien.Value?.ToString();
+        CaDemItems.tenNV = string.IsNullOrEmpty(cdnv) ? "Khang" : cdnv.Trim();
+    }
+
+    // Notification
+    void ShowNotification(string message, NotificationSeverity notifytype, double time)
+    {
+        NotificationMessage notify = new NotificationMessage
+            {
+                Style = "position: fixed; top: 0; right: 0;",
+                Severity = notifytype,
+                Summary = message,
+                Duration = time
+            };
+
+        NotificationService.Notify(notify);
+    }
+
+    private async Task ShowWarningOverQuantity()
+    {
+        await DialogService.Alert($"Số lượng OK vượt quá số lượng sản xuất!", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+    }
+}

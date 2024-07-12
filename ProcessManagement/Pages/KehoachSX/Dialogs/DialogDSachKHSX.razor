@@ -1,0 +1,219 @@
+﻿@using ProcessManagement.Commons
+@using ProcessManagement.Services.SQLServer
+@using Radzen.Blazor
+@using Radzen
+@using ProcessManagement.Models
+
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject SQLServerServices SQLServerServices
+
+<style>
+    .khsxSelected {
+        border: solid;
+        border-width: 2px;
+        border-color: var(--rz-success-dark);
+    }
+
+    .khsxUnSelected {
+    }
+</style>
+
+<RadzenStack Style="width: 100%; height: 100%" Orientation=Orientation.Vertical AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Gap="10px">
+    <RadzenStack Style="width: 100%; height: contain; border-bottom: var(--rz-grid-cell-border); padding-bottom: 10px" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
+        <RadzenText Style="color: darkred; font-weight: 600; font-size: 16px; font-style: initial" Text="Danh sách kế hoạch sản xuất"></RadzenText>
+    </RadzenStack>
+    <RadzenStack Style="width: 100%; height: contain" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+        <RadzenCard Variant="Variant.Outlined" Style="width: 100%; height: contain; padding: 5px">
+            <RadzenStack Gap="20px" Orientation="Orientation.Horizontal" Style="height: contain; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                <!--Search KHSX area-->
+                <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" Style="height: contain; width: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                    <RadzenStack Style="height: 100%; width: contain; background-color: white; padding: 5px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                        <RadzenCheckBox TValue="bool" @bind-Value="@(displaybyDay)" Name="CheckBoxLOADKHSX" Change="@((args) => { displaybyDay = args; OnSearchListKHSXfromDayRange();  })" />
+                        <RadzenLabel Text="Lọc theo ngày" Component="CheckBoxLOADKHSX" Style="font-size: 14px; color: black; font-weight: 600; cursor: pointer" />
+                    </RadzenStack>
+                    <RadzenText Text="Từ ngày" Style="font-weight: 500; font-size: 14px; color: black;"></RadzenText>
+                    <RadzenDatePicker TValue="DateTime" Value="@startSearchDay"
+                                      ValueChanged="@((args) => { startSearchDay = args; OnSearchListKHSXfromDayRange(); })"
+                                      ShowTime="false" HourFormat="12" DateFormat="@Common.DayTimeFormatnoTime" AllowInput="false">
+                        <FooterTemplate>
+                            <RadzenStack Style="height: 100%; width: contain; padding: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenButton Style="height: 100%; width: 50%;" Text="To day" Click="@(() => { startSearchDay = DateTime.Today; OnSearchListKHSXfromDayRange(); })" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />
+                            </RadzenStack>
+                        </FooterTemplate>
+                    </RadzenDatePicker>
+                </RadzenStack>
+                <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" Style="height: contain; width: contain; margin-right: 50px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                    <RadzenText Text="Đến ngày" Style="font-weight: 500; font-size: 14px; color: black;"></RadzenText>
+                    <RadzenDatePicker TValue="DateTime" Value="@endSearchDay"
+                                      ValueChanged="@((args) => { endSearchDay = args; OnSearchListKHSXfromDayRange(); })"
+                                      ShowTime="false" HourFormat="12" DateFormat="@Common.DayTimeFormatnoTime" AllowInput="false">
+                        <FooterTemplate>
+                            <RadzenStack Style="height: 100%; width: contain; padding: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenButton Style="height: 100%; width: 50%;" Text="To day" Click="@(() => { endSearchDay = DateTime.Today; OnSearchListKHSXfromDayRange(); })" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />
+                            </RadzenStack>
+                        </FooterTemplate>
+                    </RadzenDatePicker>
+                </RadzenStack>
+            </RadzenStack>
+        </RadzenCard>
+    </RadzenStack>
+    <RadzenStack Style="width: 100%; height: 80%" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+        <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: 100%;">
+            <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style="height: 100%; width: 100%; padding: 10px; border-top: var(--rz-grid-cell-border); overflow-y: scroll" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                @foreach (var khsx in ListKHSXs)
+                {
+                    <RadzenCard Variant="Variant.Filled" Style="width: 100%; height: 100%; padding: 0px; border-radius: 5px">
+                        <RadzenStack class="@IsKHSXSelected(khsx)" @onclick=@(() => OnKHSXClick(khsx)) Gap="0" Orientation="Orientation.Horizontal" Style="height: 100%; width: 100%; padding: 10px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                            <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style="height: 50%; width: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenText Text="@Common.MaLSX" Style="font-size: 14px; font-weight: 500; color: darkgray "></RadzenText>
+                                <RadzenText Visible="@(khsx?.MaLSX.Value != null)" Text="@khsx?.MaLSX.Value?.ToString()" Style="font-size: 16px; font-weight: bold; color: red"></RadzenText>
+                            </RadzenStack>
+                            <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style="height: 50%; width: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenText Text="@Common.MaSP" Style="font-size: 14px; font-weight: 500; color: darkgray "></RadzenText>
+                                <RadzenText Visible="@(khsx?.SanPham != null)" Text="@(khsx?.SanPham?.MaSP.Value?.ToString())" Style="font-size: 14px; font-weight: bold; color: darkblue "></RadzenText>
+                            </RadzenStack>
+                            <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style="height: 50%; width: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenText Text="@Common.SLSanXuat" Style="font-size: 14px; font-weight: 500; color: darkgray "></RadzenText>
+                                <RadzenText Visible="@(khsx?.SLSanXuat.Value != null)" Text="@($"{khsx?.SLSanXuat.Value?.ToString()?? "0"} (pcs)")" Style="font-size: 14px; font-weight: bold; color: black "></RadzenText>
+                            </RadzenStack>
+                            <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style="height: 50%; width: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenText Text="SL Lot" Style="font-size: 14px; font-weight: 500; color: darkgray "></RadzenText>
+                                <RadzenText Visible="@(khsx.SLLot.Value != null)" Text="@($"{khsx.SLLot.Value?.ToString()?? "0"} (lot)")" Style="font-size: 14px; font-weight: bold; color: black "></RadzenText>
+                            </RadzenStack>
+                            <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style="height: 50%; width: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenText Text="@Common.TileLoi" Style="font-size: 14px; font-weight: 500; color: darkgray "></RadzenText>
+                                @{
+                                    int slloichophep = (int.TryParse(khsx.DinhMuc.Value?.ToString(), out int dinhmuc) ? dinhmuc : 0) - (int.TryParse(khsx.SLSanXuat.Value?.ToString(), out int slsx) ? slsx : 0);
+                                }
+                                <RadzenText Text="@($"{khsx?.TileLoi.Value?.ToString()?? "0"} (%) ({slloichophep} pcs)")" Style="font-size: 14px; font-weight: bold; color: red "></RadzenText>
+                            </RadzenStack>
+                            <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style="height: 50%; width: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenText Text="@Common.DinhMuc" Style="font-size: 14px; font-weight: 500; color: darkgray "></RadzenText>
+                                <RadzenText Visible="@(khsx?.DinhMuc.Value != null)" Text="@($"{khsx?.DinhMuc.Value?.ToString()?? "0"} (pcs)")" Style="font-size: 14px; font-weight: bold; color: black "></RadzenText>
+                            </RadzenStack>
+                            <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style="height: 50%; width: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenText Text="@Common.MaQuanLy" Style="font-size: 14px; font-weight: 500; color: darkgray "></RadzenText>
+                                @{
+                                    NguyenCongofKHSX? fistCongdoan = khsx?.DSachCongDoans.FirstOrDefault();
+                                }
+                                <RadzenText Visible="@(fistCongdoan!= null)" Text="@($"({fistCongdoan?.DSachNVLCongDoans.FirstOrDefault()?.MaQuanLy.Value?.ToString()?? "_"} --> {fistCongdoan?.DSachNVLCongDoans.LastOrDefault()?.MaQuanLy.Value?? "_"})")"
+                                            Style="font-size: 14px; font-weight: bold; color: black "></RadzenText>
+                            </RadzenStack>
+                            <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style="height: 50%; width: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenText Text="@Common.NgayTao" Style="font-size: 14px; font-weight: 500; color: darkgray "></RadzenText>
+                                @if (khsx?.NgayTao.Value?.ToString() != string.Empty)
+                                {
+                                    DateTime ngaytao = Convert.ToDateTime(khsx?.NgayTao.Value?.ToString());
+                                    <RadzenText Text="@ngaytao.ToString(Common.DayTimeFormatnoTime)" Style="font-size: 14px; font-weight: bold; color: black "></RadzenText>
+                                }
+                                else
+                                {
+                                    <RadzenText Text="----" Style="font-size: 14px; font-weight: bold; color: black "></RadzenText>
+                                }
+                            </RadzenStack>
+                            <RadzenCard Visible=@(khsx.KHSXID.Value == SelectKHSX.KHSXID.Value) Variant=Variant.Flat Style="width: contain; height: 100%">
+                                <RadzenStack Gap="10px" Style="height: 100%; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                    <RadzenText Text="Xem chi tiết" @onclick="@(() => OnOpenChitietKHSX())" TextAlign="TextAlign.Center" Style="font-size: 16px; font-weight: 500; color: Highlight; cursor: pointer "></RadzenText>
+                                    <RadzenButton Click="@(() => DialogService.Close(khsx))" Icon="download" Text="Tiến hành SX" Size="ButtonSize.Small" Variant="Variant.Filled"
+                                                  Style="height: 100%; width: contain; font-size: 16px; background-color: darkgreen " />
+                                    <RadzenButton Click="@(() => OnDeleteKHSX(khsx))" Style="width: contain; color: white; background-color: darkred" Icon="delete" Text="Xóa" Size="ButtonSize.Small" Variant="Variant.Flat" />
+                                </RadzenStack>
+                            </RadzenCard>
+                        </RadzenStack>
+                    </RadzenCard>
+                }
+            </RadzenStack>
+        </RadzenCard>
+    </RadzenStack>
+    <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding-bottom: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+        <RadzenButton Click="@(() => DialogService.Close(null))" Style="width: contain; color: white; background-color: darkred" Icon="close" Text="Thoát" Size="ButtonSize.Small" Variant="Variant.Flat" />
+    </RadzenStack>
+</RadzenStack>
+
+@code {
+
+    private DateTime endSearchDay = DateTime.Today;
+    private DateTime startSearchDay = DateTime.Today;
+    private bool displaybyDay = true;
+    private List<KHSX> ListKHSXs = new();
+    private KHSX SelectKHSX = new();
+
+    protected override Task OnInitializedAsync()
+    {
+        OnSearchListKHSXfromDayRange();
+
+        return base.OnInitializedAsync();
+    }
+
+    private void OnSearchListKHSXfromDayRange()
+    {
+        DateTime offsetendDay = endSearchDay.AddDays(1);
+
+        if (displaybyDay)
+        {
+            ListKHSXs = SQLServerServices.GetListKHSXs(startSearchDay, offsetendDay);
+        }
+        else ListKHSXs = SQLServerServices.GetListKHSXs();
+    }
+
+    private string IsKHSXSelected(KHSX selectedkhsx)
+    {
+        if (selectedkhsx.KHSXID.Value == SelectKHSX.KHSXID.Value)
+            return "khsxSelected";
+        else
+            return "khsxUnSelected";
+    }
+
+    private void OnKHSXClick(KHSX selectedkhsx)
+    {
+        if (selectedkhsx.KHSXID.Value != SelectKHSX.KHSXID.Value)
+        {
+            SelectKHSX = selectedkhsx;
+        }
+        else SelectKHSX = new();
+    }
+
+    private async Task OnDeleteKHSX(KHSX khsx)
+    {
+        bool? comfirm = await DialogService.Confirm("Xóa kế hoạch sản xuất này?", "Xác nhận", new ConfirmOptions() { OkButtonText = "OK", CancelButtonText = "Hủy", ShowClose = false });
+
+        if (comfirm.Value)
+        {
+            (int deleteResult, string errorMess) = SQLServerServices.DeleteKehoachSanxuat(khsx);
+
+            if (deleteResult != -1)
+            {
+                ShowNotification("Xóa KHSX thành công!", NotificationSeverity.Success, 2000);
+
+                OnSearchListKHSXfromDayRange();
+            }
+            else
+            {
+                await DialogService.Alert($"{errorMess}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+            }
+        }
+    }
+
+    // Open dialog chi tiet KHSX
+    private async Task OnOpenChitietKHSX()
+    {
+        await DialogService.OpenAsync<DialogDetailKHSX>(null, new Dictionary<string, object>() { { "SelectKHSX", SelectKHSX } },
+        new DialogOptions() { Width = "80%", Height = "85%", Resizable = false, Draggable = true, ShowTitle = false, ShowClose = false, Style = "background-color: while; border-radius: 0px; padding: 0px" });
+    }
+
+
+    // Notification
+    void ShowNotification(string message, NotificationSeverity notifytype, double time)
+    {
+        NotificationMessage notify = new NotificationMessage
+            {
+                Style = "position: fixed; top: 0; right: 0;",
+                Severity = notifytype,
+                Summary = message,
+                Duration = time
+            };
+
+        NotificationService.Notify(notify);
+    }
+}

@@ -1,0 +1,136 @@
+﻿@using ProcessManagement.Commons
+@using ProcessManagement.Services.SQLServer
+@using Radzen.Blazor
+@using Radzen
+@using ProcessManagement.Models
+
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject SQLServerServices SQLServerServices
+
+<RadzenStack Gap="0" Style="height: 100%; width: 100%; margin: 0" Orientation="Orientation.Vertical" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start">
+    <RadzenStack Orientation="Orientation.Horizontal" Gap="10px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: 5%; width: 100%;">
+        <RadzenText Text="@($"Thêm nguyên liệu sản phẩm")" Style="font-size: 18px; font-weight: 500; color: black"></RadzenText>
+        <RadzenText Text="@($"{Sanpham?.MaSP.Value?.ToString()}")" Style="font-size: 18px; font-weight: 600; color: darkblue"></RadzenText>
+    </RadzenStack>
+
+    <RadzenRow Gap="10px" Style="height: contain; width: 100%; border-top: var(--rz-grid-cell-border); overflow-y: scroll; padding: 0;">
+        <RadzenColumn Size="12" SizeMD="12" Style="height: 100%; width: 100%; padding: 15px;">
+            <RadzenText Text="Thông tin nguyên vật liệu" Style="color: darkred; font-size: 16px; font-weight: 500; height: contain; width: contain"></RadzenText>
+            <RadzenCard Variant="Variant.Flat" Style="min-height: 300px; width: 100%; padding: 10px; overflow: scroll ">
+                <RadzenStack Style="height: 100%; width: 100%; padding: 10px;" Gap="0" Orientation="Orientation.Vertical">
+                    @{
+                        NewNL.MaSP.Value = Sanpham?.MaSP.Value;
+
+                        List<Propertyy>? lotproperties = NewNL.GetPropertiesValues();
+
+                        if (lotproperties != null)
+                        {
+                            foreach (var property in lotproperties)
+                            {
+                                if (property.Name != Common.NLID)
+                                {
+                                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 10px; border-bottom: var(--rz-grid-cell-border);">
+                                        <RadzenStack Style="width: 20%;">
+                                            <RadzenText Text="@property.Name" Style="font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
+                                        </RadzenStack>
+                                        <RadzenStack Style="width: 80%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                            @if (property.Name != Common.LotNVL)
+                                            {
+                                                @if (property.Type == typeof(string))
+                                                {
+                                                    <RadzenTextBox Placeholder="@($"*Nhập {property.Name}")" Value="@property.Value?.ToString()" ValueChanged="@((args) => { property.Value = args; } )"
+                                                                   Style="font-size: 16px; height: contain;  border-width: 1px; width: 100% "></RadzenTextBox>
+                                                }
+                                                else if (property.Type == typeof(int))
+                                                {
+                                                    <RadzenNumeric Placeholder="@($"*Nhập {property.Name}")" TValue="int" Value="@int.Parse(property.Value?.ToString()?? "0")" Min="0" Max="100000" ValueChanged="@((args) => { property.Value = args; })"
+                                                                   Style="font-size: 16px; height: contain;  border-width: 1px; width: 100%" />
+                                                }
+                                                else if (property.Type == typeof(DateTime))
+                                                {
+                                                    <RadzenDatePicker Placeholder="@($"*Chọn {property.Name}")" TValue="DateTime"
+                                                                      ValueChanged="@((args) => { property.Value = args; NewNL.LotNVL.Value = args.ToString("yyyMMdd");})"
+                                                                      ShowTime="false" HourFormat="12" DateFormat="@Common.DayTimeFormatnoTime" AllowInput="false"
+                                                                      Name="DatePicker" Style="width: 100%; font-size: 16px"></RadzenDatePicker>
+                                                }
+                                            }
+                                            else if (property.Name == Common.LotNVL)
+                                            {
+                                                <RadzenTextBox Placeholder="@($"*Nhập {property.Name}")" Value="@property.Value?.ToString()" ValueChanged="@((args) => { property.Value = args; } )"
+                                                               Style="font-size: 16px; height: contain; border-width: 1px; width: 100% "></RadzenTextBox>
+                                            }
+                                        </RadzenStack>
+                                    </RadzenStack>
+                                }
+                            }
+                        }
+                    }
+                </RadzenStack>
+            </RadzenCard>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding-left: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+        <RadzenButton Style="width: contain; height: 80%; color: white; background-color: darkgreen" Icon="save" Text="Xác nhận thêm" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Variant="Variant.Filled" Click="@(() => OnAddNewLot())" />
+        <RadzenButton Style="width: contain; height: 80%; color: white; background-color: darkred" Icon="close" Text="Thoát" Size="ButtonSize.Small" Variant="Variant.Flat" Click="@(() => OnCancelAddnewLot())" />
+    </RadzenStack>
+</RadzenStack>
+
+@code {
+
+    [Parameter]
+    public SanPham? Sanpham { get; set; }
+
+    private NguyenLieu NewNL = new();
+
+    private void OnCancelAddnewLot()
+    {
+        DialogService.Close();
+    }
+
+    private async Task OnAddNewLot()
+    {
+        bool? comfirm = await DialogService.Confirm("Thêm nguyên liệu cho sản phẩm này?", "Xác nhận", new ConfirmOptions() { OkButtonText = "OK", CancelButtonText = "Hủy", ShowClose = false });
+
+        if (comfirm.Value)
+        {
+            foreach (var property in NewNL.GetPropertiesValues())
+            {
+                if (property.Name != Common.NLID)
+                {
+                    if (property.Value == null)
+                    {
+                        ShowNotification("Hãy nhập đầy đủ thông tin!", NotificationSeverity.Warning, 2000);
+
+                        return;
+                    }
+                }
+            }
+
+            (int result, string error) = SQLServerServices.InsertNewNLforSanpham(NewNL);
+
+            if (result > 0)
+            {
+                ShowNotification("Thêm nguyên liệu thành công!", NotificationSeverity.Success, 2000);
+            }
+            else
+            {
+                await DialogService.Alert($"{error}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+            }
+        }
+    }
+
+    // Notification
+    void ShowNotification(string message, NotificationSeverity notifytype, double time)
+    {
+        NotificationMessage notify = new NotificationMessage
+            {
+                Style = "position: fixed; top: 0; right: 0;",
+                Severity = notifytype,
+                Summary = message,
+                Duration = time
+            };
+
+        NotificationService.Notify(notify);
+    }
+}
