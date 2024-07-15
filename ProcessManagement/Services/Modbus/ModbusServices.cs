@@ -75,7 +75,12 @@ namespace ProcessManagement.Services.Modbus
 
         private void ModbusServer_LogDataChanged()
         {
+            if (ModbusServer != null && IsServerRunning)
+            {
+                string datetimenow = DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss");
 
+                WriteRegData("59", RegTypes.RegWriteString, datetimenow); // update datetime now ( 4x58 )
+            }
         }
 
         private void ModbusServer_NumberOfConnectedClientsChanged()

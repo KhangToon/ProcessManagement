@@ -72,7 +72,8 @@ namespace ProcessManagement.Commons
         public const string STTNguyencong = "STT nguyên công";
         public const string Danhgia = "Đánh giá";
         public const string IsUpdated = "IsUpdated";
-        public const string SLCanGiaCong = "SL cần gia công";
+        public const string SLGoccuaLOTNVL = "SL gốc LOT NVL";
+        public const string SLTruocGiaCong = "SL trước gia công";
         public const string SLSauGiaCong = "SL sau gia công";
         // Table Calamviec //
         public const string TableCalamviec = "Table_Calamviec";

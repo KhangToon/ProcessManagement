@@ -1470,7 +1470,7 @@ namespace ProcessManagement.Services.SQLServer
                     connection.Open();
 
                     string sqlQuery = $"UPDATE {Common.TableCalamviec} SET [{Common.OK}] = '{temNVLMCD.slOK}', [{Common.NG}] = '{temNVLMCD.slNG}' ,[{Common.NgayGiaCong}] = '{temNVLMCD.ngayGC}', [{Common.NhanVien}] = '{temNVLMCD.tenNV}' " +
-                                    $"WHERE [{Common.NVLMCDID}] = '{nVLmoiCong.NVLMCDID.Value}' AND [{Common.Ca}] = N'{temNVLMCD.Ca}'";
+                                    $", [{Common.IsUpdated}] = '{1}' WHERE [{Common.NVLMCDID}] = '{nVLmoiCong.NVLMCDID.Value}' AND [{Common.Ca}] = N'{temNVLMCD.Ca}'";
 
                     var command = new SqlCommand(sqlQuery, connection);
 
@@ -1490,11 +1490,11 @@ namespace ProcessManagement.Services.SQLServer
         }
 
         // Update so luong sau gia cong moi cong doan
-        public (int, string) UpdateSLsaugiacongNVLMCD(NVLmoiNguyenCong? nVLmoiCong, object? slsaugiacong)
+        public (int, string) UpdateSLsaugiacongNVLMCD(object? nvlmcdid, int slsaugiacong, int tongNG, int isupdated)
         {
             int result = -1; string errorMess = string.Empty;
 
-            if (nVLmoiCong == null) { return (result, errorMess); }
+            if (nvlmcdid == null) { return (result, errorMess); }
 
             try
             {
@@ -1502,7 +1502,40 @@ namespace ProcessManagement.Services.SQLServer
                 {
                     connection.Open();
 
-                    string sqlQuery = $"UPDATE {Common.TableNVLmoiCongDoan} SET [{Common.SLSauGiaCong}] = '{slsaugiacong}' WHERE [{Common.NVLMCDID}] = '{nVLmoiCong.NVLMCDID.Value}'";
+                    string sqlQuery = $"UPDATE {Common.TableNVLmoiCongDoan} SET [{Common.SLSauGiaCong}] = '{slsaugiacong}', [{Common.TongOK}] = '{slsaugiacong}' " +
+                        $", [{Common.TongNG}] = '{tongNG}', [{Common.IsUpdated}] = '{isupdated}' WHERE [{Common.NVLMCDID}] = '{nvlmcdid}'";
+
+                    var command = new SqlCommand(sqlQuery, connection);
+
+                    result = command.ExecuteNonQuery();
+
+                    connection.Close();
+
+                    return (result, string.Empty);
+                }
+            }
+            catch (Exception ex)
+            {
+                string err = ex.Message;
+
+                return (-1, err);
+            }
+        }
+
+        // Update sltruocgiacong cua nguyen cong tiep theo
+        public (int, string) UpdateSLTruocgiacongNextNguyenCong(int cdid, string maquanly, int sltruocgiacong)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            if (cdid <= 0) { return (result, errorMess); }
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+
+                    string sqlQuery = $"UPDATE {Common.TableNVLmoiCongDoan} SET [{Common.SLTruocGiaCong}] = '{sltruocgiacong}' WHERE [{Common.CDID}] = '{cdid}' AND [{Common.MaQuanLy}] = '{maquanly}'";
 
                     var command = new SqlCommand(sqlQuery, connection);
 

@@ -34,7 +34,7 @@
                             <RadzenText Text="Nguyên công: " Style="color: black; font-weight: 600; font-size: 16px; font-style: initial"></RadzenText>
                             <RadzenText Text="@_selectNVLmoiCD?.TenCongDoan.Value?.ToString()" Style="color: darkred; font-weight: 600; font-size: 16px; font-style: initial"></RadzenText>
                             <RadzenText Text="Số lượng cần gia công: " Style="color: black; font-weight: 600; font-size: 16px; font-style: initial"></RadzenText>
-                            <RadzenText Text="@($"{_selectNVLmoiCD?.SLCanGiaCong.Value?.ToString()} (pcs)")" Style="color: darkgreen; font-weight: 600; font-size: 16px; font-style: initial"></RadzenText>
+                            <RadzenText Text="@($"{_selectNVLmoiCD?.SLGoccuaLOTNVL.Value?.ToString()} (pcs)")" Style="color: darkgreen; font-weight: 600; font-size: 16px; font-style: initial"></RadzenText>
                         </RadzenStack>
                         <RadzenStack Style="width: contain; height: contain;" Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                             <RadzenText Text="Mã quản lý: " Style="color: black; font-weight: 600; font-size: 16px; font-style: initial"></RadzenText>
@@ -48,7 +48,7 @@
                                 {
                                     <RadzenAlert Text="@($"Còn {slconlaiCongdoan} (pcs) chưa gia công")" Style="width: 100%; height: contain; font-size: 16px" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
                                 }
-                                else if (_selectNVLmoiCD?.SLCanGiaCong.Value?.ToString() == "0")
+                                else if (_selectNVLmoiCD?.SLGoccuaLOTNVL.Value?.ToString() == "0")
                                 {
                                     <RadzenAlert Text="@($"Nguyên công chưa được phép gia công")" Style="width: 100%; height: contain; font-size: 16px" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
                                 }
@@ -221,20 +221,22 @@
         int slngCangay = int.TryParse(_selectNVLmoiCD?.CaNgay.NG.Value?.ToString(), out int cnng) ? cnng : 0;
         int slokCadem = int.TryParse(_selectNVLmoiCD?.CaDem.OK.Value?.ToString(), out int cdok) ? cdok : 0;
         int slngCadem = int.TryParse(_selectNVLmoiCD?.CaDem.NG.Value?.ToString(), out int cdng) ? cdng : 0;
-        int slcangiacong = int.TryParse(_selectNVLmoiCD?.SLCanGiaCong.Value?.ToString(), out int slcgc) ? slcgc : 0;
+        int slcangiacong = int.TryParse(_selectNVLmoiCD?.SLGoccuaLOTNVL.Value?.ToString(), out int slcgc) ? slcgc : 0;
 
         int slconlaiCD = slcangiacong - (slokCangay + slngCangay) - (slokCadem + slngCadem);
 
         return slconlaiCD;
     }
 
-    private int CalculateSLconlaiCongDoanbeforeSubmit()
+    private int CheckInputSLOKNGisCorrect()
     {
-        int slcangiacong = int.TryParse(_selectNVLmoiCD?.SLCanGiaCong.Value?.ToString(), out int slcgc) ? slcgc : 0;
+        int slcangiacong = int.TryParse(_selectNVLmoiCD?.SLGoccuaLOTNVL.Value?.ToString(), out int slcgc) ? slcgc : 0;
 
         int slconlaiCD = slcangiacong - (CaNgayItems.slOK + CaNgayItems.slNG) - (CaDemItems.slOK + CaDemItems.slNG);
 
         return slconlaiCD;
+
+        // tinh so luong chenh lech khi nhap slok slng so voi so luong truoc khi gia cong
     }
 
     private async Task OnOpenUpdateCaNgay()
@@ -247,9 +249,9 @@
         }
         else
         {
-            int slconlaisaugiacong = CalculateSLconlaiCongDoanbeforeSubmit();
+            int slchenhlech = CheckInputSLOKNGisCorrect();
 
-            if (slconlaisaugiacong < 0 || (CaNgayItems.slOK + CaNgayItems.slNG) == 0)
+            if (slchenhlech < 0 || (CaNgayItems.slOK + CaNgayItems.slNG) == 0)
             {
                 await DialogService.Alert($"Nhập số lượng chưa phù hợp, hãy nhập lại", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
             }
@@ -263,9 +265,31 @@
                 }
                 else
                 {
-                    ShowNotification("Cập nhật thành công!", NotificationSeverity.Success, 2000);
+                    int slOKsaukhigiacong = CaNgayItems.slOK + CaDemItems.slOK; // so luong OK(so luong con lai) sau khi gia cong
 
-                    Common.RaiseCongdoanUpdatedEvent(_selectNVLmoiCD?.NVLMCDID.Value);
+                    int slNGsaukhigiacong = CaNgayItems.slNG + CaDemItems.slNG; // so luong loi sau khi gia cong
+
+                    int isUpdated = 0;
+
+                    if (slchenhlech == 0) { isUpdated = 1; } // khi da gia cong het sltruocgiacong
+
+                    // Update slsaugiacong nguyen cong hien tai
+                    (updateResult, errorMess) = SQLServerServices.UpdateSLsaugiacongNVLMCD(_selectNVLmoiCD?.NVLMCDID.Value, slOKsaukhigiacong, slNGsaukhigiacong, isUpdated);
+
+                    // Update sltruocgiacong nguyen cong tiep theo
+                    (updateResult, errorMess) = UpdateSLtruocgiacongOfNextNguyencong(_selectNVLmoiCD, slOKsaukhigiacong);
+
+                    if (updateResult != 1)
+                    {
+                        await DialogService.Alert($"Lỗi: {errorMess}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                        // return last update
+                    }
+                    else
+                    {
+                        ShowNotification("Cập nhật thành công!", NotificationSeverity.Success, 2000);
+
+                        Common.RaiseCongdoanUpdatedEvent(_selectNVLmoiCD?.NVLMCDID.Value);
+                    }
                 }
 
                 IsEditCaNgay = false;
@@ -283,7 +307,9 @@
         }
         else
         {
-            if (CalculateSLconlaiCongDoanbeforeSubmit() < 0 || (CaDemItems.slOK + CaDemItems.slNG) == 0)
+            int slchenhlech = CheckInputSLOKNGisCorrect();
+
+            if (slchenhlech < 0 || (CaDemItems.slOK + CaDemItems.slNG) == 0)
             {
                 await DialogService.Alert($"Nhập số lượng chưa phù hợp, hãy nhập lại", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
             }
@@ -297,14 +323,67 @@
                 }
                 else
                 {
-                    ShowNotification("Cập nhật thành công!", NotificationSeverity.Success, 2000);
+                    int slOKsaukhigiacong = CaNgayItems.slOK + CaDemItems.slOK; // so luong OK(so luong con lai) sau khi gia cong
 
-                    Common.RaiseCongdoanUpdatedEvent(_selectNVLmoiCD?.NVLMCDID.Value);
+                    int slNGsaukhigiacong = CaNgayItems.slNG + CaDemItems.slNG; // so luong loi sau khi gia cong
+
+                    int isUpdated = 0;
+
+                    if (slchenhlech == 0) { isUpdated = 1; } // khi da gia cong het sltruocgiacong
+
+                    // Update slsaugiacong nguyen cong hien tai
+                    (updateResult, errorMess) = SQLServerServices.UpdateSLsaugiacongNVLMCD(_selectNVLmoiCD?.NVLMCDID.Value, slOKsaukhigiacong, slNGsaukhigiacong, isUpdated);
+
+                    // Update sltruocgiacong nguyen cong tiep theo
+                    (updateResult, errorMess) = UpdateSLtruocgiacongOfNextNguyencong(_selectNVLmoiCD, slOKsaukhigiacong);
+
+                    if (updateResult != 1)
+                    {
+                        await DialogService.Alert($"Lỗi: {errorMess}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                        // return last update
+                    }
+                    else
+                    {
+                        ShowNotification("Cập nhật thành công!", NotificationSeverity.Success, 2000);
+
+                        Common.RaiseCongdoanUpdatedEvent(_selectNVLmoiCD?.NVLMCDID.Value);
+                    }
                 }
 
                 IsEditCaDem = false;
             }
         }
+    }
+
+    private (int, string) UpdateSLtruocgiacongOfNextNguyencong(NVLmoiNguyenCong? currentNVLMCD, int slsaukhigiacong)
+    {
+        int result = -1; string errorMess = string.Empty;
+
+        int slgocnguyencong = int.TryParse(currentNVLMCD?.SLGoccuaLOTNVL.Value?.ToString(), out int slgoc) ? slgoc : 0;
+        string maquanly = currentNVLMCD?.MaQuanLy.Value?.ToString() ?? string.Empty;
+        int currentCDid = int.TryParse(currentNVLMCD?.CDID.Value?.ToString(), out int cdid) ? cdid : 0;
+        int nextCDid = (currentCDid > 0) ? (currentCDid + 1) : 0;
+
+        // index cua nguyen cong hien tai trong danh sach nguyen cong
+        int indexCurrentNC = int.TryParse(currentNVLMCD?.IndexNguyenCong?.ToString(), out int indexnc) ? indexnc : -1;
+
+        if (nextCDid == 0 || maquanly == string.Empty || indexCurrentNC == -1) { return (result, errorMess); }
+
+        if (indexCurrentNC == 0) // nguyen cong dau tien
+        {
+            // Update nguyen cong tiep theo
+            (result, errorMess) = SQLServerServices.UpdateSLTruocgiacongNextNguyenCong(nextCDid, maquanly, slsaukhigiacong);
+
+            // Update sltruocgiacong nguyencong dau tien
+            (result, errorMess) = SQLServerServices.UpdateSLTruocgiacongNextNguyenCong(currentCDid, maquanly, slgocnguyencong);
+        }
+        else
+        {
+            // Update nguyen cong tiep theo
+            (result, errorMess) = SQLServerServices.UpdateSLTruocgiacongNextNguyenCong(nextCDid, maquanly, slsaukhigiacong);
+        }
+
+        return (result, errorMess);
     }
 
     private void GetValuebeforeOpenEdit()
@@ -318,7 +397,6 @@
         CaDemItems.slOK = int.TryParse(_selectNVLmoiCD?.CaDem.OK.Value?.ToString(), out int cdok) ? cdok : 0;
         CaDemItems.slNG = int.TryParse(_selectNVLmoiCD?.CaDem.NG.Value?.ToString(), out int cdng) ? cdng : 0;
         CaDemItems.ngayGC = DateTime.TryParse(_selectNVLmoiCD?.CaDem.NgayGiaCong.Value?.ToString(), out DateTime cdngc) ? cdngc : DateTime.Now;
-
         var cdnv = _selectNVLmoiCD?.CaDem.NhanVien.Value?.ToString();
         CaDemItems.tenNV = string.IsNullOrEmpty(cdnv) ? "Khang" : cdnv.Trim();
     }

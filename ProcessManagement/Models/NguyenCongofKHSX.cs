@@ -32,7 +32,7 @@ namespace ProcessManagement.Models
 
                 nVLmoiCongDoan.MaQuanLy.Value = nvl.MaQuanLy.Value;
 
-                nVLmoiCongDoan.SLCanGiaCong.Value = nvl?.SoLuong.Value;
+                nVLmoiCongDoan.SLGoccuaLOTNVL.Value = nvl?.SoLuong.Value;
 
                 nVLmoiCongDoan.NgayXuat.Value = nvl?.NgayXuat.Value;
 

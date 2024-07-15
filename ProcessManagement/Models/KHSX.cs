@@ -23,18 +23,9 @@ namespace ProcessManagement.Models
         public SanPham? SanPham { get; set; }
         public List<NguyenCongofKHSX> DSachCongDoans { get; set; } = new();
 
-        //private List<string> Listtencongdoan = new() { "Tiện phi", "Khoan lỗ", "Tiện ren", "Bavia + Rửa", "Kiểm Pin, M, Ren", "Ngoại quan + đóng thùng" };
-
         public KHSX()
         {
-            //foreach (var item in Listtencongdoan)
-            //{
-            //    CongDoan congDoan = new();
 
-            //    congDoan.TenCongDoan.Value = item;
-
-            //    DSachCongDoans.Add(congDoan);
-            //}
         }
 
         public List<Propertyy> GetPropertiesValues()
@@ -79,6 +70,28 @@ namespace ProcessManagement.Models
             Propertyy? tagetProperty = propertiesValue.FirstOrDefault(f => f.Name == propertyName);
 
             return tagetProperty?.Value;
+        }
+
+        // Control mothods //
+        public int GetSLcongdoantruoc(NguyenCongofKHSX currentNguyenCong, NVLmoiNguyenCong nvlmnc)
+        {
+            int lastSLgiacong = 0;
+
+            int indexCD = this.DSachCongDoans.IndexOf(currentNguyenCong);
+
+            if (indexCD > 0)
+            {
+                NguyenCongofKHSX? lastNC = this.DSachCongDoans[indexCD - 1];
+                NVLmoiNguyenCong? lastnvlcd = lastNC.DSachNVLCongDoans.FirstOrDefault(nvl => nvl.MaQuanLy.Value?.ToString() == nvlmnc.MaQuanLy.Value?.ToString());
+                var lastOK = (int.TryParse(lastnvlcd?.CaNgay.OK.Value?.ToString(), out int lastcnok) ? lastcnok : 0) + (int.TryParse(lastnvlcd?.CaDem.OK.Value?.ToString(), out int lastcdok) ? lastcdok : 0);
+                lastSLgiacong = lastOK;
+            }
+            else
+            {
+                lastSLgiacong = int.TryParse(nvlmnc.SLGoccuaLOTNVL.Value?.ToString(), out int vl) ? vl : 0;
+            }
+
+            return lastSLgiacong;
         }
     }
 }

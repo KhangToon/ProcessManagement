@@ -13,8 +13,9 @@ namespace ProcessManagement.Models
         public Propertyy LoaiNVL = new() { Name = Common.LoaiNL, Type = typeof(string), AlowDatabase = true };
         public Propertyy MaSP { get; set; } = new() { Name = Common.MaSP, Type = typeof(string), AlowDatabase = true };
         public Propertyy MaQuanLy { get; set; } = new() { Name = Common.MaQuanLy, Type = typeof(string), AlowDatabase = true };
-        public Propertyy SLCanGiaCong { get; set; } = new() { Name = Common.SLCanGiaCong, Type = typeof(int), AlowDatabase = true };
-        public Propertyy SLSauGiaCong { get; set; } = new() { Name = Common.SLCanGiaCong, Type = typeof(int), AlowDatabase = true };
+        public Propertyy SLGoccuaLOTNVL { get; set; } = new() { Name = Common.SLGoccuaLOTNVL, Type = typeof(int), AlowDatabase = true };
+        public Propertyy SLTruocGiaCong { get; set; } = new() { Name = Common.SLTruocGiaCong, Type = typeof(int), AlowDatabase = true };
+        public Propertyy SLSauGiaCong { get; set; } = new() { Name = Common.SLSauGiaCong, Type = typeof(int), AlowDatabase = true };
 
         public Propertyy NgayXuat = new() { Name = Common.NgayXuat, Type = typeof(DateTime), AlowDatabase = true };
         public CaLamViec CaNgay { get; set; } = new("Ngày");
@@ -23,6 +24,8 @@ namespace ProcessManagement.Models
         public Propertyy TongNG { get; set; } = new() { Name = Common.TongNG, Type = typeof(int), AlowDatabase = true };
         public Propertyy DanhGia { get; set; } = new() { Name = Common.Danhgia, Type = typeof(string), AlowDatabase = true };
         public Propertyy IsUpdated { get; set; } = new() { Name = Common.IsUpdated, Type = typeof(int), AlowDatabase = true };
+
+        public object? IndexNguyenCong = null;
 
         public List<Propertyy> GetPropertiesValues()
         {
@@ -77,6 +80,7 @@ namespace ProcessManagement.Models
         public Propertyy NhanVien { get; set; } = new() { Name = Common.NhanVien, Type = typeof(string), AlowDatabase = true };
         public Propertyy OK { get; set; } = new() { Name = Common.OK, Type = typeof(int), AlowDatabase = true };
         public Propertyy NG { get; set; } = new() { Name = Common.NG, Type = typeof(int), AlowDatabase = true };
+        public Propertyy IsUpdated { get; set; } = new() { Name = Common.IsUpdated, Type = typeof(int), AlowDatabase = true };
 
         public CaLamViec(string calamviec)
         {
