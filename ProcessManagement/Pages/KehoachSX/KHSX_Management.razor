@@ -228,6 +228,8 @@
                                     if (nvlcd != null)
                                     {
                                         nvlcd.SLGoccuaLOTNVL.Value = lastSLgiacong;
+
+                                        nvlcd.IndexNguyenCong = indexCD; // gan vi tri cua nguyen cong trong danh sach cho target nvlcd
                                     }
                                         /////
 
@@ -251,7 +253,7 @@
                                         }
                                     }
 
-                                    <RadzenStack class="@IsNVLmCDSelected(nvlmcd, cd)" @onclick="(() => {SelectNVLcuaCongdoan = nvlcd; OnNVLmCDClick(nvlmcd, cd, indexCD); })" Gap="10px" Orientation="Orientation.Vertical" Style="width: 220px; height: 100%; cursor: pointer" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                    <RadzenStack class="@IsNVLmCDSelected(nvlmcd, cd)" @onclick="(() => {SelectNVLcuaCongdoan = nvlcd; OnNVLmCDClick(nvlmcd, cd); })" Gap="10px" Orientation="Orientation.Vertical" Style="width: 220px; height: 100%; cursor: pointer" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                         <RadzenStack Gap="0" Orientation="Orientation.Horizontal" Style="width: 100%; height: 100%; border-right: var(--rz-grid-cell-border); border-left: var(--rz-grid-cell-border); border-width: 2px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                             <RadzenCard Variant="@((OK != 0 || NG != 0)? Variant.Filled : Variant.Outlined)" Style="width: 50%; height: contain; padding: 0; border-radius: 0 ">
                                                 <RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="width: 100%; height: contain;">
@@ -496,7 +498,7 @@
         }
     }
 
-    private void OnNVLmCDClick(NVLmoiNguyenCong selectednvlmcd, NguyenCongofKHSX selectedCD, object? indexNguyenCong)
+    private void OnNVLmCDClick(NVLmoiNguyenCong selectednvlmcd, NguyenCongofKHSX selectedCD)
     {
         if (selectednvlmcd.NVLMCDID.Value != SelectedNVLmcd.NVLMCDID.Value)
         {
@@ -510,7 +512,6 @@
         else IsDisplayDetails = true;
 
         SelectedNguyenCong = selectedCD;
-        SelectedNVLmcd.IndexNguyenCong = indexNguyenCong;
     }
 
     private string IsNVLmCDSelected(NVLmoiNguyenCong selectednvlmcd, NguyenCongofKHSX selectedCongDoan)

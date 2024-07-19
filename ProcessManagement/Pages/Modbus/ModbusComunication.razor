@@ -189,7 +189,9 @@
             return;
         }
 
-        Modbus.WriteRegData(RegAddress, RegType, RegValue?.ToString());
+        int address = int.TryParse(RegAddress, out int add) ? add : 0;
+
+        Modbus.WriteRegData(address, RegType, RegValue?.ToString());
     }
 
     private void ResetAllHoldingRegisters()

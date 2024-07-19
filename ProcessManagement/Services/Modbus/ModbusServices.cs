@@ -1,6 +1,7 @@
 ﻿using EasyModbus;
 using ProcessManagement.Commons;
 using ProcessManagement.Models;
+using ProcessManagement.Pages.KehoachSX;
 using ProcessManagement.Services.SQLServer;
 using System.Net;
 using System.Text;
@@ -22,27 +23,6 @@ namespace ProcessManagement.Services.Modbus
 
         private SQLServerServices SQLServerServices = new();
 
-        public class RegTypes
-        {
-            public const string RegCoilOutputs = "Coil Outputs"; // 0x
-            public const string RegDigitalInputs = "Digital Inputs"; // 2x
-            public const string RegAnalogueInputs = "Analogue Inputs"; // 3x
-            public const string RegHoldingRegisters = "Holding Registers"; // 4x
-            public const string RegWriteString = "Write String";
-        }
-
-        public class NguyenCongRegs
-        {
-            public static Dictionary<int, int> NguyenCongs = new()
-            {
-                {1, 2}, // Tiện phi
-                {2, 3}, // Tiện ren
-                {3, 4}, // Khoan lỗ
-                {4, 13}, // Bavia + Rữa
-                {5, 14}, // Kiểm Pin,M,Ren
-                {6, 15}, // Ngoại quan + đóng thùng 
-            };
-        }
 
         public void StartServer()
         {
@@ -52,7 +32,7 @@ namespace ProcessManagement.Services.Modbus
                 ModbusServer = new();
                 ModbusServer.Listen();
 
-                // Event register
+                // Modbus Event register
                 ModbusServer.CoilsChanged += ModbusServer_CoilsChanged;
                 ModbusServer.HoldingRegistersChanged += ModbusServer_HoldingRegistersChanged;
                 ModbusServer.NumberOfConnectedClientsChanged += ModbusServer_NumberOfConnectedClientsChanged;
@@ -64,6 +44,7 @@ namespace ProcessManagement.Services.Modbus
                 ModbusServer?.StopListening();
                 if (ModbusServer != null)
                 {
+                    // Modbus Event unregister
                     ModbusServer.CoilsChanged -= ModbusServer_CoilsChanged;
                     ModbusServer.HoldingRegistersChanged -= ModbusServer_HoldingRegistersChanged;
                     ModbusServer.NumberOfConnectedClientsChanged -= ModbusServer_NumberOfConnectedClientsChanged;
@@ -73,16 +54,18 @@ namespace ProcessManagement.Services.Modbus
             }
         }
 
+        // Modbus Event - Loging data  
         private void ModbusServer_LogDataChanged()
         {
             if (ModbusServer != null && IsServerRunning)
             {
+                // Update datetime to all clients
                 string datetimenow = DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss");
-
-                WriteRegData("59", RegTypes.RegWriteString, datetimenow); // update datetime now ( 4x58 )
+                WriteRegData(Regs.Server.ServerDatetime, Regs.RegTypes.RegWriteString, datetimenow); // update datetime now ( 4x58 )
             }
         }
 
+        // Modbus Event - Number of client connected changed
         private void ModbusServer_NumberOfConnectedClientsChanged()
         {
             if (ModbusServer != null)
@@ -96,31 +79,34 @@ namespace ProcessManagement.Services.Modbus
             }
         }
 
+        // Modbus Event - Holding register changed
         private void ModbusServer_HoldingRegistersChanged(int register, int numberOfRegisters)
         {
             RequiredRenderEvent?.Invoke(null, numberOfRegisters);
 
             if (ModbusServer != null && IsServerRunning)
-            {
-                if (register == 54)  // Device 01 - Nguyen cong Tien phi load LSX // 4x53
+            {   
+                // Required load lsx // 4x 53
+                if (register == Regs.Device01.NgCongRequiredLoadLSX01)  // Device 01 - Nguyen cong Tien phi load LSX // 4x 53
                 {
-                    if (ModbusServer.holdingRegisters[54] == 1)
+                    if (ModbusServer.holdingRegisters[Regs.Device01.NgCongRequiredLoadLSX01] == 1) // Is required load LSX from device 
                     {
-                        int nguyencongID = ModbusServer.holdingRegisters[54];
-
-                        // Reset 
-                        ModbusServer.holdingRegisters[54] = 0;
+                        int nguyencongID = ModbusServer.holdingRegisters[Regs.Device01.NgCongRequiredLoadLSX01];
 
                         // Send LSX to device 01
                         WriteLSXdetailstoDevice01(nguyencongID);
 
-                        // Disable LoadLSX button
-                        ModbusServer.coils[3] = false;
+                        // Return lsx is load done - chong nhan hai lan khi chua load xong// 0x 02 
+                        ModbusServer.coils[Regs.Device01.LSXIsLoading01] = false;
+
+                        // Reset cho lan raising tiep theo
+                        ModbusServer.holdingRegisters[Regs.Device01.NgCongRequiredLoadLSX01] = 0;
                     }
                 }
             }
         }
 
+        // Modbus Event - Coils changed
         private void ModbusServer_CoilsChanged(int coil, int numberOfCoils)
         {
             if (ModbusServer != null && IsServerRunning)
@@ -130,11 +116,10 @@ namespace ProcessManagement.Services.Modbus
                     ModbusServer.coils[4] = false;
 
                     // Read submit data from device 01
-                    ReadDataSubmitedFromDevice01();
+                    ReadDataSubmitedFromDevice01andUpdate();
                 }
             }
         }
-
 
 
         // Load LSX thong tin chi tiet
@@ -142,12 +127,12 @@ namespace ProcessManagement.Services.Modbus
         {
             if (Common.CurrentKHSX?.KHSXID == null)
             {
-                SendAlarmLogToDevice01(6); // send alarmlog : chua co LSX
+                SendAlarmLogToDevice01(Regs.AlarmCode.LSXNotexist); // send alarmlog 6: chua co LSX
                 return;
             }
 
             // Get nguyen cong
-            var tagertNgCong = SQLServerServices.GetNguyenCong(NguyenCongRegs.NguyenCongs[nguyencongID]);
+            var tagertNgCong = SQLServerServices.GetNguyenCong(Regs.NguyenCongID.IDs[nguyencongID]);
 
             var nguyencong = Common.CurrentKHSX?.DSachCongDoans.FirstOrDefault(x => x.TenCongDoan.Value?.ToString()?.Trim() == tagertNgCong.TenNguyenCong.Value?.ToString()?.Trim()) ?? null;
 
@@ -173,86 +158,79 @@ namespace ProcessManagement.Services.Modbus
                 var sldasanxuat = tongOK + tongNG;
 
                 // SLLoichophep to device 01 // 4x48
-                WriteRegData("49", RegTypes.RegHoldingRegisters, slloichophep.ToString());
+                WriteRegData(Regs.Device01.SLLoichophep01, Regs.RegTypes.RegHoldingRegisters, slloichophep.ToString());
 
                 // SLLoihientai to device 01 // 4x55
-                WriteRegData("56", RegTypes.RegHoldingRegisters, slLoihientai.ToString());
+                WriteRegData(Regs.Device01.SLLoihientai01, Regs.RegTypes.RegHoldingRegisters, slLoihientai.ToString());
 
                 // SLDaSanXuat to device 01 // 4x47
-                WriteRegData("48", RegTypes.RegHoldingRegisters, sldasanxuat.ToString());
+                WriteRegData(Regs.Server.SLDaSanXuat, Regs.RegTypes.RegHoldingRegisters, sldasanxuat.ToString());
 
                 // SLLotDone to device 01 // 4x49
-                WriteRegData("50", RegTypes.RegHoldingRegisters, sllotdone.ToString());
+                WriteRegData(Regs.Server.SLLotDone, Regs.RegTypes.RegHoldingRegisters, sllotdone.ToString());
 
                 // MaLSX to device01 // 4x16
                 string maLSX = Common.CurrentKHSX?.MaLSX.Value?.ToString() ?? string.Empty;
-                WriteRegData("17", RegTypes.RegWriteString, maLSX);
+                WriteRegData(Regs.Server.LSXCode, Regs.RegTypes.RegWriteString, maLSX);
 
                 // Masanpham to device01 // 4x22
                 string maSP = Common.CurrentKHSX?.SanPham?.MaSP.Value?.ToString() ?? string.Empty;
-                WriteRegData("23", RegTypes.RegWriteString, maSP);
+                WriteRegData(Regs.Server.MaSanPham, Regs.RegTypes.RegWriteString, maSP);
 
                 // LoaiNVL to device01 // 4x28
                 string loaiNVL = Common.CurrentKHSX?.LoaiNL.Value?.ToString() ?? string.Empty;
-                WriteRegData("29", RegTypes.RegWriteString, loaiNVL);
+                WriteRegData(Regs.Server.LoaiNVL01, Regs.RegTypes.RegWriteString, loaiNVL);
 
                 // SLSanxuat to device01 // 4x46
                 // Maximum num is 32767 for short
                 string slSX = Common.CurrentKHSX?.SLSanXuat.Value?.ToString() ?? "0";
-                WriteRegData("47", RegTypes.RegHoldingRegisters, slSX);
+                WriteRegData(Regs.Server.SLSanXuat, Regs.RegTypes.RegHoldingRegisters, slSX);
 
                 // SLLotNVL to device 01 // 4x51
                 string slLotNVL = Common.CurrentKHSX?.SLLot.Value?.ToString() ?? "0";
-                WriteRegData("52", RegTypes.RegHoldingRegisters, slLotNVL);
+                WriteRegData(Regs.Server.SLLot, Regs.RegTypes.RegHoldingRegisters, slLotNVL);
             }
             else
             {
                 ResetDataLSXDetailstoDevice01();
-                SendAlarmLogToDevice01(3); // send alarmlog : nguyen cong khong ton tai trong LSX
+                SendAlarmLogToDevice01(Regs.AlarmCode.NCNotexist); // send alarmlog 3 : nguyen cong khong ton tai trong LSX
             }
         }
 
+        // Reset LSX details for client
         private void ResetDataLSXDetailstoDevice01()
         {
             // SLLoichophep to device 01 // 4x48
-            WriteRegData("49", RegTypes.RegHoldingRegisters, "0");
+            WriteRegData(Regs.Device01.SLLoichophep01, Regs.RegTypes.RegHoldingRegisters, "0");
 
             // SLLoihientai to device 01 // 4x55
-            WriteRegData("56", RegTypes.RegHoldingRegisters, "0");
+            WriteRegData(Regs.Device01.SLLoihientai01, Regs.RegTypes.RegHoldingRegisters, "0");
 
             // SLDaSanXuat to device 01 // 4x47
-            WriteRegData("48", RegTypes.RegHoldingRegisters, "0");
+            WriteRegData(Regs.Server.SLDaSanXuat, Regs.RegTypes.RegHoldingRegisters, "0");
 
             // SLLotDone to device 01 // 4x49
-            WriteRegData("50", RegTypes.RegHoldingRegisters, "0");
+            WriteRegData(Regs.Server.SLLotDone, Regs.RegTypes.RegHoldingRegisters, "0");
 
             // MaLSX to device01 // 4x16
-            WriteRegData("17", RegTypes.RegWriteString, "0");
+            WriteRegData(Regs.Server.LSXCode, Regs.RegTypes.RegWriteString, "0");
 
             // Masanpham to device01 // 4x22
-            WriteRegData("23", RegTypes.RegWriteString, "0");
+            WriteRegData(Regs.Server.MaSanPham, Regs.RegTypes.RegWriteString, "0");
 
             // LoaiNVL to device01 // 4x28
-            WriteRegData("29", RegTypes.RegWriteString, "0");
+            WriteRegData(Regs.Server.LoaiNVL01, Regs.RegTypes.RegWriteString, "0");
 
             // SLSanxuat to device01 // 4x46
             // Maximum num is 32767 for short
-            WriteRegData("47", RegTypes.RegHoldingRegisters, "0");
+            WriteRegData(Regs.Server.SLSanXuat, Regs.RegTypes.RegHoldingRegisters, "0");
 
             // SLLotNVL to device 01 // 4x51
-            WriteRegData("52", RegTypes.RegHoldingRegisters, "0");
-        }
-
-        private void SendAlarmLogToDevice01(short alarmCode)
-        {
-            if (ModbusServer != null && IsServerRunning)
-            {
-                ModbusServer.holdingRegisters[58] = alarmCode; // AlarmLog register // 4x57 //
-            }
+            WriteRegData(Regs.Server.SLLot, Regs.RegTypes.RegHoldingRegisters, "0");
         }
 
         // Read submit data from device 01
-        private void ReadDataSubmitedFromDevice01()
+        private void ReadDataSubmitedFromDevice01andUpdate()
         {
             if (ModbusServer != null && IsServerRunning)
             {
@@ -273,29 +251,56 @@ namespace ProcessManagement.Services.Modbus
 
                 ModbusServer.coils[1] = false; // disable device 01 // 0x0
 
-                if (string.IsNullOrEmpty(maquanlylot) || string.IsNullOrEmpty(manhanvien))
-                {
-                    SendAlarmLogToDevice01(5); // send alarmlog: chua nhap du thong tin
-                    return;
-                }
+                // calling update method
+                Regs.AlarmCode result = UpdateCalamviec(calamviec, maquanlylot, manhanvien, slOK, slNG);
 
-                // Checking maquanlylot
-                // Checking manhanvien
-                // Checking maquanlylot cua nguyen cong da update hay chua
-
-                if ((slOK == 0 && slNG == 0))
-                {
-                    SendAlarmLogToDevice01(4); // send alarmlog: chua nhap du thong tin
-                    return;
-                }
-
-                // so sanh slOK/slNG tuong ung voi sl con lai cua qua trinh sx
-
-                SendAlarmLogToDevice01(1); // send alarmlog success
+                // feedback update result to client
+                SendAlarmLogToDevice01(result);
             }
         }
 
+        private Regs.AlarmCode UpdateCalamviec(bool ca, string maquanlylot, string manhanvien, int slOK, int slNG)
+        {
+            Regs.AlarmCode result = Regs.AlarmCode.UpdateSuccess; string errorMess = string.Empty;
 
+            if (string.IsNullOrEmpty(maquanlylot) || string.IsNullOrEmpty(manhanvien))
+            {
+                return Regs.AlarmCode.NotEnoughInfor;
+            }
+
+            if ((slOK == 0 && slNG == 0))
+            {
+                return Regs.AlarmCode.ErrorSLOKNG;
+            }
+
+            // Get target NVLmoiNguyencong
+            var targetItems = Common.CurrentKHSX?.DSachCongDoans.SelectMany(item => item.DSachNVLCongDoans).FirstOrDefault(mql => mql.MaQuanLy.Value?.ToString() == maquanlylot) ?? null;
+
+            // Checking maquanlylot
+            if (targetItems == null) return Regs.AlarmCode.MQLNotexist; // ma quan ly khong ton tai
+
+            // Checking manhanvien
+
+            // Checking maquanlylot cua nguyen cong da update hay chua
+            var isupdated = (targetItems.IsUpdated.Value?.ToString() == "1");
+            if (isupdated) return Regs.AlarmCode.IsUpdated;
+
+
+            // so sanh slOK/slNG tuong ung voi sl con lai cua qua trinh sx
+
+            return result;
+        }
+
+        // Method send alarm log to client 
+        private void SendAlarmLogToDevice01(Regs.AlarmCode alarmCode)
+        {
+            if (ModbusServer != null && IsServerRunning)
+            {
+                ModbusServer.holdingRegisters[58] = (short)alarmCode; // AlarmLog register // 4x57 //
+            }
+        }
+
+        // Convert string to register type
         private int[] ConvertStringToRegisters(string stringToConvert)
         {
             byte[] bytes = Encoding.ASCII.GetBytes(stringToConvert);
@@ -312,6 +317,7 @@ namespace ProcessManagement.Services.Modbus
             return array;
         }
 
+        // Convert regsiter type to string
         private static string ConvertRegistersToString(int[] registers, int offset, int stringLength)
         {
             byte[] array = new byte[stringLength];
@@ -326,6 +332,7 @@ namespace ProcessManagement.Services.Modbus
             return Encoding.Default.GetString(array);
         }
 
+        // Read string data
         public string ReadStringData(int regStartPosition, int stringLengh)
         {
             if (IsServerRunning && ModbusServer != null)
@@ -347,13 +354,12 @@ namespace ProcessManagement.Services.Modbus
             else { return string.Empty; }
         }
 
-        public void WriteRegData(string address, string regType, string? value)
+        // Write string data
+        public void WriteRegData(int address, string regType, string? value)
         {
             if (IsServerRunning && value != null)
             {
-                int iadr = int.Parse(address);
-
-                if (regType == RegTypes.RegWriteString)
+                if (regType == Regs.RegTypes.RegWriteString)
                 {
                     int[] cv = ConvertStringToRegisters(value);
 
@@ -363,30 +369,30 @@ namespace ProcessManagement.Services.Modbus
                         for (int i = 0; i < cv.Length; i++)
                         {
                             short shortvl = (short)cv[i];
-                            regs[iadr + i] = shortvl;
+                            regs[address + i] = shortvl;
                         }
                     }
                 }
-                else if (regType == RegTypes.RegHoldingRegisters)
+                else if (regType == Regs.RegTypes.RegHoldingRegisters)
                 {
                     short ival = short.Parse(value); // Maximum num is 32767 for short
 
                     ModbusServer.HoldingRegisters? regs = ModbusServer?.holdingRegisters;
                     if (regs != null)
                     {
-                        regs[iadr] = ival;
+                        regs[address] = ival;
                     }
                 }
-                else if (regType == RegTypes.RegAnalogueInputs)
+                else if (regType == Regs.RegTypes.RegAnalogueInputs)
                 {
                     short ival = short.Parse(value);
                     ModbusServer.InputRegisters? regs = ModbusServer?.inputRegisters;
                     if (regs != null)
                     {
-                        regs[iadr] = ival;
+                        regs[address] = ival;
                     }
                 }
-                else if (regType == RegTypes.RegDigitalInputs)
+                else if (regType == Regs.RegTypes.RegDigitalInputs)
                 {
                     bool ival = false;
 
@@ -395,10 +401,10 @@ namespace ProcessManagement.Services.Modbus
                     ModbusServer.DiscreteInputs? regs = ModbusServer?.discreteInputs;
                     if (regs != null)
                     {
-                        regs[iadr] = ival;
+                        regs[address] = ival;
                     }
                 }
-                else if (regType == RegTypes.RegCoilOutputs)
+                else if (regType == Regs.RegTypes.RegCoilOutputs)
                 {
                     bool ival = false;
 
@@ -407,12 +413,13 @@ namespace ProcessManagement.Services.Modbus
                     ModbusServer.Coils? regs = ModbusServer?.coils;
                     if (regs != null)
                     {
-                        regs[iadr] = ival;
+                        regs[address] = ival;
                     }
                 }
             }
         }
 
+        // Reset all holding regsiter value
         public void ResetAllHoldingRegisters()
         {
             if (IsServerRunning && ModbusServer != null)
@@ -421,7 +428,7 @@ namespace ProcessManagement.Services.Modbus
             }
         }
 
-        // // // // MODBUS CLIENT // // // //
+        // // // // MODBUS CLIENT // // // // NOT USE
         #region Modbus client
         private ModbusClient? modbusClient;
         private string? receiveData = null;
