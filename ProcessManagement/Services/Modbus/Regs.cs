@@ -11,6 +11,7 @@
             NotEnoughInfor = 5, // Chua nhap day du thong tin
             LSXNotexist = 6, // LSX khong ton tai
             IsUpdated = 7, // MQL da duoc update truoc do
+            UpdateFailed = 8, // Update SQL calamviec error
         }
 
         public class NguyenCongID // Nguyen cong code
@@ -35,7 +36,6 @@
             public const string RegHoldingRegisters = "Holding Registers"; // 4x
             public const string RegWriteString = "Write String";
         }
-
 
         public static class Server // server common register
         {

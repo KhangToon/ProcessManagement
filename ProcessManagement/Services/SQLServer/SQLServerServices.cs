@@ -1341,9 +1341,9 @@ namespace ProcessManagement.Services.SQLServer
             {
                 List<CaLamViec> listCaLamviec = GetlistNVLmoiCongdoanCalamviecs(nvl.NVLMCDID.Value);
 
-                nvl.CaNgay = listCaLamviec.FirstOrDefault(ca => ca.Ca?.Value?.ToString() == "Ngày") ?? new CaLamViec();
+                nvl.CaNgay = listCaLamviec.FirstOrDefault(ca => ca.Ca?.Value?.ToString() == Common.Cangay) ?? new CaLamViec();
 
-                nvl.CaDem = listCaLamviec.FirstOrDefault(ca => ca.Ca?.Value?.ToString() == "Đêm") ?? new CaLamViec();
+                nvl.CaDem = listCaLamviec.FirstOrDefault(ca => ca.Ca?.Value?.ToString() == Common.Cadem) ?? new CaLamViec();
             });
 
             return listNVLmoiCongdoans;
@@ -1383,9 +1383,9 @@ namespace ProcessManagement.Services.SQLServer
 
             List<CaLamViec> listCaLamviec = GetlistNVLmoiCongdoanCalamviecs(nvlmoiCongdoan.NVLMCDID.Value);
 
-            nvlmoiCongdoan.CaNgay = listCaLamviec.FirstOrDefault(ca => ca.Ca?.Value?.ToString() == "Ngày") ?? new CaLamViec();
+            nvlmoiCongdoan.CaNgay = listCaLamviec.FirstOrDefault(ca => ca.Ca?.Value?.ToString() == Common.Cangay) ?? new CaLamViec();
 
-            nvlmoiCongdoan.CaDem = listCaLamviec.FirstOrDefault(ca => ca.Ca?.Value?.ToString() == "Đêm") ?? new CaLamViec();
+            nvlmoiCongdoan.CaDem = listCaLamviec.FirstOrDefault(ca => ca.Ca?.Value?.ToString() == Common.Cadem) ?? new CaLamViec();
 
             return nvlmoiCongdoan;
         }

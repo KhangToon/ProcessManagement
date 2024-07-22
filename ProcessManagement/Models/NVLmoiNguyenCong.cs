@@ -18,14 +18,14 @@ namespace ProcessManagement.Models
         public Propertyy SLSauGiaCong { get; set; } = new() { Name = Common.SLSauGiaCong, Type = typeof(int), AlowDatabase = true };
 
         public Propertyy NgayXuat = new() { Name = Common.NgayXuat, Type = typeof(DateTime), AlowDatabase = true };
-        public CaLamViec CaNgay { get; set; } = new("Ngày");
-        public CaLamViec CaDem { get; set; } = new("Đêm");
+        public CaLamViec CaNgay { get; set; } = new(Common.Cangay);
+        public CaLamViec CaDem { get; set; } = new(Common.Cadem);
         public Propertyy TongOK { get; set; } = new() { Name = Common.TongOK, Type = typeof(int), AlowDatabase = true };
         public Propertyy TongNG { get; set; } = new() { Name = Common.TongNG, Type = typeof(int), AlowDatabase = true };
         public Propertyy DanhGia { get; set; } = new() { Name = Common.Danhgia, Type = typeof(string), AlowDatabase = true };
         public Propertyy IsUpdated { get; set; } = new() { Name = Common.IsUpdated, Type = typeof(int), AlowDatabase = true };
 
-        public object? IndexNguyenCong = null;
+        public object? IndexNguyenCong = -1;
 
         public List<Propertyy> GetPropertiesValues()
         {

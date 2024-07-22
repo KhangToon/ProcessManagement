@@ -78,6 +78,8 @@ namespace ProcessManagement.Commons
         // Table Calamviec //
         public const string TableCalamviec = "Table_Calamviec";
         public const string CLVID = "CLVID";
+        public const string Cangay = "Ngày";
+        public const string Cadem = "Đêm";
         //public const string CDID = "CDID";
         public const string Ca = "Ca";
         public const string NgayGiaCong = "Ngày gia công";
@@ -118,6 +120,8 @@ namespace ProcessManagement.Commons
         public const string NCID = "NCID";
         public const string NguyenCong = "Nguyên công";
         public const string Ghichu = "Ghi chú";
+
+        
 
         // Socket 
         public const string socketEndKey = "<END>";

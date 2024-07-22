@@ -3,6 +3,7 @@ using ProcessManagement.Commons;
 using ProcessManagement.Models;
 using ProcessManagement.Pages.KehoachSX;
 using ProcessManagement.Services.SQLServer;
+using Radzen;
 using System.Net;
 using System.Text;
 
@@ -85,7 +86,7 @@ namespace ProcessManagement.Services.Modbus
             RequiredRenderEvent?.Invoke(null, numberOfRegisters);
 
             if (ModbusServer != null && IsServerRunning)
-            {   
+            {
                 // Required load lsx // 4x 53
                 if (register == Regs.Device01.NgCongRequiredLoadLSX01)  // Device 01 - Nguyen cong Tien phi load LSX // 4x 53
                 {
@@ -234,6 +235,15 @@ namespace ProcessManagement.Services.Modbus
         {
             if (ModbusServer != null && IsServerRunning)
             {
+                // Read Tennguyencong // 4x 71
+                int nguyencongID = ModbusServer.holdingRegisters[72];
+
+                nguyencongID = Regs.NguyenCongID.IDs[nguyencongID];
+
+                NguyenCong targetngcong = SQLServerServices.GetNguyenCong(nguyencongID);
+
+                string tenngcong = targetngcong.TenNguyenCong.Value?.ToString()?.Trim() ?? string.Empty;
+
                 // Read Maquanlylot (QRCode) // 4x0 - lenght 31
                 string maquanlylot = ReadStringData(0, 31);
 
@@ -249,19 +259,19 @@ namespace ProcessManagement.Services.Modbus
                 // Read SLNG // 4x52
                 int slNG = ModbusServer.holdingRegisters[53];
 
-                ModbusServer.coils[1] = false; // disable device 01 // 0x0
+                //ModbusServer.coils[1] = false; // disable device 01 // 0x0
 
                 // calling update method
-                Regs.AlarmCode result = UpdateCalamviec(calamviec, maquanlylot, manhanvien, slOK, slNG);
+                Regs.AlarmCode result = UpdateCalamviec(tenngcong, calamviec, maquanlylot, manhanvien, slOK, slNG);
 
                 // feedback update result to client
                 SendAlarmLogToDevice01(result);
             }
         }
 
-        private Regs.AlarmCode UpdateCalamviec(bool ca, string maquanlylot, string manhanvien, int slOK, int slNG)
+        private Regs.AlarmCode UpdateCalamviec(string tenngcong, bool iscadem, string maquanlylot, string manhanvien, int slOK, int slNG)
         {
-            Regs.AlarmCode result = Regs.AlarmCode.UpdateSuccess; string errorMess = string.Empty;
+            // iscadem == 1 (ca dem) // iscadem = 0 (ca ngay)
 
             if (string.IsNullOrEmpty(maquanlylot) || string.IsNullOrEmpty(manhanvien))
             {
@@ -273,23 +283,128 @@ namespace ProcessManagement.Services.Modbus
                 return Regs.AlarmCode.ErrorSLOKNG;
             }
 
-            // Get target NVLmoiNguyencong
-            var targetItems = Common.CurrentKHSX?.DSachCongDoans.SelectMany(item => item.DSachNVLCongDoans).FirstOrDefault(mql => mql.MaQuanLy.Value?.ToString() == maquanlylot) ?? null;
+            // Get target NVLmoiNguyencong by maquanly and tennguyencong
+            var targetLotNVLItems = Common.CurrentKHSX?.DSachCongDoans.SelectMany(item => item.DSachNVLCongDoans)
+                            .FirstOrDefault(mql => mql.MaQuanLy.Value?.ToString()?.Trim() == maquanlylot && mql.TenCongDoan.Value?.ToString()?.Trim() == tenngcong) ?? null;
 
             // Checking maquanlylot
-            if (targetItems == null) return Regs.AlarmCode.MQLNotexist; // ma quan ly khong ton tai
+            if (targetLotNVLItems == null) return Regs.AlarmCode.MQLNotexist; // ma quan ly khong ton tai
 
             // Checking manhanvien
 
             // Checking maquanlylot cua nguyen cong da update hay chua
-            var isupdated = (targetItems.IsUpdated.Value?.ToString() == "1");
+            var isupdated = (targetLotNVLItems.IsUpdated.Value?.ToString() == "1");
             if (isupdated) return Regs.AlarmCode.IsUpdated;
 
+            // checking NG/OK error before update //
+            int slgocLOTngcong = int.TryParse(targetLotNVLItems?.SLGoccuaLOTNVL.Value?.ToString(), out int slcgc) ? slcgc : 0;
+            int slLOTtruocgiacong = int.TryParse(targetLotNVLItems?.SLTruocGiaCong.Value?.ToString(), out int sltgc) ? sltgc : 0;
+
+            // lay so luong cua moi ca truoc do
+            int cangayOK = int.TryParse(targetLotNVLItems?.CaNgay.OK.Value?.ToString(), out int cangayok) ? cangayok : 0;
+            int cangayNG = int.TryParse(targetLotNVLItems?.CaNgay.NG.Value?.ToString(), out int cangayng) ? cangayng : 0;
+            int cademOK = int.TryParse(targetLotNVLItems?.CaDem.OK.Value?.ToString(), out int candemok) ? candemok : 0;
+            int cademNG = int.TryParse(targetLotNVLItems?.CaDem.NG.Value?.ToString(), out int candemng) ? candemng : 0;
+
+            // gan lai gia tri NG/OK cua ca lam viec dang submit
+            if (iscadem) { cademOK = slOK; cademNG = slNG; } else { cangayOK = slOK; cangayNG = slNG; }
+
+            // gan sl truoc gia cong la sl goc cua lot nguyen cong, neu no == 0
+            if (slLOTtruocgiacong == 0) { slLOTtruocgiacong = slgocLOTngcong; }
+
+            // tinh sl con lai sau khi updated
+            int slconlaiCD = slLOTtruocgiacong - (cangayOK + cangayNG) - (cademOK + cademNG);
 
             // so sanh slOK/slNG tuong ung voi sl con lai cua qua trinh sx
+            if (slconlaiCD < 0 || slconlaiCD == slLOTtruocgiacong)
+            {
+                return Regs.AlarmCode.ErrorSLOKNG;
+            }
+            else
+            {
+                // create data for update calamviec
+                TemNVLMCDValues targetCalamviec = new((iscadem) ? Common.Cadem : Common.Cangay)
+                {
+                    slConlai = slconlaiCD,
+                    ngayGC = DateTime.TryParse(((iscadem) ? targetLotNVLItems?.CaDem : targetLotNVLItems?.CaNgay)?.NgayGiaCong.Value?.ToString(), out DateTime ngc) ? ngc : DateTime.Now,
+                    slOK = slOK,
+                    slNG = slNG,
+                    tenNV = manhanvien
+                };
 
-            return result;
+                // update target calamviec
+                (int updateResult, string updateErrMess) = SQLServerServices.UpdateCalamviec(targetLotNVLItems, targetCalamviec);
+
+                if (updateResult != 1)
+                {
+                    return Regs.AlarmCode.UpdateFailed;
+                }
+                else
+                {
+                    int slOKsaukhigiacong = cangayOK + cademOK; // so luong OK(so luong con lai) sau khi gia cong
+
+                    int slNGsaukhigiacong = cangayNG + cademNG; // so luong loi sau khi gia cong
+
+                    int isUpdated = 0;
+
+                    if (slconlaiCD == 0) { isUpdated = 1; } // khi da gia cong het sltruocgiacong
+
+                    // Update slsaugiacong nguyen cong hien tai
+                    (updateResult, updateErrMess) = SQLServerServices.UpdateSLsaugiacongNVLMCD(targetLotNVLItems?.NVLMCDID.Value, slOKsaukhigiacong, slNGsaukhigiacong, isUpdated);
+
+                    // Update sltruocgiacong nguyen cong tiep theo
+                    (updateResult, updateErrMess) = UpdateSLtruocgiacongOfNextNguyencong(targetLotNVLItems, slOKsaukhigiacong);
+
+                    if (updateResult != 1)
+                    {
+                        return Regs.AlarmCode.UpdateFailed;
+                    }
+                    else
+                    {
+                        Common.RaiseCongdoanUpdatedEvent(targetLotNVLItems?.NVLMCDID.Value);
+
+                        // Trigger LSX infor for client after updated
+
+                        return Regs.AlarmCode.UpdateSuccess;
+                    }
+                }
+            }
         }
+
+        private (int, string) UpdateSLtruocgiacongOfNextNguyencong(NVLmoiNguyenCong? currentNVLMCD, int slsaukhigiacong)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            int slgocnguyencong = int.TryParse(currentNVLMCD?.SLGoccuaLOTNVL.Value?.ToString(), out int slgoc) ? slgoc : 0;
+
+            string maquanly = currentNVLMCD?.MaQuanLy.Value?.ToString() ?? string.Empty;
+
+            int currentCDid = int.TryParse(currentNVLMCD?.CDID.Value?.ToString(), out int cdid) ? cdid : 0;
+
+            int nextCDid = (currentCDid > 0) ? (currentCDid + 1) : 0;
+
+            // index cua nguyen cong hien tai trong danh sach nguyen cong
+            int indexCurrentNC = int.TryParse(currentNVLMCD?.IndexNguyenCong?.ToString(), out int indexnc) ? indexnc : -1;
+
+            if (nextCDid == 0 || maquanly == string.Empty || indexCurrentNC == -1) { return (result, errorMess); }
+
+            if (indexCurrentNC == 0) // nguyen cong dau tien
+            {
+                // Update nguyen cong tiep theo
+                (result, errorMess) = SQLServerServices.UpdateSLTruocgiacongNextNguyenCong(nextCDid, maquanly, slsaukhigiacong);
+
+                // Update sltruocgiacong nguyencong dau tien
+                (result, errorMess) = SQLServerServices.UpdateSLTruocgiacongNextNguyenCong(currentCDid, maquanly, slgocnguyencong);
+            }
+            else
+            {
+                // Update nguyen cong tiep theo
+                (result, errorMess) = SQLServerServices.UpdateSLTruocgiacongNextNguyenCong(nextCDid, maquanly, slsaukhigiacong);
+            }
+
+            return (result, errorMess);
+        }
+
 
         // Method send alarm log to client 
         private void SendAlarmLogToDevice01(Regs.AlarmCode alarmCode)
