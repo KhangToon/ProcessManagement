@@ -36,7 +36,6 @@
             public const string RegWriteString = "Write String";
         }
 
-
         public static class Server // server common register
         {
             // Server datetime

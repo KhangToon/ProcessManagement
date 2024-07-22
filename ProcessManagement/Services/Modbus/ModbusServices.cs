@@ -3,6 +3,7 @@ using ProcessManagement.Commons;
 using ProcessManagement.Models;
 using ProcessManagement.Pages.KehoachSX;
 using ProcessManagement.Services.SQLServer;
+using Radzen;
 using System.Net;
 using System.Text;
 
@@ -85,7 +86,7 @@ namespace ProcessManagement.Services.Modbus
             RequiredRenderEvent?.Invoke(null, numberOfRegisters);
 
             if (ModbusServer != null && IsServerRunning)
-            {   
+            {
                 // Required load lsx // 4x 53
                 if (register == Regs.Device01.NgCongRequiredLoadLSX01)  // Device 01 - Nguyen cong Tien phi load LSX // 4x 53
                 {
@@ -259,7 +260,7 @@ namespace ProcessManagement.Services.Modbus
             }
         }
 
-        private Regs.AlarmCode UpdateCalamviec(bool ca, string maquanlylot, string manhanvien, int slOK, int slNG)
+        private Regs.AlarmCode UpdateCalamviec(bool iscangay, string maquanlylot, string manhanvien, int slOK, int slNG)
         {
             Regs.AlarmCode result = Regs.AlarmCode.UpdateSuccess; string errorMess = string.Empty;
 
@@ -285,8 +286,37 @@ namespace ProcessManagement.Services.Modbus
             var isupdated = (targetItems.IsUpdated.Value?.ToString() == "1");
             if (isupdated) return Regs.AlarmCode.IsUpdated;
 
+            // checking NG/OK error before update //
+            int slgocLOTngcong = int.TryParse(targetItems?.SLGoccuaLOTNVL.Value?.ToString(), out int slcgc) ? slcgc : 0;
+            int slLOTtruocgiacong = int.TryParse(targetItems?.SLTruocGiaCong.Value?.ToString(), out int sltgc) ? sltgc : 0;
+
+            // lay so luong cua moi ca truoc do
+            int cangayOK = int.TryParse(targetItems?.CaNgay.OK.Value?.ToString(), out int cangayok) ? cangayok : 0;
+            int cangayNG = int.TryParse(targetItems?.CaNgay.NG.Value?.ToString(), out int cangayng) ? cangayng : 0;
+            int cademOK = int.TryParse(targetItems?.CaNgay.OK.Value?.ToString(), out int candemok) ? candemok : 0;
+            int cademNG = int.TryParse(targetItems?.CaNgay.NG.Value?.ToString(), out int candemng) ? candemng : 0;
+
+            // gan lai gia tri NG/OK cua ca lam viec dang submit
+            if (iscangay) { cangayOK = slOK; cangayNG = slNG; } else { cademOK = slOK; cademNG = slNG; }
+
+            // gan sl truoc gia cong la sl goc cua lot nguyen cong, neu no == 0
+            if (slLOTtruocgiacong == 0) { slLOTtruocgiacong = slgocLOTngcong; }
+
+            // tinh sl con lai sau khi updated
+            int slconlaiCD = slLOTtruocgiacong - (cangayOK + cangayNG) - (cademOK + cademNG);
 
             // so sanh slOK/slNG tuong ung voi sl con lai cua qua trinh sx
+            if (slconlaiCD < 0 || (cangayOK + cangayNG) == 0)
+            {
+                return Regs.AlarmCode.ErrorSLOKNG;
+            }
+            else
+            {
+                TemNVLMCDValues updateCalamviec = new((iscangay) ? Common.Cangay : Common.Cadem)
+                { slConlai = slconlaiCD };
+
+                (int updateResult, string updateErrMess) = SQLServerServices.UpdateCalamviec(targetItems, updateCalamviec);
+            }
 
             return result;
         }
