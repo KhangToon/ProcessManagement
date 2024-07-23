@@ -35,6 +35,10 @@
     .SoluongnotOK {
         background-color: yellow;
     }
+
+    .LotNVLconthieu {
+        background-color: orange;
+    }
 </style>
 
 <RadzenRow class="rowbackground-style" Gap="0px" Style="height: 100%; width: 100%;">
@@ -187,10 +191,14 @@
                 {
                     foreach (var nvlmcd in temDSMaQuanly)
                     {
-                        int tongOKAllnguenCong = 0; int tongNGAllnguyenCong = 0; bool haveCDupdated = false; bool islastCDupdated = false;
+                        int tongOKAllnguyenCong = 0; // so luong OK (slgoclotnvl - slNGall) qua tat ca nguyen cong
+                        int tongNGAllnguyenCong = 0; // so luong NG++ qua tat ca nguyen cong
+                        bool haveCDupdated = false;
+                        bool islastCDupdated = false;
 
                         <RadzenStack Style="height: contain; width: 100%;" Gap="0" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                             <RadzenStack Style="height: contain; width: 100%; padding: 5px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <!--Column STT/Maquanly/Soluong-->
                                 <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style="width: 300px; height: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                     <RadzenStack Gap="0" Orientation="Orientation.Horizontal" Style="width: 100%; height: 100%; border-right: var(--rz-grid-cell-border); border-width: 2px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                         <RadzenCard Variant="Variant.Outlined" Style="width: 100%; height:  100%; padding: 0px; border-radius: 0">
@@ -202,51 +210,68 @@
                                         </RadzenCard>
                                     </RadzenStack>
                                 </RadzenStack>
+                                <!--List Column trong danh sach nguyen cong-->
                                 @foreach (var cd in SelectedKHSX.DSachCongDoans)
                                 {
                                     // Get sl cong doan truoc //
                                     int lastSLgiacong = 0;
 
+                                    // so thu tu cua nguyen cong trong danh sach nguyen cong
                                     int indexCD = SelectedKHSX.DSachCongDoans.IndexOf(cd);
 
-                                    if (indexCD > 0)
+                                    if (indexCD > 0) // nguyen cong khong phai vi tri dau tien trong danh sach
                                     {
+                                        // get nguyencong truoc do
                                         NguyenCongofKHSX? lastCD = SelectedKHSX.DSachCongDoans[indexCD - 1];
+                                        // get lotnvl tuong ung voi ten nguyen cong
                                         NVLmoiNguyenCong? lastnvlcd = lastCD.DSachNVLCongDoans.FirstOrDefault(nvl => nvl.MaQuanLy.Value?.ToString() == nvlmcd.MaQuanLy.Value?.ToString());
+                                        // get so luong gia cong OK cua lotnvl nguyencong truoc do
                                         var lastOK = (int.TryParse(lastnvlcd?.CaNgay.OK.Value?.ToString(), out int lastcnok) ? lastcnok : 0) + (int.TryParse(lastnvlcd?.CaDem.OK.Value?.ToString(), out int lastcdok) ? lastcdok : 0);
+                                        // asign cho lastSLgiacong
                                         lastSLgiacong = lastOK;
                                     }
-                                    else
+                                    else // nguyen cong o vi tri dau tien
                                     {
                                         lastSLgiacong = int.TryParse(nvlmcd.SLGoccuaLOTNVL.Value?.ToString(), out int vl) ? vl : 0;
                                     }
                                     /////
 
-                                    // Asign sl can gia cong cho cd tiep theo //
+                                    // Asign sl can gia cong cho lotnvl cua nguyencong hien tai //
                                     NVLmoiNguyenCong? nvlcd = cd.DSachNVLCongDoans.FirstOrDefault(nvl => nvl.MaQuanLy.Value?.ToString() == nvlmcd.MaQuanLy.Value?.ToString());
 
                                     if (nvlcd != null)
                                     {
-                                        nvlcd.SLGoccuaLOTNVL.Value = lastSLgiacong;
+                                        // gan so luong truoc khi gia cong cho lotnvl nguyen cong
+                                        nvlcd.SLTruocGiaCong.Value = lastSLgiacong;                             // RE-CHECK // khong phai SLGoccuaLOTNVL --> SLTRuocgiacong
 
-                                        nvlcd.IndexNguyenCong = indexCD; // gan vi tri cua nguyen cong trong danh sach cho target nvlcd
+                                        // gan vi tri cua nguyen cong trong danh sach cho target nvlcd
+                                        nvlcd.IndexNguyenCong = indexCD;
                                     }
-                                        /////
+                                    /////
 
+                                    // Tinh so luong OK/NG lovnvl nguyencong hien tai
                                     var OK = (int.TryParse(nvlcd?.CaNgay.OK.Value?.ToString(), out int cnok) ? cnok : 0) + (int.TryParse(nvlcd?.CaDem.OK.Value?.ToString(), out int cdok) ? cdok : 0);
 
                                     var NG = (int.TryParse(nvlcd?.CaNgay.NG.Value?.ToString(), out int cnng) ? cnng : 0) + (int.TryParse(nvlcd?.CaDem.NG.Value?.ToString(), out int cdng) ? cdng : 0);
 
                                     var tongOK = OK.ToString(); var tongNG = NG.ToString();
 
-                                    tongNGAllnguyenCong += int.Parse(tongNG ?? "0");
+                                    // tong OK lotnvl qua cac nguyencong
+                                    tongOKAllnguyenCong = OK;
 
-                                    tongOKAllnguenCong += int.Parse(tongOK ?? "0");
+                                    // ++ tong NG lotnvl qua cac nguyencong
+                                    tongNGAllnguyenCong += int.Parse(tongNG ?? "0");
 
                                     if (OK != 0 || NG != 0)
                                     {
-                                        haveCDupdated = true;
+                                        // get bit isupdate cua lotnvl cua nguyen cong hien tai
+                                        int islotnvlUpdated = int.TryParse(nvlcd?.IsUpdated.Value?.ToString(), out int isupdated) ? isupdated : 0;
 
+                                        if (islotnvlUpdated == 1)
+                                        {
+                                            haveCDupdated = true;
+                                        }
+                                        // set true neu lotnvl dang la cua nguyen cong cuoi cung
                                         if (cd.CDID.Value?.ToString() == SelectedKHSX.DSachCongDoans.LastOrDefault()?.CDID.Value?.ToString())
                                         {
                                             islastCDupdated = true;
@@ -255,11 +280,13 @@
 
                                     <RadzenStack class="@IsNVLmCDSelected(nvlmcd, cd)" @onclick="(() => {SelectNVLcuaCongdoan = nvlcd; OnNVLmCDClick(nvlmcd, cd); })" Gap="10px" Orientation="Orientation.Vertical" Style="width: 220px; height: 100%; cursor: pointer" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                         <RadzenStack Gap="0" Orientation="Orientation.Horizontal" Style="width: 100%; height: 100%; border-right: var(--rz-grid-cell-border); border-left: var(--rz-grid-cell-border); border-width: 2px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                            <!--Display column OK-->
                                             <RadzenCard Variant="@((OK != 0 || NG != 0)? Variant.Filled : Variant.Outlined)" Style="width: 50%; height: contain; padding: 0; border-radius: 0 ">
                                                 <RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="width: 100%; height: contain;">
                                                     <RadzenText Text="@((tongOK == "0" && tongNG == "0")? "_" : tongOK)" Style="font-size: 14px; font-weight: 600; color: darkgreen "></RadzenText>
                                                 </RadzenStack>
                                             </RadzenCard>
+                                            <!--Display column NG-->
                                             <RadzenCard Variant="@((OK != 0 || NG != 0)? Variant.Filled : Variant.Outlined)" Style="width: 50%; height: contain; padding: 0; border-radius: 0 ">
                                                 <RadzenStack class="@((NG != 0)? "SoluongnotOK" : string.Empty)" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="width: 100%; height: contain">
                                                     <RadzenText Text="@((NG == 0 && OK == 0)? "_" : tongNG)" Style="font-size: 14px; font-weight: 600; color: black "></RadzenText>
@@ -268,26 +295,34 @@
                                         </RadzenStack>
                                     </RadzenStack>
                                 }
+                                <!--Colum tong ket-->
+                                @{
+                                    int slgoclotnvl = int.TryParse(nvlmcd.SLGoccuaLOTNVL.Value?.ToString(), out int slg) ? slg : 0;
+                                    int slconthieu = slgoclotnvl - (tongOKAllnguyenCong + tongNGAllnguyenCong);
+                                }
                                 <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style="width: 220px; height: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                     <RadzenStack Gap="5px" Orientation="Orientation.Horizontal" Style="width: 100%; height: 100%; border-right: var(--rz-grid-cell-border); border-width: 2px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                         <RadzenCard Variant="Variant.Outlined" Style="width: 100%; height:  100%; padding: 0px; border-radius: 0">
                                             <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Style="width: 100%; height:  100%;" Gap="0">
                                                 <RadzenCard Variant="@((haveCDupdated == true && islastCDupdated == true)? Variant.Filled : Variant.Outlined)" Style="width: 50%; height: contain; padding: 0; border-radius: 0 ">
-                                                    <RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="width: 100%; height: contain; border-left: var(--rz-grid-cell-border);">
-                                                        @{
-                                                            int slcangiacong = int.TryParse(nvlmcd?.SLGoccuaLOTNVL.Value?.ToString(), out int slcgc) ? slcgc : 0;
-                                                        }
-                                                        <RadzenText Text="@((haveCDupdated && islastCDupdated)? (slcangiacong - tongNGAllnguyenCong).ToString() : "_")" Style="font-size: 14px; font-weight: 600; color: darkgreen "></RadzenText>
+                                                    <RadzenStack class="@((slconthieu != 0 && (haveCDupdated == true && islastCDupdated == true))? "LotNVLconthieu" : string.Empty)" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="width: 100%; height: contain; border-left: var(--rz-grid-cell-border);">
+                                                        <!-- Hien thi SL OK tong ket cua lotnvl qua cac nguyen cong-->
+                                                        <RadzenText Text="@((haveCDupdated && islastCDupdated)? (tongOKAllnguyenCong).ToString() : "_")" Style="font-size: 14px; font-weight: 600; color: darkgreen "></RadzenText>
                                                     </RadzenStack>
                                                 </RadzenCard>
                                                 <RadzenCard Variant="@((haveCDupdated == true && islastCDupdated == true)? Variant.Filled : Variant.Outlined)" Style="width: 50%; height: contain; padding: 0; border-radius: 0 ">
                                                     <RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="width: 100%; height: contain; border-left: var(--rz-grid-cell-border);">
                                                         @if (tongNGAllnguyenCong == 0 && haveCDupdated == true && islastCDupdated == true)
                                                         {
-                                                            <RadzenButton Icon="check" Text="OK" Style="font-size: 12px; width: 100%; height: 100%; border-radius: 0px" Variant="Variant.Flat" ButtonStyle="ButtonStyle.Success" Shade="Shade.Dark" Size="ButtonSize.ExtraSmall"></RadzenButton>
+                                                            if (slgoclotnvl == tongOKAllnguyenCong)
+                                                            {
+                                                                // Hien thi "Check" neu lotnvl da gia cong het cac nguyen cong va khong co NG
+                                                                <RadzenButton Icon="check" Text="OK" Style="font-size: 12px; width: 100%; height: 100%; border-radius: 0px" Variant="Variant.Flat" ButtonStyle="ButtonStyle.Success" Shade="Shade.Dark" Size="ButtonSize.ExtraSmall"></RadzenButton>
+                                                            }
                                                         }
                                                         else
                                                         {
+                                                            // Hien thi SL NG tong ket cua lotnvl qua cac nguyen cong
                                                             <RadzenText Text="@((haveCDupdated == true)? tongNGAllnguyenCong.ToString() : "_")" Style="font-size: 14px; font-weight: 600; color: red "></RadzenText>
                                                         }
                                                     </RadzenStack>

@@ -34,7 +34,7 @@
                             <RadzenText Text="Nguyên công: " Style="color: black; font-weight: 600; font-size: 16px; font-style: initial"></RadzenText>
                             <RadzenText Text="@_selectNVLmoiCD?.TenCongDoan.Value?.ToString()" Style="color: darkred; font-weight: 600; font-size: 16px; font-style: initial"></RadzenText>
                             <RadzenText Text="Số lượng cần gia công: " Style="color: black; font-weight: 600; font-size: 16px; font-style: initial"></RadzenText>
-                            <RadzenText Text="@($"{_selectNVLmoiCD?.SLGoccuaLOTNVL.Value?.ToString()} (pcs)")" Style="color: darkgreen; font-weight: 600; font-size: 16px; font-style: initial"></RadzenText>
+                            <RadzenText Text="@($"{_selectNVLmoiCD?.SLTruocGiaCong.Value?.ToString()} (pcs)")" Style="color: darkgreen; font-weight: 600; font-size: 16px; font-style: initial"></RadzenText>
                         </RadzenStack>
                         <RadzenStack Style="width: contain; height: contain;" Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                             <RadzenText Text="Mã quản lý: " Style="color: black; font-weight: 600; font-size: 16px; font-style: initial"></RadzenText>
@@ -48,7 +48,7 @@
                                 {
                                     <RadzenAlert Text="@($"Còn {slconlaiCongdoan} (pcs) chưa gia công")" Style="width: 100%; height: contain; font-size: 16px" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
                                 }
-                                else if (_selectNVLmoiCD?.SLGoccuaLOTNVL.Value?.ToString() == "0")
+                                else if (_selectNVLmoiCD?.SLTruocGiaCong.Value?.ToString() == "0")
                                 {
                                     <RadzenAlert Text="@($"Nguyên công chưa được phép gia công")" Style="width: 100%; height: contain; font-size: 16px" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
                                 }
@@ -221,7 +221,7 @@
         int slngCangay = int.TryParse(_selectNVLmoiCD?.CaNgay.NG.Value?.ToString(), out int cnng) ? cnng : 0;
         int slokCadem = int.TryParse(_selectNVLmoiCD?.CaDem.OK.Value?.ToString(), out int cdok) ? cdok : 0;
         int slngCadem = int.TryParse(_selectNVLmoiCD?.CaDem.NG.Value?.ToString(), out int cdng) ? cdng : 0;
-        int slcangiacong = int.TryParse(_selectNVLmoiCD?.SLGoccuaLOTNVL.Value?.ToString(), out int slcgc) ? slcgc : 0;
+        int slcangiacong = int.TryParse(_selectNVLmoiCD?.SLTruocGiaCong.Value?.ToString(), out int slcgc) ? slcgc : 0;
 
         int slconlaiCD = slcangiacong - (slokCangay + slngCangay) - (slokCadem + slngCadem);
 
@@ -230,7 +230,7 @@
 
     private int CheckInputSLOKNGisCorrect()
     {
-        int slcangiacong = int.TryParse(_selectNVLmoiCD?.SLGoccuaLOTNVL.Value?.ToString(), out int slcgc) ? slcgc : 0;
+        int slcangiacong = int.TryParse(_selectNVLmoiCD?.SLTruocGiaCong.Value?.ToString(), out int slcgc) ? slcgc : 0;
 
         int slconlaiCD = slcangiacong - (CaNgayItems.slOK + CaNgayItems.slNG) - (CaDemItems.slOK + CaDemItems.slNG);
 
@@ -359,7 +359,7 @@
     {
         int result = -1; string errorMess = string.Empty;
 
-        int slgocnguyencong = int.TryParse(currentNVLMCD?.SLGoccuaLOTNVL.Value?.ToString(), out int slgoc) ? slgoc : 0;
+        int sltruocgiacong = int.TryParse(currentNVLMCD?.SLTruocGiaCong.Value?.ToString(), out int slgoc) ? slgoc : 0;
         string maquanly = currentNVLMCD?.MaQuanLy.Value?.ToString() ?? string.Empty;
         int currentCDid = int.TryParse(currentNVLMCD?.CDID.Value?.ToString(), out int cdid) ? cdid : 0;
         int nextCDid = (currentCDid > 0) ? (currentCDid + 1) : 0;
@@ -375,7 +375,7 @@
             (result, errorMess) = SQLServerServices.UpdateSLTruocgiacongNextNguyenCong(nextCDid, maquanly, slsaukhigiacong);
 
             // Update sltruocgiacong nguyencong dau tien
-            (result, errorMess) = SQLServerServices.UpdateSLTruocgiacongNextNguyenCong(currentCDid, maquanly, slgocnguyencong);
+            (result, errorMess) = SQLServerServices.UpdateSLTruocgiacongNextNguyenCong(currentCDid, maquanly, sltruocgiacong);
         }
         else
         {
