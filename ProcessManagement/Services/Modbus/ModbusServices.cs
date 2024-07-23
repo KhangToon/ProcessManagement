@@ -236,9 +236,9 @@ namespace ProcessManagement.Services.Modbus
             if (ModbusServer != null && IsServerRunning)
             {
                 // Read Tennguyencong // 4x 71
-                int nguyencongID = ModbusServer.holdingRegisters[72];
+                var clientngcongID = ModbusServer.holdingRegisters[72];
 
-                nguyencongID = Regs.NguyenCongID.IDs[nguyencongID];
+                var nguyencongID = Regs.NguyenCongID.IDs[clientngcongID];
 
                 NguyenCong targetngcong = SQLServerServices.GetNguyenCong(nguyencongID);
 
@@ -335,7 +335,7 @@ namespace ProcessManagement.Services.Modbus
                 // update target calamviec
                 (int updateResult, string updateErrMess) = SQLServerServices.UpdateCalamviec(targetLotNVLItems, targetCalamviec);
 
-                if (updateResult != 1)
+                if (updateResult == -1)
                 {
                     return Regs.AlarmCode.UpdateFailed;
                 }
@@ -355,7 +355,7 @@ namespace ProcessManagement.Services.Modbus
                     // Update sltruocgiacong nguyen cong tiep theo
                     (updateResult, updateErrMess) = UpdateSLtruocgiacongOfNextNguyencong(targetLotNVLItems, slOKsaukhigiacong);
 
-                    if (updateResult != 1)
+                    if (updateResult == -1)
                     {
                         return Regs.AlarmCode.UpdateFailed;
                     }
