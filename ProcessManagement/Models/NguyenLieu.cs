@@ -5,17 +5,17 @@ namespace ProcessManagement.Models
 {
     public class NguyenLieu
     {
-        public Propertyy NLID = new() { Name = Common.NLID, Type = typeof(int), DispDatagrid = false, AlowDatabase = true };
+        public Propertyy NLID = new() { DBName = Common.NLID, Type = typeof(int), DispDatagrid = false, AlowDatabase = true };
 
-        public Propertyy MaSP = new() { Name = Common.MaSP, Type = typeof(string), AlowDatabase = true };
+        public Propertyy MaSP = new() { DBName = Common.MaSP, Type = typeof(string), AlowDatabase = true };
 
-        public Propertyy LoaiNL = new() { Name = Common.LoaiNL, Type = typeof(string), AlowDatabase = true };
+        public Propertyy LoaiNL = new() { DBName = Common.LoaiNL, Type = typeof(string), AlowDatabase = true };
 
-        public Propertyy NgayNhap = new() { Name = Common.NgayNhap, Type = typeof(DateTime), AlowDatabase = true };
+        public Propertyy NgayNhap = new() { DBName = Common.NgayNhap, Type = typeof(DateTime), AlowDatabase = true };
 
-        public Propertyy LotNVL = new() { Name = Common.LotNVL, Type = typeof(string), AlowDatabase = true };
+        public Propertyy LotNVL = new() { DBName = Common.LotNVL, Type = typeof(string), AlowDatabase = true };
 
-        public Propertyy SoLuongNL = new() { Name = Common.SoLuongNVL, Type = typeof(int), AlowDatabase = true };
+        public Propertyy SoLuongNL = new() { DBName = Common.SoLuongNVL, Type = typeof(int), AlowDatabase = true };
 
         public List<Propertyy> GetPropertiesValues()
         {
@@ -44,7 +44,7 @@ namespace ProcessManagement.Models
         {
             List<Propertyy> propertiesValue = GetPropertiesValues();
 
-            Propertyy? tagetProperty = propertiesValue.FirstOrDefault(f => f.Name == propertyName);
+            Propertyy? tagetProperty = propertiesValue.FirstOrDefault(f => f.DBName == propertyName);
 
             if (tagetProperty != null)
             {
@@ -56,7 +56,7 @@ namespace ProcessManagement.Models
         {
             List<Propertyy> propertiesValue = GetPropertiesValues();
 
-            Propertyy? tagetProperty = propertiesValue.FirstOrDefault(f => f.Name == propertyName);
+            Propertyy? tagetProperty = propertiesValue.FirstOrDefault(f => f.DBName == propertyName);
 
             return tagetProperty?.Value;
         }

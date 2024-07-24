@@ -121,7 +121,91 @@ namespace ProcessManagement.Commons
         public const string NguyenCong = "Nguyên công";
         public const string Ghichu = "Ghi chú";
 
-        
+        // QUAN LY KHO NVL TABLES //
+        // Table KHO_DanhMucNguyenVatLieu //
+        public const string TableDanhMucNVL = "KHO_DanhMucNguyenVatLieu";
+        public const string MaDanhMuc = "MaDanhMuc";
+        public const string TenDanhMuc = "TenDanhMuc";
+
+        // Table KHO_NguyenVatLieu //
+        public const string TableNguyenVatLieu = "KHO_NguyenVatLieu";
+        public const string MaNVL = "MaNVL";
+        //public const string MaDanhMuc = "MaDanhMuc";
+        public const string TenNVL = "TenNVL";
+        public const string MoTa = "MoTa";
+        public const string DonViTinh = "DonViTinh";
+        public const string SoLuongTonKhoToiThieu = "SoLuongTonKhoToiThieu";
+        public const string SoLuongTonKhoToiDa = "SoLuongTonKhoToiDa";
+        public const string ThoiGianBaoQuan = "ThoiGianBaoQuan";
+        public const string NgayCapNhat = "NgayCapNhat";
+
+        // Table KHO_NhaCungCap //
+        public const string TableNhaCungCap = "KHO_NhaCungCap";
+        public const string MaNCC = "MaNCC";
+        public const string TenNCC = "TenNCC";
+        public const string DiaChi = "DiaChi";
+        public const string SoDienThoai = "SoDienThoai";
+        public const string Email = "Email";
+        public const string NguoiLienHe = "NguoiLienHe";
+        public const string MaSoThue = "MaSoThue";
+        public const string GhiChuNCC = "GhiChu";
+
+        // Table KHO_KhoLuuTru //
+        public const string TableKhoLuuTru = "KHO_KhoLuuTru";
+        public const string MaKho = "MaKho";
+        public const string TenKho = "TenKho";
+        //public const string DiaChi = "DiaChi";
+        public const string SucChua = "SucChua";
+        public const string NguoiQuanLy = "NguoiQuanLy";
+        //public const string SoDienThoai = "SoDienThoai";
+        public const string TrangThai = "TrangThai";
+
+        // Table KHO_ViTriLuuTru //
+        public const string TableViTriLuuTru = "KHO_ViTriLuuTru";
+        public const string MaViTri = "MaViTri";
+        //public const string MaKho = "MaKho";
+        public const string TenViTri = "TenViTri";
+        //public const string SucChua = "SucChua";
+
+        // Table KHO_NhapKho //
+        public const string TableNhapKho = "KHO_NhapKho";
+        public const string MaNhapKho = "MaNhapKho";
+        //public const string MaNVL = "MaNVL";
+        //public const string MaNCC = "MaNCC";
+        //public const string MaKho = "MaKho";
+        //public const string MaViTri = "MaViTri";
+        public const string SoLuongNhapKho = "SoLuongNhap";
+        public const string NgayNhapKho = "NgayNhap";
+        public const string NgayHetHan = "NgayHetHan";
+        public const string SoLoNhapKho = "SoLo";
+        public const string NguoiNhapKho = "NguoiNhap";
+        public const string GhiChuNhapKho = "GhiChu";
+
+        // Table KHO_XuatKho //
+        public const string TableXuatKho = "KHO_XuatKho";
+        public const string MaXuatKho = "MaXuatKho";
+        //public const string MaNVL = "MaNVL";
+        //public const string MaKho = "MaKho";
+        //public const string MaViTri = "MaViTri";
+        public const string SoLuongXuatKho = "SoLuongXuat";
+        public const string NgayXuatKho = "NgayXuat";
+        public const string NguoiXuatKho = "NguoiXuat";
+        public const string NguoiNhan = "NguoiNhan";
+        public const string MucDichSuDung = "MucDichSuDung";
+        public const string GhiChuXuatKho = "GhiChu";
+
+        // Table KHO_KiemKe //
+        public const string TableKiemKe = "KHO_KiemKe";
+        public const string MaKiemKe = "MaKiemKe";
+        //public const string MaNVL = "MaNVL";
+        //public const string MaKho = "MaKho";
+        public const string NgayKiemKe = "NgayKiemKe";
+        public const string SoLuongThucTe = "SoLuongThucTe";
+        public const string SoLuongHeThong = "SoLuongHeThong";
+        public const string ChenhLech = "ChenhLech";
+        public const string NguyenNhan = "NguyenNhan";
+        public const string NguoiKiemKe = "NguoiKiemKe";
+
 
         // Socket 
         public const string socketEndKey = "<END>";

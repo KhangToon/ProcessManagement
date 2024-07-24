@@ -5,9 +5,9 @@ namespace ProcessManagement.Models
 {
     public class NhanVien
     {
-        public Propertyy NVID { get; set; } = new() { Name = Common.NVID, Type = typeof(int), AlowDatabase = true };
-        public Propertyy MaNhanVien { get; set; } = new() { Name = Common.MaNhanVien, Type = typeof(string), AlowDatabase = true };
-        public Propertyy TenNhanVien { get; set; } = new() { Name = Common.TenNhanVien, Type = typeof(string), AlowDatabase = true };
+        public Propertyy NVID { get; set; } = new() { DBName = Common.NVID, Type = typeof(int), AlowDatabase = true };
+        public Propertyy MaNhanVien { get; set; } = new() { DBName = Common.MaNhanVien, Type = typeof(string), AlowDatabase = true };
+        public Propertyy TenNhanVien { get; set; } = new() { DBName = Common.TenNhanVien, Type = typeof(string), AlowDatabase = true };
 
 
         public List<Propertyy> GetPropertiesValues()
@@ -37,7 +37,7 @@ namespace ProcessManagement.Models
         {
             List<Propertyy> propertiesValue = GetPropertiesValues();
 
-            Propertyy? tagetProperty = propertiesValue.FirstOrDefault(f => f.Name == propertyName);
+            Propertyy? tagetProperty = propertiesValue.FirstOrDefault(f => f.DBName == propertyName);
 
             if (tagetProperty != null)
             {
@@ -49,7 +49,7 @@ namespace ProcessManagement.Models
         {
             List<Propertyy> propertiesValue = GetPropertiesValues();
 
-            Propertyy? tagetProperty = propertiesValue.FirstOrDefault(f => f.Name == propertyName);
+            Propertyy? tagetProperty = propertiesValue.FirstOrDefault(f => f.DBName == propertyName);
 
             return tagetProperty?.Value;
         }

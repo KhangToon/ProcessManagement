@@ -28,36 +28,36 @@
                         {
                             foreach (var property in lotproperties)
                             {
-                                if (property.Name != Common.NLID)
+                                if (property.DBName != Common.NLID)
                                 {
                                     <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 10px; border-bottom: var(--rz-grid-cell-border);">
                                         <RadzenStack Style="width: 20%;">
-                                            <RadzenText Text="@property.Name" Style="font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
+                                            <RadzenText Text="@property.DBName" Style="font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
                                         </RadzenStack>
                                         <RadzenStack Style="width: 80%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                            @if (property.Name != Common.LotNVL)
+                                            @if (property.DBName != Common.LotNVL)
                                             {
                                                 @if (property.Type == typeof(string))
                                                 {
-                                                    <RadzenTextBox Placeholder="@($"*Nhập {property.Name}")" Value="@property.Value?.ToString()" ValueChanged="@((args) => { property.Value = args; } )"
+                                                    <RadzenTextBox Placeholder="@($"*Nhập {property.DBName}")" Value="@property.Value?.ToString()" ValueChanged="@((args) => { property.Value = args; } )"
                                                                    Style="font-size: 16px; height: contain;  border-width: 1px; width: 100% "></RadzenTextBox>
                                                 }
                                                 else if (property.Type == typeof(int))
                                                 {
-                                                    <RadzenNumeric Placeholder="@($"*Nhập {property.Name}")" TValue="int" Value="@int.Parse(property.Value?.ToString()?? "0")" Min="0" Max="100000" ValueChanged="@((args) => { property.Value = args; })"
+                                                    <RadzenNumeric Placeholder="@($"*Nhập {property.DBName}")" TValue="int" Value="@int.Parse(property.Value?.ToString()?? "0")" Min="0" Max="100000" ValueChanged="@((args) => { property.Value = args; })"
                                                                    Style="font-size: 16px; height: contain;  border-width: 1px; width: 100%" />
                                                 }
                                                 else if (property.Type == typeof(DateTime))
                                                 {
-                                                    <RadzenDatePicker Placeholder="@($"*Chọn {property.Name}")" TValue="DateTime"
+                                                    <RadzenDatePicker Placeholder="@($"*Chọn {property.DBName}")" TValue="DateTime"
                                                                       ValueChanged="@((args) => { property.Value = args; NewNL.LotNVL.Value = args.ToString("yyyMMdd");})"
                                                                       ShowTime="false" HourFormat="12" DateFormat="@Common.DayTimeFormatnoTime" AllowInput="false"
                                                                       Name="DatePicker" Style="width: 100%; font-size: 16px"></RadzenDatePicker>
                                                 }
                                             }
-                                            else if (property.Name == Common.LotNVL)
+                                            else if (property.DBName == Common.LotNVL)
                                             {
-                                                <RadzenTextBox Placeholder="@($"*Nhập {property.Name}")" Value="@property.Value?.ToString()" ValueChanged="@((args) => { property.Value = args; } )"
+                                                <RadzenTextBox Placeholder="@($"*Nhập {property.DBName}")" Value="@property.Value?.ToString()" ValueChanged="@((args) => { property.Value = args; } )"
                                                                Style="font-size: 16px; height: contain; border-width: 1px; width: 100% "></RadzenTextBox>
                                             }
                                         </RadzenStack>
@@ -96,7 +96,7 @@
         {
             foreach (var property in NewNL.GetPropertiesValues())
             {
-                if (property.Name != Common.NLID)
+                if (property.DBName != Common.NLID)
                 {
                     if (property.Value == null)
                     {

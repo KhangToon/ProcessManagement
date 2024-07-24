@@ -4,7 +4,7 @@ namespace ProcessManagement.Models
 {
     public class KeHoachSX
     {
-        public Propertyy KHSXID { get; set; } = new() { Name = Common.KHSXID, Type = typeof(int), AlowDatabase = true };
+        public Propertyy KHSXID { get; set; } = new() { DBName = Common.KHSXID, Type = typeof(int), AlowDatabase = true };
         public SanPham? SanPham { get; set; }
         public int SoluongSX { get; set; }
         public int DinhMuc { get; set; }

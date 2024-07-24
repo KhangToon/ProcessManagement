@@ -1,23 +1,22 @@
 ﻿using ProcessManagement.Commons;
 using System.Reflection;
 
-namespace ProcessManagement.Models
+namespace ProcessManagement.Models.KHO_NVL
 {
-    public class Lot
+    public class NhaCungCap
     {
-        public Propertyy LotID = new() { DBName = Common.LotID, Type = typeof(int), DispDatagrid = false, AlowDatabase = true };
-
-        public Propertyy LotNVL = new() { DBName = Common.LotNVL, Type = typeof(string), AlowDatabase = true };
-
-        public Propertyy NgayTao = new() { DBName = Common.NgayTao, Type = typeof(DateTime), AlowDatabase = true };
-
-        public Propertyy SoLuongNL = new() { DBName = Common.SoLuongNVL, Type = typeof(int), AlowDatabase = true };
-
-        public Propertyy GhiChu = new() { DBName = Common.GhiChu, Type = typeof(string), AlowDatabase = true };
+        public Propertyy MaNCC { get; set; } = new() { DBName = Common.MaNCC, DisplayName = "Mã NCC", Type = typeof(int), AlowDatabase = true }; // ID
+        public Propertyy TenNCC { get; set; } = new() { DBName = Common.TenNCC, DisplayName = "Tên NCC", Type = typeof(string), AlowDatabase = true };
+        public Propertyy DiaChiNCC { get; set; } = new() { DBName = Common.DiaChi, DisplayName = "Địa chỉ", Type = typeof(string), AlowDatabase = true };
+        public Propertyy SoDienThoaiNCC { get; set; } = new() { DBName = Common.SoDienThoai, DisplayName = "Số điện thoại", Type = typeof(int), AlowDatabase = true };
+        public Propertyy EmailNCC { get; set; } = new() { DBName = Common.Email, DisplayName = "Email", Type = typeof(string), AlowDatabase = true };
+        public Propertyy NguoiLienHe { get; set; } = new() { DBName = Common.NguoiLienHe, DisplayName = "Người liên hệ", Type = typeof(string), AlowDatabase = true };
+        public Propertyy MaSoThue { get; set; } = new() { DBName = Common.MaSoThue, DisplayName = "Mã số thuế", Type = typeof(int), AlowDatabase = true };
+        public Propertyy GhiChuNCC { get; set; } = new() { DBName = Common.GhiChuNCC, DisplayName = "Ghi chú", Type = typeof(string), AlowDatabase = true };
 
         public List<Propertyy> GetPropertiesValues()
         {
-            Type propertyType = typeof(Lot);
+            Type propertyType = typeof(NhaCungCap);
 
             FieldInfo[] fields = propertyType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 

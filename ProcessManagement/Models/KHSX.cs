@@ -5,20 +5,20 @@ namespace ProcessManagement.Models
 {
     public class KHSX
     {
-        public Propertyy KHSXID { get; set; } = new() { Name = Common.KHSXID, Type = typeof(int), AlowDatabase = true };
-        public Propertyy MaLSX { get; set; } = new() { Name = Common.MaLSX, Type = typeof(string), AlowDatabase = true };
-        public Propertyy LoaiNL { get; set; } = new() { Name = Common.LoaiNL, Type = typeof(string), AlowDatabase = true };
-        public Propertyy SLSanXuat { get; set; } = new() { Name = Common.SLSanXuat, Type = typeof(int), AlowDatabase = true };
-        public Propertyy DinhMuc { get; set; } = new() { Name = Common.DinhMuc, Type = typeof(int), AlowDatabase = true };
-        public Propertyy TileLoi { get; set; } = new() { Name = Common.TileLoi, Type = typeof(double), AlowDatabase = true };
-        public Propertyy SLLot { get; set; } = new() { Name = Common.SLLot, Type = typeof(int), AlowDatabase = true };
-        public Propertyy SLLotChan { get; set; } = new() { Name = Common.SLLotChan, Type = typeof(int), AlowDatabase = true };
-        public Propertyy SLperLotChan { get; set; } = new() { Name = Common.SLperLotChan, Type = typeof(int), AlowDatabase = true };
-        public Propertyy SLLotLe { get; set; } = new() { Name = Common.SLLotLe, Type = typeof(int), AlowDatabase = true };
-        public Propertyy SLperLotLe { get; set; } = new() { Name = Common.SLperLotLe, Type = typeof(int), AlowDatabase = true };
-        public Propertyy SPID { get; set; } = new() { Name = Common.SPID, Type = typeof(int), AlowDatabase = true };
+        public Propertyy KHSXID { get; set; } = new() { DBName = Common.KHSXID, Type = typeof(int), AlowDatabase = true };
+        public Propertyy MaLSX { get; set; } = new() { DBName = Common.MaLSX, Type = typeof(string), AlowDatabase = true };
+        public Propertyy LoaiNL { get; set; } = new() { DBName = Common.LoaiNL, Type = typeof(string), AlowDatabase = true };
+        public Propertyy SLSanXuat { get; set; } = new() { DBName = Common.SLSanXuat, Type = typeof(int), AlowDatabase = true };
+        public Propertyy DinhMuc { get; set; } = new() { DBName = Common.DinhMuc, Type = typeof(int), AlowDatabase = true };
+        public Propertyy TileLoi { get; set; } = new() { DBName = Common.TileLoi, Type = typeof(double), AlowDatabase = true };
+        public Propertyy SLLot { get; set; } = new() { DBName = Common.SLLot, Type = typeof(int), AlowDatabase = true };
+        public Propertyy SLLotChan { get; set; } = new() { DBName = Common.SLLotChan, Type = typeof(int), AlowDatabase = true };
+        public Propertyy SLperLotChan { get; set; } = new() { DBName = Common.SLperLotChan, Type = typeof(int), AlowDatabase = true };
+        public Propertyy SLLotLe { get; set; } = new() { DBName = Common.SLLotLe, Type = typeof(int), AlowDatabase = true };
+        public Propertyy SLperLotLe { get; set; } = new() { DBName = Common.SLperLotLe, Type = typeof(int), AlowDatabase = true };
+        public Propertyy SPID { get; set; } = new() { DBName = Common.SPID, Type = typeof(int), AlowDatabase = true };
 
-        public Propertyy NgayTao = new() { Name = Common.NgayTao, Type = typeof(DateTime), AlowDatabase = true };
+        public Propertyy NgayTao = new() { DBName = Common.NgayTao, Type = typeof(DateTime), AlowDatabase = true };
 
         public SanPham? SanPham { get; set; }
         public List<NguyenCongofKHSX> DSachCongDoans { get; set; } = new();
@@ -55,7 +55,7 @@ namespace ProcessManagement.Models
         {
             List<Propertyy> propertiesValue = GetPropertiesValues();
 
-            Propertyy? tagetProperty = propertiesValue.FirstOrDefault(f => f.Name == propertyName);
+            Propertyy? tagetProperty = propertiesValue.FirstOrDefault(f => f.DBName == propertyName);
 
             if (tagetProperty != null)
             {
@@ -67,7 +67,7 @@ namespace ProcessManagement.Models
         {
             List<Propertyy> propertiesValue = GetPropertiesValues();
 
-            Propertyy? tagetProperty = propertiesValue.FirstOrDefault(f => f.Name == propertyName);
+            Propertyy? tagetProperty = propertiesValue.FirstOrDefault(f => f.DBName == propertyName);
 
             return tagetProperty?.Value;
         }

@@ -1,23 +1,16 @@
 ﻿using ProcessManagement.Commons;
 using System.Reflection;
 
-namespace ProcessManagement.Models
+namespace ProcessManagement.Models.KHO_NVL
 {
-    public class Lot
+    public class ViTriLuu
     {
-        public Propertyy LotID = new() { DBName = Common.LotID, Type = typeof(int), DispDatagrid = false, AlowDatabase = true };
-
-        public Propertyy LotNVL = new() { DBName = Common.LotNVL, Type = typeof(string), AlowDatabase = true };
-
-        public Propertyy NgayTao = new() { DBName = Common.NgayTao, Type = typeof(DateTime), AlowDatabase = true };
-
-        public Propertyy SoLuongNL = new() { DBName = Common.SoLuongNVL, Type = typeof(int), AlowDatabase = true };
-
-        public Propertyy GhiChu = new() { DBName = Common.GhiChu, Type = typeof(string), AlowDatabase = true };
+        public Propertyy MaViTri { get; set; } = new() { DBName = Common.MaViTri, DisplayName = "Mã vị trí", Type = typeof(int), AlowDatabase = true }; // ID
+        public Propertyy TenViTri { get; set; } = new() { DBName = Common.TenViTri, DisplayName = "Tên vị trí", Type = typeof(string), AlowDatabase = true };
 
         public List<Propertyy> GetPropertiesValues()
         {
-            Type propertyType = typeof(Lot);
+            Type propertyType = typeof(ViTriLuu);
 
             FieldInfo[] fields = propertyType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 

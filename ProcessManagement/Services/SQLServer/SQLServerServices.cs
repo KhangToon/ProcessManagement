@@ -49,7 +49,7 @@ namespace ProcessManagement.Services.SQLServer
 
                     foreach (var item in rowNVLitems)
                     {
-                        string? columnName = item.Name;
+                        string? columnName = item.DBName;
 
                         object columnValue = reader[columnName];
 
@@ -88,7 +88,7 @@ namespace ProcessManagement.Services.SQLServer
 
                     foreach (var item in rowNVLitems)
                     {
-                        string? columnName = item.Name;
+                        string? columnName = item.DBName;
 
                         object columnValue = reader[columnName];
 
@@ -127,7 +127,7 @@ namespace ProcessManagement.Services.SQLServer
 
                     foreach (var item in rowNVLitems)
                     {
-                        string? columnName = item.Name;
+                        string? columnName = item.DBName;
 
                         object columnValue = reader[columnName];
 
@@ -166,7 +166,7 @@ namespace ProcessManagement.Services.SQLServer
 
                     foreach (var item in rowNVLitems)
                     {
-                        string? columnName = item.Name;
+                        string? columnName = item.DBName;
 
                         object columnValue = reader[columnName];
 
@@ -205,7 +205,7 @@ namespace ProcessManagement.Services.SQLServer
 
                     foreach (var item in rowNVLitems)
                     {
-                        string? columnName = item.Name;
+                        string? columnName = item.DBName;
 
                         object columnValue = reader[columnName];
 
@@ -242,7 +242,7 @@ namespace ProcessManagement.Services.SQLServer
 
                     foreach (var item in rowNVLitems)
                     {
-                        string? columnName = item.Name;
+                        string? columnName = item.DBName;
 
                         object columnValue = reader[columnName];
 
@@ -272,15 +272,15 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                string columnNames = string.Join(",", newNVLItems.Select(key => $"[{key.Name}]"));
+                string columnNames = string.Join(",", newNVLItems.Select(key => $"[{key.DBName}]"));
 
-                string parameterNames = string.Join(",", newNVLItems.Select(key => $"@{Regex.Replace(key.Name ?? string.Empty, @"[^\w]+", "")}"));
+                string parameterNames = string.Join(",", newNVLItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
 
                 command.CommandText = $"INSERT INTO [{Common.TableNVL}] ({columnNames}) OUTPUT INSERTED.{Common.NVLID} VALUES ({parameterNames})";
 
                 foreach (var item in newNVLItems)
                 {
-                    string parameterName = $"@{Regex.Replace(item.Name ?? string.Empty, @"[^\w]+", "")}";
+                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
 
                     object? parameterValue = item.Value;
 
@@ -326,7 +326,7 @@ namespace ProcessManagement.Services.SQLServer
 
                     foreach (var item in rowLotitems)
                     {
-                        string? columnName = item.Name;
+                        string? columnName = item.DBName;
 
                         object columnValue = reader[columnName];
 
@@ -366,15 +366,15 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                string columnNames = string.Join(",", newLotItems.Select(key => $"[{key.Name}]"));
+                string columnNames = string.Join(",", newLotItems.Select(key => $"[{key.DBName}]"));
 
-                string parameterNames = string.Join(",", newLotItems.Select(key => $"@{Regex.Replace(key.Name ?? string.Empty, @"[^\w]+", "")}"));
+                string parameterNames = string.Join(",", newLotItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
 
                 command.CommandText = $"INSERT INTO [{Common.TableLot}] ({columnNames}) OUTPUT INSERTED.{Common.LotID} VALUES ({parameterNames})";
 
                 foreach (var item in newLotItems)
                 {
-                    string parameterName = $"@{Regex.Replace(item.Name ?? string.Empty, @"[^\w]+", "")}";
+                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
 
                     object? parameterValue = item.Value;
 
@@ -413,15 +413,15 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                string columnNames = string.Join(",", newLotItems.Select(key => $"[{key.Name}]"));
+                string columnNames = string.Join(",", newLotItems.Select(key => $"[{key.DBName}]"));
 
-                string parameterNames = string.Join(",", newLotItems.Select(key => $"@{Regex.Replace(key.Name ?? string.Empty, @"[^\w]+", "")}"));
+                string parameterNames = string.Join(",", newLotItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
 
                 command.CommandText = $"INSERT INTO [{Common.TableNguyenLieu}] ({columnNames}) OUTPUT INSERTED.{Common.NLID} VALUES ({parameterNames})";
 
                 foreach (var item in newLotItems)
                 {
-                    string parameterName = $"@{Regex.Replace(item.Name ?? string.Empty, @"[^\w]+", "")}";
+                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
 
                     object? parameterValue = item.Value;
 
@@ -496,7 +496,7 @@ namespace ProcessManagement.Services.SQLServer
 
                     foreach (var item in rowSPitems)
                     {
-                        string? columnName = item.Name;
+                        string? columnName = item.DBName;
 
                         object columnValue = reader[columnName];
 
@@ -536,7 +536,7 @@ namespace ProcessManagement.Services.SQLServer
 
                     foreach (var item in rowSPitems)
                     {
-                        string? columnName = item.Name;
+                        string? columnName = item.DBName;
 
                         object columnValue = reader[columnName];
 
@@ -574,7 +574,7 @@ namespace ProcessManagement.Services.SQLServer
 
                     foreach (var item in rowSPitems)
                     {
-                        string? columnName = item.Name;
+                        string? columnName = item.DBName;
 
                         object columnValue = reader[columnName];
 
@@ -632,15 +632,15 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                string columnNames = string.Join(",", newspItems.Select(key => $"[{key.Name}]"));
+                string columnNames = string.Join(",", newspItems.Select(key => $"[{key.DBName}]"));
 
-                string parameterNames = string.Join(",", newspItems.Select(key => $"@{Regex.Replace(key.Name ?? string.Empty, @"[^\w]+", "")}"));
+                string parameterNames = string.Join(",", newspItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
 
                 command.CommandText = $"INSERT INTO [{Common.TableSanPham}] ({columnNames}) OUTPUT INSERTED.{Common.SPID} VALUES ({parameterNames})";
 
                 foreach (var item in newspItems)
                 {
-                    string parameterName = $"@{Regex.Replace(item.Name ?? string.Empty, @"[^\w]+", "")}";
+                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
 
                     object? parameterValue = item.Value;
 
@@ -678,15 +678,15 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                string columnNames = string.Join(",", newctspItems.Select(key => $"[{key.Name}]"));
+                string columnNames = string.Join(",", newctspItems.Select(key => $"[{key.DBName}]"));
 
-                string parameterNames = string.Join(",", newctspItems.Select(key => $"@{Regex.Replace(key.Name ?? string.Empty, @"[^\w]+", "")}"));
+                string parameterNames = string.Join(",", newctspItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
 
                 command.CommandText = $"INSERT INTO [{Common.TableChitietSanPham}] ({columnNames}) OUTPUT INSERTED.{Common.CTSPID} VALUES ({parameterNames})";
 
                 foreach (var item in newctspItems)
                 {
-                    string parameterName = $"@{Regex.Replace(item.Name ?? string.Empty, @"[^\w]+", "")}";
+                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
 
                     object? parameterValue = item.Value;
 
@@ -728,13 +728,13 @@ namespace ProcessManagement.Services.SQLServer
 
                     var command = connection.CreateCommand();
 
-                    string setClause = string.Join(",", chitietItems.Select(key => $"[{key.Name}] = @{Regex.Replace(key.Name ?? string.Empty, @"[^\w]+", "")}"));
+                    string setClause = string.Join(",", chitietItems.Select(key => $"[{key.DBName}] = @{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
 
                     command.CommandText = $"UPDATE [{Common.TableChitietSanPham}] SET {setClause} WHERE [{Common.CTSPID}] = '{chitietSanpham.CTSPID.Value}'";
 
                     foreach (var item in chitietItems)
                     {
-                        string parameterName = $"@{Regex.Replace(item.Name ?? string.Empty, @"[^\w]+", "")}";
+                        string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
 
                         object? parameterValue = item.Value;
 
@@ -844,7 +844,7 @@ namespace ProcessManagement.Services.SQLServer
 
                     foreach (var item in rowSPitems)
                     {
-                        string? columnName = item.Name;
+                        string? columnName = item.DBName;
 
                         object columnValue = reader[columnName];
 
@@ -872,15 +872,15 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                string columnNames = string.Join(",", newkhsxItems.Select(key => $"[{key.Name}]"));
+                string columnNames = string.Join(",", newkhsxItems.Select(key => $"[{key.DBName}]"));
 
-                string parameterNames = string.Join(",", newkhsxItems.Select(key => $"@{Regex.Replace(key.Name ?? string.Empty, @"[^\w]+", "")}"));
+                string parameterNames = string.Join(",", newkhsxItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
 
                 command.CommandText = $"INSERT INTO [{Common.TableKHSX}] ({columnNames}) OUTPUT INSERTED.{Common.KHSXID} VALUES ({parameterNames})";
 
                 foreach (var item in newkhsxItems)
                 {
-                    string parameterName = $"@{Regex.Replace(item.Name ?? string.Empty, @"[^\w]+", "")}";
+                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
 
                     object? parameterValue = item.Value;
 
@@ -955,7 +955,7 @@ namespace ProcessManagement.Services.SQLServer
 
                     foreach (var item in rowSPitems)
                     {
-                        string? columnName = item.Name;
+                        string? columnName = item.DBName;
 
                         object columnValue = reader[columnName];
 
@@ -994,7 +994,7 @@ namespace ProcessManagement.Services.SQLServer
 
                     foreach (var item in rowSPitems)
                     {
-                        string? columnName = item.Name;
+                        string? columnName = item.DBName;
 
                         object columnValue = reader[columnName];
 
@@ -1035,7 +1035,7 @@ namespace ProcessManagement.Services.SQLServer
 
                     foreach (var item in rowSPitems)
                     {
-                        string? columnName = item.Name;
+                        string? columnName = item.DBName;
 
                         object columnValue = reader[columnName];
 
@@ -1099,15 +1099,15 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                string columnNames = string.Join(",", newcdItems.Select(key => $"[{key.Name}]"));
+                string columnNames = string.Join(",", newcdItems.Select(key => $"[{key.DBName}]"));
 
-                string parameterNames = string.Join(",", newcdItems.Select(key => $"@{Regex.Replace(key.Name ?? string.Empty, @"[^\w]+", "")}"));
+                string parameterNames = string.Join(",", newcdItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
 
                 command.CommandText = $"INSERT INTO [{Common.TableCongDoan}] ({columnNames}) OUTPUT INSERTED.{Common.CDID} VALUES ({parameterNames})";
 
                 foreach (var item in newcdItems)
                 {
-                    string parameterName = $"@{Regex.Replace(item.Name ?? string.Empty, @"[^\w]+", "")}";
+                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
 
                     object? parameterValue = item.Value;
 
@@ -1153,7 +1153,7 @@ namespace ProcessManagement.Services.SQLServer
 
                     foreach (var item in rowSPitems)
                     {
-                        string? columnName = item.Name;
+                        string? columnName = item.DBName;
 
                         object columnValue = reader[columnName];
 
@@ -1189,15 +1189,15 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                string columnNames = string.Join(",", Items.Select(key => $"[{key.Name}]"));
+                string columnNames = string.Join(",", Items.Select(key => $"[{key.DBName}]"));
 
-                string parameterNames = string.Join(",", Items.Select(key => $"@{Regex.Replace(key.Name ?? string.Empty, @"[^\w]+", "")}"));
+                string parameterNames = string.Join(",", Items.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
 
                 command.CommandText = $"INSERT INTO [{Common.TableNVLmoiCongDoan}] ({columnNames}) OUTPUT INSERTED.{Common.NVLMCDID} VALUES ({parameterNames})";
 
                 foreach (var item in Items)
                 {
-                    string parameterName = $"@{Regex.Replace(item.Name ?? string.Empty, @"[^\w]+", "")}";
+                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
 
                     object? parameterValue = item.Value;
 
@@ -1235,15 +1235,15 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                string columnNames = string.Join(",", Items.Select(key => $"[{key.Name}]"));
+                string columnNames = string.Join(",", Items.Select(key => $"[{key.DBName}]"));
 
-                string parameterNames = string.Join(",", Items.Select(key => $"@{Regex.Replace(key.Name ?? string.Empty, @"[^\w]+", "")}"));
+                string parameterNames = string.Join(",", Items.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
 
                 command.CommandText = $"INSERT INTO [{Common.TableCalamviec}] ({columnNames}) OUTPUT INSERTED.{Common.CLVID} VALUES ({parameterNames})";
 
                 foreach (var item in Items)
                 {
-                    string parameterName = $"@{Regex.Replace(item.Name ?? string.Empty, @"[^\w]+", "")}";
+                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
 
                     object? parameterValue = item.Value;
 
@@ -1289,7 +1289,7 @@ namespace ProcessManagement.Services.SQLServer
 
                     foreach (var item in rowSPitems)
                     {
-                        string? columnName = item.Name;
+                        string? columnName = item.DBName;
 
                         object columnValue = reader[columnName];
 
@@ -1326,7 +1326,7 @@ namespace ProcessManagement.Services.SQLServer
 
                     foreach (var item in rowSPitems)
                     {
-                        string? columnName = item.Name;
+                        string? columnName = item.DBName;
 
                         object columnValue = reader[columnName];
 
@@ -1372,7 +1372,7 @@ namespace ProcessManagement.Services.SQLServer
 
                     foreach (var item in rowSPitems)
                     {
-                        string? columnName = item.Name;
+                        string? columnName = item.DBName;
 
                         object columnValue = reader[columnName];
 
@@ -1630,15 +1630,15 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                string columnNames = string.Join(",", newNCItems.Select(key => $"[{key.Name}]"));
+                string columnNames = string.Join(",", newNCItems.Select(key => $"[{key.DBName}]"));
 
-                string parameterNames = string.Join(",", newNCItems.Select(key => $"@{Regex.Replace(key.Name ?? string.Empty, @"[^\w]+", "")}"));
+                string parameterNames = string.Join(",", newNCItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
 
                 command.CommandText = $"INSERT INTO [{Common.TableNguyenCong}] ({columnNames}) OUTPUT INSERTED.{Common.NCID} VALUES ({parameterNames})";
 
                 foreach (var item in newNCItems)
                 {
-                    string parameterName = $"@{Regex.Replace(item.Name ?? string.Empty, @"[^\w]+", "")}";
+                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
 
                     object? parameterValue = item.Value;
 
@@ -1682,7 +1682,7 @@ namespace ProcessManagement.Services.SQLServer
 
                     foreach (var item in NCitems)
                     {
-                        string? columnName = item.Name;
+                        string? columnName = item.DBName;
 
                         object columnValue = reader[columnName];
 
@@ -1717,7 +1717,7 @@ namespace ProcessManagement.Services.SQLServer
 
                     foreach (var item in NCitems)
                     {
-                        string? columnName = item.Name;
+                        string? columnName = item.DBName;
 
                         object columnValue = reader[columnName];
 

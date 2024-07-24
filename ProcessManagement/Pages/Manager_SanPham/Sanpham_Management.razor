@@ -89,28 +89,28 @@
                                             {
                                                 foreach (var property in sp_properties)
                                                 {
-                                                    if (property.Name != Common.SPID && property.Name != Common.SoLuong)
+                                                    if (property.DBName != Common.SPID && property.DBName != Common.SoLuong)
                                                     {
                                                         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: contain; width: 25%; padding-right: 10px; border-right: var(--rz-grid-cell-border);">
                                                             <RadzenStack Style="width: 30%; height: contain" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                <RadzenText Text="@property.Name" Style="font-size: 15px; font-weight: 600; height: contain; width: 100% "></RadzenText>
+                                                                <RadzenText Text="@property.DBName" Style="font-size: 15px; font-weight: 600; height: contain; width: 100% "></RadzenText>
                                                             </RadzenStack>
                                                             <RadzenStack Style="width: 70%; height: contain" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                                 @if (!IsCreateSanphamOK)
                                                                 {
                                                                     @if (property.Type == typeof(string))
                                                                     {
-                                                                        <RadzenTextBox Placeholder="@($"*Nhập {property.Name}")" Value="@property.Value?.ToString()" ValueChanged="@((args) => { property.Value = args; } )"
+                                                                        <RadzenTextBox Placeholder="@($"*Nhập {property.DBName}")" Value="@property.Value?.ToString()" ValueChanged="@((args) => { property.Value = args; } )"
                                                                                        Style="font-size: 14px; height: contain; border-radius: 5px; border-width: 1px; width: 100% "></RadzenTextBox>
                                                                     }
                                                                     else if (property.Type == typeof(int))
                                                                     {
-                                                                        <RadzenNumeric Placeholder="@($"*Nhập {property.Name}")" TValue="int" Value="@int.Parse(property.Value?.ToString()?? "0")" Min="0" Max="100000" ValueChanged="@((args) => { property.Value = args; })"
+                                                                        <RadzenNumeric Placeholder="@($"*Nhập {property.DBName}")" TValue="int" Value="@int.Parse(property.Value?.ToString()?? "0")" Min="0" Max="100000" ValueChanged="@((args) => { property.Value = args; })"
                                                                                        Style="font-size: 14px; height: contain; border-radius: 5px; border-width: 1px; width: 100%" />
                                                                     }
                                                                     else if (property.Type == typeof(DateTime))
                                                                     {
-                                                                        <RadzenDatePicker Placeholder="@($"*{property.Name}")" TValue="DateTime"
+                                                                        <RadzenDatePicker Placeholder="@($"*{property.DBName}")" TValue="DateTime"
                                                                                           ValueChanged="@((args) => { property.Value = args; })"
                                                                                           ShowTime="false" HourFormat="12" DateFormat="@Common.DayTimeFormatnoTime" AllowInput="false"
                                                                                           Name="DatePicker" Style="width: 100%; border-radius: 0; font-size: 14px"></RadzenDatePicker>
@@ -153,7 +153,7 @@
 
                                     foreach (var column in columns)
                                     {
-                                        string colName = column.Name ?? string.Empty;
+                                        string colName = column.DBName ?? string.Empty;
 
                                         @if (colName.Contains("ID"))
                                         {
@@ -407,7 +407,7 @@
     {
         foreach (var property in NewSanpham.GetPropertiesValues())
         {
-            if (property.Name != Common.SPID && property.Name != Common.SoLuong)
+            if (property.DBName != Common.SPID && property.DBName != Common.SoLuong)
             {
                 if (property.Value == null)
                 {

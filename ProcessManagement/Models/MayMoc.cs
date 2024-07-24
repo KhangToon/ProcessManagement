@@ -5,9 +5,9 @@ namespace ProcessManagement.Models
 {
     public class MayMoc
     {
-        public Propertyy MMID { get; set; } = new() { Name = Common.MMID, Type = typeof(int), AlowDatabase = true };
-        public Propertyy MaMay { get; set; } = new() { Name = Common.MaMay, Type = typeof(string), AlowDatabase = true };
-        public Propertyy TenMay { get; set; } = new() { Name = Common.TenMay, Type = typeof(string), AlowDatabase = true };
+        public Propertyy MMID { get; set; } = new() { DBName = Common.MMID, Type = typeof(int), AlowDatabase = true };
+        public Propertyy MaMay { get; set; } = new() { DBName = Common.MaMay, Type = typeof(string), AlowDatabase = true };
+        public Propertyy TenMay { get; set; } = new() { DBName = Common.TenMay, Type = typeof(string), AlowDatabase = true };
 
         public List<Propertyy> GetPropertiesValues()
         {
@@ -36,7 +36,7 @@ namespace ProcessManagement.Models
         {
             List<Propertyy> propertiesValue = GetPropertiesValues();
 
-            Propertyy? tagetProperty = propertiesValue.FirstOrDefault(f => f.Name == propertyName);
+            Propertyy? tagetProperty = propertiesValue.FirstOrDefault(f => f.DBName == propertyName);
 
             if (tagetProperty != null)
             {
@@ -48,7 +48,7 @@ namespace ProcessManagement.Models
         {
             List<Propertyy> propertiesValue = GetPropertiesValues();
 
-            Propertyy? tagetProperty = propertiesValue.FirstOrDefault(f => f.Name == propertyName);
+            Propertyy? tagetProperty = propertiesValue.FirstOrDefault(f => f.DBName == propertyName);
 
             return tagetProperty?.Value;
         }

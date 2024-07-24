@@ -5,9 +5,9 @@ namespace ProcessManagement.Models
 {
     public class NguyenCong
     {
-        public Propertyy NCID { get; set; } = new() { Name = Common.NCID, Type = typeof(int), AlowDatabase = true };
-        public Propertyy TenNguyenCong { get; set; } = new() { Name = Common.NguyenCong, Type = typeof(string), AlowDatabase = true };
-        public Propertyy Ghichu { get; set; } = new() { Name = Common.Ghichu, Type = typeof(string), AlowDatabase = true };
+        public Propertyy NCID { get; set; } = new() { DBName = Common.NCID, Type = typeof(int), AlowDatabase = true };
+        public Propertyy TenNguyenCong { get; set; } = new() { DBName = Common.NguyenCong, Type = typeof(string), AlowDatabase = true };
+        public Propertyy Ghichu { get; set; } = new() { DBName = Common.Ghichu, Type = typeof(string), AlowDatabase = true };
 
 
         public List<Propertyy> GetPropertiesValues()
@@ -37,7 +37,7 @@ namespace ProcessManagement.Models
         {
             List<Propertyy> propertiesValue = GetPropertiesValues();
 
-            Propertyy? tagetProperty = propertiesValue.FirstOrDefault(f => f.Name == propertyName);
+            Propertyy? tagetProperty = propertiesValue.FirstOrDefault(f => f.DBName == propertyName);
 
             if (tagetProperty != null)
             {
@@ -49,7 +49,7 @@ namespace ProcessManagement.Models
         {
             List<Propertyy> propertiesValue = GetPropertiesValues();
 
-            Propertyy? tagetProperty = propertiesValue.FirstOrDefault(f => f.Name == propertyName);
+            Propertyy? tagetProperty = propertiesValue.FirstOrDefault(f => f.DBName == propertyName);
 
             return tagetProperty?.Value;
         }

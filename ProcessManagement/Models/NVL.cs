@@ -7,25 +7,25 @@ namespace ProcessManagement.Models
 {
     public class NVL
     {
-        public Propertyy NVLID = new() { Name = Common.NVLID, Type = typeof(int), DispDatagrid = false, AlowDatabase = false };
+        public Propertyy NVLID = new() { DBName = Common.NVLID, Type = typeof(int), DispDatagrid = false, AlowDatabase = false };
 
-        public Propertyy LoaiNVL = new() { Name = Common.LoaiNL, Type = typeof(string), AlowDatabase = true };
+        public Propertyy LoaiNVL = new() { DBName = Common.LoaiNL, Type = typeof(string), AlowDatabase = true };
 
-        public Propertyy MaSP = new() { Name = Common.MaSP, Type = typeof(string), AlowDatabase = true };
+        public Propertyy MaSP = new() { DBName = Common.MaSP, Type = typeof(string), AlowDatabase = true };
 
-        public Propertyy MaQuanLy = new() { Name = Common.MaQuanLy, Type = typeof(string), AlowDatabase = true };
+        public Propertyy MaQuanLy = new() { DBName = Common.MaQuanLy, Type = typeof(string), AlowDatabase = true };
 
-        public Propertyy LotNVL = new() { Name = Common.LotNVL, Type = typeof(string), AlowDatabase = true };
+        public Propertyy LotNVL = new() { DBName = Common.LotNVL, Type = typeof(string), AlowDatabase = true };
 
-        public Propertyy SoLuong = new() { Name = Common.SoLuong, Type = typeof(int), AlowDatabase = true };
+        public Propertyy SoLuong = new() { DBName = Common.SoLuong, Type = typeof(int), AlowDatabase = true };
 
-        public Propertyy NgayNhap = new() { Name = Common.NgayNhap, Type = typeof(DateTime), AlowDatabase = true };
+        public Propertyy NgayNhap = new() { DBName = Common.NgayNhap, Type = typeof(DateTime), AlowDatabase = true };
 
-        public Propertyy NgayXuat = new() { Name = Common.NgayXuat, Type = typeof(DateTime), AlowDatabase = true };
+        public Propertyy NgayXuat = new() { DBName = Common.NgayXuat, Type = typeof(DateTime), AlowDatabase = true };
 
-        public Propertyy SoLuongXuat = new() { Name = Common.SoLuongXuat, Type = typeof(int), AlowDatabase = true };
+        public Propertyy SoLuongXuat = new() { DBName = Common.SoLuongXuat, Type = typeof(int), AlowDatabase = true };
 
-        public Propertyy GhiChu = new() { Name = Common.GhiChu, Type = typeof(string), AlowDatabase = true };
+        public Propertyy GhiChu = new() { DBName = Common.GhiChu, Type = typeof(string), AlowDatabase = true };
 
         public List<Propertyy> GetPropertiesValues()
         {
@@ -55,7 +55,7 @@ namespace ProcessManagement.Models
         {
             List<Propertyy> propertiesValue = GetPropertiesValues();
 
-            Propertyy? tagetProperty = propertiesValue.FirstOrDefault(f => f.Name == propertyName);
+            Propertyy? tagetProperty = propertiesValue.FirstOrDefault(f => f.DBName == propertyName);
 
             if (tagetProperty != null)
             {
@@ -67,7 +67,7 @@ namespace ProcessManagement.Models
         {
             List<Propertyy> propertiesValue = GetPropertiesValues();
 
-            Propertyy? tagetProperty = propertiesValue.FirstOrDefault(f => f.Name == propertyName);
+            Propertyy? tagetProperty = propertiesValue.FirstOrDefault(f => f.DBName == propertyName);
 
             return tagetProperty?.Value;
         }
