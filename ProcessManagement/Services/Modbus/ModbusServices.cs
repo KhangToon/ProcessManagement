@@ -267,7 +267,7 @@ namespace ProcessManagement.Services.Modbus
                 // feedback update result to client
                 SendAlarmLogToDevice01(result);
             }
-        }
+        } 
 
         private Regs.AlarmCode UpdateCalamviec(string tenngcong, bool iscadem, string maquanlylot, string manhanvien, int slOK, int slNG)
         {
