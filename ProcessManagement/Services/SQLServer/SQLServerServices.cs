@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal;
 using ProcessManagement.Commons;
 using ProcessManagement.Models;
+using ProcessManagement.Models.KHO_NVL;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
@@ -1730,6 +1731,95 @@ namespace ProcessManagement.Services.SQLServer
 
             return lisNCs;
         }
+
+        // Management KHO_NGUYENVATLIEU //
+
+        // Table KHO_NguyenVatLieu //
+        // Them loai NVL moi 
+        public (int, string) InsertNewLoaiNguyenVatLieu(NguyenVatLieu newnvl)
+        {
+            List<Propertyy> newNVLItems = newnvl.GetPropertiesValues().Where(po => po.AlowDatabase == true && po.Value != null).ToList();
+
+            int result = -1; string errorMess = string.Empty;
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                string columnNames = string.Join(",", newNVLItems.Select(key => $"[{key.DBName}]"));
+
+                string parameterNames = string.Join(",", newNVLItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $"INSERT INTO [{Common.TableNguyenVatLieu}] ({columnNames}) OUTPUT INSERTED.{Common.MaNVL} VALUES ({parameterNames})";
+
+                foreach (var item in newNVLItems)
+                {
+                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
+
+                    object? parameterValue = item.Value;
+
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                object? rs = command.ExecuteScalar();
+
+                result = Convert.ToInt32(rs);
+
+                if (result == 0) result = -1;
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
+        // Table KHO_DanhMucNguyenVatLieu //
+        // Get list danh muc NVL
+        public List<DanhMucNVL> GetListDanhMucNVLs()
+        {
+            List<DanhMucNVL> listDanhmucNVLs = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.TableDanhMucNVL}]";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    DanhMucNVL danhmuc = new();
+
+                    List<Propertyy> rowitems = danhmuc.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue;
+                    }
+
+                    listDanhmucNVLs.Add(danhmuc);
+                }
+            }
+
+            return listDanhmucNVLs;
+        }
+
+
 
     }
 }
