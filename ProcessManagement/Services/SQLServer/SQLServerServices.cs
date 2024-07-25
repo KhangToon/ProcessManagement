@@ -5,6 +5,7 @@ using ProcessManagement.Commons;
 using ProcessManagement.Models;
 using ProcessManagement.Models.KHO_NVL;
 using System.Collections.Generic;
+using System.Data;
 using System.Text.RegularExpressions;
 
 namespace ProcessManagement.Services.SQLServer
@@ -1780,6 +1781,24 @@ namespace ProcessManagement.Services.SQLServer
 
             return (result, errorMess);
         }
+        // Check Ten NVL da ton tai
+        public bool IsTenNVLExists(string? tenNVL)
+        {   
+            using (var connection = new SqlConnection(connectionString))
+            {
+                string query = $"SELECT COUNT(*) FROM [{Common.TableNguyenVatLieu}] WHERE [{Common.TenNVL}] = '{tenNVL}'";
+
+                using (var command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+
+                    int count = (int)command.ExecuteScalar();
+
+                    return count > 0;
+                }
+            }
+        }
+
 
         // Table KHO_DanhMucNguyenVatLieu //
         // Get list danh muc NVL
@@ -1819,6 +1838,8 @@ namespace ProcessManagement.Services.SQLServer
             return listDanhmucNVLs;
         }
 
+
+        
 
 
     }
