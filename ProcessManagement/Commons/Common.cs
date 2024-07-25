@@ -127,6 +127,12 @@ namespace ProcessManagement.Commons
         public const string MaDanhMuc = "MaDanhMuc";
         public const string TenDanhMuc = "TenDanhMuc";
 
+        // Table KHO_LoaiNguyenVatLieu //
+        public const string TableLoaiNVL = "KHO_LoaiNguyenVatLieu";
+        public const string MaLoaiNVL = "MaLoaiNVL";
+        //public const string MaDanhMuc = "MaDanhMuc";
+        public const string TenLoaiNVL = "TenLoaiNVL";
+
         // Table KHO_NguyenVatLieu //
         public const string TableNguyenVatLieu = "KHO_NguyenVatLieu";
         public const string MaNVL = "MaNVL";
@@ -136,6 +142,7 @@ namespace ProcessManagement.Commons
         public const string DonViTinh = "DonViTinh";
         public const string SoLuongTonKhoToiThieu = "SoLuongTonKhoToiThieu";
         public const string SoLuongTonKhoToiDa = "SoLuongTonKhoToiDa";
+        public const string TonKhoHienTai = "TonKhoHienTai";
         public const string ThoiGianBaoQuan = "ThoiGianBaoQuan";
         public const string NgayCapNhat = "NgayCapNhat";
 

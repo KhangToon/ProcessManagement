@@ -1783,7 +1783,7 @@ namespace ProcessManagement.Services.SQLServer
         }
         // Check Ten NVL da ton tai
         public bool IsTenNVLExists(string? tenNVL)
-        {   
+        {
             using (var connection = new SqlConnection(connectionString))
             {
                 string query = $"SELECT COUNT(*) FROM [{Common.TableNguyenVatLieu}] WHERE [{Common.TenNVL}] = '{tenNVL}'";
@@ -1838,9 +1838,80 @@ namespace ProcessManagement.Services.SQLServer
             return listDanhmucNVLs;
         }
 
+        // Table KHO_LoaiNguyenVatLieu //
 
-        
+        // Get list loai nguyen vat lieu (get all)
+        public List<LoaiNVL> GetListLoaiNVLs()
+        {
+            List<LoaiNVL> listloaiNVLs = new();
 
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
 
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.TableLoaiNVL}]";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    LoaiNVL loaiNVL = new();
+
+                    List<Propertyy> rowitems = loaiNVL.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue;
+                    }
+
+                    listloaiNVLs.Add(loaiNVL);
+                }
+            }
+
+            return listloaiNVLs;
+        }
+
+        // Get list loai nguyen vat lieu (order by madanhmuc)
+        public List<LoaiNVL> GetListLoaiNVLs(int madanhmuc)
+        {
+            List<LoaiNVL> listloaiNVLs = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.TableLoaiNVL}] WHERE [{Common.MaDanhMuc}] = '{madanhmuc}'";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    LoaiNVL loaiNVL = new();
+
+                    List<Propertyy> rowitems = loaiNVL.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue;
+                    }
+
+                    listloaiNVLs.Add(loaiNVL);
+                }
+            }
+
+            return listloaiNVLs;
+        }
     }
 }

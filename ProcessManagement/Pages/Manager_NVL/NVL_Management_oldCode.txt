@@ -34,71 +34,66 @@
     <RadzenColumn Size="12" SizeMD="12" Style="height: 100%; width: 100%;">
         <RadzenTabs Style="width: 100%; height: 100%;">
             <Tabs>
-                <RadzenTabsItem Text="Danh mục NVL"></RadzenTabsItem>
-                <RadzenTabsItem Text="Loại NVL"></RadzenTabsItem>
-                <RadzenTabsItem Selected="true" Text="Nguyên vật liệu">
-                    <RadzenCard Variant="Variant.Flat" Style="height: contain; width: 100%; padding-top: 15px">
+                <RadzenTabsItem Text="Danh sách NVL">
+                    <RadzenCard Variant="Variant.Flat" Style="height: contain; width: 100%;">
                         <RadzenStack Gap="10" Style="height: contain; width: 100%;">
                             <!--Search by maquanly-->
                             <RadzenStack Style="height: contain; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                                 <RadzenText Text="Danh sách nguyên vật liệu (NVL)" Style="color: Highlight; font-weight: 600; height: contain; min-width: 15%; width: contain"></RadzenText>
-                                <RadzenStack Gap="15px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: 100%; width: 60%;">
+                                <RadzenStack Gap="15px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: 100%; width: 85%;">
                                     <RadzenTextBox @oninput="@((args) => FilterNVL(args?.Value))" Placeholder="Tìm theo mã quản lý" Style="border-radius: 20px; padding-left: 20px; border-width: 2px; border-color: var(--rz-primary-light); width: 50% "></RadzenTextBox>
                                     <RadzenButton Icon="search" ButtonStyle="ButtonStyle.Primary" Style="border-radius: 20px;" />
                                     <RadzenButton Click="@(() => { OnSearchNVLListFromDayRange(); })" Style="border-radius: 20px;" Icon="autorenew" ButtonStyle="ButtonStyle.Primary" />
                                     <RadzenStack></RadzenStack>
                                 </RadzenStack>
-                                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: 100%; width: contain;">
-                                    <RadzenButton Click="OnThemNguyenVatLieu" Icon="add" Text="Thêm loại nguyên vật liệu" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled"
-                                                  Style="height: contain; width: contain; font-size: 14px; background-color: Highlight " />
-                                </RadzenStack>
                             </RadzenStack>
 
                             <!--Search by ngaynhap-->
-                            <RadzenStack Gap="0px" Orientation="Orientation.Horizontal" Style="height: contain; width: 100%; padding-top: 10px; border-top: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" Style="height: contain; width: contain; padding: 0; padding-right: 10px; border-right: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                    <RadzenStack Gap="10px" Style="height: 100%; width: contain; background-color: white; padding: 5px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                        <RadzenLabel Text="Ngày cập nhật" Component="CheckBox1" Style="font-size: 14px; color: darkred; font-weight: 600; cursor: pointer" />
+                            <RadzenStack Gap="20px" Orientation="Orientation.Horizontal" Style="height: contain; width: 100%; padding-top: 10px; border-top: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                <RadzenStack Gap="20px" Orientation="Orientation.Horizontal" Style="height: contain; width: contain; padding: 0;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                    <RadzenStack Style="height: 100%; width: contain; background-color: white; padding: 5px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                        <RadzenLabel Text="Lọc theo ngày" Component="CheckBox1" Style="font-size: 16px; color: darkred; font-weight: 600; cursor: pointer" />
                                         <RadzenCheckBox TValue="bool" @bind-Value="@(displaybyDay)" Name="CheckBox1" Change="@((args) => { displaybyDay = args; OnSearchNVLListFromDayRange();  })" />
                                     </RadzenStack>
                                     <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" Style="height: contain; width: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                         <RadzenText Text="Từ ngày" Style="font-weight: 500; font-size: 14px; color: black;"></RadzenText>
-                                        <RadzenDatePicker Disabled="@(!displaybyDay)" Style="width: 120px" TValue="DateTime" Value="@startSearchDay"
+                                        <RadzenDatePicker Disabled="@(!displaybyDay)" TValue="DateTime" Value="@startSearchDay"
                                                           ValueChanged="@((args) => { startSearchDay = args; OnSearchNVLListFromDayRange(); })"
                                                           ShowTime="false" HourFormat="12" DateFormat="@Common.DayTimeFormatnoTime" AllowInput="false">
                                             <FooterTemplate>
                                                 <RadzenStack Style="height: 100%; width: contain; padding: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                    @*<RadzenButton Style="height: 100%; width: 50%;" Text="Now" Click="@(() => { startSearchDay = DateTime.Now; OnSearchProductListFromDayRange(); })" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />*@
                                                     <RadzenButton Style="height: 100%; width: 50%;" Text="To day" Click="@(() => { startSearchDay = DateTime.Today; OnSearchNVLListFromDayRange(); })" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />
                                                 </RadzenStack>
                                             </FooterTemplate>
                                         </RadzenDatePicker>
                                     </RadzenStack>
-                                    <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" Style="height: contain; width: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                    <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" Style="height: contain; width: contain; margin-right: 50px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                         <RadzenText Text="Đến ngày" Style="font-weight: 500; font-size: 14px; color: black;"></RadzenText>
-                                        <RadzenDatePicker Disabled="@(!displaybyDay)" Style="width: 120px" TValue="DateTime" Value="@endSearchDay"
+                                        <RadzenDatePicker Disabled="@(!displaybyDay)" TValue="DateTime" Value="@endSearchDay"
                                                           ValueChanged="@((args) => { endSearchDay = args; OnSearchNVLListFromDayRange(); })"
                                                           ShowTime="false" HourFormat="12" DateFormat="@Common.DayTimeFormatnoTime" AllowInput="false">
                                             <FooterTemplate>
                                                 <RadzenStack Style="height: 100%; width: contain; padding: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                    @*<RadzenButton Style="height: 100%; width: 50%;" Text="Now" Click="@(() => { endSearchDay = DateTime.Now; OnSearchProductListFromDayRange(); })" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />*@
                                                     <RadzenButton Style="height: 100%; width: 50%;" Text="To day" Click="@(() => { endSearchDay = DateTime.Today; OnSearchNVLListFromDayRange(); })" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />
                                                 </RadzenStack>
                                             </FooterTemplate>
                                         </RadzenDatePicker>
                                     </RadzenStack>
                                 </RadzenStack>
-                                <!--Search by Loai Danh muc-->
-                                <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: 100%; width: contain; padding-left: 10px ; padding-right: 10px; border-right: var(--rz-grid-cell-border);">
-                                    <RadzenLabel Text="Danh mục" Style="font-size: 14px; color: darkred; font-weight: 600; width: contain" />
+
+                                <!--Search by Lot NVL-->
+                                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: 100%; width: contain; padding-left: 20px; padding-right: 20px; border-left: var(--rz-grid-cell-border); border-right: var(--rz-grid-cell-border);">
+                                    <RadzenLabel Text="Lọc theo loại NVL" Style="font-size: 16px; color: darkred; font-weight: 600" />
                                     <RadzenDropDown Value="@currentSelectedLoaiNVL" ValueChanged="@((args) => { OnSelectLoaiNVLValueChanged(args);})" TValue="string"
-                                                    Data=@GetListLoaiNVL() Style="border-radius: 5px; border-width: 1px; font-size: 14px; width: 120px ">
+                                                    Data=@GetListLoaiNVL() Style="border-radius: 10px; border-width: 1px; font-size: 14px; ">
                                     </RadzenDropDown>
                                 </RadzenStack>
-                                <!--Search by Lot NVL-->
-                                <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: 100%; width: contain; padding-left: 10px; padding-right: 10px; border-right: var(--rz-grid-cell-border);">
-                                    <RadzenLabel Text="Loại NVL" Style="font-size: 14px; color: darkred; font-weight: 600; width: contain" />
-                                    <RadzenDropDown Value="@currentSelectedLoaiNVL" ValueChanged="@((args) => { OnSelectLoaiNVLValueChanged(args);})" TValue="string"
-                                                    Data=@GetListLoaiNVL() Style="border-radius: 5px; border-width: 1px; font-size: 14px; width: 120px">
-                                    </RadzenDropDown>
+
+                                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: 100%; width: contain;">
+                                    <RadzenButton Click="OnThemNguyenVatLieu" Icon="add" Text="Thêm loại nguyên vật liệu" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled"
+                                                  Style="height: contain; width: contain; font-size: 14px; background-color: Highlight " />
                                 </RadzenStack>
                             </RadzenStack>
 
