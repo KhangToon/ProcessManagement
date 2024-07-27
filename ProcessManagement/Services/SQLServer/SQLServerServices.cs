@@ -1780,7 +1780,7 @@ namespace ProcessManagement.Services.SQLServer
         {
             using (var connection = new SqlConnection(connectionString))
             {
-                string query = $"SELECT COUNT(*) FROM [{Common.TableNVLofSanPham}] WHERE [{Common.MaNVL}] = '{nVLofSanPham.MaNVL.Value}'";
+                string query = $"SELECT COUNT(*) FROM [{Common.TableNVLofSanPham}] WHERE [{Common.SPID}] = '{nVLofSanPham.SPID.Value}' AND [{Common.MaNVL}] = '{nVLofSanPham.MaNVL.Value}'";
 
                 using (var command = new SqlCommand(query, connection))
                 {
