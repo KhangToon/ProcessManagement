@@ -179,7 +179,7 @@ namespace ProcessManagement.Services.Modbus
                 WriteRegData(Regs.Server.MaSanPham, Regs.RegTypes.RegWriteString, maSP);
 
                 // LoaiNVL to device01 // 4x28
-                string loaiNVL = Common.CurrentKHSX?.LoaiNL.Value?.ToString() ?? string.Empty;
+                string loaiNVL = Common.CurrentKHSX?.LoaiNVL?.TenLoaiNVL.Value?.ToString() ?? string.Empty;
                 WriteRegData(Regs.Server.LoaiNVL01, Regs.RegTypes.RegWriteString, loaiNVL);
 
                 // SLSanxuat to device01 // 4x46
@@ -267,7 +267,7 @@ namespace ProcessManagement.Services.Modbus
                 // feedback update result to client
                 SendAlarmLogToDevice01(result);
             }
-        } 
+        }
 
         private Regs.AlarmCode UpdateCalamviec(string tenngcong, bool iscadem, string maquanlylot, string manhanvien, int slOK, int slNG)
         {

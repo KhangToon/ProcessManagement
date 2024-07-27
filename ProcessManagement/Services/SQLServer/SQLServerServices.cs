@@ -512,6 +512,7 @@ namespace ProcessManagement.Services.SQLServer
             Parallel.ForEach(listSanphams, sp =>
             {
                 sp.ChitietSanPhams = GetDSachChitietSanPham(sp);
+                sp.DanhSachNVLs = GetDSachNVLofSanPham(sp.SPID.Value);
             });
 
             return listSanphams;
@@ -965,7 +966,9 @@ namespace ProcessManagement.Services.SQLServer
                     }
                 }
 
-                khsx.SanPham = GetSanpham(int.Parse(khsx.SPID.Value?.ToString() ?? "0"));
+                khsx.SanPham = GetSanpham(int.TryParse(khsx.SPID.Value?.ToString(), out int spid) ? spid : 0);
+
+                khsx.LoaiNVL = GetLoaiNVLbyID(int.TryParse(khsx.MaLoaiNVL.Value?.ToString(), out int loainvlid) ? loainvlid : 0);
 
                 khsx.DSachCongDoans = GetlistCongdoans(khsx.KHSXID.Value);
             }
@@ -1733,6 +1736,109 @@ namespace ProcessManagement.Services.SQLServer
             return lisNCs;
         }
 
+        // Table Table_NVLofSanPham //
+        // Get danh sach NVL cua san pham
+        public List<NVLofSanPham> GetDSachNVLofSanPham(object? spID)
+        {
+            List<NVLofSanPham> listNVLofSanphams = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.TableNVLofSanPham}] WHERE [{Common.SPID}] = '{spID}'";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    NVLofSanPham nvlofsp = new();
+
+                    List<Propertyy> rowitems = nvlofsp.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue;
+                    }
+
+                    listNVLofSanphams.Add(nvlofsp);
+                }
+            }
+
+            return listNVLofSanphams;
+        }
+
+        // Kiem tra da ton tai NVL trong ds NVL cua san pham
+        public bool IsNVLofSanPhamExisting(NVLofSanPham nVLofSanPham)
+        {
+            using (var connection = new SqlConnection(connectionString))
+            {
+                string query = $"SELECT COUNT(*) FROM [{Common.TableNVLofSanPham}] WHERE [{Common.MaNVL}] = '{nVLofSanPham.MaNVL.Value}'";
+
+                using (var command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+
+                    int count = (int)command.ExecuteScalar();
+
+                    return count > 0;
+                }
+            }
+        }
+
+        // Them loai NVL cho san pham
+        public (int, string) InsertNewNguyenVatLieuchoSanPham(NVLofSanPham newnvl)
+        {
+            List<Propertyy> newNVLItems = newnvl.GetPropertiesValues().Where(po => po.AlowDatabase == true && po.Value != null).ToList();
+
+            int result = -1; string errorMess = string.Empty;
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                string columnNames = string.Join(",", newNVLItems.Select(key => $"[{key.DBName}]"));
+
+                string parameterNames = string.Join(",", newNVLItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $"INSERT INTO [{Common.TableNVLofSanPham}] ({columnNames}) OUTPUT INSERTED.{Common.NVLSPID} VALUES ({parameterNames})";
+
+                foreach (var item in newNVLItems)
+                {
+                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
+
+                    object? parameterValue = item.Value;
+
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                object? rs = command.ExecuteScalar();
+
+                result = Convert.ToInt32(rs);
+
+                if (result == 0) result = -1;
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
+
         // Management KHO_NGUYENVATLIEU //
 
         // Table KHO_NguyenVatLieu //
@@ -1798,7 +1904,76 @@ namespace ProcessManagement.Services.SQLServer
                 }
             }
         }
+        // Get Nguyen Vat Lieu by ID
+        public NguyenVatLieu GetNguyenVatLieubyID(int maNVL)
+        {
+            NguyenVatLieu nvl = new();
 
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.TableNguyenVatLieu}] WHERE [{Common.MaNVL}] = '{maNVL}'";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    List<Propertyy> rowitems = nvl.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue;
+                    }
+
+                }
+            }
+
+            return nvl;
+        }
+
+        // Get list NguyenVatLieu
+        public List<NguyenVatLieu> GetListNguyenVatLieu(int loainvlID)
+        {
+            List<NguyenVatLieu> nguyenvatlieus = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.TableNguyenVatLieu}] WHERE [{Common.MaLoaiNVL}] = '{loainvlID}'";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    NguyenVatLieu nvl = new();
+
+                    List<Propertyy> rowitems = nvl.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue;
+                    }
+
+                    nguyenvatlieus.Add(nvl);
+                }
+            }
+
+            return nguyenvatlieus;
+        }
 
         // Table KHO_DanhMucNguyenVatLieu //
         // Get list danh muc NVL
@@ -1839,6 +2014,40 @@ namespace ProcessManagement.Services.SQLServer
         }
 
         // Table KHO_LoaiNguyenVatLieu //
+
+        // Get loai NVL by maloai NVL
+        public LoaiNVL GetLoaiNVLbyID(int maloaiNVL)
+        {
+            LoaiNVL loainvl = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.TableLoaiNVL}] WHERE [{Common.MaLoaiNVL}] = '{maloaiNVL}'";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    List<Propertyy> rowitems = loainvl.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue;
+                    }
+
+                }
+            }
+
+            return loainvl;
+        }
 
         // Get list loai nguyen vat lieu (get all)
         public List<LoaiNVL> GetListLoaiNVLs()

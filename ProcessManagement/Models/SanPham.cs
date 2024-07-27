@@ -10,7 +10,7 @@ namespace ProcessManagement.Models
         public Propertyy TenSanPham { get; set; } = new() { DBName = Common.TenSanPham, Type = typeof(string), AlowDatabase = true };
         public Propertyy NgayTao { get; set; } = new() { DBName = Common.NgayTao, Type = typeof(DateTime), AlowDatabase = true };
         public List<ChitietSanPham>? ChitietSanPhams { get; set; }
-        public List<NVL>? DanhSachNVLs { get; set; }
+        public List<NVLofSanPham>? DanhSachNVLs { get; set; }
 
         public List<Propertyy> GetPropertiesValues()
         {

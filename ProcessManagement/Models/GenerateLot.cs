@@ -1,4 +1,5 @@
-﻿using ProcessManagement.Services.SQLServer;
+﻿using ProcessManagement.Models.KHO_NVL;
+using ProcessManagement.Services.SQLServer;
 
 namespace ProcessManagement.Models
 {
@@ -9,7 +10,6 @@ namespace ProcessManagement.Models
         private static readonly string NumberDigit = "D3";
 
         public string MaLSX { get; set; } = string.Empty;
-        public string LoaNVL { get; set; } = string.Empty;
         public int SLSanXuat { get; set; } = 0;
         public double TiLeLoi { get; set; } = 0;
         public int SLLoi { get; set; } = 0;
@@ -25,6 +25,7 @@ namespace ProcessManagement.Models
         public KHSX NewKHSX { get; set; } = new KHSX();
 
         private List<SanPham> DSachSanPhams { get; set; } = new List<SanPham>();
+        private List<LoaiNVL> DSachLoaiNVLs { get; set; } = new List<LoaiNVL>();
 
         public bool isErrorSLloiChophep = true;
         public bool isComfirmSLLoiNguyenCong = false;
@@ -153,10 +154,15 @@ namespace ProcessManagement.Models
             NewKHSX.SanPham = DSachSanPhams.FirstOrDefault(sp => sp.MaSP.Value?.ToString() == masp) ?? new();
         }
 
+        public void SetCurrentKHSXloaiNVL(string tenloainvl)
+        {
+            NewKHSX.LoaiNVL = DSachLoaiNVLs.FirstOrDefault(nl => nl.TenLoaiNVL.Value?.ToString() == tenloainvl) ?? new();
+        }
+
         public void AsignKHSXdata()
         {
             NewKHSX.MaLSX.Value = MaLSX;
-            NewKHSX.LoaiNL.Value = LoaNVL;
+            NewKHSX.MaLoaiNVL.Value = NewKHSX.LoaiNVL?.MaLoaiNVL.Value;
             NewKHSX.SLSanXuat.Value = SLSanXuat;
             NewKHSX.DinhMuc.Value = DinhMuc;
             NewKHSX.TileLoi.Value = TiLeLoi;
@@ -174,6 +180,15 @@ namespace ProcessManagement.Models
             DSachSanPhams = SQLServerServices.GetlistSanphams();
 
             List<string> result = DSachSanPhams.Select(sp => sp.MaSP.Value?.ToString() ?? string.Empty).ToList();
+
+            return result;
+        }
+
+        public List<string> GetDSMaLoaiNVLs()
+        {
+            DSachLoaiNVLs = SQLServerServices.GetListLoaiNVLs();
+
+            List<string> result = DSachLoaiNVLs.Select(nl => nl.TenLoaiNVL.Value?.ToString() ?? string.Empty).ToList();
 
             return result;
         }
@@ -315,7 +330,7 @@ namespace ProcessManagement.Models
             for (int index = 1; index <= SLLotChan; index++)
             {
                 NVL nVL = new();
-                nVL.LoaiNVL.Value = LoaNVL;
+                nVL.LoaiNVL.Value = NewKHSX.LoaiNVL?.TenLoaiNVL.Value;
                 nVL.MaSP.Value = NewKHSX.SanPham?.MaSP.Value;
                 nVL.MaQuanLy.Value = MaLSX + NewKHSX.SanPham?.MaSP.Value + "-" + index.ToString(NumberDigit);
                 nVL.SoLuong.Value = SLperLotChan;
@@ -332,7 +347,7 @@ namespace ProcessManagement.Models
 
                 // Add lot le
                 NVL lotnvlle = new();
-                lotnvlle.LoaiNVL.Value = LoaNVL;
+                lotnvlle.LoaiNVL.Value = NewKHSX.LoaiNVL?.TenLoaiNVL.Value;
                 lotnvlle.MaSP.Value = NewKHSX.SanPham?.MaSP.Value;
                 lotnvlle.MaQuanLy.Value = MaLSX + NewKHSX.SanPham?.MaSP.Value + "-" + (SLLotChan + 1).ToString(NumberDigit);
                 lotnvlle.SoLuong.Value = SLperLotLe;

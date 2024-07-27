@@ -24,6 +24,13 @@ namespace ProcessManagement.Commons
         public const string PropertyValue = "PropertyValue";
         public const string PropertyType = "PropertyType";
 
+        // Table NVL of Sanpham
+        public const string TableNVLofSanPham = "Table_NVLofSanPham";
+        public const string NVLSPID = "NVLSPID";
+        //public const string SPID = "SPID";
+        //public const string MaLoaiSP = "MaLoaiSP";
+        public const string NgayThem = "NgayThem";
+
         // Table NVL //
         public const string TableNVL = "Table_NVL";
         public const string NVLID = "NVLID";
