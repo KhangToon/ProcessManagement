@@ -550,6 +550,7 @@ namespace ProcessManagement.Services.SQLServer
             }
 
             sanpham.ChitietSanPhams = GetDSachChitietSanPham(sanpham);
+            sanpham.DanhSachNVLs = GetDSachNVLofSanPham(sanpham.SPID.Value);
 
             return sanpham;
         }
@@ -1838,6 +1839,36 @@ namespace ProcessManagement.Services.SQLServer
             return (result, errorMess);
         }
 
+        // Xoa NVL cua SP
+        public (int, string) DeleteNVLofSanpham(NVLofSanPham? removeNVLofSP)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            if (removeNVLofSP == null) return (result, errorMess);
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"DELETE FROM {Common.TableNVLofSanPham} WHERE [{Common.NVLSPID}] = '{removeNVLofSP.NVLSPID.Value}'";
+
+                object rs = command.ExecuteScalar();
+
+                result = Convert.ToInt32(rs);
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
 
         // Management KHO_NGUYENVATLIEU //
 

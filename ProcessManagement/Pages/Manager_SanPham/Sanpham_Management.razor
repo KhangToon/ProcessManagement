@@ -212,7 +212,11 @@
                                             <span style="font-weight: bold; font-size: 16px; color: white">Danh sách NVL</span>
                                         </HeaderTemplate>
                                         <Template Context="sp">
-                                            <RadzenButton Click="@(() => OnOpenDialogXemDSachNVL(sp))" Style=" background-color: white;" Size="ButtonSize.Small" Variant="Variant.Outlined" Text="Xem"></RadzenButton>
+                                            @{
+                                                var nvlcount = sp?.DanhSachNVLs?.Count;
+                                            }
+                                            <RadzenButton Text="@($"{((nvlcount == 0)? "0" : $"{nvlcount} NVL")}")" Click="@(() => OnOpenDialogXemDSachNVL(sp))" Style="background-color: white; font-size: 18px" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat"></RadzenButton>
+
                                         </Template>
                                     </RadzenDataGridColumn>
                                     <RadzenDataGridColumn Width="contain" Frozen="true" FrozenPosition="FrozenColumnPosition.Left" Filterable="false"
@@ -512,16 +516,21 @@
 
     private async Task OnOpenDialogXemDSachNVL(SanPham? seletecSP)
     {
-        List<NguyenLieu> DSNguyenlieus = SQLServerServices.GetlistNguyenLieuperSanPham(seletecSP);
-
         await DialogService.OpenAsync<DialogXemDSNguyenLieu>(null, new Dictionary<string, object>() { { "Sanpham", seletecSP ?? new SanPham() } },
         new DialogOptions() { ShowTitle = false, Width = "50%", Height = "contain", Resizable = false, Draggable = false, ShowClose = false, Style = "background-color: while; border-radius: 0px; padding: 0px" });
+
+        OnSearchProductListFromDayRange();
     }
 
     private async Task OnOpenDialogAddNVL(SanPham? seletecSP)
     {
-        await DialogService.OpenAsync<DialogAddNLforSanpham>(null, new Dictionary<string, object>() { { "SanPham", seletecSP ?? new SanPham() } },
-        new DialogOptions() { ShowTitle = false, Width = "50%", Height = "contain", Resizable = false, Draggable = false, ShowClose = false, Style = "background-color: while; border-radius: 0px; padding: 0px" });
+        var result = await DialogService.OpenAsync<DialogAddNLforSanpham>(null, new Dictionary<string, object>() { { "SanPham", seletecSP ?? new SanPham() } },
+        new DialogOptions() { ShowTitle = false, Width = "80%", Height = "contain", Resizable = false, Draggable = false, ShowClose = false, Style = "background-color: while; border-radius: 0px; padding: 0px" });
+
+        if (result != null)
+        {
+            OnSearchProductListFromDayRange();
+        }
     }
 
     private async Task OnDeleteSanpham(SanPham? seletecSP)

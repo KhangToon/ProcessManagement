@@ -32,15 +32,18 @@
                         <RadzenStack Style="width: 30%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                             <RadzenText Text="Ngày thêm" Style="font-size: 16px; color: white; font-weight: 500;"></RadzenText>
                         </RadzenStack>
+                        <RadzenStack Style="width: 5%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenText Text="" Style="font-size: 16px; color: white; font-weight: 500;"></RadzenText>
+                        </RadzenStack>
                     </RadzenStack>
-                    foreach (var nvl in Sanpham.DanhSachNVLs)
+                    foreach (var nvlofSP in Sanpham.DanhSachNVLs)
                     {
-                        int nvlid = int.TryParse(nvl.MaNVL.Value?.ToString(), out int id) ? id : 0;
+                        int nvlid = int.TryParse(nvlofSP.MaNVL.Value?.ToString(), out int id) ? id : 0;
                         var nguyenvatlieu = SQLServerServices.GetNguyenVatLieubyID(nvlid);
 
                         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: contain; width: 100%; border-bottom: var(--rz-grid-cell-border);">
                             <RadzenStack Style="width: 5%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                <RadzenText Text="@((Sanpham?.DanhSachNVLs?.IndexOf(nvl) + 1).ToString())" Style="color: darkgray; font-size: 12px; font-weight: 500;"></RadzenText>
+                                <RadzenText Text="@((Sanpham?.DanhSachNVLs?.IndexOf(nvlofSP) + 1).ToString())" Style="color: darkgray; font-size: 12px; font-weight: 500;"></RadzenText>
                             </RadzenStack>
                             <RadzenStack Style="width: 30%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                 <RadzenText Text="@nguyenvatlieu.TenNVL.Value?.ToString()" Style="font-size: 16px; font-weight: 600; color: darkred"></RadzenText>
@@ -49,7 +52,10 @@
                                 <RadzenText Text="@Sanpham?.TenSanPham.Value?.ToString()" Style="font-size: 16px; font-weight: 600; color: darkblue"></RadzenText>
                             </RadzenStack>
                             <RadzenStack Style="width: 30%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                <RadzenText Text="@nvl.NgayThem.Value?.ToString()" Style="font-size: 16px; font-weight: 500;"></RadzenText>
+                                <RadzenText Text="@nvlofSP.NgayThem.Value?.ToString()" Style="font-size: 16px; font-weight: 500;"></RadzenText>
+                            </RadzenStack>
+                            <RadzenStack Style="width: 5%; height: contain; padding-bottom: 5px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenButton Click="@(() => OnDeleteNVLofSP(nvlofSP))" Style="background-color: black;" Icon="delete" Size="ButtonSize.Small" Variant="Variant.Filled"></RadzenButton>
                             </RadzenStack>
                         </RadzenStack>
                     }
@@ -78,5 +84,40 @@
     protected override Task OnInitializedAsync()
     {
         return base.OnInitializedAsync();
+    }
+
+    private async Task OnDeleteNVLofSP(NVLofSanPham removeNVLofSP)
+    {
+        bool? comfirm = await DialogService.Confirm($"Xóa nguyên liệu khỏi sản phẩm này?", "Xác nhận", new ConfirmOptions() { OkButtonText = "Đồng ý", CancelButtonText = "Hủy" });
+
+        if (comfirm.Value)
+        {
+            (int result, string errormess) = SQLServerServices.DeleteNVLofSanpham(removeNVLofSP);
+
+            if (result != -1)
+            {
+                ShowNotification("Đã xóa!", NotificationSeverity.Success, 2000);
+
+                Sanpham?.DanhSachNVLs?.Remove(removeNVLofSP);
+            }
+            else
+            {
+                await DialogService.Alert($"{errormess}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+            }
+        }
+    }
+
+    // Notification
+    void ShowNotification(string message, NotificationSeverity notifytype, double time)
+    {
+        NotificationMessage notify = new NotificationMessage
+            {
+                Style = "position: fixed; top: 0; right: 0;",
+                Severity = notifytype,
+                Summary = message,
+                Duration = time
+            };
+
+        NotificationService.Notify(notify);
     }
 }
