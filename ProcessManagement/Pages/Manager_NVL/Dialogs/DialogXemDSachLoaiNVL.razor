@@ -1,0 +1,89 @@
+﻿@using ProcessManagement.Commons
+@using ProcessManagement.Models.KHO_NVL
+@using ProcessManagement.Services.SQLServer
+@using Radzen.Blazor
+@using Radzen
+@using ProcessManagement.Models
+
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject SQLServerServices SQLServerServices
+
+<RadzenCard Variant="Variant.Filled" Style="height: 100%; width: 100%; background-color: white; border-radius: 0px">
+    <RadzenStack Gap="10px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: 100%; width: 100%;">
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="10px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: 5%; width: 100%;">
+            <RadzenText Text="@($"Danh sách loại nguyên vật liệu của danh mục ")" Style="font-size: 18px; font-weight: 500; color: black"></RadzenText>
+            <RadzenText Text="@($" {SelectDMucNVL?.TenDanhMuc.Value?.ToString()}")" Style="font-size: 18px; font-weight: 600; color: darkblue"></RadzenText>
+        </RadzenStack>
+
+        <RadzenCard Variant="Variant.Outlined" Style="height: 75%; width: 100%; background-color: white; border-radius: 5px;">
+            <RadzenStack Style="height: 100%; width: 100%; overflow-y: scroll" Gap="10px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                @if (DSachLoaiNVLs != null)
+                {
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="background-color: rgba(58, 71, 77); padding-top: 10px; padding-bottom: 10px; height: contain; width: 100%; border-bottom: var(--rz-grid-cell-border);">
+                        <RadzenStack Style="width: 5%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenText Text="STT" Style="font-size: 16px; color: white; font-weight: 500;"></RadzenText>
+                        </RadzenStack>
+                        <RadzenStack Style="width: 30%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenText Text="Loại nguyên vật liệu" Style="font-size: 16px; color: white; font-weight: 500;"></RadzenText>
+                        </RadzenStack>
+                        <RadzenStack Style="width: 30%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenText Text="Danh mục nguyên vật liệu" Style="font-size: 16px; color: white; font-weight: 500;"></RadzenText>
+                        </RadzenStack>
+                        <RadzenStack Style="width: 30%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenText Text="Ngày tạo" Style="font-size: 16px; color: white; font-weight: 500;"></RadzenText>
+                        </RadzenStack>
+                    </RadzenStack>
+                    foreach (var loainvl in DSachLoaiNVLs)
+                    {
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: contain; width: 100%; border-bottom: var(--rz-grid-cell-border);">
+                            <RadzenStack Style="width: 5%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenText Text="@((DSachLoaiNVLs?.IndexOf(loainvl) + 1).ToString())" Style="color: darkgray; font-size: 12px; font-weight: 500;"></RadzenText>
+                            </RadzenStack>
+                            <RadzenStack Style="width: 30%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenText Text="@loainvl.TenLoaiNVL.Value?.ToString()" Style="font-size: 16px; font-weight: 600; color: darkred"></RadzenText>
+                            </RadzenStack>
+                            <RadzenStack Style="width: 30%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenText Text="@SelectDMucNVL?.TenDanhMuc.Value?.ToString()" Style="font-size: 16px; font-weight: 500;"></RadzenText>
+                            </RadzenStack>
+                            <RadzenStack Style="width: 30%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                @{
+                                    var value = loainvl.NgayThem.Value?.ToString();
+                                    string ngaythem = (loainvl.NgayThem.Value == null || string.IsNullOrEmpty(value)) ? " ____ " : Convert.ToDateTime(value).ToString(Common.DayTimeFormatnoTime);
+                                }
+                                <RadzenText Text="@ngaythem" Style="font-size: 16px; font-weight: 500;"></RadzenText>
+                            </RadzenStack>
+                        </RadzenStack>
+                    }
+                }
+            </RadzenStack>
+        </RadzenCard>
+        <RadzenStack Style="height: 5%; width: 100%; padding: 5px; padding-right: 10px; padding-top: 15px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+            <RadzenStack Gap="20px" Style="height: 100%; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                <RadzenText Text="@("Tổng: " + DSachLoaiNVLs?.Count)"
+                            Style="font-weight: 500; font-size: 18px; color: black; "></RadzenText>
+            </RadzenStack>
+
+            <RadzenStack Gap="15px" Style="height: 100%; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                <RadzenButton Style="width: 120px; height: 80%;" Icon="close" Text="Thoát" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" Click="@(() => DialogService.Close())" />
+            </RadzenStack>
+        </RadzenStack>
+    </RadzenStack>
+</RadzenCard>
+
+@code {
+
+    [Parameter]
+    public DanhMucNVL? SelectDMucNVL { get; set; }
+
+    private List<LoaiNVL>? DSachLoaiNVLs;
+
+    protected override Task OnInitializedAsync()
+    {
+        int madanhmuc = int.TryParse(SelectDMucNVL?.MaDanhMuc.Value?.ToString(), out int dmid) ? dmid : 0;
+
+        DSachLoaiNVLs = SQLServerServices.GetListLoaiNVLs(madanhmuc);
+
+        return base.OnInitializedAsync();
+    }
+}

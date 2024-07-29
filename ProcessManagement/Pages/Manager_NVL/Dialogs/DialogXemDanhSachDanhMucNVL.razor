@@ -1,0 +1,76 @@
+﻿@using ProcessManagement.Commons
+@using ProcessManagement.Models.KHO_NVL
+@using ProcessManagement.Services.SQLServer
+@using Radzen.Blazor
+@using Radzen
+@using ProcessManagement.Models
+
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject SQLServerServices SQLServerServices
+
+<RadzenCard Variant="Variant.Filled" Style="height: 100%; width: 100%; background-color: white; border-radius: 0px">
+    <RadzenStack Gap="10px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: 100%; width: 100%;">
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="10px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: 5%; width: 100%;">
+            <RadzenText Text="@($"Danh sách danh mục nguyên vật liệu")" Style="font-size: 18px; font-weight: 500; color: black"></RadzenText>
+        </RadzenStack>
+
+        <RadzenCard Variant="Variant.Outlined" Style="height: 75%; width: 100%; background-color: white; border-radius: 5px;">
+            <RadzenStack Style="height: 100%; width: 100%; overflow-y: scroll" Gap="10px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                @if (DSachdanhmucs != null)
+                {
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="background-color: rgba(58, 71, 77); padding-top: 10px; padding-bottom: 10px; height: contain; width: 100%; border-bottom: var(--rz-grid-cell-border);">
+                        <RadzenStack Style="width: 5%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenText Text="STT" Style="font-size: 16px; color: white; font-weight: 500;"></RadzenText>
+                        </RadzenStack>
+                        <RadzenStack Style="width: 40%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenText Text="Tên danh mục NVL" Style="font-size: 16px; color: white; font-weight: 500;"></RadzenText>
+                        </RadzenStack>
+                        <RadzenStack Style="width: 40%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenText Text="Ngày tạo" Style="font-size: 16px; color: white; font-weight: 500;"></RadzenText>
+                        </RadzenStack>
+                    </RadzenStack>
+                    foreach (var danhmuc in DSachdanhmucs)
+                    {
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: contain; width: 100%; border-bottom: var(--rz-grid-cell-border);">
+                            <RadzenStack Style="width: 5%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenText Text="@((DSachdanhmucs?.IndexOf(danhmuc) + 1).ToString())" Style="color: darkgray; font-size: 12px; font-weight: 500;"></RadzenText>
+                            </RadzenStack>
+                            <RadzenStack Style="width: 40%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenText Text="@danhmuc.TenDanhMuc.Value?.ToString()" Style="font-size: 16px; font-weight: 600; color: darkred"></RadzenText>
+                            </RadzenStack>
+                            <RadzenStack Style="width: 40%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                @{
+                                    var value = danhmuc.NgayThem.Value?.ToString();
+                                    string ngaythem = (danhmuc.NgayThem.Value == null || string.IsNullOrEmpty(value)) ? " ____ " : Convert.ToDateTime(value).ToString(Common.DayTimeFormatnoTime);
+                                }
+                                <RadzenText Text="@ngaythem" Style="font-size: 16px; font-weight: 500;"></RadzenText>
+                            </RadzenStack>
+                        </RadzenStack>
+                    }
+                }
+            </RadzenStack>
+        </RadzenCard>
+        <RadzenStack Style="height: 5%; width: 100%; padding: 5px; padding-right: 10px; padding-top: 15px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+            <RadzenStack Gap="20px" Style="height: 100%; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                <RadzenText Text="@("Tổng: " + DSachdanhmucs?.Count)"
+                            Style="font-weight: 500; font-size: 18px; color: black; "></RadzenText>
+            </RadzenStack>
+
+            <RadzenStack Gap="15px" Style="height: 100%; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                <RadzenButton Style="width: 120px; height: 80%;" Icon="close" Text="Thoát" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" Click="@(() => DialogService.Close())" />
+            </RadzenStack>
+        </RadzenStack>
+    </RadzenStack>
+</RadzenCard>
+
+@code {
+    private List<DanhMucNVL>? DSachdanhmucs;
+
+    protected override Task OnInitializedAsync()
+    {
+        DSachdanhmucs = SQLServerServices.GetListDanhMucNVLs();
+
+        return base.OnInitializedAsync();
+    }
+}

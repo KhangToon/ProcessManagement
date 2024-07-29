@@ -1,0 +1,126 @@
+﻿@using ProcessManagement.Commons
+@using ProcessManagement.Models.KHO_NVL
+@using ProcessManagement.Services.SQLServer
+@using Radzen.Blazor
+@using Radzen
+@using ProcessManagement.Models
+
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject SQLServerServices SQLServerServices
+
+<RadzenCard Variant="Variant.Filled" Style="height: contain; width: 100%; min-width: 500px; border-radius: 10px">
+    <RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: 100%; width: 100%;">
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="10px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%;">
+            <RadzenText Text="@("Thêm mới danh mục nguyên vật liệu")" Style="color: var(--rz-primary-dark); font-size: 18px; font-weight: 600; height: contain; width: contain"></RadzenText>
+        </RadzenStack>
+        <RadzenCard Variant="Variant.Flat" Style="min-height: 150px; width: 100%; padding: 10px; border-radius: 10px; margin-top: 5px;">
+            <RadzenStack Style="height: 100%; width: 100%; padding: 10px;" Gap="0" Orientation="Orientation.Vertical">
+                @{
+                    List<Propertyy>? nvlproperties = newDanhmucNVL.GetPropertiesValues();
+
+                    var alowdispproperties = nvlproperties.Where(nvl => nvl.AlowDisplay == true);
+                    // Chon danh muc nguyen vat lieu
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 10px; border-bottom: var(--rz-grid-cell-border);">
+                        <RadzenStack Style="width: 40%;">
+                            <RadzenText Text="Danh mục NVL" Style="font-size: 16px; font-weight: 700; height: contain; width: 100% "></RadzenText>
+                        </RadzenStack>
+                        <RadzenStack Style="width: 60%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenTextBox Placeholder="@($"*Nhập {newDanhmucNVL.TenDanhMuc.DisplayName}")" Value="@newDanhmucNVL.TenDanhMuc.Value?.ToString()" Style="font-size: 16px; height: contain;  border-width: 1px; width: 100% "
+                                           ValueChanged="@((args) => {newDanhmucNVL.TenDanhMuc.Value = args; IsDanhmucDatontai();})">
+                            </RadzenTextBox>
+                        </RadzenStack>
+                    </RadzenStack>
+                    // Ngay tao danh muc
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 10px; border-bottom: var(--rz-grid-cell-border);">
+                        <RadzenStack Style="width: 40%;">
+                            <RadzenText Text="Ngày tạo" Style="font-size: 16px; font-weight: 700; height: contain; width: 100% "></RadzenText>
+                        </RadzenStack>
+                        <RadzenStack Style="width: 60%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenDatePicker TValue="DateTime" Value="@((newDanhmucNVL.NgayThem.Value != null) ? Convert.ToDateTime(newDanhmucNVL.NgayThem.Value?.ToString()) : DateTime.Now)"
+                                              ValueChanged="@((args) => { newDanhmucNVL.NgayThem.Value = args;})"
+                                              ShowTime="false" HourFormat="12" DateFormat="@Common.DayTimeFormatnoTime" AllowInput="false"
+                                              Style="width: 100%; font-size: 16px"></RadzenDatePicker>
+                        </RadzenStack>
+                    </RadzenStack>
+                    if (newDanhmucNVL.TenDanhMuc.Value?.ToString() != string.Empty && newDanhmucNVL.TenDanhMuc.Value != null)
+                    {
+                        if (danhmucdatontai)
+                        {
+                            <RadzenAlert Text="@("Tên danh mục đã tồn tại, thử tên khác!")" Style="width: 100%; height: contain; font-size: 16px; padding-left: 15px" AlertStyle="AlertStyle.Danger" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                        }
+                        else
+                        {
+                            <RadzenAlert Text="@("Tên danh mục hợp lệ")" Style="width: 100%; height: contain; font-size: 16px; padding-left: 15px" AlertStyle="AlertStyle.Success" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                        }
+                    }
+
+                    <RadzenText Text="Xem danh sách danh mục" onclick="@(() => OnOpenDialogXemDSachDanhmucNVL())"
+                                Style="font-size: 14px; color: Highlight; cursor: pointer; font-weight: 500; height: contain; width: 100%; font-style: italic; text-decoration: underline; margin-top: 10px">
+                    </RadzenText>
+                }
+            </RadzenStack>
+        </RadzenCard>
+        <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding-top: 10px; border-top: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+            <RadzenButton Disabled="@(IsDanhmucDatontai() || newDanhmucNVL.TenDanhMuc.Value?.ToString() == string.Empty || newDanhmucNVL.TenDanhMuc.Value == null)" Style="width: contain; height: contain; color: white; background-color: darkgreen" Icon="save" Text="Xác nhận thêm" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Variant="Variant.Filled" Click="@(() => OnAddNewDanhmucNVL(newDanhmucNVL))" />
+            <RadzenButton Style="width: 120px; height: 80%;" Icon="close" Text="Thoát" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" Click="@(() => DialogService.Close(newDanhmucNVL))" />
+        </RadzenStack>
+    </RadzenStack>
+</RadzenCard>
+
+@code {
+    private DanhMucNVL newDanhmucNVL = new() { NgayThem = { Value = DateTime.Now } };
+
+    private bool danhmucdatontai = false;
+
+    private async Task OnAddNewDanhmucNVL(DanhMucNVL? newdmnvl)
+    {
+        bool? comfirm = await DialogService.Confirm("Thêm mới danh mục nguyên vật liệu này?", "Xác nhận", new ConfirmOptions() { OkButtonText = "OK", CancelButtonText = "Hủy", ShowClose = false });
+
+        if (comfirm.Value && newdmnvl?.TenDanhMuc.Value?.ToString() != string.Empty && newdmnvl?.TenDanhMuc.Value != null)
+        {
+            (int result, string error) = SQLServerServices.InsertNewDanhMucNguyenVatLieu(newdmnvl);
+
+            if (result > 0)
+            {
+                ShowNotification("Thêm thành công!", NotificationSeverity.Success, 2000);
+
+                DialogService.Close(newdmnvl);
+            }
+            else
+            {
+                await DialogService.Alert($"{error}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+            }
+        }
+    }
+
+    private bool IsDanhmucDatontai()
+    {
+        var isexisted = SQLServerServices.IsTenDanhmucNVLExists(newDanhmucNVL.TenDanhMuc.Value?.ToString()?.Trim());
+
+        danhmucdatontai = isexisted;
+
+        return danhmucdatontai;
+    }
+
+    private async Task OnOpenDialogXemDSachDanhmucNVL()
+    {
+        await DialogService.OpenAsync<DialogXemDanhSachDanhMucNVL>(null, null,
+        new DialogOptions() { ShowTitle = false, Width = "50%", Height = "contain", Resizable = false, Draggable = false, ShowClose = false, Style = "border-radius: 10px; padding: 0px" });
+    }
+
+
+    // Notification
+    void ShowNotification(string message, NotificationSeverity notifytype, double time)
+    {
+        NotificationMessage notify = new NotificationMessage
+            {
+                Style = "position: fixed; top: 0; right: 0;",
+                Severity = notifytype,
+                Summary = message,
+                Duration = time
+            };
+
+        NotificationService.Notify(notify);
+    }
+}

@@ -1923,7 +1923,7 @@ namespace ProcessManagement.Services.SQLServer
         {
             using (var connection = new SqlConnection(connectionString))
             {
-                string query = $"SELECT COUNT(*) FROM [{Common.TableNguyenVatLieu}] WHERE [{Common.TenNVL}] = '{tenNVL}'";
+                string query = $"SELECT COUNT(*) FROM [{Common.TableNguyenVatLieu}] WHERE [{Common.TenNVL}] = N'{tenNVL}'";
 
                 using (var command = new SqlCommand(query, connection))
                 {
@@ -2044,9 +2044,73 @@ namespace ProcessManagement.Services.SQLServer
             return listDanhmucNVLs;
         }
 
+        // Them new danh muc NVL // KHO_DanhMucNguyenVatLieu
+        public (int, string) InsertNewDanhMucNguyenVatLieu(DanhMucNVL newdmnvl)
+        {
+            List<Propertyy> newItems = newdmnvl.GetPropertiesValues().Where(po => po.AlowDatabase == true && po.Value != null).ToList();
+
+            int result = -1; string errorMess = string.Empty;
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                string columnNames = string.Join(",", newItems.Select(key => $"[{key.DBName}]"));
+
+                string parameterNames = string.Join(",", newItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $"INSERT INTO [{Common.TableDanhMucNVL}] ({columnNames}) OUTPUT INSERTED.{Common.MaDanhMuc} VALUES ({parameterNames})";
+
+                foreach (var item in newItems)
+                {
+                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
+
+                    object? parameterValue = item.Value;
+
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                object? rs = command.ExecuteScalar();
+
+                result = Convert.ToInt32(rs);
+
+                if (result == 0) result = -1;
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
+        // Check ten danh muc da ton tai // KHO_DanhMucNguyenVatLieu
+        public bool IsTenDanhmucNVLExists(string? tendmnvl)
+        {
+            using (var connection = new SqlConnection(connectionString))
+            {
+                string query = $"SELECT COUNT(*) FROM [{Common.TableDanhMucNVL}] WHERE [{Common.TenDanhMuc}] = N'{tendmnvl}'";
+
+                using (var command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+
+                    int count = (int)command.ExecuteScalar();
+
+                    return count > 0;
+                }
+            }
+        }
+
         // Table KHO_LoaiNguyenVatLieu //
 
-        // Get loai NVL by maloai NVL
+        // Get loai NVL by maloai NVL // KHO_LoaiNguyenVatLieu
         public LoaiNVL GetLoaiNVLbyID(int maloaiNVL)
         {
             LoaiNVL loainvl = new();
@@ -2080,7 +2144,7 @@ namespace ProcessManagement.Services.SQLServer
             return loainvl;
         }
 
-        // Get list loai nguyen vat lieu (get all)
+        // Get list loai nguyen vat lieu (get all) // KHO_LoaiNguyenVatLieu
         public List<LoaiNVL> GetListLoaiNVLs()
         {
             List<LoaiNVL> listloaiNVLs = new();
@@ -2117,7 +2181,7 @@ namespace ProcessManagement.Services.SQLServer
             return listloaiNVLs;
         }
 
-        // Get list loai nguyen vat lieu (order by madanhmuc)
+        // Get list loai nguyen vat lieu (order by madanhmuc) // KHO_LoaiNguyenVatLieu
         public List<LoaiNVL> GetListLoaiNVLs(int madanhmuc)
         {
             List<LoaiNVL> listloaiNVLs = new();
@@ -2152,6 +2216,70 @@ namespace ProcessManagement.Services.SQLServer
             }
 
             return listloaiNVLs;
+        }
+
+        // Check ten loai nvl da ton tai // KHO_LoaiNguyenVatLieu
+        public bool IsTenLoaiNVLExists(string? tenloainvl)
+        {
+            using (var connection = new SqlConnection(connectionString))
+            {
+                string query = $"SELECT COUNT(*) FROM [{Common.TableLoaiNVL}] WHERE [{Common.TenLoaiNVL}] = N'{tenloainvl}'";
+
+                using (var command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+
+                    int count = (int)command.ExecuteScalar();
+
+                    return count > 0;
+                }
+            }
+        }
+
+        // Them new loai NVL // KHO_LoaiNguyenVatLieu
+        public (int, string) InsertNewLoaiNguyenVatLieu(LoaiNVL newloainvl)
+        {
+            List<Propertyy> newItems = newloainvl.GetPropertiesValues().Where(po => po.AlowDatabase == true && po.Value != null).ToList();
+
+            int result = -1; string errorMess = string.Empty;
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                string columnNames = string.Join(",", newItems.Select(key => $"[{key.DBName}]"));
+
+                string parameterNames = string.Join(",", newItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $"INSERT INTO [{Common.TableLoaiNVL}] ({columnNames}) OUTPUT INSERTED.{Common.MaLoaiNVL} VALUES ({parameterNames})";
+
+                foreach (var item in newItems)
+                {
+                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
+
+                    object? parameterValue = item.Value;
+
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                object? rs = command.ExecuteScalar();
+
+                result = Convert.ToInt32(rs);
+
+                if (result == 0) result = -1;
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
         }
     }
 }

@@ -1,0 +1,146 @@
+﻿@using ProcessManagement.Commons
+@using ProcessManagement.Models.KHO_NVL
+@using ProcessManagement.Services.SQLServer
+@using Radzen.Blazor
+@using Radzen
+@using ProcessManagement.Models
+
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject SQLServerServices SQLServerServices
+
+<RadzenCard Variant="Variant.Filled" Style="height: contain; width: 100%; min-width: 500px; border-radius: 10px">
+    <RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: 100%; width: 100%;">
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="10px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%;">
+            <RadzenText Text="@("Thêm mới loại nguyên vật liệu")" Style="color: var(--rz-primary-dark); font-size: 18px; font-weight: 600; height: contain; width: contain"></RadzenText>
+        </RadzenStack>
+        <RadzenCard Variant="Variant.Flat" Style="min-height: 150px; width: 100%; padding: 10px; border-radius: 10px; margin-top: 5px;">
+            <RadzenStack Style="height: 100%; width: 100%; padding: 10px;" Gap="0" Orientation="Orientation.Vertical">
+                @{
+                    List<Propertyy>? nvlproperties = newLoaiNVL.GetPropertiesValues();
+
+                    var alowdispproperties = nvlproperties.Where(nvl => nvl.AlowDisplay == true);
+                    // Danh muc nguyen vat lieu
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 10px; border-bottom: var(--rz-grid-cell-border);">
+                        <RadzenStack Style="width: 40%;">
+                            <RadzenText Text="Danh mục NVL" Style="font-size: 16px; font-weight: 700; height: contain; width: 100% "></RadzenText>
+                        </RadzenStack>
+                        <RadzenStack Style="width: 60%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenTextBox Disabled="true" Value="@SelectDMucNVL?.TenDanhMuc.Value?.ToString()" Style="font-size: 16px; height: contain;  border-width: 1px; width: 100%; background-color: white; color: darkblue"></RadzenTextBox>
+                        </RadzenStack>
+                    </RadzenStack>
+                    // Loai nguyen vat lieu
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 10px; border-bottom: var(--rz-grid-cell-border);">
+                        <RadzenStack Style="width: 40%;">
+                            <RadzenText Text="Loại nguyên vật liệu" Style="font-size: 16px; font-weight: 700; height: contain; width: 100% "></RadzenText>
+                        </RadzenStack>
+                        <RadzenStack Style="width: 60%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenTextBox Placeholder="@($"*Nhập {newLoaiNVL.TenLoaiNVL.DisplayName}")" Value="@newLoaiNVL.TenLoaiNVL.Value?.ToString()" Style="font-size: 16px; height: contain;  border-width: 1px; width: 100% "
+                                           ValueChanged="@((args) => {newLoaiNVL.TenLoaiNVL.Value = args; IsLoaiNvlDatontai();})">
+                            </RadzenTextBox>
+                        </RadzenStack>
+                    </RadzenStack>
+                    // Ngay tao
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 10px; border-bottom: var(--rz-grid-cell-border);">
+                        <RadzenStack Style="width: 40%;">
+                            <RadzenText Text="Ngày tạo" Style="font-size: 16px; font-weight: 700; height: contain; width: 100% "></RadzenText>
+                        </RadzenStack>
+                        <RadzenStack Style="width: 60%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenDatePicker TValue="DateTime" Value="@((newLoaiNVL.NgayThem.Value != null) ? Convert.ToDateTime(newLoaiNVL.NgayThem.Value?.ToString()) : DateTime.Now)"
+                                              ValueChanged="@((args) => { newLoaiNVL.NgayThem.Value = args;})"
+                                              ShowTime="false" HourFormat="12" DateFormat="@Common.DayTimeFormatnoTime" AllowInput="false"
+                                              Style="width: 100%; font-size: 16px"></RadzenDatePicker>
+                        </RadzenStack>
+                    </RadzenStack>
+                    if (newLoaiNVL.TenLoaiNVL.Value?.ToString() != string.Empty && newLoaiNVL.TenLoaiNVL.Value != null)
+                    {
+                        if (loainvldatontai)
+                        {
+                            <RadzenAlert Text="@("Loại NVL đã tồn tại, thử tên khác!")" Style="width: 100%; height: contain; font-size: 16px; padding-left: 15px" AlertStyle="AlertStyle.Danger" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                        }
+                        else
+                        {
+                            <RadzenAlert Text="@("Tên loại NVL hợp lệ")" Style="width: 100%; height: contain; font-size: 16px; padding-left: 15px" AlertStyle="AlertStyle.Success" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                        }
+                    }
+
+                    <RadzenText Text="Xem danh sách loại NVL" onclick="@(() => OnOpenDialogXemDSachLoaiNVL())"
+                                Style="font-size: 14px; color: Highlight; cursor: pointer; font-weight: 500; height: contain; width: 100%; font-style: italic; text-decoration: underline; margin-top: 10px">
+                    </RadzenText>
+                }
+            </RadzenStack>
+        </RadzenCard>
+        <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding-top: 10px; border-top: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+            <RadzenButton Disabled="@(IsLoaiNvlDatontai() || newLoaiNVL.TenLoaiNVL.Value?.ToString() == string.Empty || newLoaiNVL.TenLoaiNVL.Value == null)" Style="width: contain; height: contain; color: white; background-color: darkgreen" Icon="save" Text="Xác nhận thêm" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Variant="Variant.Filled" Click="@(() => OnAddNewLoaiNVL(newLoaiNVL))" />
+            <RadzenButton Style="width: 120px; height: 80%;" Icon="close" Text="Thoát" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" Click="@(() => DialogService.Close(newLoaiNVL))" />
+        </RadzenStack>
+    </RadzenStack>
+</RadzenCard>
+
+@code {
+    [Parameter]
+    public DanhMucNVL? SelectDMucNVL { get; set; }
+    private LoaiNVL newLoaiNVL = new() { NgayThem = { Value = DateTime.Now } };
+    private bool loainvldatontai = false;
+
+    private bool IsLoaiNvlDatontai()
+    {
+        var isexisted = SQLServerServices.IsTenLoaiNVLExists(newLoaiNVL.TenLoaiNVL.Value?.ToString()?.Trim());
+
+        loainvldatontai = isexisted;
+
+        return loainvldatontai;
+    }
+
+    private async Task OnAddNewLoaiNVL(LoaiNVL? newloainvl)
+    {
+        bool? comfirm = await DialogService.Confirm("Thêm mới loại nguyên vật liệu này?", "Xác nhận", new ConfirmOptions() { OkButtonText = "OK", CancelButtonText = "Hủy", ShowClose = false });
+
+        if (comfirm.Value && newloainvl?.TenLoaiNVL.Value?.ToString() != string.Empty && newloainvl?.TenLoaiNVL.Value != null)
+        {
+            int madanhmuc = int.TryParse(SelectDMucNVL?.MaDanhMuc.Value?.ToString(), out int dmid) ? dmid : 0;
+
+            if (madanhmuc != 0)
+            {
+                newloainvl.MaDanhMuc.Value = madanhmuc;
+
+                (int result, string error) = SQLServerServices.InsertNewLoaiNguyenVatLieu(newloainvl);
+
+                if (result > 0)
+                {
+                    ShowNotification("Thêm thành công!", NotificationSeverity.Success, 2000);
+
+                    DialogService.Close(newloainvl);
+                }
+                else
+                {
+                    await DialogService.Alert($"{error}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                }
+            }
+            else
+            {
+                await DialogService.Alert($"Lỗi, danh mục không tồn tại", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+            }
+        }
+    }
+
+    private async Task OnOpenDialogXemDSachLoaiNVL()
+    {
+        await DialogService.OpenAsync<DialogXemDSachLoaiNVL>(null, new Dictionary<string, object>() { { "SelectDMucNVL", SelectDMucNVL ?? new() } },
+        new DialogOptions() { ShowTitle = false, Width = "50%", Height = "contain", Resizable = false, Draggable = false, ShowClose = false, Style = "border-radius: 10px; padding: 0px" });
+    }
+
+    // Notification
+    void ShowNotification(string message, NotificationSeverity notifytype, double time)
+    {
+        NotificationMessage notify = new NotificationMessage
+            {
+                Style = "position: fixed; top: 0; right: 0;",
+                Severity = notifytype,
+                Summary = message,
+                Duration = time
+            };
+
+        NotificationService.Notify(notify);
+    }
+}

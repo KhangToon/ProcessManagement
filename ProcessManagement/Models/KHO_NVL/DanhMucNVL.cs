@@ -7,6 +7,7 @@ namespace ProcessManagement.Models.KHO_NVL
     {
         public Propertyy MaDanhMuc { get; set; } = new() { DBName = Common.MaDanhMuc, DisplayName = "Mã danh mục", Type = typeof(int), AlowDatabase = true }; // ID
         public Propertyy TenDanhMuc { get; set; } = new() { DBName = Common.TenDanhMuc, DisplayName = "Tên danh mục", Type = typeof(string), AlowDatabase = true };
+        public Propertyy NgayThem { get; set; } = new() { DBName = Common.NgayThem, DisplayName = "Ngày tạo", Type = typeof(DateTime), AlowDatabase = true };
 
         public List<Propertyy> GetPropertiesValues()
         {

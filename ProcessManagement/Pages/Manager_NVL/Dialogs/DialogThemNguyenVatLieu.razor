@@ -7,6 +7,7 @@
 
 @inject DialogService DialogService
 @inject NotificationService NotificationService
+@inject TooltipService TooltipService
 @inject SQLServerServices SQLServerServices
 
 <RadzenCard Style="height: 100%; width: 100%;" Variant="Variant.Flat">
@@ -16,7 +17,7 @@
         </RadzenStack>
         <RadzenRow Gap="10px" Style="height: contain; width: 100%; border-top: var(--rz-grid-cell-border); overflow-y: scroll; padding: 0;">
             <RadzenColumn Size="12" SizeMD="12" Style="height: 100%; width: 100%; padding: 15px; padding-right: 0">
-                <RadzenText Text="Nhập thông tin nguyên vật liệu" Style="color: darkred; font-size: 16px; font-weight: 500; height: contain; width: contain"></RadzenText>
+                <RadzenText Text="Nhập thông tin nguyên vật liệu (NVL)" Style="color: darkred; font-size: 16px; font-weight: 500; height: contain; width: contain"></RadzenText>
                 <RadzenCard Variant="Variant.Filled" Style="min-height: 300px; width: 100%; padding: 0px; margin-top: 10px;">
                     <RadzenStack Style="height: 100%; width: 100%; padding: 10px;" Gap="0" Orientation="Orientation.Vertical">
                         @{
@@ -35,28 +36,36 @@
                                         <RadzenStack Style="width: 70%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                             @if (property.DBName == Common.MaDanhMuc)
                                             {
-                                                <RadzenDropDown AllowClear="true" Placeholder="@("*Chọn danh mục nguyên vật liệu")" TValue="string" Style="width: 100%; height: contain; font-size: 14px; font-weight: 600"
-                                                                Data=@danhMucNVLs?.Select(dm => dm.TenDanhMuc.Value?.ToString())
-                                                                Change="@(args =>
+                                                <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
+                                                    <RadzenDropDown AllowClear="true" Placeholder="@("*Chọn danh mục nguyên vật liệu")" TValue="string" Style="width: 70%; height: contain; font-size: 14px; font-weight: 600;"
+                                                                    Data=@danhMucNVLs?.Select(dm => dm.TenDanhMuc.Value?.ToString())
+                                                                    Change="@(args =>
                                                                     {
                                                                         selectDanhmuc = danhMucNVLs?.FirstOrDefault(dm => dm.TenDanhMuc.Value?.ToString() == args?.ToString());
                                                                         property.Value = selectDanhmuc?.MaDanhMuc.Value?.ToString();
                                                                         loaiNVLs = LoadListLoaiNguyenVatLieu(selectDanhmuc);
                                                                         selectLoaiNVL = null; // reset selected loaiNVL
                                                                     })">
-                                                </RadzenDropDown>
+                                                    </RadzenDropDown>
+                                                    <RadzenButton Style="width: 30%; min-height: 35px; height: contain;" Click="@(() => OnOpenDialogAddNewDanhmucNVL())" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Top, "Thêm danh mục"))"
+                                                                  Icon="add" Text="Danh mục khác" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" />
+                                                </RadzenStack>
                                             }
                                             else if (property.DBName == Common.MaLoaiNVL)
                                             {
-                                                <RadzenDropDown AllowClear="true" Placeholder="@("*Chọn loại nguyên vật liệu")" Disabled="(loaiNVLs?.Count == 0)" TValue="string" Style="width: 100%; height: contain; font-size: 14px; font-weight: 600" Value="selectLoaiNVL?.TenLoaiNVL.Value?.ToString()"
-                                                                Data=@(loaiNVLs?.Select(dm => dm.TenLoaiNVL.Value?.ToString()) ?? Enumerable.Empty<string>())
-                                                                Change="@(args =>
+                                                <RadzenStack Gap=" 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
+                                                    <RadzenDropDown AllowClear="true" Placeholder="@("*Chọn loại nguyên vật liệu")" Disabled="(loaiNVLs?.Count == 0)" TValue="string" Style="width: 70%; height: contain; font-size: 14px; font-weight: 600" Value="selectLoaiNVL?.TenLoaiNVL.Value?.ToString()"
+                                                                    Data=@(loaiNVLs?.Select(dm => dm.TenLoaiNVL.Value?.ToString()) ?? Enumerable.Empty<string>())
+                                                                    Change="@(args =>
                                                                     {
                                                                         selectLoaiNVL = loaiNVLs?.FirstOrDefault(dm => dm.TenLoaiNVL.Value?.ToString() == args?.ToString());
                                                                         property.Value = selectLoaiNVL?.MaLoaiNVL.Value?.ToString();
                                                                     })">
-                                                </RadzenDropDown>
-                                                if (selectLoaiNVL == null) { property.Value = null; } // reset property value (MaLoaiNVL) khi chuyen san danh muc khac
+                                                    </RadzenDropDown>
+                                                    <RadzenButton Style="width: 30%; min-height: 35px; height: contain;" Click="@(() => OnOpenDialogAddNewLoaiNVL())" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Thêm loại NVL"))"
+                                                                  Icon="add" Text="Loại NVL khác" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" />
+                                                </RadzenStack>
+                                                @if (selectLoaiNVL == null) { property.Value = null; } // reset property value (MaLoaiNVL) khi chuyen san danh muc khac
                                             }
                                             else if (property.DBName == Common.TenNVL)
                                             {
@@ -136,6 +145,29 @@
         return loaiNVLs;
     }
 
+    private async Task OnOpenDialogAddNewDanhmucNVL()
+    {
+        var newDanhMuc = await DialogService.OpenAsync<DialogThemDanhmuc>(null, null,
+        new DialogOptions() { ShowTitle = false, Width = "contain", Height = "contain", Resizable = false, Draggable = false, ShowClose = false, Style = "border-radius: 10px; padding: 0px" });
+
+        danhMucNVLs = LoadListDanhmucNguyenVatLieu();
+    }
+
+    private async Task OnOpenDialogAddNewLoaiNVL()
+    {
+        if (selectDanhmuc != null)
+        {
+            var newLoaiNVL = await DialogService.OpenAsync<DialogThemLoaiNVL>(null, new Dictionary<string, object>() { { "SelectDMucNVL", selectDanhmuc ?? new() } },
+            new DialogOptions() { ShowTitle = false, Width = "contain", Height = "contain", Resizable = false, Draggable = false, ShowClose = false, Style = "border-radius: 10px; padding: 0px" });
+
+            loaiNVLs = LoadListLoaiNguyenVatLieu(selectDanhmuc);
+        }
+        else
+        {
+            ShowNotification("Hãy chọn danh mục!", NotificationSeverity.Warning, 2000);
+        }
+    }
+
     private async Task OnAddnewNVL()
     {
         bool? comfirm = await DialogService.Confirm("Thêm mới loại nguyên liệu này?", "Xác nhận", new ConfirmOptions() { OkButtonText = "OK", CancelButtonText = "Hủy", ShowClose = false });
@@ -178,5 +210,12 @@
             };
 
         NotificationService.Notify(notify);
+    }
+    // Tooltip
+    void ShowToolTip(ElementReference elementReference, TooltipPosition position, string content)
+    {
+        TooltipOptions options = new TooltipOptions() { Position = position, Style = "background-color: var(--rz-primary-light); " };
+
+        TooltipService.Open(elementReference, content, options);
     }
 }
