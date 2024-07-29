@@ -133,6 +133,7 @@ namespace ProcessManagement.Commons
         public const string TableDanhMucNVL = "KHO_DanhMucNguyenVatLieu";
         public const string DMID = "DMID";
         public const string TenDanhMuc = "TenDanhMuc";
+        public const string DanhMucNguyenLieuGiaCong = "Nguyên liệu gia công";
 
         // Table KHO_LoaiNguyenVatLieu //
         public const string TableLoaiNVL = "KHO_LoaiNguyenVatLieu";

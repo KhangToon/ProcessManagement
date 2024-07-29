@@ -28,18 +28,18 @@
                                     // Chon danh muc nguyen vat lieu
                                     <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 10px; border-bottom: var(--rz-grid-cell-border);">
                                         <RadzenStack Style="width: 30%;">
-                                            <RadzenText Text="Danh mục NVL" Style="font-size: 16px; font-weight: 700; height: contain; width: 100% "></RadzenText>
+                                            <RadzenText Text="Danh mục" Style="font-size: 16px; font-weight: 700; height: contain; width: 100% "></RadzenText>
                                         </RadzenStack>
                                         <RadzenStack Style="width: 70%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                            <RadzenDropDown AllowClear="true" Placeholder="@("*Chọn danh mục nguyên vật liệu")" TValue="string" Style="width: 100%; height: contain; font-size: 14px; font-weight: 600"
-                                                            Data=@dsachDanhmucNVL?.Select(dm => dm.TenDanhMuc.Value?.ToString())
+                                            <RadzenDropDown Disabled="true" AllowClear="true" Placeholder="@("*Chọn danh mục nguyên vật liệu")" TValue="string" Style="width: 100%; height: contain; font-size: 14px; font-weight: 600; background-color: white"
+                                                            Data=@DsachDanhmucNVL?.Select(dm => dm.TenDanhMuc.Value?.ToString()) Value="@SelectDanhmuc?.TenDanhMuc.Value?.ToString()"
                                                             Change="@(args =>
                                                                     {
-                                                                        selectDanhmuc = dsachDanhmucNVL?.FirstOrDefault(dm => dm.TenDanhMuc.Value?.ToString() == args?.ToString());
-                                                                        dsachloaiNVLs = LoadListLoaiNguyenVatLieu(selectDanhmuc);
+                                                                        SelectDanhmuc = DsachDanhmucNVL?.FirstOrDefault(dm => dm.TenDanhMuc.Value?.ToString() == args?.ToString());
+                                                                        DsachloaiNVLs = LoadListLoaiNguyenVatLieu(SelectDanhmuc);
                                                                         selectLoaiNVL = null; // reset selected loaiNVL
                                                                         selectNguyenVL = null; // reset selected NVL
-                                                                        dsachNVLs = null; // reset danh sach NVL
+                                                                        DsachNVLs = null; // reset danh sach NVL
                                                                     })">
                                             </RadzenDropDown>
                                         </RadzenStack>
@@ -51,13 +51,13 @@
                                             <RadzenText Text="Loại NVL" Style="font-size: 16px; font-weight: 700; height: contain; width: 100% "></RadzenText>
                                         </RadzenStack>
                                         <RadzenStack Style="width: 70%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                            <RadzenDropDown AllowClear="true" Placeholder="@("*Chọn loại nguyên vật liệu")" Disabled="(dsachloaiNVLs?.Count == 0 || dsachloaiNVLs == null)" TValue="string" Style="width: 100%; height: contain; font-size: 14px; font-weight: 600"
+                                            <RadzenDropDown AllowClear="true" Placeholder="@("*Chọn loại nguyên vật liệu")" Disabled="(DsachloaiNVLs?.Count == 0 || DsachloaiNVLs == null)" TValue="string" Style="width: 100%; height: contain; font-size: 14px; font-weight: 600"
                                                             Value="selectLoaiNVL?.TenLoaiNVL.Value?.ToString()"
-                                                            Data=@(dsachloaiNVLs?.Select(dm => dm.TenLoaiNVL.Value?.ToString()) ?? Enumerable.Empty<string>())
+                                                            Data=@(DsachloaiNVLs?.Select(dm => dm.TenLoaiNVL.Value?.ToString()) ?? Enumerable.Empty<string>())
                                                             Change="@(args =>
                                                                     {
-                                                                        selectLoaiNVL = dsachloaiNVLs?.FirstOrDefault(lnvl => lnvl.TenLoaiNVL.Value?.ToString() == args?.ToString());
-                                                                        dsachNVLs = LoadListNguyenVatLieu(selectLoaiNVL);
+                                                                        selectLoaiNVL = DsachloaiNVLs?.FirstOrDefault(lnvl => lnvl.TenLoaiNVL.Value?.ToString() == args?.ToString());
+                                                                        DsachNVLs = LoadListNguyenVatLieu(selectLoaiNVL);
                                                                         selectNguyenVL = null; // reset selected NVL
                                                                     })">
                                             </RadzenDropDown>
@@ -70,12 +70,12 @@
                                             <RadzenText Text="Nguyên liệu" Style="font-size: 16px; font-weight: 700; height: contain; width: 100% "></RadzenText>
                                         </RadzenStack>
                                         <RadzenStack Style="width: 70%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                            <RadzenDropDown AllowClear="true" Placeholder="@("*Chọn nguyên liệu")" Disabled="(dsachNVLs?.Count == 0 || dsachNVLs == null)" TValue="string" Style="width: 100%; height: contain; font-size: 14px; font-weight: 600"
+                                            <RadzenDropDown AllowClear="true" Placeholder="@("*Chọn nguyên liệu")" Disabled="(DsachNVLs?.Count == 0 || DsachNVLs == null)" TValue="string" Style="width: 100%; height: contain; font-size: 14px; font-weight: 600"
                                                             Value="selectNguyenVL?.TenNVL.Value?.ToString()"
-                                                            Data=@(dsachNVLs?.Select(dm => dm.TenNVL.Value?.ToString()) ?? Enumerable.Empty<string>())
+                                                            Data=@(DsachNVLs?.Select(dm => dm.TenNVL.Value?.ToString()) ?? Enumerable.Empty<string>())
                                                             Change="@(args =>
                                                                     {
-                                                                        selectNguyenVL = dsachNVLs?.FirstOrDefault(nvl => nvl.TenNVL.Value?.ToString() == args?.ToString());
+                                                                        selectNguyenVL = DsachNVLs?.FirstOrDefault(nvl => nvl.TenNVL.Value?.ToString() == args?.ToString());
                                                                     })">
                                             </RadzenDropDown>
                                         </RadzenStack>
@@ -166,19 +166,23 @@
     [Parameter]
     public SanPham? Sanpham { get; set; }
 
-    private List<DanhMucNVL>? dsachDanhmucNVL;
-    private DanhMucNVL? selectDanhmuc;
+    private List<DanhMucNVL>? DsachDanhmucNVL;
+    private DanhMucNVL? SelectDanhmuc;
 
-    private List<LoaiNVL>? dsachloaiNVLs;
+    private List<LoaiNVL>? DsachloaiNVLs;
     private LoaiNVL? selectLoaiNVL;
 
-    private List<NguyenVatLieu>? dsachNVLs;
+    private List<NguyenVatLieu>? DsachNVLs;
     private NguyenVatLieu? selectNguyenVL;
 
 
     protected override Task OnInitializedAsync()
     {
-        dsachDanhmucNVL = LoadListDanhmucNguyenVatLieu();
+        DsachDanhmucNVL = LoadListDanhmucNguyenVatLieu();
+
+        SelectDanhmuc = DsachDanhmucNVL?.FirstOrDefault(dm => dm.TenDanhMuc.Value?.ToString()?.Trim() == Common.DanhMucNguyenLieuGiaCong);
+
+        DsachloaiNVLs = LoadListLoaiNguyenVatLieu(SelectDanhmuc);
 
         return base.OnInitializedAsync();
     }

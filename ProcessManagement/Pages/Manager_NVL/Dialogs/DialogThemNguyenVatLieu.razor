@@ -37,28 +37,28 @@
                                             @if (property.DBName == Common.DMID)
                                             {
                                                 <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
-                                                    <RadzenDropDown AllowClear="true" Placeholder="@("*Chọn danh mục nguyên vật liệu")" TValue="string" Style="width: 70%; height: contain; font-size: 14px; font-weight: 600;"
-                                                                    Data=@danhMucNVLs?.Select(dm => dm.TenDanhMuc.Value?.ToString())
+                                                    <RadzenDropDown Disabled="true" AllowClear="true" Placeholder="@("*Chọn danh mục nguyên vật liệu")" TValue="string" Style="width: 70%; height: contain; font-size: 14px; font-weight: 600;"
+                                                                    Data=@danhMucNVLs?.Select(dm => dm.TenDanhMuc.Value?.ToString()) Value="@SelectDanhmuc?.TenDanhMuc.Value?.ToString()"
                                                                     Change="@(args =>
                                                                     {
-                                                                        selectDanhmuc = danhMucNVLs?.FirstOrDefault(dm => dm.TenDanhMuc.Value?.ToString() == args?.ToString());
-                                                                        property.Value = selectDanhmuc?.DMID.Value?.ToString();
-                                                                        loaiNVLs = LoadListLoaiNguyenVatLieu(selectDanhmuc);
+                                                                        SelectDanhmuc = danhMucNVLs?.FirstOrDefault(dm => dm.TenDanhMuc.Value?.ToString() == args?.ToString());
+                                                                        property.Value = SelectDanhmuc?.DMID.Value?.ToString();
+                                                                        LoaiNVLs = LoadListLoaiNguyenVatLieu(SelectDanhmuc);
                                                                         selectLoaiNVL = null; // reset selected loaiNVL
                                                                     })">
                                                     </RadzenDropDown>
-                                                    <RadzenButton Style="width: 30%; min-height: 35px; height: contain;" Click="@(() => OnOpenDialogAddNewDanhmucNVL())" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Top, "Thêm danh mục"))"
+                                                    <RadzenButton Disabled="true" Style="width: 30%; min-height: 35px; height: contain;" Click="@(() => OnOpenDialogAddNewDanhmucNVL())"
                                                                   Icon="add" Text="Danh mục khác" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" />
                                                 </RadzenStack>
                                             }
                                             else if (property.DBName == Common.LOAINVLID)
                                             {
                                                 <RadzenStack Gap=" 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
-                                                    <RadzenDropDown AllowClear="true" Placeholder="@("*Chọn loại nguyên vật liệu")" Disabled="(loaiNVLs?.Count == 0)" TValue="string" Style="width: 70%; height: contain; font-size: 14px; font-weight: 600" Value="selectLoaiNVL?.TenLoaiNVL.Value?.ToString()"
-                                                                    Data=@(loaiNVLs?.Select(dm => dm.TenLoaiNVL.Value?.ToString()) ?? Enumerable.Empty<string>())
+                                                    <RadzenDropDown AllowClear="true" Placeholder="@("*Chọn loại nguyên vật liệu")" Disabled="(LoaiNVLs?.Count == 0)" TValue="string" Style="width: 70%; height: contain; font-size: 14px; font-weight: 600" Value="selectLoaiNVL?.TenLoaiNVL.Value?.ToString()"
+                                                                    Data=@(LoaiNVLs?.Select(dm => dm.TenLoaiNVL.Value?.ToString()) ?? Enumerable.Empty<string>())
                                                                     Change="@(args =>
                                                                     {
-                                                                        selectLoaiNVL = loaiNVLs?.FirstOrDefault(dm => dm.TenLoaiNVL.Value?.ToString() == args?.ToString());
+                                                                        selectLoaiNVL = LoaiNVLs?.FirstOrDefault(dm => dm.TenLoaiNVL.Value?.ToString() == args?.ToString());
                                                                         property.Value = selectLoaiNVL?.LOAINVLID.Value?.ToString();
                                                                     })">
                                                     </RadzenDropDown>
@@ -117,14 +117,18 @@
 @code {
     private NguyenVatLieu NewNVL = new();
     private List<DanhMucNVL>? danhMucNVLs;
-    private List<LoaiNVL>? loaiNVLs;
+    private List<LoaiNVL>? LoaiNVLs;
     private bool notallowAddnewNVL = false;
-    private DanhMucNVL? selectDanhmuc;
+    private DanhMucNVL? SelectDanhmuc;
     private LoaiNVL? selectLoaiNVL;
 
     protected override Task OnInitializedAsync()
     {
         danhMucNVLs = LoadListDanhmucNguyenVatLieu();
+
+        SelectDanhmuc = danhMucNVLs?.FirstOrDefault(dm => dm.TenDanhMuc.Value?.ToString()?.Trim() == Common.DanhMucNguyenLieuGiaCong);
+
+        LoaiNVLs = LoadListLoaiNguyenVatLieu(SelectDanhmuc);
 
         return base.OnInitializedAsync();
     }
@@ -155,12 +159,12 @@
 
     private async Task OnOpenDialogAddNewLoaiNVL()
     {
-        if (selectDanhmuc != null)
+        if (SelectDanhmuc != null)
         {
-            var newLoaiNVL = await DialogService.OpenAsync<DialogThemLoaiNVL>(null, new Dictionary<string, object>() { { "SelectDMucNVL", selectDanhmuc ?? new() } },
+            var newLoaiNVL = await DialogService.OpenAsync<DialogThemLoaiNVL>(null, new Dictionary<string, object>() { { "SelectDMucNVL", SelectDanhmuc ?? new() } },
             new DialogOptions() { ShowTitle = false, Width = "contain", Height = "contain", Resizable = false, Draggable = false, ShowClose = false, Style = "border-radius: 10px; padding: 0px" });
 
-            loaiNVLs = LoadListLoaiNguyenVatLieu(selectDanhmuc);
+            LoaiNVLs = LoadListLoaiNguyenVatLieu(SelectDanhmuc);
         }
         else
         {
