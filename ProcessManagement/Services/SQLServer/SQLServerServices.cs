@@ -1780,7 +1780,7 @@ namespace ProcessManagement.Services.SQLServer
         {
             using (var connection = new SqlConnection(connectionString))
             {
-                string query = $"SELECT COUNT(*) FROM [{Common.TableNVLofSanPham}] WHERE [{Common.SPID}] = '{nVLofSanPham.SPID.Value}' AND [{Common.MaNVL}] = '{nVLofSanPham.MaNVL.Value}'";
+                string query = $"SELECT COUNT(*) FROM [{Common.TableNVLofSanPham}] WHERE [{Common.SPID}] = '{nVLofSanPham.SPID.Value}' AND [{Common.NVLID}] = '{nVLofSanPham.NVLID.Value}'";
 
                 using (var command = new SqlCommand(query, connection))
                 {
@@ -1892,7 +1892,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 string parameterNames = string.Join(",", newNVLItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
 
-                command.CommandText = $"INSERT INTO [{Common.TableNguyenVatLieu}] ({columnNames}) OUTPUT INSERTED.{Common.MaNVL} VALUES ({parameterNames})";
+                command.CommandText = $"INSERT INTO [{Common.TableNguyenVatLieu}] ({columnNames}) OUTPUT INSERTED.{Common.NVLID} VALUES ({parameterNames})";
 
                 foreach (var item in newNVLItems)
                 {
@@ -1946,7 +1946,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"SELECT * FROM [{Common.TableNguyenVatLieu}] WHERE [{Common.MaNVL}] = '{maNVL}'";
+                command.CommandText = $"SELECT * FROM [{Common.TableNguyenVatLieu}] WHERE [{Common.NVLID}] = '{maNVL}'";
 
                 using var reader = command.ExecuteReader();
 
@@ -1980,7 +1980,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"SELECT * FROM [{Common.TableNguyenVatLieu}] WHERE [{Common.MaLoaiNVL}] = '{loainvlID}'";
+                command.CommandText = $"SELECT * FROM [{Common.TableNguyenVatLieu}] WHERE [{Common.LOAINVLID}] = '{loainvlID}'";
 
                 using var reader = command.ExecuteReader();
 
@@ -2063,7 +2063,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 string parameterNames = string.Join(",", newItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
 
-                command.CommandText = $"INSERT INTO [{Common.TableDanhMucNVL}] ({columnNames}) OUTPUT INSERTED.{Common.MaDanhMuc} VALUES ({parameterNames})";
+                command.CommandText = $"INSERT INTO [{Common.TableDanhMucNVL}] ({columnNames}) OUTPUT INSERTED.{Common.DMID} VALUES ({parameterNames})";
 
                 foreach (var item in newItems)
                 {
@@ -2121,7 +2121,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"SELECT * FROM [{Common.TableLoaiNVL}] WHERE [{Common.MaLoaiNVL}] = '{maloaiNVL}'";
+                command.CommandText = $"SELECT * FROM [{Common.TableLoaiNVL}] WHERE [{Common.LOAINVLID}] = '{maloaiNVL}'";
 
                 using var reader = command.ExecuteReader();
 
@@ -2192,7 +2192,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"SELECT * FROM [{Common.TableLoaiNVL}] WHERE [{Common.MaDanhMuc}] = '{madanhmuc}'";
+                command.CommandText = $"SELECT * FROM [{Common.TableLoaiNVL}] WHERE [{Common.DMID}] = '{madanhmuc}'";
 
                 using var reader = command.ExecuteReader();
 
@@ -2255,7 +2255,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 string parameterNames = string.Join(",", newItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
 
-                command.CommandText = $"INSERT INTO [{Common.TableLoaiNVL}] ({columnNames}) OUTPUT INSERTED.{Common.MaLoaiNVL} VALUES ({parameterNames})";
+                command.CommandText = $"INSERT INTO [{Common.TableLoaiNVL}] ({columnNames}) OUTPUT INSERTED.{Common.LOAINVLID} VALUES ({parameterNames})";
 
                 foreach (var item in newItems)
                 {

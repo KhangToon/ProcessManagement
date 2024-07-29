@@ -1,4 +1,5 @@
 ﻿@using ProcessManagement.Commons
+@using ProcessManagement.Models.KHO_NVL
 @using ProcessManagement.Services.SQLServer
 @using Radzen.Blazor
 @using Radzen
@@ -23,13 +24,16 @@
                         <RadzenStack Style="width: 5%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                             <RadzenText Text="STT" Style="font-size: 16px; color: white; font-weight: 500;"></RadzenText>
                         </RadzenStack>
-                        <RadzenStack Style="width: 30%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                        <RadzenStack Style="width: 20%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                             <RadzenText Text="Tên nguyên liệu" Style="font-size: 16px; color: white; font-weight: 500;"></RadzenText>
                         </RadzenStack>
-                        <RadzenStack Style="width: 30%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                        <RadzenStack Style="width: 20%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                             <RadzenText Text="Tên sản phẩm" Style="font-size: 16px; color: white; font-weight: 500;"></RadzenText>
                         </RadzenStack>
-                        <RadzenStack Style="width: 30%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                        <RadzenStack Style="width: 20%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenText Text="Tồn kho" Style="font-size: 16px; color: white; font-weight: 500;"></RadzenText>
+                        </RadzenStack>
+                        <RadzenStack Style="width: 20%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                             <RadzenText Text="Ngày thêm" Style="font-size: 16px; color: white; font-weight: 500;"></RadzenText>
                         </RadzenStack>
                         <RadzenStack Style="width: 5%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
@@ -38,7 +42,7 @@
                     </RadzenStack>
                     foreach (var nvlofSP in Sanpham.DanhSachNVLs)
                     {
-                        int nvlid = int.TryParse(nvlofSP.MaNVL.Value?.ToString(), out int id) ? id : 0;
+                        int nvlid = int.TryParse(nvlofSP.NVLID.Value?.ToString(), out int id) ? id : 0;
                         var nguyenvatlieu = SQLServerServices.GetNguyenVatLieubyID(nvlid);
 
                         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: contain; width: 100%; border-bottom: var(--rz-grid-cell-border);">
@@ -50,6 +54,9 @@
                             </RadzenStack>
                             <RadzenStack Style="width: 30%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                 <RadzenText Text="@Sanpham?.TenSanPham.Value?.ToString()" Style="font-size: 16px; font-weight: 600; color: darkblue"></RadzenText>
+                            </RadzenStack>
+                            <RadzenStack Style="width: 30%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenText Text="@(GetTonKhoNVL(nvlofSP))" Style="font-size: 16px; font-weight: 600; color: darkblue"></RadzenText>
                             </RadzenStack>
                             <RadzenStack Style="width: 30%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                 <RadzenText Text="@nvlofSP.NgayThem.Value?.ToString()" Style="font-size: 16px; font-weight: 500;"></RadzenText>
@@ -105,6 +112,23 @@
                 await DialogService.Alert($"{errormess}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
             }
         }
+    }
+
+    private string GetTonKhoNVL(NVLofSanPham nVLofSanP)
+    {
+        int nvlid = int.TryParse(nVLofSanP.NVLID.Value?.ToString(), out int id) ? id : 0;
+
+        if (id != 0)
+        {
+            NguyenVatLieu nguyenVatLieu = SQLServerServices.GetNguyenVatLieubyID(id);
+
+            int tonkhonvl = int.TryParse(nguyenVatLieu.TonKhoHienTai.Value?.ToString(), out int tonkho) ? tonkho : 0;
+
+            string donvitinh = nguyenVatLieu.DonViTinh.Value?.ToString() ?? string.Empty;
+
+            return $"{tonkhonvl} ({donvitinh})";
+        }
+        else return string.Empty;
     }
 
     // Notification

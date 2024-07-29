@@ -162,7 +162,7 @@ namespace ProcessManagement.Models
         public void AsignKHSXdata()
         {
             NewKHSX.MaLSX.Value = MaLSX;
-            NewKHSX.MaLoaiNVL.Value = NewKHSX.LoaiNVL?.MaLoaiNVL.Value;
+            NewKHSX.MaLoaiNVL.Value = NewKHSX.LoaiNVL?.LOAINVLID.Value;
             NewKHSX.SLSanXuat.Value = SLSanXuat;
             NewKHSX.DinhMuc.Value = DinhMuc;
             NewKHSX.TileLoi.Value = TiLeLoi;

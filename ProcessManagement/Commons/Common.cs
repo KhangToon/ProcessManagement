@@ -33,7 +33,7 @@ namespace ProcessManagement.Commons
 
         // Table NVL //
         public const string TableNVL = "Table_NVL";
-        public const string NVLID = "NVLID";
+        //public const string NVLID = "NVLID";
         public const string LoaiNL = "Loại NL";
         //public const string TenSanPham = "Tên sản phẩm";
         public const string MaQuanLy = "Mã quản lý";
@@ -131,18 +131,18 @@ namespace ProcessManagement.Commons
         // QUAN LY KHO NVL TABLES //
         // Table KHO_DanhMucNguyenVatLieu //
         public const string TableDanhMucNVL = "KHO_DanhMucNguyenVatLieu";
-        public const string MaDanhMuc = "MaDanhMuc";
+        public const string DMID = "DMID";
         public const string TenDanhMuc = "TenDanhMuc";
 
         // Table KHO_LoaiNguyenVatLieu //
         public const string TableLoaiNVL = "KHO_LoaiNguyenVatLieu";
-        public const string MaLoaiNVL = "MaLoaiNVL";
+        public const string LOAINVLID = "LOAINVLID";
         //public const string MaDanhMuc = "MaDanhMuc";
         public const string TenLoaiNVL = "TenLoaiNVL";
 
         // Table KHO_NguyenVatLieu //
         public const string TableNguyenVatLieu = "KHO_NguyenVatLieu";
-        public const string MaNVL = "MaNVL";
+        public const string NVLID = "NVLID";
         //public const string MaDanhMuc = "MaDanhMuc";
         public const string TenNVL = "TenNVL";
         public const string MoTa = "MoTa";
@@ -155,7 +155,7 @@ namespace ProcessManagement.Commons
 
         // Table KHO_NhaCungCap //
         public const string TableNhaCungCap = "KHO_NhaCungCap";
-        public const string MaNCC = "MaNCC";
+        public const string NCCID = "MaNCC";
         public const string TenNCC = "TenNCC";
         public const string DiaChi = "DiaChi";
         public const string SoDienThoai = "SoDienThoai";
@@ -166,7 +166,7 @@ namespace ProcessManagement.Commons
 
         // Table KHO_KhoLuuTru //
         public const string TableKhoLuuTru = "KHO_KhoLuuTru";
-        public const string MaKho = "MaKho";
+        public const string KHOID = "KHOID";
         public const string TenKho = "TenKho";
         //public const string DiaChi = "DiaChi";
         public const string SucChua = "SucChua";
@@ -176,14 +176,14 @@ namespace ProcessManagement.Commons
 
         // Table KHO_ViTriLuuTru //
         public const string TableViTriLuuTru = "KHO_ViTriLuuTru";
-        public const string MaViTri = "MaViTri";
+        public const string VTID = "VTID";
         //public const string MaKho = "MaKho";
         public const string TenViTri = "TenViTri";
         //public const string SucChua = "SucChua";
 
         // Table KHO_NhapKho //
         public const string TableNhapKho = "KHO_NhapKho";
-        public const string MaNhapKho = "MaNhapKho";
+        public const string NKID = "NKID";
         //public const string MaNVL = "MaNVL";
         //public const string MaNCC = "MaNCC";
         //public const string MaKho = "MaKho";
@@ -197,7 +197,7 @@ namespace ProcessManagement.Commons
 
         // Table KHO_XuatKho //
         public const string TableXuatKho = "KHO_XuatKho";
-        public const string MaXuatKho = "MaXuatKho";
+        public const string XKID = "XKID";
         //public const string MaNVL = "MaNVL";
         //public const string MaKho = "MaKho";
         //public const string MaViTri = "MaViTri";
@@ -210,7 +210,7 @@ namespace ProcessManagement.Commons
 
         // Table KHO_KiemKe //
         public const string TableKiemKe = "KHO_KiemKe";
-        public const string MaKiemKe = "MaKiemKe";
+        public const string KIEMKEID = "KIEMKEID";
         //public const string MaNVL = "MaNVL";
         //public const string MaKho = "MaKho";
         public const string NgayKiemKe = "NgayKiemKe";

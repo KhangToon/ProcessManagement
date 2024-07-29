@@ -5,9 +5,9 @@ namespace ProcessManagement.Models.KHO_NVL
 {
     public class KiemKe
     {
-        public Propertyy MaKiemKe { get; set; } = new() { DBName = Common.MaKiemKe, DisplayName = "Mã kiểm kê", Type = typeof(int), AlowDatabase = true }; // ID
-        public Propertyy MaNVL { get; set; } = new() { DBName = Common.MaNVL, DisplayName = "Mã NVL", Type = typeof(int), AlowDatabase = true };
-        public Propertyy MaKho { get; set; } = new() { DBName = Common.MaKho, DisplayName = "Mã kho", Type = typeof(int), AlowDatabase = true };
+        public Propertyy KIEMKEID { get; set; } = new() { DBName = Common.KIEMKEID, DisplayName = "Kiểm kê ID", Type = typeof(int), AlowDatabase = true }; // ID
+        public Propertyy NVLID { get; set; } = new() { DBName = Common.NVLID, DisplayName = "NVL ID", Type = typeof(int), AlowDatabase = true };
+        public Propertyy KHOID { get; set; } = new() { DBName = Common.KHOID, DisplayName = "Kho ID", Type = typeof(int), AlowDatabase = true };
         public Propertyy NgayKiemKe { get; set; } = new() { DBName = Common.NgayKiemKe, DisplayName = "Ngày kiểm kê", Type = typeof(DateTime), AlowDatabase = true };
         public Propertyy SoLuongThucTe { get; set; } = new() { DBName = Common.SoLuongThucTe, DisplayName = "Số lượng thực tế", Type = typeof(decimal), AlowDatabase = true };
         public Propertyy SoLuongHeThong { get; set; } = new() { DBName = Common.SoLuongHeThong, DisplayName = "Số lượng hệ thống", Type = typeof(decimal), AlowDatabase = true };

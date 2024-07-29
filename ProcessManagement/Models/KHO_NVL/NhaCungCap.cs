@@ -5,7 +5,7 @@ namespace ProcessManagement.Models.KHO_NVL
 {
     public class NhaCungCap
     {
-        public Propertyy MaNCC { get; set; } = new() { DBName = Common.MaNCC, DisplayName = "Mã NCC", Type = typeof(int), AlowDatabase = true }; // ID
+        public Propertyy NCCID { get; set; } = new() { DBName = Common.NCCID, DisplayName = "NCC ID", Type = typeof(int), AlowDatabase = true }; // ID
         public Propertyy TenNCC { get; set; } = new() { DBName = Common.TenNCC, DisplayName = "Tên NCC", Type = typeof(string), AlowDatabase = true };
         public Propertyy DiaChiNCC { get; set; } = new() { DBName = Common.DiaChi, DisplayName = "Địa chỉ", Type = typeof(string), AlowDatabase = true };
         public Propertyy SoDienThoaiNCC { get; set; } = new() { DBName = Common.SoDienThoai, DisplayName = "Số điện thoại", Type = typeof(int), AlowDatabase = true };

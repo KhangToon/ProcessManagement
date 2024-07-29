@@ -5,11 +5,11 @@ namespace ProcessManagement.Models.KHO_NVL
 {
     public class NhapKho
     {
-        public Propertyy MaNhapKho { get; set; } = new() { DBName = Common.MaNhapKho, DisplayName = "Mã nhập kho", Type = typeof(int), AlowDatabase = true }; // ID
-        public Propertyy MaNVL { get; set; } = new() { DBName = Common.MaNVL, DisplayName = "Mã NVL", Type = typeof(int), AlowDatabase = true };
-        public Propertyy MaNCC { get; set; } = new() { DBName = Common.MaNCC, DisplayName = "Mã NCC", Type = typeof(int), AlowDatabase = true };
-        public Propertyy MaKho { get; set; } = new() { DBName = Common.MaKho, DisplayName = "Mã kho", Type = typeof(int), AlowDatabase = true };
-        public Propertyy MaViTri { get; set; } = new() { DBName = Common.MaViTri, DisplayName = "Mã vị trí", Type = typeof(int), AlowDatabase = true };
+        public Propertyy NKID { get; set; } = new() { DBName = Common.NKID, DisplayName = "Nhập kho ID", Type = typeof(int), AlowDatabase = true }; // ID
+        public Propertyy NVLID { get; set; } = new() { DBName = Common.NVLID, DisplayName = "NVL ID", Type = typeof(int), AlowDatabase = true };
+        public Propertyy NCCID { get; set; } = new() { DBName = Common.NCCID, DisplayName = "NCC ID", Type = typeof(int), AlowDatabase = true };
+        public Propertyy KHOID { get; set; } = new() { DBName = Common.KHOID, DisplayName = "Kho ID", Type = typeof(int), AlowDatabase = true };
+        public Propertyy VTID { get; set; } = new() { DBName = Common.VTID, DisplayName = "Vị trí ID", Type = typeof(int), AlowDatabase = true };
         public Propertyy SoLuongNhapKho { get; set; } = new() { DBName = Common.SoLuongNhapKho, DisplayName = "Số lượng nhập", Type = typeof(decimal), AlowDatabase = true };
         public Propertyy NgayNhapKho { get; set; } = new() { DBName = Common.NgayNhap, DisplayName = "Ngày nhập", Type = typeof(DateTime), AlowDatabase = true };
         public Propertyy NgayHetHan { get; set; } = new() { DBName = Common.NgayHetHan, DisplayName = "Ngày hết hạn", Type = typeof(DateTime), AlowDatabase = true };

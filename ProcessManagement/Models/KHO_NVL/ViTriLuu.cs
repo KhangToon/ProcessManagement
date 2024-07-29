@@ -5,8 +5,10 @@ namespace ProcessManagement.Models.KHO_NVL
 {
     public class ViTriLuu
     {
-        public Propertyy MaViTri { get; set; } = new() { DBName = Common.MaViTri, DisplayName = "Mã vị trí", Type = typeof(int), AlowDatabase = true }; // ID
+        public Propertyy VTID { get; set; } = new() { DBName = Common.VTID, DisplayName = "Vị trí ID", Type = typeof(int), AlowDatabase = true }; // ID
+        public Propertyy KHOID { get; set; } = new() { DBName = Common.KHOID, DisplayName = "Kho ID", Type = typeof(string), AlowDatabase = true };
         public Propertyy TenViTri { get; set; } = new() { DBName = Common.TenViTri, DisplayName = "Tên vị trí", Type = typeof(string), AlowDatabase = true };
+        public Propertyy SucChua { get; set; } = new() { DBName = Common.SucChua, DisplayName = "Sức chứa", Type = typeof(string), AlowDatabase = true };
 
         public List<Propertyy> GetPropertiesValues()
         {
