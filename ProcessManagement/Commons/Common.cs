@@ -26,7 +26,7 @@ namespace ProcessManagement.Commons
 
         // Table NVL of Sanpham
         public const string TableNVLofSanPham = "Table_NVLofSanPham";
-        public const string NVLSPID = "NVLSPID";
+        //public const string NVLID = "NVLID";
         //public const string SPID = "SPID";
         //public const string MaLoaiSP = "MaLoaiSP";
         public const string NgayThem = "NgayThem";
@@ -95,8 +95,7 @@ namespace ProcessManagement.Commons
         public const string NG = "NG";
 
         // Table Kehoachsanxuat //
-        public const string TableKHSX = "Table_KehoachSX";
-        public const string TableKHSX2 = "Table_KHSX";
+        public const string TableKHSX = "Table_KHSX";
         public const string KHSXID = "KHSXID";
         public const string MaLSX = "Mã lệnh SX";
         public const string SLSanXuat = "SL sản xuất";
@@ -107,6 +106,16 @@ namespace ProcessManagement.Commons
         public const string SLperLotChan = "SL mỗi lot chẳn";
         public const string SLLotLe = "SL lot lẻ";
         public const string SLperLotLe = "SL mỗi lot lẻ";
+
+        // Table KHSXpickNVL //
+        public const string TableKHSXpickNVL = "Table_KHSXpickNVL";
+        public const string NVLKHSXID = "NVLKHSXID";
+        //public const string KHSXID = "KHSXID";
+        //public const string SPID = "SPID";
+        //public const string NVLSPID = "NVLSPID";
+        //public const string SoLuong = "Số lượng";
+        //public const string NgayTao = "Ngày tạo";
+
 
         // Table Nhanvien //
         public const string TableNhanVien = "Table_NhanVien";

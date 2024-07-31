@@ -143,44 +143,6 @@ namespace ProcessManagement.Services.SQLServer
             return listNVL;
         }
 
-        // Lay danh sach NVL theo ma san pham
-        public List<NguyenLieu> GetlistNguyenLieuperSanPham(SanPham? sanpham)
-        {
-            List<NguyenLieu> listNVL = new();
-
-            if (sanpham == null || sanpham.MaSP.Value == null) { return listNVL; }
-
-            using (var connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-
-                var command = connection.CreateCommand();
-
-                command.CommandText = $"SELECT * FROM [{Common.TableNguyenLieu}] WHERE [{Common.MaSP}] = '{sanpham.MaSP.Value}'";
-
-                using var reader = command.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    NguyenLieu rowNVL = new();
-
-                    List<Propertyy> rowNVLitems = rowNVL.GetPropertiesValues();
-
-                    foreach (var item in rowNVLitems)
-                    {
-                        string? columnName = item.DBName;
-
-                        object columnValue = reader[columnName];
-
-                        item.Value = columnValue;
-                    }
-
-                    listNVL.Add(rowNVL);
-                }
-            }
-
-            return listNVL;
-        }
 
         // Lay danh sach nguyen vat lieu
         public List<NVL> GetlistNVLperLot(string lotNVL)
@@ -373,53 +335,6 @@ namespace ProcessManagement.Services.SQLServer
                 string parameterNames = string.Join(",", newLotItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
 
                 command.CommandText = $"INSERT INTO [{Common.TableLot}] ({columnNames}) OUTPUT INSERTED.{Common.LotID} VALUES ({parameterNames})";
-
-                foreach (var item in newLotItems)
-                {
-                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
-
-                    object? parameterValue = item.Value;
-
-                    command.Parameters.AddWithValue(parameterName, parameterValue);
-                }
-
-                object? rs = command.ExecuteScalar();
-
-                result = Convert.ToInt32(rs);
-
-                if (result == 0) result = -1;
-            }
-            catch (Exception ex)
-            {
-                errorMess = ex.Message;
-
-                return (-1, errorMess);
-            }
-
-            return (result, errorMess);
-        }
-
-        // Them moi Lot
-        public (int, string) InsertNewNLforSanpham(NguyenLieu newnl)
-        {
-            List<Propertyy> newLotItems = newnl.GetPropertiesValues().Where(po => po.AlowDatabase == true && po.Value != null).ToList();
-
-            int result = -1;
-            string errorMess = string.Empty;
-
-            try
-            {
-                using var connection = new SqlConnection(connectionString);
-
-                connection.Open();
-
-                var command = connection.CreateCommand();
-
-                string columnNames = string.Join(",", newLotItems.Select(key => $"[{key.DBName}]"));
-
-                string parameterNames = string.Join(",", newLotItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
-
-                command.CommandText = $"INSERT INTO [{Common.TableNguyenLieu}] ({columnNames}) OUTPUT INSERTED.{Common.NLID} VALUES ({parameterNames})";
 
                 foreach (var item in newLotItems)
                 {
@@ -789,43 +704,6 @@ namespace ProcessManagement.Services.SQLServer
             return (result, errorMess);
         }
 
-        // Insert new Ke hoach san xuat
-        public (int, string) InsertNewKehoachSanxuat(KeHoachSX newKHSX)
-        {
-            int result = -1;
-            string errorMess = string.Empty;
-
-            object? spid = newKHSX.SanPham?.SPID.Value;
-            int slsanxuat = newKHSX.SoluongSX;
-            object? masp = newKHSX.SanPham?.MaSP.Value;
-
-            if (spid == null && slsanxuat == 0) return (result, "Sản phẩm ID null, SL sản xuất bằng 0");
-
-            try
-            {
-                using var connection = new SqlConnection(connectionString);
-
-                connection.Open();
-
-                var command = connection.CreateCommand();
-
-                command.CommandText = $"INSERT INTO [{Common.TableKHSX}] ([{Common.SPID}], [{Common.SLSanXuat}], [{Common.MaSP}]) OUTPUT INSERTED.{Common.KHSXID} VALUES ('{spid}', '{slsanxuat}', '{masp}')";
-
-                object? rs = command.ExecuteScalar();
-
-                result = Convert.ToInt32(rs);
-
-                if (result == 0) result = -1;
-            }
-            catch (Exception ex)
-            {
-                errorMess = ex.Message;
-
-                return (-1, errorMess);
-            }
-
-            return (result, errorMess);
-        }
 
         // Get last ke hoach san xuat
         public KHSX GetLastKHSX()
@@ -969,7 +847,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 khsx.SanPham = GetSanpham(int.TryParse(khsx.SPID.Value?.ToString(), out int spid) ? spid : 0);
 
-                khsx.LoaiNVL = GetLoaiNVLbyID(int.TryParse(khsx.MaLoaiNVL.Value?.ToString(), out int loainvlid) ? loainvlid : 0);
+                khsx.LoaiNVL = GetLoaiNVLbyID(int.TryParse(khsx.LOAINVLID.Value?.ToString(), out int loainvlid) ? loainvlid : 0);
 
                 khsx.DSachCongDoans = GetlistCongdoans(khsx.KHSXID.Value);
             }
@@ -1775,7 +1653,41 @@ namespace ProcessManagement.Services.SQLServer
             return listNVLofSanphams;
         }
 
-        // Kiem tra da ton tai NVL trong ds NVL cua san pham
+        // Get NVL of SanPham by ID // Table Table_NVLofSanPham //
+        public NVLofSanPham GetNVLofSPbyID(int nvlspid)
+        {
+            NVLofSanPham nvlsp = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.TableNVLofSanPham}] WHERE [{Common.NVLID}] = '{nvlspid}'";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    List<Propertyy> rowitems = nvlsp.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue;
+                    }
+
+                }
+            }
+
+            return nvlsp;
+        }
+
+        // Kiem tra da ton tai NVL trong ds NVL cua san pham // Table Table_NVLofSanPham //
         public bool IsNVLofSanPhamExisting(NVLofSanPham nVLofSanPham)
         {
             using (var connection = new SqlConnection(connectionString))
@@ -1793,7 +1705,7 @@ namespace ProcessManagement.Services.SQLServer
             }
         }
 
-        // Them loai NVL cho san pham
+        // Them loai NVL cho san pham // Table Table_NVLofSanPham //
         public (int, string) InsertNewNguyenVatLieuchoSanPham(NVLofSanPham newnvl)
         {
             List<Propertyy> newNVLItems = newnvl.GetPropertiesValues().Where(po => po.AlowDatabase == true && po.Value != null).ToList();
@@ -1812,7 +1724,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 string parameterNames = string.Join(",", newNVLItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
 
-                command.CommandText = $"INSERT INTO [{Common.TableNVLofSanPham}] ({columnNames}) OUTPUT INSERTED.{Common.NVLSPID} VALUES ({parameterNames})";
+                command.CommandText = $"INSERT INTO [{Common.TableNVLofSanPham}] ({columnNames}) OUTPUT INSERTED.{Common.NVLID} VALUES ({parameterNames})";
 
                 foreach (var item in newNVLItems)
                 {
@@ -1839,7 +1751,7 @@ namespace ProcessManagement.Services.SQLServer
             return (result, errorMess);
         }
 
-        // Xoa NVL cua SP
+        // Xoa NVL cua SP // Table Table_NVLofSanPham //
         public (int, string) DeleteNVLofSanpham(NVLofSanPham? removeNVLofSP)
         {
             int result = -1; string errorMess = string.Empty;
@@ -1854,7 +1766,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"DELETE FROM {Common.TableNVLofSanPham} WHERE [{Common.NVLSPID}] = '{removeNVLofSP.NVLSPID.Value}'";
+                command.CommandText = $"DELETE FROM {Common.TableNVLofSanPham} WHERE [{Common.NVLID}] = '{removeNVLofSP.NVLSPID.Value}'";
 
                 object rs = command.ExecuteScalar();
 
@@ -1918,7 +1830,7 @@ namespace ProcessManagement.Services.SQLServer
 
             return (result, errorMess);
         }
-        // Check Ten NVL da ton tai
+        // Check Ten NVL da ton tai // Table KHO_NguyenVatLieu //
         public bool IsTenNVLExists(string? tenNVL)
         {
             using (var connection = new SqlConnection(connectionString))
@@ -1935,7 +1847,7 @@ namespace ProcessManagement.Services.SQLServer
                 }
             }
         }
-        // Get Nguyen Vat Lieu by ID
+        // Get Nguyen Vat Lieu by ID // Table KHO_NguyenVatLieu //
         public NguyenVatLieu GetNguyenVatLieubyID(int maNVL)
         {
             NguyenVatLieu nvl = new();
@@ -1969,7 +1881,7 @@ namespace ProcessManagement.Services.SQLServer
             return nvl;
         }
 
-        // Get list NguyenVatLieu
+        // Get list NguyenVatLieu // Table KHO_NguyenVatLieu //
         public List<NguyenVatLieu> GetListNguyenVatLieu(int loainvlID)
         {
             List<NguyenVatLieu> nguyenvatlieus = new();
@@ -2044,7 +1956,7 @@ namespace ProcessManagement.Services.SQLServer
             return listDanhmucNVLs;
         }
 
-        // Them new danh muc NVL // KHO_DanhMucNguyenVatLieu
+        // Them new danh muc NVL // Table KHO_DanhMucNguyenVatLieu //
         public (int, string) InsertNewDanhMucNguyenVatLieu(DanhMucNVL newdmnvl)
         {
             List<Propertyy> newItems = newdmnvl.GetPropertiesValues().Where(po => po.AlowDatabase == true && po.Value != null).ToList();
@@ -2090,7 +2002,7 @@ namespace ProcessManagement.Services.SQLServer
             return (result, errorMess);
         }
 
-        // Check ten danh muc da ton tai // KHO_DanhMucNguyenVatLieu
+        // Check ten danh muc da ton tai // Table KHO_DanhMucNguyenVatLieu //
         public bool IsTenDanhmucNVLExists(string? tendmnvl)
         {
             using (var connection = new SqlConnection(connectionString))
@@ -2110,7 +2022,7 @@ namespace ProcessManagement.Services.SQLServer
 
         // Table KHO_LoaiNguyenVatLieu //
 
-        // Get loai NVL by maloai NVL // KHO_LoaiNguyenVatLieu
+        // Get loai NVL by maloai NVL // Table KHO_LoaiNguyenVatLieu //
         public LoaiNVL GetLoaiNVLbyID(int maloaiNVL)
         {
             LoaiNVL loainvl = new();
@@ -2144,7 +2056,7 @@ namespace ProcessManagement.Services.SQLServer
             return loainvl;
         }
 
-        // Get list loai nguyen vat lieu (get all) // KHO_LoaiNguyenVatLieu
+        // Get list loai nguyen vat lieu (get all) // Table KHO_LoaiNguyenVatLieu //
         public List<LoaiNVL> GetListLoaiNVLs()
         {
             List<LoaiNVL> listloaiNVLs = new();
@@ -2181,7 +2093,7 @@ namespace ProcessManagement.Services.SQLServer
             return listloaiNVLs;
         }
 
-        // Get list loai nguyen vat lieu (order by madanhmuc) // KHO_LoaiNguyenVatLieu
+        // Get list loai nguyen vat lieu (order by madanhmuc) // Table KHO_LoaiNguyenVatLieu //
         public List<LoaiNVL> GetListLoaiNVLs(int madanhmuc)
         {
             List<LoaiNVL> listloaiNVLs = new();
@@ -2218,7 +2130,7 @@ namespace ProcessManagement.Services.SQLServer
             return listloaiNVLs;
         }
 
-        // Check ten loai nvl da ton tai // KHO_LoaiNguyenVatLieu
+        // Check ten loai nvl da ton tai // Table KHO_LoaiNguyenVatLieu //
         public bool IsTenLoaiNVLExists(string? tenloainvl)
         {
             using (var connection = new SqlConnection(connectionString))
@@ -2236,7 +2148,7 @@ namespace ProcessManagement.Services.SQLServer
             }
         }
 
-        // Them new loai NVL // KHO_LoaiNguyenVatLieu
+        // Them new loai NVL // Table KHO_LoaiNguyenVatLieu //
         public (int, string) InsertNewLoaiNguyenVatLieu(LoaiNVL newloainvl)
         {
             List<Propertyy> newItems = newloainvl.GetPropertiesValues().Where(po => po.AlowDatabase == true && po.Value != null).ToList();
@@ -2271,6 +2183,37 @@ namespace ProcessManagement.Services.SQLServer
                 result = Convert.ToInt32(rs);
 
                 if (result == 0) result = -1;
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
+        // Delete Loai NVL // Table KHO_LoaiNguyenVatLieu //
+        public (int, string) DeleteLoaiNVL(LoaiNVL? removeloainvl)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            if (removeloainvl == null) return (result, errorMess);
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"DELETE FROM {Common.TableLoaiNVL} WHERE [{Common.LOAINVLID}] = '{removeloainvl.LOAINVLID.Value}'";
+
+                object rs = command.ExecuteScalar();
+
+                result = Convert.ToInt32(rs);
             }
             catch (Exception ex)
             {

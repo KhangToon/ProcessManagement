@@ -17,6 +17,8 @@ namespace ProcessManagement.Models.KHO_NVL
         public Propertyy ThoiGianBaoQuan { get; set; } = new() { DBName = Common.ThoiGianBaoQuan, DisplayName = "Thời gian bảo quản", Type = typeof(int), AlowDatabase = true };
         public Propertyy NgayCapNhat { get; set; } = new() { DBName = Common.NgayCapNhat, DisplayName = "Ngày cập nhật", Type = typeof(DateTime), AlowDatabase = true };
 
+        public int SLSanXuat = 0;
+
         public List<Propertyy> GetPropertiesValues()
         {
             Type propertyType = typeof(NguyenVatLieu);

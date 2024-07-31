@@ -21,9 +21,9 @@ namespace ProcessManagement.Models
         public int SLperLotLe { get; set; } = 0;
 
         public DateTime NgayTao { get; set; } = DateTime.Now;
-        public List<NVL>? ListNVLs { get; set; }
         public KHSX NewKHSX { get; set; } = new KHSX();
 
+        public List<NVL>? ListNVLs { get; set; }
         private List<SanPham> DSachSanPhams { get; set; } = new List<SanPham>();
         private List<LoaiNVL> DSachLoaiNVLs { get; set; } = new List<LoaiNVL>();
 
@@ -90,6 +90,36 @@ namespace ProcessManagement.Models
             LoadListTenNguyenCong();
         }
 
+        public bool IsAllowPickSLnvlofKHSX()
+        {
+            if (DinhMuc != 0 && NewKHSX.SanPham != null && NewKHSX.LoaiNVL != null)
+            {
+                return true;
+            }
+            else { return false; }
+        }
+
+        public bool CheckSLNVLisOK()
+        {
+            int sumSL = NewKHSX.DSachNVLs?.Sum(nvl => (int.TryParse(nvl.SoLuong.Value?.ToString(), out int sl) ? sl : 0)) ?? 0;
+
+            int dinhmuc = int.TryParse(NewKHSX?.DinhMuc.Value?.ToString(), out int vl) ? vl : 0;
+
+            if ((dinhmuc > 0) && ((sumSL - dinhmuc) == 0))
+            {
+                return true;
+            }
+            else return false;
+        }
+
+        public void AsignNVLofKHSX(List<NVLofKHSX> dsNVLofkhsx)
+        {
+            foreach (var nvlofkhsx in dsNVLofkhsx)
+            {
+                NewKHSX.DSachNVLs.Add(nvlofkhsx);
+            }
+        }
+
         public bool CheckSoluongLoiChophep()
         {
             int tongSLloi = DinhMuc - SLSanXuat;
@@ -107,6 +137,8 @@ namespace ProcessManagement.Models
             }
             else { isErrorSLloiChophep = false; return true; }
         }
+
+
 
         public void AddNewNguyenCongtoList(string newnguyencong)
         {
@@ -149,9 +181,9 @@ namespace ProcessManagement.Models
             _defaultListCDnames = tenNClist;
         }
 
-        public void SetCurrentKHSXsanPham(string masp)
+        public void SetCurrentKHSXsanPham(string tenSP)
         {
-            NewKHSX.SanPham = DSachSanPhams.FirstOrDefault(sp => sp.MaSP.Value?.ToString() == masp) ?? new();
+            NewKHSX.SanPham = DSachSanPhams.FirstOrDefault(sp => sp.TenSanPham.Value?.ToString() == tenSP) ?? new();
         }
 
         public void SetCurrentKHSXloaiNVL(string tenloainvl)
@@ -162,7 +194,7 @@ namespace ProcessManagement.Models
         public void AsignKHSXdata()
         {
             NewKHSX.MaLSX.Value = MaLSX;
-            NewKHSX.MaLoaiNVL.Value = NewKHSX.LoaiNVL?.LOAINVLID.Value;
+            NewKHSX.LOAINVLID.Value = NewKHSX.LoaiNVL?.LOAINVLID.Value;
             NewKHSX.SLSanXuat.Value = SLSanXuat;
             NewKHSX.DinhMuc.Value = DinhMuc;
             NewKHSX.TileLoi.Value = TiLeLoi;
@@ -179,7 +211,7 @@ namespace ProcessManagement.Models
         {
             DSachSanPhams = SQLServerServices.GetlistSanphams();
 
-            List<string> result = DSachSanPhams.Select(sp => sp.MaSP.Value?.ToString() ?? string.Empty).ToList();
+            List<string> result = DSachSanPhams.Select(sp => sp.TenSanPham.Value?.ToString() ?? string.Empty).ToList();
 
             return result;
         }
@@ -280,7 +312,7 @@ namespace ProcessManagement.Models
             // Tinh dinh muc
             DinhMuc = (int)(SLSanXuat + SLSanXuat * (TiLeLoi / 100));
 
-            if (SLSanXuat == 0 || SLperLotChan == 0 || (SLSanXuat / SLperLotChan < 1))
+            if (SLSanXuat == 0 || SLperLotChan == 0 || (DinhMuc / SLperLotChan < 1))
             {
                 SLLot = 0;
 
@@ -311,7 +343,7 @@ namespace ProcessManagement.Models
         {
             int result = -1; string error = string.Empty;
 
-            if (SLSanXuat == 0 || SLperLotChan == 0 || (SLSanXuat / SLperLotChan < 1))
+            if (SLSanXuat == 0 || SLperLotChan == 0 || (DinhMuc / SLperLotChan < 1))
             {
                 return (result, "Số lượng nhập vào không hợp lệ");
             }

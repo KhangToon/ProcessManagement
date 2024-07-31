@@ -3,23 +3,18 @@ using System.Reflection;
 
 namespace ProcessManagement.Models
 {
-    public class NguyenLieu
+    public class NVLofKHSX
     {
-        public Propertyy NLID = new() { DBName = Common.NLID, Type = typeof(int), DispDatagrid = false, AlowDatabase = true };
-
-        public Propertyy MaSP = new() { DBName = Common.MaSP, Type = typeof(string), AlowDatabase = true };
-
-        public Propertyy LoaiNL = new() { DBName = Common.LoaiNL, Type = typeof(string), AlowDatabase = true };
-
-        public Propertyy NgayNhap = new() { DBName = Common.NgayNhap, Type = typeof(DateTime), AlowDatabase = true };
-
-        public Propertyy LotNVL = new() { DBName = Common.LotNVL, Type = typeof(string), AlowDatabase = true };
-
-        public Propertyy SoLuongNL = new() { DBName = Common.SoLuongNVL, Type = typeof(int), AlowDatabase = true };
+        public Propertyy NVLKHSXID { get; set; } = new() { DBName = Common.NVLKHSXID, Type = typeof(int), AlowDatabase = true };
+        public Propertyy KHSXID { get; set; } = new() { DBName = Common.KHSXID, Type = typeof(int), AlowDatabase = true };
+        public Propertyy SPID { get; set; } = new() { DBName = Common.SPID, Type = typeof(int), AlowDatabase = true };
+        public Propertyy NVLID { get; set; } = new() { DBName = Common.NVLID, Type = typeof(int), AlowDatabase = true };
+        public Propertyy SoLuong { get; set; } = new() { DBName = Common.SoLuong, Type = typeof(int), AlowDatabase = true };
+        public Propertyy NgayTao { get; set; } = new() { DBName = Common.NgayTao, Type = typeof(DateTime), AlowDatabase = true };
 
         public List<Propertyy> GetPropertiesValues()
         {
-            Type propertyType = typeof(NguyenLieu);
+            Type propertyType = typeof(NVLofKHSX);
 
             FieldInfo[] fields = propertyType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
@@ -60,5 +55,7 @@ namespace ProcessManagement.Models
 
             return tagetProperty?.Value;
         }
+
+
     }
 }

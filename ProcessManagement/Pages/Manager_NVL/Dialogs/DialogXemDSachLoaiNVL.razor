@@ -28,10 +28,13 @@
                             <RadzenText Text="Loại nguyên vật liệu" Style="font-size: 16px; color: white; font-weight: 500;"></RadzenText>
                         </RadzenStack>
                         <RadzenStack Style="width: 30%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                            <RadzenText Text="Danh mục nguyên vật liệu" Style="font-size: 16px; color: white; font-weight: 500;"></RadzenText>
+                            <RadzenText Text="Danh mục" Style="font-size: 16px; color: white; font-weight: 500;"></RadzenText>
                         </RadzenStack>
                         <RadzenStack Style="width: 30%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                             <RadzenText Text="Ngày tạo" Style="font-size: 16px; color: white; font-weight: 500;"></RadzenText>
+                        </RadzenStack>
+                        <RadzenStack Style="width: 5%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenText Text=" " Style="font-size: 16px; color: white; font-weight: 500;"></RadzenText>
                         </RadzenStack>
                     </RadzenStack>
                     foreach (var loainvl in DSachLoaiNVLs)
@@ -52,6 +55,9 @@
                                     string ngaythem = (loainvl.NgayThem.Value == null || string.IsNullOrEmpty(value)) ? " ____ " : Convert.ToDateTime(value).ToString(Common.DayTimeFormatnoTime);
                                 }
                                 <RadzenText Text="@ngaythem" Style="font-size: 16px; font-weight: 500;"></RadzenText>
+                            </RadzenStack>
+                            <RadzenStack Style="width: 5%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenButton Click="@(() => OnDeleteLoaiNVL(loainvl))" Style="background-color: black;" Icon="delete" Size="ButtonSize.Small" Variant="Variant.Filled"></RadzenButton>
                             </RadzenStack>
                         </RadzenStack>
                     }
@@ -85,5 +91,40 @@
         DSachLoaiNVLs = SQLServerServices.GetListLoaiNVLs(madanhmuc);
 
         return base.OnInitializedAsync();
+    }
+
+    private async Task OnDeleteLoaiNVL(LoaiNVL loaiNVL)
+    {
+        bool? comfirm = await DialogService.Confirm($"Xóa loại NVL này?", "Xác nhận", new ConfirmOptions() { OkButtonText = "Đồng ý", CancelButtonText = "Hủy" });
+
+        if (comfirm.Value)
+        {
+            (int result, string errormess) = SQLServerServices.DeleteLoaiNVL(loaiNVL);
+
+            if (result != -1)
+            {
+                ShowNotification("Đã xóa!", NotificationSeverity.Success, 2000);
+
+                DSachLoaiNVLs?.Remove(loaiNVL);
+            }
+            else
+            {
+                await DialogService.Alert($"{errormess}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+            }
+        }
+    }
+
+    // Notification
+    void ShowNotification(string message, NotificationSeverity notifytype, double time)
+    {
+        NotificationMessage notify = new NotificationMessage
+            {
+                Style = "position: fixed; top: 0; right: 0;",
+                Severity = notifytype,
+                Summary = message,
+                Duration = time
+            };
+
+        NotificationService.Notify(notify);
     }
 }

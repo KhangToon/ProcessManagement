@@ -10,14 +10,14 @@
 @inject SQLServerServices SQLServerServices
 
 <RadzenStack Gap="0" Style="width: 100%; height: 100%; background-color: white" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-    <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: 95%; border-radius: 10px; padding-right: 0px;">
-        <RadzenRow Style="width: 100%; height: 100%">
+    <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: 100%; border-radius: 10px; padding-right: 0px;">
+        <RadzenRow Style="width: 100%; height: 100%; overflow-y: scroll">
             <RadzenColumn Size="12" SizeMD="4" Style="width: 100%; height: 100%">
-                <RadzenStack Style="height: 100%; width: 100%; padding-right: 15px; border-right: var(--rz-grid-cell-border)" Orientation="Orientation.Vertical">
-                    <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: 100%; padding: 15px; border-radius: 10px;">
-                        <RadzenStack Gap="0px" Style="width: 100%; height: 100%; padding: 0" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                <RadzenStack Style="height: 100%; width: 100%; padding-bottom: 5px; padding-right: 15px; border-right: var(--rz-grid-cell-border);" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                    <RadzenCard Variant="Variant.Filled" Style="width: 100%; height: 100%; padding: 15px; padding-right: 5px; border-radius: 10px;">
+                        <RadzenStack Gap="0px" Style="width: 100%; height: 100%; padding: 0; overflow-y: scroll" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                             <RadzenStack Style="width: 100%; height: contain; border-bottom: var(--rz-grid-cell-border); padding-bottom: 10px" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
-                                <RadzenText Style="color: darkred; font-weight: 600; font-size: 16px; font-style: initial" Text="Nhập thông tin kế hoạch sản xuất"></RadzenText>
+                                <RadzenText Text="Nhập thông tin kế hoạch sản xuất" Style="color: darkred; font-weight: 600; font-size: 16px; font-style: initial"></RadzenText>
                             </RadzenStack>
                             <RadzenStack Gap="10px" Style="width: 100%; height: contain; padding: 10px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                 <!--LSX Code-->
@@ -27,28 +27,6 @@
                                     </RadzenStack>
                                     <RadzenStack Style="width: 60%; height: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                         <RadzenText Text="@generLot.MaLSX" Style="font-size: 16px; font-weight: 600; width: 100%; height: contain; color: red"></RadzenText>
-                                    </RadzenStack>
-                                </RadzenStack>
-                                <!--Ma SP-->
-                                <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                    <RadzenStack Style="width: 40%; height: contain; padding-right: 10px" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
-                                        <RadzenText Text="Mã sản phẩm" Style="font-size: 14px; font-weight: 700;"></RadzenText>
-                                    </RadzenStack>
-                                    <RadzenStack Style="width: 60%; height: contain;" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
-                                        <RadzenDropDown Value="@generLot.NewKHSX.SanPham?.MaSP.Value?.ToString()" ValueChanged="@((args) => { generLot.SetCurrentKHSXsanPham(args); })" TValue="string"
-                                                        Data=@(generLot.GetDSMaSPs()) Style="width: 100%; border-radius: 5px; border-width: 1px; font-size: 14px; ">
-                                        </RadzenDropDown>
-                                    </RadzenStack>
-                                </RadzenStack>
-                                <!--Loai NL-->
-                                <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                    <RadzenStack Style="width: 40%; height: contain; padding-right: 10px" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
-                                        <RadzenText Text="Loại nguyên liệu" Style="font-size: 14px; font-weight: 700;"></RadzenText>
-                                    </RadzenStack>
-                                    <RadzenStack Style="width: 60%; height: contain;" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
-                                        <RadzenDropDown Value="@generLot.NewKHSX.LoaiNVL?.TenLoaiNVL.Value?.ToString()" ValueChanged="@((args) => { generLot.SetCurrentKHSXloaiNVL(args); })" TValue="string"
-                                                        Data=@(generLot.GetDSMaLoaiNVLs()) Style="width: 100%; border-radius: 5px; border-width: 1px; font-size: 14px; ">
-                                        </RadzenDropDown>
                                     </RadzenStack>
                                 </RadzenStack>
                                 <!--Ngày tạo-->
@@ -64,6 +42,18 @@
                                         </RadzenDatePicker>
                                     </RadzenStack>
                                 </RadzenStack>
+                                <!--Ma SP-->
+                                <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                    <RadzenStack Style="width: 40%; height: contain; padding-right: 10px" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
+                                        <RadzenText Text="Sản phẩm" Style="font-size: 14px; font-weight: 700;"></RadzenText>
+                                    </RadzenStack>
+                                    <RadzenStack Style="width: 60%; height: contain;" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
+                                        <RadzenDropDown Placeholder="*Chọn sản phẩm" Value="@generLot.NewKHSX.SanPham?.TenSanPham.Value?.ToString()" ValueChanged="@((args) => { allowgeneratenewLotlist = true; submitLotListDone = false; ResetNVLofKHSX(); generLot.SetCurrentKHSXsanPham(args); })" TValue="string"
+                                                        Data=@(generLot.GetDSMaSPs()) Style="width: 100%; border-radius: 5px; border-width: 1px; font-size: 14px; ">
+                                        </RadzenDropDown>
+                                    </RadzenStack>
+                                </RadzenStack>
+
                                 <!--Số lượng SX-->
                                 <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                     <RadzenStack Style="width: 40%; height: contain; padding-right: 10px" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
@@ -71,7 +61,7 @@
                                     </RadzenStack>
                                     <RadzenStack Style="width: 60%; height: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                         <RadzenNumeric Placeholder="*Nhập số lượng sản xuất" TValue="int" Min="0" Max="100000"
-                                                       Value="@generLot.SLSanXuat" ValueChanged="@((args) => { generLot.SLSanXuat = args ; generLot.ReCalculate();})"
+                                                       Value="@generLot.SLSanXuat" ValueChanged="@((args) => { allowgeneratenewLotlist = true; submitLotListDone = false; ResetNVLofKHSX(); generLot.SLSanXuat = args ; generLot.ReCalculate();})"
                                                        Style="font-size: 14px; height: contain; border-radius: 0; border-width: 1px; width: 100%" />
                                     </RadzenStack>
                                 </RadzenStack>
@@ -80,31 +70,60 @@
                                     <RadzenStack Style="width: 40%; height: contain; padding-right: 10px" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
                                         <RadzenText Text="Tỉ lệ lỗi (%)" Style="font-size: 14px; font-weight: 700;"></RadzenText>
                                     </RadzenStack>
-                                    <RadzenStack Style="width: 60%; height: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                    <RadzenStack Style="width: 60%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                         <RadzenNumeric Placeholder="*Nhập tỉ lệ lỗi" TValue="double" Min="0" Max="100000"
-                                                       Value="@generLot.TiLeLoi" ValueChanged="@((args) => { generLot.TiLeLoi = args ; generLot.ReCalculate();})"
-                                                       Style="font-size: 14px; height: contain; border-radius: 0; border-width: 1px; width: 100%" />
+                                                       Value="@generLot.TiLeLoi" ValueChanged="@((args) => { allowgeneratenewLotlist = true; submitLotListDone = false; ResetNVLofKHSX(); generLot.TiLeLoi = args ; generLot.ReCalculate();})"
+                                                       Style="font-size: 14px; border-radius: 0; border-width: 1px; width: 50%" />
+                                        <RadzenStack Visible="(generLot.TiLeLoi != 0)" Style="width: 50%; height: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                            <RadzenText Text="@($"{generLot.DinhMuc - generLot.SLSanXuat} (pcs)")" Style="font-size: 16px; font-weight: 500;"></RadzenText>
+                                        </RadzenStack>
                                     </RadzenStack>
                                 </RadzenStack>
-                                <!--Số lượng mỗi Lot-->
+                                <!--Định mức-->
                                 <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                     <RadzenStack Style="width: 40%; height: contain; padding-right: 10px" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
-                                        <RadzenText Text="Số lượng mỗi lot (pcs)" Style="font-size: 14px; font-weight: 700;"></RadzenText>
+                                        <RadzenText Text="Định mức SX (pcs)" Style="font-size: 14px; font-weight: 700;"></RadzenText>
                                     </RadzenStack>
                                     <RadzenStack Style="width: 60%; height: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                        <RadzenNumeric Placeholder="*Nhập số lượng mỗi lot" TValue="int" Min="0" Max="100000"
-                                                       Value="@generLot.SLperLotChan" ValueChanged="@((args) => { generLot.SLperLotChan = args ; generLot.ReCalculate();})"
-                                                       Style="font-size: 14px; height: contain; border-radius: 0; border-width: 1px; width: 100%" />
+                                        <RadzenText Text="@($"{generLot.DinhMuc.ToString()} (pcs)")" Style="font-size: 16px; font-weight: 600; width: 100%; height: contain; color: darkblue"></RadzenText>
                                     </RadzenStack>
                                 </RadzenStack>
+
+                                <!--Loai NL-->
+                                <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                    <RadzenStack Style="width: 40%; height: contain; padding-right: 10px" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
+                                        <RadzenText Text="Loại nguyên liệu" Style="font-size: 14px; font-weight: 700;"></RadzenText>
+                                    </RadzenStack>
+                                    <RadzenStack Style="width: 60%; height: contain;" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
+                                        <RadzenDropDown Placeholder="*Chọn loại nguyên liệu" Value="@generLot.NewKHSX.LoaiNVL?.TenLoaiNVL.Value?.ToString()" ValueChanged="@((args) => { ResetNVLofKHSX(); generLot.SetCurrentKHSXloaiNVL(args); })" TValue="string"
+                                                        Data=@(generLot.GetDSMaLoaiNVLs()) Style="width: 100%; border-radius: 5px; border-width: 1px; font-size: 14px; ">
+                                        </RadzenDropDown>
+                                    </RadzenStack>
+                                </RadzenStack>
+
+                                <!--Select so luong NVL-->
+                                <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                    <RadzenStack Style="width: 40%; height: contain; padding-right: 10px" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
+                                        <RadzenText Text="" Style="font-size: 14px; font-weight: 700;"></RadzenText>
+                                    </RadzenStack>
+                                    <RadzenStack Gap="10px" Style="width: 60%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                        <!--Chua chi dinh so luong NVL-->
+                                        <RadzenButton Visible="@(!isCheckSLNVLisOK)" Disabled="@(!generLot.IsAllowPickSLnvlofKHSX())" Click="@(() => OpenDialogSelectNVLofKHSX())" Style="width: 100%;" Icon="add" Text="Lấy nguyên vật liệu" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Variant="Variant.Flat" />
+                                        <!--Da chi dinh so luong NVL-->
+                                        <RadzenButton Visible="@isCheckSLNVLisOK" Click="@(() => OpenDialogSelectNVLofKHSX())" Style="width: 100%; cursor: default; font-size: 16px" Icon="check" Text="Đã chọn NVL" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Success" Shade="Shade.Lighter" Variant="Variant.Flat" />
+                                    </RadzenStack>
+                                </RadzenStack>
+
                                 <RadzenStack Gap="10px" Style="width: 100%; height: contain; padding-top: 10px; padding-bottom: 10px; border-top: var(--rz-grid-cell-border); border-bottom: var(--rz-grid-cell-border)" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                    <!--Định mức-->
+                                    <!--Số lượng mỗi Lot-->
                                     <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                         <RadzenStack Style="width: 40%; height: contain; padding-right: 10px" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
-                                            <RadzenText Text="Định mức SX (pcs)" Style="font-size: 14px; font-weight: 700;"></RadzenText>
+                                            <RadzenText Text="Số lượng mỗi lot (pcs)" Style="font-size: 14px; font-weight: 700;"></RadzenText>
                                         </RadzenStack>
                                         <RadzenStack Style="width: 60%; height: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                            <RadzenText Text="@generLot.DinhMuc.ToString()" Style="font-size: 16px; font-weight: 600; width: 100%; height: contain; color: darkblue"></RadzenText>
+                                            <RadzenNumeric Placeholder="*Nhập số lượng mỗi lot" TValue="int" Min="0" Max="100000"
+                                                           Value="@generLot.SLperLotChan" ValueChanged="@((args) => { allowgeneratenewLotlist = true; submitLotListDone = false; generLot.SLperLotChan = args ; generLot.ReCalculate();})"
+                                                           Style="font-size: 14px; height: contain; border-radius: 0; border-width: 1px; width: 100%" />
                                         </RadzenStack>
                                     </RadzenStack>
                                     <!--Số Lot-->
@@ -113,7 +132,7 @@
                                             <RadzenText Text="Số lượng lot" Style="font-size: 14px; font-weight: 700;"></RadzenText>
                                         </RadzenStack>
                                         <RadzenStack Style="width: 60%; height: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                            <RadzenText Text="@generLot.SLLot.ToString()" Style="font-size: 16px; font-weight: 600; width: 100%; height: contain; color: darkblue"></RadzenText>
+                                            <RadzenText Text="@($"{generLot.SLLot.ToString()} (lot)")" Style="font-size: 16px; font-weight: 600; width: 100%; height: contain; color: darkblue"></RadzenText>
                                         </RadzenStack>
                                     </RadzenStack>
                                     <RadzenStack Visible="@(generLot.SLperLotLe > 0)" Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
@@ -138,17 +157,22 @@
                             <RadzenStack Orientation="Orientation.Horizontal" Style="width: 100%; height: contain;" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
                                 <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" Style="width: 100%; height: contain;" AlignItems="AlignItems.Start">
                                     <!--Button generate-->
-                                    <RadzenStack Visible="@(allowgeneratenewLotlist)" Style="width: 100%; height: 100%" JustifyContent="JustifyContent.Center">
-                                        <RadzenButton Click="@(async () => { await GenerateListLot(); submitLotListDone = false;})" Icon="autorenew" Text="Tạo LOT" IsBusy="@waitgetlistlot" BusyText="Creating..."
-                                                      Style="font-size: 14px; border-radius: 5px; width: 100% " Variant="Variant.Filled" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small"></RadzenButton>
+                                    <RadzenStack Visible="@(allowgeneratenewLotlist && !submitLotListDone)" Style="width: 100%; height: 100%" JustifyContent="JustifyContent.Center">
+                                        <RadzenButton Click="@(async () => { await GenerateListLot(); submitLotListDone = false;})" Icon="autorenew" Text="Tạo danh sách LOT" IsBusy="@waitgetlistlot" BusyText="Creating..."
+                                                      Style="font-size: 14px; border-radius: 5px; width: 100% " Shade="Shade.Dark" Variant="Variant.Filled" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small"></RadzenButton>
                                     </RadzenStack>
-                                    <!--Button cancle generate-->
-                                    <RadzenStack Visible="@(!allowgeneratenewLotlist)" Style="width: 50%; height: 100%" JustifyContent="JustifyContent.Center">
-                                        <RadzenButton Click="@(() => {allowgeneratenewLotlist = true; submitLotListDone = false; generLot.ListNVLs = new();})" Icon="close" Text="Hủy" Style="font-size: 14px; border-radius: 5px; width: 100%;" Variant="Variant.Filled" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small"></RadzenButton>
+                                    <!--Button generate success-->
+                                    <RadzenStack Visible="@(allowgeneratenewLotlist && submitLotListDone)" Style="width: 100%; height: 100%" JustifyContent="JustifyContent.Center">
+                                        <RadzenButton Click="@(async () => { await GenerateListLot(); submitLotListDone = false;})" Icon="check" Text="Đã tạo danh sách LOT" IsBusy="@waitgetlistlot" BusyText="Creating..."
+                                                      Style="font-size: 16px; border-radius: 5px; width: 100% " Shade="Shade.Lighter" Variant="Variant.Filled" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small"></RadzenButton>
                                     </RadzenStack>
                                     <!--Button comfirm generate-->
                                     <RadzenStack Visible="@(!allowgeneratenewLotlist)" Style="width: 50%; height: 100%" JustifyContent="JustifyContent.Center">
-                                        <RadzenButton Click="@(() => {allowgeneratenewLotlist = true; submitLotListDone = true;})" Icon="check" Text="Xác nhận" Style="font-size: 14px; border-radius: 5px; width: 100%;" Variant="Variant.Filled" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small"></RadzenButton>
+                                        <RadzenButton Click="@(() => {allowgeneratenewLotlist = true; submitLotListDone = true;})" Icon="check" Text="Xác nhận" Style="font-size: 14px; border-radius: 5px; width: 100%;" Shade="Shade.Dark" Variant="Variant.Flat" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small"></RadzenButton>
+                                    </RadzenStack>
+                                    <!--Button cancle generate-->
+                                    <RadzenStack Visible="@(!allowgeneratenewLotlist)" Style="width: 50%; height: 100%" JustifyContent="JustifyContent.Center">
+                                        <RadzenButton Click="@(() => {allowgeneratenewLotlist = true; submitLotListDone = false; generLot.ListNVLs = new();})" Icon="close" Text="Hủy" Style="font-size: 14px; border-radius: 5px; width: 100%;" Shade="Shade.Lighter" Variant="Variant.Flat" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small"></RadzenButton>
                                     </RadzenStack>
                                 </RadzenStack>
                             </RadzenStack>
@@ -156,179 +180,179 @@
                     </RadzenCard>
                 </RadzenStack>
             </RadzenColumn>
-
             <RadzenColumn Size="12" SizeMD="8" Style="width: 100%; height: 100%;">
                 <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: 100%; padding-top: 0px; padding-bottom: 0px">
                     <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style="width: 100%; height: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                        <RadzenStack Style="width: 100%; height: 100%;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                            <RadzenStack Style="height: 5%; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                <RadzenText Text="___" Style="color: white; font-style: italic; font-weight: 600; font-size: 16px"></RadzenText>
-                            </RadzenStack>
-                            <RadzenStack Gap="0" Style="width: 100%; height: 88%; background-color: white;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                <RadzenRow Gap="10px" Style="width: 100%; height: 95%; padding: 10px; padding-right: 0px; overflow-y: scroll;">
-                                    <RadzenColumn Size="12" SizeMD="4" Style="width: 100%; height: 100%;">
-                                        <RadzenStack Style="height: 5%; width: 100%; padding-bottom: 5px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                            <RadzenText Text="Danh sách LOT nguyên vật liệu" Style="color: black; font-style: italic; font-weight: 600; font-size: 16px"></RadzenText>
-                                        </RadzenStack>
-                                        <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style=" height: 95%; width: 100%; padding: 10px; border-top: var(--rz-grid-cell-border);" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start">
-                                            <!--LOT List-->
-                                            <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: 100%; padding: 5px;">
-                                                <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style=" height: 100%; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                    <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style=" height: 8%; width: 100%; overflow-y: scroll" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                        <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: 100%; padding: 5px;">
-                                                            <RadzenStack Style="width: 100%; height: contain" Gap="0" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                <RadzenStack Style="width: 10%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                    <RadzenText Text="#" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
-                                                                </RadzenStack>
-                                                                <RadzenStack Style="width: 60%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                    <RadzenText Text="Mã quản lý" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
-                                                                </RadzenStack>
-                                                                <RadzenStack Style="width: 30%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                    <RadzenText Text="Số lượng" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
-                                                                </RadzenStack>
+                        <RadzenStack Style="width: 100%; height: 100%;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                            <RadzenRow Gap="10px" Style="width: 100%; height: 90%; padding: 10px; padding-right: 0px; background-color: white; border-radius: 10px; overflow-y: scroll;">
+                                <RadzenColumn Size="12" SizeMD="4" Style="width: 100%; height: 100%;">
+                                    <RadzenStack Style="height: 5%; width: 100%; padding-bottom: 5px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                        <RadzenText Text="Danh sách LOT nguyên vật liệu" Style="color: black; font-style: italic; font-weight: 600; font-size: 16px"></RadzenText>
+                                    </RadzenStack>
+                                    <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style=" height: 95%; width: 100%; padding: 10px; border-top: var(--rz-grid-cell-border);" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start">
+                                        <!--LOT List-->
+                                        <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: 100%; padding: 5px;">
+                                            <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style=" height: 100%; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style=" height: 8%; width: 100%; overflow-y: scroll" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                    <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: 100%; padding: 5px;">
+                                                        <RadzenStack Style="width: 100%; height: contain" Gap="0" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                            <RadzenStack Style="width: 10%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                <RadzenText Text="#" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
                                                             </RadzenStack>
+                                                            <RadzenStack Style="width: 60%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                <RadzenText Text="Mã quản lý" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                                                            </RadzenStack>
+                                                            <RadzenStack Style="width: 30%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                <RadzenText Text="Số lượng" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                                                            </RadzenStack>
+                                                        </RadzenStack>
+                                                    </RadzenCard>
+                                                </RadzenStack>
+
+                                                <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style=" height: 92%; width: 100%; overflow-y: scroll" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                    @if (generLot.ListNVLs != null)
+                                                    {
+                                                        @foreach (var lot in generLot.ListNVLs)
+                                                        {
+                                                            <RadzenCard Variant="Variant.Outlined" Style="width: 100%; height: 100%; padding: 5px; background-color: white">
+                                                                <RadzenStack Style="width: 100%; height: contain" Gap="10px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                    <RadzenStack Style="width: 10%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                        <RadzenText Text="@((generLot.ListNVLs?.IndexOf(lot) + 1).ToString())" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                                                                    </RadzenStack>
+                                                                    <RadzenStack Style="width: 60%; height: contain; background-color: beige" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                        <RadzenText Text="@lot.MaQuanLy.Value?.ToString()" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                                                                    </RadzenStack>
+                                                                    <RadzenStack Style="width: 30%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                        <RadzenText Text="@($"{lot.SoLuong.Value} (pcs)")" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                                                                    </RadzenStack>
+                                                                </RadzenStack>
+                                                            </RadzenCard>
+                                                        }
+                                                    }
+                                                </RadzenStack>
+                                            </RadzenStack>
+                                        </RadzenCard>
+                                    </RadzenStack>
+                                </RadzenColumn>
+
+                                <RadzenColumn Size="12" SizeMD="8" Style="width: 100%; height: 100%;">
+                                    <RadzenStack Style="height: 5%; width: 100%; padding-bottom: 5px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                        <RadzenText Text="Nguyên công sản xuất" Style="color: black; font-style: italic; font-weight: 600; font-size: 16px"></RadzenText>
+                                    </RadzenStack>
+                                    <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style=" height: 95%; width: 100%; padding: 10px; border-top: var(--rz-grid-cell-border);" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start">
+                                        <RadzenTabs Style="height: 500px; width: 100%;">
+                                            <Tabs>
+                                                <!--Select Nguyen cong list-->
+                                                <RadzenTabsItem @onclick="@(() => selectNCongTab = 1)" Text="Chọn nguyên công" Style="font-weight: 600; font-size: 16px; color: darkred">
+                                                    <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style=" height: 100%; width: 100%; padding: 0px; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                        <RadzenCard Variant="Variant.Filled" Style="height: 100%; width: 100%; padding: 10px;">
+                                                            <RadzenPickList @bind-Source="@(generLot.DefaultListCDnames)" @bind-Target="@generLot.SelectListCDnames" Style="height: 290px; width:100%;" Orientation="Orientation.Horizontal"
+                                                                            AllowFiltering="true" Multiple="false" ShowHeader="true"
+                                                                            ButtonGap="10px" ButtonJustifyContent="JustifyContent.Center" ButtonStyle="ButtonStyle.Secondary" ButtonSize="ButtonSize.Small" ButtonShade="Shade.Default" ButtonVariant="Variant.Filled">
+                                                                <SourceHeader>
+                                                                    <RadzenText Text="Danh sách nguyên công:" Style="color: black; font-weight: 500; font-size: 16px"></RadzenText>
+                                                                </SourceHeader>
+                                                                <TargetHeader>
+                                                                    <RadzenText Text="Thứ tự nguyên công đã chọn:" Style="color: black; font-weight: 500; font-size: 16px"></RadzenText>
+                                                                </TargetHeader>
+                                                                <Template>
+                                                                    <RadzenStack Style="height: contain; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                                                        <RadzenText Text="@($"{context}")" Style="color: black; font-weight: 500; font-size: 16px"></RadzenText>
+                                                                        @{
+                                                                            int index = generLot.SelectListCDnames?.ToList().IndexOf(context) ?? -1;
+                                                                        }
+                                                                        <RadzenText Text="@((index == -1)? string.Empty : "["+(index + 1).ToString()+"]")" Style="color: darkblue; font-weight: 600; font-size: 16px"></RadzenText>
+                                                                    </RadzenStack>
+                                                                </Template>
+                                                            </RadzenPickList>
+                                                            <RadzenButton Click="@(() => OpenDialogThemmoiNguyenCong())" Style="width: contain; margin-top: 10px;" Icon="add" Text="Thêm nguyên công khác" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Variant="Variant.Flat" />
                                                         </RadzenCard>
                                                     </RadzenStack>
-
-                                                    <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style=" height: 92%; width: 100%; overflow-y: scroll" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                                        @if (generLot.ListNVLs != null)
-                                                        {
-                                                            @foreach (var lot in generLot.ListNVLs)
-                                                            {
-                                                                <RadzenCard Variant="Variant.Outlined" Style="width: 100%; height: 100%; padding: 5px; background-color: white">
-                                                                    <RadzenStack Style="width: 100%; height: contain" Gap="10px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                        <RadzenStack Style="width: 10%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                            <RadzenText Text="@((generLot.ListNVLs?.IndexOf(lot) + 1).ToString())" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
-                                                                        </RadzenStack>
-                                                                        <RadzenStack Style="width: 60%; height: contain; background-color: beige" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                            <RadzenText Text="@lot.MaQuanLy.Value?.ToString()" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
-                                                                        </RadzenStack>
-                                                                        <RadzenStack Style="width: 30%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                            <RadzenText Text="@($"{lot.SoLuong.Value} (pcs)")" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
-                                                                        </RadzenStack>
-                                                                    </RadzenStack>
-                                                                </RadzenCard>
+                                                </RadzenTabsItem>
+                                                <!--Select Tileloi nguyen cong-->
+                                                <RadzenTabsItem @onclick="@(() => selectNCongTab = 2)" Text="Tỉ lệ lỗi nguyên công" Style="font-weight: 600; font-size: 16px; color: darkred">
+                                                    <RadzenCard Variant="Variant.Filled" Style="height: 100%; width: 100%; padding: 10px;">
+                                                        <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style=" height: 100%; width: 100%; padding: 0px; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                            <RadzenStack Gap="20px" Visible="@(generLot.DinhMuc == 0)" Style="height: contain; width: 100%; background-color: var(--rz-success-lighter); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                <RadzenText Text="Hãy nhập số lượng SX và tỉ lệ lỗi của kế hoạch sản xuất" Style="color: red; font-weight: 500; font-size: 14px"></RadzenText>
+                                                            </RadzenStack>
+                                                            @{
+                                                                generLot.CheckSoluongLoiChophep();
                                                             }
-                                                        }
-                                                    </RadzenStack>
-                                                </RadzenStack>
-                                            </RadzenCard>
-                                        </RadzenStack>
-                                    </RadzenColumn>
-
-                                    <RadzenColumn Size="12" SizeMD="8" Style="width: 100%; height: 100%;">
-                                        <RadzenStack Style="height: 5%; width: 100%; padding-bottom: 5px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                            <RadzenText Text="Nguyên công sản xuất" Style="color: black; font-style: italic; font-weight: 600; font-size: 16px"></RadzenText>
-                                        </RadzenStack>
-                                        <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style=" height: 95%; width: 100%; padding: 10px; border-top: var(--rz-grid-cell-border);" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start">
-                                            <RadzenTabs Style="height: 500px; width: 100%;">
-                                                <Tabs>
-                                                    <!--Select Nguyen cong list-->
-                                                    <RadzenTabsItem @onclick="@(() => selectNCongTab = 1)" Text="Chọn nguyên công" Style="font-weight: 600; font-size: 16px; color: darkred">
-                                                        <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style=" height: 100%; width: 100%; padding: 0px; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                            <RadzenCard Variant="Variant.Filled" Style="height: 100%; width: 100%; padding: 10px;">
-                                                                <RadzenPickList @bind-Source="@(generLot.DefaultListCDnames)" @bind-Target="@generLot.SelectListCDnames" Style="height: 290px; width:100%;" Orientation="Orientation.Horizontal"
-                                                                                AllowFiltering="true" Multiple="false" ShowHeader="true"
-                                                                                ButtonGap="10px" ButtonJustifyContent="JustifyContent.Center" ButtonStyle="ButtonStyle.Secondary" ButtonSize="ButtonSize.Small" ButtonShade="Shade.Default" ButtonVariant="Variant.Filled">
-                                                                    <SourceHeader>
-                                                                        <RadzenText Text="Danh sách nguyên công:" Style="color: black; font-weight: 500; font-size: 16px"></RadzenText>
-                                                                    </SourceHeader>
-                                                                    <TargetHeader>
-                                                                        <RadzenText Text="Thứ tự nguyên công đã chọn:" Style="color: black; font-weight: 500; font-size: 16px"></RadzenText>
-                                                                    </TargetHeader>
-                                                                    <Template>
-                                                                        <RadzenStack Style="height: contain; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                                                                            <RadzenText Text="@($"{context}")" Style="color: black; font-weight: 500; font-size: 16px"></RadzenText>
-                                                                            @{
-                                                                                int index = generLot.SelectListCDnames?.ToList().IndexOf(context) ?? -1;
-                                                                            }
-                                                                            <RadzenText Text="@((index == -1)? string.Empty : "["+(index + 1).ToString()+"]")" Style="color: darkblue; font-weight: 600; font-size: 16px"></RadzenText>
+                                                            <RadzenStack Gap="20px" Visible="@(generLot.DinhMuc != 0)" Style="height: contain; width: 100%; background-color: var(--rz-success-lighter); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                                <RadzenText Text="Tỉ lệ lỗi cho phép: " Style="color: green; font-weight: 500; font-size: 16px"></RadzenText>
+                                                                <RadzenText Text="@($"{generLot.TiLeLoi} %")" Style="color: darkred; font-weight: 500; font-size: 16px"></RadzenText>
+                                                                <RadzenText Text="@($"{generLot.DinhMuc - generLot.SLSanXuat} (pcs)")" Style="color: darkred; font-weight: 500; font-size: 16px"></RadzenText>
+                                                            </RadzenStack>
+                                                            <RadzenRow Gap="10px" Style="width: 100%; height: 100%;">
+                                                                <RadzenColumn Size="12" SizeMD="8" Style="width: 100%; height: 100%; padding-right: 10px; border-right: var(--rz-grid-cell-border)">
+                                                                    <RadzenStack Visible="@(generLot.DinhMuc != 0)" Gap="10px" Orientation="Orientation.Vertical" Style="height: contain; max-height: 280px; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                        <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style=" height: contain; width: 100%; padding-right: 10px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                            <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: 100%; padding: 5px;">
+                                                                                <RadzenStack Style="width: 100%; height: contain" Gap="0" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                                    <RadzenStack Style="width: 5%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                                        <RadzenText Text="#" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                                                                                    </RadzenStack>
+                                                                                    <RadzenStack Style="width: 50%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                                        <RadzenText Text="Nguyên công" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                                                                                    </RadzenStack>
+                                                                                    <RadzenStack Style="width: 45%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                                        <RadzenText Text="SL lỗi cho phép" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                                                                                    </RadzenStack>
+                                                                                </RadzenStack>
+                                                                            </RadzenCard>
                                                                         </RadzenStack>
-                                                                    </Template>
-                                                                </RadzenPickList>
-                                                                <RadzenButton Click="@(() => OpenDialogThemmoiNguyenCong())" Style="width: contain; margin-top: 10px;" Icon="add" Text="Thêm nguyên công khác" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Variant="Variant.Flat" />
-                                                            </RadzenCard>
-                                                        </RadzenStack>
-                                                    </RadzenTabsItem>
-                                                    <!--Select Tileloi nguyen cong-->
-                                                    <RadzenTabsItem @onclick="@(() => selectNCongTab = 2)" Text="Tỉ lệ lỗi nguyên công" Style="font-weight: 600; font-size: 16px; color: darkred">
-                                                        <RadzenCard Variant="Variant.Filled" Style="height: 100%; width: 100%; padding: 10px;">
-                                                            <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style=" height: 100%; width: 100%; padding: 0px; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                                                <RadzenStack Gap="20px" Visible="@(generLot.TiLeLoi == 0)" Style="height: contain; width: 100%; background-color: var(--rz-success-lighter); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                    <RadzenText Text="Hãy nhập số lượng SX và tỉ lệ lỗi của kế hoạch sản xuất" Style="color: red; font-weight: 500; font-size: 14px"></RadzenText>
-                                                                </RadzenStack>
-                                                                <RadzenStack Gap="20px" Visible="@(generLot.TiLeLoi != 0)" Style="height: contain; width: 100%; background-color: var(--rz-success-lighter); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                                                    <RadzenText Text="Tỉ lệ lỗi cho phép: " Style="color: green; font-weight: 500; font-size: 16px"></RadzenText>
-                                                                    <RadzenText Text="@($"{generLot.TiLeLoi} %")" Style="color: darkred; font-weight: 500; font-size: 16px"></RadzenText>
-                                                                    <RadzenText Text="@($"{generLot.DinhMuc - generLot.SLSanXuat} (pcs)")" Style="color: darkred; font-weight: 500; font-size: 16px"></RadzenText>
-                                                                </RadzenStack>
-                                                                <RadzenRow Gap="10px" Style="width: 100%; height: 100%;">
-                                                                    <RadzenColumn Size="12" SizeMD="8" Style="width: 100%; height: 100%; padding-right: 10px; border-right: var(--rz-grid-cell-border)">
-                                                                        <RadzenStack Visible="@(generLot.TiLeLoi != 0)" Gap="10px" Orientation="Orientation.Vertical" Style="height: contain; max-height: 280px; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                            <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style=" height: contain; width: 100%; padding-right: 10px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                                <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: 100%; padding: 5px;">
-                                                                                    <RadzenStack Style="width: 100%; height: contain" Gap="0" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+
+                                                                        <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style=" height: 90%; width: 100%; overflow-y: scroll" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+
+                                                                            @foreach (var nguyencong in generLot.NewKHSX.DSachCongDoans)
+                                                                            {
+                                                                                <RadzenCard Variant="Variant.Outlined" Style="width: 100%; height: 100%; padding: 5px; background-color: white">
+                                                                                    <RadzenStack Style="width: 100%; height: contain" Gap="10px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                                                         <RadzenStack Style="width: 5%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                                            <RadzenText Text="#" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                                                                                            <RadzenText Text="@((generLot.NewKHSX.DSachCongDoans.IndexOf(nguyencong) + 1).ToString())" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
                                                                                         </RadzenStack>
-                                                                                        <RadzenStack Style="width: 50%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                                            <RadzenText Text="Nguyên công" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                                                                                        <RadzenStack Style="width: 50%; height: contain; border-left: var(--rz-grid-cell-border); border-right: var(--rz-grid-cell-border); padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                                            <RadzenText Text="@nguyencong.TenCongDoan.Value?.ToString()" Style="color: darkblue; font-weight: 600; font-size: 14px"></RadzenText>
                                                                                         </RadzenStack>
-                                                                                        <RadzenStack Style="width: 45%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                                            <RadzenText Text="SL lỗi cho phép" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                                                                                        <RadzenStack Style="width: 45%; height: contain; " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                                            <RadzenNumeric TValue="int" Min="0" Value="@(int.TryParse(nguyencong.SoluongNG.Value?.ToString(), out int slloi)? slloi : 0)"
+                                                                                                           ValueChanged="@((args) =>{ nguyencong.SoluongNG.Value = args; generLot.CheckSoluongLoiChophep();})"
+                                                                                                           Style="font-size: 16px; font-weight: 600; height: contain; width: 50%; border-radius: 0px;" />
+                                                                                            <RadzenText Text="(pcs)" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
                                                                                         </RadzenStack>
                                                                                     </RadzenStack>
                                                                                 </RadzenCard>
-                                                                            </RadzenStack>
-
-                                                                            <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style=" height: 90%; width: 100%; overflow-y: scroll" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-
-                                                                                @foreach (var nguyencong in generLot.NewKHSX.DSachCongDoans)
-                                                                                {
-                                                                                    <RadzenCard Variant="Variant.Outlined" Style="width: 100%; height: 100%; padding: 5px; background-color: white">
-                                                                                        <RadzenStack Style="width: 100%; height: contain" Gap="10px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                                            <RadzenStack Style="width: 5%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                                                <RadzenText Text="@((generLot.NewKHSX.DSachCongDoans.IndexOf(nguyencong) + 1).ToString())" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
-                                                                                            </RadzenStack>
-                                                                                            <RadzenStack Style="width: 50%; height: contain; border-left: var(--rz-grid-cell-border); border-right: var(--rz-grid-cell-border); padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                                                <RadzenText Text="@nguyencong.TenCongDoan.Value?.ToString()" Style="color: darkblue; font-weight: 600; font-size: 14px"></RadzenText>
-                                                                                            </RadzenStack>
-                                                                                            <RadzenStack Style="width: 45%; height: contain; " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                                                <RadzenNumeric TValue="int" Min="0" Value="@(int.TryParse(nguyencong.SoluongNG.Value?.ToString(), out int slloi)? slloi : 0)"
-                                                                                                               ValueChanged="@((args) =>{ nguyencong.SoluongNG.Value = args; generLot.CheckSoluongLoiChophep();})"
-                                                                                                               Style="font-size: 16px; font-weight: 600; height: contain; width: 50%; border-radius: 0px; border: var(--rz-border-primary)" />
-                                                                                                <RadzenText Text="(pcs)" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
-                                                                                            </RadzenStack>
-                                                                                        </RadzenStack>
-                                                                                    </RadzenCard>
-                                                                                }
-                                                                            </RadzenStack>
+                                                                            }
                                                                         </RadzenStack>
-                                                                    </RadzenColumn>
-                                                                    <RadzenColumn Size="12" SizeMD="4" Style="width: 100%; height: 100%;">
-                                                                        <RadzenStack Visible="@(generLot.TiLeLoi != 0)" Gap="10px" Orientation="Orientation.Vertical" Style="height: contain; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                            <RadzenButton Click="@(() => ChiadeuSLloiNguyencong())" Style="width: 100%;" Icon="autorenew" Text="Chia đều" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Variant="Variant.Flat" />
-                                                                            <RadzenButton Click="@(() => {if(!generLot.isErrorSLloiChophep){generLot.isComfirmSLLoiNguyenCong = true;}})" Style="width: 100%;" Icon="check" Text="Xác nhận" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Success" Shade="Shade.Lighter" Variant="Variant.Flat" />
-                                                                            <RadzenAlert Visible="@generLot.isErrorSLloiChophep" Text="@($"Số lượng lỗi mỗi nguyên công chưa hợp lệ!")" Style="width: 100%; height: contain; font-size: 16px" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
-                                                                        </RadzenStack>
-                                                                    </RadzenColumn>
-                                                                </RadzenRow>
-                                                            </RadzenStack>
-                                                        </RadzenCard>
-                                                    </RadzenTabsItem>
-                                                </Tabs>
-                                            </RadzenTabs>
-                                        </RadzenStack>
-                                    </RadzenColumn>
-                                </RadzenRow>
-                            </RadzenStack>
+                                                                    </RadzenStack>
+                                                                </RadzenColumn>
+                                                                <RadzenColumn Size="12" SizeMD="4" Style="width: 100%; height: 100%;">
+                                                                    <RadzenStack Visible="@(generLot.DinhMuc != 0)" Gap="10px" Orientation="Orientation.Vertical" Style="height: contain; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                        <RadzenButton Click="@(() => ChiadeuSLloiNguyencong())" Style="width: 100%;" Icon="autorenew" Text="Chia đều" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Variant="Variant.Flat" />
+                                                                        <RadzenButton Click="@(() => {if(!generLot.isErrorSLloiChophep){generLot.isComfirmSLLoiNguyenCong = true;}})" Style="width: 100%;" Icon="check" Text="Xác nhận" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Success" Shade="Shade.Lighter" Variant="Variant.Flat" />
+                                                                        <RadzenAlert Visible="@generLot.isErrorSLloiChophep" Text="@($"Số lượng lỗi mỗi nguyên công chưa hợp lệ!")" Style="width: 100%; height: contain; font-size: 16px" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                                                                    </RadzenStack>
+                                                                </RadzenColumn>
+                                                            </RadzenRow>
+                                                        </RadzenStack>
+                                                    </RadzenCard>
+                                                </RadzenTabsItem>
+                                            </Tabs>
+                                        </RadzenTabs>
+                                    </RadzenStack>
+                                </RadzenColumn>
+                            </RadzenRow>
                             <!--Submit LSX to database-->
-                            <RadzenStack Style="width: 100%; height: 7%; padding: 5px; background-color: white" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                <RadzenButton Disabled="@(!(allowgeneratenewLotlist) || generLot.NewKHSX.DSachCongDoans?.Count() == 0 || generLot.ListNVLs == null || generLot.ListNVLs?.Count() == 0 || !generLot.isComfirmSLLoiNguyenCong || generLot.isErrorSLloiChophep)" Icon="upload" Text="Lưu kế hoạch sản xuất"
+                            <RadzenStack Style="width: 100%; height: 7%; padding: 5px; background-color: white" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                <RadzenButton Disabled="@(!(allowgeneratenewLotlist) || (!submitLotListDone) || (!isCheckSLNVLisOK)|| generLot.NewKHSX.DSachCongDoans?.Count() == 0
+                                                        || generLot.ListNVLs == null || generLot.ListNVLs?.Count() == 0 || !generLot.isComfirmSLLoiNguyenCong || generLot.isErrorSLloiChophep)"
+                                              Icon="upload" Text="Lưu kế hoạch sản xuất"
                                               Click="@(() => SubmitKHSXtoDatabase())" Style="font-size: 14px; border-radius: 5px; width: 50%;"
                                               IsBusy=@isAddingLSXtodatabase BusyText="Waiting..."
                                               Variant="Variant.Filled" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small">
                                 </RadzenButton>
+                                <RadzenButton Style="width: contain; color: white; background-color: darkred" Icon="close" Text="Thoát" Size="ButtonSize.Small" Variant="Variant.Flat" Click="@(() => DialogService.Close(null))" />
                             </RadzenStack>
                         </RadzenStack>
                     </RadzenStack>
@@ -336,9 +360,6 @@
             </RadzenColumn>
         </RadzenRow>
     </RadzenCard>
-    <RadzenStack Gap="10px" Style="height: 5%; width: 100%; padding-top: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
-        <RadzenButton Style="width: contain; color: white; background-color: darkred" Icon="close" Text="Thoát" Size="ButtonSize.Small" Variant="Variant.Flat" Click="@(() => DialogService.Close(null))" />
-    </RadzenStack>
 </RadzenStack>
 
 @code {
@@ -353,6 +374,7 @@
     private string currentSelectCDname = string.Empty;
     private bool isAddingLSXtodatabase = false;
     private int selectNCongTab = 1;
+    private bool isCheckSLNVLisOK = false;
 
     private async Task GenerateListLot()
     {
@@ -425,6 +447,14 @@
                 // Asign id for new KHSX
                 generLot.NewKHSX.KHSXID.Value = khsxID;
 
+                // Asign KHSX id for NVLofKHSX List
+                foreach (var nvl in generLot.NewKHSX.DSachNVLs)
+                {
+                    nvl.KHSXID.Value = khsxID;
+
+                    // Insert NVLofKHSX
+                }
+
                 // Add new Cong doan to DB
                 foreach (var congdoan in generLot.NewKHSX.DSachCongDoans.Where(cd => cd.IsUsing == true).ToList())
                 {
@@ -434,10 +464,12 @@
 
                     congdoan.CreateDSachNVLCongDoans(generLot.ListNVLs);
 
+                    // Insert Congdoan vao KHSX
                     (int cdID, string addcdError) = SQLServerServices.InsertCongdoantoKehoachSanxuat(congdoan);
 
                     if (cdID <= 0)
-                    {
+                    {   
+                        // Remove KHSX if error
                         await DeleteKehoachSanxuat();
 
                         await DialogService.Alert($"{addcdError}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
@@ -453,10 +485,12 @@
 
                             nvlmoicd.NgayXuat.Value = DateTime.Today.ToString(Common.DayTimeFormatnoTime);
 
+                            // Insert NVL cho moi congdoan
                             (int nvlmcdID, string addnvlmcdError) = SQLServerServices.InsertNVLmoiCongdoan(nvlmoicd);
 
                             if (nvlmcdID <= 0)
-                            {
+                            {   
+                                // Remove KHSX if error
                                 await DeleteKehoachSanxuat();
 
                                 await DialogService.Alert($"{addnvlmcdError}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
@@ -483,7 +517,7 @@
                 }
             }
             else
-            {
+            {   
                 await DialogService.Alert($"{addkhsxError}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
             }
         });
@@ -519,12 +553,35 @@
         }
     }
 
+    private async Task OpenDialogSelectNVLofKHSX()
+    {
+        // Re-Asign khsx data
+        generLot.AsignKHSXdata();
+
+        List<NVLofKHSX> nVLofKHSXs = await DialogService.OpenAsync<DialalogSelectSoluongNVLofKHSX>(null, new Dictionary<string, object>() { { "newKHSX", generLot.NewKHSX }, { "DSachNVLofKHSXs", generLot.NewKHSX.DSachNVLs } },
+        new DialogOptions() { Width = "50%", Height = "contain", Resizable = false, Draggable = true, ShowTitle = false, ShowClose = false, Style = "background-color: while; border-radius: 0px; padding: 0px" });
+
+        if (nVLofKHSXs != null)
+        {
+            generLot.NewKHSX.DSachNVLs = nVLofKHSXs.ToList();
+        }
+
+        // Update trang thai - SLNVL
+        isCheckSLNVLisOK = generLot.CheckSLNVLisOK();
+    }
+
+    private void ResetNVLofKHSX()
+    {
+        // Reset so luong cua moi nvl cua lsx khi bat ki thong so nao thay doi (loai nvl, ti le loi, slsx, ...)
+        isCheckSLNVLisOK = false;
+        generLot.NewKHSX.DSachNVLs = new();
+    }
 
     private void ChiadeuSLloiNguyencong()
     {
         generLot.SLLoi = generLot.DinhMuc - generLot.SLSanXuat;
 
-        if (generLot.SLLoi > 0 && generLot.NewKHSX.DSachCongDoans.Count() > 0)
+        if (generLot.SLLoi >= 0 && generLot.NewKHSX.DSachCongDoans.Count() > 0)
         {
             int slloiChan = generLot.SLLoi / generLot.NewKHSX.DSachCongDoans.Count();
 
@@ -554,39 +611,3 @@
         }
     }
 }
-
-
-@* <RadzenCard Variant="Variant.Filled" Style="height: contain; width: 100%; padding: 10px;">
-@if (generLot.NewKHSX != null)
-{
-<RadzenStack Style="height: 100%; width: 100%; padding: 10px;" Gap="10px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-<RadzenStack Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-<RadzenCheckBox Disabled="@(!submitLotListDone)" Value="@isSelectAllCongdoan" TValue="bool" Change=@(args => {isSelectAllCongdoan = !isSelectAllCongdoan; generLot.Listtencongdoan.ForEach(tencd => OnAddCongdoan(tencd, isSelectAllCongdoan));}) Name="CheckBoxCDAll" />
-<RadzenLabel Text="Chọn tất cả" Component="CheckBoxCDAll" Style="margin-left: 8px; font-weight: 600; vertical-align: middle;" />
-</RadzenStack>
-@foreach (var tenCondoan in generLot.Listtencongdoan)
-{
-<RadzenStack Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-@{
-var slcd = generLot.NewKHSX.DSachCongDoans.FirstOrDefault(cd => cd.TenCongDoan.Value?.ToString() == tenCondoan && cd.IsUsing == true);
-string index = string.Empty;
-if (slcd != null)
-{
-index = (generLot.NewKHSX.DSachCongDoans.IndexOf(slcd) + 1).ToString();
-}
-}
-<RadzenCheckBox Disabled="@(!submitLotListDone)" Value="@IsCDSelected(tenCondoan)" TValue="bool" Change=@(() => OnAddCongdoan(tenCondoan, false)) Name="@($"Congdoan{generLot.Listtencongdoan.IndexOf(tenCondoan).ToString()}")" />
-<RadzenLabel Text="@($"{tenCondoan}")" Component="@($"Congdoan{generLot.Listtencongdoan.IndexOf(tenCondoan).ToString()}")" Style="margin-left: 8px; vertical-align: middle;" />
-<RadzenText Visible=@(!string.IsNullOrEmpty(index)) Text="@($"[{index}]")" Style="color: darkblue; font-weight: 600; font-size: 16px; height: contain; width: contain"></RadzenText>
-</RadzenStack>
-}
-</RadzenStack>
-}
-</RadzenCard> *@
-
-@* <RadzenStack Style="height: 25%; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-@foreach (var cd in generLot.NewKHSX.DSachCongDoans)
-{
-<RadzenText Text="@cd.TenCongDoan.Value?.ToString()" Style="color: black; font-style: italic; font-weight: 600; font-size: 12px; width: contain; height: contain"></RadzenText>
-}
-</RadzenStack> *@

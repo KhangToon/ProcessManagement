@@ -8,7 +8,7 @@ namespace ProcessManagement.Models
     {
         public Propertyy KHSXID { get; set; } = new() { DBName = Common.KHSXID, Type = typeof(int), AlowDatabase = true };
         public Propertyy MaLSX { get; set; } = new() { DBName = Common.MaLSX, Type = typeof(string), AlowDatabase = true };
-        public Propertyy MaLoaiNVL { get; set; } = new() { DBName = Common.LOAINVLID, DisplayName = "Loại NVL", Type = typeof(int), AlowDatabase = true };
+        public Propertyy LOAINVLID { get; set; } = new() { DBName = Common.LOAINVLID, DisplayName = "Loại NVL", Type = typeof(int), AlowDatabase = true };
         public Propertyy SLSanXuat { get; set; } = new() { DBName = Common.SLSanXuat, Type = typeof(int), AlowDatabase = true };
         public Propertyy DinhMuc { get; set; } = new() { DBName = Common.DinhMuc, Type = typeof(int), AlowDatabase = true };
         public Propertyy TileLoi { get; set; } = new() { DBName = Common.TileLoi, Type = typeof(double), AlowDatabase = true };
@@ -24,6 +24,8 @@ namespace ProcessManagement.Models
         public SanPham? SanPham { get; set; }
         public LoaiNVL? LoaiNVL { get; set; }   
         public List<NguyenCongofKHSX> DSachCongDoans { get; set; } = new();
+
+        public List<NVLofKHSX> DSachNVLs { get; set; } = new(); // Danh sach NVL cua KHSX (so luong, loai nvl, sp, ngay tao)
 
         public KHSX()
         {
