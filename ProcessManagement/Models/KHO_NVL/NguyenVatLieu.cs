@@ -6,8 +6,8 @@ namespace ProcessManagement.Models.KHO_NVL
     public class NguyenVatLieu
     {
         public Propertyy NVLID { get; set; } = new() { DBName = Common.NVLID, DisplayName = "NVL ID", Type = typeof(int), AlowDatabase = false, AlowDisplay = false }; // ID
-        public Propertyy DMID { get; set; } = new() { DBName = Common.DMID, DisplayName = "Danh mục NVL", Type = typeof(int), AlowDatabase = true, };
-        public Propertyy LOAINVLID { get; set; } = new() { DBName = Common.LOAINVLID, DisplayName = "Loại NVL", Type = typeof(int), AlowDatabase = true, };
+        public Propertyy DMID { get; set; } = new() { DBName = Common.DMID, DisplayName = "Danh mục NVL", Type = typeof(int), AlowDatabase = true, AlowDisplay = false };
+        public Propertyy LOAINVLID { get; set; } = new() { DBName = Common.LOAINVLID, DisplayName = "Loại NVL", Type = typeof(int), AlowDatabase = true, AlowDisplay = false };
         public Propertyy TenNVL { get; set; } = new() { DBName = Common.TenNVL, DisplayName = "Tên NVL", Type = typeof(string), AlowDatabase = true };
         public Propertyy MoTa { get; set; } = new() { DBName = Common.MoTa, DisplayName = "Mô tả", Type = typeof(string), AlowDatabase = true };
         public Propertyy DonViTinh { get; set; } = new() { DBName = Common.DonViTinh, DisplayName = "Đơn vị tính", Type = typeof(string), AlowDatabase = true };

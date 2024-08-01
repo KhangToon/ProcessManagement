@@ -108,13 +108,13 @@ namespace ProcessManagement.Commons
         public const string SLperLotLe = "SL mỗi lot lẻ";
 
         // Table KHSXpickNVL //
-        public const string TableKHSXpickNVL = "Table_KHSXpickNVL";
+        public const string TableNVLofKHSX = "Table_NVLofKHSX";
         public const string NVLKHSXID = "NVLKHSXID";
         //public const string KHSXID = "KHSXID";
         //public const string SPID = "SPID";
         //public const string NVLSPID = "NVLSPID";
         //public const string SoLuong = "Số lượng";
-        //public const string NgayTao = "Ngày tạo";
+        public const string ThoiDiem = "Thời điểm";
 
 
         // Table Nhanvien //

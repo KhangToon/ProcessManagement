@@ -21,13 +21,11 @@
                 <RadzenCard Variant="Variant.Filled" Style="min-height: 300px; width: 100%; padding: 0px; margin-top: 10px;">
                     <RadzenStack Style="height: 100%; width: 100%; padding: 10px;" Gap="0" Orientation="Orientation.Vertical">
                         @{
-                            List<Propertyy>? nvlproperties = NewNVL.GetPropertiesValues();
+                            List<Propertyy>? nvlproperties = NewNVL.GetPropertiesValues().Where(nvl => nvl.DBName != Common.NVLID).ToList();
 
-                            var alowdispNVLproperties = nvlproperties.Where(nvl => nvl.AlowDisplay == true);
-
-                            if (alowdispNVLproperties != null)
+                            if (nvlproperties != null)
                             {
-                                foreach (var property in alowdispNVLproperties)
+                                foreach (var property in nvlproperties)
                                 {
                                     <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 10px; border-bottom: var(--rz-grid-cell-border);">
                                         <RadzenStack Style="width: 30%;">

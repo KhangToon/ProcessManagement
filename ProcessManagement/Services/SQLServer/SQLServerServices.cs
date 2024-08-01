@@ -143,7 +143,6 @@ namespace ProcessManagement.Services.SQLServer
             return listNVL;
         }
 
-
         // Lay danh sach nguyen vat lieu
         public List<NVL> GetlistNVLperLot(string lotNVL)
         {
@@ -266,6 +265,7 @@ namespace ProcessManagement.Services.SQLServer
 
             return (result, errorMess);
         }
+
 
         // Lay danh sach Lot
         public List<Lot> GetlistLot()
@@ -390,6 +390,7 @@ namespace ProcessManagement.Services.SQLServer
             }
         }
 
+        #region Table_SanPham
         // Lay danh sach san pham
         public List<SanPham> GetlistSanphams()
         {
@@ -673,6 +674,37 @@ namespace ProcessManagement.Services.SQLServer
             return (result, errorMess);
         }
 
+        // Delete san pham
+        public (int, string) DeleteSanpham(SanPham? removeSanpham)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            if (removeSanpham == null) return (result, errorMess);
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"DELETE FROM {Common.TableSanPham} WHERE [{Common.SPID}] = '{removeSanpham.SPID.Value}'";
+
+                object rs = command.ExecuteScalar();
+
+                result = Convert.ToInt32(rs);
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
         // Delete chi tiet san pham
         public (int, string) DeleteChitietSanPham(SanPham.ChitietSanPham? removeChitiet)
         {
@@ -704,7 +736,9 @@ namespace ProcessManagement.Services.SQLServer
             return (result, errorMess);
         }
 
+        #endregion Table_SanPham
 
+        #region Table_KHSX
         // Get last ke hoach san xuat
         public KHSX GetLastKHSX()
         {
@@ -849,6 +883,8 @@ namespace ProcessManagement.Services.SQLServer
 
                 khsx.LoaiNVL = GetLoaiNVLbyID(int.TryParse(khsx.LOAINVLID.Value?.ToString(), out int loainvlid) ? loainvlid : 0);
 
+                khsx.DSachNVLs = GetListNVLofKHSXbyID(khsx.KHSXID.Value);
+
                 khsx.DSachCongDoans = GetlistCongdoans(khsx.KHSXID.Value);
             }
 
@@ -886,6 +922,10 @@ namespace ProcessManagement.Services.SQLServer
                     }
 
                     khsx.SanPham = GetSanpham(int.Parse(khsx.SPID.Value?.ToString() ?? "0"));
+
+                    khsx.LoaiNVL = GetLoaiNVLbyID(int.TryParse(khsx.LOAINVLID.Value?.ToString(), out int loainvlid) ? loainvlid : 0);
+
+                    khsx.DSachNVLs = GetListNVLofKHSXbyID(khsx.KHSXID.Value);
 
                     khsx.DSachCongDoans = GetlistCongdoans(khsx.KHSXID.Value);
 
@@ -927,6 +967,10 @@ namespace ProcessManagement.Services.SQLServer
                     }
 
                     khsx.SanPham = GetSanpham(int.Parse(khsx.SPID.Value?.ToString() ?? "0"));
+
+                    khsx.LoaiNVL = GetLoaiNVLbyID(int.TryParse(khsx.LOAINVLID.Value?.ToString(), out int loainvlid) ? loainvlid : 0);
+
+                    khsx.DSachNVLs = GetListNVLofKHSXbyID(khsx.KHSXID.Value);
 
                     khsx.DSachCongDoans = GetlistCongdoans(khsx.KHSXID.Value);
 
@@ -1014,6 +1058,9 @@ namespace ProcessManagement.Services.SQLServer
             return (result, errorMess);
         }
 
+        #endregion
+
+        #region Table_NguyenCongofKHSX
         // Load danh sach cong doan
         public List<NguyenCongofKHSX> GetlistCongdoans(object? khsxID)
         {
@@ -1308,39 +1355,6 @@ namespace ProcessManagement.Services.SQLServer
         }
 
         // Update calam viec
-        public (int, string) UpdateCalamviec2(NVLmoiNguyenCong? nVLmoiCong, string calamviec, int slOK)
-        {
-            int result = -1; string errorMess = string.Empty;
-
-            if (nVLmoiCong == null) { return (result, errorMess); }
-
-            try
-            {
-                using (var connection = new SqlConnection(connectionString))
-                {
-                    connection.Open();
-
-                    string sqlQuery = $"UPDATE {Common.TableCalamviec} SET [{Common.OK}] = '{slOK}', [{Common.NgayGiaCong}] = '{DateTime.Now}' " +
-                                    $"WHERE [{Common.NVLMCDID}] = '{nVLmoiCong.NVLMCDID.Value}' AND [{Common.Ca}] = '{calamviec}'";
-
-                    var command = new SqlCommand(sqlQuery, connection);
-
-                    result = command.ExecuteNonQuery();
-
-                    connection.Close();
-
-                    return (result, string.Empty);
-                }
-            }
-            catch (Exception ex)
-            {
-                string err = ex.Message;
-
-                return (-1, err);
-            }
-        }
-
-        // Update calam viec
         public (int, string) UpdateCalamviec(NVLmoiNguyenCong? nVLmoiCong, TemNVLMCDValues temNVLMCD)
         {
             int result = -1; string errorMess = string.Empty;
@@ -1438,36 +1452,8 @@ namespace ProcessManagement.Services.SQLServer
             }
         }
 
-        // Delete Ke hoach san xuat
-        public (int, string) DeleteSanpham(SanPham? removeSanpham)
-        {
-            int result = -1; string errorMess = string.Empty;
+        #endregion Table_NguyenCongofKHSX
 
-            if (removeSanpham == null) return (result, errorMess);
-
-            try
-            {
-                using var connection = new SqlConnection(connectionString);
-
-                connection.Open();
-
-                var command = connection.CreateCommand();
-
-                command.CommandText = $"DELETE FROM {Common.TableSanPham} WHERE [{Common.SPID}] = '{removeSanpham.SPID.Value}'";
-
-                object rs = command.ExecuteScalar();
-
-                result = Convert.ToInt32(rs);
-            }
-            catch (Exception ex)
-            {
-                errorMess = ex.Message;
-
-                return (-1, errorMess);
-            }
-
-            return (result, errorMess);
-        }
 
         // Nguyen cong ///////////
         // Kiem tra nguyen cong da ton tai
@@ -1615,7 +1601,8 @@ namespace ProcessManagement.Services.SQLServer
             return lisNCs;
         }
 
-        // Table Table_NVLofSanPham //
+
+        #region Table_NVLofSanPham
         // Get danh sach NVL cua san pham
         public List<NVLofSanPham> GetDSachNVLofSanPham(object? spID)
         {
@@ -1782,9 +1769,98 @@ namespace ProcessManagement.Services.SQLServer
             return (result, errorMess);
         }
 
+        #endregion Table_NVLofSanPham
+
+        #region Table_NVLofKHSX
+        // Insert NVLofKHSX
+        public (int, string) InsertNVLofKHSX(NVLofKHSX nvlofkhsx)
+        {
+            List<Propertyy> newNVLItems = nvlofkhsx.GetPropertiesValues().Where(po => po.AlowDatabase == true && po.Value != null).ToList();
+
+            int result = -1; string errorMess = string.Empty;
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                string columnNames = string.Join(",", newNVLItems.Select(key => $"[{key.DBName}]"));
+
+                string parameterNames = string.Join(",", newNVLItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $"INSERT INTO [{Common.TableNVLofKHSX}] ({columnNames}) OUTPUT INSERTED.{Common.NVLKHSXID} VALUES ({parameterNames})";
+
+                foreach (var item in newNVLItems)
+                {
+                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
+
+                    object? parameterValue = item.Value;
+
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                object? rs = command.ExecuteScalar();
+
+                result = Convert.ToInt32(rs);
+
+                if (result == 0) result = -1;
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
+        // Get list NVLofKHSX by ID
+        public List<NVLofKHSX> GetListNVLofKHSXbyID(object? khsxid)
+        {
+            List<NVLofKHSX> listnvls = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.TableNVLofKHSX}] WHERE [{Common.KHSXID}] = '{khsxid}'";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    NVLofKHSX nvl = new();
+
+                    List<Propertyy> rowitems = nvl.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue;
+                    }
+
+                    listnvls.Add(nvl);
+                }
+            }
+
+            return listnvls;
+        }
+
+        #endregion
+
+
         // Management KHO_NGUYENVATLIEU //
 
-        // Table KHO_NguyenVatLieu //
+        #region Table KHO_NguyenVatLieu
         // Them loai NVL moi 
         public (int, string) InsertNewLoaiNguyenVatLieu(NguyenVatLieu newnvl)
         {
@@ -1830,6 +1906,39 @@ namespace ProcessManagement.Services.SQLServer
 
             return (result, errorMess);
         }
+
+        // Update so luong ton kho NVL // Table KHO_NguyenVatLieu //
+        public (int, string) UpdateSLTonkhoNguyenVatLieu(object? nvlid, object? soluongLay)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            if (soluongLay == null || nvlid == null) { return (result, errorMess); }
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+
+                    string sqlQuery = $"UPDATE {Common.TableNguyenVatLieu} SET [{Common.TonKhoHienTai}] = [{Common.TonKhoHienTai}] - '{soluongLay}' WHERE [{Common.NVLID}] = '{nvlid}'";
+
+                    var command = new SqlCommand(sqlQuery, connection);
+
+                    result = command.ExecuteNonQuery();
+
+                    connection.Close();
+
+                    return (result, string.Empty);
+                }
+            }
+            catch (Exception ex)
+            {
+                string err = ex.Message;
+
+                return (-1, err);
+            }
+        }
+
         // Check Ten NVL da ton tai // Table KHO_NguyenVatLieu //
         public bool IsTenNVLExists(string? tenNVL)
         {
@@ -1847,6 +1956,7 @@ namespace ProcessManagement.Services.SQLServer
                 }
             }
         }
+
         // Get Nguyen Vat Lieu by ID // Table KHO_NguyenVatLieu //
         public NguyenVatLieu GetNguyenVatLieubyID(int maNVL)
         {
@@ -1917,8 +2027,9 @@ namespace ProcessManagement.Services.SQLServer
 
             return nguyenvatlieus;
         }
+        #endregion  Table KHO_NguyenVatLieu
 
-        // Table KHO_DanhMucNguyenVatLieu //
+        #region Table KHO_DanhMucNguyenVatLieu
         // Get list danh muc NVL
         public List<DanhMucNVL> GetListDanhMucNVLs()
         {
@@ -1955,7 +2066,39 @@ namespace ProcessManagement.Services.SQLServer
 
             return listDanhmucNVLs;
         }
+        // Get danh muc by ID
+        public DanhMucNVL GetDanhMucbyID(int danhmucID)
+        {
+            DanhMucNVL dmnvl = new();
 
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.TableDanhMucNVL}] WHERE [{Common.DMID}] = '{danhmucID}'";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    List<Propertyy> rowitems = dmnvl.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue;
+                    }
+
+                }
+            }
+
+            return dmnvl;
+        }
         // Them new danh muc NVL // Table KHO_DanhMucNguyenVatLieu //
         public (int, string) InsertNewDanhMucNguyenVatLieu(DanhMucNVL newdmnvl)
         {
@@ -2019,8 +2162,9 @@ namespace ProcessManagement.Services.SQLServer
                 }
             }
         }
+        #endregion Table KHO_DanhMucNguyenVatLieu
 
-        // Table KHO_LoaiNguyenVatLieu //
+        #region Table KHO_LoaiNguyenVatLieu
 
         // Get loai NVL by maloai NVL // Table KHO_LoaiNguyenVatLieu //
         public LoaiNVL GetLoaiNVLbyID(int maloaiNVL)
@@ -2224,5 +2368,6 @@ namespace ProcessManagement.Services.SQLServer
 
             return (result, errorMess);
         }
+        #endregion Table KHO_LoaiNguyenVatLieu
     }
 }

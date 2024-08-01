@@ -110,7 +110,7 @@
                                         <!--Chua chi dinh so luong NVL-->
                                         <RadzenButton Visible="@(!isCheckSLNVLisOK)" Disabled="@(!generLot.IsAllowPickSLnvlofKHSX())" Click="@(() => OpenDialogSelectNVLofKHSX())" Style="width: 100%;" Icon="add" Text="Lấy nguyên vật liệu" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Variant="Variant.Flat" />
                                         <!--Da chi dinh so luong NVL-->
-                                        <RadzenButton Visible="@isCheckSLNVLisOK" Click="@(() => OpenDialogSelectNVLofKHSX())" Style="width: 100%; cursor: default; font-size: 16px" Icon="check" Text="Đã chọn NVL" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Success" Shade="Shade.Lighter" Variant="Variant.Flat" />
+                                        <RadzenButton Visible="@isCheckSLNVLisOK" Click="@(() => OpenDialogSelectNVLofKHSX())" Style="width: 100%; font-size: 16px" Icon="check" Text="Đã chọn NVL" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Success" Shade="Shade.Lighter" Variant="Variant.Flat" />
                                     </RadzenStack>
                                 </RadzenStack>
 
@@ -157,23 +157,27 @@
                             <RadzenStack Orientation="Orientation.Horizontal" Style="width: 100%; height: contain;" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
                                 <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" Style="width: 100%; height: contain;" AlignItems="AlignItems.Start">
                                     <!--Button generate-->
+                                    @*                                     <RadzenStack Visible="@(allowgeneratenewLotlist && !submitLotListDone)" Style="width: 100%; height: 100%" JustifyContent="JustifyContent.Center">
+                                    <RadzenButton Click="@(async () => { await GenerateListLot(); submitLotListDone = false;})" Icon="autorenew" Text="Tạo danh sách LOT" IsBusy="@waitgetlistlot" BusyText="Creating..."
+                                    Style="font-size: 14px; border-radius: 5px; width: 100% " Shade="Shade.Dark" Variant="Variant.Filled" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small"></RadzenButton>
+                                    </RadzenStack> *@
                                     <RadzenStack Visible="@(allowgeneratenewLotlist && !submitLotListDone)" Style="width: 100%; height: 100%" JustifyContent="JustifyContent.Center">
-                                        <RadzenButton Click="@(async () => { await GenerateListLot(); submitLotListDone = false;})" Icon="autorenew" Text="Tạo danh sách LOT" IsBusy="@waitgetlistlot" BusyText="Creating..."
+                                        <RadzenButton Click="@(async () => { await CreateListLot();})" Icon="autorenew" Text="Tạo danh sách LOT" IsBusy="@waitgetlistlot" BusyText="Creating..."
                                                       Style="font-size: 14px; border-radius: 5px; width: 100% " Shade="Shade.Dark" Variant="Variant.Filled" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small"></RadzenButton>
                                     </RadzenStack>
                                     <!--Button generate success-->
                                     <RadzenStack Visible="@(allowgeneratenewLotlist && submitLotListDone)" Style="width: 100%; height: 100%" JustifyContent="JustifyContent.Center">
-                                        <RadzenButton Click="@(async () => { await GenerateListLot(); submitLotListDone = false;})" Icon="check" Text="Đã tạo danh sách LOT" IsBusy="@waitgetlistlot" BusyText="Creating..."
+                                        <RadzenButton Click="@(async () => { await CreateListLot();})" Icon="check" Text="Đã tạo danh sách LOT" IsBusy="@waitgetlistlot" BusyText="Creating..."
                                                       Style="font-size: 16px; border-radius: 5px; width: 100% " Shade="Shade.Lighter" Variant="Variant.Filled" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small"></RadzenButton>
                                     </RadzenStack>
                                     <!--Button comfirm generate-->
-                                    <RadzenStack Visible="@(!allowgeneratenewLotlist)" Style="width: 50%; height: 100%" JustifyContent="JustifyContent.Center">
+@*                                     <RadzenStack Visible="@(!allowgeneratenewLotlist)" Style="width: 50%; height: 100%" JustifyContent="JustifyContent.Center">
                                         <RadzenButton Click="@(() => {allowgeneratenewLotlist = true; submitLotListDone = true;})" Icon="check" Text="Xác nhận" Style="font-size: 14px; border-radius: 5px; width: 100%;" Shade="Shade.Dark" Variant="Variant.Flat" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small"></RadzenButton>
                                     </RadzenStack>
                                     <!--Button cancle generate-->
                                     <RadzenStack Visible="@(!allowgeneratenewLotlist)" Style="width: 50%; height: 100%" JustifyContent="JustifyContent.Center">
                                         <RadzenButton Click="@(() => {allowgeneratenewLotlist = true; submitLotListDone = false; generLot.ListNVLs = new();})" Icon="close" Text="Hủy" Style="font-size: 14px; border-radius: 5px; width: 100%;" Shade="Shade.Lighter" Variant="Variant.Flat" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small"></RadzenButton>
-                                    </RadzenStack>
+                                    </RadzenStack> *@
                                 </RadzenStack>
                             </RadzenStack>
                         </RadzenStack>
@@ -350,7 +354,7 @@
                                               Icon="upload" Text="Lưu kế hoạch sản xuất"
                                               Click="@(() => SubmitKHSXtoDatabase())" Style="font-size: 14px; border-radius: 5px; width: 50%;"
                                               IsBusy=@isAddingLSXtodatabase BusyText="Waiting..."
-                                              Variant="Variant.Filled" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small">
+                                              Variant="Variant.Filled" ButtonStyle="ButtonStyle.Success" Shade="Shade.Darker" Size="ButtonSize.Small">
                                 </RadzenButton>
                                 <RadzenButton Style="width: contain; color: white; background-color: darkred" Icon="close" Text="Thoát" Size="ButtonSize.Small" Variant="Variant.Flat" Click="@(() => DialogService.Close(null))" />
                             </RadzenStack>
@@ -391,6 +395,15 @@
             await DialogService.Alert($"{error}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
         }
         else { allowgeneratenewLotlist = false; }
+    }
+
+    private async Task CreateListLot()
+    {
+        await GenerateListLot();
+
+        allowgeneratenewLotlist = true;
+
+        submitLotListDone = true;
     }
 
     private void OnAddCongdoan(string tenCD, bool isSelecteAll)
@@ -447,13 +460,49 @@
                 // Asign id for new KHSX
                 generLot.NewKHSX.KHSXID.Value = khsxID;
 
+                bool addNVLofKHSXok = true;
+
                 // Asign KHSX id for NVLofKHSX List
                 foreach (var nvl in generLot.NewKHSX.DSachNVLs)
                 {
                     nvl.KHSXID.Value = khsxID;
 
-                    // Insert NVLofKHSX
+                    // Insert NVL of KHSX
+                    (int nvlkhsxid, string er) = SQLServerServices.InsertNVLofKHSX(nvl);
+
+                    if (nvlkhsxid <= 0)
+                    {
+                        // Remove KHSX if error
+                        await DeleteKehoachSanxuat();
+
+                        await DialogService.Alert($"{er}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+
+                        addNVLofKHSXok = false;
+
+                        break;
+                    }
+                    else
+                    {
+                        // Update SL NgVatLieu
+                        (int udrs, string uder) = SQLServerServices.UpdateSLTonkhoNguyenVatLieu(nvl.NVLID.Value, nvl.SoLuong.Value);
+
+                        if (udrs == -1)
+                        {
+                            // Remove KHSX if error
+                            await DeleteKehoachSanxuat();
+
+                            await DialogService.Alert($"{uder}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+
+                            addNVLofKHSXok = false;
+
+                            break;
+                        }
+
+                        // Add History lay so luong NVL
+                    }
                 }
+
+                if (!addNVLofKHSXok) { return; }
 
                 // Add new Cong doan to DB
                 foreach (var congdoan in generLot.NewKHSX.DSachCongDoans.Where(cd => cd.IsUsing == true).ToList())
@@ -468,7 +517,7 @@
                     (int cdID, string addcdError) = SQLServerServices.InsertCongdoantoKehoachSanxuat(congdoan);
 
                     if (cdID <= 0)
-                    {   
+                    {
                         // Remove KHSX if error
                         await DeleteKehoachSanxuat();
 
@@ -489,7 +538,7 @@
                             (int nvlmcdID, string addnvlmcdError) = SQLServerServices.InsertNVLmoiCongdoan(nvlmoicd);
 
                             if (nvlmcdID <= 0)
-                            {   
+                            {
                                 // Remove KHSX if error
                                 await DeleteKehoachSanxuat();
 
@@ -517,7 +566,7 @@
                 }
             }
             else
-            {   
+            {
                 await DialogService.Alert($"{addkhsxError}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
             }
         });
