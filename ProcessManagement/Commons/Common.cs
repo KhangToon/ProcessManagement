@@ -230,6 +230,19 @@ namespace ProcessManagement.Commons
         public const string NguyenNhan = "NguyenNhan";
         public const string NguoiKiemKe = "NguoiKiemKe";
 
+        // Table KHO_NVLDetailsListName
+        public const string Table_NVLDetailsListName = "KHO_NVLDetailsListName";
+        public const string TenTTID = "TenTTID";
+        public const string TenThongTin = "Tên thông tin";
+        public const string KieuDulieu = "Kiểu dữ liệu";
+        public const string MacDinh = "Mặc định";
+
+        // Table KHO_NguyenLieuDetails
+        public const string Table_NguyenLieuDetails = "KHO_NguyenLieuDetails";
+        public const string TTNVLID = "TTNVLID";
+        //public const string NVLID = "NVLID";
+        //public const string TenTTID = "TenTTID";
+        public const string NoiDung = "Nội dung";
 
         // Socket 
         public const string socketEndKey = "<END>";

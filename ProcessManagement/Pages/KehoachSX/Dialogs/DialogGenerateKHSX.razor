@@ -48,7 +48,7 @@
                                         <RadzenText Text="Sản phẩm" Style="font-size: 14px; font-weight: 700;"></RadzenText>
                                     </RadzenStack>
                                     <RadzenStack Style="width: 60%; height: contain;" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
-                                        <RadzenDropDown Placeholder="*Chọn sản phẩm" Value="@generLot.NewKHSX.SanPham?.TenSanPham.Value?.ToString()" ValueChanged="@((args) => { allowgeneratenewLotlist = true; submitLotListDone = false; ResetNVLofKHSX(); generLot.SetCurrentKHSXsanPham(args); })" TValue="string"
+                                        <RadzenDropDown Placeholder="*Chọn sản phẩm" Value="@generLot.NewKHSX.SanPham?.TenSanPham.Value?.ToString()" ValueChanged="@((args) => { submitLotListDone = false; ResetNVLofKHSX(); generLot.SetCurrentKHSXsanPham(args); })" TValue="string"
                                                         Data=@(generLot.GetDSMaSPs()) Style="width: 100%; border-radius: 5px; border-width: 1px; font-size: 14px; ">
                                         </RadzenDropDown>
                                     </RadzenStack>
@@ -61,7 +61,7 @@
                                     </RadzenStack>
                                     <RadzenStack Style="width: 60%; height: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                         <RadzenNumeric Placeholder="*Nhập số lượng sản xuất" TValue="int" Min="0" Max="100000"
-                                                       Value="@generLot.SLSanXuat" ValueChanged="@((args) => { allowgeneratenewLotlist = true; submitLotListDone = false; ResetNVLofKHSX(); generLot.SLSanXuat = args ; generLot.ReCalculate();})"
+                                                       Value="@generLot.SLSanXuat" ValueChanged="@((args) => { submitLotListDone = false; ResetNVLofKHSX(); generLot.SLSanXuat = args ; generLot.ReCalculate();})"
                                                        Style="font-size: 14px; height: contain; border-radius: 0; border-width: 1px; width: 100%" />
                                     </RadzenStack>
                                 </RadzenStack>
@@ -72,7 +72,7 @@
                                     </RadzenStack>
                                     <RadzenStack Style="width: 60%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                         <RadzenNumeric Placeholder="*Nhập tỉ lệ lỗi" TValue="double" Min="0" Max="100000"
-                                                       Value="@generLot.TiLeLoi" ValueChanged="@((args) => { allowgeneratenewLotlist = true; submitLotListDone = false; ResetNVLofKHSX(); generLot.TiLeLoi = args ; generLot.ReCalculate();})"
+                                                       Value="@generLot.TiLeLoi" ValueChanged="@((args) => { submitLotListDone = false; ResetNVLofKHSX(); generLot.TiLeLoi = args ; generLot.ReCalculate();})"
                                                        Style="font-size: 14px; border-radius: 0; border-width: 1px; width: 50%" />
                                         <RadzenStack Visible="(generLot.TiLeLoi != 0)" Style="width: 50%; height: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                             <RadzenText Text="@($"{generLot.DinhMuc - generLot.SLSanXuat} (pcs)")" Style="font-size: 16px; font-weight: 500;"></RadzenText>
@@ -122,7 +122,7 @@
                                         </RadzenStack>
                                         <RadzenStack Style="width: 60%; height: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                             <RadzenNumeric Placeholder="*Nhập số lượng mỗi lot" TValue="int" Min="0" Max="100000"
-                                                           Value="@generLot.SLperLotChan" ValueChanged="@((args) => { allowgeneratenewLotlist = true; submitLotListDone = false; generLot.SLperLotChan = args ; generLot.ReCalculate();})"
+                                                           Value="@generLot.SLperLotChan" ValueChanged="@((args) => { submitLotListDone = false; generLot.SLperLotChan = args ; generLot.ReCalculate();})"
                                                            Style="font-size: 14px; height: contain; border-radius: 0; border-width: 1px; width: 100%" />
                                         </RadzenStack>
                                     </RadzenStack>
@@ -156,28 +156,15 @@
                             </RadzenStack>
                             <RadzenStack Orientation="Orientation.Horizontal" Style="width: 100%; height: contain;" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
                                 <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" Style="width: 100%; height: contain;" AlignItems="AlignItems.Start">
-                                    <!--Button generate-->
-                                    @*                                     <RadzenStack Visible="@(allowgeneratenewLotlist && !submitLotListDone)" Style="width: 100%; height: 100%" JustifyContent="JustifyContent.Center">
-                                    <RadzenButton Click="@(async () => { await GenerateListLot(); submitLotListDone = false;})" Icon="autorenew" Text="Tạo danh sách LOT" IsBusy="@waitgetlistlot" BusyText="Creating..."
-                                    Style="font-size: 14px; border-radius: 5px; width: 100% " Shade="Shade.Dark" Variant="Variant.Filled" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small"></RadzenButton>
-                                    </RadzenStack> *@
-                                    <RadzenStack Visible="@(allowgeneratenewLotlist && !submitLotListDone)" Style="width: 100%; height: 100%" JustifyContent="JustifyContent.Center">
+                                    <RadzenStack Visible="@(!submitLotListDone)" Style="width: 100%; height: 100%" JustifyContent="JustifyContent.Center">
                                         <RadzenButton Click="@(async () => { await CreateListLot();})" Icon="autorenew" Text="Tạo danh sách LOT" IsBusy="@waitgetlistlot" BusyText="Creating..."
                                                       Style="font-size: 14px; border-radius: 5px; width: 100% " Shade="Shade.Dark" Variant="Variant.Filled" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small"></RadzenButton>
                                     </RadzenStack>
                                     <!--Button generate success-->
-                                    <RadzenStack Visible="@(allowgeneratenewLotlist && submitLotListDone)" Style="width: 100%; height: 100%" JustifyContent="JustifyContent.Center">
+                                    <RadzenStack Visible="@(submitLotListDone)" Style="width: 100%; height: 100%" JustifyContent="JustifyContent.Center">
                                         <RadzenButton Click="@(async () => { await CreateListLot();})" Icon="check" Text="Đã tạo danh sách LOT" IsBusy="@waitgetlistlot" BusyText="Creating..."
                                                       Style="font-size: 16px; border-radius: 5px; width: 100% " Shade="Shade.Lighter" Variant="Variant.Filled" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small"></RadzenButton>
                                     </RadzenStack>
-                                    <!--Button comfirm generate-->
-@*                                     <RadzenStack Visible="@(!allowgeneratenewLotlist)" Style="width: 50%; height: 100%" JustifyContent="JustifyContent.Center">
-                                        <RadzenButton Click="@(() => {allowgeneratenewLotlist = true; submitLotListDone = true;})" Icon="check" Text="Xác nhận" Style="font-size: 14px; border-radius: 5px; width: 100%;" Shade="Shade.Dark" Variant="Variant.Flat" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small"></RadzenButton>
-                                    </RadzenStack>
-                                    <!--Button cancle generate-->
-                                    <RadzenStack Visible="@(!allowgeneratenewLotlist)" Style="width: 50%; height: 100%" JustifyContent="JustifyContent.Center">
-                                        <RadzenButton Click="@(() => {allowgeneratenewLotlist = true; submitLotListDone = false; generLot.ListNVLs = new();})" Icon="close" Text="Hủy" Style="font-size: 14px; border-radius: 5px; width: 100%;" Shade="Shade.Lighter" Variant="Variant.Flat" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small"></RadzenButton>
-                                    </RadzenStack> *@
                                 </RadzenStack>
                             </RadzenStack>
                         </RadzenStack>
@@ -349,7 +336,7 @@
                             </RadzenRow>
                             <!--Submit LSX to database-->
                             <RadzenStack Style="width: 100%; height: 7%; padding: 5px; background-color: white" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                                <RadzenButton Disabled="@(!(allowgeneratenewLotlist) || (!submitLotListDone) || (!isCheckSLNVLisOK)|| generLot.NewKHSX.DSachCongDoans?.Count() == 0
+                                <RadzenButton Disabled="@((!submitLotListDone) || (!isCheckSLNVLisOK)|| generLot.NewKHSX.DSachCongDoans?.Count() == 0
                                                         || generLot.ListNVLs == null || generLot.ListNVLs?.Count() == 0 || !generLot.isComfirmSLLoiNguyenCong || generLot.isErrorSLloiChophep)"
                                               Icon="upload" Text="Lưu kế hoạch sản xuất"
                                               Click="@(() => SubmitKHSXtoDatabase())" Style="font-size: 14px; border-radius: 5px; width: 50%;"
@@ -368,7 +355,7 @@
 
 @code {
     private GenerateLot generLot = new();
-    private bool allowgeneratenewLotlist = true;
+    //private bool allowgeneratenewLotlist = true;
     private bool submitLotListDone = false;
     private bool waitgetlistlot = false;
     private bool allowgenerateCongdoan = true;
@@ -394,16 +381,17 @@
         {
             await DialogService.Alert($"{error}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
         }
-        else { allowgeneratenewLotlist = false; }
+        else
+        {
+            submitLotListDone = true;
+        }
     }
 
     private async Task CreateListLot()
     {
+        submitLotListDone = false;
+
         await GenerateListLot();
-
-        allowgeneratenewLotlist = true;
-
-        submitLotListDone = true;
     }
 
     private void OnAddCongdoan(string tenCD, bool isSelecteAll)

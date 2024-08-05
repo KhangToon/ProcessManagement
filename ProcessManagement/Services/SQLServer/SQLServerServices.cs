@@ -1454,8 +1454,7 @@ namespace ProcessManagement.Services.SQLServer
 
         #endregion Table_NguyenCongofKHSX
 
-
-        // Nguyen cong ///////////
+        #region Table_NguyenCong
         // Kiem tra nguyen cong da ton tai
         public (int, string) NguyencongDatontai(NguyenCong nguyenCong)
         {
@@ -1600,7 +1599,7 @@ namespace ProcessManagement.Services.SQLServer
 
             return lisNCs;
         }
-
+        #endregion Table_NguyenCong
 
         #region Table_NVLofSanPham
         // Get danh sach NVL cua san pham
@@ -1858,15 +1857,17 @@ namespace ProcessManagement.Services.SQLServer
         #endregion
 
 
-        // Management KHO_NGUYENVATLIEU //
+        //////// Management KHO_NGUYENVATLIEU ////////
 
         #region Table KHO_NguyenVatLieu
         // Them loai NVL moi 
-        public (int, string) InsertNewLoaiNguyenVatLieu(NguyenVatLieu newnvl)
+        public (int, string) InsertNewLoaiNguyenVatLieu(NguyenVatLieu? newnvl)
         {
-            List<Propertyy> newNVLItems = newnvl.GetPropertiesValues().Where(po => po.AlowDatabase == true && po.Value != null).ToList();
-
             int result = -1; string errorMess = string.Empty;
+
+            if (newnvl == null) return (result, "Error");
+
+            List<Propertyy> newNVLItems = newnvl.GetPropertiesValues().Where(po => po.AlowDatabase == true && po.Value != null).ToList();
 
             try
             {
@@ -1907,7 +1908,7 @@ namespace ProcessManagement.Services.SQLServer
             return (result, errorMess);
         }
 
-        // Update so luong ton kho NVL // Table KHO_NguyenVatLieu //
+        // Update so luong ton kho NVL 
         public (int, string) UpdateSLTonkhoNguyenVatLieu(object? nvlid, object? soluongLay)
         {
             int result = -1; string errorMess = string.Empty;
@@ -1939,7 +1940,7 @@ namespace ProcessManagement.Services.SQLServer
             }
         }
 
-        // Check Ten NVL da ton tai // Table KHO_NguyenVatLieu //
+        // Check Ten NVL da ton tai 
         public bool IsTenNVLExists(string? tenNVL)
         {
             using (var connection = new SqlConnection(connectionString))
@@ -1957,7 +1958,7 @@ namespace ProcessManagement.Services.SQLServer
             }
         }
 
-        // Get Nguyen Vat Lieu by ID // Table KHO_NguyenVatLieu //
+        // Get Nguyen Vat Lieu by ID 
         public NguyenVatLieu GetNguyenVatLieubyID(int maNVL)
         {
             NguyenVatLieu nvl = new();
@@ -1988,11 +1989,14 @@ namespace ProcessManagement.Services.SQLServer
                 }
             }
 
+            // Load Details NVL 
+            GetNguyenVatLieuDetails(nvl.NVLID.Value);
+
             return nvl;
         }
 
-        // Get list NguyenVatLieu // Table KHO_NguyenVatLieu //
-        public List<NguyenVatLieu> GetListNguyenVatLieu(int loainvlID)
+        // Get list NguyenVatLieu by loai nvl ID
+        public List<NguyenVatLieu> GetListNguyenVatLieu(object? loainvlID)
         {
             List<NguyenVatLieu> nguyenvatlieus = new();
 
@@ -2021,6 +2025,49 @@ namespace ProcessManagement.Services.SQLServer
                         item.Value = columnValue;
                     }
 
+                    // Load Details NVL 
+                    GetNguyenVatLieuDetails(nvl.NVLID.Value);
+
+                    nguyenvatlieus.Add(nvl);
+                }
+            }
+
+            return nguyenvatlieus;
+        }
+
+        // Get list Nguyen vat lieu
+        public List<NguyenVatLieu> GetListNguyenVatLieu()
+        {
+            List<NguyenVatLieu> nguyenvatlieus = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.TableNguyenVatLieu}]";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    NguyenVatLieu nvl = new();
+
+                    List<Propertyy> rowitems = nvl.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue;
+                    }
+
+                    // Load Details NVL 
+                    GetNguyenVatLieuDetails(nvl.NVLID.Value);
+
                     nguyenvatlieus.Add(nvl);
                 }
             }
@@ -2028,6 +2075,102 @@ namespace ProcessManagement.Services.SQLServer
             return nguyenvatlieus;
         }
         #endregion  Table KHO_NguyenVatLieu
+
+        #region Table_KHONguyenLieuDetails
+        // Load thong tin of nguyen vat lieu
+        public List<NguyenVatLieuDetail> GetNguyenVatLieuDetails(object? nvlid)
+        {
+            List<NguyenVatLieuDetail> nvlDetails = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_NguyenLieuDetails}] WHERE [{Common.TTNVLID}] = '{nvlid}'";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    NguyenVatLieuDetail detail = new();
+
+                    List<Propertyy> rowitems = detail.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue;
+                    }
+
+                    nvlDetails.Add(detail);
+                }
+            }
+
+            return nvlDetails;
+        }
+        #endregion Table_KHONguyenLieuDetails
+
+        #region Table_KHONVLDetailsListName
+        // Load list name of thong tin nguyen vat lieu 
+        public List<NVLDetailsName> GetListNVLdetailsName()
+        {
+            List<NVLDetailsName> names = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_NVLDetailsListName}]";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    NVLDetailsName name = new();
+
+                    List<Propertyy> rowitems = name.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue;
+                    }
+
+                    names.Add(name);
+                }
+            }
+
+            return names;
+        }
+
+        // Check ten nvl details da tong tai
+        public bool IsNVLDetailExisting(string? tenNVLDetail)
+        {
+            using (var connection = new SqlConnection(connectionString))
+            {
+                string query = $"SELECT COUNT(*) FROM [{Common.Table_NVLDetailsListName}] WHERE [{Common.TenThongTin}] = N'{tenNVLDetail}'";
+
+                using (var command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+
+                    int count = (int)command.ExecuteScalar();
+
+                    return count > 0;
+                }
+            }
+        }
+        #endregion Table_KHONVLDetailsListName
 
         #region Table KHO_DanhMucNguyenVatLieu
         // Get list danh muc NVL
@@ -2238,7 +2381,7 @@ namespace ProcessManagement.Services.SQLServer
         }
 
         // Get list loai nguyen vat lieu (order by madanhmuc) // Table KHO_LoaiNguyenVatLieu //
-        public List<LoaiNVL> GetListLoaiNVLs(int madanhmuc)
+        public List<LoaiNVL> GetListLoaiNVLs(object? dmid)
         {
             List<LoaiNVL> listloaiNVLs = new();
 
@@ -2248,7 +2391,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"SELECT * FROM [{Common.TableLoaiNVL}] WHERE [{Common.DMID}] = '{madanhmuc}'";
+                command.CommandText = $"SELECT * FROM [{Common.TableLoaiNVL}] WHERE [{Common.DMID}] = '{dmid}'";
 
                 using var reader = command.ExecuteReader();
 

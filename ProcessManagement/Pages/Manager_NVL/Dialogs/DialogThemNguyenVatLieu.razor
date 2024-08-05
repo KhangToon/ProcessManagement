@@ -11,7 +11,7 @@
 @inject SQLServerServices SQLServerServices
 
 <RadzenCard Style="height: 100%; width: 100%; padding: 5px" Variant="Variant.Flat">
-    <RadzenStack Gap="0" Style="height: 100%; width: 100%; margin: 0; padding: 0" Orientation="Orientation.Vertical" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start">
+    <RadzenStack Gap="0" Style="height: 100%; width: 100%; margin: 0; padding: 0; padding-bottom: 10px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start">
         <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding-bottom: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
             <RadzenText Text="Thêm nguyên vật liệu mới" Style="font-size: 18px; font-weight: 600; color: black"></RadzenText>
         </RadzenStack>
@@ -21,7 +21,7 @@
                 <RadzenCard Variant="Variant.Filled" Style="min-height: 300px; width: 100%; padding: 0px; margin-top: 10px;">
                     <RadzenStack Style="height: 100%; width: 100%; padding: 10px;" Gap="0" Orientation="Orientation.Vertical">
                         @{
-                            List<Propertyy>? nvlproperties = NewNVL.GetPropertiesValues().Where(nvl => nvl.DBName != Common.NVLID).ToList();
+                            List<Propertyy>? nvlproperties = NewNVL?.GetPropertiesValues().Where(nvl => nvl.DBName != Common.NVLID).ToList();
 
                             if (nvlproperties != null)
                             {
@@ -42,7 +42,7 @@
                                                                         SelectDanhmuc = danhMucNVLs?.FirstOrDefault(dm => dm.TenDanhMuc.Value?.ToString() == args?.ToString());
                                                                         property.Value = SelectDanhmuc?.DMID.Value?.ToString();
                                                                         LoaiNVLs = LoadListLoaiNguyenVatLieu(SelectDanhmuc);
-                                                                        selectLoaiNVL = null; // reset selected loaiNVL
+                                                                        SelectLoaiNVL = null; // reset selected loaiNVL
                                                                     })">
                                                     </RadzenDropDown>
                                                     <RadzenButton Disabled="true" Style="width: 30%; min-height: 35px; height: contain;" Click="@(() => OnOpenDialogAddNewDanhmucNVL())"
@@ -52,28 +52,29 @@
                                             else if (property.DBName == Common.LOAINVLID)
                                             {
                                                 <RadzenStack Gap=" 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
-                                                    <RadzenDropDown AllowClear="true" Placeholder="@("*Chọn loại nguyên vật liệu")" Disabled="(LoaiNVLs?.Count == 0)" TValue="string" Style="width: 70%; height: contain; font-size: 14px; font-weight: 600" Value="selectLoaiNVL?.TenLoaiNVL.Value?.ToString()"
+                                                    <RadzenDropDown AllowClear="true" Placeholder="@("*Chọn loại nguyên vật liệu")" Disabled="(LoaiNVLs?.Count == 0)" TValue="string" Style="width: 70%; height: contain; font-size: 14px; font-weight: 600" Value="SelectLoaiNVL?.TenLoaiNVL.Value?.ToString()"
                                                                     Data=@(LoaiNVLs?.Select(dm => dm.TenLoaiNVL.Value?.ToString()) ?? Enumerable.Empty<string>())
                                                                     Change="@(args =>
                                                                     {
-                                                                        selectLoaiNVL = LoaiNVLs?.FirstOrDefault(dm => dm.TenLoaiNVL.Value?.ToString() == args?.ToString());
-                                                                        property.Value = selectLoaiNVL?.LOAINVLID.Value?.ToString();
+                                                                        SelectLoaiNVL = LoaiNVLs?.FirstOrDefault(dm => dm.TenLoaiNVL.Value?.ToString() == args?.ToString());
+                                                                        property.Value = SelectLoaiNVL?.LOAINVLID.Value?.ToString();
                                                                     })">
                                                     </RadzenDropDown>
                                                     <RadzenButton Style="width: 30%; min-height: 35px; height: contain;" Click="@(() => OnOpenDialogAddNewLoaiNVL())" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Thêm loại NVL"))"
                                                                   Icon="add" Text="Loại NVL khác" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" />
                                                 </RadzenStack>
-                                                @if (selectLoaiNVL == null) { property.Value = null; } // reset property value (MaLoaiNVL) khi chuyen san danh muc khac
+                                                @if (SelectLoaiNVL == null) { property.Value = null; } // reset property value (MaLoaiNVL) khi chuyen san danh muc khac
                                             }
                                             else if (property.DBName == Common.TenNVL)
                                             {
-                                                <RadzenTextBox Placeholder="@($"*Nhập {property.DisplayName}")" Value="@property.Value?.ToString()" Style="font-size: 16px; height: contain;  border-width: 1px; width: 100% "
-                                                               ValueChanged="@((args) => {property.Value = args;})">
-                                                </RadzenTextBox>
+                                                <RadzenStack Gap=" 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
+                                                    <RadzenTextBox Placeholder="@($"*Nhập {property.DisplayName}")" Value="@property.Value?.ToString()" Style="font-size: 16px; height: contain;  border-width: 1px; width: 80% "
+                                                                   @oninput=@((args) => property.Value = OnCheckboxTenNVLChanged(args))>
+                                                    </RadzenTextBox>
+                                                    <RadzenAlert Visible="@(!tenLoaiNVLdatontai && property.Value != null && property.Value.ToString() != string.Empty)" Text="@("Tên hợp lệ")" Style="width: 20%; height: 100%; font-size: 14px; padding: 2px; margin: 0" AlertStyle="AlertStyle.Success" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                                                </RadzenStack>
 
-                                                notallowAddnewNVL = SQLServerServices.IsTenNVLExists(property.Value?.ToString()?.Trim());
-
-                                                <RadzenAlert Visible="notallowAddnewNVL" Text="@("Tên nguyên vật liệu đã tồn tại, thử tên khác!")" Style="width: 100%; height: contain; font-size: 16px; background-color: orangered; color: white; padding-left: 15px" IconColor="white" AlertStyle="AlertStyle.Danger" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                                                <RadzenAlert Visible="@(tenLoaiNVLdatontai && property.Value != null && property.Value.ToString() != string.Empty)" Text="@("Tên nguyên vật liệu đã tồn tại, thử tên khác!")" Style="width: 100%; height: contain; font-size: 16px; background-color: orangered; color: white; padding-left: 15px" IconColor="white" AlertStyle="AlertStyle.Danger" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
                                             }
                                             else
                                             {
@@ -90,10 +91,16 @@
                                                 }
                                                 else if (property.Type == typeof(DateTime))
                                                 {
-                                                    <RadzenDatePicker Placeholder="@($"*Chọn {property.DisplayName}")" TValue="DateTime"
-                                                                      ValueChanged="@((args) => { var now = DateTime.Now ; property.Value = args.Add(new TimeSpan(now.Hour, now.Minute, now.Second));})"
+                                                    <RadzenDatePicker Placeholder="@($"*Chọn {property.DisplayName}")" TValue="DateTime" Value="@ngaycapnhat"
+                                                                      ValueChanged="@((args) => { ngaycapnhat = args; property.Value = ngaycapnhat; })"
                                                                       ShowTime="false" HourFormat="12" DateFormat="@Common.DayTimeFormatnoTime" AllowInput="false"
-                                                                      Style="width: 100%; font-size: 16px"></RadzenDatePicker>
+                                                                      Style="width: 100%; font-size: 16px">
+                                                        <FooterTemplate>
+                                                            <RadzenStack Style="height: 100%; width: contain; padding: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                <RadzenButton Style="height: 100%; width: 50%;" Text="To day" Click="@(() => { ngaycapnhat = DateTime.Today; property.Value = ngaycapnhat; })" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />
+                                                            </RadzenStack>
+                                                        </FooterTemplate>
+                                                    </RadzenDatePicker>
                                                 }
                                             }
                                         </RadzenStack>
@@ -106,19 +113,23 @@
             </RadzenColumn>
         </RadzenRow>
         <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding-right: 15px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
-            <RadzenButton Style="width: contain; height: 80%; color: white; background-color: darkgreen" Icon="save" Text="Xác nhận thêm" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Variant="Variant.Filled" Click="@(() => OnAddnewNVL())" />
+            <RadzenButton Style="width: contain; height: 80%;" Icon="save" Text="Xác nhận thêm" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Default" Size="ButtonSize.Small" Variant="Variant.Filled" Click="@(() => OnAddnewNVL())" />
             <RadzenButton Style="width: contain; height: 80%;" Icon="close" Text="Thoát" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" Click="@(() => OnCancelAddnewNVL())" />
         </RadzenStack>
     </RadzenStack>
 </RadzenCard>
 
 @code {
-    private NguyenVatLieu NewNVL = new();
+    private NguyenVatLieu? NewNVL;
     private List<DanhMucNVL>? danhMucNVLs;
-    private List<LoaiNVL>? LoaiNVLs;
-    private bool notallowAddnewNVL = false;
+
     private DanhMucNVL? SelectDanhmuc;
-    private LoaiNVL? selectLoaiNVL;
+    private DateTime ngaycapnhat = DateTime.Now;
+
+    private bool tenLoaiNVLdatontai = false;
+    private List<LoaiNVL>? LoaiNVLs;
+    [Parameter]
+    public LoaiNVL? SelectLoaiNVL { get; set; }
 
     protected override Task OnInitializedAsync()
     {
@@ -126,11 +137,29 @@
 
         SelectDanhmuc = danhMucNVLs?.FirstOrDefault(dm => dm.TenDanhMuc.Value?.ToString()?.Trim() == Common.DanhMucNguyenLieuGiaCong);
 
-        NewNVL.DMID.Value = SelectDanhmuc?.DMID.Value;
+        NewNVL = new()
+            {
+                DMID = { Value = SelectDanhmuc?.DMID.Value },
+                LOAINVLID = { Value = SelectLoaiNVL?.LOAINVLID.Value },
+                NgayCapNhat = { Value = ngaycapnhat }
+            };
 
         LoaiNVLs = LoadListLoaiNguyenVatLieu(SelectDanhmuc);
 
         return base.OnInitializedAsync();
+    }
+
+
+    private string OnCheckboxTenNVLChanged(ChangeEventArgs args)
+    {
+        string newValue = args.Value?.ToString() ?? string.Empty;
+
+        if (newValue != string.Empty)
+        {
+            tenLoaiNVLdatontai = SQLServerServices.IsTenNVLExists(newValue);
+        }
+
+        return newValue;
     }
 
     private List<DanhMucNVL>? LoadListDanhmucNguyenVatLieu()
@@ -178,10 +207,6 @@
 
         if (comfirm.Value)
         {
-            // List<Propertyy>? nvlproperties = NewNVL.GetPropertiesValues();
-
-            // var alowdispNVLproperties = nvlproperties.Where(nvl => nvl.AlowDisplay == true);
-
             (int result, string error) = SQLServerServices.InsertNewLoaiNguyenVatLieu(NewNVL);
 
             if (result > 0)

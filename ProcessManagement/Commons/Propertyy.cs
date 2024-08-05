@@ -9,5 +9,6 @@
         public bool AlowDatabase { get; set; } = false;
         public string DisplayName { get; set; } = "###";
         public bool AlowDisplay { get; set; } = true;
+
     }
 }

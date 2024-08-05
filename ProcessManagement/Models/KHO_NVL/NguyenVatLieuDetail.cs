@@ -1,18 +1,19 @@
 ﻿using ProcessManagement.Commons;
+using ProcessManagement.Pages.KehoachSX;
 using System.Reflection;
 
 namespace ProcessManagement.Models.KHO_NVL
 {
-    public class LoaiNVL
+    public class NguyenVatLieuDetail
     {
-        public Propertyy LOAINVLID { get; set; } = new() { DBName = Common.LOAINVLID, DisplayName = "Loại NVL ID", Type = typeof(int), AlowDatabase = true }; // ID
-        public Propertyy DMID { get; set; } = new() { DBName = Common.DMID, DisplayName = "Danh mục ID", Type = typeof(int), AlowDatabase = true };
-        public Propertyy TenLoaiNVL { get; set; } = new() { DBName = Common.TenLoaiNVL, DisplayName = "Tên loại NVL", Type = typeof(string), AlowDatabase = true };
-        public Propertyy NgayThem { get; set; } = new() { DBName = Common.NgayThem, DisplayName = "Ngày tạo", Type = typeof(DateTime), AlowDatabase = true };
+        public Propertyy TTNVLID { get; set; } = new() { DBName = Common.TTNVLID, DisplayName = "TTNVLID", Type = typeof(int), AlowDatabase = false, AlowDisplay = false }; // ID
+        public Propertyy NVLID { get; set; } = new() { DBName = Common.NVLID, DisplayName = "NVL ID", Type = typeof(int), AlowDisplay = false };
+        public Propertyy TenTTID { get; set; } = new() { DBName = Common.TenTTID, DisplayName = "TenTTID", Type = typeof(int), AlowDisplay = false };
+        public Propertyy NoiDung { get; set; } = new() { DBName = Common.NoiDung, DisplayName = "Nội dung", Type = typeof(string), AlowDatabase = true };
 
         public List<Propertyy> GetPropertiesValues()
         {
-            Type propertyType = typeof(LoaiNVL);
+            Type propertyType = typeof(NguyenVatLieuDetail);
 
             FieldInfo[] fields = propertyType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 

@@ -3,16 +3,17 @@ using System.Reflection;
 
 namespace ProcessManagement.Models.KHO_NVL
 {
-    public class LoaiNVL
+    public class NVLDetailsName
     {
-        public Propertyy LOAINVLID { get; set; } = new() { DBName = Common.LOAINVLID, DisplayName = "Loại NVL ID", Type = typeof(int), AlowDatabase = true }; // ID
-        public Propertyy DMID { get; set; } = new() { DBName = Common.DMID, DisplayName = "Danh mục ID", Type = typeof(int), AlowDatabase = true };
-        public Propertyy TenLoaiNVL { get; set; } = new() { DBName = Common.TenLoaiNVL, DisplayName = "Tên loại NVL", Type = typeof(string), AlowDatabase = true };
-        public Propertyy NgayThem { get; set; } = new() { DBName = Common.NgayThem, DisplayName = "Ngày tạo", Type = typeof(DateTime), AlowDatabase = true };
+        public Propertyy TenTTID { get; set; } = new() { DBName = Common.TenTTID, DisplayName = "TenTTID", Type = typeof(int), AlowDatabase = false, AlowDisplay = false, DispDatagrid = false }; // ID
+        public Propertyy TenThongTin { get; set; } = new() { DBName = Common.TenThongTin, DisplayName = "Tên thông tin", Type = typeof(string), AlowDatabase = true, };
+        public Propertyy KieuDulieu { get; set; } = new() { DBName = Common.KieuDulieu, DisplayName = "Kiểu dữ liệu", Type = typeof(int), AlowDatabase = true, };
+        // Kieudulieu :  1-string, 2-number, 3-datetime
+        public Propertyy GiatriMacDinh { get; set; } = new() { DBName = Common.MacDinh, DisplayName = "Gía trị mặc định", Type = typeof(string), AlowDatabase = true, };
 
         public List<Propertyy> GetPropertiesValues()
         {
-            Type propertyType = typeof(LoaiNVL);
+            Type propertyType = typeof(NVLDetailsName);
 
             FieldInfo[] fields = propertyType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
