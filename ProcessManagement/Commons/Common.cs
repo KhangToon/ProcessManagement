@@ -264,12 +264,14 @@ namespace ProcessManagement.Commons
         public static event EventHandler? ClickSaveEvent;
         public static event EventHandler<object?>? CongdoaUpdatedEvent;
 
-
+        // KHSX static variable
         public static object? CurrentKHSXid;
         public static object? CurrentNVLMCDid;
         public static object? CurrentCDid;
-
         public static KHSX? CurrentKHSX;
+
+        // NVL management static variable
+        public static object? SelectedNVLid;
 
         public static void RaiseClickSaveEvent()
         {

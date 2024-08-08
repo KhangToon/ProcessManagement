@@ -1959,7 +1959,7 @@ namespace ProcessManagement.Services.SQLServer
         }
 
         // Get Nguyen Vat Lieu by ID 
-        public NguyenVatLieu GetNguyenVatLieubyID(int maNVL)
+        public NguyenVatLieu GetNguyenVatLieubyID(object? maNVL)
         {
             NguyenVatLieu nvl = new();
 
@@ -1990,7 +1990,11 @@ namespace ProcessManagement.Services.SQLServer
             }
 
             // Load Details NVL 
-            GetNguyenVatLieuDetails(nvl.NVLID.Value);
+            nvl.DSNguyenVatLieuDetails = GetNguyenVatLieuDetails(nvl.NVLID.Value);
+            // Load Danh muc
+            nvl.DanhMuc = GetDanhMucbyID(nvl.DMID.Value);
+            // Load Loai NVL
+            nvl.LoaiNVL = GetLoaiNVLbyID(nvl.LOAINVLID.Value);
 
             return nvl;
         }
@@ -2026,7 +2030,11 @@ namespace ProcessManagement.Services.SQLServer
                     }
 
                     // Load Details NVL 
-                    GetNguyenVatLieuDetails(nvl.NVLID.Value);
+                    nvl.DSNguyenVatLieuDetails = GetNguyenVatLieuDetails(nvl.NVLID.Value);
+                    // Load Danh muc
+                    nvl.DanhMuc = GetDanhMucbyID(nvl.DMID.Value);
+                    // Load Loai NVL
+                    nvl.LoaiNVL = GetLoaiNVLbyID(nvl.LOAINVLID.Value);
 
                     nguyenvatlieus.Add(nvl);
                 }
@@ -2066,7 +2074,11 @@ namespace ProcessManagement.Services.SQLServer
                     }
 
                     // Load Details NVL 
-                    GetNguyenVatLieuDetails(nvl.NVLID.Value);
+                    nvl.DSNguyenVatLieuDetails = GetNguyenVatLieuDetails(nvl.NVLID.Value);
+                    // Load Danh muc
+                    nvl.DanhMuc = GetDanhMucbyID(nvl.DMID.Value);
+                    // Load Loai NVL
+                    nvl.LoaiNVL = GetLoaiNVLbyID(nvl.LOAINVLID.Value);
 
                     nguyenvatlieus.Add(nvl);
                 }
@@ -2113,6 +2125,51 @@ namespace ProcessManagement.Services.SQLServer
 
             return nvlDetails;
         }
+
+        public (int, string) UpdateListNguyenVatLieuDetails(List<NguyenVatLieuDetail> ngvatlieudetails)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            if (ngvatlieudetails == null) return (result, errorMess);
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                foreach (var nvldetail in ngvatlieudetails)
+                {
+                    List<Propertyy> chitietItems = nvldetail.GetPropertiesValues().Where(pro => pro.AlowDatabase == true).ToList();
+
+                    var command = connection.CreateCommand();
+
+                    string setClause = string.Join(",", chitietItems.Select(key => $"[{key.DBName}] = @{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                    command.CommandText = $"UPDATE [{Common.Table_NguyenLieuDetails}] SET {setClause} WHERE [{Common.NVLID}] = '{nvldetail.NVLID.Value}'";
+
+                    foreach (var item in chitietItems)
+                    {
+                        string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
+
+                        object? parameterValue = item.Value;
+
+                        command.Parameters.AddWithValue(parameterName, parameterValue);
+                    }
+
+                    result = command.ExecuteNonQuery();
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
         #endregion Table_KHONguyenLieuDetails
 
         #region Table_KHONVLDetailsListName
@@ -2210,7 +2267,7 @@ namespace ProcessManagement.Services.SQLServer
             return listDanhmucNVLs;
         }
         // Get danh muc by ID
-        public DanhMucNVL GetDanhMucbyID(int danhmucID)
+        public DanhMucNVL GetDanhMucbyID(object? danhmucID)
         {
             DanhMucNVL dmnvl = new();
 
@@ -2310,7 +2367,7 @@ namespace ProcessManagement.Services.SQLServer
         #region Table KHO_LoaiNguyenVatLieu
 
         // Get loai NVL by maloai NVL // Table KHO_LoaiNguyenVatLieu //
-        public LoaiNVL GetLoaiNVLbyID(int maloaiNVL)
+        public LoaiNVL GetLoaiNVLbyID(object? maloaiNVL)
         {
             LoaiNVL loainvl = new();
 
