@@ -236,13 +236,19 @@ namespace ProcessManagement.Commons
         public const string TenThongTin = "Tên thông tin";
         public const string KieuDulieu = "Kiểu dữ liệu";
         public const string MacDinh = "Mặc định";
+        public const string IsDefault = "IsDefault";
+        public const string TenTruyXuat = "Tên truy xuất";
+        // Danh sach TenTruyXuat cac cot duoc su dung
+        public const string TTX_Donvitinh = "donvitinh";
 
         // Table KHO_NguyenLieuDetails
         public const string Table_NguyenLieuDetails = "KHO_NguyenLieuDetails";
         public const string TTNVLID = "TTNVLID";
         //public const string NVLID = "NVLID";
         //public const string TenTTID = "TenTTID";
-        public const string NoiDung = "Nội dung";
+        public const string GiaTri = "Gía trị";
+
+
 
         // Socket 
         public const string socketEndKey = "<END>";

@@ -10,6 +10,9 @@ namespace ProcessManagement.Models.KHO_NVL
         public Propertyy KieuDulieu { get; set; } = new() { DBName = Common.KieuDulieu, DisplayName = "Kiểu dữ liệu", Type = typeof(int), AlowDatabase = true, };
         // Kieudulieu :  1-string, 2-number, 3-datetime
         public Propertyy GiatriMacDinh { get; set; } = new() { DBName = Common.MacDinh, DisplayName = "Gía trị mặc định", Type = typeof(string), AlowDatabase = true, };
+        public Propertyy IsDefault { get; set; } = new() { DBName = Common.IsDefault, DisplayName = "IsDefault", Type = typeof(string), AlowDatabase = true, };
+        public Propertyy TenTruyXuat { get; set; } = new() { DBName = Common.TenTruyXuat, DisplayName = "Tên truy xuất", Type = typeof(string), AlowDatabase = true, AlowDisplay = false, DispDatagrid = false };
+
 
         public List<Propertyy> GetPropertiesValues()
         {

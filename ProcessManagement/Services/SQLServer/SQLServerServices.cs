@@ -1,10 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal;
 using ProcessManagement.Commons;
 using ProcessManagement.Models;
 using ProcessManagement.Models.KHO_NVL;
-using System.Collections.Generic;
 using System.Data;
 using System.Text.RegularExpressions;
 
@@ -2100,7 +2097,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"SELECT * FROM [{Common.Table_NguyenLieuDetails}] WHERE [{Common.TTNVLID}] = '{nvlid}'";
+                command.CommandText = $"SELECT * FROM [{Common.Table_NguyenLieuDetails}] WHERE [{Common.NVLID}] = '{nvlid}'";
 
                 using var reader = command.ExecuteReader();
 
@@ -2119,11 +2116,60 @@ namespace ProcessManagement.Services.SQLServer
                         item.Value = columnValue;
                     }
 
+                    // Load ten thong tin 
+                    detail.NVLDetailItems = GetNVLdetailsNamebyID(detail.TenTTID.Value);
+
                     nvlDetails.Add(detail);
                 }
             }
 
             return nvlDetails;
+        }
+
+        // Them moi detail cho nvl
+        public (int, string) InsertNewNguyenVatLieuDetail(NguyenVatLieuDetail newnvldetail)
+        {
+            List<Propertyy> newItems = newnvldetail.GetPropertiesValues().Where(po => po.AlowDatabase == true && po.Value != null).ToList();
+
+            int result = -1; string errorMess = string.Empty;
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                string columnNames = string.Join(",", newItems.Select(key => $"[{key.DBName}]"));
+
+                string parameterNames = string.Join(",", newItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $"INSERT INTO [{Common.Table_NguyenLieuDetails}] ({columnNames}) OUTPUT INSERTED.{Common.TTNVLID} VALUES ({parameterNames})";
+
+                foreach (var item in newItems)
+                {
+                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
+
+                    object? parameterValue = item.Value;
+
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                object? rs = command.ExecuteScalar();
+
+                result = Convert.ToInt32(rs);
+
+                if (result == 0) result = -1;
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
         }
 
         public (int, string) UpdateListNguyenVatLieuDetails(List<NguyenVatLieuDetail> ngvatlieudetails)
@@ -2210,6 +2256,40 @@ namespace ProcessManagement.Services.SQLServer
             return names;
         }
 
+        // Get name of nguyen vat lieu detail column 
+        public NVLDetailsName GetNVLdetailsNamebyID(object? tenttID)
+        {
+            NVLDetailsName detailname = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_NVLDetailsListName}] WHERE [{Common.TenTTID}] = '{tenttID}'";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    List<Propertyy> rowitems = detailname.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue;
+                    }
+
+                }
+            }
+
+            return detailname;
+        }
+
         // Check ten nvl details da tong tai
         public bool IsNVLDetailExisting(string? tenNVLDetail)
         {
@@ -2227,6 +2307,53 @@ namespace ProcessManagement.Services.SQLServer
                 }
             }
         }
+
+        // Them NVL detail name moi
+        public (int, string) InsertNewNVLDetailName(NVLDetailsName newnvldetailName)
+        {
+            List<Propertyy> newItems = newnvldetailName.GetPropertiesValues().Where(po => po.AlowDatabase == true && po.Value != null).ToList();
+
+            int result = -1; string errorMess = string.Empty;
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                string columnNames = string.Join(",", newItems.Select(key => $"[{key.DBName}]"));
+
+                string parameterNames = string.Join(",", newItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $"INSERT INTO [{Common.Table_NVLDetailsListName}] ({columnNames}) OUTPUT INSERTED.{Common.TenTTID} VALUES ({parameterNames})";
+
+                foreach (var item in newItems)
+                {
+                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
+
+                    object? parameterValue = item.Value;
+
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                object? rs = command.ExecuteScalar();
+
+                result = Convert.ToInt32(rs);
+
+                if (result == 0) result = -1;
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
         #endregion Table_KHONVLDetailsListName
 
         #region Table KHO_DanhMucNguyenVatLieu

@@ -9,7 +9,9 @@ namespace ProcessManagement.Models.KHO_NVL
         public Propertyy TTNVLID { get; set; } = new() { DBName = Common.TTNVLID, DisplayName = "TTNVLID", Type = typeof(int), AlowDatabase = false, AlowDisplay = false }; // ID
         public Propertyy NVLID { get; set; } = new() { DBName = Common.NVLID, DisplayName = "NVL ID", Type = typeof(int), AlowDisplay = false };
         public Propertyy TenTTID { get; set; } = new() { DBName = Common.TenTTID, DisplayName = "TenTTID", Type = typeof(int), AlowDisplay = false };
-        public Propertyy NoiDung { get; set; } = new() { DBName = Common.NoiDung, DisplayName = "Nội dung", Type = typeof(string), AlowDatabase = true };
+        public Propertyy GiaTri { get; set; } = new() { DBName = Common.GiaTri, DisplayName = "Gía trị", Type = typeof(string), AlowDatabase = true };
+
+        public NVLDetailsName? NVLDetailItems { get; set; }
 
         public List<Propertyy> GetPropertiesValues()
         {

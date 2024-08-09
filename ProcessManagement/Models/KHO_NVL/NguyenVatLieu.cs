@@ -10,9 +10,9 @@ namespace ProcessManagement.Models.KHO_NVL
         public Propertyy DMID { get; set; } = new() { DBName = Common.DMID, DisplayName = "Danh mục", Type = typeof(int), AlowDatabase = true, AlowDisplay = false, DispDatagrid = false };
         public Propertyy LOAINVLID { get; set; } = new() { DBName = Common.LOAINVLID, DisplayName = "Loại nguyên liệu", Type = typeof(int), AlowDatabase = true, AlowDisplay = false, DispDatagrid = false };
         public Propertyy TenNVL { get; set; } = new() { DBName = Common.TenNVL, DisplayName = "Tên nguyên liệu", Type = typeof(string), AlowDatabase = true };
-        public Propertyy MoTa { get; set; } = new() { DBName = Common.MoTa, DisplayName = "Mô tả", Type = typeof(string), AlowDatabase = true, DispDatagrid = false };
-        public Propertyy DonViTinh { get; set; } = new() { DBName = Common.DonViTinh, DisplayName = "Đơn vị tính", Type = typeof(string), AlowDatabase = true, DispDatagrid = false };
-        public Propertyy SoLuongTonKhoToiThieu { get; set; } = new() { DBName = Common.SoLuongTonKhoToiThieu, DisplayName = "Số lượng tối thiểu", Type = typeof(int), AlowDatabase = true };
+        //public Propertyy MoTa { get; set; } = new() { DBName = Common.MoTa, DisplayName = "Mô tả", Type = typeof(string), AlowDatabase = true, DispDatagrid = false };
+        //public Propertyy DonViTinh { get; set; } = new() { DBName = Common.DonViTinh, DisplayName = "Đơn vị tính", Type = typeof(string), AlowDatabase = true, DispDatagrid = false };
+        //public Propertyy SoLuongTonKhoToiThieu { get; set; } = new() { DBName = Common.SoLuongTonKhoToiThieu, DisplayName = "Số lượng tối thiểu", Type = typeof(int), AlowDatabase = true };
         //public Propertyy SoLuongTonKhoToiDa { get; set; } = new() { DBName = Common.SoLuongTonKhoToiDa, DisplayName = "Số lượng tối đa", Type = typeof(int), AlowDatabase = true };
         public Propertyy TonKhoHienTai { get; set; } = new() { DBName = Common.TonKhoHienTai, DisplayName = "Tồn kho", Type = typeof(int), AlowDatabase = true };
         //public Propertyy ThoiGianBaoQuan { get; set; } = new() { DBName = Common.ThoiGianBaoQuan, DisplayName = "Thời gian bảo quản", Type = typeof(int), AlowDatabase = true };
