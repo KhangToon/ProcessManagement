@@ -36,7 +36,7 @@
             </RadzenStack>
         </RadzenStack>
         <RadzenCard Variant="Variant.Flat" Style="height: 350px; width: 100%; padding: 10px; padding-right: 0; border-radius: 10px; overflow: scroll ">
-            <RadzenStack Style="height: 100%; width: 100%; padding: 10px;" Gap="0" Orientation="Orientation.Vertical">
+            <RadzenStack Style="height: 100%; width: 100%; padding: 10px; padding-right: 0;" Gap="0" Orientation="Orientation.Vertical">
                 @if (IsCreateNew)
                 {
                     <!--// Ten thong tin M1-->
@@ -125,13 +125,18 @@
                         </RadzenStack>
                     </RadzenStack>
                     <!--Gia tri  M1//-->
-                    <RadzenStack Visible="@(IsAlowAddNew_M1())" Gap="20px" Style="height: contain; width: 100%; background-color: var(--rz-success-lighter); padding: 10px; margin-top: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                        <RadzenText Text="Thông tin hợp lệ" Style="font-weight: 600; font-size: 16px; color: darkgreen; font-style: italic"></RadzenText>
+                    <!--// Checkbox add option M1-->
+                    <RadzenStack Gap="5px" Style="height: contain; width: contain; padding: 10px; background-color: var(--rz-primary-lighter); margin-top: 10px; margin-right: 10px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                        <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding: 5px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                            <RadzenCheckBox TValue="bool" Value=@IsAddForAll_M1 Change=@(args => IsAddForAll_M1 = args) Name="CheckBoxAddforAll" />
+                            <RadzenLabel Text="Thêm trường thông tin này cho những nguyên liệu khác." Style="font-size: 14px; font-weight: bold; font-style: italic" Component="CheckBoxAddforAll" />
+                        </RadzenStack>
+                        <RadzenStack Visible="@IsAddForAll_M1" Gap="10px" Style="height: contain; width: 100%; padding: 5px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                            <RadzenCheckBox TValue="bool" Value=@IsAddForAllwithDefaultValue_M1 Change=@(args => IsAddForAllwithDefaultValue_M1 = args) Name="CheckBoxAddforAllwithDefault" />
+                            <RadzenLabel Text="Thêm với giá trị mặc định" Style="font-size: 14px; font-weight: bold; font-style: italic" Component="CheckBoxAddforAllwithDefault" />
+                        </RadzenStack>
                     </RadzenStack>
-                    <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding: 10px; background-color: var(--rz-primary-lighter); margin-top: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                        <RadzenCheckBox TValue="bool" Value=@IsAddForAll_M1 Change=@(args => IsAddForAll_M1 = args) Name="CheckBoxAddforAll" />
-                        <RadzenLabel Text="Thêm trường thông tin này cho những nguyên liệu khác." Style="font-size: 14px; font-weight: bold; font-style: italic" Component="CheckBoxAddforAll" />
-                    </RadzenStack>
+                    <!--Checkbox add option M1 //-->
                 }
                 else
                 {
@@ -198,9 +203,9 @@
                         </RadzenStack>
                     </RadzenStack>
                     <!--Gia tri  M2//-->
-                    <RadzenStack Visible="@(IsAlowAddNew_M2())" Gap="20px" Style="height: contain; width: 100%; background-color: var(--rz-success-lighter); padding: 10px; margin-top: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                        <RadzenText Text="Thông tin hợp lệ" Style="font-weight: 600; font-size: 16px; color: darkgreen; font-style: italic"></RadzenText>
-                    </RadzenStack>
+                    @*                     <RadzenStack Visible="@(IsAlowAddNew_M2())" Gap="20px" Style="height: contain; width: 100%; background-color: var(--rz-success-lighter); padding: 10px; margin-top: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                <RadzenText Text="Thông tin hợp lệ" Style="font-weight: 600; font-size: 16px; color: darkgreen; font-style: italic"></RadzenText>
+                </RadzenStack> *@
                 }
             </RadzenStack>
         </RadzenCard>
@@ -231,7 +236,7 @@
     private bool IsKieuSoOK_M1 = false;
     private bool IsKieuDateOK_M1 = false;
     private bool IsAddForAll_M1 = false;
-
+    private bool IsAddForAllwithDefaultValue_M1 = false;
     // Mode 2
     private bool IsKieuKituOK_M2 = false;
     private bool IsKieuSoOK_M2 = false;
@@ -263,38 +268,171 @@
 
     private async Task OnThemNVLDetail()
     {
-        if (IsAlowAddNew_M1())
+        bool? comfirm = await DialogService.Confirm($"Thêm mới trường thông tin này?", "Xác nhận", new ConfirmOptions() { OkButtonText = "Đồng ý", CancelButtonText = "Hủy" });
+
+        if (comfirm.Value)
         {
-            if (IsCreateNew) // khi tao thong tin moi
+            if (IsCreateNew) // Mode 1 - khi tao thong tin moi
             {
-                if (NewNVLDetail_M1 != null)
+                await AddNVLDetail_Mode1();
+            }
+            else // Mode 2 - khi them thong tin co san
+            {
+                await AddNVLDetail_Mode2();
+            }
+        }
+
+    }
+
+    private async Task AddNVLDetail_Mode1()
+    {
+        if (NewNVLDetail_M1 != null && IsAlowAddNew_M1())
+        {
+            // Gan ten truy xuat
+            NewNVLDetail_M1.TenTruyXuat.Value = Common.RemoveDiacriticsAndSpaces(NewNVLDetail_M1.TenThongTin.Value?.ToString() ?? string.Empty);
+
+            // Kiem tra ten chua da ton tai
+            bool isexisting = SQLServerServices.IsNVLDetailExisting(NewNVLDetail_M1.TenThongTin?.Value?.ToString());
+
+            if (isexisting)
+            {
+                await DialogService.Alert($"Tên thông tin đã tồn tại, nhập tên khác!", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+            }
+            else
+            {
+                // Them NVLDetailsName moi
+                (int tenttid, string error) = SQLServerServices.InsertNewNVLDetailName(NewNVLDetail_M1);
+
+                if (tenttid > 0)
                 {
-                    // Them NVLDetailsName moi
-                    (int tenttid, string error) = SQLServerServices.InsertNewNVLDetailName(NewNVLDetail_M1);
-                    
                     NguyenVatLieuDetail newNVLdetail = new()
                         {
                             TenTTID = { Value = tenttid },
                             NVLID = { Value = NgVLieu?.NVLID.Value },
                             GiaTri = { Value = NewNVLDetail_M1.GiatriMacDinh.Value }
                         };
-                }
-            }
-            else // khi them thong tin co san
-            {
-                if (SelectedNVLDetail_M2 != null)
-                {
-                    NguyenVatLieuDetail newNVLdetail = new()
+
+                    // Them truong thong tin moi cho NVL hien tai
+                    (int ttnvlid, error) = SQLServerServices.InsertNewNguyenVatLieuDetail(newNVLdetail);
+
+                    if (ttnvlid > 0)
+                    {
+                        // Them truong thong tin cho tat ca NVL
+                        if (IsAddForAll_M1)
                         {
-                            TenTTID = { Value = SelectedNVLDetail_M2.TenTTID.Value },
-                            NVLID = { Value = NgVLieu?.NVLID.Value },
-                            GiaTri = { Value = SelectedNVLDetail_M2.GiatriMacDinh.Value }
-                        };
+                            // Lay ds NVL id
+                            List<int> listNVLid = SQLServerServices.GetlistNgVatLieuId();
+
+                            int currentNVLid = int.TryParse(NgVLieu?.NVLID.Value?.ToString(), out int id) ? id : 0;
+
+                            // Remove current Ngvatlieu ID (khong them vi da them roi)
+                            if (listNVLid.Contains(currentNVLid)) { listNVLid.Remove(currentNVLid); }
+
+                            // Create va gan gia tri cho NVL detail
+                            NguyenVatLieuDetail nvldetail = new();
+
+                            nvldetail.TenTTID.Value = tenttid;
+
+                            // NVL ID duoc gan trong AddNVLDetailForAllNVL
+                            if (IsAddForAllwithDefaultValue_M1)
+                            {
+                                nvldetail.GiaTri.Value = NewNVLDetail_M1.GiatriMacDinh.Value;
+                            }
+
+                            // Add new truong thong tin cho tat ca NVL
+                            (int addallresult, string addallerror) = AddNVLDetailForAllNVL(listNVLid, nvldetail);
+
+                            if (addallresult > 0)
+                            {
+                                ShowNotification("Thêm thành công!", NotificationSeverity.Success, 3000);
+                            }
+                            else await DialogService.Alert($"Lỗi: {addallerror}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+
+                        }
+                        else ShowNotification("Thêm thành công!", NotificationSeverity.Success, 3000);
+                    }
+                    else
+                    {
+                        await DialogService.Alert($"Lỗi: {error}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                    }
+                }
+                else
+                {
+                    await DialogService.Alert($"Lỗi: {error}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
                 }
             }
         }
+    }
 
-        await Task.Delay(1);
+    private async Task AddNVLDetail_Mode2()
+    {
+        if (SelectedNVLDetail_M2 != null && IsAlowAddNew_M2())
+        {
+            // Kiem tra ten chua da ton tai trong list detail of current NVL
+            bool isexisting = SQLServerServices.IsDetailExistingInNVLDetailsList(SelectedNVLDetail_M2.TenTTID?.Value, NgVLieu?.NVLID.Value);
+
+            if (isexisting)
+            {
+                await DialogService.Alert($"Sản phẩm đã tồn tài trường thông tin này, chọn trường khác!", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+            }
+            else
+            {
+                // Gan ten truy xuat
+                SelectedNVLDetail_M2.TenTruyXuat.Value = Common.RemoveDiacriticsAndSpaces(SelectedNVLDetail_M2.TenThongTin?.Value?.ToString() ?? string.Empty);
+
+                NguyenVatLieuDetail newNVLdetail = new()
+                    {
+                        TenTTID = { Value = SelectedNVLDetail_M2?.TenTTID?.Value },
+                        NVLID = { Value = NgVLieu?.NVLID.Value },
+                        GiaTri = { Value = SelectedNVLDetail_M2?.GiatriMacDinh.Value }
+                    };
+
+                // Them truong thong tin moi cho NVL hien tai
+                (int ttnvlid, string error) = SQLServerServices.InsertNewNguyenVatLieuDetail(newNVLdetail);
+
+                if (ttnvlid > 0)
+                {
+                    ShowNotification("Thêm thành công!", NotificationSeverity.Success, 3000);
+                }
+                else
+                {
+                    await DialogService.Alert($"Lỗi: {error}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                }
+            }
+
+        }
+    }
+    /// <summary>
+    /// Thêm trường thông tin cho tất cả nguyên vật liệu trong kho
+    /// </summary>
+    /// <param name="NVLids"></param>
+    /// <returns></returns>
+    private (int, string) AddNVLDetailForAllNVL(List<int> NVLids, NguyenVatLieuDetail nvldetail)
+    {
+        int addallresult = -1; string addallerror = "Error";
+
+        foreach (var nvlid in NVLids)
+        {
+            // Gan ID NVL
+            nvldetail.NVLID.Value = nvlid;
+
+            // Them truong thong tin moi cho NVL
+            (addallresult, addallerror) = SQLServerServices.InsertNewNguyenVatLieuDetail(nvldetail);
+
+            if (addallresult == -1)
+            {
+                break;
+            }
+        }
+
+        if (addallresult < 0)
+        {
+            return (-1, addallerror);
+        }
+        else
+        {
+            return (addallresult, "Success");
+        }
     }
 
     #region MODE1 1 - Tao moi thong tin
@@ -406,6 +544,7 @@
         IsKieuSoOK_M1 = false;
         IsKieuDateOK_M1 = false;
         IsAddForAll_M1 = false;
+        IsAddForAllwithDefaultValue_M1 = false;
     }
     #endregion MODE1 - Tao moi thong tin
 
@@ -498,4 +637,18 @@
         IsKieuDateOK_M2 = false;
     }
     #endregion MODE 2 - Lay thong tin da co
+
+    // Notification
+    void ShowNotification(string message, NotificationSeverity notifytype, double time)
+    {
+        NotificationMessage notify = new NotificationMessage
+            {
+                Style = "position: fixed; top: 0; right: 0;",
+                Severity = notifytype,
+                Summary = message,
+                Duration = time
+            };
+
+        NotificationService.Notify(notify);
+    }
 }

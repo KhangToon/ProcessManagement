@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using ProcessManagement.Models;
+using System.Globalization;
+using System.Text;
 
 namespace ProcessManagement.Commons
 {
@@ -302,6 +304,26 @@ namespace ProcessManagement.Commons
         public static bool IsCongdoanUpdatedEventRegistered()
         {
             return CongdoaUpdatedEvent != null;
+        }
+
+        public static string RemoveDiacriticsAndSpaces(string text)
+        {
+            string normalizedString = text.Normalize(NormalizationForm.FormD);
+            StringBuilder stringBuilder = new();
+
+            foreach (char c in normalizedString)
+            {
+                UnicodeCategory unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
+                if (unicodeCategory != UnicodeCategory.NonSpacingMark)
+                {
+                    stringBuilder.Append(c);
+                }
+            }
+
+            return stringBuilder.ToString()
+                .Normalize(NormalizationForm.FormC)
+                .ToLowerInvariant()
+                .Replace(" ", "");
         }
     }
 }

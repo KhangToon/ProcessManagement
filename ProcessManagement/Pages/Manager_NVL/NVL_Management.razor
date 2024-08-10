@@ -48,7 +48,7 @@
                                 <RadzenStack Gap="15px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: 100%; width: 60%;">
                                     <RadzenTextBox @oninput="@((args) => FilterNVL(args?.Value))" Placeholder="Tìm theo tên nguyên liệu" Style="border-radius: 20px; padding-left: 20px; border-width: 2px; border-color: var(--rz-primary-light); width: 50% "></RadzenTextBox>
                                     <RadzenButton Icon="search" ButtonStyle="ButtonStyle.Primary" Style="border-radius: 20px;" />
-                                    <RadzenButton Click="@(() => { LoadList_LoaiNVL(); LoadList_NguyenVatLieu();})" Style="border-radius: 20px;" Icon="autorenew" ButtonStyle="ButtonStyle.Primary" />
+                                    <RadzenButton Click="@(() => { LoadList_LoaiNVL(); LoadList_NguyenVatLieu(); ReSelectCurrentNguyenVatLieu(); })" Style="border-radius: 20px;" Icon="autorenew" ButtonStyle="ButtonStyle.Primary" />
                                 </RadzenStack>
                                 <RadzenStack Style="height: 100%; width: 20%; padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
 
@@ -141,9 +141,9 @@
                                         <RadzenText Text="Hãy chọn loại nguyên vật liệu" Style="color: red; font-weight: 500; font-size: 16px"></RadzenText>
                                     </RadzenStack>
                                     <!--Table listNVL-->
-                                    <RadzenStack Visible="@(DSNguyenVatLieus != null && DSNguyenVatLieus.Count > 0)" Style="height: 450px; width: 100%; padding-top: 10px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                    <RadzenStack Visible="@(DSNguyenVatLieus != null && DSNguyenVatLieus.Count > 0)" Style="height: 450px; width: 100%; padding-top: 10px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                         <RadzenDataGrid class="rz-grid-table-fixed-2" Data="@(DSNguyenVatLieus)" TItem="NguyenVatLieu"
-                                                        EmptyText="Danh sách nguyên liệu trống."
+                                                        EmptyText="Danh sách nguyên liệu trống." Style="padding-right: 0;"
                                                         ShowColumnTitleAsTooltip="true" ShowCellDataAsTooltip="true"
                                                         AllowFiltering="false" FilterMode="FilterMode.Simple"
                                                         AllowPaging="true" AllowSorting="false" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
@@ -201,6 +201,15 @@
                                                             </Template>
                                                         </RadzenDataGridColumn>
                                                     }
+                                                    <RadzenDataGridColumn Width="60px" TItem="NguyenVatLieu" Title="#ID" Frozen="true"
+                                                                          Property="#ID" TextAlign="TextAlign.Center">
+                                                        <HeaderTemplate>
+                                                            <span style="font-weight: 600; font-size: 15px; color: white">#ID</span>
+                                                        </HeaderTemplate>
+                                                        <Template Context="nvl">
+                                                            <span style="color: black; font-weight: 500;">@($"#{nvl.GetPropertyValue(Common.NVLID)}")</span>
+                                                        </Template>
+                                                    </RadzenDataGridColumn>
                                                 }
                                             </Columns>
                                         </RadzenDataGrid>
@@ -226,7 +235,7 @@
                                                             // Danh muc
                                                             <RadzenStack Gap="0" Style="height: contain; width: 100%; padding-bottom: 5px; padding-top: 5px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                                                 <RadzenStack Style="width: 30%;">
-                                                                    <RadzenText Text="Danh mục" Style="font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
+                                                                    <RadzenText Text="Danh mục" Style="font-size: 16px; font-weight: 600; color: black; height: contain; width: 100% "></RadzenText>
                                                                 </RadzenStack>
                                                                 <RadzenStack Style="width: 55%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="@((isEditNVLDetail)? JustifyContent.Start : JustifyContent.Center)">
                                                                     <RadzenText Text="@SelectedNgVatLieu.FirstOrDefault()?.DanhMuc?.TenDanhMuc.Value?.ToString()" Style="font-size: 16px; height: contain;"></RadzenText>
@@ -235,7 +244,7 @@
                                                             // Loai nguyen vat lieu
                                                             <RadzenStack Gap="0" Style="height: contain; width: 100%; padding-bottom: 5px; padding-top: 5px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                                                 <RadzenStack Style="width: 30%;">
-                                                                    <RadzenText Text="Loại NVL" Style="font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
+                                                                    <RadzenText Text="Loại NVL" Style="font-size: 16px; font-weight: 600; color: black; height: contain; width: 100% "></RadzenText>
                                                                 </RadzenStack>
                                                                 <RadzenStack Style="width: 55%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="@((isEditNVLDetail)? JustifyContent.Start : JustifyContent.Center)">
                                                                     <RadzenText Text="@SelectedNgVatLieu.FirstOrDefault()?.LoaiNVL?.TenLoaiNVL.Value?.ToString()" Style="font-size: 16px; height: contain;"></RadzenText>
@@ -246,7 +255,7 @@
                                                             {
                                                                 <RadzenStack Gap="0" Style="height: contain; width: 100%; padding-bottom: 5px; padding-top: 5px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                                                     <RadzenStack Style="width: 30%;">
-                                                                        <RadzenText Text="@item.DisplayName" Style="font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
+                                                                        <RadzenText Text="@item.DisplayName" Style="font-size: 16px; font-weight: 600; color: black; height: contain; width: 100% "></RadzenText>
                                                                     </RadzenStack>
                                                                     <RadzenStack Style="width: 55%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="@((isEditNVLDetail)? JustifyContent.Start : JustifyContent.Center)">
 
@@ -330,6 +339,9 @@
                                                                                 <RadzenText Text="@nvldetail.GiaTri.Value?.ToString()" Style="font-size: 16px; height: contain;"></RadzenText>
                                                                             }
                                                                         </RadzenStack>
+                                                                        <RadzenStack Visible="@isEditNVLDetail" Gap="5" Style="width: 15%; height: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                            <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Style="border-radius: 5px; --rz-icon-size: 18px; background-color: black" />
+                                                                        </RadzenStack>
                                                                     </RadzenStack>
                                                                 }
                                                             }
@@ -401,24 +413,7 @@
 
         LoadList_NguyenVatLieu();
 
-        // Re-selected datagrid nguyenvatlieu list
-        if (DSNguyenVatLieus != null)
-        {
-            if (Common.SelectedNVLid == null) // get fist row of dsnvl
-            {
-                var fistitem = DSNguyenVatLieus.FirstOrDefault();
-
-                if (fistitem != null) { SelectedNgVatLieu = new List<NguyenVatLieu>() { fistitem }; }
-            }
-            else
-            {
-                var selectedID = Common.SelectedNVLid;
-                // load last selected item
-                var selecteditem = DSNguyenVatLieus.FirstOrDefault(nvl => nvl.NVLID.Value?.ToString() == selectedID.ToString());
-
-                if (selecteditem != null) { SelectedNgVatLieu = new List<NguyenVatLieu>() { selecteditem }; }
-            }
-        }
+        ReSelectCurrentNguyenVatLieu();
 
         await base.OnInitializedAsync();
     }
@@ -467,11 +462,11 @@
         {
             if (isDisplaybyDay)
             {
-                DSNguyenVatLieus = SQLServerServices.GetListNguyenVatLieu().Where(sp => (startSearchDay <= Convert.ToDateTime(sp.NgayCapNhat.Value) && Convert.ToDateTime(sp.NgayCapNhat.Value) < offsetendDay)).ToList();
+                DSNguyenVatLieus = SQLServerServices.GetListNgVatLieuByDanhmucID(SelectedDanhMuc?.DMID.Value).Where(sp => (startSearchDay <= Convert.ToDateTime(sp.NgayCapNhat.Value) && Convert.ToDateTime(sp.NgayCapNhat.Value) < offsetendDay)).ToList();
             }
             else
             {
-                DSNguyenVatLieus = SQLServerServices.GetListNguyenVatLieu();
+                DSNguyenVatLieus = SQLServerServices.GetListNgVatLieuByDanhmucID(SelectedDanhMuc?.DMID.Value);
             }
         }
         else
@@ -489,11 +484,33 @@
     }
 
     // Load danh sach danh muc
-    public void LoadList_DanhMuc()
+    private void LoadList_DanhMuc()
     {
         DanhMucNVLs = SQLServerServices.GetListDanhMucNVLs();
         // Asign danh muc nguyen vat lieu
         SelectedDanhMuc = DanhMucNVLs?.FirstOrDefault(dm => dm.TenDanhMuc.Value?.ToString() == "Nguyên liệu gia công");
+    }
+
+    // Re-selected current nguyenvatlieu
+    private void ReSelectCurrentNguyenVatLieu()
+    {
+        if (DSNguyenVatLieus != null)
+        {
+            if (Common.SelectedNVLid == null) // get fist row of dsnvl
+            {
+                var fistitem = DSNguyenVatLieus.FirstOrDefault();
+
+                if (fistitem != null) { SelectedNgVatLieu = new List<NguyenVatLieu>() { fistitem }; }
+            }
+            else
+            {
+                var selectedID = Common.SelectedNVLid;
+                // load last selected item
+                var selecteditem = DSNguyenVatLieus.FirstOrDefault(nvl => nvl.NVLID.Value?.ToString() == selectedID.ToString());
+
+                if (selecteditem != null) { SelectedNgVatLieu = new List<NguyenVatLieu>() { selecteditem }; }
+            }
+        }
     }
 
     private void OnSelectDanhMucValueChanged(string danhmuc)

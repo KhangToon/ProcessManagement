@@ -2040,6 +2040,50 @@ namespace ProcessManagement.Services.SQLServer
             return nguyenvatlieus;
         }
 
+        // Get list Nguyenvatlieu by DanhmucID
+        public List<NguyenVatLieu> GetListNgVatLieuByDanhmucID(object? dmucID)
+        {
+            List<NguyenVatLieu> nguyenvatlieus = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.TableNguyenVatLieu}] WHERE [{Common.DMID}] = '{dmucID}'";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    NguyenVatLieu nvl = new();
+
+                    List<Propertyy> rowitems = nvl.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue;
+                    }
+
+                    // Load Details NVL 
+                    nvl.DSNguyenVatLieuDetails = GetNguyenVatLieuDetails(nvl.NVLID.Value);
+                    // Load Danh muc
+                    nvl.DanhMuc = GetDanhMucbyID(nvl.DMID.Value);
+                    // Load Loai NVL
+                    nvl.LoaiNVL = GetLoaiNVLbyID(nvl.LOAINVLID.Value);
+
+                    nguyenvatlieus.Add(nvl);
+                }
+            }
+
+            return nguyenvatlieus;
+        }
+
         // Get list Nguyen vat lieu
         public List<NguyenVatLieu> GetListNguyenVatLieu()
         {
@@ -2083,9 +2127,59 @@ namespace ProcessManagement.Services.SQLServer
 
             return nguyenvatlieus;
         }
+
+        /// <summary>
+        /// Lấy danh sách ID của danh sách nguyên vật liệu
+        /// </summary>
+        /// <returns></returns>
+        public List<int> GetlistNgVatLieuId()
+        {
+            List<int> nvlIDs = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT [{Common.NVLID}] FROM [{Common.TableNguyenVatLieu}]";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    int nvlid = int.Parse(reader[Common.NVLID].ToString() ?? "0");
+
+                    if (nvlid > 0)
+                    {
+                        nvlIDs.Add(nvlid);
+                    }
+                }
+            }
+
+            return nvlIDs;
+        }
         #endregion  Table KHO_NguyenVatLieu
 
         #region Table_KHONguyenLieuDetails
+
+        public bool IsDetailExistingInNVLDetailsList(object? tenttid, object? nvlid)
+        {
+            using (var connection = new SqlConnection(connectionString))
+            {
+                string query = $"SELECT COUNT(*) FROM [{Common.Table_NguyenLieuDetails}] WHERE [{Common.TenTTID}] = N'{tenttid}' AND [{Common.NVLID}] = {nvlid}";
+
+                using (var command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+
+                    int count = (int)command.ExecuteScalar();
+
+                    return count > 0;
+                }
+            }
+        }
+
         // Load thong tin of nguyen vat lieu
         public List<NguyenVatLieuDetail> GetNguyenVatLieuDetails(object? nvlid)
         {
@@ -2126,7 +2220,13 @@ namespace ProcessManagement.Services.SQLServer
             return nvlDetails;
         }
 
-        // Them moi detail cho nvl
+
+
+        /// <summary>
+        /// Thêm trường thông tin chi tiết mới cho nguyên vật liệu
+        /// </summary>
+        /// <param name="newnvldetail"></param>
+        /// <returns></returns>
         public (int, string) InsertNewNguyenVatLieuDetail(NguyenVatLieuDetail newnvldetail)
         {
             List<Propertyy> newItems = newnvldetail.GetPropertiesValues().Where(po => po.AlowDatabase == true && po.Value != null).ToList();
@@ -2290,7 +2390,11 @@ namespace ProcessManagement.Services.SQLServer
             return detailname;
         }
 
-        // Check ten nvl details da tong tai
+        /// <summary>
+        /// Check ten nvl details da ton tai
+        /// </summary>
+        /// <param name="tenNVLDetail"></param>
+        /// <returns></returns>
         public bool IsNVLDetailExisting(string? tenNVLDetail)
         {
             using (var connection = new SqlConnection(connectionString))
