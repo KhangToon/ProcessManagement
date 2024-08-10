@@ -352,7 +352,10 @@
                                                                             }
                                                                         </RadzenStack>
                                                                         <RadzenStack Visible="@isEditNVLDetail" Gap="5" Style="width: 15%; height: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                            <RadzenButton Click="@(() => OpendialogDeleteThongTinNVL(nvldetail))" Icon="delete" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Style="border-radius: 5px; --rz-icon-size: 18px; background-color: black" />
+                                                                            <RadzenButton Click="@(() => OpendialogRenameThongTinNVL(nvldetail))" Icon="edit" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Đổi tên trường thông tin"))"
+                                                                                          ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Style="border-radius: 5px; --rz-icon-size: 18px; background-color: black" />
+                                                                            <RadzenButton Click="@(() => OpendialogDeleteThongTinNVL(nvldetail))" Icon="delete" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Xóa trường thông tin"))"
+                                                                                          ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Style="border-radius: 5px; --rz-icon-size: 18px; background-color: black" />
                                                                         </RadzenStack>
                                                                     </RadzenStack>
                                                                 }
@@ -590,6 +593,21 @@
         }
     }
 
+    private async Task OpendialogRenameThongTinNVL(NguyenVatLieuDetail ngvlDetail)
+    {
+        var deletestatus = await DialogService.OpenAsync<DialogRenameThongTinNgVatLieu>(null, new Dictionary<string, object>() { { "NgVLieuDetail", ngvlDetail } },
+        new DialogOptions() { ShowTitle = false, Width = "45%", Height = "contain", Resizable = false, Draggable = false, ShowClose = false, Style = "background-color: while; border-radius: 10px; padding: 0px" });
+
+        if (deletestatus != null)
+        {
+            LoadList_LoaiNVL();
+
+            LoadList_NguyenVatLieu();
+
+            ReSelectCurrentNguyenVatLieu();
+        }
+    }
+
     private async Task OpendialogDeleteThongTinNVL(NguyenVatLieuDetail ngvlDetail)
     {
         var deletestatus = await DialogService.OpenAsync<DialogDeleteThongTinNgVatLieu>(null, new Dictionary<string, object>() { { "NgVLieuDetail", ngvlDetail } },
@@ -659,11 +677,8 @@
     // Tooltip
     void ShowToolTip(ElementReference elementReference, TooltipPosition position, string content)
     {
-        if (!isEditNVLDetail)
-        {
-            TooltipOptions options = new TooltipOptions() { Position = position, Delay = 500, Style = "background-color: var(--rz-black);" };
+        TooltipOptions options = new TooltipOptions() { Position = position, Delay = 500, Style = "background-color: var(--rz-primary-dark);" };
 
-            TooltipService.Open(elementReference, content, options);
-        }
+        TooltipService.Open(elementReference, content, options);
     }
 }

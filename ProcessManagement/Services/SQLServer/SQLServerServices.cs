@@ -2563,6 +2563,41 @@ namespace ProcessManagement.Services.SQLServer
             return (result, errorMess);
         }
 
+        /// <summary>
+        /// Thay đổi tên của trường thông tin nguyên vật liệu
+        /// </summary>
+        /// <param name="tenttid"></param>
+        /// <param name="newName"></param>
+        /// <returns></returns>
+        public (int, string) UpdateNVLDetailName(object? tenttid, string newName, string tentruyxuat)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+
+                    string sqlQuery = $"UPDATE {Common.Table_NVLDetailsListName} SET [{Common.TenThongTin}] = N'{newName}', [{Common.TenTruyXuat}] = '{tentruyxuat}' WHERE [{Common.TenTTID}] = '{tenttid}' ";
+
+                    var command = new SqlCommand(sqlQuery, connection);
+
+                    result = command.ExecuteNonQuery();
+
+                    connection.Close();
+
+                    return (result, string.Empty);
+                }
+            }
+            catch (Exception ex)
+            {
+                string err = ex.Message;
+
+                return (-1, err);
+            }
+        }
+
         #endregion Table_KHONVLDetailsListName
 
         #region Table KHO_DanhMucNguyenVatLieu

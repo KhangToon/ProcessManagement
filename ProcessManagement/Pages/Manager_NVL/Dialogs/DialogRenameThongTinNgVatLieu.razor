@@ -1,0 +1,99 @@
+﻿@using ProcessManagement.Commons
+@using ProcessManagement.Models.KHO_NVL
+@using ProcessManagement.Services.SQLServer
+@using Radzen.Blazor
+@using Radzen
+@using ProcessManagement.Models
+
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject TooltipService TooltipService
+@inject SQLServerServices SQLServerServices
+
+<RadzenCard Variant="Variant.Filled" Style="height: 100%; width: 100%; padding: 10px;">
+    <RadzenStack Gap="20px" Style="height: contain; width: contain; border-radius: 5px; background-color: var(--rz-success-lighter); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+        <RadzenText Text="@($"Đổi tên trường thông tin")" Style="font-weight: 600; font-size: 16px; color: darkgreen; font-style: italic"></RadzenText>
+    </RadzenStack>
+    <RadzenStack Gap="0" Style="height: contain; width: 100%; padding: 10px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+        <RadzenStack Style="width: 30%;">
+            <RadzenText Text="Tên hiện tại" Style="font-size: 16px; font-weight: 600; color: black; height: contain; width: 100% "></RadzenText>
+        </RadzenStack>
+        <RadzenStack Style="width: 55%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+            <RadzenText Text="@NgVLieuDetail?.NVLDetailItems?.TenThongTin.Value?.ToString()" Style="font-size: 16px; height: contain;"></RadzenText>
+        </RadzenStack>
+    </RadzenStack>
+    <RadzenStack Gap="0" Style="height: contain; width: 100%; padding: 10px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+        <RadzenStack Style="width: 30%;">
+            <RadzenText Text="Tên mới" Style="font-size: 16px; font-weight: 600; color: black; height: contain; width: 100% "></RadzenText>
+        </RadzenStack>
+        <RadzenStack Style="width: 55%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+            <RadzenTextBox Placeholder="@($"*Nhập tên mới")" Value="@newName" ValueChanged="@((args) => { newName = args; } )"
+                           Style="font-size: 16px; height: contain; border-width: 1px; width: 100% "></RadzenTextBox>
+        </RadzenStack>
+    </RadzenStack>
+    <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding-top: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+        <RadzenButton Disabled="@(String.IsNullOrEmpty(newName))" Style="width: contain;" Icon="save" Text="Lưu thay đổi" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Dark" Variant="Variant.Flat" Click="@(() => OnSaveNewName())" />
+        <RadzenButton Style="width: 120px;" Icon="close" Text="Hủy" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" Click="@(() => DialogService.Close(null))" />
+    </RadzenStack>
+</RadzenCard>
+
+@code {
+    [Parameter]
+    public NguyenVatLieuDetail? NgVLieuDetail { get; set; }
+
+    private string newName = string.Empty;
+
+    private async Task OnSaveNewName()
+    {
+        if (!String.IsNullOrEmpty(newName))
+        {
+            if (NgVLieuDetail?.NVLDetailItems?.TenThongTin.Value?.ToString() != newName)
+            {
+                // Check ten is existing
+
+                bool isexisting = SQLServerServices.IsNVLDetailExisting(newName.Trim());
+
+                if (isexisting)
+                {
+                    await DialogService.Alert($"Lỗi: đã tồn tại tên trường thông tin này", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                }
+                else
+                {
+                    // Change ten thong tin // Change ten truy xuat
+                    string tentruyxuat = Common.RemoveDiacriticsAndSpaces(newName.Trim());
+                    (int result, string error) = SQLServerServices.UpdateNVLDetailName(NgVLieuDetail?.NVLDetailItems?.TenTTID.Value, newName, tentruyxuat);
+
+                    if (result > 0)
+                    {
+                        ShowNotification("Đổi tên thành công!", NotificationSeverity.Success, 3000);
+
+                        DialogService.Close(newName);
+                    }
+                    else await DialogService.Alert($"Lỗi: {error}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                }
+            }
+            else
+            {
+                await DialogService.Alert($"Lỗi: tên trùng với tên hiện tại", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+            }
+        }
+        else
+        {
+            await DialogService.Alert($"Lỗi: tên không được để trống", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+        }
+    }
+
+    // Notification
+    void ShowNotification(string message, NotificationSeverity notifytype, double time)
+    {
+        NotificationMessage notify = new NotificationMessage
+            {
+                Style = "position: fixed; top: 0; right: 0;",
+                Severity = notifytype,
+                Summary = message,
+                Duration = time
+            };
+
+        NotificationService.Notify(notify);
+    }
+}
