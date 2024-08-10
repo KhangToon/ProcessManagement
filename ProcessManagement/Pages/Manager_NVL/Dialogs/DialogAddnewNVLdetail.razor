@@ -35,7 +35,7 @@
                 </RadzenRadioButtonList>
             </RadzenStack>
         </RadzenStack>
-        <RadzenCard Variant="Variant.Flat" Style="height: 350px; width: 100%; padding: 10px; padding-right: 0; border-radius: 10px; overflow: scroll ">
+        <RadzenCard Variant="Variant.Flat" Style="height: 370px; width: 100%; padding: 10px; padding-right: 0; border-radius: 10px; overflow: scroll ">
             <RadzenStack Style="height: 100%; width: 100%; padding: 10px; padding-right: 0;" Gap="0" Orientation="Orientation.Vertical">
                 @if (IsCreateNew)
                 {
@@ -92,7 +92,7 @@
                     <!--// Gia tri M1-->
                     <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 10px; border-bottom: var(--rz-grid-cell-border);">
                         <RadzenStack Style="width: 25%;">
-                            <RadzenText Text="Gía trị mặc định" Style="font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
+                            <RadzenText Text="Gía trị" Style="font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
                         </RadzenStack>
                         <RadzenStack Gap="10px" Style="width: 75%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Vertical" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
                             @{
@@ -100,26 +100,26 @@
 
                                 if (kieudulieu == 1) // kieu ki tu
                                 {
-                                    <RadzenTextBox Placeholder="@($"*Nhập giá trị")" @oninput="@(async (args) => { await OnCheckKieukituValue_M1(args);})"
+                                    <RadzenTextBox Disabled="@(!IsAddWithValue_M1)" Placeholder="@($"*Nhập giá trị")" @oninput="@(async (args) => { await OnCheckKieukituValue_M1(args);})"
                                                    class="custom-placeholder"
                                                    Style="font-size: 16px; height: contain; width: 100% "></RadzenTextBox>
-                                    <RadzenText Visible="@(!IsKieuKituOK_M1)" Text="*Gía trị chưa hợp lệ" Style="font-size: 14px; color: red; font-style: italic; height: contain; width: 100% "></RadzenText>
+                                    <RadzenText Visible="@(!IsKieuKituOK_M1 && IsAddWithValue_M1)" Text="*Gía trị chưa hợp lệ" Style="font-size: 14px; color: red; font-style: italic; height: contain; width: 100% "></RadzenText>
                                 }
                                 else if (kieudulieu == 2) // kieu so
                                 {
-                                    <RadzenNumeric Placeholder="@($"*Nhập giá trị")" TValue="int"
+                                    <RadzenNumeric Disabled="@(!IsAddWithValue_M1)" Placeholder="@($"*Nhập giá trị")" TValue="int"
                                                    Min="0" Max="999999" ValueChanged="@((args) => OnCheckKieuSoValue_M1(args))"
                                                    class="custom-placeholder"
                                                    Style="font-size: 16px; height: contain; width: 100%" />
-                                    <RadzenText Visible="@(!IsKieuSoOK_M1)" Text="*Gía trị chưa hợp lệ" Style="font-size: 14px; color: red; font-style: italic; height: contain; width: 100% "></RadzenText>
+                                    <RadzenText Visible="@(!IsKieuSoOK_M1 && IsAddWithValue_M1)" Text="*Gía trị chưa hợp lệ" Style="font-size: 14px; color: red; font-style: italic; height: contain; width: 100% "></RadzenText>
                                 }
                                 else if (kieudulieu == 3) // datetime
                                 {
-                                    <RadzenDatePicker Placeholder="@($"*Nhập giá trị")" TValue="DateTime"
+                                    <RadzenDatePicker Disabled="@(!IsAddWithValue_M1)" Placeholder="@($"*Nhập giá trị")" TValue="DateTime"
                                                       ValueChanged="@((args) => { OnCheckKieuDateValue_M1(args); })" class="custom-placeholder"
                                                       ShowTime="false" HourFormat="12" DateFormat="@Common.DayTimeFormatnoTime" AllowInput="false"
                                                       Style="width: 100%;  font-size: 16px"></RadzenDatePicker>
-                                    <RadzenText Visible="@(!IsKieuDateOK_M1)" Text="*Gía trị chưa hợp lệ" Style="font-size: 14px; color: red; font-style: italic; height: contain; width: 100% "></RadzenText>
+                                    <RadzenText Visible="@(!IsKieuDateOK_M1 && IsAddWithValue_M1)" Text="*Gía trị chưa hợp lệ" Style="font-size: 14px; color: red; font-style: italic; height: contain; width: 100% "></RadzenText>
                                 }
                             }
                         </RadzenStack>
@@ -128,12 +128,12 @@
                     <!--// Checkbox add option M1-->
                     <RadzenStack Gap="5px" Style="height: contain; width: contain; padding: 10px; background-color: var(--rz-primary-lighter); margin-top: 10px; margin-right: 10px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                         <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding: 5px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                            <RadzenCheckBox TValue="bool" Value=@IsAddForAll_M1 Change=@(args => IsAddForAll_M1 = args) Name="CheckBoxAddforAll" />
-                            <RadzenLabel Text="Thêm trường thông tin này cho những nguyên liệu khác." Style="font-size: 14px; font-weight: bold; font-style: italic" Component="CheckBoxAddforAll" />
+                            <RadzenCheckBox TValue="bool" Value=@IsAddForAll_M1 Change=@(args => IsAddForAll_M1 = args) Name="IsAddForAll_M1" />
+                            <RadzenLabel Text="Thêm trường thông tin này cho những nguyên liệu khác." Style="font-size: 14px; font-weight: bold; font-style: italic" Component="IsAddForAll_M1" />
                         </RadzenStack>
-                        <RadzenStack Visible="@IsAddForAll_M1" Gap="10px" Style="height: contain; width: 100%; padding: 5px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                            <RadzenCheckBox TValue="bool" Value=@IsAddForAllwithDefaultValue_M1 Change=@(args => IsAddForAllwithDefaultValue_M1 = args) Name="CheckBoxAddforAllwithDefault" />
-                            <RadzenLabel Text="Thêm với giá trị mặc định" Style="font-size: 14px; font-weight: bold; font-style: italic" Component="CheckBoxAddforAllwithDefault" />
+                        <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding: 5px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                            <RadzenCheckBox TValue="bool" Value=@IsAddWithValue_M1 Change=@(args => IsAddWithValue_M1 = args) Name="IsAllowEmptyValue_M1" />
+                            <RadzenLabel Text="Thêm với giá trị" Style="font-size: 14px; font-weight: bold; font-style: italic" Component="IsAllowEmptyValue_M1" />
                         </RadzenStack>
                     </RadzenStack>
                     <!--Checkbox add option M1 //-->
@@ -236,11 +236,12 @@
     private bool IsKieuSoOK_M1 = false;
     private bool IsKieuDateOK_M1 = false;
     private bool IsAddForAll_M1 = false;
-    private bool IsAddForAllwithDefaultValue_M1 = false;
+    private bool IsAddWithValue_M1 = false;
     // Mode 2
     private bool IsKieuKituOK_M2 = false;
     private bool IsKieuSoOK_M2 = false;
     private bool IsKieuDateOK_M2 = false;
+    private bool IsAllowEmptyValue_M2 = true;
 
     private List<NVLDetailsName> DSNVLDetailsName_M2 = new(); // mode 2
 
@@ -334,7 +335,7 @@
                             nvldetail.TenTTID.Value = tenttid;
 
                             // NVL ID duoc gan trong AddNVLDetailForAllNVL
-                            if (IsAddForAllwithDefaultValue_M1)
+                            if (IsAddWithValue_M1)
                             {
                                 nvldetail.GiaTri.Value = NewNVLDetail_M1.GiatriMacDinh.Value;
                             }
@@ -515,21 +516,27 @@
         {
             int kieudulieu = int.TryParse(NewNVLDetail_M1?.KieuDulieu.Value?.ToString(), out int kdl) ? kdl : 0;
 
+            if (kieudulieu == 0) return false;
+
             if (IsTenDetailOK_M1)
             {
-                if (kieudulieu == 1)
+                if (IsAddWithValue_M1)
                 {
-                    return IsKieuKituOK_M1;
+                    if (kieudulieu == 1)
+                    {
+                        return IsKieuKituOK_M1;
+                    }
+                    else if (kieudulieu == 2)
+                    {
+                        return IsKieuSoOK_M1;
+                    }
+                    else if (kieudulieu == 3)
+                    {
+                        return IsKieuDateOK_M1;
+                    }
+                    else return false;
                 }
-                else if (kieudulieu == 2)
-                {
-                    return IsKieuSoOK_M1;
-                }
-                else if (kieudulieu == 3)
-                {
-                    return IsKieuDateOK_M1;
-                }
-                else return false;
+                else return true;
             }
             else return false;
         }
@@ -544,7 +551,7 @@
         IsKieuSoOK_M1 = false;
         IsKieuDateOK_M1 = false;
         IsAddForAll_M1 = false;
-        IsAddForAllwithDefaultValue_M1 = false;
+        IsAddWithValue_M1 = false;
     }
     #endregion MODE1 - Tao moi thong tin
 

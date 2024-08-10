@@ -2163,6 +2163,12 @@ namespace ProcessManagement.Services.SQLServer
 
         #region Table_KHONguyenLieuDetails
 
+        /// <summary>
+        /// Kiểm tra thông tin đã tồn tại trong danh sách nvl details
+        /// </summary>
+        /// <param name="tenttid"></param>
+        /// <param name="nvlid"></param>
+        /// <returns></returns>
         public bool IsDetailExistingInNVLDetailsList(object? tenttid, object? nvlid)
         {
             using (var connection = new SqlConnection(connectionString))
@@ -2220,8 +2226,6 @@ namespace ProcessManagement.Services.SQLServer
             return nvlDetails;
         }
 
-
-
         /// <summary>
         /// Thêm trường thông tin chi tiết mới cho nguyên vật liệu
         /// </summary>
@@ -2261,6 +2265,74 @@ namespace ProcessManagement.Services.SQLServer
                 result = Convert.ToInt32(rs);
 
                 if (result == 0) result = -1;
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
+        /// <summary>
+        /// Xóa trường thông tin của nguyên vật liệu
+        /// </summary>
+        /// <param name="removeNVLdetail"></param>
+        /// <returns></returns>
+        public (int, string) DeleteThongTinNgVatLieu(NguyenVatLieuDetail? removeNVLdetail)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            if (removeNVLdetail == null) return (result, errorMess);
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"DELETE FROM {Common.Table_NguyenLieuDetails} WHERE [{Common.TTNVLID}] = '{removeNVLdetail.TTNVLID.Value}'";
+
+                object rs = command.ExecuteScalar();
+
+                result = Convert.ToInt32(rs);
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
+        /// <summary>
+        /// Xóa trường thông tin ở các nguyên vật liệu khác
+        /// </summary>
+        /// <param name="removeNVLdetail"></param>
+        /// <returns></returns>
+        public (int, string) DeleteThongTinNgVatLieuByTenTTID(object? tenttID)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"DELETE FROM {Common.Table_NguyenLieuDetails} WHERE [{Common.TenTTID}] = '{tenttID}'";
+
+                object rs = command.ExecuteScalar();
+
+                result = Convert.ToInt32(rs);
             }
             catch (Exception ex)
             {
@@ -2447,6 +2519,39 @@ namespace ProcessManagement.Services.SQLServer
                 result = Convert.ToInt32(rs);
 
                 if (result == 0) result = -1;
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
+        /// <summary>
+        /// Xóa loại thông tin trong bảng danh sách thông tin NVL
+        /// </summary>
+        /// <param name="tenttID"></param>
+        /// <returns></returns>
+        public (int, string) DeleteNVLDetailName(object? tenttID)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"DELETE FROM {Common.Table_NVLDetailsListName} WHERE [{Common.TenTTID}] = '{tenttID}'";
+
+                object rs = command.ExecuteScalar();
+
+                result = Convert.ToInt32(rs);
             }
             catch (Exception ex)
             {

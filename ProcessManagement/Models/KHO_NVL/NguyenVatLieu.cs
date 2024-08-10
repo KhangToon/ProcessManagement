@@ -5,11 +5,12 @@ using System.Text.Json;
 namespace ProcessManagement.Models.KHO_NVL
 {
     public class NguyenVatLieu
-    {
+    {   
         public Propertyy NVLID { get; set; } = new() { DBName = Common.NVLID, DisplayName = "NVL ID", Type = typeof(int), AlowDatabase = false, AlowDisplay = false, DispDatagrid = false }; // ID
-        public Propertyy DMID { get; set; } = new() { DBName = Common.DMID, DisplayName = "Danh mục", Type = typeof(int), AlowDatabase = true, AlowDisplay = false, DispDatagrid = false };
-        public Propertyy LOAINVLID { get; set; } = new() { DBName = Common.LOAINVLID, DisplayName = "Loại nguyên liệu", Type = typeof(int), AlowDatabase = true, AlowDisplay = false, DispDatagrid = false };
         public Propertyy TenNVL { get; set; } = new() { DBName = Common.TenNVL, DisplayName = "Tên nguyên liệu", Type = typeof(string), AlowDatabase = true };
+        public Propertyy LOAINVLID { get; set; } = new() { DBName = Common.LOAINVLID, DisplayName = "Loại nguyên liệu", Type = typeof(int), AlowDatabase = true, AlowDisplay = false, DispDatagrid = false };
+
+        public Propertyy DMID { get; set; } = new() { DBName = Common.DMID, DisplayName = "Danh mục", Type = typeof(int), AlowDatabase = true, AlowDisplay = false, DispDatagrid = false };
         //public Propertyy MoTa { get; set; } = new() { DBName = Common.MoTa, DisplayName = "Mô tả", Type = typeof(string), AlowDatabase = true, DispDatagrid = false };
         //public Propertyy DonViTinh { get; set; } = new() { DBName = Common.DonViTinh, DisplayName = "Đơn vị tính", Type = typeof(string), AlowDatabase = true, DispDatagrid = false };
         //public Propertyy SoLuongTonKhoToiThieu { get; set; } = new() { DBName = Common.SoLuongTonKhoToiThieu, DisplayName = "Số lượng tối thiểu", Type = typeof(int), AlowDatabase = true };
