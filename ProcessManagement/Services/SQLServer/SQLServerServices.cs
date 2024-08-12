@@ -2023,7 +2023,7 @@ namespace ProcessManagement.Services.SQLServer
 
                         object columnValue = reader[columnName];
 
-                        item.Value = columnValue;
+                        item.Value = columnValue.ToString()?.Trim();
                     }
 
                     // Load Details NVL 
@@ -2067,51 +2067,7 @@ namespace ProcessManagement.Services.SQLServer
 
                         object columnValue = reader[columnName];
 
-                        item.Value = columnValue;
-                    }
-
-                    // Load Details NVL 
-                    nvl.DSNguyenVatLieuDetails = GetNguyenVatLieuDetails(nvl.NVLID.Value);
-                    // Load Danh muc
-                    nvl.DanhMuc = GetDanhMucbyID(nvl.DMID.Value);
-                    // Load Loai NVL
-                    nvl.LoaiNVL = GetLoaiNVLbyID(nvl.LOAINVLID.Value);
-
-                    nguyenvatlieus.Add(nvl);
-                }
-            }
-
-            return nguyenvatlieus;
-        }
-
-        // Get list Nguyen vat lieu
-        public List<NguyenVatLieu> GetListNguyenVatLieu()
-        {
-            List<NguyenVatLieu> nguyenvatlieus = new();
-
-            using (var connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-
-                var command = connection.CreateCommand();
-
-                command.CommandText = $"SELECT * FROM [{Common.TableNguyenVatLieu}]";
-
-                using var reader = command.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    NguyenVatLieu nvl = new();
-
-                    List<Propertyy> rowitems = nvl.GetPropertiesValues();
-
-                    foreach (var item in rowitems)
-                    {
-                        string? columnName = item.DBName;
-
-                        object columnValue = reader[columnName];
-
-                        item.Value = columnValue;
+                        item.Value = columnValue.ToString()?.Trim();
                     }
 
                     // Load Details NVL 
@@ -2159,6 +2115,53 @@ namespace ProcessManagement.Services.SQLServer
 
             return nvlIDs;
         }
+
+        /// <summary>
+        /// Cập nhật giá trị các thông tin chính của NVL
+        /// </summary>
+        /// <param name="ngVatLieu"></param>
+        /// <returns></returns>
+        public (int, string) UpdateNguyenVatLieuMainDetails(NguyenVatLieu ngVatLieu)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            if (ngVatLieu == null) return (result, errorMess);
+
+            List<Propertyy> Items = ngVatLieu.GetPropertiesValues().Where(pro => pro.AlowDatabase == true).ToList();
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                string setClause = string.Join(",", Items.Select(key => $"[{key.DBName}] = @{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $"UPDATE [{Common.TableNguyenVatLieu}] SET {setClause} WHERE [{Common.NVLID}] = '{ngVatLieu.NVLID.Value}'";
+
+                foreach (var item in Items)
+                {
+                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
+
+                    object? parameterValue = item.Value;
+
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                result = command.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
         #endregion  Table KHO_NguyenVatLieu
 
         #region Table_KHONguyenLieuDetails
@@ -2213,7 +2216,7 @@ namespace ProcessManagement.Services.SQLServer
 
                         object columnValue = reader[columnName];
 
-                        item.Value = columnValue;
+                        item.Value = columnValue.ToString()?.Trim();
                     }
 
                     // Load ten thong tin 
@@ -2344,6 +2347,11 @@ namespace ProcessManagement.Services.SQLServer
             return (result, errorMess);
         }
 
+        /// <summary>
+        /// Cập nhật danh sách thông tin phụ của nguyên vật liệu
+        /// </summary>
+        /// <param name="ngvatlieudetails"></param>
+        /// <returns></returns>
         public (int, string) UpdateListNguyenVatLieuDetails(List<NguyenVatLieuDetail> ngvatlieudetails)
         {
             int result = -1; string errorMess = string.Empty;
@@ -2358,15 +2366,15 @@ namespace ProcessManagement.Services.SQLServer
 
                 foreach (var nvldetail in ngvatlieudetails)
                 {
-                    List<Propertyy> chitietItems = nvldetail.GetPropertiesValues().Where(pro => pro.AlowDatabase == true).ToList();
+                    List<Propertyy> items = nvldetail.GetPropertiesValues().Where(pro => pro.DBName == Common.GiaTri).ToList();
 
                     var command = connection.CreateCommand();
 
-                    string setClause = string.Join(",", chitietItems.Select(key => $"[{key.DBName}] = @{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
+                    string setClause = string.Join(",", items.Select(key => $"[{key.DBName}] = @{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
 
-                    command.CommandText = $"UPDATE [{Common.Table_NguyenLieuDetails}] SET {setClause} WHERE [{Common.NVLID}] = '{nvldetail.NVLID.Value}'";
+                    command.CommandText = $"UPDATE [{Common.Table_NguyenLieuDetails}] SET {setClause} WHERE [{Common.TTNVLID}] = '{nvldetail.TTNVLID.Value}'";
 
-                    foreach (var item in chitietItems)
+                    foreach (var item in items)
                     {
                         string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
 

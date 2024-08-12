@@ -110,10 +110,10 @@
                                     </RadzenDropDown>
                                 </RadzenStack>
                                 <!--Them nguyen vat lieu button-->
-                                <RadzenStack Visible="@(SelectedLoaiNVL == null)" Style="height: 100%; width: contain; padding-left: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+@*                                 <RadzenStack Visible="@(SelectedLoaiNVL == null)" Style="height: 100%; width: contain; padding-left: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                     <RadzenButton Click="OnThemNguyenVatLieu" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Thêm nguyên liệu mới"))" Icon="add" Text="Thêm nguyên liệu mới" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled"
                                                   Style="height: contain; width: contain; font-size: 14px; background-color: Highlight " />
-                                </RadzenStack>
+                                </RadzenStack> *@
                             </RadzenStack>
 
                             <RadzenRow Gap="10px" Style="height: contain; width: 100%; border-top: var(--rz-grid-cell-border); padding: 0;">
@@ -132,7 +132,7 @@
                                                 <RadzenText Text="@($"{DSNguyenVatLieus?.Count?? 0}")" Style="color: black; font-weight: 600; height: contain; width: contain"></RadzenText>
                                             </RadzenStack>
                                         </RadzenStack>
-                                        <RadzenStack Visible="@(!isSelectAllNguyenVatLieu)" Style="height: 100%; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                        <RadzenStack Style="height: 100%; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                             <RadzenButton Click="OnThemNguyenVatLieu" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Thêm nguyên liệu mới"))" Icon="add" Text="Thêm nguyên liệu mới" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled"
                                                           Style="height: contain; width: contain; font-size: 14px; background-color: Highlight " />
                                         </RadzenStack>
@@ -289,8 +289,15 @@
                                                                             }
                                                                             else if (item.Type == typeof(DateTime))
                                                                             {
-                                                                                <RadzenDatePicker TValue="DateTime" Value="Convert.ToDateTime(item.Value?.ToString())"
-                                                                                                  ValueChanged="@((args) => { item.Value = args; })"
+                                                                                DateTime selectday = DateTime.TryParse(item.Value?.ToString(), out DateTime sld) ? sld : DateTime.Now;
+                                                                                selectday = selectday.Date.Add(DateTime.Now.TimeOfDay);
+
+                                                                                <RadzenDatePicker TValue="DateTime"
+                                                                                                  ValueChanged="@((args) =>
+                                                                                                    {
+                                                                                                        args = args.Date.Add(DateTime.Now.TimeOfDay); item.Value = args;
+                                                                                                    })"
+                                                                                                  Value="selectday"
                                                                                                   ShowTime="false" HourFormat="12" DateFormat="@Common.DayTimeFormatnoTime" AllowInput="false"
                                                                                                   Name="DatePicker" Style="width: 100%;  font-size: 16px"></RadzenDatePicker>
                                                                             }
@@ -339,8 +346,15 @@
                                                                                 }
                                                                                 else if (kieudulieu == 3) // datetime
                                                                                 {
-                                                                                    <RadzenDatePicker TValue="DateTime" Value="Convert.ToDateTime(nvldetail.GiaTri.Value?.ToString())"
-                                                                                                      ValueChanged="@((args) => { nvldetail.GiaTri.Value = args; })"
+                                                                                    DateTime selectday = DateTime.TryParse(nvldetail.GiaTri.Value?.ToString(), out DateTime sld2) ? sld2 : DateTime.Now;
+                                                                                    selectday = selectday.Date.Add(DateTime.Now.TimeOfDay);
+
+                                                                                    <RadzenDatePicker TValue="DateTime"
+                                                                                                      ValueChanged="@((args) =>
+                                                                                                        {
+                                                                                                            args = args.Date.Add(DateTime.Now.TimeOfDay); nvldetail.GiaTri.Value = args;
+                                                                                                        })"
+                                                                                                      Value="selectday"
                                                                                                       ShowTime="false" HourFormat="12" DateFormat="@Common.DayTimeFormatnoTime" AllowInput="false"
                                                                                                       Name="DatePicker" Style="width: 100%;  font-size: 16px"></RadzenDatePicker>
                                                                                 }
@@ -645,10 +659,36 @@
         {
             isSavingNVLInfors = true; await Task.Delay(300);
 
+            // Update truong thong tin chinh
 
+            (int mainUDresult, string mainUDerror) = SQLServerServices.UpdateNguyenVatLieuMainDetails(updateItems);
 
+            if (mainUDresult == -1)
+            {
+                await DialogService.Alert($"Lỗi: {mainUDerror}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+            }
+            else
+            {
+                // Update truong thong tin phu
+
+                (int subUDresult, string subUDerror) = SQLServerServices.UpdateListNguyenVatLieuDetails(updateItems.DSNguyenVatLieuDetails);
+
+                if (mainUDresult == -1)
+                {
+                    await DialogService.Alert($"Lỗi: {mainUDerror}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                }
+                else
+                {
+                    await DialogService.Alert($"Cập nhật thành công!", "<strong><span style='color: darkgreen'>Success!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                    isEditNVLDetail = false;
+                }
+            }
 
             isSavingNVLInfors = false;
+
+            LoadList_NguyenVatLieu();
+
+            ReSelectCurrentNguyenVatLieu();
         }
     }
 
