@@ -1,0 +1,303 @@
+﻿@using ProcessManagement.Commons
+@using ProcessManagement.Models.KHO_NVL
+@using ProcessManagement.Services.SQLServer
+@using Radzen.Blazor
+@using Radzen
+@using ProcessManagement.Models
+
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject TooltipService TooltipService
+@inject SQLServerServices SQLServerServices
+
+<RadzenCard Variant="Variant.Filled" Style="height: 100%; width: 100%; padding: 10px;">
+    <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style=" height: 100%; width: 100%; padding: 0px; padding-bottom: 10px " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+        <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+            <RadzenStack Gap="5px" Style="height: contain; width: contain; padding: 0px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
+                <RadzenStack Gap="5px" Style="height: contain; width: contain; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
+                    <RadzenText Text="@($"Mã phiếu:")" Style="font-weight: 600; font-size: 15px; font-style: italic;"></RadzenText>
+                    <RadzenText Text="@($"#17498")" Style="font-weight: 600; font-size: 15px; font-style: italic; color: black;"></RadzenText>
+                </RadzenStack>
+                <RadzenStack Gap="5px" Style="height: contain; width: contain; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
+                    <RadzenText Text="@($"Người lập phiếu:")" Style="font-weight: 600; font-size: 15px; font-style: italic;"></RadzenText>
+                    <RadzenText Text="@($"admin")" Style="font-weight: 600; font-size: 15px; font-style: italic; color: black;"></RadzenText>
+                </RadzenStack>
+            </RadzenStack>
+            <RadzenStack Gap="20px" Style="height: contain; width: contain; padding: 10px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                <RadzenText Text="Phiếu nhập kho nguyên vật liệu" Style="color: black; font-weight: 600; font-size: 20px"></RadzenText>
+            </RadzenStack>
+            <RadzenStack Gap="5px" Style="height: contain; width: contain; padding: 0px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
+                <RadzenStack Gap="5px" Style="height: contain; width: contain; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
+                    <RadzenText Text="@($"Ngày lập phiếu:")" Style="font-weight: 600; font-size: 15px; font-style: italic;"></RadzenText>
+                    <RadzenText Text="@($"{DateTime.Now.Date.ToString("dd/MM/yyyy")}")" Style="font-weight: 600; font-size: 15px; font-style: italic; color: black;"></RadzenText>
+                </RadzenStack>
+                <RadzenStack Gap="5px" Style="height: contain; width: contain; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
+                    <RadzenText Text="@($"Lệnh:")" Style="font-weight: 600; font-size: 15px; font-style: italic;"></RadzenText>
+                    <RadzenText Text="@($"Nhập kho")" Style="font-weight: 600; font-size: 15px; font-style: italic; color: black;"></RadzenText>
+                </RadzenStack>
+            </RadzenStack>
+            @*             <RadzenStack Gap="20px" Style="height: contain; width: contain; border-left: var(--rz-grid-cell-border); border-radius: 10px; background-color: var(--rz-primary-lighter); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+            <RadzenRadioButtonList Value=@modeCode TValue="int" ValueChanged=@(args => OnModeSelectChanged(args))>
+            <Items>
+            <RadzenRadioButtonListItem Text="@NK" Value="0" />
+            <RadzenRadioButtonListItem Text="@XK" Value="1" />
+            </Items>
+            </RadzenRadioButtonList>
+            </RadzenStack> *@
+        </RadzenStack>
+        @*         @{
+        var vitrike = nvl.DSNguyenVatLieuDetails.FirstOrDefault(i => i.NVLDetailItems?.TenTruyXuat.Value?.ToString()?.Trim() == Common.Tentruyxuat.VitriKe)?.GiaTri.Value?.ToString() ?? string.Empty;
+        var vitrihang = nvl.DSNguyenVatLieuDetails.FirstOrDefault(i => i.NVLDetailItems?.TenTruyXuat.Value?.ToString()?.Trim() == Common.Tentruyxuat.VitriHang)?.GiaTri.Value?.ToString() ?? string.Empty;
+        var vitricot = nvl.DSNguyenVatLieuDetails.FirstOrDefault(i => i.NVLDetailItems?.TenTruyXuat.Value?.ToString()?.Trim() == Common.Tentruyxuat.VitriCot)?.GiaTri.Value?.ToString() ?? string.Empty;
+        } *@
+        <RadzenRow class="rowbackground-style" Gap="10px" Style="height: 100%; width: 100%; padding-top: 10px; border-radius: 0; overflow-y: auto; border-top: var(--rz-grid-cell-border);">
+            <RadzenColumn Size="12" SizeMD="7" Style="height: 100%; width: 100%; border-right: var(--rz-grid-cell-border); padding-right: 10px">
+                <!--Table listNVL-->
+                <RadzenStack Gap="5px" Style="height: 100%; width: 100%;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                    <RadzenStack Visible="@(DSNVLNhapXuatKho != null && DSNVLNhapXuatKho.Count > 0)" Gap="10px" Style="height: contain; width: 100%; padding: 0px; padding-left: 0" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                        <RadzenText Text="Danh sách nhập kho" Style="font-weight: 600; height: contain; width: contain; font-style: italic; color: darkred"></RadzenText>
+                        <RadzenStack Gap="5px" Style="height: contain; width: contain; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenButton Icon="edit" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Chỉnh sửa danh sách"))"
+                                          ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 18px;" />
+                        </RadzenStack>
+                    </RadzenStack>
+                    <RadzenDataGrid class="rz-grid-table-fixed-2" Data="@(DSNVLNhapXuatKho)" TItem="NguyenVatLieu"
+                                    EmptyText="Danh sách nguyên liệu trống."
+                                    ShowColumnTitleAsTooltip="true" ShowCellDataAsTooltip="true"
+                                    AllowFiltering="false" FilterMode="FilterMode.Simple"
+                                    AllowPaging="true" AllowSorting="false" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                    ShowPagingSummary="true" PagerPosition="PagerPosition.Bottom" Style="padding-right: 5px"
+                                    GridLines="DataGridGridLines.Both" PageSize="10" Density="Density.Compact"
+                                    HeaderCellRender="@(args => args.Attributes.Add("style", $"background-color: rgba(58, 71, 77)"))"
+                                    CellRender="@OnCellRender" Value="@SelectedNgVatLieu" ValueChanged="@((args) => OnDatagridSelectChanged(args))">
+                        <Columns>
+                            @if (DSNVLNhapXuatKho != null && DSNVLNhapXuatKho.Count > 0)
+                            {
+                                List<Propertyy> columns = DSNVLNhapXuatKho.FirstOrDefault()?.GetPropertiesValues() ?? new();
+
+                                <RadzenDataGridColumn Width="50px" Frozen="true" FrozenPosition="FrozenColumnPosition.Left" Filterable="false"
+                                                      TItem="NguyenVatLieu" Title="#"
+                                                      Property="STT" TextAlign="TextAlign.Center">
+                                    <HeaderTemplate>
+                                        <span style="font-weight: 600; font-size: 15px; color: white">STT</span>
+                                    </HeaderTemplate>
+                                    <Template Context="nvl">
+                                        <span style="font-weight: bold;">@(DSNVLNhapXuatKho.IndexOf(nvl) + 1)</span>
+                                    </Template>
+                                </RadzenDataGridColumn>
+
+                                foreach (var column in columns.Where(cl => cl.DispDatagrid == true).ToList())
+                                {
+                                    string colName = column.DBName ?? string.Empty;
+                                    string displayName = column.DisplayName ?? string.Empty;
+
+                                    if (colName == Common.TenNVL)
+                                    {
+                                        <RadzenDataGridColumn Width="contain" TItem="NguyenVatLieu" Title="Tên nguyên vật liệu"
+                                                              Property="tennvl" TextAlign="TextAlign.Center">
+                                            <HeaderTemplate>
+                                                <span style="font-weight: 600; font-size: 15px; color: white">Tên NVL</span>
+                                            </HeaderTemplate>
+                                            <Template Context="nvl">
+                                                <span style="color: black; font-weight: bold;">@($"{nvl?.TenNVL.Value?.ToString()}")</span>
+                                            </Template>
+                                        </RadzenDataGridColumn>
+                                    }
+                                }
+
+                                <RadzenDataGridColumn Width="contain" TItem="NguyenVatLieu" Title="Số lượng" Frozen="false"
+                                                      Property="soluong" TextAlign="TextAlign.Center">
+                                    <HeaderTemplate>
+                                        <span style="font-weight: 600; font-size: 15px; color: white">Số lượng</span>
+                                    </HeaderTemplate>
+                                    <Template Context="nvl">
+                                        <RadzenNumeric TValue="int" Min="0" Max="999999"
+                                                       Style="font-size: 16px; height: contain; border-width: 1px; width: 100%" />
+                                    </Template>
+                                </RadzenDataGridColumn>
+
+                                <RadzenDataGridColumn Width="contain" TItem="NguyenVatLieu" Title="Trạng thái" Frozen="false"
+                                                      Property="trangthai" TextAlign="TextAlign.Center">
+                                    <HeaderTemplate>
+                                        <span style="font-weight: 600; font-size: 15px; color: white">Trạng thái</span>
+                                    </HeaderTemplate>
+                                    <Template Context="nvl">
+                                        <RadzenStack Style="height: contain; width: 100%; border-radius: 5px; background-color: var(--rz-warning-light); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                            <RadzenText Text="Chưa nhập kho" Style="font-weight: 600; font-size: 15px"></RadzenText>
+                                        </RadzenStack>
+                                    </Template>
+                                </RadzenDataGridColumn>
+
+                                <RadzenDataGridColumn Width="60px" TItem="NguyenVatLieu" Title="clear" Frozen="false"
+                                                      Property="clear" TextAlign="TextAlign.Center">
+                                    <HeaderTemplate>
+                                        <span style="font-weight: 600; font-size: 15px; color: white"></span>
+                                    </HeaderTemplate>
+                                    <Template Context="nvl">
+                                        <RadzenButton Icon="delete" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Xóa nguyên liệu khỏi danh sách"))"
+                                                      ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Darker" Style="border-radius: 5px; --rz-icon-size: 18px;" />
+                                    </Template>
+                                </RadzenDataGridColumn>
+                            }
+                        </Columns>
+                    </RadzenDataGrid>
+                </RadzenStack>
+            </RadzenColumn>
+
+            <RadzenColumn Size="12" SizeMD="5" Style="height: 100%; width: 100%;">
+                <RadzenRow class="rowbackground-style" Gap="10px" Style="height: 100%; width: 100%; border-radius: 0; ">
+                    <RadzenColumn Size="12" SizeMD="12" Style="height: contain; width: 100%;">
+                        <RadzenCard Variant="Variant.Text" Style="height: 100%; width: 100%; padding: 10px; padding-right: 5px; border-radius: 10px; margin-top: 20px;">
+                            <RadzenStack Visible="@(DSNVLNhapXuatKho != null && DSNVLNhapXuatKho.Count > 0)" Gap="10px" Style="height: contain; width: 100%; padding: 0px; padding-left: 0" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                <RadzenText Text="Thông tin chi tiết" Style="font-weight: 600; font-size: 16px; height: contain; width: contain; font-style: italic;"></RadzenText>
+                            </RadzenStack>
+                            <RadzenStack Style="height: 100%; width: 100%; padding: 5px; padding-right: 0; overflow-y: scroll" Gap="5px" Orientation="Orientation.Vertical">
+                                <RadzenStack Gap="0" Style="height: contain; width: 100%; padding-bottom: 5px; padding-top: 5px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                    <RadzenStack Style="width: 35%;">
+                                        <RadzenText Text="Vị trí kệ" Style="font-size: 14px; font-weight: 600; color: black; height: contain; width: 100% "></RadzenText>
+                                    </RadzenStack>
+                                    <RadzenStack Style="width: 55%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                        <RadzenText Text="Kệ: #1" Style="font-size: 16px; height: contain;"></RadzenText>
+                                    </RadzenStack>
+                                </RadzenStack>
+
+                                <RadzenStack Gap="0" Style="height: contain; width: 100%; padding-bottom: 5px; padding-top: 5px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                    <RadzenStack Style="width: 35%;">
+                                        <RadzenText Text="Vị trí hàng" Style="font-size: 14px; font-weight: 600; color: black; height: contain; width: 100% "></RadzenText>
+                                    </RadzenStack>
+                                    <RadzenStack Style="width: 55%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                        <RadzenText Text="Hàng: #2" Style="font-size: 16px; height: contain;"></RadzenText>
+                                    </RadzenStack>
+                                </RadzenStack>
+
+                                <RadzenStack Gap="0" Style="height: contain; width: 100%; padding-bottom: 5px; padding-top: 5px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                    <RadzenStack Style="width: 35%;">
+                                        <RadzenText Text="Vị trí cột" Style="font-size: 14px; font-weight: 600; color: black; height: contain; width: 100% "></RadzenText>
+                                    </RadzenStack>
+                                    <RadzenStack Style="width: 55%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                        <RadzenText Text="Cột: #3" Style="font-size: 16px; height: contain;"></RadzenText>
+                                    </RadzenStack>
+                                </RadzenStack>
+
+                                <RadzenStack Gap="0" Style="height: contain; width: 100%; padding-bottom: 5px; padding-top: 5px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                    <RadzenStack Style="width: 35%;">
+                                        <RadzenText Text="Ngày nhập kho" Style="font-size: 14px; font-weight: 600; color: black; height: contain; width: 100% "></RadzenText>
+                                    </RadzenStack>
+                                    <RadzenStack Style="width: 55%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                        <RadzenText Text="@(DateTime.Now.Date.ToString("dd/MM/yyyy"))" Style="font-size: 16px; height: contain;"></RadzenText>
+                                    </RadzenStack>
+                                </RadzenStack>
+
+                                <RadzenStack Gap="0" Style="height: contain; width: 100%; padding-bottom: 5px; padding-top: 5px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                    <RadzenStack Style="width: 35%;">
+                                        <RadzenText Text="Người nhập kho" Style="font-size: 14px; font-weight: 600; color: black; height: contain; width: 100% "></RadzenText>
+                                    </RadzenStack>
+                                    <RadzenStack Style="width: 55%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                        <RadzenText Text="Nhân viên A" Style="font-size: 16px; height: contain;"></RadzenText>
+                                    </RadzenStack>
+                                </RadzenStack>
+
+                                <RadzenStack Gap="0" Style="height: contain; width: 100%; padding-bottom: 5px; padding-top: 5px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                    <RadzenStack Style="width: 35%;">
+                                        <RadzenText Text="Ghi chú" Style="font-size: 14px; font-weight: 600; color: black; height: contain; width: 100% "></RadzenText>
+                                    </RadzenStack>
+                                    <RadzenStack Style="width: 55%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                        <RadzenText Text="___" Style="font-size: 16px; height: contain;"></RadzenText>
+                                    </RadzenStack>
+                                </RadzenStack>
+                            </RadzenStack>
+                        </RadzenCard>
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeMD="12" Style="height: contain; width: 100%;">
+                        <RadzenStack Gap="10px" Style="height: contain; width: 100%;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                            <RadzenStack Style="height: 100%; width: 100%; border-radius: 10px; background-color: var(--rz-success-lighter); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenText Text="QUÉT MÃ" Style="color: green; font-weight: 600; font-size: 18px"></RadzenText>
+                            </RadzenStack>
+
+                            <RadzenStack Gap="5px" Style="height: contain; width: 100%; padding-bottom: 5px; padding-top: 5px; border-top: var(--rz-grid-cell-border)" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                <RadzenStack Style="width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                    <RadzenText Text="Mã nguyên liệu" Style="font-weight: 600; font-size: 16px; font-style: italic;"></RadzenText>
+                                </RadzenStack>
+                                <RadzenStack Style="width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                    <RadzenTextBox Style="font-size: 16px; height: contain; border-width: 1px; width: 100% "></RadzenTextBox>
+                                </RadzenStack>
+                            </RadzenStack>
+
+                            <RadzenStack Gap="5px" Style="height: contain; width: 100%;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                <RadzenStack Style="width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                    <RadzenText Text="Mã vị trí" Style="font-weight: 600; font-size: 16px; font-style: italic;"></RadzenText>
+                                </RadzenStack>
+                                <RadzenStack Style="width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                    <RadzenTextBox Style="font-size: 16px; height: contain; border-width: 1px; width: 100% "></RadzenTextBox>
+                                </RadzenStack>
+                            </RadzenStack>
+
+                            <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding-top: 10px; border-top: var(--rz-grid-cell-border) " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                <RadzenButton Style="width: 100%; max-width: contain" Icon="add" Text="Lưu kho" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Dark" Variant="Variant.Flat" />
+                            </RadzenStack>
+                        </RadzenStack>
+                    </RadzenColumn>
+                </RadzenRow>
+            </RadzenColumn>
+            
+        </RadzenRow>
+
+        <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding-top: 10px; border-top: var(--rz-grid-cell-border) " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+            <RadzenStack Gap="10px" Style="height: 100%; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                <RadzenButton Style="width: 120px;" Icon="check" Text="Lưu phiếu" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Dark" Variant="Variant.Flat" />
+                <RadzenButton Style="width: contain;" Icon="save" Text="Lưu kết quả nhập kho" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Dark" Variant="Variant.Flat" />
+            </RadzenStack>
+            <RadzenStack Gap="10px" Style="height: 100%; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                <RadzenButton Style="width: 120px;" Icon="close" Text="Thoát" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" Click="@(() => DialogService.Close(null))" />
+            </RadzenStack>
+        </RadzenStack>
+    </RadzenStack>
+</RadzenCard>
+
+@code {
+    [Parameter]
+    public List<NguyenVatLieu>? DSNVLNhapXuatKho { get; set; }
+
+    private const string NK = "Nhập kho";
+    private const string XK = "Xuất kho";
+
+    private IList<NguyenVatLieu>? SelectedNgVatLieu;
+    private int modeCode = 0; // 0 - nhap // 1 - xuat //
+    private string modeText = NK;
+
+    private void OnModeSelectChanged(int mode)
+    {
+        if (mode == 0)
+        {
+            modeText = NK;
+            modeCode = 0;
+        }
+        else if (mode == 1)
+        {
+            modeText = XK;
+            modeCode = 1;
+        }
+    }
+
+    private void OnCellRender(DataGridCellRenderEventArgs<NguyenVatLieu> args)
+    {
+        if (args.Column.Property.Contains("ID"))
+        {
+            args.Attributes.Add("style", $"font-weight: bold;");
+        }
+    }
+
+    // Datagrid selected changed event
+    private void OnDatagridSelectChanged(IList<NguyenVatLieu> selectedNgvatlieu)
+    {
+        SelectedNgVatLieu = selectedNgvatlieu;
+    }
+
+    // Tooltip
+    void ShowToolTip(ElementReference elementReference, TooltipPosition position, string content)
+    {
+        TooltipOptions options = new TooltipOptions() { Position = position, Delay = 500, Style = "background-color: black" };
+
+        TooltipService.Open(elementReference, content, options);
+    }
+}

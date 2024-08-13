@@ -5,6 +5,7 @@
 @using ProcessManagement.Commons
 @using ProcessManagement.Models
 @using ProcessManagement.Models.KHO_NVL
+@using ProcessManagement.Pages.Manager_NVL.Dialogs.NhapXuatKho
 @using ProcessManagement.Services.SQLServer
 @using ProcessManagement.Pages.Manager_NVL.Dialogs
 @using Radzen.Blazor
@@ -13,6 +14,7 @@
 
 @inject NotificationService NotificationService
 @inject TooltipService TooltipService
+@inject ContextMenuService ContextMenuService
 @inject DialogService DialogService
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject SQLServerServices SQLServerServices
@@ -109,10 +111,22 @@
                                                     Data=@(DSLoaiNVLs?.Select(loai => loai.TenLoaiNVL.Value?.ToString()).Prepend(allLoainvlFormat).ToList()) Style="border-radius: 5px; border-width: 1px; font-size: 14px; width: contain">
                                     </RadzenDropDown>
                                 </RadzenStack>
-                                <!--Nhap/Xuat kho button-->
+                                <!--Nhap kho button-->
                                 <RadzenStack Style="height: 100%; width: contain; padding-left: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                    <RadzenButton Click="OnThemNguyenVatLieu" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Thêm nguyên liệu mới"))" Icon="add" Text="Thêm nguyên liệu mới" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled"
-                                                  Style="height: contain; width: contain; font-size: 14px; background-color: Highlight " />
+                                    <RadzenButton Click="OnOpenDialogNhapXuatKho" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Nhập kho nguyên liệu"))" Icon="download" Text="Nhập kho" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
+                                                  Style="height: contain; width: contain; font-size: 14px;" />
+                                </RadzenStack>
+
+                                <!--Xuat kho button-->
+                                <RadzenStack Style="height: 100%; width: contain; padding-left: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                    <RadzenButton Click="OnThemNguyenVatLieu" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Xuất kho nguyên liệu"))" Icon="upload" Text="Xuất kho" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
+                                                  Style="height: contain; width: contain; font-size: 14px;" />
+                                </RadzenStack>
+
+                                <!--Cart button (ds ngvl nhap/xuat kho)-->
+                                <RadzenStack Style="height: 100%; width: contain; padding-left: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                    <RadzenButton Click="OnThemNguyenVatLieu" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Danh sách NVL nhập/xuất kho"))" Text="@(DSNvlNhapXuatKho.Count.ToString())" Icon="shopping_cart" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
+                                                  Style="height: contain; width: contain; font-size: 14px;" />
                                 </RadzenStack>
                             </RadzenStack>
 
@@ -120,7 +134,7 @@
                                 <RadzenColumn Size="12" SizeMD="7" Style="height: contain; width: 100%; padding-top: 5px;">
                                     <RadzenStack Gap="20px" Style="height: contain; width: 100%; padding-bottom: 5px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                                         <RadzenStack Visible="@(DSNguyenVatLieus != null && DSNguyenVatLieus.Count > 0)" Gap="10px" Style="height: contain; width: contain; padding: 10px; padding-left: 0" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                                            <RadzenText Text="Bảng danh sách nguyên liệu" Style="font-weight: 600; height: contain; width: contain; font-style: italic; color: Highlight"></RadzenText>
+                                            <RadzenText Text="Bảng danh sách nguyên liệu" Style="font-weight: 600; height: contain; width: contain; font-style: italic; color: darkred"></RadzenText>
                                         </RadzenStack>
                                         <RadzenStack Gap="10px" Style="height: 100%; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                             <RadzenStack Gap="10px" Style="height: 100%; width: contain; padding-right: 10px; border-right: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
@@ -132,9 +146,11 @@
                                                 <RadzenText Text="@($"{DSNguyenVatLieus?.Count?? 0}")" Style="color: black; font-weight: 600; height: contain; width: contain"></RadzenText>
                                             </RadzenStack>
                                         </RadzenStack>
+
+                                        <!--Them NVL moi-->
                                         <RadzenStack Style="height: 100%; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                            <RadzenButton Click="OnThemNguyenVatLieu" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Thêm nguyên liệu mới"))" Icon="add" Text="Thêm nguyên liệu mới" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled"
-                                                          Style="height: contain; width: contain; font-size: 14px; background-color: Highlight " />
+                                            <RadzenButton Click="OnThemNguyenVatLieu" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Thêm nguyên liệu mới"))" Icon="add" Text="Thêm nguyên liệu mới" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
+                                                          Style="height: contain; width: contain; font-size: 14px;" />
                                         </RadzenStack>
                                     </RadzenStack>
                                     <RadzenStack Visible="@(DSNguyenVatLieus?.Count == 0)" Gap="20px" Style="height: contain; width: 100%; background-color: var(--rz-primary-lighter); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
@@ -148,7 +164,7 @@
                                                         AllowFiltering="false" FilterMode="FilterMode.Simple"
                                                         AllowPaging="true" AllowSorting="false" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
                                                         ShowPagingSummary="true" PagingSummaryFormat="@pagingSummaryFormat" PagerPosition="PagerPosition.Bottom"
-                                                        GridLines="DataGridGridLines.Both" PageSize="10" Density="Density.Default"
+                                                        GridLines="DataGridGridLines.Both" PageSize="10" Density="Density.Default" CellContextMenu="@OnDatagridCellContextMenu"
                                                         HeaderCellRender="@(args => args.Attributes.Add("style", $"background-color: rgba(58, 71, 77)"))"
                                                         CellRender="@OnCellRender" Value="@SelectedNgVatLieu" ValueChanged="@((args) => OnDatagridSelectChanged(args))">
                                             <Columns>
@@ -225,25 +241,6 @@
                                                         }
 
                                                     }
-
-                                                    <RadzenDataGridColumn Width="contain" TItem="NguyenVatLieu" Title="Nhapkho" 
-                                                                          Property="Nhapkho" TextAlign="TextAlign.Center">
-                                                        <HeaderTemplate>
-                                                            <span style="font-weight: 600; font-size: 15px; color: white"></span>
-                                                        </HeaderTemplate>
-                                                        <Template Context="nvl">
-
-                                                        </Template>
-                                                    </RadzenDataGridColumn>
-                                                    <RadzenDataGridColumn Width="contain" TItem="NguyenVatLieu" Title="Xuatkho"
-                                                                          Property="Xuatkho" TextAlign="TextAlign.Center">
-                                                        <HeaderTemplate>
-                                                            <span style="font-weight: 600; font-size: 15px; color: white"></span>
-                                                        </HeaderTemplate>
-                                                        <Template Context="nvl">
-
-                                                        </Template>
-                                                    </RadzenDataGridColumn>
 
                                                     <RadzenDataGridColumn Width="60px" TItem="NguyenVatLieu" Title="#ID" Frozen="true"
                                                                           Property="#ID" TextAlign="TextAlign.Center">
@@ -387,9 +384,9 @@
                                                                         </RadzenStack>
                                                                         <RadzenStack Visible="@isEditNVLDetail" Gap="5" Style="width: 15%; height: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                                             <RadzenButton Click="@(() => OpendialogRenameThongTinNVL(nvldetail))" Icon="edit" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Đổi tên trường thông tin"))"
-                                                                                          ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Style="border-radius: 5px; --rz-icon-size: 18px; background-color: black" />
+                                                                                          ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 18px;" />
                                                                             <RadzenButton Click="@(() => OpendialogDeleteThongTinNVL(nvldetail))" Icon="delete" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Xóa trường thông tin"))"
-                                                                                          ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Style="border-radius: 5px; --rz-icon-size: 18px; background-color: black" />
+                                                                                          ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 18px;" />
                                                                         </RadzenStack>
                                                                     </RadzenStack>
                                                                 }
@@ -403,9 +400,9 @@
                                                               Icon="add" Text="Thông tin khác" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat"
                                                               Click="@(() => OnOpenDialogAddNewNVLDetail())" />
                                                 <RadzenButton Style="width: contain; min-width: 120px; height: contain;" Click="@(() => EnableEditNVLDetail(SelectedNgVatLieu?.FirstOrDefault()?.NVLID.Value))" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Thêm/xóa/sửa thông tin"))"
-                                                              Icon="@((isEditNVLDetail)? "clear" : "edit")" Text="@((isEditNVLDetail)? "Hủy" : "Chỉnh sửa")" ButtonStyle="@((isEditNVLDetail)? ButtonStyle.Primary : ButtonStyle.Primary)" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" />
+                                                              Icon="@((isEditNVLDetail)? "clear" : "edit")" Text="@((isEditNVLDetail)? "Hủy" : "Chỉnh sửa")" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" />
                                                 <RadzenButton Visible="@(isEditNVLDetail)" Style="width: contain; height: contain;"
-                                                              Icon="save" Text="Lưu thay đổi" ButtonStyle="ButtonStyle.Success" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat"
+                                                              Icon="save" Text="Lưu thay đổi" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Size="ButtonSize.Small" Variant="Variant.Flat"
                                                               Click=@(() => OnUpdateThongTinNguyenVatLieu(SelectedNgVatLieu))
                                                               BusyText="Saving ..." IsBusy=@isSavingNVLInfors />
                                             </RadzenStack>
@@ -444,6 +441,8 @@
     private string pagingSummaryFormat = "Displaying page {0} of {1} <b>(total {2} records)</b>";
     private string allLoainvlFormat = "Tất cả";
     private bool isEditNVLDetail = false;
+
+    private List<NguyenVatLieu> DSNvlNhapXuatKho = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -712,6 +711,13 @@
         }
     }
 
+    // Nhap/Xuat kho dialog
+    private async Task OnOpenDialogNhapXuatKho()
+    {
+        await DialogService.OpenAsync<DialogNhap_Xuat_Kho>(null, new Dictionary<string, object>() { { "DSNVLNhapXuatKho", DSNvlNhapXuatKho } },
+        new DialogOptions() { ShowTitle = false, Width = "70%", Height = "90%", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
+    }
+
     // Datagrid selected changed event
     private void OnDatagridSelectChanged(IList<NguyenVatLieu> selectedNgvatlieu)
     {
@@ -734,11 +740,61 @@
         }
     }
 
+    // Add nvl vao danh sach sp nhap kho
+
+
     // Tooltip
     void ShowToolTip(ElementReference elementReference, TooltipPosition position, string content)
     {
-        TooltipOptions options = new TooltipOptions() { Position = position, Delay = 500, Style = "background-color: var(--rz-primary-dark);" };
+        TooltipOptions options = new TooltipOptions() { Position = position, Delay = 500, Style = "background-color: black" };
 
         TooltipService.Open(elementReference, content, options);
+    }
+
+    // ContextMenu
+    void OnDatagridCellContextMenu(DataGridCellMouseEventArgs<NguyenVatLieu> args)
+    {
+        SelectedNgVatLieu = new List<NguyenVatLieu>() { args.Data };
+
+        var fistItemSelectdNVL = SelectedNgVatLieu.FirstOrDefault();
+
+
+        if (fistItemSelectdNVL != null)
+        {
+            // Save selected NVLid into static variable
+            Common.SelectedNVLid = fistItemSelectdNVL.NVLID.Value;
+
+            var item = DSNvlNhapXuatKho.FirstOrDefault(nvl => nvl.NVLID.Value?.ToString() == fistItemSelectdNVL?.NVLID.Value?.ToString());
+
+            if (item != null)
+            {
+                ContextMenuService.Open(args,
+                new List<ContextMenuItem> { new ContextMenuItem() { Text = "Đã có trong danh sách nhập/xuất kho", Value = 1, Icon = "warning" } }, (e) => { });
+
+            }
+            else
+            {
+                ContextMenuService.Open(args,
+                new List<ContextMenuItem>{ new ContextMenuItem(){ Text = "Thêm vào danh sách nhập kho", Value = 1, Icon = "add" },
+                                            new ContextMenuItem(){ Text = "Thêm vào danh sách xuất kho", Value = 2, Icon = "add" }},
+                                            (e) =>
+                                            {
+                                                if (e.Value.Equals(1))
+                                                {
+                                                    // Them nvl vao ds nhap kho
+                                                    DSNvlNhapXuatKho.Add(fistItemSelectdNVL);
+                                                }
+                                                else if (e.Value.Equals(2))
+                                                {
+                                                    // Them nvl vao ds xuat kho
+                                                    DSNvlNhapXuatKho.Add(fistItemSelectdNVL);
+                                                }
+
+                                                StateHasChanged();
+                                                ContextMenuService.Close();
+                                            });
+            }
+        }
+
     }
 }

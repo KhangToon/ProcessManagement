@@ -251,7 +251,6 @@ namespace ProcessManagement.Commons
         public const string GiaTri = "Gía trị";
 
 
-
         // Socket 
         public const string socketEndKey = "<END>";
         public const string CMDTYPE = "CMDTYPE";
@@ -280,6 +279,13 @@ namespace ProcessManagement.Commons
 
         // NVL management static variable
         public static object? SelectedNVLid;
+
+        public static class Tentruyxuat
+        {
+            public const string VitriKe = "vitrike";
+            public const string VitriHang = "vitrihang";
+            public const string VitriCot = "vitricot";
+        }
 
         public static void RaiseClickSaveEvent()
         {

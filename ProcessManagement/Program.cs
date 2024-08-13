@@ -42,6 +42,7 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddScoped<DialogService>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<TooltipService>();
+builder.Services.AddScoped<ContextMenuService>();
 
 // Authentication
 builder.Services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStateProvider>();
