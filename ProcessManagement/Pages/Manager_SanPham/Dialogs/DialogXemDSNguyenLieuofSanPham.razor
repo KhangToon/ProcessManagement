@@ -47,7 +47,7 @@
                     foreach (var nvlofSP in Sanpham.DanhSachNVLs)
                     {
                         int nvlid = int.TryParse(nvlofSP.NVLID.Value?.ToString(), out int id) ? id : 0;
-                        var nguyenvatlieu = SQLServerServices.GetNguyenVatLieubyID(nvlid);
+                        var nguyenvatlieu = SQLServerServices.GetNguyenVatLieuByID(nvlid);
 
                         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: contain; width: 100%; border-bottom: var(--rz-grid-cell-border);">
                             <RadzenStack Style="width: 5%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
@@ -127,13 +127,13 @@
 
         if (id != 0)
         {
-            NguyenVatLieu nguyenVatLieu = SQLServerServices.GetNguyenVatLieubyID(id);
+            NguyenVatLieu nguyenVatLieu = SQLServerServices.GetNguyenVatLieuByID(id);
 
-            int tonkhonvl = int.TryParse(nguyenVatLieu.TonKhoHienTai.Value?.ToString(), out int tonkho) ? tonkho : 0;
+            int tonkhonvl = nguyenVatLieu.TonKho;
 
-            var donvitinh = nguyenVatLieu.DSNguyenVatLieuDetails.FirstOrDefault(dtail => dtail.NVLDetailItems?.TenTruyXuat.Value?.ToString()?.Trim() == Common.TTX_Donvitinh);
+            var donvitinh = nguyenVatLieu.DonViTinh.Value?.ToString();
 
-            return $"{tonkhonvl} ({donvitinh?.GiaTri.Value?.ToString() ?? string.Empty})";
+            return $"{tonkhonvl} ({donvitinh})";
         }
         else return string.Empty;
     }

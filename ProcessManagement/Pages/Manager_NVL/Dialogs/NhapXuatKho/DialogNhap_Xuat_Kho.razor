@@ -12,11 +12,12 @@
 
 <RadzenCard Variant="Variant.Filled" Style="height: 100%; width: 100%; padding: 10px;">
     <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style=" height: 100%; width: 100%; padding: 0px; padding-bottom: 10px " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+        <!--Header Phieu Nhap Kho-->
         <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
             <RadzenStack Gap="5px" Style="height: contain; width: contain; padding: 0px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
                 <RadzenStack Gap="5px" Style="height: contain; width: contain; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
                     <RadzenText Text="@($"Mã phiếu:")" Style="font-weight: 600; font-size: 15px; font-style: italic;"></RadzenText>
-                    <RadzenText Text="@($"#17498")" Style="font-weight: 600; font-size: 15px; font-style: italic; color: black;"></RadzenText>
+                    <RadzenText Text="@($"{PNK.MaPhieuNK?.Value?.ToString()}")" Style="font-weight: 600; font-size: 15px; font-style: italic; color: black;"></RadzenText>
                 </RadzenStack>
                 <RadzenStack Gap="5px" Style="height: contain; width: contain; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
                     <RadzenText Text="@($"Người lập phiếu:")" Style="font-weight: 600; font-size: 15px; font-style: italic;"></RadzenText>
@@ -24,7 +25,7 @@
                 </RadzenStack>
             </RadzenStack>
             <RadzenStack Gap="20px" Style="height: contain; width: contain; padding: 10px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                <RadzenText Text="Phiếu nhập kho nguyên vật liệu" Style="color: black; font-weight: 600; font-size: 20px"></RadzenText>
+                <RadzenText Text="PHIẾU NHẬP KHO NGUYÊN VẬT LIỆU" Style="color: black; font-weight: 600; font-size: 20px"></RadzenText>
             </RadzenStack>
             <RadzenStack Gap="5px" Style="height: contain; width: contain; padding: 0px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
                 <RadzenStack Gap="5px" Style="height: contain; width: contain; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
@@ -36,32 +37,18 @@
                     <RadzenText Text="@($"Nhập kho")" Style="font-weight: 600; font-size: 15px; font-style: italic; color: black;"></RadzenText>
                 </RadzenStack>
             </RadzenStack>
-            @*             <RadzenStack Gap="20px" Style="height: contain; width: contain; border-left: var(--rz-grid-cell-border); border-radius: 10px; background-color: var(--rz-primary-lighter); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-            <RadzenRadioButtonList Value=@modeCode TValue="int" ValueChanged=@(args => OnModeSelectChanged(args))>
-            <Items>
-            <RadzenRadioButtonListItem Text="@NK" Value="0" />
-            <RadzenRadioButtonListItem Text="@XK" Value="1" />
-            </Items>
-            </RadzenRadioButtonList>
-            </RadzenStack> *@
         </RadzenStack>
-        @*         @{
-        var vitrike = nvl.DSNguyenVatLieuDetails.FirstOrDefault(i => i.NVLDetailItems?.TenTruyXuat.Value?.ToString()?.Trim() == Common.Tentruyxuat.VitriKe)?.GiaTri.Value?.ToString() ?? string.Empty;
-        var vitrihang = nvl.DSNguyenVatLieuDetails.FirstOrDefault(i => i.NVLDetailItems?.TenTruyXuat.Value?.ToString()?.Trim() == Common.Tentruyxuat.VitriHang)?.GiaTri.Value?.ToString() ?? string.Empty;
-        var vitricot = nvl.DSNguyenVatLieuDetails.FirstOrDefault(i => i.NVLDetailItems?.TenTruyXuat.Value?.ToString()?.Trim() == Common.Tentruyxuat.VitriCot)?.GiaTri.Value?.ToString() ?? string.Empty;
-        } *@
+
+        <!--Body Phieu Nhap Kho-->
         <RadzenRow class="rowbackground-style" Gap="10px" Style="height: 100%; width: 100%; padding-top: 10px; border-radius: 0; overflow-y: auto; border-top: var(--rz-grid-cell-border);">
-            <RadzenColumn Size="12" SizeMD="7" Style="height: 100%; width: 100%; border-right: var(--rz-grid-cell-border); padding-right: 10px">
-                <!--Table listNVL-->
+            <!--Danh sach san pham nhap kho-->
+            <RadzenColumn Size="12" SizeMD="6" Style="height: 100%; width: 100%; border-right: var(--rz-grid-cell-border); padding-right: 10px">
                 <RadzenStack Gap="5px" Style="height: 100%; width: 100%;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                    <RadzenStack Visible="@(DSNVLNhapXuatKho != null && DSNVLNhapXuatKho.Count > 0)" Gap="10px" Style="height: contain; width: 100%; padding: 0px; padding-left: 0" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                    <RadzenStack Visible="@(PNK.DSNVLofPNKs.Count > 0)" Gap="10px" Style="height: contain; width: 100%; padding: 0px; padding-left: 0" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                         <RadzenText Text="Danh sách nhập kho" Style="font-weight: 600; height: contain; width: contain; font-style: italic; color: darkred"></RadzenText>
-                        <RadzenStack Gap="5px" Style="height: contain; width: contain; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                            <RadzenButton Icon="edit" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Chỉnh sửa danh sách"))"
-                                          ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 18px;" />
-                        </RadzenStack>
                     </RadzenStack>
-                    <RadzenDataGrid class="rz-grid-table-fixed-2" Data="@(DSNVLNhapXuatKho)" TItem="NguyenVatLieu"
+                    <!--Table listNVL-->
+                    <RadzenDataGrid class="rz-grid-table-fixed-2" Data="@(PNK.DSNVLofPNKs)" TItem="NVLofPhieuNhapKho"
                                     EmptyText="Danh sách nguyên liệu trống."
                                     ShowColumnTitleAsTooltip="true" ShowCellDataAsTooltip="true"
                                     AllowFiltering="false" FilterMode="FilterMode.Simple"
@@ -69,157 +56,378 @@
                                     ShowPagingSummary="true" PagerPosition="PagerPosition.Bottom" Style="padding-right: 5px"
                                     GridLines="DataGridGridLines.Both" PageSize="10" Density="Density.Compact"
                                     HeaderCellRender="@(args => args.Attributes.Add("style", $"background-color: rgba(58, 71, 77)"))"
-                                    CellRender="@OnCellRender" Value="@SelectedNgVatLieu" ValueChanged="@((args) => OnDatagridSelectChanged(args))">
+                                    CellRender="@OnCellRender" Value="@DatagridSelectedNVLofPNK" ValueChanged="@((args) => OnDatagridSelectChanged(args))">
                         <Columns>
-                            @if (DSNVLNhapXuatKho != null && DSNVLNhapXuatKho.Count > 0)
-                            {
-                                List<Propertyy> columns = DSNVLNhapXuatKho.FirstOrDefault()?.GetPropertiesValues() ?? new();
+                            @{
+                                List<Propertyy> columns = PNK.DSNVLofPNKs.FirstOrDefault()?.GetPropertiesValues() ?? new();
 
+                                <!--Column ID-->
                                 <RadzenDataGridColumn Width="50px" Frozen="true" FrozenPosition="FrozenColumnPosition.Left" Filterable="false"
-                                                      TItem="NguyenVatLieu" Title="#"
+                                                      TItem="NVLofPhieuNhapKho" Title="#"
                                                       Property="STT" TextAlign="TextAlign.Center">
                                     <HeaderTemplate>
                                         <span style="font-weight: 600; font-size: 15px; color: white">STT</span>
                                     </HeaderTemplate>
                                     <Template Context="nvl">
-                                        <span style="font-weight: bold;">@(DSNVLNhapXuatKho.IndexOf(nvl) + 1)</span>
+                                        <span style="font-weight: bold;">@(PNK.DSNVLofPNKs.IndexOf(nvl) + 1)</span>
                                     </Template>
                                 </RadzenDataGridColumn>
 
-                                foreach (var column in columns.Where(cl => cl.DispDatagrid == true).ToList())
-                                {
-                                    string colName = column.DBName ?? string.Empty;
-                                    string displayName = column.DisplayName ?? string.Empty;
-
-                                    if (colName == Common.TenNVL)
-                                    {
-                                        <RadzenDataGridColumn Width="contain" TItem="NguyenVatLieu" Title="Tên nguyên vật liệu"
-                                                              Property="tennvl" TextAlign="TextAlign.Center">
-                                            <HeaderTemplate>
-                                                <span style="font-weight: 600; font-size: 15px; color: white">Tên NVL</span>
-                                            </HeaderTemplate>
-                                            <Template Context="nvl">
-                                                <span style="color: black; font-weight: bold;">@($"{nvl?.TenNVL.Value?.ToString()}")</span>
-                                            </Template>
-                                        </RadzenDataGridColumn>
-                                    }
-                                }
-
-                                <RadzenDataGridColumn Width="contain" TItem="NguyenVatLieu" Title="Số lượng" Frozen="false"
-                                                      Property="soluong" TextAlign="TextAlign.Center">
+                                <!--Column TenNVL-->
+                                <RadzenDataGridColumn Width="contain" TItem="NVLofPhieuNhapKho" Title="Tên nguyên vật liệu"
+                                                      Property="tennvl" TextAlign="TextAlign.Center">
                                     <HeaderTemplate>
-                                        <span style="font-weight: 600; font-size: 15px; color: white">Số lượng</span>
+                                        <span style="font-weight: 600; font-size: 15px; color: white">Tên NVL</span>
                                     </HeaderTemplate>
                                     <Template Context="nvl">
-                                        <RadzenNumeric TValue="int" Min="0" Max="999999"
+                                        <span style="color: black; font-weight: bold;">@($"{nvl?.TargetNgLieu.TenNVL.Value?.ToString()}")</span>
+                                    </Template>
+                                </RadzenDataGridColumn>
+
+                                <!--Column tong so luong-->
+                                <RadzenDataGridColumn Width="contain" TItem="NVLofPhieuNhapKho" Title="Tổng số lượng nhập kho" Frozen="false"
+                                                      Property="soluong" TextAlign="TextAlign.Center">
+                                    <HeaderTemplate>
+                                        <span style="font-weight: 600; font-size: 15px; color: white">Tổng nhập kho</span>
+                                    </HeaderTemplate>
+                                    <Template Context="nvl">
+                                        <RadzenNumeric Placeholder="@($"*Nhập số lượng")" TValue="int"
+                                                       Value="@int.Parse(nvl.NVLNKSoLuongAll.Value?.ToString()?? "0")" Min="0" Max="999999"
+                                                       ValueChanged="@((args) => { nvl.NVLNKSoLuongAll.Value = args; })"
                                                        Style="font-size: 16px; height: contain; border-width: 1px; width: 100%" />
                                     </Template>
                                 </RadzenDataGridColumn>
 
-                                <RadzenDataGridColumn Width="contain" TItem="NguyenVatLieu" Title="Trạng thái" Frozen="false"
+                                <!--Column trang thai nhap kho-->
+                                <RadzenDataGridColumn Width="contain" TItem="NVLofPhieuNhapKho" Title="Trạng thái" Frozen="false"
                                                       Property="trangthai" TextAlign="TextAlign.Center">
                                     <HeaderTemplate>
                                         <span style="font-weight: 600; font-size: 15px; color: white">Trạng thái</span>
                                     </HeaderTemplate>
                                     <Template Context="nvl">
-                                        <RadzenStack Style="height: contain; width: 100%; border-radius: 5px; background-color: var(--rz-warning-light); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                            <RadzenText Text="Chưa nhập kho" Style="font-weight: 600; font-size: 15px"></RadzenText>
-                                        </RadzenStack>
+                                        @{
+                                            if (nvl.IsNhapKhoDone)
+                                            {
+                                                <RadzenButton Icon="check" Text="Hoàn thành" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Light" Variant="Variant.Flat"
+                                                              Style="border-radius: 5px; --rz-icon-size: 18px; height: 30px; width: 100%; cursor: default;" />
+                                            }
+                                            else
+                                            {
+                                                <RadzenButton Text="Chưa hoàn thành" ButtonStyle="ButtonStyle.Warning" Size="ButtonSize.Small" Shade="Shade.Light" Variant="Variant.Flat"
+                                                              Style="border-radius: 5px; --rz-icon-size: 18px; height: 30px; width: 100%; cursor: default;  color: rgba(58, 71, 77); font-weight: 600" />
+                                            }
+                                        }
+
                                     </Template>
                                 </RadzenDataGridColumn>
 
-                                <RadzenDataGridColumn Width="60px" TItem="NguyenVatLieu" Title="clear" Frozen="false"
+                                <!--Column remove from list NVLNK-->
+                                <RadzenDataGridColumn Width="60px" TItem="NVLofPhieuNhapKho" Title="clear" Frozen="false"
                                                       Property="clear" TextAlign="TextAlign.Center">
                                     <HeaderTemplate>
                                         <span style="font-weight: 600; font-size: 15px; color: white"></span>
                                     </HeaderTemplate>
                                     <Template Context="nvl">
-                                        <RadzenButton Icon="delete" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Xóa nguyên liệu khỏi danh sách"))"
+                                        <RadzenButton Icon="delete" Click="(() => { OnRemoveNVLofPNK(nvl); })"
+                                                      MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Xóa nguyên liệu khỏi danh sách"))"
                                                       ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Darker" Style="border-radius: 5px; --rz-icon-size: 18px;" />
                                     </Template>
                                 </RadzenDataGridColumn>
                             }
                         </Columns>
                     </RadzenDataGrid>
+                    <!--Ngay nhap kho-->
+                    <RadzenStack Gap="0" Style="height: contain; width: 100%; padding-left: 10px; padding-bottom: 5px; padding-top: 5px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                        <RadzenStack Style="width: 35%;">
+                            <RadzenText Text="Ngày nhập kho" Style="font-size: 16px; font-weight: 600; color: black; height: contain; width: 100% "></RadzenText>
+                        </RadzenStack>
+                        <RadzenStack Style="width: 55%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            @{
+                                DateTime createdday = DateTime.TryParse(PNK.NgayLapPNK.Value?.ToString(), out DateTime nnk) ? nnk : DateTime.Now;
+                                createdday = createdday.Date.Add(DateTime.Now.TimeOfDay);
+
+                                <RadzenDatePicker TValue="DateTime"
+                                                  ValueChanged="@((args) =>
+                                                                {
+                                                                    args = args.Date.Add(DateTime.Now.TimeOfDay); PNK.NgayLapPNK.Value = args;
+                                                                })"
+                                                  Value="createdday"
+                                                  ShowTime="false" HourFormat="12" DateFormat="@Common.DayTimeFormatnoTime" AllowInput="false"
+                                                  Style="width: 100%;  font-size: 16px"></RadzenDatePicker>
+                            }
+                        </RadzenStack>
+                    </RadzenStack>
+                    <!--Nguoi nhap kho-->
+                    <RadzenStack Gap="0" Style="height: contain; width: 100%; padding-left: 10px; padding-bottom: 5px; padding-top: 5px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                        <RadzenStack Style="width: 35%;">
+                            <RadzenText Text="Người nhập kho" Style="font-size: 16px; font-weight: 600; color: black; height: contain; width: 100% "></RadzenText>
+                        </RadzenStack>
+                        <RadzenStack Style="width: 55%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenTextBox Placeholder="*Nhập tên người nhập kho"
+                                           Value="@PNK.NguoiLapPNK.Value?.ToString()" ValueChanged="@((args) => { PNK.NguoiLapPNK.Value = args; } )"
+                                           Style="font-size: 16px; height: contain; border-width: 1px; width: 100% "></RadzenTextBox>
+                        </RadzenStack>
+                    </RadzenStack>
+                    <!--Phieu nhap kho ghi chu-->
+                    <RadzenStack Gap="0" Style="height: contain; width: 100%; padding-left: 10px; padding-bottom: 5px; padding-top: 5px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                        <RadzenStack Style="width: 35%;">
+                            <RadzenText Text="Ghi chú" Style="font-size: 16px; font-weight: 600; color: black; height: contain; width: 100% "></RadzenText>
+                        </RadzenStack>
+                        <RadzenStack Style="width: 55%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenTextBox Placeholder="*Nhập ghi chú"
+                                           Value="@PNK.GhiChuPNK.Value?.ToString()" ValueChanged="@((args) => { PNK.GhiChuPNK.Value = args; } )"
+                                           Style="font-size: 16px; height: contain; border-width: 1px; width: 100% "></RadzenTextBox>
+                        </RadzenStack>
+                    </RadzenStack>
                 </RadzenStack>
             </RadzenColumn>
 
-            <RadzenColumn Size="12" SizeMD="5" Style="height: 100%; width: 100%;">
-                <RadzenRow class="rowbackground-style" Gap="10px" Style="height: 100%; width: 100%; border-radius: 0; ">
+            <!--Vi tri luu tru-->
+            <RadzenColumn Size="12" SizeMD="6" Style="height: 100%; width: 100%;">
+                <RadzenRow Visible="@(SelectedNVLofPNK.NVLID.Value != null)" class="rowbackground-style" Gap="10px" Style="height: 100%; width: 100%; border-radius: 0; overflow: scroll">
                     <RadzenColumn Size="12" SizeMD="12" Style="height: contain; width: 100%;">
-                        <RadzenCard Variant="Variant.Text" Style="height: 100%; width: 100%; padding: 10px; padding-right: 5px; border-radius: 10px; margin-top: 20px;">
-                            <RadzenStack Visible="@(DSNVLNhapXuatKho != null && DSNVLNhapXuatKho.Count > 0)" Gap="10px" Style="height: contain; width: 100%; padding: 0px; padding-left: 0" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                <RadzenText Text="Thông tin chi tiết" Style="font-weight: 600; font-size: 16px; height: contain; width: contain; font-style: italic;"></RadzenText>
+                        <RadzenStack Gap="0" Style="height: 100%; width: 100%; padding: 5px; padding-top: 10px; border-radius: 10px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                            <RadzenStack Visible="@(PNK.DSNVLofPNKs.Count > 0)" Gap="10px" Style="height: contain; width: 100%; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                <RadzenText Text="Thông tin chi tiết" Style="color: darkred; font-weight: 600; font-size: 16px; height: contain; width: contain; font-style: italic;"></RadzenText>
+                                <RadzenText Text="@($"(nguyên liệu {SelectedNVLofPNK.TargetNgLieu.TenNVL.Value?.ToString()})")" Style="color: black; font-weight: 600; font-size: 16px; height: contain; width: contain; font-style: italic;"></RadzenText>
                             </RadzenStack>
-                            <RadzenStack Style="height: 100%; width: 100%; padding: 5px; padding-right: 0; overflow-y: scroll" Gap="5px" Orientation="Orientation.Vertical">
-                                <RadzenStack Gap="0" Style="height: contain; width: 100%; padding-bottom: 5px; padding-top: 5px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                    <RadzenStack Style="width: 35%;">
-                                        <RadzenText Text="Vị trí kệ" Style="font-size: 14px; font-weight: 600; color: black; height: contain; width: 100% "></RadzenText>
-                                    </RadzenStack>
-                                    <RadzenStack Style="width: 55%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                        <RadzenText Text="Kệ: #1" Style="font-size: 16px; height: contain;"></RadzenText>
-                                    </RadzenStack>
+                            <RadzenStack Style="height: 100%; width: 100%; padding: 5px; padding-top: 5px; padding-right: 0;" Gap="5px" Orientation="Orientation.Vertical">
+                                <!--Display list VitriLuutri-->
+                                <RadzenStack Style="width: 100%; height: contain; padding: 0" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                    <RadzenCard Variant="Variant.Outlined" Style="height: contain; width: 100%; padding: 10px; margin-bottom: 10px">
+                                        <RadzenStack Gap="5px" Orientation="Orientation.Vertical" Style=" height: contain; width: 100%; padding: 0px;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                            <RadzenStack Gap="20px" Style="height: contain; width: 100%; padding: 5px; padding-right: 10px; padding-left: 10px; background-color: var(--rz-primary-darker)" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                                <RadzenText Text="Vị trí hiện tại trong kho" Style="color: white; font-weight: 500; font-size: 16px"></RadzenText>
+                                            </RadzenStack>
+                                            <RadzenStack Gap="5px" Orientation="Orientation.Vertical" Style=" height: contain; width: 100%; max-height: 350px; padding-right: 0;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: contain; padding: 5px; padding-right: 0px;">
+                                                    <RadzenStack Style="width: 100%; height: 100%; " Gap="10px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                        <RadzenStack Style="width: 5%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                            <RadzenText Text="#" Style="color: black; font-weight: 500; font-size: 14px"></RadzenText>
+                                                        </RadzenStack>
+                                                        <RadzenStack Style="width: 25%; height: contain; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                            <RadzenText Text="Mã vị trí" Style="color: black; font-weight: 500; font-size: 16px"></RadzenText>
+                                                        </RadzenStack>
+                                                        <RadzenStack Style="width: 15%; height: contain; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                            <RadzenText Text="Hiện có" Style="color: black; font-weight: 500; font-size: 16px"></RadzenText>
+                                                        </RadzenStack>
+                                                        <RadzenStack Style="width: 35%; height: contain; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                            <RadzenText Text="Trạng thái vị trí" Style="color: black; font-weight: 500; font-size: 16px"></RadzenText>
+                                                        </RadzenStack>
+                                                        <RadzenStack Style="width: 10%; height: contain; " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+
+                                                        </RadzenStack>
+                                                    </RadzenStack>
+                                                </RadzenCard>
+                                                @{
+                                                    var dsvitri = SelectedNVLofPNK.TargetNgLieu.DSViTri;
+
+                                                    if (dsvitri != null && dsvitri.Count > 0)
+                                                    {
+                                                        foreach (var vitri in dsvitri)
+                                                        {
+                                                            int SLnvlhiencoTaivitri = int.TryParse(vitri.VTNVLSoLuong.Value?.ToString(), out int slhc) ? slhc : 0;
+                                                            int slcontrong = vitri.VitriInfor.SLConTrong;
+                                                            int succhuavitri = int.TryParse(vitri.VitriInfor.VTSucChua.Value?.ToString(), out int scvt) ? scvt : 0;
+
+
+                                                            <RadzenCard Variant="Variant.Outlined" Style="width: 100%; height: contain; padding: 5px; padding-right: 0px; background-color: white">
+                                                                <RadzenStack Style="width: 100%; height: 100%" Gap="10px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                                    <RadzenStack Style="width: 5%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                        <RadzenText Text="@($"{(dsvitri.IndexOf(vitri) + 1).ToString()}")" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                                                                    </RadzenStack>
+                                                                    <RadzenStack Style="width: 25%; height: contain; border-left: var(--rz-grid-cell-border); border-right: var(--rz-grid-cell-border); padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                        <RadzenStack Style="height: 30px; width: 100%; border-radius: 5px; background-color: var(--rz-secondary-lighter); padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                            <RadzenText Text="@($"{vitri.VitriInfor.MaViTri.Value?.ToString()}")" Style="color: rgba(58, 71, 77); font-weight: 600; font-size: 15px"></RadzenText>
+                                                                        </RadzenStack>
+                                                                    </RadzenStack>
+                                                                    <RadzenStack Style="width: 15%; height: contain; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                        <RadzenText Text="@($"{SLnvlhiencoTaivitri.ToString()} ({SelectedNVLofPNK.TargetNgLieu.DonViTinh.Value?.ToString()?.Trim()})")" Style="font-weight: 600; font-size: 15px"></RadzenText>
+                                                                    </RadzenStack>
+                                                                    <RadzenStack Style="width: 35%; height: contain; border-left: var(--rz-grid-cell-border); border-right: var(--rz-grid-cell-border); padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                        <RadzenStack Visible="@((slcontrong > 0))" Style="height: 30px; width: 100%; border-radius: 5px; background-color: var(--rz-success-lighter); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                            <RadzenText Text="@($"Còn trống ({slcontrong}/{succhuavitri})")" Style="color: darkgreen; font-weight: 600; font-size: 15px"></RadzenText>
+                                                                        </RadzenStack>
+                                                                        <RadzenStack Visible="@((slcontrong == 0))" Style="height: 30px; width: 100%; border-radius: 5px; background-color: var(--rz-secondary-light); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                            <RadzenText Text="@($"Đầy ({succhuavitri}/{succhuavitri})")" Style="color: darkred; font-weight: 600; font-size: 15px"></RadzenText>
+                                                                        </RadzenStack>
+                                                                    </RadzenStack>
+                                                                    <RadzenStack Style="width: 10%; height: contain; " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                        <RadzenText Text="Chi tiết" Style="color: Highlight; font-weight: 600; font-size: 15px; font-style: italic; text-decoration: underline; cursor: pointer"></RadzenText>
+                                                                    </RadzenStack>
+                                                                </RadzenStack>
+                                                            </RadzenCard>
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        <RadzenStack Style="width: 100%; height: contain; " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                            <RadzenText Text="Sản phẩm chưa được nhập kho" Style="font-size: 16px; font-weight: 500; height: contain; color: red"></RadzenText>
+                                                        </RadzenStack>
+                                                    }
+                                                }
+                                            </RadzenStack>
+                                        </RadzenStack>
+                                    </RadzenCard>
                                 </RadzenStack>
 
-                                <RadzenStack Gap="0" Style="height: contain; width: 100%; padding-bottom: 5px; padding-top: 5px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                    <RadzenStack Style="width: 35%;">
-                                        <RadzenText Text="Vị trí hàng" Style="font-size: 14px; font-weight: 600; color: black; height: contain; width: 100% "></RadzenText>
-                                    </RadzenStack>
-                                    <RadzenStack Style="width: 55%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                        <RadzenText Text="Hàng: #2" Style="font-size: 16px; height: contain;"></RadzenText>
-                                    </RadzenStack>
+                                <!--Danh sach lenh nhap kho-->
+                                <RadzenStack Style="width: 100%; height: contain; padding: 0" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                    <RadzenCard Variant="Variant.Outlined" Style="height: contain; width: 100%; padding: 10px; margin-top: 10px; margin-bottom: 10px">
+                                        <RadzenStack Gap="5px" Orientation="Orientation.Vertical" Style=" height: contain; width: 100%; padding: 0px;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                            <RadzenStack Gap="20px" Style="height: contain; width: 100%; padding: 5px; padding-right: 10px; padding-left: 10px; background-color: var(--rz-primary-darker)" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                                <RadzenText Text="Chỉ định vị trí nhập kho" Style="color: white; font-weight: 500; font-size: 16px"></RadzenText>
+
+                                                @{
+                                                    // Tong so luong can nhap kho
+                                                    int slallnhapkho = int.TryParse(SelectedNVLofPNK.NVLNKSoLuongAll.Value?.ToString(), out int slall) ? slall : 0;
+                                                    // Tinh tong so luong nhap kho sau moi lan tao lenh moi
+                                                    int slallnhapkhodatao = 0;
+                                                    foreach (var lnk in SelectedNVLofPNK.DSLenhNKs)
+                                                    {
+                                                        int lnkslnhap = int.TryParse(lnk.LNKSoLuong.Value?.ToString(), out int lnksln) ? lnksln : 0;
+                                                        slallnhapkhodatao += lnkslnhap;
+                                                    }
+                                                }
+                                                <RadzenButton Text="@($"Đã chỉ định {slallnhapkhodatao}/{slallnhapkho}")" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Light" Variant="Variant.Flat"
+                                                              Style="border-radius: 5px; height: 30px; width: contain; cursor: default;" />
+                                                <RadzenButton Visible="@(!isAddLocation)" Style="width: contain; height: 100%; background-color: white; color: black"
+                                                              Click="(() => ButtonAddVitriluukho())"
+                                                              Icon="add" Text="Thêm vị trí" ButtonStyle="ButtonStyle.Secondary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" />
+                                            </RadzenStack>
+
+                                            <!--Them vi tri luu kho-->
+                                            <RadzenCard Visible="@isAddLocation" Variant="Variant.Outlined" Style="width: 100%; height: contain; padding: 5px; padding-right: 0px; background-color: white">
+                                                <RadzenStack Gap="3px" Orientation="Orientation.Vertical" Style=" height: contain; width: 100%; padding-right: 0;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                    <RadzenStack Style="width: 100%; height: 100%" Gap="10px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                        <RadzenStack Style="width: 25%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                            <RadzenText Text="Chọn vị trí" Style="font-weight: 500; font-size: 16px"></RadzenText>
+                                                        </RadzenStack>
+                                                        <RadzenStack Style="width: 25%; height: contain; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                            <RadzenText Text="Số lượng nhập" Style="font-weight: 500; font-size: 16px"></RadzenText>
+                                                        </RadzenStack>
+                                                        <RadzenStack Style="width: 40%; height: contain; " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                            <RadzenText Text="Xác nhận thêm" Style="font-weight: 500; font-size: 16px"></RadzenText>
+                                                        </RadzenStack>
+                                                    </RadzenStack>
+                                                    <RadzenStack Style="width: 100%; height: 100%" Gap="10px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                        <RadzenStack Style="width: 25%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                            <RadzenDropDown TValue="VitriLuuTru" ValueChanged="@((args) => temporaryLenhNK.TagertVitri = args)"
+                                                                            Data=@(DSVitris) Style="border-radius: 5px; border-width: 1px; font-size: 14px; width: contain ">
+                                                                <Template>
+                                                                    @context.MaViTri.Value
+                                                                </Template>
+                                                            </RadzenDropDown>
+                                                        </RadzenStack>
+                                                        <RadzenStack Style="width: 25%; height: contain; border-left: var(--rz-grid-cell-border); border-right: var(--rz-grid-cell-border); padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                            <RadzenNumeric TValue="int"
+                                                                           Value="@int.Parse(temporaryLenhNK.LNKSoLuong.Value?.ToString()?? "0")" Min="0" Max="999999"
+                                                                           ValueChanged="@((args) => { temporaryLenhNK.LNKSoLuong.Value = args; })"
+                                                                           Style="font-size: 16px; height: contain; border-width: 1px; width: 100%" />
+                                                        </RadzenStack>
+                                                        <RadzenStack Style="width: 40%; height: contain; " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                            <!--Button xacnhan add vitri luu kho-->
+                                                            <RadzenButton Click="@(() => OnThemNewLNKintoListLNK())" Icon="save" Text="Thêm vị trí" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
+                                                                          Style="height: contain; width: contain; font-size: 14px;" />
+                                                            <RadzenButton Click="@(() => {temporaryLenhNK = new();isAddLocation = false;})" Icon="cancel" Text="Hủy" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
+                                                                          Style="height: contain; width: contain; font-size: 14px;" />
+                                                        </RadzenStack>
+                                                    </RadzenStack>
+                                                </RadzenStack>
+                                            </RadzenCard>
+                                            <!--Them vi tri luu kho-->
+                                            <!--Hien thi danh sach lenh nhap kho-->
+                                            <RadzenStack Gap="5px" Orientation="Orientation.Vertical" Style=" height: contain; width: 100%; max-height: 350px; padding-right: 0;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: contain; padding: 5px; padding-right: 0px;">
+                                                    <RadzenStack Style="width: 100%; height: 100%; " Gap="10px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                        <RadzenStack Style="width: 5%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                            <RadzenText Text="#" Style="font-weight: 500; font-size: 16px"></RadzenText>
+                                                        </RadzenStack>
+                                                        <RadzenStack Style="width: 20%; height: contain; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                            <RadzenText Text="Mã vị trí" Style="font-weight: 500; font-size: 16px"></RadzenText>
+                                                        </RadzenStack>
+                                                        <RadzenStack Style="width: 25%; height: contain; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                            <RadzenText Text="Số lượng nhập" Style="font-weight: 500; font-size: 16px"></RadzenText>
+                                                        </RadzenStack>
+                                                        <RadzenStack Style="width: 30%; height: contain; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                            <RadzenText Text="Trạng thái" Style=" font-weight: 500; font-size: 16px"></RadzenText>
+                                                        </RadzenStack>
+                                                        <RadzenStack Style="width: 10%; height: contain; " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+
+                                                        </RadzenStack>
+                                                    </RadzenStack>
+                                                </RadzenCard>
+                                                @if (SelectedNVLofPNK.DSLenhNKs.Count > 0)
+                                                {
+                                                    var DSlenhnhapkho = SelectedNVLofPNK.DSLenhNKs;
+
+                                                    @foreach (var lnk in DSlenhnhapkho)
+                                                    {
+                                                        string vitrike = lnk.TagertVitri.ViTriKe.Value?.ToString() ?? string.Empty;
+                                                        string vitrihang = lnk.TagertVitri.ViTriHang.Value?.ToString() ?? string.Empty;
+                                                        string vitricot = lnk.TagertVitri.ViTriCot.Value?.ToString() ?? string.Empty;
+                                                        int slnhapkho = int.TryParse(lnk.LNKSoLuong.Value?.ToString(), out int slnk) ? slnk : 0;
+                                                        var lnkIsdone = int.TryParse(lnk.LNKIsDone.Value?.ToString(), out int lnkd) ? lnkd : -1;
+
+                                                        <RadzenCard Variant="Variant.Outlined" Style="width: 100%; height: contain; padding: 5px; padding-right: 0px; background-color: white">
+                                                            <RadzenStack Style="width: 100%; height: 100%" Gap="10px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                                <RadzenStack Style="width: 5%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                    <RadzenText Text="@($"{(DSlenhnhapkho.IndexOf(lnk) + 1).ToString()}")" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                                                                </RadzenStack>
+                                                                <RadzenStack Style="width: 20%; height: contain; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                    <RadzenText Text="@($"{lnk.TagertVitri.MaViTri.Value?.ToString()}")" Style="color: rgba(58, 71, 77); font-weight: 600; font-size: 16px"></RadzenText>
+                                                                </RadzenStack>
+                                                                <RadzenStack Style="width: 25%; height: contain; border-left: var(--rz-grid-cell-border); border-right: var(--rz-grid-cell-border); padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                    <RadzenText Text="@slnhapkho.ToString()" Style="color: rgba(58, 71, 77); font-weight: 600; font-size: 16px"></RadzenText>
+                                                                </RadzenStack>
+                                                                <RadzenStack Style="width: 30%; height: contain; " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+
+                                                                    @if (lnkIsdone.Equals(1))
+                                                                    {
+                                                                        <RadzenButton Icon="check" Text="Đã nhập" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Light" Variant="Variant.Flat"
+                                                                                      Style="border-radius: 5px; --rz-icon-size: 18px; height: 30px; width: 100%; cursor: default;" />
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <RadzenButton Text="Chưa nhập" ButtonStyle="ButtonStyle.Warning" Size="ButtonSize.Small" Shade="Shade.Light" Variant="Variant.Outlined"
+                                                                                      Style="border-radius: 5px; --rz-icon-size: 18px; height: 30px; width: 100%; cursor: default; background-color: rgb(254,243,220); font-weight: 600" />
+                                                                    }
+                                                                </RadzenStack>
+                                                                <RadzenStack Style="width: 10%; height: contain; " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                    <RadzenButton Icon="delete" Click="(() => { OnRemoveLNKfromDSLenhNKs(lnk); })"
+                                                                                  MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Xóa khỏi danh sách"))"
+                                                                                  ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Darker" Style="border-radius: 5px; --rz-icon-size: 18px;" />
+                                                                </RadzenStack>
+                                                            </RadzenStack>
+                                                        </RadzenCard>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <RadzenStack Style="width: 100%; height: contain; " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                        <RadzenText Text="Chưa chỉ định vị trí lưu kho" Style="font-size: 16px; font-weight: 500; height: contain; color: red"></RadzenText>
+                                                    </RadzenStack>
+                                                }
+                                            </RadzenStack>
+                                            <!--Hien thi danh sach lenh nhap kho-->
+                                        </RadzenStack>
+                                    </RadzenCard>
                                 </RadzenStack>
 
-                                <RadzenStack Gap="0" Style="height: contain; width: 100%; padding-bottom: 5px; padding-top: 5px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                    <RadzenStack Style="width: 35%;">
-                                        <RadzenText Text="Vị trí cột" Style="font-size: 14px; font-weight: 600; color: black; height: contain; width: 100% "></RadzenText>
-                                    </RadzenStack>
-                                    <RadzenStack Style="width: 55%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                        <RadzenText Text="Cột: #3" Style="font-size: 16px; height: contain;"></RadzenText>
-                                    </RadzenStack>
-                                </RadzenStack>
-
-                                <RadzenStack Gap="0" Style="height: contain; width: 100%; padding-bottom: 5px; padding-top: 5px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                    <RadzenStack Style="width: 35%;">
-                                        <RadzenText Text="Ngày nhập kho" Style="font-size: 14px; font-weight: 600; color: black; height: contain; width: 100% "></RadzenText>
-                                    </RadzenStack>
-                                    <RadzenStack Style="width: 55%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                        <RadzenText Text="@(DateTime.Now.Date.ToString("dd/MM/yyyy"))" Style="font-size: 16px; height: contain;"></RadzenText>
-                                    </RadzenStack>
-                                </RadzenStack>
-
-                                <RadzenStack Gap="0" Style="height: contain; width: 100%; padding-bottom: 5px; padding-top: 5px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                    <RadzenStack Style="width: 35%;">
-                                        <RadzenText Text="Người nhập kho" Style="font-size: 14px; font-weight: 600; color: black; height: contain; width: 100% "></RadzenText>
-                                    </RadzenStack>
-                                    <RadzenStack Style="width: 55%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                        <RadzenText Text="Nhân viên A" Style="font-size: 16px; height: contain;"></RadzenText>
-                                    </RadzenStack>
-                                </RadzenStack>
-
-                                <RadzenStack Gap="0" Style="height: contain; width: 100%; padding-bottom: 5px; padding-top: 5px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                    <RadzenStack Style="width: 35%;">
-                                        <RadzenText Text="Ghi chú" Style="font-size: 14px; font-weight: 600; color: black; height: contain; width: 100% "></RadzenText>
-                                    </RadzenStack>
-                                    <RadzenStack Style="width: 55%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                        <RadzenText Text="___" Style="font-size: 16px; height: contain;"></RadzenText>
-                                    </RadzenStack>
-                                </RadzenStack>
                             </RadzenStack>
-                        </RadzenCard>
+                        </RadzenStack>
                     </RadzenColumn>
                     <RadzenColumn Size="12" SizeMD="12" Style="height: contain; width: 100%;">
-                        <RadzenStack Gap="10px" Style="height: contain; width: 100%;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                            <RadzenStack Style="height: 100%; width: 100%; border-radius: 10px; background-color: var(--rz-success-lighter); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                        <RadzenStack Gap="10px" Style="height: 100%; width: 100%;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                            <RadzenStack Style="height: contain; width: 100%; border-radius: 10px; background-color: var(--rz-success-lighter); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                 <RadzenText Text="QUÉT MÃ" Style="color: green; font-weight: 600; font-size: 18px"></RadzenText>
                             </RadzenStack>
-
                             <RadzenStack Gap="5px" Style="height: contain; width: 100%; padding-bottom: 5px; padding-top: 5px; border-top: var(--rz-grid-cell-border)" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                 <RadzenStack Style="width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                     <RadzenText Text="Mã nguyên liệu" Style="font-weight: 600; font-size: 16px; font-style: italic;"></RadzenText>
                                 </RadzenStack>
                                 <RadzenStack Style="width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                    <RadzenTextBox Style="font-size: 16px; height: contain; border-width: 1px; width: 100% "></RadzenTextBox>
+                                    <RadzenTextBox @bind-Value=@scanMaNVL Style="font-size: 16px; height: contain; border-width: 1px; width: 100% "></RadzenTextBox>
                                 </RadzenStack>
                             </RadzenStack>
 
@@ -228,27 +436,29 @@
                                     <RadzenText Text="Mã vị trí" Style="font-weight: 600; font-size: 16px; font-style: italic;"></RadzenText>
                                 </RadzenStack>
                                 <RadzenStack Style="width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                    <RadzenTextBox Style="font-size: 16px; height: contain; border-width: 1px; width: 100% "></RadzenTextBox>
+                                    <RadzenTextBox @bind-Value=@scanmaVitri Style="font-size: 16px; height: contain; border-width: 1px; width: 100% "></RadzenTextBox>
                                 </RadzenStack>
                             </RadzenStack>
 
                             <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding-top: 10px; border-top: var(--rz-grid-cell-border) " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                <RadzenButton Style="width: 100%; max-width: contain" Icon="add" Text="Lưu kho" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Dark" Variant="Variant.Flat" />
+                                <RadzenButton Click="@(() => {QuetMaNhapKhoNguyenVatLieu(PNK.MaPhieuNK.Value?.ToString(), scanMaNVL, scanmaVitri);})" Style="width: 100%; max-width: contain" Icon="add" Text="Lưu kho" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Dark" Variant="Variant.Flat" />
                             </RadzenStack>
                         </RadzenStack>
                     </RadzenColumn>
                 </RadzenRow>
+                <!--Warning not selectedNVLokPNK-->
+                <RadzenStack Visible="@(SelectedNVLofPNK.NVLID.Value == null)" Gap="10px" Style="height: contain; width: 100%; padding: 20px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                    <RadzenText Text="Chọn nguyên liệu trong bảng để chỉ định vị trí lưu kho" Style="color: red; font-weight: 600; font-size: 16px; height: contain; width: contain; font-style: italic;"></RadzenText>
+                </RadzenStack>
             </RadzenColumn>
-            
         </RadzenRow>
 
         <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding-top: 10px; border-top: var(--rz-grid-cell-border) " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
             <RadzenStack Gap="10px" Style="height: 100%; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                <RadzenButton Style="width: 120px;" Icon="check" Text="Lưu phiếu" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Dark" Variant="Variant.Flat" />
-                <RadzenButton Style="width: contain;" Icon="save" Text="Lưu kết quả nhập kho" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Dark" Variant="Variant.Flat" />
+                <RadzenButton Visible=@(!isPNKSaved) Click="@( async () => { await ButtonSavePhieuNhapKho();})" Style="width: 120px;" Icon="check" Text="Lưu phiếu" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Dark" Variant="Variant.Flat" />
             </RadzenStack>
             <RadzenStack Gap="10px" Style="height: 100%; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                <RadzenButton Style="width: 120px;" Icon="close" Text="Thoát" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" Click="@(() => DialogService.Close(null))" />
+                <RadzenButton Click="@(async () => { await ButtonClosePhieuNhapKho();})" Style="width: 120px;" Icon="close" Text="@(((isPNKSaved)? "Đóng" : "Hủy phiếu"))" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" />
             </RadzenStack>
         </RadzenStack>
     </RadzenStack>
@@ -256,30 +466,428 @@
 
 @code {
     [Parameter]
-    public List<NguyenVatLieu>? DSNVLNhapXuatKho { get; set; }
+    public List<NguyenVatLieu> DSNVLNhapXuatKho { get; set; } = new();
+    private PhieuNhapKho PNK = new();
+    private IList<NVLofPhieuNhapKho> DatagridSelectedNVLofPNK = new List<NVLofPhieuNhapKho>();
+    private NVLofPhieuNhapKho SelectedNVLofPNK = new();
+    private bool isAddLocation = false;
+    private LenhNhapKho temporaryLenhNK = new();
+    private List<VitriLuuTru> DSVitris = new();
+    private bool isAllowCreatePNK = true;
+    private bool isPNKSaved = false;
 
-    private const string NK = "Nhập kho";
-    private const string XK = "Xuất kho";
+    private string scanMaNVL = string.Empty;
+    private string scanmaVitri = string.Empty;
 
-    private IList<NguyenVatLieu>? SelectedNgVatLieu;
-    private int modeCode = 0; // 0 - nhap // 1 - xuat //
-    private string modeText = NK;
-
-    private void OnModeSelectChanged(int mode)
+    private async Task QuetMaNhapKhoNguyenVatLieu(string? maPhieuNK, string? maNVL, string? maVitri)
     {
-        if (mode == 0)
+        if (String.IsNullOrEmpty(maPhieuNK) || String.IsNullOrEmpty(maNVL) || String.IsNullOrEmpty(maVitri)) return;
+
+        // Get PNK infor
+        PhieuNhapKho phieuNhapKho = SQLServerServices.GetPhieuNhapKhoByMaPhieu(maPhieuNK);
+
+        NVLofPhieuNhapKho targetNVLofPNK = phieuNhapKho.DSNVLofPNKs.FirstOrDefault(item => item.TargetNgLieu.TenNVL.Value?.ToString() == maNVL.Trim()) ?? new();
+
+        foreach (var lenh in targetNVLofPNK.DSLenhNKs)
         {
-            modeText = NK;
-            modeCode = 0;
+            int lenhstatus = int.TryParse(lenh.LNKIsDone.Value?.ToString(), out int status) ? status : 3;
+            string mavitri = lenh.TagertVitri.MaViTri.Value?.ToString()?.Trim() ?? string.Empty;
+
+            if (lenhstatus == 0 && mavitri == maVitri.Trim())
+            {
+                int soluongNhapthem = int.TryParse(lenh.LNKSoLuong.Value?.ToString(), out int slt) ? slt : 0;
+
+                ViTriofNVL viTriofNVL = new()
+                    {
+                        VTID = { Value = lenh.TagertVitri.VTID.Value },
+                        NVLID = { Value = targetNVLofPNK.TargetNgLieu.NVLID.Value },
+                        VTNVLSoLuong = { Value = soluongNhapthem }
+                    };
+
+                // Kiem tra NVL da co o vi tri
+                bool isNVLExisting = false;
+
+                foreach (var vitri in targetNVLofPNK.TargetNgLieu.DSViTri)
+                {
+                    var vtid = vitri.VTID.Value;
+                    var nvlid = vitri.NVLID.Value;
+
+                    if (vtid != null && nvlid != null)
+                    {
+                        if (vtid.Equals(viTriofNVL.VTID.Value) && nvlid.Equals(viTriofNVL.NVLID.Value))
+                        {
+                            // gan neu da ton tai vi tri trong danh sach
+                            viTriofNVL = vitri;
+
+                            isNVLExisting = true; break;
+                        }
+                    }
+                }
+
+                int updateInsertVTofNVLstatus = -1; string updateInsertVTofNVLerror = string.Empty;
+
+                if (isNVLExisting)
+                {
+                    // Tinh so luong hien co cua nvl o vitri
+                    int soluongHientai = int.TryParse(viTriofNVL.VTNVLSoLuong.Value?.ToString(), out int crsl) ? crsl : 0;
+
+                    viTriofNVL.VTNVLSoLuong.Value = soluongHientai + soluongNhapthem;   // gan so luong them cho vi tri da luu
+
+                    // Update so luong vi tri da co cua nvl
+                    (updateInsertVTofNVLstatus, updateInsertVTofNVLerror) = SQLServerServices.UpdateViTriOfNgVatLieu(viTriofNVL);
+                }
+                else
+                {
+                    // Insert vao bang VitriOfNVL
+                    (updateInsertVTofNVLstatus, updateInsertVTofNVLerror) = SQLServerServices.InsertNewViTriOfNgVatLieu(viTriofNVL);
+                }
+
+                // Update lenh nhap kho status
+                if (updateInsertVTofNVLstatus > 0)
+                {
+                    lenh.LNKIsDone.Value = 1;
+
+                    // Update lenh nhap kho status
+                    (int updatelnk, string updatelnkError) = SQLServerServices.UpdateLenhNhapKho(lenh);
+
+                    if (updatelnk > 0)
+                    {
+                        ShowNotification("Nhập kho thành công!", NotificationSeverity.Success, 2000);
+                    }
+                    else await DialogService.Alert($"Lỗi - Không thể nhập kho: ({updatelnkError})", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                }
+                else await DialogService.Alert($"Lỗi - Không thể nhập kho: ({updateInsertVTofNVLerror})", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+
+                break;
+            }
         }
-        else if (mode == 1)
+
+
+    }
+
+
+    protected async override Task OnInitializedAsync()
+    {
+        if (DSNVLNhapXuatKho.Count > 0)
         {
-            modeText = XK;
-            modeCode = 1;
+            // Load dsvitri
+            DSVitris = SQLServerServices.GetAllViTriLuuTru();
+
+            // Tao ma phieu random
+            string maphieu = Common.Generate5UppercaseChars();
+            PNK.MaPhieuNK.Value = $"#{maphieu}";
+            PNK.NgayLapPNK.Value = DateTime.Now;
+
+            // Insert in to DB new PNK
+            (int newpnkID, string newpnkerror) = SQLServerServices.InsertNewPhieuNhapKho(PNK);
+
+            if (newpnkID == -1)
+            {
+                isAllowCreatePNK = false;
+                await DialogService.Alert($"Lỗi: không thể tạo phiếu ({newpnkerror})", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+            }
+            else
+            {
+                // Gan PNKID cho PNK
+                PNK.PNKID.Value = newpnkID;
+                // Khoi tao danh sach nguyen vat lieu nhap kho
+                PNK.DSNVLofPNKs = new();
+                foreach (var nvl in DSNVLNhapXuatKho)
+                {
+                    NVLofPhieuNhapKho nvlpnk = new()
+                        {
+                            PNKID = { Value = newpnkID },
+                            NVLID = { Value = nvl.NVLID.Value },
+                            TargetNgLieu = nvl,
+                            NVLNKSoLuongAll = { Value = 0 }
+                        };
+
+                    // Insert in to DB new NVL of PNK
+                    (int newNVLpnkID, string newnvlPNKerror) = SQLServerServices.InsertNVLofPhieuNhapKho(nvlpnk);
+
+                    if (newNVLpnkID == -1)
+                    {
+                        isAllowCreatePNK = false;
+                        // Delete PNK when error
+                        await DeletePhieuNhapKho();
+
+                        await DialogService.Alert($"Lỗi: không thể thêm NVL cho phiếu ({newnvlPNKerror})", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                        break;
+                    }
+                    else
+                    {
+                        nvlpnk.NVLPNKID.Value = newNVLpnkID;
+                        PNK.DSNVLofPNKs.Add(nvlpnk);
+                    }
+                }
+            }
+        }
+        else isAllowCreatePNK = false;
+
+        await base.OnInitializedAsync();
+    }
+
+    // Huy va xoa phieu nhap kho khi press Cancel button
+    private async Task DeletePhieuNhapKho()
+    {
+        (int result, string error) = SQLServerServices.DeletePhieuNhapKho(PNK.PNKID.Value);
+
+        if (result != -1)
+        {
+            ShowNotification("Đã hủy phiếu nhập kho!", NotificationSeverity.Warning, 2000);
+        }
+        else
+        {
+            await DialogService.Alert($"Lỗi: Không thể hủy phiếu {error}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
         }
     }
 
-    private void OnCellRender(DataGridCellRenderEventArgs<NguyenVatLieu> args)
+    // Xoa nvl of list nvlofpnk
+    private void OnRemoveNVLofPNK(NVLofPhieuNhapKho nvl)
+    {
+        PNK.DSNVLofPNKs.RemoveAll(item => item.NVLID.Value?.ToString() == nvl.NVLID.Value?.ToString());
+
+        SQLServerServices.DeleteNVLofPhieuNhapKho(nvl.NVLPNKID.Value);
+
+        SelectedNVLofPNK = new();
+
+        PNK.DSNVLofPNKs = new List<NVLofPhieuNhapKho>(PNK.DSNVLofPNKs);
+    }
+
+    // Xoa lenh nhap kho khoi dslenhnk
+    private void OnRemoveLNKfromDSLenhNKs(LenhNhapKho lnk)
+    {
+        SelectedNVLofPNK.DSLenhNKs.Remove(lnk);
+
+        int slcontrong = lnk.TagertVitri.SLConTrong;
+        int soluongnhap = int.TryParse(lnk.LNKSoLuong.Value?.ToString(), out int sln) ? sln : 0;
+        // gan so luong con trong cho vi tri sau kho remove lenhnhapkho
+        lnk.TagertVitri.SLConTrong = slcontrong + soluongnhap;
+
+        SelectedNVLofPNK.DSLenhNKs = new List<LenhNhapKho>(SelectedNVLofPNK.DSLenhNKs);
+
+        SQLServerServices.DeleteLenhNhapKho(lnk.LenhNKID.Value);
+    }
+
+    // Enable add new vitri luu kho
+    private void ButtonAddVitriluukho()
+    {
+        temporaryLenhNK = new();
+
+        if (isAddLocation)
+        {
+            isAddLocation = false;
+        }
+        else
+        {
+            isAddLocation = true;
+        }
+    }
+
+    // Save vitri luu kho cho NVLofPNK
+    private async Task OnThemNewLNKintoListLNK()
+    {
+        // Kiem tra vi tri da ton tai
+        bool iscontain = SelectedNVLofPNK.DSLenhNKs.Select(lenh => lenh.TagertVitri.VTID.Value).ToList().Contains(temporaryLenhNK.TagertVitri.VTID.Value);
+
+        if (!iscontain)
+        {
+            // Gan thong tin cua lenh nhap kho
+            LenhNhapKho newLenhNhapKho = new()
+                {
+                    LNKSoLuong = { Value = temporaryLenhNK.LNKSoLuong.Value },    // soluong
+                    VTID = { Value = temporaryLenhNK.TagertVitri.VTID.Value },    // vitri id
+                    NVLPNKID = { Value = SelectedNVLofPNK.NVLPNKID.Value }, // nvlpnkid
+                    PNKID = { Value = PNK.PNKID.Value }, // pnkid
+                    LNKIsDone = { Value = 0 }   // status
+                };
+            newLenhNhapKho.TagertVitri = temporaryLenhNK.TagertVitri;
+
+            // Kiem tra cac dieu kien truoc khi insert DB
+
+            // So luong con trong cua vi tri
+            int slcontrong = newLenhNhapKho.TagertVitri.SLConTrong;
+            // So luong nhap cua vi tri
+            int soluongnhap = int.TryParse(newLenhNhapKho.LNKSoLuong.Value?.ToString(), out int sln) ? sln : 0;
+
+            if (soluongnhap == 0)
+            {
+                await DialogService.Alert($"Số lượng nhập kho phải lớn hơn 0", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                return;
+            }
+
+            // Tong so luong can nhap kho
+            int slallnhapkho = int.TryParse(SelectedNVLofPNK.NVLNKSoLuongAll.Value?.ToString(), out int slall) ? slall : 0;
+            // Tinh tong so luong nhap kho sau moi lan tao lenh moi
+            int slallnhapkhodatao = 0;
+            foreach (var lnk in SelectedNVLofPNK.DSLenhNKs)
+            {
+                int lnkslnhap = int.TryParse(lnk.LNKSoLuong.Value?.ToString(), out int lnksln) ? lnksln : 0;
+                slallnhapkhodatao += lnkslnhap;
+            }
+
+            // Kiem tra qua so luong can nhap kho
+            if ((slallnhapkhodatao + soluongnhap) > slallnhapkho)
+            {
+                await DialogService.Alert($"Qúa số lượng cần nhập kho ({slallnhapkho})", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                return;
+            }
+
+
+            if (soluongnhap > slcontrong)
+            {
+                await DialogService.Alert($"Số lượng nhập kho ({soluongnhap}) quá số lượng trống của vị trí ({slcontrong})", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+            }
+            else
+            {
+                (int lenhnkId, string lnkError) = SQLServerServices.InsertLenhNhapKho(newLenhNhapKho);
+
+                if (lenhnkId > 0)
+                {
+                    // Gan ID cua lenh nhap kho sau khi insert
+                    newLenhNhapKho.LenhNKID.Value = lenhnkId;
+                    // Add new lenh to DB
+                    SelectedNVLofPNK.DSLenhNKs.Add(newLenhNhapKho);
+
+                    int slcontrongsaunhap = slcontrong - soluongnhap; // tinh so luong con trong cua vi tri sau khi tao lenh
+
+                    newLenhNhapKho.TagertVitri.SLConTrong = slcontrongsaunhap; // cap nhat so luong trong sau khi tao lenh
+
+                    // True bit da chi dinh day du vi tri (so luong cua lenh truoc do + so luong cua lenh moi)
+                    if ((slallnhapkhodatao + soluongnhap) == slallnhapkho)
+                    {
+                        SelectedNVLofPNK.IsAsignedVitri = true;
+                    }
+
+                    temporaryLenhNK = new(); isAddLocation = false;
+                }
+                else
+                {
+                    await DialogService.Alert($"Lỗi: {lnkError}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                }
+
+            }
+
+        }
+        else
+        {
+            await DialogService.Alert($"Đã chọn vị trí này trước đó", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+        }
+    }
+
+    // Button close phieu nhap kho
+    private async Task ButtonSavePhieuNhapKho()
+    {
+        bool isAsignedVitriOK = true;
+        bool isPNKinforOK = true;
+
+        // Kiem tra trang thai chi dinh vi tri cua listNVLofPNK
+        foreach (var nvl in PNK.DSNVLofPNKs)
+        {
+            if (nvl.IsAsignedVitri == false)
+            {
+                await DialogService.Alert($"Chưa chỉ định đầy đủ vị trí cho nguyên vật liệu ({nvl.TargetNgLieu.TenNVL.Value})", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                isAsignedVitriOK = false;
+                break;
+            }
+            else
+            {
+                // Update tong so luong nhap kho cua Lenhnhapkho
+            }
+        }
+
+        if (isAsignedVitriOK == false) return;
+
+        // Kiem tra phieu nhap kho day du thong tin
+        if (PNK.NguoiLapPNK.Value == null)
+        {
+            await DialogService.Alert($"Hãy nhập thông tin người lập phiếu!", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+            isPNKinforOK = false;
+        }
+        if (PNK.NgayLapPNK.Value == null)
+        {
+            await DialogService.Alert($"Hãy nhập thông tin ngày lập phiếu!", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+            isPNKinforOK = false;
+        }
+        if (PNK.MaPhieuNK.Value == null)
+        {
+            await DialogService.Alert($"Chưa tạo mã phiếu nhập kho!", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+            isPNKinforOK = false;
+        }
+
+
+        if (isAsignedVitriOK && isPNKinforOK)
+        {
+            // Update PNK infor
+            (int updateResult, string errorMess) = SQLServerServices.UpdatePhieuNhapKhoInfor(PNK);
+
+            if (updateResult > 0)
+            {
+                isPNKSaved = true;
+                await DialogService.Alert($"Phiếu đã lưu thành công!", "<strong><span style='color: Darkgreen'>Success!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+            }
+            else
+            {
+                await DialogService.Alert($"Error: {errorMess}", "<strong><span style='color: red'>Không thể lưu phiếu nhập kho!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+            }
+        }
+    }
+
+    // Button close phieu nhap kho
+    private async Task ButtonClosePhieuNhapKho()
+    {
+        if (isPNKSaved)
+        {
+            DialogService.Close(null);
+        }
+        else
+        {
+            await DeletePhieuNhapKho();
+            DialogService.Close(null);
+        }
+    }
+
+
+
+    private string GetVitriCode(VitriLuuTru vitri)
+    {
+        string vitrike = vitri.ViTriKe.Value?.ToString() ?? string.Empty;
+        string vitrihang = vitri.ViTriHang.Value?.ToString() ?? string.Empty;
+        string vitricot = vitri.ViTriCot.Value?.ToString() ?? string.Empty;
+
+        if (String.IsNullOrEmpty(vitrike + vitrihang + vitricot))
+        {
+            return string.Empty;
+        }
+        else return $"VT#{vitrike}#{vitrihang}#{vitricot}";
+
+    }
+
+    private List<string> GetDSVitriCode()
+    {
+        List<string> dsvitricode = new();
+        foreach (var vitri in DSVitris)
+        {
+            string vitricode = GetVitriCode(vitri).Trim();
+            dsvitricode.Add(vitricode);
+        }
+        return dsvitricode;
+    }
+
+    private string GetValue(IList<NguyenVatLieu>? nvl, string proName)
+    {
+        var seletednvl = nvl?.FirstOrDefault();
+
+        var tagertItem = seletednvl?.DSNguyenVatLieuDetails.FirstOrDefault(dt => dt.NVLDetailItems?.TenTruyXuat.Value?.ToString()?.Trim() == proName);
+
+        if (tagertItem != null)
+        {
+            return tagertItem.GiaTri.Value?.ToString()?.Trim() ?? string.Empty;
+        }
+        else return string.Empty;
+    }
+
+    private void OnCellRender(DataGridCellRenderEventArgs<NVLofPhieuNhapKho> args)
     {
         if (args.Column.Property.Contains("ID"))
         {
@@ -288,9 +896,13 @@
     }
 
     // Datagrid selected changed event
-    private void OnDatagridSelectChanged(IList<NguyenVatLieu> selectedNgvatlieu)
+    private void OnDatagridSelectChanged(IList<NVLofPhieuNhapKho> selectedNgvatlieu)
     {
-        SelectedNgVatLieu = selectedNgvatlieu;
+        temporaryLenhNK = new(); isAddLocation = false;
+
+        DatagridSelectedNVLofPNK = selectedNgvatlieu;
+
+        SelectedNVLofPNK = DatagridSelectedNVLofPNK.FirstOrDefault() ?? new();
     }
 
     // Tooltip
@@ -299,5 +911,19 @@
         TooltipOptions options = new TooltipOptions() { Position = position, Delay = 500, Style = "background-color: black" };
 
         TooltipService.Open(elementReference, content, options);
+    }
+
+    // Notification
+    void ShowNotification(string message, NotificationSeverity notifytype, double time)
+    {
+        NotificationMessage notify = new NotificationMessage
+            {
+                Style = "position: fixed; top: 0; right: 0;",
+                Severity = notifytype,
+                Summary = message,
+                Duration = time
+            };
+
+        NotificationService.Notify(notify);
     }
 }

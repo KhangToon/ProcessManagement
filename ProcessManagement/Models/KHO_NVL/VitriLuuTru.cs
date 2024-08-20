@@ -1,21 +1,23 @@
 ﻿using ProcessManagement.Commons;
-using ProcessManagement.Models.KHO_NVL;
 using System.Reflection;
 
-namespace ProcessManagement.Models
+namespace ProcessManagement.Models.KHO_NVL
 {
-    public class NVLofSanPham
+    public class VitriLuuTru
     {
-        public Propertyy NVLSPID { get; set; } = new() { DBName = Common.NVLID, DisplayName = "NVLSPID", Type = typeof(int), AlowDatabase = false, AlowDisplay = false }; // ID
-        public Propertyy SPID { get; set; } = new() { DBName = Common.SPID, DisplayName = "SP ID", Type = typeof(int), AlowDatabase = true, };
-        public Propertyy NVLID { get; set; } = new() { DBName = Common.NVLID, DisplayName = "NVL ID", Type = typeof(int), AlowDatabase = true, };
-        public Propertyy NgayThem { get; set; } = new() { DBName = Common.NgayThem, DisplayName = "Ngày thêm", Type = typeof(DateTime), AlowDatabase = true };
+        public Propertyy VTID { get; set; } = new() { DBName = Common.VTID, Type = typeof(int), AlowDatabase = false }; // ID
+        public Propertyy KHOID { get; set; } = new() { DBName = Common.KHOID, Type = typeof(string), AlowDatabase = true };
+        public Propertyy MaViTri { get; set; } = new() { DBName = Common.MaViTri, Type = typeof(string), AlowDatabase = true };
+        public Propertyy VTSucChua { get; set; } = new() { DBName = Common.VTSucChua, Type = typeof(int), AlowDatabase = true };
+        public Propertyy ViTriHang { get; set; } = new() { DBName = Common.ViTriHang, Type = typeof(string), AlowDatabase = true };
+        public Propertyy ViTriKe { get; set; } = new() { DBName = Common.ViTriKe, Type = typeof(string), AlowDatabase = true };
+        public Propertyy ViTriCot { get; set; } = new() { DBName = Common.ViTriCot, Type = typeof(string), AlowDatabase = true };
 
-        public NguyenVatLieu TargetNgLieu { get; set; } = new();
+        public int SLConTrong = 0;
 
         public List<Propertyy> GetPropertiesValues()
         {
-            Type propertyType = typeof(NVLofSanPham);
+            Type propertyType = typeof(VitriLuuTru);
 
             FieldInfo[] fields = propertyType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 

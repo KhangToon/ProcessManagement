@@ -155,14 +155,10 @@ namespace ProcessManagement.Commons
         // Table KHO_NguyenVatLieu //
         public const string TableNguyenVatLieu = "KHO_NguyenVatLieu";
         public const string NVLID = "NVLID";
-        //public const string MaDanhMuc = "MaDanhMuc";
         public const string TenNVL = "TenNVL";
+        public const string NVLTonKho = "Tồn kho";
         public const string MoTa = "MoTa";
         public const string DonViTinh = "DonViTinh";
-        public const string SoLuongTonKhoToiThieu = "SoLuongTonKhoToiThieu";
-        public const string SoLuongTonKhoToiDa = "SoLuongTonKhoToiDa";
-        public const string TonKhoHienTai = "TonKhoHienTai";
-        public const string ThoiGianBaoQuan = "ThoiGianBaoQuan";
         public const string NgayCapNhat = "NgayCapNhat";
 
         // Table KHO_NhaCungCap //
@@ -189,9 +185,18 @@ namespace ProcessManagement.Commons
         // Table KHO_ViTriLuuTru //
         public const string TableViTriLuuTru = "KHO_ViTriLuuTru";
         public const string VTID = "VTID";
-        //public const string MaKho = "MaKho";
-        public const string TenViTri = "TenViTri";
-        //public const string SucChua = "SucChua";
+        public const string MaViTri = "Mã vị trí";
+        public const string ViTriKe = "Vị trí kệ";
+        public const string ViTriHang = "Vị trí hàng";
+        public const string ViTriCot = "Vị trí cột";
+        public const string VTSucChua = "Sức chứa";
+        public const string VTSLTrong = "SL trống";
+
+        // Table KHO_VitriOfNVL //
+        public const string TableVitriOfNVL = "KHO_VitriOfNVL";
+        public const string VTofNVLID = "VTofNVLID";
+        public const string VTNVLSoLuong = "Số lượng";
+
 
         // Table KHO_NhapKho //
         public const string TableNhapKho = "KHO_NhapKho";
@@ -250,6 +255,30 @@ namespace ProcessManagement.Commons
         //public const string TenTTID = "TenTTID";
         public const string GiaTri = "Gía trị";
 
+        // Table KHO_PhieuNhapKho
+        public const string Table_PhieuNhapKho = "KHO_PhieuNhapKho";
+        public const string PNKID = "PNKID";
+        public const string MaPhieuNhapKho = "Mã phiếu";
+        public const string NguoiLapPNK = "Người lập phiếu";
+        public const string NgayLapPNK = "Ngày lập phiếu";
+        public const string GhiChuPNK = "Ghi chú";
+
+        // Table KHO_NVLofPhieuNhapKho
+        public const string Table_NVLofPhieuNhapKho = "KHO_NVLofPhieuNhapKho";
+        //public const string PNKID = "PNKID";
+        //public const string NVLID = "NVLID";
+        public const string NVLPNKID = "NVLPNKID";
+        public const string NVLNKSoLuongAll = "Tổng số lượng";
+        public const string NVLNKTrangThai = "Trạng thái";
+
+        // Table KHO_LenhNhapKho
+        public const string Table_LenhNhapKho = "KHO_LenhNhapKho";
+        public const string LenhNKID = "LenhNKID";
+        //public const string PNKID = "PNKID";
+        //public const string NVLPNKID = "NVLPNKID";
+        //public const string VTID = "VTID";
+        public const string LNKSoLuong = "Số lượng";
+        public const string LNKIsDone = "IsDone";
 
         // Socket 
         public const string socketEndKey = "<END>";
@@ -285,6 +314,7 @@ namespace ProcessManagement.Commons
             public const string VitriKe = "vitrike";
             public const string VitriHang = "vitrihang";
             public const string VitriCot = "vitricot";
+            public const string DonViTinh = "donvitinh";
         }
 
         public static void RaiseClickSaveEvent()
@@ -330,6 +360,15 @@ namespace ProcessManagement.Commons
                 .Normalize(NormalizationForm.FormC)
                 .ToLowerInvariant()
                 .Replace(" ", "");
+        }
+
+        private static Random random = new Random();
+
+        public static string Generate5UppercaseChars()
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            return new string(Enumerable.Repeat(chars, 5)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
         }
     }
 }

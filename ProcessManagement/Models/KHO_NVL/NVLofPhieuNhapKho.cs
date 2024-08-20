@@ -1,21 +1,25 @@
 ﻿using ProcessManagement.Commons;
-using ProcessManagement.Models.KHO_NVL;
 using System.Reflection;
 
-namespace ProcessManagement.Models
+namespace ProcessManagement.Models.KHO_NVL
 {
-    public class NVLofSanPham
+    public class NVLofPhieuNhapKho
     {
-        public Propertyy NVLSPID { get; set; } = new() { DBName = Common.NVLID, DisplayName = "NVLSPID", Type = typeof(int), AlowDatabase = false, AlowDisplay = false }; // ID
-        public Propertyy SPID { get; set; } = new() { DBName = Common.SPID, DisplayName = "SP ID", Type = typeof(int), AlowDatabase = true, };
-        public Propertyy NVLID { get; set; } = new() { DBName = Common.NVLID, DisplayName = "NVL ID", Type = typeof(int), AlowDatabase = true, };
-        public Propertyy NgayThem { get; set; } = new() { DBName = Common.NgayThem, DisplayName = "Ngày thêm", Type = typeof(DateTime), AlowDatabase = true };
+        public Propertyy NVLPNKID { get; set; } = new() { DBName = Common.NVLPNKID, Type = typeof(int), AlowDatabase = false, AlowDisplay = false, DispDatagrid = false }; // ID
+        public Propertyy PNKID { get; set; } = new() { DBName = Common.PNKID, Type = typeof(int), AlowDatabase = true, AlowDisplay = false, DispDatagrid = false };
+        public Propertyy NVLID { get; set; } = new() { DBName = Common.NVLID, Type = typeof(int), AlowDatabase = true, AlowDisplay = false, DispDatagrid = false };
+        public Propertyy NVLNKSoLuongAll { get; set; } = new() { DBName = Common.NVLNKSoLuongAll, Type = typeof(int), AlowDatabase = true, AlowDisplay = false, DispDatagrid = false };
+        public List<LenhNhapKho> DSLenhNKs { get; set; } = new();
 
         public NguyenVatLieu TargetNgLieu { get; set; } = new();
 
+        public bool IsAsignedVitri = false;
+
+        public bool IsNhapKhoDone = false; // trang thai cua lenh nhap kho tong (bao gom trang thai cua cac vi tri cac lenh )
+
         public List<Propertyy> GetPropertiesValues()
         {
-            Type propertyType = typeof(NVLofSanPham);
+            Type propertyType = typeof(NVLofPhieuNhapKho);
 
             FieldInfo[] fields = propertyType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 

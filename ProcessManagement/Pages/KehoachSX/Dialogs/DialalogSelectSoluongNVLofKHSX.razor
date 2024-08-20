@@ -56,7 +56,7 @@
                                             <RadzenText Text="@(nvl.TenNVL.Value?.ToString())" Style="color: darkblue; font-weight: 600; font-size: 14px"></RadzenText>
                                         </RadzenStack>
                                         <RadzenStack Style="width: 30%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                            <RadzenText Text="@($"{nvl.TonKhoHienTai.Value?.ToString()} (pcs)")" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                                            <RadzenText Text="@($"{nvl.TonKho} ({nvl.DonViTinh.Value?.ToString()})")" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
                                         </RadzenStack>
                                         <RadzenStack Style="width: 35%; height: contain; " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                             <RadzenNumeric TValue="int" Min="0" Value="@(nvl.SLSanXuat)"
@@ -125,7 +125,7 @@
     {
         int loainvlID = int.TryParse(newKHSX?.LoaiNVL?.LOAINVLID.Value?.ToString(), out int x) ? x : 0;
 
-        DSachNgVatLieus = SQLServerServices.GetListNguyenVatLieu(loainvlID);
+        DSachNgVatLieus = SQLServerServices.GetListNguyenVatLieuByLoaiNvlID(loainvlID);
     }
 
     private bool CheckSLNVLisOK()
@@ -145,7 +145,7 @@
 
         foreach (var nvl in DSachNgVatLieus)
         {
-            int sltonkho = int.TryParse(nvl.TonKhoHienTai.Value?.ToString(), out int tonkho) ? tonkho : 0;
+            int sltonkho = nvl.TonKho;
 
             int slcanlay = nvl.SLSanXuat;
 

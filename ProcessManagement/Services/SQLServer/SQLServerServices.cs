@@ -387,6 +387,7 @@ namespace ProcessManagement.Services.SQLServer
             }
         }
 
+        // ------------------------------------------------------------------------------------- //
         #region Table_SanPham
         // Lay danh sach san pham
         public List<SanPham> GetlistSanphams()
@@ -735,6 +736,7 @@ namespace ProcessManagement.Services.SQLServer
 
         #endregion Table_SanPham
 
+        // ------------------------------------------------------------------------------------- //
         #region Table_KHSX
         // Get last ke hoach san xuat
         public KHSX GetLastKHSX()
@@ -1057,6 +1059,7 @@ namespace ProcessManagement.Services.SQLServer
 
         #endregion
 
+        // ------------------------------------------------------------------------------------- //
         #region Table_NguyenCongofKHSX
         // Load danh sach cong doan
         public List<NguyenCongofKHSX> GetlistCongdoans(object? khsxID)
@@ -1451,6 +1454,7 @@ namespace ProcessManagement.Services.SQLServer
 
         #endregion Table_NguyenCongofKHSX
 
+        // ------------------------------------------------------------------------------------- //
         #region Table_NguyenCong
         // Kiem tra nguyen cong da ton tai
         public (int, string) NguyencongDatontai(NguyenCong nguyenCong)
@@ -1598,6 +1602,7 @@ namespace ProcessManagement.Services.SQLServer
         }
         #endregion Table_NguyenCong
 
+        // ------------------------------------------------------------------------------------- //
         #region Table_NVLofSanPham
         // Get danh sach NVL cua san pham
         public List<NVLofSanPham> GetDSachNVLofSanPham(object? spID)
@@ -1628,6 +1633,9 @@ namespace ProcessManagement.Services.SQLServer
 
                         item.Value = columnValue;
                     }
+
+                    // Load target nguyen vat lieu
+                    nvlofsp.TargetNgLieu = GetNguyenVatLieuByID(nvlofsp.NVLID.Value);
 
                     listNVLofSanphams.Add(nvlofsp);
                 }
@@ -1767,6 +1775,7 @@ namespace ProcessManagement.Services.SQLServer
 
         #endregion Table_NVLofSanPham
 
+        // ------------------------------------------------------------------------------------- //
         #region Table_NVLofKHSX
         // Insert NVLofKHSX
         public (int, string) InsertNVLofKHSX(NVLofKHSX nvlofkhsx)
@@ -1853,9 +1862,7 @@ namespace ProcessManagement.Services.SQLServer
 
         #endregion
 
-
-        //////// Management KHO_NGUYENVATLIEU ////////
-
+        // ------------------------------------------------------------------------------------- //
         #region Table KHO_NguyenVatLieu
         // Them loai NVL moi 
         public (int, string) InsertNewLoaiNguyenVatLieu(NguyenVatLieu? newnvl)
@@ -1906,7 +1913,7 @@ namespace ProcessManagement.Services.SQLServer
         }
 
         // Update so luong ton kho NVL 
-        public (int, string) UpdateSLTonkhoNguyenVatLieu(object? nvlid, object? soluongLay)
+        public (int, string) UpdateSLTonkhoNguyenVatLieu_XuatKho(object? nvlid, object? soluongLay)
         {
             int result = -1; string errorMess = string.Empty;
 
@@ -1918,7 +1925,7 @@ namespace ProcessManagement.Services.SQLServer
                 {
                     connection.Open();
 
-                    string sqlQuery = $"UPDATE {Common.TableNguyenVatLieu} SET [{Common.TonKhoHienTai}] = [{Common.TonKhoHienTai}] - '{soluongLay}' WHERE [{Common.NVLID}] = '{nvlid}'";
+                    string sqlQuery = $"UPDATE {Common.TableNguyenVatLieu} SET [{Common.NVLTonKho}] = [{Common.NVLTonKho}] - '{soluongLay}' WHERE [{Common.NVLID}] = '{nvlid}'";
 
                     var command = new SqlCommand(sqlQuery, connection);
 
@@ -1956,7 +1963,7 @@ namespace ProcessManagement.Services.SQLServer
         }
 
         // Get Nguyen Vat Lieu by ID 
-        public NguyenVatLieu GetNguyenVatLieubyID(object? maNVL)
+        public NguyenVatLieu GetNguyenVatLieuByID(object? nvlID)
         {
             NguyenVatLieu nvl = new();
 
@@ -1966,7 +1973,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"SELECT * FROM [{Common.TableNguyenVatLieu}] WHERE [{Common.NVLID}] = '{maNVL}'";
+                command.CommandText = $"SELECT * FROM [{Common.TableNguyenVatLieu}] WHERE [{Common.NVLID}] = '{nvlID}'";
 
                 using var reader = command.ExecuteReader();
 
@@ -1980,7 +1987,7 @@ namespace ProcessManagement.Services.SQLServer
 
                         object columnValue = reader[columnName];
 
-                        item.Value = columnValue;
+                        item.Value = columnValue.ToString()?.Trim();
                     }
 
                 }
@@ -1992,12 +1999,61 @@ namespace ProcessManagement.Services.SQLServer
             nvl.DanhMuc = GetDanhMucbyID(nvl.DMID.Value);
             // Load Loai NVL
             nvl.LoaiNVL = GetLoaiNVLbyID(nvl.LOAINVLID.Value);
+            // Load list vi tri 
+            nvl.DSViTri = GetListViTriOfNgVatLieuByNVLid(nvl.NVLID.Value);
+            // Tinh so luong ton kho
+            nvl.TonKho = nvl.DSViTri.Sum(vitri => int.TryParse(vitri.VTNVLSoLuong.Value?.ToString(), out int slvt) ? slvt : 0);
+
+            return nvl;
+        }
+
+        // Get nguyen vat lieu by TenNVL
+        public NguyenVatLieu GetNguyenVatLieuByTenNVL(object? tenNVL)
+        {
+            NguyenVatLieu nvl = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.TableNguyenVatLieu}] WHERE [{Common.TenNVL}] = '{tenNVL}'";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    List<Propertyy> rowitems = nvl.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue.ToString()?.Trim();
+                    }
+
+                }
+            }
+
+            // Load Details NVL 
+            nvl.DSNguyenVatLieuDetails = GetNguyenVatLieuDetails(nvl.NVLID.Value);
+            // Load Danh muc
+            nvl.DanhMuc = GetDanhMucbyID(nvl.DMID.Value);
+            // Load Loai NVL
+            nvl.LoaiNVL = GetLoaiNVLbyID(nvl.LOAINVLID.Value);
+            // Load list vi tri 
+            nvl.DSViTri = GetListViTriOfNgVatLieuByNVLid(nvl.NVLID.Value);
+            // Tinh so luong ton kho
+            nvl.TonKho = nvl.DSViTri.Sum(vitri => int.TryParse(vitri.VTNVLSoLuong.Value?.ToString(), out int slvt) ? slvt : 0);
 
             return nvl;
         }
 
         // Get list NguyenVatLieu by loai nvl ID
-        public List<NguyenVatLieu> GetListNguyenVatLieu(object? loainvlID)
+        public List<NguyenVatLieu> GetListNguyenVatLieuByLoaiNvlID(object? loainvlID)
         {
             List<NguyenVatLieu> nguyenvatlieus = new();
 
@@ -2032,6 +2088,10 @@ namespace ProcessManagement.Services.SQLServer
                     nvl.DanhMuc = GetDanhMucbyID(nvl.DMID.Value);
                     // Load Loai NVL
                     nvl.LoaiNVL = GetLoaiNVLbyID(nvl.LOAINVLID.Value);
+                    // Load list vi tri 
+                    nvl.DSViTri = GetListViTriOfNgVatLieuByNVLid(nvl.NVLID.Value);
+                    // Tinh so luong ton kho
+                    nvl.TonKho = nvl.DSViTri.Sum(vitri => int.TryParse(vitri.VTNVLSoLuong.Value?.ToString(), out int slvt) ? slvt : 0);
 
                     nguyenvatlieus.Add(nvl);
                 }
@@ -2076,6 +2136,10 @@ namespace ProcessManagement.Services.SQLServer
                     nvl.DanhMuc = GetDanhMucbyID(nvl.DMID.Value);
                     // Load Loai NVL
                     nvl.LoaiNVL = GetLoaiNVLbyID(nvl.LOAINVLID.Value);
+                    // Load list vi tri 
+                    nvl.DSViTri = GetListViTriOfNgVatLieuByNVLid(nvl.NVLID.Value);
+                    // Tinh so luong ton kho
+                    nvl.TonKho = nvl.DSViTri.Sum(vitri => int.TryParse(vitri.VTNVLSoLuong.Value?.ToString(), out int slvt) ? slvt : 0);
 
                     nguyenvatlieus.Add(nvl);
                 }
@@ -2084,10 +2148,7 @@ namespace ProcessManagement.Services.SQLServer
             return nguyenvatlieus;
         }
 
-        /// <summary>
-        /// Lấy danh sách ID của danh sách nguyên vật liệu
-        /// </summary>
-        /// <returns></returns>
+        // Lấy danh sách ID của danh sách nguyên vật liệu
         public List<int> GetlistNgVatLieuId()
         {
             List<int> nvlIDs = new();
@@ -2116,11 +2177,7 @@ namespace ProcessManagement.Services.SQLServer
             return nvlIDs;
         }
 
-        /// <summary>
-        /// Cập nhật giá trị các thông tin chính của NVL
-        /// </summary>
-        /// <param name="ngVatLieu"></param>
-        /// <returns></returns>
+        // Cập nhật giá trị các thông tin chính của NVL
         public (int, string) UpdateNguyenVatLieuMainDetails(NguyenVatLieu ngVatLieu)
         {
             int result = -1; string errorMess = string.Empty;
@@ -2162,16 +2219,12 @@ namespace ProcessManagement.Services.SQLServer
             return (result, errorMess);
         }
 
-        #endregion  Table KHO_NguyenVatLieu
+        #endregion
 
-        #region Table_KHONguyenLieuDetails
+        // ------------------------------------------------------------------------------------- //
+        #region Table_KHO_NguyenLieuDetails
 
-        /// <summary>
-        /// Kiểm tra thông tin đã tồn tại trong danh sách nvl details
-        /// </summary>
-        /// <param name="tenttid"></param>
-        /// <param name="nvlid"></param>
-        /// <returns></returns>
+        // Kiểm tra thông tin đã tồn tại trong danh sách nvl details
         public bool IsDetailExistingInNVLDetailsList(object? tenttid, object? nvlid)
         {
             using (var connection = new SqlConnection(connectionString))
@@ -2229,11 +2282,7 @@ namespace ProcessManagement.Services.SQLServer
             return nvlDetails;
         }
 
-        /// <summary>
-        /// Thêm trường thông tin chi tiết mới cho nguyên vật liệu
-        /// </summary>
-        /// <param name="newnvldetail"></param>
-        /// <returns></returns>
+        // Thêm trường thông tin chi tiết mới cho nguyên vật liệu
         public (int, string) InsertNewNguyenVatLieuDetail(NguyenVatLieuDetail newnvldetail)
         {
             List<Propertyy> newItems = newnvldetail.GetPropertiesValues().Where(po => po.AlowDatabase == true && po.Value != null).ToList();
@@ -2279,11 +2328,7 @@ namespace ProcessManagement.Services.SQLServer
             return (result, errorMess);
         }
 
-        /// <summary>
-        /// Xóa trường thông tin của nguyên vật liệu
-        /// </summary>
-        /// <param name="removeNVLdetail"></param>
-        /// <returns></returns>
+        // Xóa trường thông tin của nguyên vật liệu
         public (int, string) DeleteThongTinNgVatLieu(NguyenVatLieuDetail? removeNVLdetail)
         {
             int result = -1; string errorMess = string.Empty;
@@ -2314,11 +2359,7 @@ namespace ProcessManagement.Services.SQLServer
             return (result, errorMess);
         }
 
-        /// <summary>
-        /// Xóa trường thông tin ở các nguyên vật liệu khác
-        /// </summary>
-        /// <param name="removeNVLdetail"></param>
-        /// <returns></returns>
+        // Xóa trường thông tin ở các nguyên vật liệu khác
         public (int, string) DeleteThongTinNgVatLieuByTenTTID(object? tenttID)
         {
             int result = -1; string errorMess = string.Empty;
@@ -2347,11 +2388,7 @@ namespace ProcessManagement.Services.SQLServer
             return (result, errorMess);
         }
 
-        /// <summary>
-        /// Cập nhật danh sách thông tin phụ của nguyên vật liệu
-        /// </summary>
-        /// <param name="ngvatlieudetails"></param>
-        /// <returns></returns>
+        // Cập nhật danh sách thông tin phụ của nguyên vật liệu
         public (int, string) UpdateListNguyenVatLieuDetails(List<NguyenVatLieuDetail> ngvatlieudetails)
         {
             int result = -1; string errorMess = string.Empty;
@@ -2396,9 +2433,10 @@ namespace ProcessManagement.Services.SQLServer
             return (result, errorMess);
         }
 
-        #endregion Table_KHONguyenLieuDetails
+        #endregion
 
-        #region Table_KHONVLDetailsListName
+        // ------------------------------------------------------------------------------------- //
+        #region Table_KHO_NVLDetailsListName
         // Load list name of thong tin nguyen vat lieu 
         public List<NVLDetailsName> GetListNVLdetailsName()
         {
@@ -2470,11 +2508,7 @@ namespace ProcessManagement.Services.SQLServer
             return detailname;
         }
 
-        /// <summary>
-        /// Check ten nvl details da ton tai
-        /// </summary>
-        /// <param name="tenNVLDetail"></param>
-        /// <returns></returns>
+        // Check ten nvl details da ton tai
         public bool IsNVLDetailExisting(string? tenNVLDetail)
         {
             using (var connection = new SqlConnection(connectionString))
@@ -2538,11 +2572,7 @@ namespace ProcessManagement.Services.SQLServer
             return (result, errorMess);
         }
 
-        /// <summary>
-        /// Xóa loại thông tin trong bảng danh sách thông tin NVL
-        /// </summary>
-        /// <param name="tenttID"></param>
-        /// <returns></returns>
+        // Xóa loại thông tin trong bảng danh sách thông tin NVL
         public (int, string) DeleteNVLDetailName(object? tenttID)
         {
             int result = -1; string errorMess = string.Empty;
@@ -2571,12 +2601,7 @@ namespace ProcessManagement.Services.SQLServer
             return (result, errorMess);
         }
 
-        /// <summary>
-        /// Thay đổi tên của trường thông tin nguyên vật liệu
-        /// </summary>
-        /// <param name="tenttid"></param>
-        /// <param name="newName"></param>
-        /// <returns></returns>
+        // Thay đổi tên của trường thông tin nguyên vật liệu
         public (int, string) UpdateNVLDetailName(object? tenttid, string newName, string tentruyxuat)
         {
             int result = -1; string errorMess = string.Empty;
@@ -2606,8 +2631,374 @@ namespace ProcessManagement.Services.SQLServer
             }
         }
 
-        #endregion Table_KHONVLDetailsListName
+        #endregion
 
+        // ------------------------------------------------------------------------------------- //
+        #region Table_KHO_ViTriLuuTru
+
+        // Tính số lượng trống còn lại của vị trí
+        public (int, string) GetViTriLuuTruSoLuongTrong(object? vtltID)
+        {
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+
+                    var command = connection.CreateCommand();
+
+                    command.CommandText = $"SELECT SUM(CAST([{Common.SoLuong}] AS INT)) AS TongSoLuong FROM [{Common.TableVitriOfNVL}] WHERE [{Common.VTID}] = '{vtltID}'";
+
+                    object result = command.ExecuteScalar();
+
+                    if (result != null && result != DBNull.Value)
+                    {
+                        int tongSoLuong = Convert.ToInt32(result);
+
+                        return (tongSoLuong, string.Empty);
+                    }
+                    else
+                    {
+                        return (0, "Null value");
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                return (-1, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return (-1, ex.Message);
+            }
+        }
+
+
+        // Lấy thông tin vị trí lưu trữ NVL
+        public VitriLuuTru GetViTriLuuTruByID(object? vtltID)
+        {
+            VitriLuuTru vitri = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.TableViTriLuuTru}] WHERE [{Common.VTID}] = '{vtltID}'";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    List<Propertyy> rowitems = vitri.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue.ToString()?.Trim();
+                    }
+
+                }
+            }
+
+            int suchua = int.TryParse(vitri.VTSucChua.Value?.ToString(), out int sc) ? sc : 0;
+            // Get so luong con trong cua vi tri
+            vitri.SLConTrong = suchua - GetViTriLuuTruSoLuongTrong(vitri.VTID.Value).Item1;
+
+            return vitri;
+        }
+
+        // Get vị trí lưu trữ by mã vị trí
+        public VitriLuuTru GetViTriLuuTruByMaVitri(object? mavitri)
+        {
+            VitriLuuTru vitri = new();
+
+            if (mavitri == null) return vitri;
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.TableViTriLuuTru}] WHERE [{Common.MaViTri}] = '{mavitri}'";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    List<Propertyy> rowitems = vitri.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue.ToString()?.Trim();
+                    }
+                }
+            }
+
+            int suchua = int.TryParse(vitri.VTSucChua.Value?.ToString(), out int sc) ? sc : 0;
+            // Get so luong con trong cua vi tri
+            vitri.SLConTrong = suchua - GetViTriLuuTruSoLuongTrong(vitri.VTID.Value).Item1;
+
+            return vitri;
+        }
+
+        // Lấy danh sách tất cả vị trí lưu trữ
+        public List<VitriLuuTru> GetAllViTriLuuTru()
+        {
+            List<VitriLuuTru> vitris = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.TableViTriLuuTru}]";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    VitriLuuTru vitri = new();
+
+                    List<Propertyy> rowitems = vitri.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue.ToString()?.Trim();
+                    }
+
+                    int suchua = int.TryParse(vitri.VTSucChua.Value?.ToString(), out int sc) ? sc : 0;
+                    // Get so luong con trong cua vi tri
+                    vitri.SLConTrong = suchua - GetViTriLuuTruSoLuongTrong(vitri.VTID.Value).Item1;
+
+                    vitris.Add(vitri);
+                }
+            }
+
+            return vitris;
+        }
+
+        // Update thông tin vị trí lưu trữ
+        public (int, string) UpdateViTriLuuTru(object? slnhapkho, object? vtid)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            if (slnhapkho == null || vtid == null) { return (result, errorMess); }
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+
+                    string sqlQuery = $"UPDATE {Common.TableViTriLuuTru} SET [{Common.VTSLTrong}] = ([{Common.VTSLTrong}] - '{slnhapkho}') WHERE [{Common.VTID}] = '{vtid}'";
+
+                    var command = new SqlCommand(sqlQuery, connection);
+
+                    result = command.ExecuteNonQuery();
+
+                    connection.Close();
+
+                    return (result, string.Empty);
+                }
+            }
+            catch (Exception ex)
+            {
+                string err = ex.Message;
+
+                return (-1, err);
+            }
+        }
+
+        #endregion
+
+        // ------------------------------------------------------------------------------------- //
+        #region Table_KHO_ViTriOfNVL
+
+        // Lấy danh sách vị trí của nguyên vật liệu by ID
+        public List<ViTriofNVL> GetListViTriOfNgVatLieuByNVLid(object? nvlID)
+        {
+            List<ViTriofNVL> vitriOfnvls = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.TableVitriOfNVL}] WHERE [{Common.NVLID}] = '{nvlID}'";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    ViTriofNVL vitri = new();
+
+                    List<Propertyy> rowitems = vitri.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue.ToString()?.Trim();
+                    }
+
+                    // Get vitriluutru infor
+                    vitri.VitriInfor = GetViTriLuuTruByID(vitri.VTID.Value);
+
+                    vitriOfnvls.Add(vitri);
+                }
+            }
+
+            return vitriOfnvls;
+        }
+
+        public List<ViTriofNVL> GetListViTriOfNgVatLieuByVTid(object? vtID)
+        {
+            List<ViTriofNVL> vitriOfnvls = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.TableVitriOfNVL}] WHERE [{Common.VTID}] = '{vtID}'";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    ViTriofNVL vitri = new();
+
+                    List<Propertyy> rowitems = vitri.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue.ToString()?.Trim();
+                    }
+
+                    // Get vitriluutru infor
+                    vitri.VitriInfor = GetViTriLuuTruByID(vitri.VTID.Value);
+
+                    vitriOfnvls.Add(vitri);
+                }
+            }
+
+            return vitriOfnvls;
+        }
+
+        // Insert new ViTriofNVL
+        public (int, string) InsertNewViTriOfNgVatLieu(ViTriofNVL newVTofNVL)
+        {
+            List<Propertyy> newItems = newVTofNVL.GetPropertiesValues().Where(po => po.AlowDatabase == true && po.Value != null).ToList();
+
+            int result = -1; string errorMess = string.Empty;
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                string columnNames = string.Join(",", newItems.Select(key => $"[{key.DBName}]"));
+
+                string parameterNames = string.Join(",", newItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $"INSERT INTO [{Common.TableVitriOfNVL}] ({columnNames}) OUTPUT INSERTED.{Common.VTofNVLID} VALUES ({parameterNames})";
+
+                foreach (var item in newItems)
+                {
+                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
+
+                    object? parameterValue = item.Value;
+
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                object? rs = command.ExecuteScalar();
+
+                result = Convert.ToInt32(rs);
+
+                if (result == 0) result = -1;
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
+        // Update so luong ViTriofNVL
+        public (int, string) UpdateViTriOfNgVatLieu(ViTriofNVL vitriofNVL)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            if (vitriofNVL == null) return (result, errorMess);
+
+            List<Propertyy> Items = vitriofNVL.GetPropertiesValues().Where(pro => pro.AlowDatabase == true && pro.Value != null).ToList();
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                string setClause = string.Join(",", Items.Select(key => $"[{key.DBName}] = @{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $"UPDATE [{Common.TableVitriOfNVL}] SET {setClause} WHERE [{Common.VTofNVLID}] = '{vitriofNVL.VTofNVLID.Value}'";
+
+                foreach (var item in Items)
+                {
+                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
+
+                    object? parameterValue = item.Value;
+
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                result = command.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
+        #endregion
+
+        // ------------------------------------------------------------------------------------- //
         #region Table KHO_DanhMucNguyenVatLieu
         // Get list danh muc NVL
         public List<DanhMucNVL> GetListDanhMucNVLs()
@@ -2670,7 +3061,7 @@ namespace ProcessManagement.Services.SQLServer
 
                         object columnValue = reader[columnName];
 
-                        item.Value = columnValue;
+                        item.Value = columnValue.ToString()?.Trim();
                     }
 
                 }
@@ -2741,8 +3132,10 @@ namespace ProcessManagement.Services.SQLServer
                 }
             }
         }
-        #endregion Table KHO_DanhMucNguyenVatLieu
 
+        #endregion
+
+        // ------------------------------------------------------------------------------------- //
         #region Table KHO_LoaiNguyenVatLieu
 
         // Get loai NVL by maloai NVL // Table KHO_LoaiNguyenVatLieu //
@@ -2770,7 +3163,7 @@ namespace ProcessManagement.Services.SQLServer
 
                         object columnValue = reader[columnName];
 
-                        item.Value = columnValue;
+                        item.Value = columnValue.ToString()?.Trim();
                     }
 
                 }
@@ -2947,6 +3340,542 @@ namespace ProcessManagement.Services.SQLServer
 
             return (result, errorMess);
         }
-        #endregion Table KHO_LoaiNguyenVatLieu
+        #endregion
+
+        // ------------------------------------------------------------------------------------- //
+        #region Table_KHO_PhieuNhapKho
+
+        // Thêm mới phiếu nhập kho nguyên vật liệu
+        public (int, string) InsertNewPhieuNhapKho(PhieuNhapKho? newpnk)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            if (newpnk == null) return (result, "Error");
+
+            List<Propertyy> pnkItems = newpnk.GetPropertiesValues().Where(po => po.AlowDatabase == true && po.Value != null).ToList();
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                string columnNames = string.Join(",", pnkItems.Select(key => $"[{key.DBName}]"));
+
+                string parameterNames = string.Join(",", pnkItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $"INSERT INTO [{Common.Table_PhieuNhapKho}] ({columnNames}) OUTPUT INSERTED.{Common.PNKID} VALUES ({parameterNames})";
+
+                foreach (var item in pnkItems)
+                {
+                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
+
+                    object? parameterValue = item.Value;
+
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                object? rs = command.ExecuteScalar();
+
+                result = Convert.ToInt32(rs);
+
+                if (result == 0) result = -1;
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
+        // Xóa phiếu nhập kho by ID
+        public (int, string) DeletePhieuNhapKho(object? pnkID)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            if (pnkID == null) return (-1, errorMess);
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"DELETE FROM {Common.Table_PhieuNhapKho} WHERE [{Common.PNKID}] = '{pnkID}'";
+
+                object rs = command.ExecuteScalar();
+
+                result = Convert.ToInt32(rs);
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
+        // Load Phieu nhap kho by ID
+        public PhieuNhapKho GetPhieuNhapKhoByID(object? pnkid)
+        {
+            PhieuNhapKho phieunhapkho = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_PhieuNhapKho}] WHERE [{Common.PNKID}] = '{pnkid}'";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    List<Propertyy> rowitems = phieunhapkho.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue;
+                    }
+
+                }
+            }
+
+            // Load danh sach nguyen vat lieu pnk
+            phieunhapkho.DSNVLofPNKs = GetListNVLofPNKs(pnkid);
+
+            return phieunhapkho;
+        }
+
+        // Get phiếu nhập kho by Mã phiếu 
+        public PhieuNhapKho GetPhieuNhapKhoByMaPhieu(object? maPNK)
+        {
+            PhieuNhapKho phieunhapkho = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_PhieuNhapKho}] WHERE [{Common.MaPhieuNhapKho}] = '{maPNK}'";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    List<Propertyy> rowitems = phieunhapkho.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue.ToString()?.Trim();
+                    }
+
+                }
+            }
+
+            // Load danh sach nguyen vat lieu pnk
+            phieunhapkho.DSNVLofPNKs = GetListNVLofPNKs(phieunhapkho.PNKID.Value);
+
+            return phieunhapkho;
+        }
+
+        // Update thong tin Phieu nhap kho
+        public (int, string) UpdatePhieuNhapKhoInfor(PhieuNhapKho phieuNK)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            if (phieuNK == null) return (result, errorMess);
+
+            List<Propertyy> Items = phieuNK.GetPropertiesValues().Where(pro => pro.AlowDatabase == true && pro.Value != null).ToList();
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                string setClause = string.Join(",", Items.Select(key => $"[{key.DBName}] = @{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $"UPDATE [{Common.Table_PhieuNhapKho}] SET {setClause} WHERE [{Common.PNKID}] = '{phieuNK.PNKID.Value}'";
+
+                foreach (var item in Items)
+                {
+                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
+
+                    object? parameterValue = item.Value;
+
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                result = command.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+        #endregion
+
+        // ------------------------------------------------------------------------------------- //
+        #region Table_KHO_NVLofPhieuNhapKho
+
+        // Thêm NVL của phiếu nhập kho
+        public (int, string) InsertNVLofPhieuNhapKho(NVLofPhieuNhapKho? newnvlpnk)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            if (newnvlpnk == null) return (result, "Error");
+
+            List<Propertyy> nvlpnkItems = newnvlpnk.GetPropertiesValues().Where(po => po.AlowDatabase == true && po.Value != null).ToList();
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                string columnNames = string.Join(",", nvlpnkItems.Select(key => $"[{key.DBName}]"));
+
+                string parameterNames = string.Join(",", nvlpnkItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $"INSERT INTO [{Common.Table_NVLofPhieuNhapKho}] ({columnNames}) OUTPUT INSERTED.{Common.NVLPNKID} VALUES ({parameterNames})";
+
+                foreach (var item in nvlpnkItems)
+                {
+                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
+
+                    object? parameterValue = item.Value;
+
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                object? rs = command.ExecuteScalar();
+
+                result = Convert.ToInt32(rs);
+
+                if (result == 0) result = -1;
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
+        // Remove nvlof Phieu nhap kho
+        public (int, string) DeleteNVLofPhieuNhapKho(object? nvlpnkid)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"DELETE FROM {Common.Table_NVLofPhieuNhapKho} WHERE [{Common.NVLPNKID}] = '{nvlpnkid}'";
+
+                object rs = command.ExecuteScalar();
+
+                result = Convert.ToInt32(rs);
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
+        // Load danh sach NVLofPNK by PNKid
+        public List<NVLofPhieuNhapKho> GetListNVLofPNKs(object? pnkId)
+        {
+            List<NVLofPhieuNhapKho> listNvlofPnk = new();
+
+            if (pnkId == null) return listNvlofPnk;
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_NVLofPhieuNhapKho}] WHERE [{Common.PNKID}] = '{pnkId}'";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    NVLofPhieuNhapKho nvlpnk = new();
+
+                    List<Propertyy> rowitems = nvlpnk.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue.ToString()?.Trim();
+                    }
+
+                    // Get vitriluutru infor
+                    nvlpnk.DSLenhNKs = GetDSLenhNhapKho(nvlpnk.NVLPNKID.Value, pnkId);
+                    // Check nhap kho status of NVLofPNK
+                    foreach (var lenh in nvlpnk.DSLenhNKs)
+                    {
+                        int islenhdone = int.TryParse(lenh.LNKIsDone.Value?.ToString(), out int isd) ? isd : -1;
+                        if (islenhdone == 0)
+                        {
+                            nvlpnk.IsNhapKhoDone = false; break;
+                        }
+                    }
+                    // Load target Nguyenvatlieu
+                    nvlpnk.TargetNgLieu = GetNguyenVatLieuByID(nvlpnk.NVLID.Value);
+
+                    listNvlofPnk.Add(nvlpnk);
+                }
+            }
+
+            return listNvlofPnk;
+        }
+
+        #endregion
+
+        // ------------------------------------------------------------------------------------- //
+        #region Table_KHO_LenhNhapKho
+
+        // Get lệnh nhập kho by LNKID
+        public LenhNhapKho GetLenhNhapKhoByID(object? lnkid)
+        {
+            LenhNhapKho lnkho = new();
+
+            if (lnkid == null) return lnkho;
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_LenhNhapKho}] WHERE [{Common.LenhNKID}] = '{lnkid}'";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    List<Propertyy> rowitems = lnkho.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue;
+                    }
+                }
+            }
+
+            // Get vi tri luu tru
+            lnkho.TagertVitri = GetViTriLuuTruByID(lnkho.VTID.Value);
+
+            return lnkho;
+        }
+
+        // Get danh sách lệnh nhập kho by NVLPNKID and PNKID
+        public List<LenhNhapKho> GetDSLenhNhapKho(object? nvlpnkId, object? pnkId)
+        {
+            List<LenhNhapKho> lenhNKhos = new();
+
+            if (nvlpnkId == null || pnkId == null) return lenhNKhos;
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_LenhNhapKho}] WHERE [{Common.NVLPNKID}] = '{nvlpnkId}' AND [{Common.PNKID}] = '{pnkId}'";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    LenhNhapKho lenhnk = new();
+
+                    List<Propertyy> rowitems = lenhnk.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue.ToString()?.Trim();
+                    }
+
+                    // Get vitriluutru infor
+                    lenhnk.TagertVitri = GetViTriLuuTruByID(lenhnk.VTID.Value);
+
+                    lenhNKhos.Add(lenhnk);
+                }
+            }
+
+            return lenhNKhos;
+        }
+
+        // Thêm lệnh nhập kho
+        public (int, string) InsertLenhNhapKho(LenhNhapKho? lenhnk)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            if (lenhnk == null) return (result, "Error");
+
+            List<Propertyy> lnkItems = lenhnk.GetPropertiesValues().Where(po => po.AlowDatabase == true && po.Value != null).ToList();
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                string columnNames = string.Join(",", lnkItems.Select(key => $"[{key.DBName}]"));
+
+                string parameterNames = string.Join(",", lnkItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $"INSERT INTO [{Common.Table_LenhNhapKho}] ({columnNames}) OUTPUT INSERTED.{Common.LenhNKID} VALUES ({parameterNames})";
+
+                foreach (var item in lnkItems)
+                {
+                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
+
+                    object? parameterValue = item.Value;
+
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                object? rs = command.ExecuteScalar();
+
+                result = Convert.ToInt32(rs);
+
+                if (result == 0) result = -1;
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
+        // Xóa lệnh nhập kho
+        public (int, string) DeleteLenhNhapKho(object? lenhnkId)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"DELETE FROM {Common.Table_LenhNhapKho} WHERE [{Common.LenhNKID}] = '{lenhnkId}'";
+
+                object rs = command.ExecuteScalar();
+
+                result = Convert.ToInt32(rs);
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+        // Update lệnh nhập kho
+        public (int, string) UpdateLenhNhapKho(LenhNhapKho lenhnhapkho)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            if (lenhnhapkho == null) return (result, errorMess);
+
+            List<Propertyy> Items = lenhnhapkho.GetPropertiesValues().Where(pro => pro.AlowDatabase == true && pro.Value != null).ToList();
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                string setClause = string.Join(",", Items.Select(key => $"[{key.DBName}] = @{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $"UPDATE [{Common.Table_LenhNhapKho}] SET {setClause} WHERE [{Common.LenhNKID}] = '{lenhnhapkho.LenhNKID.Value}'";
+
+                foreach (var item in Items)
+                {
+                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
+
+                    object? parameterValue = item.Value;
+
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                result = command.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+        #endregion
     }
 }

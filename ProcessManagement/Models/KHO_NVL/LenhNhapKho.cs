@@ -3,16 +3,20 @@ using System.Reflection;
 
 namespace ProcessManagement.Models.KHO_NVL
 {
-    public class ViTriLuu
+    public class LenhNhapKho
     {
-        public Propertyy VTID { get; set; } = new() { DBName = Common.VTID, DisplayName = "Vị trí ID", Type = typeof(int), AlowDatabase = true }; // ID
-        public Propertyy KHOID { get; set; } = new() { DBName = Common.KHOID, DisplayName = "Kho ID", Type = typeof(string), AlowDatabase = true };
-        public Propertyy TenViTri { get; set; } = new() { DBName = Common.TenViTri, DisplayName = "Tên vị trí", Type = typeof(string), AlowDatabase = true };
-        public Propertyy SucChua { get; set; } = new() { DBName = Common.SucChua, DisplayName = "Sức chứa", Type = typeof(string), AlowDatabase = true };
+        public Propertyy LenhNKID { get; set; } = new() { DBName = Common.LenhNKID, Type = typeof(int), AlowDatabase = false, AlowDisplay = false, DispDatagrid = false }; // ID
+        public Propertyy PNKID { get; set; } = new() { DBName = Common.PNKID, Type = typeof(int), AlowDatabase = true };
+        public Propertyy NVLPNKID { get; set; } = new() { DBName = Common.NVLPNKID, Type = typeof(int), AlowDatabase = true }; 
+        public Propertyy VTID { get; set; } = new() { DBName = Common.VTID, Type = typeof(int), AlowDatabase = true };
+        public Propertyy LNKSoLuong { get; set; } = new() { DBName = Common.LNKSoLuong, Type = typeof(int), AlowDatabase = true };
+        public Propertyy LNKIsDone { get; set; } = new() { DBName = Common.LNKIsDone, Type = typeof(int), AlowDatabase = true };
+
+        public VitriLuuTru TagertVitri { get; set; } = new();
 
         public List<Propertyy> GetPropertiesValues()
         {
-            Type propertyType = typeof(ViTriLuu);
+            Type propertyType = typeof(LenhNhapKho);
 
             FieldInfo[] fields = propertyType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
