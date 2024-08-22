@@ -12,6 +12,8 @@ namespace ProcessManagement.Models.KHO_NVL
 
         public VitriLuuTru VitriInfor = new();
 
+        public NguyenVatLieu NgLieuInfor = new(); // chi load khi can (khong load luc load ViTriofNVL)
+
         public List<Propertyy> GetPropertiesValues()
         {
             Type propertyType = typeof(ViTriofNVL);

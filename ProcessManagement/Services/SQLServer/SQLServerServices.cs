@@ -2148,6 +2148,8 @@ namespace ProcessManagement.Services.SQLServer
             return nguyenvatlieus;
         }
 
+
+
         // Lấy danh sách ID của danh sách nguyên vật liệu
         public List<int> GetlistNgVatLieuId()
         {

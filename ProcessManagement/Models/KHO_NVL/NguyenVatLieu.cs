@@ -24,6 +24,18 @@ namespace ProcessManagement.Models.KHO_NVL
 
         public List<ViTriofNVL> DSViTri { get; set; } = new();
 
+        // Get nvl details infor by detail name
+        public string GetValue(string proName)
+        {
+            var tagertItem = this?.DSNguyenVatLieuDetails.FirstOrDefault(dt => dt.NVLDetailItems?.TenTruyXuat.Value?.ToString()?.Trim() == proName);
+
+            if (tagertItem != null)
+            {
+                return tagertItem.GiaTri.Value?.ToString()?.Trim() ?? string.Empty;
+            }
+            else return string.Empty;
+        }
+
         public List<Propertyy> GetPropertiesValues()
         {
             Type propertyType = typeof(NguyenVatLieu);

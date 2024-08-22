@@ -184,7 +184,7 @@
 
             <!--Vi tri luu tru-->
             <RadzenColumn Size="12" SizeMD="6" Style="height: 100%; width: 100%;">
-                <RadzenRow Visible="@(SelectedNVLofPNK.NVLID.Value != null)" class="rowbackground-style" Gap="10px" Style="height: 100%; width: 100%; border-radius: 0; overflow: scroll">
+                <RadzenRow Visible="@(SelectedNVLofPNK.NVLID.Value != null && PNK.DSNVLofPNKs.Count > 0)" class="rowbackground-style" Gap="10px" Style="height: 100%; width: 100%; border-radius: 0; overflow: scroll">
                     <RadzenColumn Size="12" SizeMD="12" Style="height: contain; width: 100%;">
                         <RadzenStack Gap="0" Style="height: 100%; width: 100%; padding: 5px; padding-top: 10px; border-radius: 10px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                             <RadzenStack Visible="@(PNK.DSNVLofPNKs.Count > 0)" Gap="10px" Style="height: contain; width: 100%; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
@@ -441,7 +441,7 @@
                             </RadzenStack>
 
                             <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding-top: 10px; border-top: var(--rz-grid-cell-border) " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                <RadzenButton Click="@(() => {QuetMaNhapKhoNguyenVatLieu(PNK.MaPhieuNK.Value?.ToString(), scanMaNVL, scanmaVitri);})" Style="width: 100%; max-width: contain" Icon="add" Text="Lưu kho" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Dark" Variant="Variant.Flat" />
+                                <RadzenButton Click="@( async () => { await QuetMaNhapKhoNguyenVatLieu(PNK.MaPhieuNK.Value?.ToString(), scanMaNVL, scanmaVitri);})" Style="width: 100%; max-width: contain" Icon="add" Text="Lưu kho" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Dark" Variant="Variant.Flat" />
                             </RadzenStack>
                         </RadzenStack>
                     </RadzenColumn>
@@ -780,6 +780,12 @@
     {
         bool isAsignedVitriOK = true;
         bool isPNKinforOK = true;
+
+        if (PNK.DSNVLofPNKs.Count == 0)
+        {
+            await DialogService.Alert($"<strong>Không thể lưu phiếu</strong> (<i>danh sách nguyên liệu nhập kho trống</i>)", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+            return;
+        }
 
         // Kiem tra trang thai chi dinh vi tri cua listNVLofPNK
         foreach (var nvl in PNK.DSNVLofPNKs)
