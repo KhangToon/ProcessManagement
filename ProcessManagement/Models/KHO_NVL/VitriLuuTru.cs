@@ -15,6 +15,8 @@ namespace ProcessManagement.Models.KHO_NVL
 
         public int SLConTrong = 0;
 
+        public List<ViTriofNVL> DSachViTriofNVL = new(); // chi dung khi can (khong load khi load VitriLuuTru)
+
         public List<Propertyy> GetPropertiesValues()
         {
             Type propertyType = typeof(VitriLuuTru);
