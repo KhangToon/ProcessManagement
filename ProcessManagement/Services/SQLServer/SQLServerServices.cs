@@ -3,6 +3,7 @@ using ProcessManagement.Commons;
 using ProcessManagement.Models;
 using ProcessManagement.Models.KHO_NVL;
 using ProcessManagement.Models.KHO_NVL.NhapKho;
+using ProcessManagement.Models.KHO_NVL.XuatKho;
 using System.Data;
 using System.Text.RegularExpressions;
 
@@ -263,7 +264,6 @@ namespace ProcessManagement.Services.SQLServer
 
             return (result, errorMess);
         }
-
 
         // Lay danh sach Lot
         public List<Lot> GetlistLot()
@@ -3879,6 +3879,533 @@ namespace ProcessManagement.Services.SQLServer
 
             return (result, errorMess);
         }
+        #endregion
+
+        // ------------------------------------------------------------------------------------- //
+        #region Table_KHO_PhieuXuatKho
+        // Thêm mới phiếu xuất kho nguyên vật liệu
+        public (int, string) InsertNewPhieuXuatKho(PhieuXuatKho? newpxk)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            if (newpxk == null) return (result, "Error");
+
+            List<Propertyy> pxkItems = newpxk.GetPropertiesValues().Where(po => po.AlowDatabase == true && po.Value != null).ToList();
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                string columnNames = string.Join(",", pxkItems.Select(key => $"[{key.DBName}]"));
+
+                string parameterNames = string.Join(",", pxkItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $"INSERT INTO [{Common.Table_PhieuXuatKho}] ({columnNames}) OUTPUT INSERTED.{Common.PXKID} VALUES ({parameterNames})";
+
+                foreach (var item in pxkItems)
+                {
+                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
+
+                    object? parameterValue = item.Value;
+
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                object? rs = command.ExecuteScalar();
+
+                result = Convert.ToInt32(rs);
+
+                if (result == 0) result = -1;
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+            return (result, errorMess);
+        }
+
+        // Xóa phiếu xuất kho by ID
+        public (int, string) DeletePhieuXuatKho(object? pxkID)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            if (pxkID == null) return (-1, errorMess);
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"DELETE FROM {Common.Table_PhieuXuatKho} WHERE [{Common.PXKID}] = '{pxkID}'";
+
+                object rs = command.ExecuteScalar();
+
+                result = Convert.ToInt32(rs);
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+            return (result, errorMess);
+        }
+
+        // Get phiếu xuất kho by ID
+        public PhieuXuatKho GetPhieuXuatKhoByID(object? pxkid)
+        {
+            PhieuXuatKho phieuxuatkho = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_PhieuXuatKho}] WHERE [{Common.PXKID}] = '{pxkid}'";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    List<Propertyy> rowitems = phieuxuatkho.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue;
+                    }
+                }
+            }
+
+            // Load danh sach nguyen vat lieu pxk
+            phieuxuatkho.DSNVLofPXKs = GetListNVLofPXKs(pxkid);
+
+            return phieuxuatkho;
+        }
+
+        // Get phiếu xuất kho by Mã phiếu 
+        public PhieuXuatKho GetPhieuXuatKhoByMaPhieu(object? maPXK)
+        {
+            PhieuXuatKho phieuxuatkho = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_PhieuXuatKho}] WHERE [{Common.MaPhieuXuatKho}] = '{maPXK}'";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    List<Propertyy> rowitems = phieuxuatkho.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue.ToString()?.Trim();
+                    }
+                }
+            }
+            // Load danh sach nguyen vat lieu pxk
+            phieuxuatkho.DSNVLofPXKs = GetListNVLofPXKs(phieuxuatkho.PXKID.Value);
+
+            return phieuxuatkho;
+        }
+
+        // Update thong tin Phieu xuat kho
+        public (int, string) UpdatePhieuXuatKhoInfor(PhieuXuatKho phieuXK)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            if (phieuXK == null) return (result, errorMess);
+
+            List<Propertyy> Items = phieuXK.GetPropertiesValues().Where(pro => pro.AlowDatabase == true && pro.Value != null).ToList();
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                string setClause = string.Join(",", Items.Select(key => $"[{key.DBName}] = @{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $"UPDATE [{Common.Table_PhieuXuatKho}] SET {setClause} WHERE [{Common.PXKID}] = '{phieuXK.PXKID.Value}'";
+
+                foreach (var item in Items)
+                {
+                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
+
+                    object? parameterValue = item.Value;
+
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                result = command.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+            return (result, errorMess);
+        }
+        #endregion
+
+        // ------------------------------------------------------------------------------------- //
+        #region Table_KHO_NVLofPhieuXuatKho
+        // Thêm NVL của phiếu xuất kho
+        public (int, string) InsertNVLofPhieuXuatKho(NVLofPhieuXuatKho? newnvlpxk)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            if (newnvlpxk == null) return (result, "Error");
+
+            List<Propertyy> nvlpxkItems = newnvlpxk.GetPropertiesValues().Where(po => po.AlowDatabase == true && po.Value != null).ToList();
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+                var command = connection.CreateCommand();
+
+                string columnNames = string.Join(",", nvlpxkItems.Select(key => $"[{key.DBName}]"));
+
+                string parameterNames = string.Join(",", nvlpxkItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $"INSERT INTO [{Common.Table_NVLofPhieuXuatKho}] ({columnNames}) OUTPUT INSERTED.{Common.NVLPXKID} VALUES ({parameterNames})";
+
+                foreach (var item in nvlpxkItems)
+                {
+                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
+
+                    object? parameterValue = item.Value;
+
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                object? rs = command.ExecuteScalar();
+
+                result = Convert.ToInt32(rs);
+
+                if (result == 0) result = -1;
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+            return (result, errorMess);
+        }
+
+        // Remove nvlof Phieu xuat kho
+        public (int, string) DeleteNVLofPhieuXuatKho(object? nvlpxkid)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"DELETE FROM {Common.Table_NVLofPhieuXuatKho} WHERE [{Common.NVLPXKID}] = '{nvlpxkid}'";
+
+                object rs = command.ExecuteScalar();
+
+                result = Convert.ToInt32(rs);
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+            return (result, errorMess);
+        }
+
+        // Load danh sach NVLofPXK by PXKid
+        public List<NVLofPhieuXuatKho> GetListNVLofPXKs(object? pxkId)
+        {
+            List<NVLofPhieuXuatKho> listNvlofPxk = new();
+
+            if (pxkId == null) return listNvlofPxk;
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_NVLofPhieuXuatKho}] WHERE [{Common.PXKID}] = '{pxkId}'";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    NVLofPhieuXuatKho nvlpxk = new();
+
+                    List<Propertyy> rowitems = nvlpxk.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue.ToString()?.Trim();
+                    }
+
+                    // Get vitriluutru infor
+                    nvlpxk.DSLenhXKs = GetDSLenhXuatKho(nvlpxk.NVLPXKID.Value, pxkId);
+
+                    // Check xuat kho status of NVLofPXK
+                    foreach (var lenh in nvlpxk.DSLenhXKs)
+                    {
+                        int islenhdone = int.TryParse(lenh.LXKIsDone.Value?.ToString(), out int isd) ? isd : -1;
+
+                        if (islenhdone == 0)
+                        {
+                            nvlpxk.IsXuatKhoDone = false; break;
+                        }
+                    }
+
+                    // Load target Nguyenvatlieu
+                    nvlpxk.TargetNgLieu = GetNguyenVatLieuByID(nvlpxk.NVLID.Value);
+
+                    listNvlofPxk.Add(nvlpxk);
+                }
+            }
+            return listNvlofPxk;
+        }
+        #endregion
+
+        // ------------------------------------------------------------------------------------- //
+        #region Table_KHO_LenhXuatKho
+
+        // Get lệnh xuất kho by LXKID
+        public LenhXuatKho GetLenhXuatKhoByID(object? lxkid)
+        {
+            LenhXuatKho lxkho = new();
+
+            if (lxkid == null) return lxkho;
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_LenhXuatKho}] WHERE [{Common.LenhXKID}] = '{lxkid}'";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    List<Propertyy> rowitems = lxkho.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue;
+                    }
+                }
+            }
+
+            // Get vi tri luu tru
+            lxkho.TagertVitri = GetViTriLuuTruByID(lxkho.VTID.Value);
+
+            return lxkho;
+        }
+
+        // Get danh sách lệnh xuất kho by NVLPXKID and PXKID
+        public List<LenhXuatKho> GetDSLenhXuatKho(object? nvlpxkId, object? pxkId)
+        {
+            List<LenhXuatKho> lenhXKhos = new();
+
+            if (nvlpxkId == null || pxkId == null) return lenhXKhos;
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_LenhXuatKho}] WHERE [{Common.NVLPXKID}] = '{nvlpxkId}' AND [{Common.PXKID}] = '{pxkId}'";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    LenhXuatKho lenhxk = new();
+
+                    List<Propertyy> rowitems = lenhxk.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue.ToString()?.Trim();
+                    }
+
+                    // Get vitriluutru infor
+                    lenhxk.TagertVitri = GetViTriLuuTruByID(lenhxk.VTID.Value);
+
+                    lenhXKhos.Add(lenhxk);
+                }
+            }
+
+            return lenhXKhos;
+        }
+
+        // Thêm lệnh xuất kho
+        public (int, string) InsertLenhXuatKho(LenhXuatKho? lenhxk)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            if (lenhxk == null) return (result, "Error");
+
+            List<Propertyy> lxkItems = lenhxk.GetPropertiesValues().Where(po => po.AlowDatabase == true && po.Value != null).ToList();
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                string columnNames = string.Join(",", lxkItems.Select(key => $"[{key.DBName}]"));
+
+                string parameterNames = string.Join(",", lxkItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $"INSERT INTO [{Common.Table_LenhXuatKho}] ({columnNames}) OUTPUT INSERTED.{Common.LenhXKID} VALUES ({parameterNames})";
+
+                foreach (var item in lxkItems)
+                {
+                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
+
+                    object? parameterValue = item.Value;
+
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                object? rs = command.ExecuteScalar();
+
+                result = Convert.ToInt32(rs);
+
+                if (result == 0) result = -1;
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
+        // Xóa lệnh xuất kho
+        public (int, string) DeleteLenhXuatKho(object? lenhxkId)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"DELETE FROM {Common.Table_LenhXuatKho} WHERE [{Common.LenhXKID}] = '{lenhxkId}'";
+
+                object rs = command.ExecuteScalar();
+
+                result = Convert.ToInt32(rs);
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
+        // Update lệnh xuất kho
+        public (int, string) UpdateLenhXuatKho(LenhXuatKho lenhxuatkho)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            if (lenhxuatkho == null) return (result, errorMess);
+
+            List<Propertyy> Items = lenhxuatkho.GetPropertiesValues().Where(pro => pro.AlowDatabase == true && pro.Value != null).ToList();
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                string setClause = string.Join(",", Items.Select(key => $"[{key.DBName}] = @{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $"UPDATE [{Common.Table_LenhXuatKho}] SET {setClause} WHERE [{Common.LenhXKID}] = '{lenhxuatkho.LenhXKID.Value}'";
+
+                foreach (var item in Items)
+                {
+                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
+
+                    object? parameterValue = item.Value;
+
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                result = command.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
         #endregion
     }
 }
