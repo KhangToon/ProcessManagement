@@ -2,6 +2,7 @@
 using ProcessManagement.Commons;
 using ProcessManagement.Models;
 using ProcessManagement.Models.KHO_NVL;
+using ProcessManagement.Models.KHO_NVL.NhapKho;
 using System.Data;
 using System.Text.RegularExpressions;
 

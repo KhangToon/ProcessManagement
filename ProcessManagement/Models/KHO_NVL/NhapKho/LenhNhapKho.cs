@@ -1,21 +1,22 @@
 ﻿using ProcessManagement.Commons;
 using System.Reflection;
 
-namespace ProcessManagement.Models.KHO_NVL
+namespace ProcessManagement.Models.KHO_NVL.NhapKho
 {
-    public class PhieuNhapKho
+    public class LenhNhapKho
     {
-        public Propertyy PNKID { get; set; } = new() { DBName = Common.PNKID, Type = typeof(int), AlowDatabase = false, AlowDisplay = false, DispDatagrid = false }; // ID
-        public Propertyy MaPhieuNK { get; set; } = new() { DBName = Common.MaPhieuNhapKho, Type = typeof(string), AlowDatabase = true };
-        public Propertyy NguoiLapPNK { get; set; } = new() { DBName = Common.NguoiLapPNK, Type = typeof(string), AlowDatabase = true };
-        public Propertyy NgayLapPNK { get; set; } = new() { DBName = Common.NgayLapPNK, Type = typeof(DateTime), AlowDatabase = true };
-        public Propertyy GhiChuPNK { get; set; } = new() { DBName = Common.GhiChuPNK, Type = typeof(string), AlowDatabase = true };
+        public Propertyy LenhNKID { get; set; } = new() { DBName = Common.LenhNKID, Type = typeof(int), AlowDatabase = false, AlowDisplay = false, DispDatagrid = false }; // ID
+        public Propertyy PNKID { get; set; } = new() { DBName = Common.PNKID, Type = typeof(int), AlowDatabase = true };
+        public Propertyy NVLPNKID { get; set; } = new() { DBName = Common.NVLPNKID, Type = typeof(int), AlowDatabase = true };
+        public Propertyy VTID { get; set; } = new() { DBName = Common.VTID, Type = typeof(int), AlowDatabase = true };
+        public Propertyy LNKSoLuong { get; set; } = new() { DBName = Common.LNKSoLuong, Type = typeof(int), AlowDatabase = true };
+        public Propertyy LNKIsDone { get; set; } = new() { DBName = Common.LNKIsDone, Type = typeof(int), AlowDatabase = true };
 
-        public List<NVLofPhieuNhapKho> DSNVLofPNKs { get; set; } = new();
+        public VitriLuuTru TagertVitri { get; set; } = new();
 
         public List<Propertyy> GetPropertiesValues()
         {
-            Type propertyType = typeof(PhieuNhapKho);
+            Type propertyType = typeof(LenhNhapKho);
 
             FieldInfo[] fields = propertyType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 

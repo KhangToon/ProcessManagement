@@ -1,22 +1,24 @@
 ﻿using ProcessManagement.Commons;
 using System.Reflection;
 
-namespace ProcessManagement.Models.KHO_NVL
+namespace ProcessManagement.Models.KHO_NVL.XuatKho
 {
-    public class LenhNhapKho
+    public class NVLofPhieuXuatKho
     {
-        public Propertyy LenhNKID { get; set; } = new() { DBName = Common.LenhNKID, Type = typeof(int), AlowDatabase = false, AlowDisplay = false, DispDatagrid = false }; // ID
-        public Propertyy PNKID { get; set; } = new() { DBName = Common.PNKID, Type = typeof(int), AlowDatabase = true };
-        public Propertyy NVLPNKID { get; set; } = new() { DBName = Common.NVLPNKID, Type = typeof(int), AlowDatabase = true }; 
-        public Propertyy VTID { get; set; } = new() { DBName = Common.VTID, Type = typeof(int), AlowDatabase = true };
-        public Propertyy LNKSoLuong { get; set; } = new() { DBName = Common.LNKSoLuong, Type = typeof(int), AlowDatabase = true };
-        public Propertyy LNKIsDone { get; set; } = new() { DBName = Common.LNKIsDone, Type = typeof(int), AlowDatabase = true };
+        public Propertyy NVLPXKID { get; set; } = new() { DBName = Common.NVLPXKID, Type = typeof(int), AlowDatabase = false, AlowDisplay = false, DispDatagrid = false }; // ID
+        public Propertyy PXKID { get; set; } = new() { DBName = Common.PXKID, Type = typeof(int), AlowDatabase = true, AlowDisplay = false, DispDatagrid = false };
+        public Propertyy NVLID { get; set; } = new() { DBName = Common.NVLID, Type = typeof(int), AlowDatabase = true, AlowDisplay = false, DispDatagrid = false };
+        public Propertyy NVLXKSoLuongAll { get; set; } = new() { DBName = Common.NVLXKSoLuongAll, Type = typeof(int), AlowDatabase = true, AlowDisplay = false, DispDatagrid = false };
+        public List<LenhXuatKho> DSLenhXKs { get; set; } = new();
+        public NguyenVatLieu TargetNgLieu { get; set; } = new();
 
-        public VitriLuuTru TagertVitri { get; set; } = new();
+        public bool IsAsignedVitri = false;
+
+        public bool IsXuatKhoDone = false; // trang thai cua lenh xuat kho tong (bao gom trang thai cua cac vi tri cac lenh )
 
         public List<Propertyy> GetPropertiesValues()
         {
-            Type propertyType = typeof(LenhNhapKho);
+            Type propertyType = typeof(NVLofPhieuXuatKho);
 
             FieldInfo[] fields = propertyType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 

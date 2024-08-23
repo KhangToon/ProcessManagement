@@ -1,0 +1,61 @@
+﻿using ProcessManagement.Commons;
+using System.Reflection;
+
+namespace ProcessManagement.Models.KHO_NVL.XuatKho
+{
+    public class PhieuXuatKho
+    {
+        public Propertyy PXKID { get; set; } = new() { DBName = Common.PXKID, Type = typeof(int), AlowDatabase = false, AlowDisplay = false, DispDatagrid = false }; // ID
+        public Propertyy MaPhieuXK { get; set; } = new() { DBName = Common.MaPhieuXuatKho, Type = typeof(string), AlowDatabase = true };
+        public Propertyy NguoiLapPXK { get; set; } = new() { DBName = Common.NguoiLapPXK, Type = typeof(string), AlowDatabase = true };
+        public Propertyy NgayLapPXK { get; set; } = new() { DBName = Common.NgayLapPXK, Type = typeof(DateTime), AlowDatabase = true };
+        public Propertyy GhiChuPXK { get; set; } = new() { DBName = Common.GhiChuPXK, Type = typeof(string), AlowDatabase = true };
+
+        public List<NVLofPhieuXuatKho> DSNVLofPXKs { get; set; } = new();
+
+
+        public List<Propertyy> GetPropertiesValues()
+        {
+            Type propertyType = typeof(PhieuXuatKho);
+
+            FieldInfo[] fields = propertyType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
+            List<Propertyy> propertiesValue = new();
+
+            foreach (FieldInfo field in fields)
+            {
+                Type ob = field.FieldType;
+
+                if (ob == typeof(Propertyy))
+                {
+                    Propertyy? fieldValue = (Propertyy?)field.GetValue(this);
+
+                    if (fieldValue != null) { propertiesValue.Add(fieldValue); }
+                }
+            }
+
+            return propertiesValue;
+        }
+
+        public void SetPropertyValue(string propertyName, object newValue)
+        {
+            List<Propertyy> propertiesValue = GetPropertiesValues();
+
+            Propertyy? tagetProperty = propertiesValue.FirstOrDefault(f => f.DBName == propertyName);
+
+            if (tagetProperty != null)
+            {
+                tagetProperty.Value = newValue;
+            }
+        }
+
+        public object? GetPropertyValue(string propertyName)
+        {
+            List<Propertyy> propertiesValue = GetPropertiesValues();
+
+            Propertyy? tagetProperty = propertiesValue.FirstOrDefault(f => f.DBName == propertyName);
+
+            return tagetProperty?.Value;
+        }
+    }
+}

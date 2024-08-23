@@ -1,25 +1,21 @@
 ﻿using ProcessManagement.Commons;
 using System.Reflection;
 
-namespace ProcessManagement.Models.KHO_NVL
+namespace ProcessManagement.Models.KHO_NVL.XuatKho
 {
-    public class NVLofPhieuNhapKho
+    public class LenhXuatKho
     {
-        public Propertyy NVLPNKID { get; set; } = new() { DBName = Common.NVLPNKID, Type = typeof(int), AlowDatabase = false, AlowDisplay = false, DispDatagrid = false }; // ID
-        public Propertyy PNKID { get; set; } = new() { DBName = Common.PNKID, Type = typeof(int), AlowDatabase = true, AlowDisplay = false, DispDatagrid = false };
-        public Propertyy NVLID { get; set; } = new() { DBName = Common.NVLID, Type = typeof(int), AlowDatabase = true, AlowDisplay = false, DispDatagrid = false };
-        public Propertyy NVLNKSoLuongAll { get; set; } = new() { DBName = Common.NVLNKSoLuongAll, Type = typeof(int), AlowDatabase = true, AlowDisplay = false, DispDatagrid = false };
-        public List<LenhNhapKho> DSLenhNKs { get; set; } = new();
-
-        public NguyenVatLieu TargetNgLieu { get; set; } = new();
-
-        public bool IsAsignedVitri = false;
-
-        public bool IsNhapKhoDone = false; // trang thai cua lenh nhap kho tong (bao gom trang thai cua cac vi tri cac lenh )
+        public Propertyy LenhXKID { get; set; } = new() { DBName = Common.LenhXKID, Type = typeof(int), AlowDatabase = false, AlowDisplay = false, DispDatagrid = false }; // ID
+        public Propertyy PXKID { get; set; } = new() { DBName = Common.PXKID, Type = typeof(int), AlowDatabase = true };
+        public Propertyy NVLPXKID { get; set; } = new() { DBName = Common.NVLPXKID, Type = typeof(int), AlowDatabase = true };
+        public Propertyy VTID { get; set; } = new() { DBName = Common.VTID, Type = typeof(int), AlowDatabase = true };
+        public Propertyy LXKSoLuong { get; set; } = new() { DBName = Common.LXKSoLuong, Type = typeof(int), AlowDatabase = true };
+        public Propertyy LXKIsDone { get; set; } = new() { DBName = Common.LXKIsDone, Type = typeof(int), AlowDatabase = true };
+        public VitriLuuTru TagertVitri { get; set; } = new();
 
         public List<Propertyy> GetPropertiesValues()
         {
-            Type propertyType = typeof(NVLofPhieuNhapKho);
+            Type propertyType = typeof(LenhXuatKho);
 
             FieldInfo[] fields = propertyType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 

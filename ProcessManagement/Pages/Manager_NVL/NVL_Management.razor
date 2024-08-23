@@ -109,7 +109,7 @@
                                 </RadzenStack>
                                 <!--Nhap kho button-->
                                 <RadzenStack Style="height: 100%; width: contain; padding-left: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                    <RadzenButton Click="OnOpenDialogNhapXuatKho" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Tạo phiếu nhập kho"))" Icon="download" Text="@($"Nhập kho {((DSNvlNhapXuatKho.Count > 0)? $"({DSNvlNhapXuatKho.Count})" : string.Empty)}")" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
+                                    <RadzenButton Click="OnOpenDialogNhapKho" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Tạo phiếu nhập kho"))" Icon="download" Text="@($"Nhập kho {((DSNvlNhapXuatKho.Count > 0)? $"({DSNvlNhapXuatKho.Count})" : string.Empty)}")" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
                                                   Style="height: contain; width: contain; font-size: 14px;" />
                                 </RadzenStack>
 
@@ -804,11 +804,11 @@
     }
 
     // Nhap/Xuat kho dialog
-    private async Task OnOpenDialogNhapXuatKho()
+    private async Task OnOpenDialogNhapKho()
     {
         if (DSNvlNhapXuatKho.Count > 0)
         {
-            await DialogService.OpenAsync<DialogNhap_Xuat_Kho>(null, new Dictionary<string, object>() { { "DSNVLNhapXuatKho", DSNvlNhapXuatKho } },
+            await DialogService.OpenAsync<DialogNhap_Kho>(null, new Dictionary<string, object>() { { "DSNVLNhapXuatKho", DSNvlNhapXuatKho } },
             new DialogOptions() { ShowTitle = false, Width = "70%", Height = "100%", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
 
             // reset dsnvlnhapkho
@@ -816,7 +816,7 @@
         }
         else
         {
-            await DialogService.Alert($"<strong>Hãy chọn nguyên liệu cần nhập kho</strong> \n <i><small>(chuột phải vào danh sách nguyên liệu)</small></i>", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+            await DialogService.Alert($"<strong>Hãy chọn nguyên liệu cần nhập kho</strong> \n <i>(chuột phải vào danh sách nguyên liệu)</i>", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
         }
     }
 

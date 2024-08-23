@@ -197,34 +197,6 @@ namespace ProcessManagement.Commons
         public const string VTofNVLID = "VTofNVLID";
         public const string VTNVLSoLuong = "Số lượng";
 
-
-        // Table KHO_NhapKho //
-        public const string TableNhapKho = "KHO_NhapKho";
-        public const string NKID = "NKID";
-        //public const string MaNVL = "MaNVL";
-        //public const string MaNCC = "MaNCC";
-        //public const string MaKho = "MaKho";
-        //public const string MaViTri = "MaViTri";
-        public const string SoLuongNhapKho = "SoLuongNhap";
-        public const string NgayNhapKho = "NgayNhap";
-        public const string NgayHetHan = "NgayHetHan";
-        public const string SoLoNhapKho = "SoLo";
-        public const string NguoiNhapKho = "NguoiNhap";
-        public const string GhiChuNhapKho = "GhiChu";
-
-        // Table KHO_XuatKho //
-        public const string TableXuatKho = "KHO_XuatKho";
-        public const string XKID = "XKID";
-        //public const string MaNVL = "MaNVL";
-        //public const string MaKho = "MaKho";
-        //public const string MaViTri = "MaViTri";
-        public const string SoLuongXuatKho = "SoLuongXuat";
-        public const string NgayXuatKho = "NgayXuat";
-        public const string NguoiXuatKho = "NguoiXuat";
-        public const string NguoiNhan = "NguoiNhan";
-        public const string MucDichSuDung = "MucDichSuDung";
-        public const string GhiChuXuatKho = "GhiChu";
-
         // Table KHO_KiemKe //
         public const string TableKiemKe = "KHO_KiemKe";
         public const string KIEMKEID = "KIEMKEID";
@@ -269,7 +241,6 @@ namespace ProcessManagement.Commons
         //public const string NVLID = "NVLID";
         public const string NVLPNKID = "NVLPNKID";
         public const string NVLNKSoLuongAll = "Tổng số lượng";
-        public const string NVLNKTrangThai = "Trạng thái";
 
         // Table KHO_LenhNhapKho
         public const string Table_LenhNhapKho = "KHO_LenhNhapKho";
@@ -279,6 +250,32 @@ namespace ProcessManagement.Commons
         //public const string VTID = "VTID";
         public const string LNKSoLuong = "Số lượng";
         public const string LNKIsDone = "IsDone";
+
+
+        // Table KHO_PhieuXuatKho
+        public const string Table_PhieuXuatKho = "KHO_PhieuXuatKho";
+        public const string PXKID = "PXKID";
+        public const string MaPhieuXuatKho = "Mã phiếu";
+        public const string NguoiLapPXK = "Người lập phiếu";
+        public const string NgayLapPXK = "Ngày lập phiếu";
+        public const string GhiChuPXK = "Ghi chú";
+
+        // Table KHO_NVLofPhieuXuatKho
+        public const string Table_NVLofPhieuXuatKho = "KHO_NVLofPhieuXuatKho";
+        //public const string PXKID = "PXKID";
+        //public const string NVLID = "NVLID";
+        public const string NVLPXKID = "NVLPXKID";
+        public const string NVLXKSoLuongAll = "Tổng số lượng";
+
+        // Table KHO_LenhXuatKho
+        public const string Table_LenhXuatKho = "KHO_LenhXuatKho";
+        public const string LenhXKID = "LenhXKID";
+        //public const string PXKID = "PXKID";
+        //public const string NVLPXKID = "NVLPXKID";
+        //public const string VTID = "VTID";
+        public const string LXKSoLuong = "Số lượng";
+        public const string LXKIsDone = "IsDone";
+
 
         // Socket 
         public const string socketEndKey = "<END>";
