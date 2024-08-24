@@ -25,7 +25,7 @@
                     <RadzenText Text="@($"admin")" Style="font-weight: 600; font-size: 15px; font-style: italic; color: black;"></RadzenText>
                 </RadzenStack>
             </RadzenStack>
-            <RadzenStack Gap="20px" Style="height: contain; width: contain; padding: 10px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+            <RadzenStack Gap="20px" Style="height: contain; width: contain; padding: 10px; border-radius: 10px; border-bottom: var(--rz-grid-cell-border); background-color: var(--rz-success-light)" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                 <RadzenText Text="PHIẾU NHẬP KHO NGUYÊN VẬT LIỆU" Style="color: black; font-weight: 600; font-size: 20px"></RadzenText>
             </RadzenStack>
             <RadzenStack Gap="5px" Style="height: contain; width: contain; padding: 0px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
@@ -142,7 +142,7 @@
                         <RadzenStack Style="width: 35%;">
                             <RadzenText Text="Ngày nhập kho" Style="font-size: 16px; font-weight: 600; color: black; height: contain; width: 100% "></RadzenText>
                         </RadzenStack>
-                        <RadzenStack Style="width: 55%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                        <RadzenStack Style="width: 65%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                             @{
                                 DateTime createdday = DateTime.TryParse(PNK.NgayLapPNK.Value?.ToString(), out DateTime nnk) ? nnk : DateTime.Now;
                                 createdday = createdday.Date.Add(DateTime.Now.TimeOfDay);
@@ -163,7 +163,7 @@
                         <RadzenStack Style="width: 35%;">
                             <RadzenText Text="Người nhập kho" Style="font-size: 16px; font-weight: 600; color: black; height: contain; width: 100% "></RadzenText>
                         </RadzenStack>
-                        <RadzenStack Style="width: 55%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                        <RadzenStack Style="width: 65%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                             <RadzenTextBox Placeholder="*Nhập tên người nhập kho"
                                            Value="@PNK.NguoiLapPNK.Value?.ToString()" ValueChanged="@((args) => { PNK.NguoiLapPNK.Value = args; } )"
                                            Style="font-size: 16px; height: contain; border-width: 1px; width: 100% "></RadzenTextBox>
@@ -174,7 +174,7 @@
                         <RadzenStack Style="width: 35%;">
                             <RadzenText Text="Ghi chú" Style="font-size: 16px; font-weight: 600; color: black; height: contain; width: 100% "></RadzenText>
                         </RadzenStack>
-                        <RadzenStack Style="width: 55%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                        <RadzenStack Style="width: 65%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                             <RadzenTextBox Placeholder="*Nhập ghi chú"
                                            Value="@PNK.GhiChuPNK.Value?.ToString()" ValueChanged="@((args) => { PNK.GhiChuPNK.Value = args; } )"
                                            Style="font-size: 16px; height: contain; border-width: 1px; width: 100% "></RadzenTextBox>
@@ -336,7 +336,6 @@
                                                     </RadzenStack>
                                                 </RadzenStack>
                                             </RadzenCard>
-                                            <!--Them vi tri luu kho-->
                                             <!--Hien thi danh sach lenh nhap kho-->
                                             <RadzenStack Gap="5px" Orientation="Orientation.Vertical" Style=" height: contain; width: 100%; max-height: 350px; padding-right: 0;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                 <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: contain; padding: 5px; padding-right: 0px;">
@@ -410,7 +409,6 @@
                                                     </RadzenStack>
                                                 }
                                             </RadzenStack>
-                                            <!--Hien thi danh sach lenh nhap kho-->
                                         </RadzenStack>
                                     </RadzenCard>
                                 </RadzenStack>
@@ -467,7 +465,7 @@
 
 @code {
     [Parameter]
-    public List<NguyenVatLieu> DSNVLNhapXuatKho { get; set; } = new();
+    public List<NguyenVatLieu> DSachNVL_NhapKho { get; set; } = new();
     private PhieuNhapKho PNK = new();
     private IList<NVLofPhieuNhapKho> DatagridSelectedNVLofPNK = new List<NVLofPhieuNhapKho>();
     private NVLofPhieuNhapKho SelectedNVLofPNK = new();
@@ -569,7 +567,7 @@
 
     protected async override Task OnInitializedAsync()
     {
-        if (DSNVLNhapXuatKho.Count > 0)
+        if (DSachNVL_NhapKho.Count > 0)
         {
             // Load dsvitri
             DSVitris = SQLServerServices.GetAllViTriLuuTru();
@@ -593,7 +591,7 @@
                 PNK.PNKID.Value = newpnkID;
                 // Khoi tao danh sach nguyen vat lieu nhap kho
                 PNK.DSNVLofPNKs = new();
-                foreach (var nvl in DSNVLNhapXuatKho)
+                foreach (var nvl in DSachNVL_NhapKho)
                 {
                     NVLofPhieuNhapKho nvlpnk = new()
                         {
@@ -776,7 +774,7 @@
         }
     }
 
-    // Button close phieu nhap kho
+    // Button save phieu nhap kho
     private async Task ButtonSavePhieuNhapKho()
     {
         bool isAsignedVitriOK = true;

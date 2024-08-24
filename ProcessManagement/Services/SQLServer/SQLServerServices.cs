@@ -2832,6 +2832,43 @@ namespace ProcessManagement.Services.SQLServer
         // ------------------------------------------------------------------------------------- //
         #region Table_KHO_ViTriOfNVL
 
+        // Lấy vitriofNVL by NVLid và VTid
+        public ViTriofNVL GetViTriOfNgVatLieuByNVLid_VTid(object? nvlid, object? vtid)
+        {
+            ViTriofNVL vitriofnvl = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.TableVitriOfNVL}] WHERE [{Common.NVLID}] = '{nvlid}' AND [{Common.VTID}] = '{vtid}'";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    List<Propertyy> rowitems = vitriofnvl.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue.ToString()?.Trim();
+                    }
+
+                }
+            }
+
+            // Get vitriluutru infor
+            vitriofnvl.VitriInfor = GetViTriLuuTruByID(vitriofnvl.VTID.Value);
+
+            return vitriofnvl;
+        }
+
         // Lấy danh sách vị trí của nguyên vật liệu by ID
         public List<ViTriofNVL> GetListViTriOfNgVatLieuByNVLid(object? nvlID)
         {
@@ -3984,7 +4021,7 @@ namespace ProcessManagement.Services.SQLServer
 
                         object columnValue = reader[columnName];
 
-                        item.Value = columnValue;
+                        item.Value = columnValue.ToString()?.Trim();
                     }
                 }
             }
@@ -4028,6 +4065,46 @@ namespace ProcessManagement.Services.SQLServer
             phieuxuatkho.DSNVLofPXKs = GetListNVLofPXKs(phieuxuatkho.PXKID.Value);
 
             return phieuxuatkho;
+        }
+
+        // Load danh sach phieu xuat kho
+        public List<PhieuXuatKho> GetListPhieuXuatKho()
+        {
+            List<PhieuXuatKho> dsPXKho = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_PhieuXuatKho}]";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    PhieuXuatKho phieuxuatkho = new();
+
+                    List<Propertyy> rowitems = phieuxuatkho.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue.ToString()?.Trim();
+                    }
+
+                    // Load danh sach nguyen vat lieu pxk
+                    phieuxuatkho.DSNVLofPXKs = GetListNVLofPXKs(phieuxuatkho.PXKID.Value);
+
+                    dsPXKho.Add(phieuxuatkho);
+                }
+            }
+
+            return dsPXKho;
         }
 
         // Update thong tin Phieu xuat kho
@@ -4180,7 +4257,7 @@ namespace ProcessManagement.Services.SQLServer
                         item.Value = columnValue.ToString()?.Trim();
                     }
 
-                    // Get vitriluutru infor
+                    // Get danh sach lenh xuat kho
                     nvlpxk.DSLenhXKs = GetDSLenhXuatKho(nvlpxk.NVLPXKID.Value, pxkId);
 
                     // Check xuat kho status of NVLofPXK
@@ -4202,17 +4279,59 @@ namespace ProcessManagement.Services.SQLServer
             }
             return listNvlofPxk;
         }
+
+        // Update NVLofPXK
+        public (int, string) UpdateNVLofPXK(NVLofPhieuXuatKho nvlofpxk)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            if (nvlofpxk == null) return (result, errorMess);
+
+            List<Propertyy> Items = nvlofpxk.GetPropertiesValues().Where(pro => pro.AlowDatabase == true && pro.Value != null).ToList();
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                string setClause = string.Join(",", Items.Select(key => $"[{key.DBName}] = @{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $"UPDATE [{Common.Table_NVLofPhieuXuatKho}] SET {setClause} WHERE [{Common.NVLPXKID}] = '{nvlofpxk.NVLPXKID.Value}'";
+
+                foreach (var item in Items)
+                {
+                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
+
+                    object? parameterValue = item.Value;
+
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                result = command.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
         #endregion
 
         // ------------------------------------------------------------------------------------- //
         #region Table_KHO_LenhXuatKho
 
-        // Get lệnh xuất kho by LXKID
-        public LenhXuatKho GetLenhXuatKhoByID(object? lxkid)
+        // Kiem tra ton tai lenh xuat kho
+        public LenhXuatKho GetLenhXuatKho(LenhXuatKho inputLXK)
         {
             LenhXuatKho lxkho = new();
 
-            if (lxkid == null) return lxkho;
+            if (inputLXK == null) return lxkho;
 
             using (var connection = new SqlConnection(connectionString))
             {
@@ -4220,7 +4339,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"SELECT * FROM [{Common.Table_LenhXuatKho}] WHERE [{Common.LenhXKID}] = '{lxkid}'";
+                command.CommandText = $"SELECT * FROM [{Common.Table_LenhXuatKho}] WHERE [{Common.PXKID}] = '{inputLXK.PXKID.Value}' AND [{Common.NVLPXKID}] = '{inputLXK.NVLPXKID.Value}' AND [{Common.VTID}] = '{inputLXK.VTID.Value}'";
 
                 using var reader = command.ExecuteReader();
 
@@ -4238,9 +4357,6 @@ namespace ProcessManagement.Services.SQLServer
                     }
                 }
             }
-
-            // Get vi tri luu tru
-            lxkho.TagertVitri = GetViTriLuuTruByID(lxkho.VTID.Value);
 
             return lxkho;
         }
@@ -4278,7 +4394,10 @@ namespace ProcessManagement.Services.SQLServer
                     }
 
                     // Get vitriluutru infor
-                    lenhxk.TagertVitri = GetViTriLuuTruByID(lenhxk.VTID.Value);
+                    //lenhxk.TagertVitri = GetViTriLuuTruByID(lenhxk.VTID.Value);
+
+                    // Get vitriofNVL infor
+                    lenhxk.ViTriofNVL = GetViTriOfNgVatLieuByNVLid_VTid(lenhxk.NVLID.Value, lenhxk.VTID.Value);
 
                     lenhXKhos.Add(lenhxk);
                 }
@@ -4292,7 +4411,7 @@ namespace ProcessManagement.Services.SQLServer
         {
             int result = -1; string errorMess = string.Empty;
 
-            if (lenhxk == null) return (result, "Error");
+            if (lenhxk?.PXKID.Value == null) return (result, "Error");
 
             List<Propertyy> lxkItems = lenhxk.GetPropertiesValues().Where(po => po.AlowDatabase == true && po.Value != null).ToList();
 

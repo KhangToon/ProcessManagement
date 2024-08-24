@@ -9,9 +9,13 @@ namespace ProcessManagement.Models.KHO_NVL.XuatKho
         public Propertyy PXKID { get; set; } = new() { DBName = Common.PXKID, Type = typeof(int), AlowDatabase = true };
         public Propertyy NVLPXKID { get; set; } = new() { DBName = Common.NVLPXKID, Type = typeof(int), AlowDatabase = true };
         public Propertyy VTID { get; set; } = new() { DBName = Common.VTID, Type = typeof(int), AlowDatabase = true };
+        public Propertyy NVLID { get; set; } = new() { DBName = Common.NVLID, Type = typeof(int), AlowDatabase = true };
         public Propertyy LXKSoLuong { get; set; } = new() { DBName = Common.LXKSoLuong, Type = typeof(int), AlowDatabase = true };
         public Propertyy LXKIsDone { get; set; } = new() { DBName = Common.LXKIsDone, Type = typeof(int), AlowDatabase = true };
-        public VitriLuuTru TagertVitri { get; set; } = new();
+
+        public ViTriofNVL ViTriofNVL { get; set; } = new(); // Chi dung cho phieu xuat kho
+
+        public bool isEditingLXK = false; // chi dung khi xuat kho
 
         public List<Propertyy> GetPropertiesValues()
         {

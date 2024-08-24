@@ -12,9 +12,11 @@ namespace ProcessManagement.Models.KHO_NVL.XuatKho
         public List<LenhXuatKho> DSLenhXKs { get; set; } = new();
         public NguyenVatLieu TargetNgLieu { get; set; } = new();
 
-        public bool IsAsignedVitri = false;
+        public bool IsDuSoluongXuatKho = false;
 
-        public bool IsXuatKhoDone = false; // trang thai cua lenh xuat kho tong (bao gom trang thai cua cac vi tri cac lenh )
+        public bool IsXuatKhoDone = false; // trang thai cua lenh xuat kho tong ( bao gom trang thai cua cac vi tri cac lenh )
+
+        public bool IsEditingSLXKhoALL = false;
 
         public List<Propertyy> GetPropertiesValues()
         {

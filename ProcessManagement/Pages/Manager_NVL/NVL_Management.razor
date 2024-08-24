@@ -11,7 +11,6 @@
 @using Radzen.Blazor
 @using Radzen
 
-
 @inject NotificationService NotificationService
 @inject TooltipService TooltipService
 @inject ContextMenuService ContextMenuService
@@ -109,24 +108,26 @@
                                 </RadzenStack>
                                 <!--Nhap kho button-->
                                 <RadzenStack Style="height: 100%; width: contain; padding-left: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                    <RadzenButton Click="OnOpenDialogNhapKho" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Tạo phiếu nhập kho"))" Icon="download" Text="@($"Nhập kho {((DSNvlNhapXuatKho.Count > 0)? $"({DSNvlNhapXuatKho.Count})" : string.Empty)}")" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
+                                    <RadzenButton Click="OnOpenDialogNhapKho" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Tạo phiếu nhập kho"))" Icon="download" Text="@($"Nhập kho {((DSNvlNhapKho.Count > 0)? $"({DSNvlNhapKho.Count})" : string.Empty)}")" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
                                                   Style="height: contain; width: contain; font-size: 14px;" />
                                 </RadzenStack>
 
                                 <!--Xuat kho button-->
                                 <RadzenStack Style="height: 100%; width: contain; padding-left: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                    <RadzenButton Click="OnThemNguyenVatLieu" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Tạo phiếu xuất kho"))" Icon="upload" Text="Xuất kho" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
+                                    <RadzenButton Click="OnOpenDialogXuatKho" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Tạo phiếu xuất kho"))" Icon="upload" Text="@($"Xuất kho {((DSNvlXuatKho.Count > 0)? $"({DSNvlXuatKho.Count})" : string.Empty)}")" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
                                                   Style="height: contain; width: contain; font-size: 14px;" />
                                 </RadzenStack>
 
                                 <!--Cart button (ds ngvl nhap/xuat kho)-->
                                 <RadzenStack Visible="false" Style="height: 100%; width: contain; padding-left: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                    <RadzenButton Click="OnThemNguyenVatLieu" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Danh sách NVL nhập/xuất kho"))" Text="@(DSNvlNhapXuatKho.Count.ToString())" Icon="shopping_cart" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
+                                    <RadzenButton Click="OnThemNguyenVatLieu" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Danh sách NVL nhập/xuất kho"))" Text="@(DSNvlNhapKho.Count.ToString())" Icon="shopping_cart" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
                                                   Style="height: contain; width: contain; font-size: 14px;" />
                                 </RadzenStack>
                             </RadzenStack>
 
+                            <!--Danh sach nguyen lieu trong kho-->
                             <RadzenRow Gap="10px" Style="height: contain; width: 100%; border-top: var(--rz-grid-cell-border); padding: 0;">
+                                <!--Column bang danh sach NVL-->
                                 <RadzenColumn Size="12" SizeMD="7" Style="height: contain; width: 100%; padding-top: 5px;">
                                     <RadzenStack Gap="20px" Style="height: contain; width: 100%; padding-bottom: 5px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                                         <RadzenStack Visible="@(DSNguyenVatLieus != null && DSNguyenVatLieus.Count > 0)" Gap="10px" Style="height: contain; width: contain; padding: 10px; padding-left: 0" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
@@ -270,6 +271,7 @@
                                         </RadzenDataGrid>
                                     </RadzenStack>
                                 </RadzenColumn>
+                                <!--Column bang thong tin NVL-->
                                 <RadzenColumn Size="12" SizeMD="5" Style="height: contain; width: 100%; padding-top: 10px; padding-left: 10px; border-left: var(--rz-grid-cell-border);">
                                     <RadzenCard Variant="Variant.Filled" Style="border-radius: 10px; height: 100%; width: 100%;">
                                         <RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: 100%; width: 100%;">
@@ -498,12 +500,18 @@
                 <RadzenTabsItem Text="Vị trí lưu trữ">
                     <RadzenCard Variant="Variant.Flat" Style="height: 100%; width: 100%; padding: 10px;">
                         <RadzenStack Gap="5" Style="height: 100%; width: 100%;">
-                            <DialogDanhSachViTriLuuTru></DialogDanhSachViTriLuuTru>
+                            <DanhSachViTriLuuTru></DanhSachViTriLuuTru>
                         </RadzenStack>
                     </RadzenCard>
                 </RadzenTabsItem>
                 <RadzenTabsItem Text="Kế hoạch nhập kho"></RadzenTabsItem>
-                <RadzenTabsItem Text="Kế hoạch xuất kho"></RadzenTabsItem>
+                <RadzenTabsItem Text="Kế hoạch xuất kho">
+                    <RadzenCard Variant="Variant.Flat" Style="height: 100%; width: 100%; padding: 10px;">
+                        <RadzenStack Gap="5" Style="height: 100%; width: 100%;">
+                            <DanhSachPhieuXuatKho></DanhSachPhieuXuatKho>
+                        </RadzenStack>
+                    </RadzenCard>
+                </RadzenTabsItem>
             </Tabs>
         </RadzenTabs>
     </RadzenColumn>
@@ -532,7 +540,9 @@
     private string allLoainvlFormat = "Tất cả";
     private bool isEditNVLDetail = false;
 
-    private List<NguyenVatLieu> DSNvlNhapXuatKho = new();
+    private List<NguyenVatLieu> DSNvlNhapKho = new();
+
+    private List<NguyenVatLieu> DSNvlXuatKho = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -803,22 +813,40 @@
         }
     }
 
-    // Nhap/Xuat kho dialog
+    // Nhap kho dialog
     private async Task OnOpenDialogNhapKho()
     {
-        if (DSNvlNhapXuatKho.Count > 0)
+        if (DSNvlNhapKho.Count > 0)
         {
-            await DialogService.OpenAsync<DialogNhap_Kho>(null, new Dictionary<string, object>() { { "DSNVLNhapXuatKho", DSNvlNhapXuatKho } },
+            await DialogService.OpenAsync<DialogNhap_Kho>(null, new Dictionary<string, object>() { { "DSachNVL_NhapKho", DSNvlNhapKho } },
             new DialogOptions() { ShowTitle = false, Width = "70%", Height = "100%", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
 
             // reset dsnvlnhapkho
-            DSNvlNhapXuatKho = new();
+            DSNvlNhapKho = new();
         }
         else
         {
             await DialogService.Alert($"<strong>Hãy chọn nguyên liệu cần nhập kho</strong> \n <i>(chuột phải vào danh sách nguyên liệu)</i>", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
         }
     }
+
+    // Xuat kho dialog
+    private async Task OnOpenDialogXuatKho()
+    {
+        if (DSNvlXuatKho.Count > 0)
+        {
+            await DialogService.OpenAsync<DialogXuat_Kho>(null, new Dictionary<string, object>() { { "DSachNVL_XuatKho", DSNvlXuatKho } },
+            new DialogOptions() { ShowTitle = false, Width = "70%", Height = "100%", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
+
+            // reset dsnvlxuatkho
+            DSNvlXuatKho = new();
+        }
+        else
+        {
+            await DialogService.Alert($"<strong>Hãy chọn nguyên liệu cần xuất kho</strong> \n <i>(chuột phải vào danh sách nguyên liệu)</i>", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+        }
+    }
+
 
     // Datagrid selected changed event
     private void OnDatagridSelectChanged(IList<NguyenVatLieu> selectedNgvatlieu)
@@ -858,43 +886,34 @@
 
         var fistItemSelectdNVL = SelectedNgVatLieu.FirstOrDefault();
 
-
         if (fistItemSelectdNVL != null)
         {
             // Save selected NVLid into static variable
             Common.SelectedNVLid = fistItemSelectdNVL.NVLID.Value;
 
-            var item = DSNvlNhapXuatKho.FirstOrDefault(nvl => nvl.NVLID.Value?.ToString() == fistItemSelectdNVL?.NVLID.Value?.ToString());
+            var itemNK = DSNvlNhapKho.FirstOrDefault(nvl => nvl.NVLID.Value?.ToString() == fistItemSelectdNVL?.NVLID.Value?.ToString());
 
-            if (item != null)
-            {
-                ContextMenuService.Open(args,
-                new List<ContextMenuItem> { new ContextMenuItem() { Text = "Đã có trong danh sách nhập/xuất kho", Value = 1, Icon = "warning" } }, (e) => { });
+            var itemXK = DSNvlXuatKho.FirstOrDefault(nvl => nvl.NVLID.Value?.ToString() == fistItemSelectdNVL?.NVLID.Value?.ToString());
 
-            }
-            else
-            {
-                ContextMenuService.Open(args,
-                new List<ContextMenuItem>{ new ContextMenuItem(){ Text = "Thêm vào danh sách nhập kho", Value = 1, Icon = "add" },
-                                            new ContextMenuItem(){ Text = "Thêm vào danh sách xuất kho", Value = 2, Icon = "add" }},
+            ContextMenuService.Open(args,
+                new List<ContextMenuItem>{ new ContextMenuItem(){ Text = ((itemNK == null)? "Thêm vào danh sách nhập kho" : "Đã có trong danh sách nhập kho"), Value = 1, Icon = ((itemNK == null)? "add" : "check") },
+                                            new ContextMenuItem(){ Text = ((itemXK == null)? "Thêm vào danh sách xuất kho" : "Đã có trong danh sách xuất kho"), Value = 2, Icon = ((itemXK == null)? "add" : "check") } },
                                             (e) =>
                                             {
-                                                if (e.Value.Equals(1))
+                                                if (e.Value.Equals(1) && itemNK == null)
                                                 {
                                                     // Them nvl vao ds nhap kho
-                                                    DSNvlNhapXuatKho.Add(fistItemSelectdNVL);
+                                                    DSNvlNhapKho.Add(fistItemSelectdNVL);
                                                 }
-                                                else if (e.Value.Equals(2))
+                                                else if (e.Value.Equals(2) && itemXK == null)
                                                 {
                                                     // Them nvl vao ds xuat kho
-                                                    DSNvlNhapXuatKho.Add(fistItemSelectdNVL);
+                                                    DSNvlXuatKho.Add(fistItemSelectdNVL);
                                                 }
 
                                                 StateHasChanged();
                                                 ContextMenuService.Close();
                                             });
-            }
         }
-
     }
 }
