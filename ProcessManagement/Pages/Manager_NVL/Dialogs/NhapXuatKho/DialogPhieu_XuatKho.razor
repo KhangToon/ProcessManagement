@@ -93,7 +93,7 @@
                                     </HeaderTemplate>
                                     <Template Context="nvl">
                                         @{
-                                            if (nvl.IsDuSoluongXuatKho)
+                                            if (nvl.IsChidinhDuSoluongXuatKho)
                                             {
                                                 <RadzenButton Icon="check" Text="Đã chỉ định SL" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Darker" Variant="Variant.Outlined"
                                                               Style="border-radius: 5px; --rz-icon-size: 18px; height: 30px; width: 100%; cursor: default; background-color: rgb(229,245,233);" />
@@ -211,9 +211,9 @@
                                                 <RadzenText Text="Vị trí hiện tại trong kho" Style="color: white; font-weight: 500; font-size: 16px"></RadzenText>
                                             </RadzenStack>
                                             <RadzenStack Visible="@(int.Parse(SelectedNVLofPXK.NVLXKSoLuongAll.Value?.ToString()?? "0") > 0)" Gap="10px" Style="height: contain; width: 100%; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                                <RadzenButton Visible=@(!SelectedNVLofPXK.IsDuSoluongXuatKho) Text="Chưa chỉ định đủ số lượng cần xuất kho" ButtonStyle="ButtonStyle.Warning" Size="ButtonSize.Small" Shade="Shade.Darker" Variant="Variant.Outlined"
+                                                <RadzenButton Visible=@(!SelectedNVLofPXK.IsChidinhDuSoluongXuatKho) Text="Chưa chỉ định đủ số lượng cần xuất kho" ButtonStyle="ButtonStyle.Warning" Size="ButtonSize.Small" Shade="Shade.Darker" Variant="Variant.Outlined"
                                                               Style="border-radius: 5px; --rz-icon-size: 18px; height: 20px; width: 100%; cursor: default; background-color: rgb(254,243,220);" />
-                                                <RadzenButton Visible=@(SelectedNVLofPXK.IsDuSoluongXuatKho) Icon="check" Text="Đã chỉ định đủ số lượng cần xuất kho" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Darker" Variant="Variant.Outlined"
+                                                <RadzenButton Visible=@(SelectedNVLofPXK.IsChidinhDuSoluongXuatKho) Icon="check" Text="Đã chỉ định đủ số lượng cần xuất kho" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Darker" Variant="Variant.Outlined"
                                                               Style="border-radius: 5px; --rz-icon-size: 18px; height: 20px; width: 100%; cursor: default; background-color: rgb(229,245,233);" />
                                             </RadzenStack>
                                             <RadzenStack Gap="5px" Orientation="Orientation.Vertical" Style=" height: contain; width: 100%; max-height: 350px; padding-right: 0;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
@@ -433,7 +433,7 @@
         // Kiem tra tong so luong chi dinh bang tong so luong can lay
         foreach (var nvlofpxk in PXK.DSNVLofPXKs)
         {
-            nvlofpxk.IsDuSoluongXuatKho = IsChidinhDuSoLuongXuatKho(nvlofpxk);
+            nvlofpxk.IsChidinhDuSoluongXuatKho = IsChidinhDuSoLuongXuatKho(nvlofpxk);
         }
 
         SelectedNVLofPXK = PXK.DSNVLofPXKs.FirstOrDefault(nvl => nvl.NVLPXKID.Value?.ToString() == seletedNVlpxkId?.ToString()) ?? new();
@@ -456,7 +456,7 @@
         // Kiem tra trang thai chi dinh vi tri cua listNVLofPXK
         foreach (var nvl in PXK.DSNVLofPXKs)
         {
-            if (nvl.IsDuSoluongXuatKho == false)
+            if (nvl.IsChidinhDuSoluongXuatKho == false)
             {
                 await DialogService.Alert($"Chưa chỉ định đầy đủ vị trí cho nguyên vật liệu ({nvl.TargetNgLieu.TenNVL.Value})", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
                 isAsignedSoluongXuatKho = false;
