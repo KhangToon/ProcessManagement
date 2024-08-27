@@ -301,7 +301,7 @@
 
                                                                                     @if (SelectedNgVatLieu != null)
                                                                                     {
-                                                                                        var dsvitri = SelectedNgVatLieu.FirstOrDefault()?.DSViTri;
+                                                                                        var dsvitri = SelectedNgVatLieu.FirstOrDefault()?.DSViTri.Where(vt => (int.TryParse(vt.VTNVLSoLuong.Value?.ToString(), out int slvt) ? slvt : 0) > 0).ToList();
 
                                                                                         if (dsvitri != null && dsvitri.Count > 0)
                                                                                         {
@@ -818,7 +818,7 @@
     {
         if (DSNvlNhapKho.Count > 0)
         {
-            await DialogService.OpenAsync<DialogPhieu_NhapKho>(null, new Dictionary<string, object>() { { "DSachNVL_NhapKho", DSNvlNhapKho } },
+            await DialogService.OpenAsync<DialogCreate_PhieuNhapKho>(null, new Dictionary<string, object>() { { "DSachNVL_NhapKho", DSNvlNhapKho } },
             new DialogOptions() { ShowTitle = false, Width = "70%", Height = "100%", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
 
             // reset dsnvlnhapkho
@@ -835,7 +835,7 @@
     {
         if (DSNvlXuatKho.Count > 0)
         {
-            await DialogService.OpenAsync<DialogPhieu_XuatKho>(null, new Dictionary<string, object>() { { "DSachNVL_XuatKho", DSNvlXuatKho } },
+            await DialogService.OpenAsync<DialogCreate_PhieuXuatKho>(null, new Dictionary<string, object>() { { "DSachNVL_XuatKho", DSNvlXuatKho } },
             new DialogOptions() { ShowTitle = false, Width = "70%", Height = "100%", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
 
             // reset dsnvlxuatkho

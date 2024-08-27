@@ -11,7 +11,9 @@ namespace ProcessManagement.Models.KHO_NVL.XuatKho
         public Propertyy NgayLapPXK { get; set; } = new() { DBName = Common.NgayLapPXK, Type = typeof(DateTime), AlowDatabase = true };
         public Propertyy GhiChuPXK { get; set; } = new() { DBName = Common.GhiChuPXK, Type = typeof(string), AlowDatabase = true };
         public Propertyy IsConfirmedPXK { get; set; } = new() { DBName = Common.IsConfirmedPXK, Type = typeof(int), AlowDatabase = true };
-        public Propertyy IsDonePXK { get; set; } = new() { DBName = Common.IsDonePXK, Type = typeof(int), AlowDatabase = true };
+        //public Propertyy IsDonePXK { get; set; } = new() { DBName = Common.IsDonePXK, Type = typeof(int), AlowDatabase = true };
+
+        public bool IsPXKDoneXuatKho = false; // Da load o SQLServices
 
         public List<NVLofPhieuXuatKho> DSNVLofPXKs { get; set; } = new();
 

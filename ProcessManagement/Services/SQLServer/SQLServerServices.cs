@@ -2149,7 +2149,34 @@ namespace ProcessManagement.Services.SQLServer
             return nguyenvatlieus;
         }
 
+        // Get list ngvatlieu ID
+        public List<int> GetListNVLIds(object? tenNVL)
+        {
+            List<int> listNVLids = new();
 
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT [{Common.NVLID}] FROM [{Common.TableNguyenVatLieu}] WHERE [{Common.TenNVL}] = '{tenNVL}'";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    _ = int.TryParse(reader[Common.NVLID]?.ToString(), out int nvlid) ? nvlid : 0;
+
+                    if (nvlid > 0)
+                    {
+                        listNVLids.Add(nvlid);
+                    }
+                }
+            }
+
+            return listNVLids;
+        }
 
         // Lấy danh sách ID của danh sách nguyên vật liệu
         public List<int> GetlistNgVatLieuId()
@@ -2676,6 +2703,34 @@ namespace ProcessManagement.Services.SQLServer
             }
         }
 
+        // Get list vitriluutru ID
+        public List<int> GetListVTriIds(object? mavitri)
+        {
+            List<int> listVitriIds = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT [{Common.VTID}] FROM [{Common.TableViTriLuuTru}] WHERE [{Common.MaViTri}] = '{mavitri}'";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    _ = int.TryParse(reader[Common.VTID]?.ToString(), out int vitriID) ? vitriID : 0;
+
+                    if (vitriID > 0)
+                    {
+                        listVitriIds.Add(vitriID);
+                    }
+                }
+            }
+
+            return listVitriIds;
+        }
 
         // Lấy thông tin vị trí lưu trữ NVL
         public VitriLuuTru GetViTriLuuTruByID(object? vtltID)
@@ -3036,6 +3091,65 @@ namespace ProcessManagement.Services.SQLServer
             return (result, errorMess);
         }
 
+        // Update so luong nguyen lieu by ID
+        public (int, string) UpdateSoluongNgVatLieuById(object? vitriofnvlId, object? tonkho)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            if (vitriofnvlId == null || tonkho == null) { return (result, errorMess); }
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+
+                    string sqlQuery = $"UPDATE {Common.TableVitriOfNVL} SET [{Common.SoLuong}] = '{tonkho}' WHERE [{Common.VTofNVLID}] = '{vitriofnvlId}'";
+
+                    var command = new SqlCommand(sqlQuery, connection);
+
+                    result = command.ExecuteNonQuery();
+
+                    connection.Close();
+
+                    return (result, string.Empty);
+                }
+            }
+            catch (Exception ex)
+            {
+                string err = ex.Message;
+
+                return (-1, err);
+            }
+        }
+
+        // Remove VitriofNVL
+        public (int, string) DeleteViTriOfNgVatLieu(object? vtofnvllid)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"DELETE FROM {Common.TableVitriOfNVL} WHERE [{Common.VTofNVLID}] = '{vtofnvllid}'";
+
+                object rs = command.ExecuteScalar();
+
+                result = Convert.ToInt32(rs);
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+            return (result, errorMess);
+        }
         #endregion
 
         // ------------------------------------------------------------------------------------- //
@@ -3703,6 +3817,7 @@ namespace ProcessManagement.Services.SQLServer
                         {
                             nvlpnk.IsNhapKhoDone = false; break;
                         }
+                        else if (islenhdone == 1) { nvlpnk.IsNhapKhoDone = true; }
                     }
                     // Load target Nguyenvatlieu
                     nvlpnk.TargetNgLieu = GetNguyenVatLieuByID(nvlpnk.NVLID.Value);
@@ -3986,6 +4101,8 @@ namespace ProcessManagement.Services.SQLServer
                 object rs = command.ExecuteScalar();
 
                 result = Convert.ToInt32(rs);
+
+                return (result, errorMess);
             }
             catch (Exception ex)
             {
@@ -3993,7 +4110,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 return (-1, errorMess);
             }
-            return (result, errorMess);
+
         }
 
         // Get phiếu xuất kho by ID
@@ -4029,6 +4146,18 @@ namespace ProcessManagement.Services.SQLServer
             // Load danh sach nguyen vat lieu pxk
             phieuxuatkho.DSNVLofPXKs = GetListNVLofPXKs(pxkid);
 
+            // Check PXK isdone
+            foreach (var nvlofpxk in phieuxuatkho.DSNVLofPXKs)
+            {
+                if (!nvlofpxk.IsXuatKhoDone)
+                {
+                    phieuxuatkho.IsPXKDoneXuatKho = false; break;
+                }
+                else if (nvlofpxk.IsXuatKhoDone)
+                {
+                    phieuxuatkho.IsPXKDoneXuatKho = true;
+                }
+            }
             return phieuxuatkho;
         }
 
@@ -4063,6 +4192,19 @@ namespace ProcessManagement.Services.SQLServer
             }
             // Load danh sach nguyen vat lieu pxk
             phieuxuatkho.DSNVLofPXKs = GetListNVLofPXKs(phieuxuatkho.PXKID.Value);
+
+            // Check PXK isdone
+            foreach (var nvlofpxk in phieuxuatkho.DSNVLofPXKs)
+            {
+                if (!nvlofpxk.IsXuatKhoDone)
+                {
+                    phieuxuatkho.IsPXKDoneXuatKho = false; break;
+                }
+                else if (nvlofpxk.IsXuatKhoDone)
+                {
+                    phieuxuatkho.IsPXKDoneXuatKho = true;
+                }
+            }
 
             return phieuxuatkho;
         }
@@ -4100,11 +4242,54 @@ namespace ProcessManagement.Services.SQLServer
                     // Load danh sach nguyen vat lieu pxk
                     phieuxuatkho.DSNVLofPXKs = GetListNVLofPXKs(phieuxuatkho.PXKID.Value);
 
+                    // Check PXK isdone
+                    foreach (var nvlofpxk in phieuxuatkho.DSNVLofPXKs)
+                    {
+                        if (!nvlofpxk.IsXuatKhoDone)
+                        {
+                            phieuxuatkho.IsPXKDoneXuatKho = false; break;
+                        }
+                        else if (nvlofpxk.IsXuatKhoDone)
+                        {
+                            phieuxuatkho.IsPXKDoneXuatKho = true;
+                        }
+                    }
+
                     dsPXKho.Add(phieuxuatkho);
                 }
             }
 
             return dsPXKho;
+        }
+
+        // Get phieu xuat kho ID by maPXK
+        public List<int> GetListPXKIds(object? maPXK)
+        {
+            List<int> listPXKids = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT [{Common.PXKID}] FROM [{Common.Table_PhieuXuatKho}] WHERE [{Common.MaPhieuXuatKho}] = '{maPXK}'";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+
+                    _ = int.TryParse(reader[Common.PXKID]?.ToString(), out int pxkid) ? pxkid : 0;
+
+                    if (pxkid > 0)
+                    {
+                        listPXKids.Add(pxkid);
+                    }
+                }
+            }
+
+            return listPXKids;
         }
 
         // Update thong tin Phieu xuat kho
@@ -4269,6 +4454,10 @@ namespace ProcessManagement.Services.SQLServer
                         {
                             nvlpxk.IsXuatKhoDone = false; break;
                         }
+                        else if (islenhdone == 1)
+                        {
+                            nvlpxk.IsXuatKhoDone = true;
+                        }
                     }
 
                     // Load target Nguyenvatlieu
@@ -4339,7 +4528,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"SELECT * FROM [{Common.Table_LenhXuatKho}] WHERE [{Common.PXKID}] = '{inputLXK.PXKID.Value}' AND [{Common.NVLPXKID}] = '{inputLXK.NVLPXKID.Value}' AND [{Common.VTID}] = '{inputLXK.VTID.Value}'";
+                command.CommandText = $"SELECT * FROM [{Common.Table_LenhXuatKho}] WHERE [{Common.PXKID}] = '{inputLXK.PXKID.Value}' AND [{Common.NVLID}] = '{inputLXK.NVLID.Value}' AND [{Common.VTID}] = '{inputLXK.VTID.Value}'";
 
                 using var reader = command.ExecuteReader();
 
@@ -4525,6 +4714,37 @@ namespace ProcessManagement.Services.SQLServer
             return (result, errorMess);
         }
 
+        // Update lenh xuat kho isdone status
+        public (int, string) UpdateLenhXuatKhoStatus(object? lenhxkId, object lxkstatus)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            if (lenhxkId == null || lxkstatus == null) { return (result, errorMess); }
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+
+                    string sqlQuery = $"UPDATE {Common.Table_LenhXuatKho} SET [{Common.LXKIsDone}] = '{lxkstatus}' WHERE [{Common.LenhXKID}] = '{lenhxkId}'";
+
+                    var command = new SqlCommand(sqlQuery, connection);
+
+                    result = command.ExecuteNonQuery();
+
+                    connection.Close();
+
+                    return (result, string.Empty);
+                }
+            }
+            catch (Exception ex)
+            {
+                string err = ex.Message;
+
+                return (-1, err);
+            }
+        }
         #endregion
     }
 }

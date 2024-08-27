@@ -11,6 +11,8 @@
 @inject TooltipService TooltipService
 @inject SQLServerServices SQLServerServices
 
+
+
 <RadzenCard Variant="Variant.Filled" Style="height: 100%; width: 100%; padding: 10px;">
     <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style=" height: 100%; width: 100%; padding: 0px; padding-bottom: 10px " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
         <!--Header Phieu Xuat Kho-->
@@ -301,6 +303,7 @@
         <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding-top: 10px; border-top: var(--rz-grid-cell-border) " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
             <RadzenStack Visible=@isAllowCreatePXK Gap="10px" Style="height: 100%; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                 <RadzenButton Visible=@(!isPXKSaved) Click="@( async () => { await ButtonSavePhieuXuatKho();})" Style="width: 120px;" Icon="check" Text="Lưu phiếu" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Dark" Variant="Variant.Flat" />
+                <RadzenButton Visible=@(isPXKSaved) Style="width: contain; cursor: default" Icon="check" Text="Phiếu đã được lưu" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Success" Shade="Shade.Dark" Variant="Variant.Flat" />
             </RadzenStack>
             <RadzenStack Gap="10px" Style="height: 100%; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                 <RadzenButton Click="@(async () => { await ButtonClosePhieuXuatKho();})" Style="width: 120px;" Icon="close" Text="@(((isPXKSaved)? "Đóng" : "Hủy phiếu"))" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" />
@@ -383,35 +386,40 @@
                             // Create lenh xuat kho tuong ung voi Vitriluu NVL
                             foreach (var vitriofnvl in nvlpxk.TargetNgLieu.DSViTri)
                             {
-                                LenhXuatKho lenhXuatkho = new()
+                                // Remove vitriofnvl co so luong = 0
+                                _ = int.TryParse(vitriofnvl.VTNVLSoLuong.Value?.ToString(), out int sltaivitri) ? sltaivitri : 0;
+                                if (sltaivitri > 0)
+                                {
+                                    LenhXuatKho lenhXuatkho = new()
+                                        {
+                                            PXKID = { Value = PXK.PXKID.Value },
+                                            NVLPXKID = { Value = newNVLpxkID },
+                                            NVLID = { Value = nvlpxk.NVLID.Value },
+                                            VTID = { Value = vitriofnvl.VTID.Value },
+                                            LXKSoLuong = { Value = 0 },
+                                            LXKIsDone = { Value = 0 },
+                                            ViTriofNVL = vitriofnvl
+                                        };
+
+                                    // Insert lenh xuat kho to DB
+                                    (int lxkId, string insertLxkError) = SQLServerServices.InsertLenhXuatKho(lenhXuatkho);
+
+                                    if (lxkId == -1)
                                     {
-                                        PXKID = { Value = PXK.PXKID.Value },
-                                        NVLPXKID = { Value = newNVLpxkID },
-                                        NVLID = { Value = nvlpxk.NVLID.Value },
-                                        VTID = { Value = vitriofnvl.VTID.Value },
-                                        LXKSoLuong = { Value = 0 },
-                                        LXKIsDone = { Value = 0 },
-                                        ViTriofNVL = vitriofnvl
-                                    };
+                                        isAllowCreatePXK = false;
+                                        // Delete PXK when error
+                                        await DeletePhieuXuatKho();
 
-                                // Insert lenh xuat kho to DB
-                                (int lxkId, string insertLxkError) = SQLServerServices.InsertLenhXuatKho(lenhXuatkho);
-
-                                if (lxkId == -1)
-                                {
-                                    isAllowCreatePXK = false;
-                                    // Delete PXK when error
-                                    await DeletePhieuXuatKho();
-
-                                    await DialogService.Alert($"Lỗi: không thể thêm lệnh xuất kho cho phiếu ({insertLxkError})", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
-                                    break;
-                                }
-                                else
-                                {
-                                    // Gan lenh xk Id
-                                    lenhXuatkho.LenhXKID.Value = lxkId;
-                                    // Them vao dslenhxkho
-                                    nvlpxk.DSLenhXKs.Add(lenhXuatkho);
+                                        await DialogService.Alert($"Lỗi: không thể thêm lệnh xuất kho cho phiếu ({insertLxkError})", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        // Gan lenh xk Id
+                                        lenhXuatkho.LenhXKID.Value = lxkId;
+                                        // Them vao dslenhxkho
+                                        nvlpxk.DSLenhXKs.Add(lenhXuatkho);
+                                    }
                                 }
                             }
                         }
@@ -422,6 +430,13 @@
             }
         }
         else isAllowCreatePXK = false;
+
+        // Selelect first row
+        if (PXK.DSNVLofPXKs.Count > 0)
+        {
+            SelectedNVLofPXK = PXK.DSNVLofPXKs.FirstOrDefault() ?? new();
+            DatagridSelectedNVLofPXK = new List<NVLofPhieuXuatKho>() { SelectedNVLofPXK };
+        }
 
         await base.OnInitializedAsync();
     }

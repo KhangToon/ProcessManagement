@@ -308,6 +308,9 @@ namespace ProcessManagement.Commons
         // NVL management static variable
         public static object? SelectedNVLid;
 
+        // PhieuXuatKho static variable
+        public static object? SelectedPXKID;
+
         public static class Tentruyxuat
         {
             public const string VitriKe = "vitrike";

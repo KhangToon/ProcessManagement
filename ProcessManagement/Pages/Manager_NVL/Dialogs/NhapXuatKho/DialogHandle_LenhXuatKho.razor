@@ -1,0 +1,288 @@
+﻿@using ProcessManagement.Commons
+@using ProcessManagement.Models.KHO_NVL
+@using ProcessManagement.Services.SQLServer
+@using ProcessManagement.Services.QRCodes
+@using Radzen.Blazor
+@using Radzen
+@using ProcessManagement.Models;
+@using ProcessManagement.Models.KHO_NVL.XuatKho
+
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject TooltipService TooltipService
+@inject SQLServerServices SQLServerServices
+@inject QRCodeServices QRCodeServices
+
+<RadzenCard Variant="Variant.Filled" Style="height: contain; width: 100%; padding: 10px;">
+    <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style=" height: contain; width: 100%; padding: 0px; padding-bottom: 10px; padding-top: 10px " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+        <RadzenStack Style="height: contain; width: 100%; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+            <RadzenStack Gap="20px" Style="height: contain; width: 220px; border-radius: 5px; background-color: var(--rz-success-lighter); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                <RadzenText Text="@($"LỆNH XUẤT KHO")" Style="font-weight: 600; font-size: 16px; color: darkgreen;"></RadzenText>
+            </RadzenStack>
+            <RadzenStack Gap="10px" Style="height: contain; width: contain; border-radius: 5px; padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                <RadzenText Text="@($"Tên nguyên liệu:")" Style="font-weight: 600; font-size: 16px; color: black; font-style: italic"></RadzenText>
+                <RadzenText Text="@($"{LXK?.ViTriofNVL.NgLieuInfor.TenNVL.Value?.ToString()}")" Style="font-weight: bold; font-size: 16px; color: black; font-style: italic"></RadzenText>
+            </RadzenStack>
+            <RadzenStack Gap="10px" Style="height: contain; width: contain; border-radius: 5px; padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                <RadzenText Text="@($"Số lượng xuất:")" Style="font-weight: 600; font-size: 16px; color: black; font-style: italic"></RadzenText>
+                <RadzenText Text="@($"{LXK?.LXKSoLuong.Value?.ToString()} ({LXK?.ViTriofNVL.NgLieuInfor.DonViTinh.Value?.ToString()})")" Style="font-weight: bold; font-size: 16px; color: black; font-style: italic"></RadzenText>
+            </RadzenStack>
+            <RadzenStack Gap="20px" Style="height: contain; width: contain; border-radius: 5px; background-color: var(--rz-primary-lighter); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                <RadzenRadioButtonList Value=@usingScanner TValue="bool" ValueChanged=@(args => usingScanner = args)>
+                    <Items>
+                        <RadzenRadioButtonListItem Text="Sử dụng USB Scanner" Value="true" />
+                        <RadzenRadioButtonListItem Text="Sử dụng Handy Scanner" Value="false" />
+                    </Items>
+                </RadzenRadioButtonList>
+            </RadzenStack>
+        </RadzenStack>
+
+        <!--Scan ma phieu xuat kho-->
+        <RadzenRow class="rowbackground-style" Gap="10px" Style="height: contain; width: 100%; padding-top: 10px; border-radius: 0; overflow-y: auto; border-top: var(--rz-grid-cell-border);">
+            <RadzenColumn Size="12" SizeMD="4" Style="height: 100%; width: 100%; border-right: var(--rz-grid-cell-border); padding-right: 10px">
+                <RadzenCard Variant="Variant.Flat" Style="height: 100%; width: 100%; padding: 10px;">
+                    <RadzenStack Gap="10px" Style="height: contain; width: 100%;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                        <RadzenStack Gap="20px" Style="height: contain; width: 100%; border-radius: 5px; background-color: var(--rz-secondary-lighter); padding: 5px; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                            <RadzenText Text="@($"Mã phiếu xuất kho: ")" Style="font-weight: 600; font-size: 16px; color: black;"></RadzenText>
+                            <RadzenText Text="@($"{MaPXK}")" Style="font-weight: 600; font-size: 18px; color: darkred;"></RadzenText>
+                        </RadzenStack>
+                        <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: contain; padding: 10px; margin-top: 10px; border-radius: 0">
+                            <RadzenStack Style="height: 100%; width: contain" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                @{
+                                    string qrBase64string = QRCodeServices.GenerateQRCode(MaPXK, 150);
+                                    <img style="border-radius: 10px;" src="@($"data:image/png;base64,{qrBase64string}")" alt="QR Code">
+                                }
+                            </RadzenStack>
+                        </RadzenCard>
+
+                        <RadzenStack Gap="5" Style="height: contain; width: 100%; padding-bottom: 5px; padding-top: 5px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                            <RadzenStack Style="height: contain; width: 100%">
+                                <RadzenText Text="Quét mã phiếu xuất kho" Style="font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
+                            </RadzenStack>
+                            <RadzenStack Style="height: contain; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenTextBox Placeholder="*Kết quả quét mã" @ref="reftxtMaPXK"
+                                               Value="@scanMaPXK" ValueChanged="@((args) => { scanMaPXK = args; } )"
+                                               Style="font-size: 16px; height: contain; border-width: 1px; width: 100%;"></RadzenTextBox>
+                            </RadzenStack>
+                        </RadzenStack>
+                    </RadzenStack>
+                </RadzenCard>
+            </RadzenColumn>
+
+            <!--Scan vi tri luu tru-->
+            <RadzenColumn Size="12" SizeMD="4" Style="height: 100%; width: 100%; border-right: var(--rz-grid-cell-border); padding-right: 10px">
+                <RadzenCard Variant="Variant.Flat" Style="height: 100%; width: 100%; padding: 10px;">
+                    <RadzenStack Gap="10px" Style="height: contain; width: 100%;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                        <RadzenStack Gap="20px" Style="height: contain; width: 100%; border-radius: 5px; background-color: var(--rz-secondary-lighter); padding: 5px; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                            <RadzenText Text="@($"Mã vị trí: ")" Style="font-weight: 600; font-size: 16px; color: black;"></RadzenText>
+                            <RadzenText Text="@($"{LXK.ViTriofNVL.VitriInfor.MaViTri.Value?.ToString()}")" Style="font-weight: 600; font-size: 18px; color: darkred;"></RadzenText>
+                        </RadzenStack>
+                        <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: contain; padding: 10px; margin-top: 10px; border-radius: 0">
+                            <RadzenStack Style="height: 100%; width: contain" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                @{
+                                    string qrBase64string = QRCodeServices.GenerateQRCode(LXK.ViTriofNVL.VitriInfor.MaViTri.Value?.ToString() ?? string.Empty, 150);
+                                    <img style="border-radius: 10px;" src="@($"data:image/png;base64,{qrBase64string}")" alt="QR Code">
+                                }
+                            </RadzenStack>
+                        </RadzenCard>
+
+                        <RadzenStack Gap="5" Style="height: contain; width: 100%; padding-bottom: 5px; padding-top: 5px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                            <RadzenStack Style="height: contain; width: 100%">
+                                <RadzenText Text="Quét mã vị trí" Style="font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
+                            </RadzenStack>
+                            <RadzenStack Style="height: contain; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenTextBox Placeholder="*Kết quả quét mã" @ref="reftxtMaViTri"
+                                               Value="@scanMaViTri" ValueChanged="@((args) => { scanMaViTri = args; } )"
+                                               Style="font-size: 16px; height: contain; border-width: 1px; width: 100%;"></RadzenTextBox>
+                            </RadzenStack>
+                        </RadzenStack>
+                    </RadzenStack>
+                </RadzenCard>
+            </RadzenColumn>
+
+            <!--Scan ma nguyen lieu-->
+            <RadzenColumn Size="12" SizeMD="4" Style="height: 100%; width: 100%;">
+                <RadzenCard Variant="Variant.Flat" Style="height: 100%; width: 100%; padding: 10px;">
+                    <RadzenStack Gap="10px" Style="height: contain; width: 100%;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                        <RadzenStack Gap="20px" Style="height: contain; width: 100%; border-radius: 5px; background-color: var(--rz-secondary-lighter); padding: 5px; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                            <RadzenText Text="@($"Mã nguyên liệu: ")" Style="font-weight: 600; font-size: 16px; color: black;"></RadzenText>
+                            <RadzenText Text="@($"{LXK.ViTriofNVL.NgLieuInfor.TenNVL.Value?.ToString()}")" Style="font-weight: 600; font-size: 18px; color: darkred;"></RadzenText>
+                        </RadzenStack>
+                        <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: contain; padding: 10px; margin-top: 10px; border-radius: 0">
+                            <RadzenStack Style="height: 100%; width: contain" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                @{
+                                    string qrBase64string = QRCodeServices.GenerateQRCode(LXK.ViTriofNVL.NgLieuInfor.TenNVL.Value?.ToString() ?? string.Empty, 150);
+                                    <img style="border-radius: 10px;" src="@($"data:image/png;base64,{qrBase64string}")" alt="QR Code">
+                                }
+                            </RadzenStack>
+                        </RadzenCard>
+
+                        <RadzenStack Gap="5" Style="height: contain; width: 100%; padding-bottom: 5px; padding-top: 5px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                            <RadzenStack Style="height: contain; width: 100%">
+                                <RadzenText Text="Quét mã nguyên liệu" Style="font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
+                            </RadzenStack>
+                            <RadzenStack Style="height: contain; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenTextBox Placeholder="*Kết quả quét mã" @ref="reftxtMaViTri"
+                                               Value="@scanMaNVL" ValueChanged="@((args) => { scanMaNVL = args; } )"
+                                               Style="font-size: 16px; height: contain; border-width: 1px; width: 100%;"></RadzenTextBox>
+                            </RadzenStack>
+                        </RadzenStack>
+                    </RadzenStack>
+                </RadzenCard>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding-top: 10px; border-top: var(--rz-grid-cell-border) " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+            <RadzenStack Gap="10px" Style="height: 100%; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                @if (scanLXK.LXKIsDone.Value?.ToString() == "1")
+                {
+                    <RadzenButton Style="width: contain; cursor: default" Icon="check" Text="Xuất kho thành công" ButtonStyle="ButtonStyle.Success" Shade="Shade.Dark" Size="ButtonSize.Small" Variant="Variant.Flat" />
+                }
+                else
+                {
+                    <RadzenButton Click="@(async () => { await OnConfirmExcuteLenhXuatKho(scanMaPXK, scanMaViTri, scanMaNVL);})" Style="width: contain;" Icon="arrow_outward" Text="Tiến hành xuất kho" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Size="ButtonSize.Small" Variant="Variant.Flat" />
+                }
+            </RadzenStack>
+            <RadzenStack Gap="10px" Style="height: 100%; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                <RadzenButton Click="@(() => { DialogService.Close();})" Style="width: 120px;" Icon="close" Text="Đóng" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" />
+            </RadzenStack>
+        </RadzenStack>
+    </RadzenStack>
+</RadzenCard>
+
+@code {
+    [Parameter]
+    public LenhXuatKho LXK { get; set; } = new();
+
+    [Parameter]
+    public string MaPXK { get; set; } = string.Empty;
+
+    private bool usingScanner = true;
+
+    private RadzenTextBox reftxtMaPXK = new();
+    private RadzenTextBox reftxtMaNVL = new();
+    private RadzenTextBox reftxtMaViTri = new();
+    private int focusIndex = 1;
+
+    private LenhXuatKho scanLXK = new();
+    private string scanMaPXK = string.Empty;
+    private string scanMaNVL = string.Empty;
+    private string scanMaViTri = string.Empty;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (focusIndex == 1)
+        {
+            await reftxtMaPXK.FocusAsync();
+        }
+        else if (focusIndex == 2)
+        {
+            await reftxtMaNVL.FocusAsync();
+        }
+        else if (focusIndex == 3)
+        {
+            await reftxtMaViTri.FocusAsync();
+        }
+    }
+
+    private async Task OnConfirmExcuteLenhXuatKho(string maphieu, string mavitri, string tennvl)
+    {
+        if (String.IsNullOrEmpty(maphieu) || String.IsNullOrEmpty(mavitri) || String.IsNullOrEmpty(tennvl))
+        {
+            await DialogService.Alert($"Hãy quét đầy đủ thông tin!", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+            return;
+        }
+
+        // Load phieu xuat kho id
+        List<int> pxkIds = SQLServerServices.GetListPXKIds(maphieu.Trim());
+        if (pxkIds.Count == 0) { return; }
+        int scanpxkID = pxkIds[0];
+
+
+        // Load nvl id
+        List<int> nvlIds = SQLServerServices.GetListNVLIds(tennvl.Trim());
+        if (nvlIds.Count == 0) { return; }
+        int scannvlID = nvlIds[0];
+
+        // Load vitri ID
+        List<int> vitriIds = SQLServerServices.GetListVTriIds(mavitri.Trim());
+        if (vitriIds.Count == 0) { return; }
+        int scanvitriID = vitriIds[0];
+
+        if (scanpxkID == 0 || scannvlID == 0 || scanvitriID == 0)
+        {
+            return;
+        }
+
+        // Get scan lenh xuat kho
+        LenhXuatKho temLXK = new() { PXKID = { Value = scanpxkID }, NVLID = { Value = scannvlID }, VTID = { Value = scanvitriID } };
+
+        scanLXK = SQLServerServices.GetLenhXuatKho(temLXK);
+        scanLXK.ViTriofNVL = LXK.ViTriofNVL;
+
+        if (scanLXK.LenhXKID.Value == null)
+        {
+            return;
+        }
+
+        // Update so luong nguyen vat lieu
+        int soluongXuatdi = int.TryParse(scanLXK.LXKSoLuong.Value?.ToString(), out int slxuat) ? slxuat : 0;
+
+        // Tinh so luong hien co cua nvl o vitri
+        int soluongHientai = int.TryParse(scanLXK.ViTriofNVL.VTNVLSoLuong.Value?.ToString(), out int slht) ? slht : 0;
+
+        // gan so luong sau khi xuat cho vi tri da luu
+        int newtonkho = soluongHientai - soluongXuatdi;
+
+        if (newtonkho < 0)
+        {
+            return;
+        }
+
+
+        // Check trang thai lenh (da hoan thanh hay chua)
+        _ = int.TryParse(scanLXK.LXKIsDone.Value?.ToString(), out int scanlxkIsdone) ? scanlxkIsdone : -1;
+        if (scanlxkIsdone != 0)
+        {
+            return;
+        }
+
+        // Update lenh xuat kho status
+        (int updatelxkResult, string updatelxkError) = SQLServerServices.UpdateLenhXuatKhoStatus(scanLXK.LenhXKID.Value, 1);
+
+        if (updatelxkResult == -1)
+        {
+            return;
+        }
+        else
+        {
+            // update status to UI
+            scanLXK.LXKIsDone.Value = 1;
+
+            // Update so luong vi tri da co cua nvl
+            (int updateVTofNVLresult, string updateVTofNVLerror) = SQLServerServices.UpdateSoluongNgVatLieuById(scanLXK.ViTriofNVL.VTofNVLID.Value, newtonkho);
+
+            if (updateVTofNVLresult == -1)
+            {
+                // Update lenh xuat kho status khi loi
+                (updatelxkResult, updatelxkError) = SQLServerServices.UpdateLenhXuatKhoStatus(scanLXK.LenhXKID.Value, 0);
+                return;
+            }
+
+            ShowNotification("Đã xuất kho!", NotificationSeverity.Success, 2000);
+        }
+    }
+
+    // Notification
+    private void ShowNotification(string message, NotificationSeverity notifytype, double time)
+    {
+        NotificationMessage notify = new NotificationMessage
+            {
+                Style = "position: fixed; top: 0; right: 0;",
+                Severity = notifytype,
+                Summary = message,
+                Duration = time
+            };
+
+        NotificationService.Notify(notify);
+    }
+}
