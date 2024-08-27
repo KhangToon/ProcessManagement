@@ -262,7 +262,6 @@
                                                                     </RadzenStack>
                                                                 </RadzenStack>
                                                                 <RadzenStack Style="width: 25%; height: contain; border-left: var(--rz-grid-cell-border); border-right: var(--rz-grid-cell-border); padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-
                                                                     <RadzenNumeric Visible="@(lxk.isEditingLXK)" Placeholder="@($"*Nhập số lượng")" TValue="int" TextAlign=TextAlign.Center Disabled="@(!lxk.isEditingLXK)"
                                                                                    Value="@SLLXkhoTake" Min="0" Max="SLnvlhiencoTaivitri"
                                                                                    ValueChanged="@((args) => { lxk.LXKSoLuong.Value = args; })" Format="@($"0 ({SelectedNVLofPXK.TargetNgLieu.DonViTinh.Value?.ToString()})")"
@@ -476,6 +475,18 @@
                 await DialogService.Alert($"Chưa chỉ định đầy đủ vị trí cho nguyên vật liệu ({nvl.TargetNgLieu.TenNVL.Value})", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
                 isAsignedSoluongXuatKho = false;
                 break;
+            }
+            else
+            {
+                // Remove lenh xuat kho (vi tri luu khac cua nvl) co so luong xuat bang 0
+                foreach (var lxk in nvl.DSLenhXKs)
+                {
+                    if (lxk.LXKSoLuong.Value?.ToString() == "0")
+                    {
+                        SQLServerServices.DeleteLenhXuatKho(lxk.LenhXKID.Value);
+                    }
+                }
+
             }
         }
 
