@@ -11,6 +11,8 @@ namespace ProcessManagement.Models.KHO_NVL.NhapKho
         public Propertyy NVLNKSoLuongAll { get; set; } = new() { DBName = Common.NVLNKSoLuongAll, Type = typeof(int), AlowDatabase = true, AlowDisplay = false, DispDatagrid = false };
         public List<LenhNhapKho> DSLenhNKs { get; set; } = new();
 
+        public bool IsChidinhDuSoluongNhapKho = false;
+
         public NguyenVatLieu TargetNgLieu { get; set; } = new();
 
         public bool IsAsignedVitri = false;

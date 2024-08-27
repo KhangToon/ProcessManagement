@@ -12,6 +12,8 @@ namespace ProcessManagement.Models.KHO_NVL.NhapKho
         public Propertyy LNKSoLuong { get; set; } = new() { DBName = Common.LNKSoLuong, Type = typeof(int), AlowDatabase = true };
         public Propertyy LNKIsDone { get; set; } = new() { DBName = Common.LNKIsDone, Type = typeof(int), AlowDatabase = true };
 
+        public ViTriofNVL ViTriofNVL { get; set; } = new(); // Chi dung cho phieu nhap kho
+
         public VitriLuuTru TagertVitri { get; set; } = new();
 
         public List<Propertyy> GetPropertiesValues()

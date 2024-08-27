@@ -310,6 +310,7 @@ namespace ProcessManagement.Commons
 
         // PhieuXuatKho static variable
         public static object? SelectedPXKID;
+        public static object? SelectedPNKID;
 
         public static class Tentruyxuat
         {

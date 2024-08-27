@@ -3652,6 +3652,59 @@ namespace ProcessManagement.Services.SQLServer
             return phieunhapkho;
         }
 
+        // Get list phieu nhap kho
+        public List<PhieuNhapKho> GetListPhieuNhapKho()
+        {
+            List<PhieuNhapKho> dsPNKho = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_PhieuNhapKho}]";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    PhieuNhapKho phieunhapkho = new();
+
+                    List<Propertyy> rowitems = phieunhapkho.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue.ToString()?.Trim();
+                    }
+
+                    // Load danh sach nguyen vat lieu pnk
+                    phieunhapkho.DSNVLofPNKs = GetListNVLofPNKs(phieunhapkho.PNKID.Value);
+
+                    // Check PNK isdone
+                    foreach (var nvlofpnk in phieunhapkho.DSNVLofPNKs)
+                    {
+                        if (!nvlofpnk.IsNhapKhoDone)
+                        {
+                            phieunhapkho.IsPXKDoneNhapKho = false; break;
+                        }
+                        else if (nvlofpnk.IsNhapKhoDone)
+                        {
+                            phieunhapkho.IsPXKDoneNhapKho = true;
+                        }
+                    }
+
+                    dsPNKho.Add(phieunhapkho);
+                }
+            }
+
+            return dsPNKho;
+        }
+
         // Update thong tin Phieu nhap kho
         public (int, string) UpdatePhieuNhapKhoInfor(PhieuNhapKho phieuNK)
         {

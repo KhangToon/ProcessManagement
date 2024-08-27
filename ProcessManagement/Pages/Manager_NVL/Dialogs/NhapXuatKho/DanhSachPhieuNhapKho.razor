@@ -1,5 +1,242 @@
-﻿<h3>DanhSachPhieuNhapKho</h3>
+﻿@using ProcessManagement.Commons
+@using ProcessManagement.Models.KHO_NVL
+@using ProcessManagement.Models.KHO_NVL.NhapKho
+@using ProcessManagement.Models.KHO_NVL.XuatKho
+@using ProcessManagement.Services.SQLServer
+@using Radzen.Blazor
+@using Radzen
+@using ProcessManagement.Models
+
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject TooltipService TooltipService
+@inject SQLServerServices SQLServerServices
+
+<style>
+    .pnkho_IsSelected {
+        border-style: solid;
+        border-width: 2px;
+        border-color: green;
+    }
+</style>
+
+<RadzenStack Style="height: contain; width: 100%; padding-bottom: 5px; padding-left: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+    <RadzenStack Style="height: 100%; width: 20%; border-radius: 10px; background-color: var(--rz-success-lighter); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+        <RadzenText Text="KẾ HOẠCH NHẬP KHO" Style="color: green; font-weight: 600; font-size: 18px"></RadzenText>
+    </RadzenStack>
+    <RadzenStack Gap="15px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: 100%; width: 60%;">
+        <RadzenTextBox @oninput="@((args) => GetFilterDSachKHNhapKho(args?.Value?.ToString()?? string.Empty))" Placeholder="Nhập mã phiếu nhập kho để tìm kiếm" Style="border-radius: 20px; padding-left: 20px; border-width: 2px; border-color: var(--rz-primary-light); width: 50% "></RadzenTextBox>
+        <RadzenButton Icon="search" ButtonStyle="ButtonStyle.Primary" Style="border-radius: 20px;" />
+        <RadzenButton Click="(async () => {await LoadDSachPhieuNhapKho(); ReSelectPhieuNhapKho();})" Style="border-radius: 20px;" Icon="autorenew" ButtonStyle="ButtonStyle.Primary" />
+    </RadzenStack>
+</RadzenStack>
+<RadzenRow Gap="10px" Style="height: 100%; width: 100%; border-top: var(--rz-grid-cell-border); padding: 0;">
+    <RadzenColumn Size="12" SizeMD="3" Style="height: contain; width: 100%;">
+        <RadzenStack Gap="0px" Style="height: contain; width: 100%;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start">
+            <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding: 10px; padding-left: 10px; border-bottom: var(--rz-grid-cell-border) " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                <RadzenText Text="Danh sách phiếu nhập kho" Style="color: darkred; font-weight: 600; font-size: 17px; height: contain; width: contain; font-style: italic;"></RadzenText>
+                <RadzenText Text="@($"( {DSPhieuNKs.Count} phiếu )")" Style="color: black; font-weight: 600; font-size: 16px; height: contain; width: contain; font-style: italic;"></RadzenText>
+            </RadzenStack>
+            <RadzenStack Gap="10px" Style="height: contain; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                <RadzenDataList Style="height: contain; width: 100%;" PagerPosition="PagerPosition.Top" PageSize="3" WrapItems="true" AllowPaging="true" Data="@DSPhieuNKs" TItem="PhieuNhapKho">
+                    <Template Context="pnk">
+                        <RadzenCard Style="width: 100%; height: contain; padding: 0" Variant="Variant.Flat">
+                            <RadzenCard class="@(IsPNKhoSelected(pnk))" Style="width: 100%; height: contain;" Variant="Variant.Filled">
+                                <RadzenStack onclick="@(() => OnPhieuNhapKhoClick(pnk))" Style="width: 100%; height: 100%; padding: 0" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                    <RadzenCard Variant="@((pnk.PNKID.Value?.Equals(SelectedPNK.PNKID.Value)?? false)? Variant.Flat : Variant.Outlined)" Style="height: 100%; width: 100%; padding: 10px;">
+                                        <RadzenStack Style="width: 100%; height: 100%;" Gap="10px" Orientation=Orientation.Vertical AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                            <RadzenStack Gap="0" Style="width: 100%; height: contain; padding-bottom: 5px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                                <RadzenStack Style="height: contain; width: contain; min-width: 30px; border-radius: 5px; background-color: var(--rz-primary-lighter); padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                    <RadzenText Text="@((DSPhieuNKs.IndexOf(pnk) + 1).ToString())" Style="color: rgba(58,71,77); font-weight: 600; font-size: 15px"></RadzenText>
+                                                </RadzenStack>
+                                                <RadzenStack Style="height: contain; width: contain; border-radius: 5px; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                    @if (pnk.IsPXKDoneNhapKho)
+                                                    {
+                                                        <RadzenButton Text="Done" Icon="check" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Dark" Variant="Variant.Outlined"
+                                                                      Style="border-radius: 5px; --rz-icon-size: 18px; height: 20px; width: 100%; cursor: default; background-color: rgb(229,245,233); font-weight: 600" />
+                                                    }
+                                                    else
+                                                    {
+                                                        <RadzenButton Text="Not done" ButtonStyle="ButtonStyle.Warning" Size="ButtonSize.Small" Shade="Shade.Dark" Variant="Variant.Outlined"
+                                                                      Style="border-radius: 5px; --rz-icon-size: 18px; height: 20px; width: 100%; cursor: default; background-color: rgb(254,243,220); font-weight: 600" />
+                                                    }
+                                                </RadzenStack>
+                                            </RadzenStack>
+                                            <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                                <RadzenStack Style="width: 40%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                    <RadzenText Text="Mã phiếu: " Style="font-size: 16px; font-weight: 500; height: contain; color: rgba(58,71,77)"></RadzenText>
+                                                </RadzenStack>
+                                                <RadzenStack Style="width: 60%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                                                    <RadzenText Text="@($"{pnk.MaPhieuNK.Value?.ToString()}")" Style="color: darkblue; font-weight: 700; font-size: 18px"></RadzenText>
+                                                </RadzenStack>
+                                            </RadzenStack>
+                                            <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                                <RadzenStack Style="width: 40%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                    <RadzenText Text="Người lập: " Style="font-size: 16px; font-weight: 500; height: contain; color: rgba(58,71,77)"></RadzenText>
+                                                </RadzenStack>
+                                                <RadzenStack Style="width: 60%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                                                    <RadzenText Text="@($"{pnk.NguoiLapPNK.Value?.ToString()}")" Style="font-size: 16px; font-weight: 600; height: contain; color: rgba(58,71,77)"></RadzenText>
+                                                </RadzenStack>
+                                            </RadzenStack>
+                                            <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                                <RadzenStack Style="width: 40%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                    <RadzenText Text="Ngày lập: " Style="font-size: 16px; font-weight: 500; height: contain; color: rgba(58,71,77)"></RadzenText>
+                                                </RadzenStack>
+                                                <RadzenStack Style="width: 60%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                                                    <RadzenText Text="@($"{pnk.NgayLapPNK.Value?.ToString()}")" Style="font-size: 16px; font-weight: 600; height: contain; color: rgba(58,71,77)"></RadzenText>
+                                                </RadzenStack>
+                                            </RadzenStack>
+                                        </RadzenStack>
+                                    </RadzenCard>
+                                </RadzenStack>
+                            </RadzenCard>
+                        </RadzenCard>
+                    </Template>
+                </RadzenDataList>
+            </RadzenStack>
+            <RadzenStack Visible="@(DSPhieuNKs.Count == 0)" Gap="10px" Style="height: contain; width: 100%; padding: 10px; padding-left: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                <RadzenText Text="Chưa có phiếu nhập kho nào" Style="color: red; font-weight: 600; font-size: 16px; height: contain; width: contain;"></RadzenText>
+            </RadzenStack>
+        </RadzenStack>
+    </RadzenColumn>
+    <RadzenColumn Size="12" SizeMD="9" Style="height: contain; width: 100%; padding: 10px; border-left: var(--rz-grid-cell-border)">
+        <RadzenStack Gap="10px" Style="height: 100%; width: 100%; padding: 0px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+            <RadzenStack Gap="10px" Style="height: 95%; width: 100%; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                <PhieuNhapKhoDetails PNK="SelectedPNK"></PhieuNhapKhoDetails>
+            </RadzenStack>
+            <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                <RadzenButton Visible="@(SelectedPNK.PNKID.Value != null)" Style="width: contain; min-width: 120px; height: contain;" Click="@(() => OnDeleteSelectedPhieuNhapKho())" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Xóa phiếu nhập kho"))"
+                              Icon="delete" Text="Xóa phiếu" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" />
+            </RadzenStack>
+        </RadzenStack>
+    </RadzenColumn>
+</RadzenRow>
+
 
 @code {
+    private List<PhieuNhapKho> DSPhieuNKs = new();
+    private PhieuNhapKho SelectedPNK = new();
+    private bool isSearching = false;
 
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDSachPhieuNhapKho();
+
+        ReSelectPhieuNhapKho();
+
+        await base.OnInitializedAsync();
+    }
+
+    private async Task LoadDSachPhieuNhapKho()
+    {
+        await Task.Run(() =>
+        {
+            DSPhieuNKs = SQLServerServices.GetListPhieuNhapKho();
+            DSPhieuNKs.Reverse();
+        });
+    }
+
+    private void ReSelectPhieuNhapKho()
+    {
+        if (Common.SelectedPNKID != null)
+        {
+            SelectedPNK = DSPhieuNKs.FirstOrDefault(pnkid => pnkid.PNKID.Value?.ToString() == Common.SelectedPNKID.ToString()) ?? new();
+        }
+        else
+        {
+            SelectedPNK = DSPhieuNKs.FirstOrDefault() ?? new();
+        }
+    }
+
+    private async Task GetFilterDSachKHNhapKho(string keyWord)
+    {
+        if (isSearching == false)
+        {
+            isSearching = true;
+
+            await LoadDSachPhieuNhapKho();
+
+
+            if (!string.IsNullOrEmpty(keyWord.Trim()))
+            {
+                DSPhieuNKs = DSPhieuNKs.Where(phieu => phieu.MaPhieuNK.Value?.ToString()?.IndexOf(keyWord.Trim(), StringComparison.OrdinalIgnoreCase) >= 0).ToList();
+
+                ReSelectPhieuNhapKho();
+            }
+
+            await InvokeAsync(StateHasChanged);
+
+            isSearching = false;
+        }
+    }
+
+
+    private void OnPhieuNhapKhoClick(PhieuNhapKho selectPNK)
+    {
+        SelectedPNK = selectPNK;
+
+        Common.SelectedPNKID = SelectedPNK.PNKID.Value;
+
+        StateHasChanged();
+    }
+
+
+
+    // Delete phieu nhap kho from Database
+    private async Task OnDeleteSelectedPhieuNhapKho()
+    {
+        if (SelectedPNK.PNKID.Value != null)
+        {
+            bool? comfirm = await DialogService.Confirm($"Xóa phiếu nhập kho này (<strong>{SelectedPNK.MaPhieuNK.Value?.ToString()}</strong>)?", "Xác nhận", new ConfirmOptions() { OkButtonText = "OK", CancelButtonText = "Hủy", ShowClose = false });
+
+            if (comfirm.Value)
+            {
+                (int result, string error) = SQLServerServices.DeletePhieuNhapKho(SelectedPNK.PNKID.Value);
+
+                if (result != -1)
+                {
+                    await LoadDSachPhieuNhapKho();
+
+                    ReSelectPhieuNhapKho();
+
+                    ShowNotification("Đã xóa phiếu!", NotificationSeverity.Success, 2000);
+                }
+                else
+                {
+                    await DialogService.Alert($"Error: {error}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                }
+            }
+        }
+    }
+
+    private string IsPNKhoSelected(PhieuNhapKho selectPNK)
+    {
+        if (SelectedPNK.PNKID.Value != null && SelectedPNK.PNKID.Value.Equals(selectPNK.PNKID.Value))
+        {
+            return "pnkho_IsSelected";
+        }
+        else return string.Empty;
+    }
+
+    // Tooltip
+    private void ShowToolTip(ElementReference elementReference, TooltipPosition position, string content)
+    {
+        TooltipOptions options = new TooltipOptions() { Position = position, Delay = 500, Style = "background-color: black" };
+
+        TooltipService.Open(elementReference, content, options);
+    }
+
+    // Notification
+    private void ShowNotification(string message, NotificationSeverity notifytype, double time)
+    {
+        NotificationMessage notify = new NotificationMessage
+            {
+                Style = "position: fixed; top: 0; right: 0;",
+                Severity = notifytype,
+                Summary = message,
+                Duration = time
+            };
+
+        NotificationService.Notify(notify);
+    }
 }
