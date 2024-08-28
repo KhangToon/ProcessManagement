@@ -9,12 +9,12 @@ namespace ProcessManagement.Models.KHO_NVL.NhapKho
         public Propertyy PNKID { get; set; } = new() { DBName = Common.PNKID, Type = typeof(int), AlowDatabase = true };
         public Propertyy NVLPNKID { get; set; } = new() { DBName = Common.NVLPNKID, Type = typeof(int), AlowDatabase = true };
         public Propertyy VTID { get; set; } = new() { DBName = Common.VTID, Type = typeof(int), AlowDatabase = true };
+        public Propertyy NVLID { get; set; } = new() { DBName = Common.NVLID, Type = typeof(int), AlowDatabase = true };
         public Propertyy LNKSoLuong { get; set; } = new() { DBName = Common.LNKSoLuong, Type = typeof(int), AlowDatabase = true };
         public Propertyy LNKIsDone { get; set; } = new() { DBName = Common.LNKIsDone, Type = typeof(int), AlowDatabase = true };
 
-        public ViTriofNVL ViTriofNVL { get; set; } = new(); // Chi dung cho phieu nhap kho
-
-        public VitriLuuTru TagertVitri { get; set; } = new();
+        public NguyenVatLieu TargetNgLieu { get; set; } = new(); // thong tin nvl cua lenh
+        public VitriLuuTru TargertVitri { get; set; } = new(); // vi tri khi chi dinh noi nhap kho
 
         public List<Propertyy> GetPropertiesValues()
         {

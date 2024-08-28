@@ -5,7 +5,6 @@
 @using Radzen.Blazor
 @using Radzen
 @using ProcessManagement.Models;
-@using ProcessManagement.Models.KHO_NVL.XuatKho
 
 @inject DialogService DialogService
 @inject NotificationService NotificationService
@@ -205,7 +204,9 @@
                                                 {
                                                     foreach (var lnk in SelectedNVLofPNK.DSLenhNKs)
                                                     {
-                                                        int SLnvlhiencoTaivitri = int.TryParse(lnk.ViTriofNVL.VTNVLSoLuong.Value?.ToString(), out int slhc) ? slhc : 0;
+                                                        ViTriofNVL viTriofNVL = SQLServerServices.GetViTriOfNgVatLieuByNVLid_VTid(lnk.NVLID.Value, lnk.VTID.Value);
+                                                        
+                                                        int SLnvlhiencoTaivitri = int.TryParse(viTriofNVL?.VTNVLSoLuong.Value?.ToString(), out int slhc) ? slhc : 0;
                                                         int SLLNkhoPUT = int.TryParse(lnk.LNKSoLuong.Value?.ToString(), out int slput) ? slput : 0;
 
                                                         <RadzenCard Variant="Variant.Outlined" Style="width: 100%; height: contain; padding: 7px; padding-right: 0px; background-color: white">
@@ -215,7 +216,7 @@
                                                                 </RadzenStack>
                                                                 <RadzenStack Style="width: 20%; height: contain; border-left: var(--rz-grid-cell-border); border-right: var(--rz-grid-cell-border); padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                                     <RadzenStack Style="height: contain; min-height: 35px; width: 100%; border-radius: 5px; background-color: var(--rz-secondary-lighter); padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                        <RadzenText Text="@($"{lnk.ViTriofNVL.VitriInfor.MaViTri.Value?.ToString()}")" Style="color: black; font-weight: 600; font-size: 15px"></RadzenText>
+                                                                        <RadzenText Text="@($"{lnk.TargertVitri.MaViTri.Value?.ToString()}")" Style="color: black; font-weight: 600; font-size: 15px"></RadzenText>
                                                                     </RadzenStack>
                                                                 </RadzenStack>
                                                                 <RadzenStack Style="width: 20%; height: contain; border-radius: 5px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
@@ -239,8 +240,8 @@
                                                                         }
                                                                         else
                                                                         {
-                                                                            <RadzenButton Text="Nhập kho" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Dark" Variant="Variant.Flat"
-                                                                                          Icon="dowload"
+                                                                            <RadzenButton Text="Nhập kho" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Dark" Variant="Variant.Flat"
+                                                                                          Click="@(() => OnOpenDialogHandleLenhNhapKho(lnk))" Icon="download"
                                                                                           Style="border-radius: 5px; --rz-icon-size: 18px; font-size: 16px; height: contain; min-height: 35px; width: 100%;" />
                                                                         }
                                                                     }
@@ -306,6 +307,13 @@
         }
 
         return isSlgAsigned;
+    }
+
+    // Handle lenh nhap kho
+    private async Task OnOpenDialogHandleLenhNhapKho(LenhNhapKho lnk)
+    {
+        await DialogService.OpenAsync<DialogHandle_LenhNhapKho>(null, new Dictionary<string, object>() { { "LNK", lnk }, { "MaPNK", PNK.MaPhieuNK.Value?.ToString() ?? string.Empty } },
+            new DialogOptions() { ShowTitle = false, Width = "70%", Height = "contain", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
     }
 
     // Datagrid cell render

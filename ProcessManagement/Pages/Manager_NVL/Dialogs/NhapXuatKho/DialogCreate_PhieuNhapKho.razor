@@ -313,7 +313,7 @@
                                                     </RadzenStack>
                                                     <RadzenStack Style="width: 100%; height: 100%" Gap="10px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                         <RadzenStack Style="width: 25%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                            <RadzenDropDown TValue="VitriLuuTru" ValueChanged="@((args) => temporaryLenhNK.TagertVitri = args)"
+                                                            <RadzenDropDown TValue="VitriLuuTru" ValueChanged="@((args) => temporaryLenhNK.TargertVitri = args)"
                                                                             Data=@(DSVitris) Style="border-radius: 5px; border-width: 1px; font-size: 14px; width: contain ">
                                                                 <Template>
                                                                     @context.MaViTri.Value
@@ -363,9 +363,9 @@
 
                                                     @foreach (var lnk in DSlenhnhapkho)
                                                     {
-                                                        string vitrike = lnk.TagertVitri.ViTriKe.Value?.ToString() ?? string.Empty;
-                                                        string vitrihang = lnk.TagertVitri.ViTriHang.Value?.ToString() ?? string.Empty;
-                                                        string vitricot = lnk.TagertVitri.ViTriCot.Value?.ToString() ?? string.Empty;
+                                                        string vitrike = lnk.TargertVitri.ViTriKe.Value?.ToString() ?? string.Empty;
+                                                        string vitrihang = lnk.TargertVitri.ViTriHang.Value?.ToString() ?? string.Empty;
+                                                        string vitricot = lnk.TargertVitri.ViTriCot.Value?.ToString() ?? string.Empty;
                                                         int slnhapkho = int.TryParse(lnk.LNKSoLuong.Value?.ToString(), out int slnk) ? slnk : 0;
                                                         var lnkIsdone = int.TryParse(lnk.LNKIsDone.Value?.ToString(), out int lnkd) ? lnkd : -1;
 
@@ -375,7 +375,7 @@
                                                                     <RadzenText Text="@($"{(DSlenhnhapkho.IndexOf(lnk) + 1).ToString()}")" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
                                                                 </RadzenStack>
                                                                 <RadzenStack Style="width: 20%; height: contain; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                    <RadzenText Text="@($"{lnk.TagertVitri.MaViTri.Value?.ToString()}")" Style="color: rgba(58, 71, 77); font-weight: 600; font-size: 16px"></RadzenText>
+                                                                    <RadzenText Text="@($"{lnk.TargertVitri.MaViTri.Value?.ToString()}")" Style="color: rgba(58, 71, 77); font-weight: 600; font-size: 16px"></RadzenText>
                                                                 </RadzenStack>
                                                                 <RadzenStack Style="width: 25%; height: contain; border-left: var(--rz-grid-cell-border); border-right: var(--rz-grid-cell-border); padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                                     <RadzenText Text="@slnhapkho.ToString()" Style="color: rgba(58, 71, 77); font-weight: 600; font-size: 16px"></RadzenText>
@@ -478,19 +478,19 @@
     private string scanMaNVL = string.Empty;
     private string scanmaVitri = string.Empty;
 
-    private async Task QuetMaNhapKhoNguyenVatLieu(string? maPhieuNK, string? maNVL, string? maVitri)
+    private async Task QuetMaNhapKhoNguyenVatLieu(string? maPhieuNK, string? tenNVL, string? maVitri)
     {
-        if (String.IsNullOrEmpty(maPhieuNK) || String.IsNullOrEmpty(maNVL) || String.IsNullOrEmpty(maVitri)) return;
+        if (String.IsNullOrEmpty(maPhieuNK) || String.IsNullOrEmpty(tenNVL) || String.IsNullOrEmpty(maVitri)) return;
 
         // Get PNK infor
         PhieuNhapKho phieuNhapKho = SQLServerServices.GetPhieuNhapKhoByMaPhieu(maPhieuNK);
 
-        NVLofPhieuNhapKho targetNVLofPNK = phieuNhapKho.DSNVLofPNKs.FirstOrDefault(item => item.TargetNgLieu.TenNVL.Value?.ToString() == maNVL.Trim()) ?? new();
+        NVLofPhieuNhapKho targetNVLofPNK = phieuNhapKho.DSNVLofPNKs.FirstOrDefault(item => item.TargetNgLieu.TenNVL.Value?.ToString() == tenNVL.Trim()) ?? new();
 
         foreach (var lenh in targetNVLofPNK.DSLenhNKs)
         {
             int lenhstatus = int.TryParse(lenh.LNKIsDone.Value?.ToString(), out int status) ? status : 3;
-            string mavitri = lenh.TagertVitri.MaViTri.Value?.ToString()?.Trim() ?? string.Empty;
+            string mavitri = lenh.TargertVitri.MaViTri.Value?.ToString()?.Trim() ?? string.Empty;
 
             if (lenhstatus == 0 && mavitri == maVitri.Trim())
             {
@@ -498,7 +498,7 @@
 
                 ViTriofNVL viTriofNVL = new()
                     {
-                        VTID = { Value = lenh.TagertVitri.VTID.Value },
+                        VTID = { Value = lenh.TargertVitri.VTID.Value },
                         NVLID = { Value = targetNVLofPNK.TargetNgLieu.NVLID.Value },
                         VTNVLSoLuong = { Value = soluongNhapthem }
                     };
@@ -574,7 +574,7 @@
 
             // Tao ma phieu random
             string maphieu = Common.Generate5UppercaseChars();
-            PNK.MaPhieuNK.Value = $"#{maphieu}";
+            PNK.MaPhieuNK.Value = $"#PNK{maphieu}";
             PNK.NgayLapPNK.Value = DateTime.Now;
 
             // Insert in to DB new PNK
@@ -658,10 +658,10 @@
     {
         SelectedNVLofPNK.DSLenhNKs.Remove(lnk);
 
-        int slcontrong = lnk.TagertVitri.SLConTrong;
+        int slcontrong = lnk.TargertVitri.SLConTrong;
         int soluongnhap = int.TryParse(lnk.LNKSoLuong.Value?.ToString(), out int sln) ? sln : 0;
         // gan so luong con trong cho vi tri sau kho remove lenhnhapkho
-        lnk.TagertVitri.SLConTrong = slcontrong + soluongnhap;
+        lnk.TargertVitri.SLConTrong = slcontrong + soluongnhap;
 
         SelectedNVLofPNK.DSLenhNKs = new List<LenhNhapKho>(SelectedNVLofPNK.DSLenhNKs);
 
@@ -687,7 +687,7 @@
     private async Task OnThemNewLNKintoListLNK()
     {
         // Kiem tra vi tri da ton tai
-        bool iscontain = SelectedNVLofPNK.DSLenhNKs.Select(lenh => lenh.TagertVitri.VTID.Value).ToList().Contains(temporaryLenhNK.TagertVitri.VTID.Value);
+        bool iscontain = SelectedNVLofPNK.DSLenhNKs.Select(lenh => lenh.TargertVitri.VTID.Value).ToList().Contains(temporaryLenhNK.TargertVitri.VTID.Value);
 
         if (!iscontain)
         {
@@ -695,17 +695,18 @@
             LenhNhapKho newLenhNhapKho = new()
                 {
                     LNKSoLuong = { Value = temporaryLenhNK.LNKSoLuong.Value },    // soluong
-                    VTID = { Value = temporaryLenhNK.TagertVitri.VTID.Value },    // vitri id
+                    NVLID = { Value = SelectedNVLofPNK.NVLID.Value },             // nvl id
+                    VTID = { Value = temporaryLenhNK.TargertVitri.VTID.Value },    // vitri id
                     NVLPNKID = { Value = SelectedNVLofPNK.NVLPNKID.Value }, // nvlpnkid
                     PNKID = { Value = PNK.PNKID.Value }, // pnkid
                     LNKIsDone = { Value = 0 }   // status
                 };
-            newLenhNhapKho.TagertVitri = temporaryLenhNK.TagertVitri;
+            newLenhNhapKho.TargertVitri = temporaryLenhNK.TargertVitri;
 
             // Kiem tra cac dieu kien truoc khi insert DB
 
             // So luong con trong cua vi tri
-            int slcontrong = newLenhNhapKho.TagertVitri.SLConTrong;
+            int slcontrong = newLenhNhapKho.TargertVitri.SLConTrong;
             // So luong nhap cua vi tri
             int soluongnhap = int.TryParse(newLenhNhapKho.LNKSoLuong.Value?.ToString(), out int sln) ? sln : 0;
 
@@ -750,7 +751,7 @@
 
                     int slcontrongsaunhap = slcontrong - soluongnhap; // tinh so luong con trong cua vi tri sau khi tao lenh
 
-                    newLenhNhapKho.TagertVitri.SLConTrong = slcontrongsaunhap; // cap nhat so luong trong sau khi tao lenh
+                    newLenhNhapKho.TargertVitri.SLConTrong = slcontrongsaunhap; // cap nhat so luong trong sau khi tao lenh
 
                     // True bit da chi dinh day du vi tri (so luong cua lenh truoc do + so luong cua lenh moi)
                     if ((slallnhapkhodatao + soluongnhap) == slallnhapkho)
@@ -787,17 +788,18 @@
         }
 
         // Kiem tra trang thai chi dinh vi tri cua listNVLofPNK
-        foreach (var nvl in PNK.DSNVLofPNKs)
+        foreach (var nvlpnk in PNK.DSNVLofPNKs)
         {
-            if (nvl.IsAsignedVitri == false)
+            if (nvlpnk.IsAsignedVitri == false)
             {
-                await DialogService.Alert($"Chưa chỉ định đầy đủ vị trí cho nguyên vật liệu ({nvl.TargetNgLieu.TenNVL.Value})", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                await DialogService.Alert($"Chưa chỉ định đầy đủ vị trí cho nguyên vật liệu ({nvlpnk.TargetNgLieu.TenNVL.Value})", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
                 isAsignedVitriOK = false;
                 break;
             }
             else
             {
                 // Update tong so luong nhap kho cua Lenhnhapkho
+                SQLServerServices.UpdateNVLofPNK(nvlpnk);
             }
         }
 

@@ -3705,6 +3705,36 @@ namespace ProcessManagement.Services.SQLServer
             return dsPNKho;
         }
 
+        // Get phieu nhap kho ID by maPNK
+        public List<int> GetListPNKIds(object? maPNK)
+        {
+            List<int> listPNKids = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT [{Common.PNKID}] FROM [{Common.Table_PhieuNhapKho}] WHERE [{Common.MaPhieuNhapKho}] = '{maPNK}'";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+
+                    _ = int.TryParse(reader[Common.PNKID]?.ToString(), out int pnkid) ? pnkid : 0;
+
+                    if (pnkid > 0)
+                    {
+                        listPNKids.Add(pnkid);
+                    }
+                }
+            }
+
+            return listPNKids;
+        }
+
         // Update thong tin Phieu nhap kho
         public (int, string) UpdatePhieuNhapKhoInfor(PhieuNhapKho phieuNK)
         {
@@ -3860,8 +3890,9 @@ namespace ProcessManagement.Services.SQLServer
                         item.Value = columnValue.ToString()?.Trim();
                     }
 
-                    // Get vitriluutru infor
+                    // Get danh sach lenh nhap kho
                     nvlpnk.DSLenhNKs = GetDSLenhNhapKho(nvlpnk.NVLPNKID.Value, pnkId);
+
                     // Check nhap kho status of NVLofPNK
                     foreach (var lenh in nvlpnk.DSLenhNKs)
                     {
@@ -3880,6 +3911,48 @@ namespace ProcessManagement.Services.SQLServer
             }
 
             return listNvlofPnk;
+        }
+
+        // Update NVLofPXK
+        public (int, string) UpdateNVLofPNK(NVLofPhieuNhapKho nvlofpnk)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            if (nvlofpnk == null) return (result, errorMess);
+
+            List<Propertyy> Items = nvlofpnk.GetPropertiesValues().Where(pro => pro.AlowDatabase == true && pro.Value != null).ToList();
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                string setClause = string.Join(",", Items.Select(key => $"[{key.DBName}] = @{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $"UPDATE [{Common.Table_NVLofPhieuNhapKho}] SET {setClause} WHERE [{Common.NVLPNKID}] = '{nvlofpnk.NVLPNKID.Value}'";
+
+                foreach (var item in Items)
+                {
+                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
+
+                    object? parameterValue = item.Value;
+
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                result = command.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
         }
 
         #endregion
@@ -3920,7 +3993,44 @@ namespace ProcessManagement.Services.SQLServer
             }
 
             // Get vi tri luu tru
-            lnkho.TagertVitri = GetViTriLuuTruByID(lnkho.VTID.Value);
+            lnkho.TargertVitri = GetViTriLuuTruByID(lnkho.VTID.Value);
+
+            // Get ng vat lieu nhap kho
+            lnkho.TargetNgLieu = GetNguyenVatLieuByID(lnkho.NVLID.Value);
+
+            return lnkho;
+        }
+
+        public LenhNhapKho GetLenhNhapKho(LenhNhapKho inputLNK)
+        {
+            LenhNhapKho lnkho = new();
+
+            if (inputLNK == null) return lnkho;
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_LenhNhapKho}] WHERE [{Common.PNKID}] = '{inputLNK.PNKID.Value}' AND [{Common.NVLID}] = '{inputLNK.NVLID.Value}' AND [{Common.VTID}] = '{inputLNK.VTID.Value}'";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    List<Propertyy> rowitems = lnkho.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue;
+                    }
+                }
+            }
 
             return lnkho;
         }
@@ -3958,7 +4068,10 @@ namespace ProcessManagement.Services.SQLServer
                     }
 
                     // Get vitriluutru infor
-                    lenhnk.TagertVitri = GetViTriLuuTruByID(lenhnk.VTID.Value);
+                    lenhnk.TargertVitri = GetViTriLuuTruByID(lenhnk.VTID.Value);
+
+                    // Get ng vat lieu nhap kho
+                    lenhnk.TargetNgLieu = GetNguyenVatLieuByID(lenhnk.NVLID.Value);
 
                     lenhNKhos.Add(lenhnk);
                 }
@@ -4083,6 +4196,37 @@ namespace ProcessManagement.Services.SQLServer
             }
 
             return (result, errorMess);
+        }
+
+        public (int, string) UpdateLenhNhapKhoStatus(object? lenhnkId, object lnkstatus)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            if (lenhnkId == null || lnkstatus == null) { return (result, errorMess); }
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+
+                    string sqlQuery = $"UPDATE {Common.Table_LenhNhapKho} SET [{Common.LNKIsDone}] = '{lnkstatus}' WHERE [{Common.LenhNKID}] = '{lenhnkId}'";
+
+                    var command = new SqlCommand(sqlQuery, connection);
+
+                    result = command.ExecuteNonQuery();
+
+                    connection.Close();
+
+                    return (result, string.Empty);
+                }
+            }
+            catch (Exception ex)
+            {
+                string err = ex.Message;
+
+                return (-1, err);
+            }
         }
         #endregion
 
