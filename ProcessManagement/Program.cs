@@ -15,7 +15,6 @@ using ProcessManagement.Services.Modbus;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
 //builder.WebHost.UseKestrel(serveroption =>
 //{
 //    serveroption.Listen(IPAddress.Loopback, port: 5002);

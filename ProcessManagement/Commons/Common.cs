@@ -282,15 +282,17 @@ namespace ProcessManagement.Commons
         // Socket 
         public const string socketEndKey = "<END>";
         public const string CMDTYPE = "CMDTYPE";
-        public const string CHECKOUT = "CHECKOUT";
         public const string SCANCODE = "SCANCODE";
-        public const string SLOK = "SLOK";
-        public const string SLNG = "SLNG";
         public const string RETURNRESULT = "RETURNRESULT";
         public const string RESULTMESS = "RESULTMESS";
         public const string SUCCESS = "SUCCESS";
         public const string FAIL = "FAIL";
-        public const string RETURNCHECKOUT = "RETURNCHECKOUT";
+        // Socket PXK Tags
+        public const string PXK_EXPORT = "PXK_EXPORT";
+        public const string PXK_MPXK = "PXK_MPXK";
+        public const string PXK_MVT = "PXK_MVT";
+        public const string PXK_MNVL = "PXK_MNVL";
+        public const string PXK_RETURN = "PXK_RETURN";
 
         public const int DispMode1 = 1;
         public const int DispMode2 = 2;
@@ -298,6 +300,7 @@ namespace ProcessManagement.Commons
 
         public static event EventHandler? ClickSaveEvent;
         public static event EventHandler<object?>? CongdoaUpdatedEvent;
+        public static event EventHandler<object?>? PXK_ExportEvent;
 
         // KHSX static variable
         public static object? CurrentKHSXid;
@@ -343,6 +346,20 @@ namespace ProcessManagement.Commons
         public static bool IsCongdoanUpdatedEventRegistered()
         {
             return CongdoaUpdatedEvent != null;
+        }
+
+        // Phieu xuat kho Export Event
+        public static void RaisePXK_Event(object? lenhxkid)
+        {
+            PXK_ExportEvent?.Invoke(null, lenhxkid);
+        }
+        public static void ResetPXK_Event()
+        {
+            PXK_ExportEvent = null;
+        }
+        public static bool IsPXK_EventRegistered()
+        {
+            return PXK_ExportEvent != null;
         }
 
         public static string RemoveDiacriticsAndSpaces(string text)

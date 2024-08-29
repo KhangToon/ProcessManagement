@@ -11,6 +11,8 @@ using ProcessManagement.Commons;
 using System.Text.RegularExpressions;
 using ProcessManagement.Services.SQLServer;
 using ProcessManagement.Services.SocketService;
+using ProcessManagement.Models.KHO_NVL.XuatKho;
+using Radzen;
 
 namespace ParamountBed_Warehouse.Services.SocketService
 {
@@ -299,9 +301,9 @@ namespace ParamountBed_Warehouse.Services.SocketService
 
             string CMDTYPE = ClientMesage?.Command[Common.CMDTYPE]?.ToString() ?? string.Empty;
 
-            if (CMDTYPE == Common.CHECKOUT)
+            if (CMDTYPE == Common.PXK_EXPORT)
             {
-                HandleCheckOut(ClientMesage, client);
+                HandleXuatKhoRequire(ClientMesage, client);
             }
         }
 
@@ -311,43 +313,155 @@ namespace ParamountBed_Warehouse.Services.SocketService
             return jsonData;
         }
 
-        public void HandleCheckOut(SocketMessage? mess, ConnectedObject client)
+        public void HandleXuatKhoRequire(SocketMessage? mess, ConnectedObject client)
         {
             if (mess != null && mess.Data != null)
             {
-                string scanCode = mess.Data.FirstOrDefault()?[Common.SCANCODE]?.ToString() ?? string.Empty;
+                string maPXK = mess.Data.FirstOrDefault()?[Common.PXK_MPXK]?.ToString() ?? string.Empty;
+                string maViTri = mess.Data.FirstOrDefault()?[Common.PXK_MVT]?.ToString() ?? string.Empty;
+                string maNVL = mess.Data.FirstOrDefault()?[Common.PXK_MNVL]?.ToString() ?? string.Empty;
 
-                int slOK = int.Parse(mess.Data.FirstOrDefault()?[Common.SLOK]?.ToString() ?? "0");
+                (int lenhxkid, string errorMess) = OnExcuteLenhXuatKho(maPXK, maViTri, maNVL);
 
-                int slNG = int.Parse(mess.Data.FirstOrDefault()?[Common.SLNG]?.ToString() ?? "0");
-
-                if (scanCode != string.Empty && slOK > 0 && slNG >= 0)
+                if (lenhxkid == -1)
                 {
-                    // Update sl NG OK masp
-                    (int result, string err) = SQLServerServices.UpdateNVLmoiCongdoan(slOK, slNG, scanCode, null, Common.CurrentCDid, Common.CurrentKHSXid);
-
-                    if (result == -1)
-                    {
-                        SendFeedBackToClient(client, Common.RETURNCHECKOUT, Common.FAIL, $"{err}", new Dictionary<string, object>()); return;
-                    }
-                    else if (result == 0)
-                    {
-                        SendFeedBackToClient(client, Common.RETURNCHECKOUT, Common.FAIL, $"Mã không nằm trong danh sách", new Dictionary<string, object>()); return;
-                    }
-                    else
-                    {
-                        SendFeedBackToClient(client, Common.RETURNCHECKOUT, Common.SUCCESS, $"Cập nhật kết quả thành công!", new Dictionary<string, object>());
-
-                        Im_Ex_Event?.Invoke(null, scanCode);
-
-                        return;
-                    }
+                    SendFeedBackToClient(client, Common.PXK_RETURN, Common.FAIL, errorMess, new Dictionary<string, object>()); return;
                 }
-                else
+                else if (lenhxkid > 0)
                 {
-                    SendFeedBackToClient(client, Common.RETURNCHECKOUT, Common.FAIL, "Thông tin chưa hợp lệ!", new Dictionary<string, object>()); return;
+                    // Raising reload 
+                    Common.RaisePXK_Event(lenhxkid);
+
+                    SendFeedBackToClient(client, Common.PXK_RETURN, Common.SUCCESS, "Xuất kho thành công!", new Dictionary<string, object>()); return;
                 }
             }
+        }
+
+
+        private (int, string) OnExcuteLenhXuatKho(string maphieu, string mavitri, string tennvl)
+        {
+            if (String.IsNullOrEmpty(maphieu) || String.IsNullOrEmpty(mavitri) || String.IsNullOrEmpty(tennvl))
+            {
+                return (-1, "Chưa đủ thông tin quét! (XKErr: 001)");
+            }
+
+            LenhXuatKho scanLXK = new();
+
+            // Load phieu xuat kho id
+            List<int> pxkIds = SQLServerServices.GetListPXKIds(maphieu.Trim());
+            if (pxkIds.Count == 0) { return (-1, "Không tìm thấy phiếu xuất kho! (XKErr: 002)"); }
+            int scanpxkID = pxkIds[0];
+
+
+            // Load nvl id
+            List<int> nvlIds = SQLServerServices.GetListNVLIds(tennvl.Trim());
+            if (nvlIds.Count == 0) { return (-1, "Không tìm thấy nguyên liệu! (XKErr: 003)"); }
+            int scannvlID = nvlIds[0];
+
+            // Load vitri ID
+            List<int> vitriIds = SQLServerServices.GetListVTriIds(mavitri.Trim());
+            if (vitriIds.Count == 0) { return (-1, "Không tìm thấy vị trí lưu kho! (XKErr: 004)"); }
+            int scanvitriID = vitriIds[0];
+
+            if (scanpxkID == 0 || scannvlID == 0 || scanvitriID == 0)
+            {
+                { return (-1, "Không thể xuất kho! (XKErr: 005)"); }
+            }
+
+            // Get scan lenh xuat kho
+            LenhXuatKho temLXK = new() { PXKID = { Value = scanpxkID }, NVLID = { Value = scannvlID }, VTID = { Value = scanvitriID } };
+
+            scanLXK = SQLServerServices.GetLenhXuatKho(temLXK);
+            scanLXK.ViTriofNVL = SQLServerServices.GetViTriOfNgVatLieuByNVLid_VTid(scanLXK.NVLID.Value, scanLXK.VTID.Value);
+
+            if (scanLXK.LenhXKID.Value == null)
+            {
+                { return (-1, "Không tìm thấy lệnh xuất kho! (XKErr: 005)"); }
+            }
+
+            // Update so luong nguyen vat lieu
+            int soluongXuatdi = int.TryParse(scanLXK.LXKSoLuong.Value?.ToString(), out int slxuat) ? slxuat : 0;
+
+            // Tinh so luong hien co cua nvl o vitri
+            int soluongHientai = int.TryParse(scanLXK.ViTriofNVL.VTNVLSoLuong.Value?.ToString(), out int slht) ? slht : 0;
+
+            // gan so luong sau khi xuat cho vi tri da luu
+            int newtonkho = soluongHientai - soluongXuatdi;
+
+            if (newtonkho < 0)
+            {
+                { return (-1, "Số lượng xuất kho không hợp lệ! (XKErr: 006)"); }
+            }
+
+
+            // Check trang thai lenh (da hoan thanh hay chua)
+            _ = int.TryParse(scanLXK.LXKIsDone.Value?.ToString(), out int scanlxkIsdone) ? scanlxkIsdone : -1;
+            if (scanlxkIsdone != 0)
+            {
+                { return (-1, "Lệnh đã xuất trước đó! (XKErr: 007)"); }
+            }
+
+            // Update so luong vi tri da co cua nvl
+            (int updateVTofNVLresult, string updateVTofNVLerror) = SQLServerServices.UpdateSoluongNgVatLieuById(scanLXK.ViTriofNVL.VTofNVLID.Value, newtonkho);
+
+            if (updateVTofNVLresult == -1)
+            {
+                { return (-1, "Không thể xuất kho! (XKErr: 008)"); }
+            }
+
+            // Update lenh xuat kho status
+            (int updatelxkResult, string updatelxkError) = SQLServerServices.UpdateLenhXuatKhoStatus(scanLXK.LenhXKID.Value, 1);
+
+            if (updatelxkResult != -1)
+            {
+                // update status to UI
+                scanLXK.LXKIsDone.Value = 1;
+
+                _ = int.TryParse(scanLXK.LenhXKID.Value.ToString(), out int lenhxkid) ? lenhxkid : -1;
+
+                { return (lenhxkid, "Xuất kho thành công!"); }
+            }
+            else { { return (-1, "Không thể xuất kho! (XKErr: 009)"); } }
+        }
+
+
+        public void HandleCheckOut(SocketMessage? mess, ConnectedObject client)
+        {
+            //if (mess != null && mess.Data != null)
+            //{
+            //    string scanCode = mess.Data.FirstOrDefault()?[Common.SCANCODE]?.ToString() ?? string.Empty;
+
+            //    int slOK = int.Parse(mess.Data.FirstOrDefault()?[Common.SLOK]?.ToString() ?? "0");
+
+            //    int slNG = int.Parse(mess.Data.FirstOrDefault()?[Common.SLNG]?.ToString() ?? "0");
+
+            //    if (scanCode != string.Empty && slOK > 0 && slNG >= 0)
+            //    {
+            //        // Update sl NG OK masp
+            //        (int result, string err) = SQLServerServices.UpdateNVLmoiCongdoan(slOK, slNG, scanCode, null, Common.CurrentCDid, Common.CurrentKHSXid);
+
+            //        if (result == -1)
+            //        {
+            //            SendFeedBackToClient(client, Common.RETURNCHECKOUT, Common.FAIL, $"{err}", new Dictionary<string, object>()); return;
+            //        }
+            //        else if (result == 0)
+            //        {
+            //            SendFeedBackToClient(client, Common.RETURNCHECKOUT, Common.FAIL, $"Mã không nằm trong danh sách", new Dictionary<string, object>()); return;
+            //        }
+            //        else
+            //        {
+            //            SendFeedBackToClient(client, Common.RETURNCHECKOUT, Common.SUCCESS, $"Cập nhật kết quả thành công!", new Dictionary<string, object>());
+
+            //            Im_Ex_Event?.Invoke(null, scanCode);
+
+            //            return;
+            //        }
+            //    }
+            //    else
+            //    {
+            //        SendFeedBackToClient(client, Common.RETURNCHECKOUT, Common.FAIL, "Thông tin chưa hợp lệ!", new Dictionary<string, object>()); return;
+            //    }
+            //}
         }
 
         private void SendFeedBackToClient(ConnectedObject client, string cmdtype, string returnresult, string resultmess, Dictionary<string, object> data)

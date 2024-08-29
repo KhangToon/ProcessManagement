@@ -4747,6 +4747,40 @@ namespace ProcessManagement.Services.SQLServer
             return lxkho;
         }
 
+        public LenhXuatKho GetLenhXuatKhoByID(object? lxkID)
+        {
+            LenhXuatKho lxkho = new();
+
+            if (lxkID == null) return lxkho;
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_LenhXuatKho}] WHERE [{Common.LenhXKID}] = '{lxkID}'";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    List<Propertyy> rowitems = lxkho.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue;
+                    }
+                }
+            }
+
+            return lxkho;
+        }
+
         // Get danh sách lệnh xuất kho by NVLPXKID and PXKID
         public List<LenhXuatKho> GetDSLenhXuatKho(object? nvlpxkId, object? pxkId)
         {

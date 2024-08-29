@@ -168,6 +168,18 @@
     private string scanMaNVL = string.Empty;
     private string scanMaViTri = string.Empty;
 
+    protected override async Task OnInitializedAsync()
+    {
+        //
+        if (Common.IsPXK_EventRegistered())
+        {
+            Common.ResetPXK_Event();
+        }
+        Common.PXK_ExportEvent += HandyPXK_ExportEventRasing;
+
+        await base.OnInitializedAsync();
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (focusIndex == 1)
@@ -184,6 +196,13 @@
         }
     }
 
+    private async void HandyPXK_ExportEventRasing(object? sender, object? lenhxkid)
+    {
+        scanLXK = SQLServerServices.GetLenhXuatKhoByID(lenhxkid);
+        
+        await this.InvokeAsync(() => this.StateHasChanged());
+    }
+
     private async Task OnConfirmExcuteLenhXuatKho(string maphieu, string mavitri, string tennvl)
     {
         if (String.IsNullOrEmpty(maphieu) || String.IsNullOrEmpty(mavitri) || String.IsNullOrEmpty(tennvl))
@@ -196,7 +215,6 @@
         List<int> pxkIds = SQLServerServices.GetListPXKIds(maphieu.Trim());
         if (pxkIds.Count == 0) { return; }
         int scanpxkID = pxkIds[0];
-
 
         // Load nvl id
         List<int> nvlIds = SQLServerServices.GetListNVLIds(tennvl.Trim());
@@ -246,29 +264,25 @@
             return;
         }
 
-        // Update lenh xuat kho status
-        (int updatelxkResult, string updatelxkError) = SQLServerServices.UpdateLenhXuatKhoStatus(scanLXK.LenhXKID.Value, 1);
+        // Update so luong vi tri da co cua nvl
+        (int updateVTofNVLresult, string updateVTofNVLerror) = SQLServerServices.UpdateSoluongNgVatLieuById(scanLXK.ViTriofNVL.VTofNVLID.Value, newtonkho);
 
-        if (updatelxkResult == -1)
+        if (updateVTofNVLresult == -1)
         {
             return;
         }
         else
         {
-            // update status to UI
-            scanLXK.LXKIsDone.Value = 1;
+            // Update lenh xuat kho status
+            (int updatelxkResult, string updatelxkError) = SQLServerServices.UpdateLenhXuatKhoStatus(scanLXK.LenhXKID.Value, 1);
 
-            // Update so luong vi tri da co cua nvl
-            (int updateVTofNVLresult, string updateVTofNVLerror) = SQLServerServices.UpdateSoluongNgVatLieuById(scanLXK.ViTriofNVL.VTofNVLID.Value, newtonkho);
-
-            if (updateVTofNVLresult == -1)
+            if (updatelxkResult != -1)
             {
-                // Update lenh xuat kho status khi loi
-                (updatelxkResult, updatelxkError) = SQLServerServices.UpdateLenhXuatKhoStatus(scanLXK.LenhXKID.Value, 0);
-                return;
-            }
+                // update status to UI
+                scanLXK.LXKIsDone.Value = 1;
 
-            ShowNotification("Đã xuất kho!", NotificationSeverity.Success, 2000);
+                ShowNotification("Đã xuất kho!", NotificationSeverity.Success, 2000);
+            }
         }
     }
 
