@@ -16,6 +16,8 @@ namespace ProcessManagement.Models.KHO_NVL.NhapKho
         public NguyenVatLieu TargetNgLieu { get; set; } = new(); // thong tin nvl cua lenh
         public VitriLuuTru TargertVitri { get; set; } = new(); // vi tri khi chi dinh noi nhap kho
 
+        public bool isEditingLNK = false;
+
         public List<Propertyy> GetPropertiesValues()
         {
             Type propertyType = typeof(LenhNhapKho);
