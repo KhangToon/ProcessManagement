@@ -5,6 +5,7 @@
 @using ProcessManagement.Commons
 @using ProcessManagement.Models
 @using ProcessManagement.Models.KHO_NVL
+@using ProcessManagement.Pages.Manager_NVL.LoggingXNK
 @using ProcessManagement.Pages.Manager_NVL.ViTriLuuTru
 @using ProcessManagement.Pages.Manager_NVL.NhapKho
 @using ProcessManagement.Pages.Manager_NVL.XuatKho
@@ -165,7 +166,7 @@
                                                         GridLines="DataGridGridLines.Both" PageSize="10" Density="Density.Default" CellContextMenu="@OnDatagridCellContextMenu"
                                                         HeaderCellRender="@(args => args.Attributes.Add("style", $"background-color: rgba(58, 71, 77)"))"
                                                         CellRender="@OnCellRender" Value="@SelectedNgVatLieu" ValueChanged="@((args) => OnDatagridSelectChanged(args))">
-                                            <Columns>
+                                                        <Columns>
                                                 @if (DSNguyenVatLieus != null && DSNguyenVatLieus.Count > 0)
                                                 {
                                                     List<Propertyy> columns = DSNguyenVatLieus.FirstOrDefault()?.GetPropertiesValues() ?? new();
@@ -317,7 +318,7 @@
                                                                                                         <RadzenStack Style="width: 40%; height: contain; border-left: var(--rz-grid-cell-border); border-right: var(--rz-grid-cell-border); padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                                                                             <RadzenText Text="@($"{vitri.VitriInfor.MaViTri.Value?.ToString()}")" Style="color: darkblue; font-weight: 600; font-size: 16px"></RadzenText>
                                                                                                         </RadzenStack>
-                                                                                                        <RadzenStack Gap=15px Style="width: 50%; height: contain; " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                                                        <RadzenStack Gap=15px Style="width: 50%; height: contain; padding-left: 30px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                                                                                             <RadzenText Text="@($"Số lượng: ")" Style="font-size: 16px; font-weight: 500; height: contain; color: rgba(58,71,77)"></RadzenText>
                                                                                                             <RadzenText Text="@($"{(int.TryParse(vitri.VTNVLSoLuong?.Value?.ToString(), out int slvt)? slvt : 0)} (pcs)")" Style="font-size: 16px; font-weight: 600; height: contain; color: rgba(58,71,77)"></RadzenText>
                                                                                                         </RadzenStack>
@@ -518,6 +519,13 @@
                     <RadzenCard Variant="Variant.Flat" Style="height: 100%; width: 100%; padding: 10px;">
                         <RadzenStack Gap="5" Style="height: 100%; width: 100%;">
                             <DanhSachPhieuXuatKho></DanhSachPhieuXuatKho>
+                        </RadzenStack>
+                    </RadzenCard>
+                </RadzenTabsItem>
+                <RadzenTabsItem Text="Lịch sử xuất/nhập kho">
+                    <RadzenCard Variant="Variant.Flat" Style="height: 100%; width: 100%; padding: 10px;">
+                        <RadzenStack Gap="5" Style="height: 100%; width: 100%;">
+                            <LoggingHistoryXNKho></LoggingHistoryXNKho>
                         </RadzenStack>
                     </RadzenCard>
                 </RadzenTabsItem>

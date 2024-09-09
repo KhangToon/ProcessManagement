@@ -278,6 +278,22 @@ namespace ProcessManagement.Commons
         public const string LXKSoLuong = "Số lượng";
         public const string LXKIsDone = "IsDone";
 
+        // Table KHO_HistoryXuatNhapKho
+        public const string Table_HistoryXNKho = "KHO_HistoryXuatNhapKho";
+        public const string LogXNKID = "LogXNKID";
+        public const string LogLoaiPhieu = "Loại phiếu";
+        public const string LogMaPhieu = "Mã phiếu";
+        public const string LogTenNVL = "Tên NVL";
+        public const string LogMaViTri = "Mã vị trí";
+        public const string LogTonKhoTruoc = "Tồn kho trước";
+        public const string LogSoLuong = "SL Xuất/Nhập";
+        public const string LogTonKhoSau = "Tồn kho sau";
+        public const string LogNgThucHien = "Người thực hiện";
+        public const string LogThoiDiem = "Thời điểm";
+        public const string LogTypePNK = "Nhập kho";
+        public const string LogTypePXK = "Xuất kho";
+        //public const string NVLID = "NVLID";
+        //public const string VTID = "VTID";
 
         // Socket 
         public const string socketEndKey = "<END>";
@@ -293,6 +309,12 @@ namespace ProcessManagement.Commons
         public const string PXK_MVT = "PXK_MVT";
         public const string PXK_MNVL = "PXK_MNVL";
         public const string PXK_RETURN = "PXK_RETURN";
+        // Socket PNK Tags
+        public const string PNK_MPNK = "PNK_MPNK";
+        public const string PNK_MVT = "PNK_MVT";
+        public const string PNK_MNVL = "PNK_MNVL";
+        public const string PNK_LOAD = "PNK_LOAD";
+        public const string PNK_RETURN = "PNK_RETURN";
 
         public const int DispMode1 = 1;
         public const int DispMode2 = 2;
@@ -301,6 +323,8 @@ namespace ProcessManagement.Commons
         public static event EventHandler? ClickSaveEvent;
         public static event EventHandler<object?>? CongdoaUpdatedEvent;
         public static event EventHandler<object?>? PXK_ExportEvent;
+        public static event EventHandler? ReloadPNKEvent;
+        public static event EventHandler? ReloadPXKEvent;
 
         // KHSX static variable
         public static object? CurrentKHSXid;
@@ -360,6 +384,34 @@ namespace ProcessManagement.Commons
         public static bool IsPXK_EventRegistered()
         {
             return PXK_ExportEvent != null;
+        }
+
+        // Reload phieu nhap kho Event
+        public static void RaiseReloadPNK_Event()
+        {
+            ReloadPNKEvent?.Invoke(null, EventArgs.Empty);
+        }
+        public static void ResetReloadPNK_Event()
+        {
+            ReloadPNKEvent = null;
+        }
+        public static bool IsReloadPNK_EventRegistered()
+        {
+            return ReloadPNKEvent != null;
+        }
+
+        // Reload phieu xuat kho Event
+        public static void RaiseReloadPXK_Event()
+        {
+            ReloadPXKEvent?.Invoke(null, EventArgs.Empty);
+        }
+        public static void ResetReloadPXK_Event()
+        {
+            ReloadPXKEvent = null;
+        }
+        public static bool IsReloadPXK_EventRegistered()
+        {
+            return ReloadPXKEvent != null;
         }
 
         public static string RemoveDiacriticsAndSpaces(string text)

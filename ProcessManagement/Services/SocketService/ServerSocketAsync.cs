@@ -13,6 +13,7 @@ using ProcessManagement.Services.SQLServer;
 using ProcessManagement.Services.SocketService;
 using ProcessManagement.Models.KHO_NVL.XuatKho;
 using Radzen;
+using ProcessManagement.Models.KHO_NVL.NhapKho;
 
 namespace ParamountBed_Warehouse.Services.SocketService
 {
@@ -301,10 +302,12 @@ namespace ParamountBed_Warehouse.Services.SocketService
 
             string CMDTYPE = ClientMesage?.Command[Common.CMDTYPE]?.ToString() ?? string.Empty;
 
-            if (CMDTYPE == Common.PXK_EXPORT)
+            if (CMDTYPE == Common.PNK_LOAD)
             {
-                HandleXuatKhoRequire(ClientMesage, client);
+                HandleLoadPhieuNhapKhoDetails(ClientMesage, client);
             }
+
+
         }
 
         public string ConvertData(List<IDictionary<string, object>> data)
@@ -481,6 +484,99 @@ namespace ParamountBed_Warehouse.Services.SocketService
 
                 Data = new List<Dictionary<string, object>>() { data }
             };
+            string datasending = JsonConvert.SerializeObject(sendingMess);
+
+            SendReply(client, datasending);
+        }
+
+
+
+        // Create PNK Infor sending to Handy
+        private List<Dictionary<string, object>> CreateNVLofPNK_SocketData(List<NVLofPhieuNhapKho> nvlofpnks)
+        {
+            List<Dictionary<string, object>> datas = new();
+
+            List<LenhNhapKho> dsanhLNKs = new();
+
+            foreach (var nvlpnk in nvlofpnks)
+            {
+                foreach (var lnk in nvlpnk.DSLenhNKs)
+                {
+                    dsanhLNKs.Add(lnk);
+                }
+            }
+
+            foreach (var lenh in dsanhLNKs)
+            {
+                _ = int.TryParse(lenh.PNKID.Value?.ToString(), out int pnkid) ? pnkid : -1;
+                string tennvl = lenh.TargetNgLieu.TenNVL.Value?.ToString() ?? string.Empty;
+
+                string mavitri = lenh.TargertVitri.MaViTri.Value?.ToString() ?? string.Empty;
+                _ = int.TryParse(lenh.LNKSoLuong.Value?.ToString(), out int soluongnhap) ? soluongnhap : 0;
+                _ = int.TryParse(lenh.LNKIsDone.Value?.ToString(), out int lnkstatus) ? lnkstatus : -1;
+
+                string lnkKey = $"LNK{dsanhLNKs.IndexOf(lenh) + 1}";
+
+                Dictionary<string, object> lnkData = new();
+
+                Dictionary<string, object> lnkdetails = new()
+                    {
+                        {Common.TenNVL, tennvl }, {Common.MaViTri, mavitri }, {Common.PNKID, pnkid },
+                        {Common.LNKSoLuong, soluongnhap }, {Common.LNKIsDone, lnkstatus }
+                    };
+
+                lnkData.Add(lnkKey, lnkdetails);
+
+                datas.Add(lnkData);
+            }
+
+            return datas;
+        }
+
+        // Handle require load phieu nhap kho detail from client
+        private void HandleLoadPhieuNhapKhoDetails(SocketMessage? mess, ConnectedObject client)
+        {
+            if (mess != null)
+            {
+                string maPNK = mess.Data.FirstOrDefault()?[Common.PNK_MPNK].ToString() ?? string.Empty;
+
+                if (string.IsNullOrWhiteSpace(maPNK)) { return; }
+
+                // Load PNK details
+                PhieuNhapKho phieuNhapKho = SQLServerServices.GetPhieuNhapKhoByMaPhieu(maPNK);
+
+                if (phieuNhapKho.PNKID.Value == null)
+                {
+                    SendFeedBackToClient(client, Common.PNK_RETURN, Common.FAIL, "Không tồn tại phiếu nhập kho!", new Dictionary<string, object>());
+                }
+                else
+                {
+                    // Sending list NVLofPNK
+                    List<Dictionary<string, object>> NVLofPNKdatas = CreateNVLofPNK_SocketData(phieuNhapKho.DSNVLofPNKs);
+
+                    SendPhieuXuatKhoDataToClient(client, Common.PNK_RETURN, Common.SUCCESS, string.Empty, NVLofPNKdatas);
+                }
+            }
+        }
+
+        private void SendPhieuXuatKhoDataToClient(ConnectedObject client, string cmdtype, string returnresult, string resultmess, List<Dictionary<string, object>> data)
+        {
+            Dictionary<string, object> HeaderSEND = new()
+            {
+                { Common.CMDTYPE, cmdtype },
+
+                { Common.RETURNRESULT, returnresult },
+
+                { Common.RESULTMESS, resultmess }
+            };
+
+            SocketMessage sendingMess = new()
+            {
+                Command = HeaderSEND
+            };
+
+            sendingMess.Data.AddRange(data);
+
             string datasending = JsonConvert.SerializeObject(sendingMess);
 
             SendReply(client, datasending);

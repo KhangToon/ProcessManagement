@@ -118,12 +118,28 @@
     private bool isSearching = false;
 
     protected override async Task OnInitializedAsync()
-    {
+    {   
+        // Registed reload pnk
+        if (Common.IsReloadPXK_EventRegistered())
+        {
+            Common.ResetReloadPXK_Event();
+        }
+        Common.ReloadPXKEvent += ReloadPXKEventRasing;
+
         await LoadDSachPhieuXuatKho();
 
         ReSelectPhieuXuatKho();
 
         await base.OnInitializedAsync();
+    }
+
+    private async void ReloadPXKEventRasing(object? sender, EventArgs eventArgs)
+    {
+        await LoadDSachPhieuXuatKho();
+
+        ReSelectPhieuXuatKho();
+
+        await this.InvokeAsync(() => this.StateHasChanged());
     }
 
     private async Task LoadDSachPhieuXuatKho()

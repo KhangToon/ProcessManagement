@@ -313,8 +313,11 @@
     {
         lxk.ViTriofNVL.NgLieuInfor = SelectedNVLofPXK.TargetNgLieu;
 
-        await DialogService.OpenAsync<DialogHandle_LenhXuatKho>(null, new Dictionary<string, object>() { { "LXK", lxk }, { "MaPXK", PXK.MaPhieuXK.Value?.ToString() ?? string.Empty } },
-            new DialogOptions() { ShowTitle = false, Width = "70%", Height = "contain", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
+        await DialogService.OpenAsync<DialogHandle_LenhXuatKho>(null, new Dictionary<string, object>() { { "LXK", lxk }, { "PXK", PXK } },
+        new DialogOptions() { ShowTitle = false, Width = "70%", Height = "contain", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
+    
+        // Raise event reload ds phieu xuat kho
+        Common.RaiseReloadPXK_Event();
     }
 
     // Datagrid cell render

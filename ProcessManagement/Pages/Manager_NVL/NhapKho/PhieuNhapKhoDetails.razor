@@ -202,7 +202,7 @@
                                                     foreach (var lnk in SelectedNVLofPNK.DSLenhNKs)
                                                     {
                                                         ViTriofNVL viTriofNVL = SQLServerServices.GetViTriOfNgVatLieuByNVLid_VTid(lnk.NVLID.Value, lnk.VTID.Value);
-                                                        
+
                                                         int SLnvlhiencoTaivitri = int.TryParse(viTriofNVL?.VTNVLSoLuong.Value?.ToString(), out int slhc) ? slhc : 0;
                                                         int SLLNkhoPUT = int.TryParse(lnk.LNKSoLuong.Value?.ToString(), out int slput) ? slput : 0;
 
@@ -304,8 +304,11 @@
     // Handle lenh nhap kho
     private async Task OnOpenDialogHandleLenhNhapKho(LenhNhapKho lnk)
     {
-        await DialogService.OpenAsync<DialogHandle_LenhNhapKho>(null, new Dictionary<string, object>() { { "LNK", lnk }, { "MaPNK", PNK.MaPhieuNK.Value?.ToString() ?? string.Empty } },
-            new DialogOptions() { ShowTitle = false, Width = "70%", Height = "contain", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
+        await DialogService.OpenAsync<DialogHandle_LenhNhapKho>(null, new Dictionary<string, object>() { { "LNK", lnk }, { "PNK", PNK } },
+        new DialogOptions() { ShowTitle = false, Width = "70%", Height = "contain", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
+
+        // Raise event reload ds phieu nhap kho
+        Common.RaiseReloadPNK_Event();
     }
 
     // Datagrid cell render

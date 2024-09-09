@@ -120,11 +120,27 @@
 
     protected override async Task OnInitializedAsync()
     {
+        // Registed reload pnk
+        if (Common.IsReloadPNK_EventRegistered())
+        {
+            Common.ResetReloadPNK_Event();
+        }
+        Common.ReloadPNKEvent += ReloadPNKEventRasing;
+
         await LoadDSachPhieuNhapKho();
 
         ReSelectPhieuNhapKho();
 
         await base.OnInitializedAsync();
+    }
+
+    private async void ReloadPNKEventRasing(object? sender, EventArgs eventArgs)
+    {
+        await LoadDSachPhieuNhapKho();
+
+        ReSelectPhieuNhapKho();
+
+        await this.InvokeAsync(() => this.StateHasChanged());
     }
 
     private async Task LoadDSachPhieuNhapKho()

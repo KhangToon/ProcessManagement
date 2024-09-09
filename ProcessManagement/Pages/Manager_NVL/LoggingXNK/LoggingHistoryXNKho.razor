@@ -1,0 +1,222 @@
+﻿@using ProcessManagement.Commons
+@using ProcessManagement.Models.KHO_NVL
+@using ProcessManagement.Models.KHO_NVL.Tracking
+@using ProcessManagement.Services.SQLServer
+@using Radzen.Blazor
+@using Radzen
+@using ProcessManagement.Models
+
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject TooltipService TooltipService
+@inject SQLServerServices SQLServerServices
+
+<style>
+    .log_IsSelected {
+        border-style: solid;
+        border-width: 2px;
+        border-color: green;
+    }
+</style>
+
+<RadzenStack Style="height: contain; width: 100%; padding-bottom: 5px; padding-left: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+    <RadzenStack Style="height: 100%; width: 20%; border-radius: 10px; background-color: var(--rz-success-lighter); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+        <RadzenText Text="LỊCH SỬ XUẤT/NHẬP KHO" Style="color: green; font-weight: 600; font-size: 18px"></RadzenText>
+    </RadzenStack>
+    <RadzenStack Gap="15px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: 100%; width: 60%;">
+        <RadzenMenu Style="height: 100%; padding: 0; margin: 0; border-radius: 10px; background-color: var(--rz-primary-lighter)">
+            <RadzenMenuItem Text="@($"Bộ lọc ( {dsachModeSearch[modeSearch]} )")" Icon="search">
+                <RadzenMenuItem Text="@dsachModeSearch[0]" Click="@( async() => {modeSearch = 0; await LoadLoggingList(); } )" Icon="filter_alt"></RadzenMenuItem>
+                <RadzenMenuItem Text="@dsachModeSearch[1]" Click="@( async() => {modeSearch = 1; await GetFilterDSachVitriLuuTru(Common.LogTypePNK);})" Icon="filter_alt"></RadzenMenuItem>
+                <RadzenMenuItem Text="@dsachModeSearch[2]" Click="@( async() => {modeSearch = 2; await GetFilterDSachVitriLuuTru(Common.LogTypePXK);})" Icon="filter_alt"></RadzenMenuItem>
+                <RadzenMenuItem Text="@dsachModeSearch[3]" Click="@( () => {modeSearch = 3;})" Icon="filter_alt"></RadzenMenuItem>
+                <RadzenMenuItem Text="@dsachModeSearch[4]" Click="@( () => {modeSearch = 4;})" Icon="filter_alt"></RadzenMenuItem>
+                <RadzenMenuItem Text="@dsachModeSearch[5]" Click="@( () => {modeSearch = 5;})" Icon="filter_alt"></RadzenMenuItem>
+            </RadzenMenuItem>
+        </RadzenMenu>
+        <RadzenTextBox @oninput="@((args) => GetFilterDSachVitriLuuTru(args?.Value?.ToString()?? string.Empty))" Placeholder="@($"Nhập {((modeSearch != 0 && modeSearch != 1 && modeSearch != 2)? $"{dsachModeSearch[modeSearch]}" : "thông tin")} để tìm kiếm")" Style="border-radius: 20px; padding-left: 20px; border-width: 2px; border-color: var(--rz-primary-light); width: 50% "></RadzenTextBox>
+        <RadzenButton Icon="search" ButtonStyle="ButtonStyle.Primary" Style="border-radius: 20px;" />
+        <RadzenButton Style="border-radius: 20px;" Icon="autorenew" ButtonStyle="ButtonStyle.Primary" />
+    </RadzenStack>
+</RadzenStack>
+<RadzenRow Gap="10px" Style="height: 100%; width: 100%; border-top: var(--rz-grid-cell-border); padding: 0;">
+    <RadzenColumn Size="12" SizeMD="12" Style="height: contain; width: 100%;">
+        <RadzenStack Gap="0px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start" Style="height: 100%; width: 100%;">
+            <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding: 10px; padding-left: 10px; border-bottom: var(--rz-grid-cell-border) " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                <RadzenText Text="Lịch sử xuất/nhập kho nguyên liệu" Style="color: darkred; font-weight: 600; font-size: 17px; height: contain; width: contain; font-style: italic;"></RadzenText>
+                <RadzenText Text="@($"( {DSLoggings.Count} )")" Style="color: black; font-weight: 600; font-size: 16px; height: contain; width: contain; font-style: italic;"></RadzenText>
+            </RadzenStack>
+            <RadzenDataList Visible="false" Style="height: 100%; width: 100%" Density="Density.Compact" PagerPosition="PagerPosition.Top" PageSize="8" WrapItems="true" AllowPaging="true" Data="@DSLoggings" TItem="HistoryXNKho">
+                <Template Context="log">
+                    <RadzenCard Style="width: 250px; height: contain; padding: 0" Variant="Variant.Flat">
+                        <RadzenCard class="@(IsLogSelected(log))" Style="width: 100%; height: 100%; padding: 10px" Variant="Variant.Flat">
+                            <RadzenStack onclick="@(() => OnLogClick(log))" Style="width: 100%; height: 100%; padding: 0" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenCard class="rz-shadow-4" Variant="Variant.Outlined" Style="width: 100%; height: contain; padding: 5px; padding-right: 0px; background-color: white">
+                                    <RadzenStack Style="width: 100%; height: 100%" Gap="10px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                        <RadzenStack Style="width: 10%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                            <RadzenText Text="@($"{(DSLoggings.IndexOf(log) + 1).ToString()}")" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                                        </RadzenStack>
+                                        <RadzenStack Style="width: 40%; height: contain; border-left: var(--rz-grid-cell-border); border-right: var(--rz-grid-cell-border); padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                            <RadzenText Text="" Style="color: darkblue; font-weight: 600; font-size: 16px"></RadzenText>
+                                        </RadzenStack>
+                                        <RadzenStack Gap=15px Style="width: 50%; height: contain; padding-left: 30px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+
+                                        </RadzenStack>
+                                    </RadzenStack>
+                                </RadzenCard>
+                            </RadzenStack>
+                        </RadzenCard>
+                    </RadzenCard>
+                </Template>
+            </RadzenDataList>
+
+            <RadzenStack Visible="@(DSLoggings != null && DSLoggings.Count > 0)" Style="height: auto; width: 100%; overflow-x: scroll; padding-top: 10px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                <RadzenDataGrid Data="@(DSLoggings)" TItem="HistoryXNKho"
+                                EmptyText="Danh sách logging trống." Style="padding-right: 0;"
+                                ShowColumnTitleAsTooltip="true" ShowCellDataAsTooltip="true"
+                                AllowFiltering="false" FilterMode="FilterMode.Simple"
+                                AllowPaging="true" AllowSorting="false" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                ShowPagingSummary="true" PagingSummaryFormat="@pagingSummaryFormat" PagerPosition="PagerPosition.Bottom"
+                                GridLines="DataGridGridLines.Both" PageSize="10" Density="Density.Default"
+                                HeaderCellRender="@(args => args.Attributes.Add("style", $"background-color: rgba(58, 71, 77)"))"
+                                CellRender="@OnCellRender" Value="@DatagridSeletedLog" ValueChanged="@((args) => OnDatagridSelectChanged(args))">
+                    <Columns>
+                        @if (DSLoggings != null && DSLoggings.Count > 0)
+                        {
+                            List<Propertyy> columns = DSLoggings.FirstOrDefault()?.GetPropertiesValues() ?? new();
+
+                            <RadzenDataGridColumn Width="50px" Frozen="true" FrozenPosition="FrozenColumnPosition.Left" Filterable="false"
+                                                  TItem="HistoryXNKho" Title="#"
+                                                  Property="STT" TextAlign="TextAlign.Center">
+                                <HeaderTemplate>
+                                    <span style="font-weight: 600; font-size: 15px; color: white">STT</span>
+                                </HeaderTemplate>
+                                <Template Context="log">
+                                    <span style="font-weight: bold;">@(DSLoggings.IndexOf(log) + 1)</span>
+                                </Template>
+                            </RadzenDataGridColumn>
+
+                            foreach (var column in columns.Where(cl => cl.DispDatagrid == true).ToList())
+                            {
+                                string colName = column.DBName ?? string.Empty;
+                                string displayName = column.DisplayName ?? string.Empty;
+
+                                <RadzenDataGridColumn Width="contain" TItem="HistoryXNKho" Title="@displayName"
+                                                      Property="@colName" TextAlign="TextAlign.Center">
+                                    <HeaderTemplate>
+                                        <span style="font-weight: 600; font-size: 15px; color: white">@displayName</span>
+                                    </HeaderTemplate>
+                                    <Template Context="log">
+                                        <span style="color: black; font-weight: 500;">@(log.GetPropertyValue(colName))</span>
+                                    </Template>
+                                </RadzenDataGridColumn>
+                            }
+                        }
+                    </Columns>
+                </RadzenDataGrid>
+            </RadzenStack>
+        </RadzenStack>
+    </RadzenColumn>
+</RadzenRow>
+
+
+@code {
+    private List<HistoryXNKho> DSLoggings = new();
+
+    private HistoryXNKho SeletedLog = new();
+
+    private IList<HistoryXNKho> DatagridSeletedLog = new List<HistoryXNKho>();
+
+    private Dictionary<int, string> dsachModeSearch = new() { { 0, "Tất cả" }, { 1, "Nhập kho" }, { 2, "Xuất kho" }, { 3, "Mã phiếu" }, { 4, "Mã NVL" }, { 5, "Mã vị trí" }
+                                                            , { 6, "Người thực hiện" } };
+    private int modeSearch = 0;
+
+    private string pagingSummaryFormat = "Displaying page {0} of {1} <b>(total {2} records)</b>";
+
+    protected async override Task OnInitializedAsync()
+    {
+        await LoadLoggingList();
+
+        await base.OnInitializedAsync();
+    }
+
+    private async Task LoadLoggingList()
+    {
+        await Task.Run(() =>
+        {
+            DSLoggings = SQLServerServices.GetDSLoggingXNKho();
+        });
+    }
+
+    private bool isSearching = false;
+    private async Task GetFilterDSachVitriLuuTru(string keyWord)
+    {
+        if (isSearching == false)
+        {
+            isSearching = true;
+
+            await LoadLoggingList();
+
+            if (modeSearch == 1 || modeSearch == 2) // tim theo loai phieu xuat/nhap kho
+            {
+                DSLoggings = DSLoggings.Where(log => log.LogLoaiPhieu.Value?.ToString()?.Trim()?.IndexOf(keyWord.Trim(), StringComparison.OrdinalIgnoreCase) >= 0).ToList();
+            }
+            else if (modeSearch == 3) // tim theo ma phieu
+            {
+                DSLoggings = DSLoggings.Where(log => log.LogMaPhieu.Value?.ToString()?.Trim()?.IndexOf(keyWord.Trim(), StringComparison.OrdinalIgnoreCase) >= 0).ToList();
+            }
+            else if (modeSearch == 4) // tim theo ma NVL
+            {
+                DSLoggings = DSLoggings.Where(log => log.LogTenNVL.Value?.ToString()?.Trim()?.IndexOf(keyWord.Trim(), StringComparison.OrdinalIgnoreCase) >= 0).ToList();
+            }
+            else if (modeSearch == 5) // tim theo ma vi tri
+            {
+                DSLoggings = DSLoggings.Where(log => log.LogMaViTri.Value?.ToString()?.Trim()?.IndexOf(keyWord.Trim(), StringComparison.OrdinalIgnoreCase) >= 0).ToList();
+            }
+            else if (modeSearch == 6) // tim theo nguoi thuc hien
+            {
+                DSLoggings = DSLoggings.Where(log => log.LogNgThucHien.Value?.ToString()?.Trim()?.IndexOf(keyWord.Trim(), StringComparison.OrdinalIgnoreCase) >= 0).ToList();
+            }
+
+            if (DSLoggings.Count > 0)
+            {
+                SeletedLog = DSLoggings.FirstOrDefault() ?? new();
+            }
+            else SeletedLog = new();
+
+            isSearching = false;
+        }
+    }
+
+    private string IsLogSelected(HistoryXNKho seletedLog)
+    {
+        if (SeletedLog.LogXNKID.Value != null && SeletedLog.LogXNKID.Value.Equals(seletedLog.LogXNKID.Value))
+        {
+            return "log_IsSelected";
+        }
+        else return string.Empty;
+    }
+
+    private void OnLogClick(HistoryXNKho seletedLog)
+    {
+        SeletedLog = seletedLog;
+
+        StateHasChanged();
+    }
+
+    private void OnCellRender(DataGridCellRenderEventArgs<HistoryXNKho> args)
+    {
+        if (args.Column.Property.Contains("ID"))
+        {
+            args.Attributes.Add("style", $"font-weight: bold;");
+        }
+    }
+
+    // Datagrid selected changed event
+    private void OnDatagridSelectChanged(IList<HistoryXNKho> selectedLog)
+    {
+        DatagridSeletedLog = selectedLog;
+
+        SeletedLog = DatagridSeletedLog.FirstOrDefault() ?? new();
+    }
+}

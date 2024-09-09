@@ -1,5 +1,6 @@
 ﻿@using ProcessManagement.Commons
 @using ProcessManagement.Models.KHO_NVL
+@using ProcessManagement.Models.KHO_NVL.Tracking
 @using ProcessManagement.Services.SQLServer
 @using ProcessManagement.Services.QRCodes
 @using Radzen.Blazor
@@ -12,6 +13,7 @@
 @inject TooltipService TooltipService
 @inject SQLServerServices SQLServerServices
 @inject QRCodeServices QRCodeServices
+@inject IJSRuntime JSRuntime
 
 <RadzenCard Variant="Variant.Filled" Style="height: contain; width: 100%; padding: 10px;">
     <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style=" height: contain; width: 100%; padding: 0px; padding-bottom: 10px; padding-top: 10px " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
@@ -44,12 +46,15 @@
                     <RadzenStack Gap="10px" Style="height: contain; width: 100%;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                         <RadzenStack Gap="20px" Style="height: contain; width: 100%; border-radius: 5px; background-color: var(--rz-secondary-lighter); padding: 5px; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                             <RadzenText Text="@($"Mã phiếu nhập kho: ")" Style="font-weight: 600; font-size: 16px; color: black;"></RadzenText>
-                            <RadzenText Text="@($"{MaPNK}")" Style="font-weight: 600; font-size: 18px; color: darkred;"></RadzenText>
+                            <RadzenStack Gap="10" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenText Text="@($"{PNK.MaPhieuNK.Value?.ToString()}")" Style="font-weight: 600; font-size: 18px; color: darkred;"></RadzenText>
+                                <RadzenButton Click="@(() => CopyToClipboard(PNK.MaPhieuNK.Value?.ToString()?? string.Empty))" Icon="content_copy" Style="--rz-icon-size: 18px;" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Light" />
+                            </RadzenStack>
                         </RadzenStack>
                         <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: contain; padding: 10px; margin-top: 10px; border-radius: 0">
                             <RadzenStack Style="height: 100%; width: contain" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                 @{
-                                    string qrBase64string = QRCodeServices.GenerateQRCode(MaPNK, 150);
+                                    string qrBase64string = QRCodeServices.GenerateQRCode(PNK.MaPhieuNK.Value?.ToString() ?? string.Empty, 150);
                                     <img style="border-radius: 10px;" src="@($"data:image/png;base64,{qrBase64string}")" alt="QR Code">
                                 }
                             </RadzenStack>
@@ -75,7 +80,10 @@
                     <RadzenStack Gap="10px" Style="height: contain; width: 100%;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                         <RadzenStack Gap="20px" Style="height: contain; width: 100%; border-radius: 5px; background-color: var(--rz-secondary-lighter); padding: 5px; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                             <RadzenText Text="@($"Mã vị trí: ")" Style="font-weight: 600; font-size: 16px; color: black;"></RadzenText>
-                            <RadzenText Text="@($"{LNK.TargertVitri.MaViTri.Value?.ToString()}")" Style="font-weight: 600; font-size: 18px; color: darkred;"></RadzenText>
+                            <RadzenStack Gap="10" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenText Text="@($"{LNK.TargertVitri.MaViTri.Value?.ToString()}")" Style="font-weight: 600; font-size: 18px; color: darkred;"></RadzenText>
+                                <RadzenButton Click="@(() => CopyToClipboard(LNK.TargertVitri.MaViTri.Value?.ToString()?? string.Empty))" Icon="content_copy" Style="--rz-icon-size: 18px;" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Light" />
+                            </RadzenStack>
                         </RadzenStack>
                         <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: contain; padding: 10px; margin-top: 10px; border-radius: 0">
                             <RadzenStack Style="height: 100%; width: contain" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
@@ -106,7 +114,10 @@
                     <RadzenStack Gap="10px" Style="height: contain; width: 100%;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                         <RadzenStack Gap="20px" Style="height: contain; width: 100%; border-radius: 5px; background-color: var(--rz-secondary-lighter); padding: 5px; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                             <RadzenText Text="@($"Mã nguyên liệu: ")" Style="font-weight: 600; font-size: 16px; color: black;"></RadzenText>
-                            <RadzenText Text="@($"{LNK.TargetNgLieu.TenNVL.Value?.ToString()}")" Style="font-weight: 600; font-size: 18px; color: darkred;"></RadzenText>
+                            <RadzenStack Gap="10" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenText Text="@($"{LNK.TargetNgLieu.TenNVL.Value?.ToString()}")" Style="font-weight: 600; font-size: 18px; color: darkred;"></RadzenText>
+                                <RadzenButton Click="@(() => CopyToClipboard(LNK.TargetNgLieu.TenNVL.Value?.ToString()?? string.Empty))" Icon="content_copy" Style="--rz-icon-size: 18px;" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Light" />
+                            </RadzenStack>
                         </RadzenStack>
                         <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: contain; padding: 10px; margin-top: 10px; border-radius: 0">
                             <RadzenStack Style="height: 100%; width: contain" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
@@ -154,7 +165,7 @@
     public LenhNhapKho LNK { get; set; } = new();
 
     [Parameter]
-    public string MaPNK { get; set; } = string.Empty;
+    public PhieuNhapKho PNK { get; set; } = new();
 
     private bool usingScanner = true;
 
@@ -243,13 +254,13 @@
         // NVL da ton tai o vitri nay --> Update so luong
         if (viTriofNVL != null && viTriofNVL.VTofNVLID.Value != null)
         {
-            int soluongHientai = int.TryParse(viTriofNVL?.VTNVLSoLuong.Value?.ToString(), out int slhc) ? slhc : 0;
+            int soluongHientaivitri = int.TryParse(viTriofNVL?.VTNVLSoLuong.Value?.ToString(), out int slhc) ? slhc : 0;
 
             // gan so luong sau khi nhap cho vi tri da luu
-            int newtonkho = soluongHientai + soluongThemvao;
+            int newtonkhotaivitri = soluongHientaivitri + soluongThemvao;
 
             // Update so luong vi tri da co cua nvl
-            (int updateVTofNVLresult, string updateVTofNVLerror) = SQLServerServices.UpdateSoluongNgVatLieuById(viTriofNVL?.VTofNVLID.Value, newtonkho);
+            (int updateVTofNVLresult, string updateVTofNVLerror) = SQLServerServices.UpdateSoluongNgVatLieuById(viTriofNVL?.VTofNVLID.Value, newtonkhotaivitri);
 
             if (updateVTofNVLresult == -1)
             {
@@ -289,12 +300,47 @@
             {
                 return;
             }
-        } 
+        }
 
         // update status to UI
         scanLNK.LNKIsDone.Value = 1;
 
+        // Logging nhap kho
+        HistoryXNKho logNhapKho = new HistoryXNKho()
+            {
+                LogLoaiPhieu = { Value = Common.LogTypePNK },
+                LogMaPhieu = { Value = PNK.MaPhieuNK.Value?.ToString() },
+                LogMaViTri = { Value = scanMaViTri },
+                LogNgThucHien = { Value = PNK.NguoiLapPNK.Value?.ToString() },
+                LogSoLuong = { Value = LNK.LNKSoLuong.Value },
+                LogTonKhoTruoc = { Value = LNK.TargetNgLieu.TonKho },
+                LogTonKhoSau = { Value = LNK.TargetNgLieu.TonKho + soluongThemvao },
+                LogTenNVL = { Value = LNK.TargetNgLieu.TenNVL.Value },
+                LogThoiDiem = { Value = DateTime.Now },
+                NVLID = { Value = scanLNK.NVLID.Value },
+                VTID = { Value = scanLNK.VTID.Value }
+            };
+        // Insert logging to Database
+        (int logId, string logErr) = SQLServerServices.InsertLogingXNKho(logNhapKho);
+
+        if (logId == -1)
+        {
+            await DialogService.Alert($"Logging error: {logErr}!", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+        }
+
         ShowNotification("Đã nhập kho!", NotificationSeverity.Success, 2000);
+    }
+
+    private async Task CopyToClipboard(string content)
+    {
+        await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", content);
+        NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Success,
+                Summary = "Copied!",
+                Detail = $"{content}",
+                Duration = 4000
+            });
     }
 
     // Notification

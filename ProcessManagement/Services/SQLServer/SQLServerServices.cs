@@ -3,6 +3,7 @@ using ProcessManagement.Commons;
 using ProcessManagement.Models;
 using ProcessManagement.Models.KHO_NVL;
 using ProcessManagement.Models.KHO_NVL.NhapKho;
+using ProcessManagement.Models.KHO_NVL.Tracking;
 using ProcessManagement.Models.KHO_NVL.XuatKho;
 using System.Data;
 using System.Text.RegularExpressions;
@@ -4976,6 +4977,96 @@ namespace ProcessManagement.Services.SQLServer
                 return (-1, err);
             }
         }
+        #endregion
+
+        // ------------------------------------------------------------------------------------- //
+        #region Table_KHO_HistoryXuatNhapKho
+
+        // Insert logging xuat-nhap kho
+        public (int, string) InsertLogingXNKho(HistoryXNKho? logging)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            if (logging == null) return (result, "Error");
+
+            List<Propertyy> logginItems = logging.GetPropertiesValues().Where(po => po.AlowDatabase == true && po.Value != null).ToList();
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                string columnNames = string.Join(",", logginItems.Select(key => $"[{key.DBName}]"));
+
+                string parameterNames = string.Join(",", logginItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $"INSERT INTO [{Common.Table_HistoryXNKho}] ({columnNames}) OUTPUT INSERTED.{Common.LogXNKID} VALUES ({parameterNames})";
+
+                foreach (var item in logginItems)
+                {
+                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
+
+                    object? parameterValue = item.Value;
+
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                object? rs = command.ExecuteScalar();
+
+                result = Convert.ToInt32(rs);
+
+                if (result == 0) result = -1;
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
+        // Get danh sach logging xuat-nhap kho
+        public List<HistoryXNKho> GetDSLoggingXNKho()
+        {
+            List<HistoryXNKho> logs = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_HistoryXNKho}]";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    HistoryXNKho log = new();
+
+                    List<Propertyy> rowitems = log.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue.ToString()?.Trim();
+                    }
+
+                    logs.Add(log);
+                }
+            }
+
+            return logs;
+        }
+
         #endregion
     }
 }
