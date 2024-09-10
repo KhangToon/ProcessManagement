@@ -1,0 +1,86 @@
+﻿@page "/camera"
+@inject IJSRuntime JSRuntime
+
+<div class="d-flex flex-column align-items-center">
+    @if (isCameraAvailable)
+    {
+        <video id="camera-video" width="320" height="240" autoplay></video>
+        <button class="btn btn-primary mt-2" @onclick="CaptureImage">Capture</button>
+        @if (!string.IsNullOrEmpty(imageDataUrl) && imageDataUrl.StartsWith("data:image/"))
+        {
+            <img src="@imageDataUrl" class="mt-2" alt="Captured image" />
+        }
+    }
+    else
+    {
+        <p class="text-danger">No camera device detected. Please ensure a camera is connected and permissions are granted.</p>
+    }
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <p class="text-danger mt-2">@errorMessage</p>
+    }
+    <p class="mt-2">Debug Info: @debugInfo</p>
+</div>
+
+@code {
+    private string? imageDataUrl;
+    private string? errorMessage;
+    private string? debugInfo;
+    private bool isCameraAvailable = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CheckCameraAvailability();
+    }
+
+    private async Task CheckCameraAvailability()
+    {
+        try
+        {
+            var result = await JSRuntime.InvokeAsync<string>("checkCameraAvailability");
+            debugInfo = $"Camera check result: {result}";
+            isCameraAvailable = result == "Camera available";
+            if (!isCameraAvailable)
+            {
+                errorMessage = "No camera device detected. Please ensure a camera is connected and permissions are granted.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error checking camera availability: {ex.Message}";
+            debugInfo = $"Camera check error: {ex.ToString()}";
+        }
+    }
+
+    private async Task CaptureImage()
+    {
+        if (!isCameraAvailable)
+        {
+            errorMessage = "Cannot capture image. No camera device available.";
+            return;
+        }
+
+        try
+        {
+            var captureResult = await JSRuntime.InvokeAsync<string>("captureImage");
+            debugInfo = $"Capture result: {captureResult}";
+
+            if (captureResult.StartsWith("data:image/"))
+            {
+                imageDataUrl = captureResult;
+                errorMessage = string.Empty;
+            }
+            else
+            {
+                errorMessage = $"Failed to capture image: {captureResult}";
+                imageDataUrl = string.Empty;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error capturing image: {ex.Message}";
+            debugInfo = $"Capture error: {ex.ToString()}";
+        }
+        StateHasChanged();
+    }
+}

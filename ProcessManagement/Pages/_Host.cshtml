@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
     <link href="css/site.css" rel="stylesheet" />
     <link href="ProcessManagement.styles.css" rel="stylesheet" />
-    <link rel="icon" type="image/png" href="favicon.png"/>
+    <link rel="icon" type="image/png" href="favicon.png" />
     <!--Radzen-->
     <link rel="stylesheet" href="_content/Radzen.Blazor/css/software.css">
     <!--Radzen-->
@@ -38,5 +38,65 @@
     <!--Radzen-->
     <script src="_content/Radzen.Blazor/Radzen.Blazor.js"></script>
     <!--Radzen-->
+    <script>
+        let videoElement;
+
+        window.checkCameraAvailability = async () => {
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const videoDevices = devices.filter(device => device.kind === 'videoinput');
+                console.log('Video devices found:', videoDevices.length);
+                if (videoDevices.length > 0) {
+                    return "Camera available";
+                } else {
+                    return "No camera devices found";
+                }
+            } catch (error) {
+                console.error('Error checking camera availability:', error);
+                return `Error checking camera: ${error.message}`;
+            }
+        };
+
+        window.setupCamera = async () => {
+            videoElement = document.getElementById('camera-video');
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                videoElement.srcObject = stream;
+                return "Camera stream set up successfully";
+            } catch (error) {
+                console.error('Error accessing camera:', error);
+                return `Error accessing camera: ${error.message}`;
+            }
+        };
+
+        window.captureImage = () => {
+            if (!videoElement || !videoElement.srcObject) {
+                console.error('Video element not set up');
+                return "Error: Video element not set up";
+            }
+
+            console.log('Video element dimensions:', videoElement.videoWidth, 'x', videoElement.videoHeight);
+
+            if (videoElement.videoWidth === 0 || videoElement.videoHeight === 0) {
+                console.error('Video dimensions are zero. The stream may not be ready.');
+                return "Error: Video dimensions are zero";
+            }
+
+            const canvas = document.createElement('canvas');
+            canvas.width = videoElement.videoWidth;
+            canvas.height = videoElement.videoHeight;
+            const context = canvas.getContext('2d');
+
+            try {
+                context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+                const dataUrl = canvas.toDataURL('image/jpeg');
+                console.log('Image captured. Data URL length:', dataUrl.length);
+                return dataUrl;
+            } catch (error) {
+                console.error('Error capturing image:', error);
+                return `Error capturing image: ${error.message}`;
+            }
+        };
+    </script>
 </body>
 </html>
