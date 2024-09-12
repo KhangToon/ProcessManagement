@@ -315,6 +315,11 @@ namespace ProcessManagement.Commons
         public const string PNK_MNVL = "PNK_MNVL";
         public const string PNK_LOAD = "PNK_LOAD";
         public const string PNK_RETURN = "PNK_RETURN";
+        
+        public const string PNK_LNKSL = "PNK_LNKSL";
+        public const string PNK_LNKID = "PNK_LNKID";
+        public const string PNK_HANDLE_LNK = "PNK_HANDLE_LNK";
+        public const string PNK_HANDLE_LNK_RETURN = "PNK_HANDLE_LNK_RETURN";
 
         public const int DispMode1 = 1;
         public const int DispMode2 = 2;

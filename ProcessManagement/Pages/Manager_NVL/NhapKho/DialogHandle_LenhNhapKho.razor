@@ -144,9 +144,9 @@
         </RadzenRow>
         <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding-top: 10px; border-top: var(--rz-grid-cell-border) " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
             <RadzenStack Gap="10px" Style="height: 100%; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                @if (scanLNK.LNKIsDone.Value?.ToString() == "1")
+                @if (scanLNK.LNKIsDone.Value?.ToString() == "1" || LNK.LNKIsDone.Value?.ToString() == "1")
                 {
-                    <RadzenButton Style="width: contain; cursor: default" Icon="check" Text="Nhập kho thành công" ButtonStyle="ButtonStyle.Success" Shade="Shade.Dark" Size="ButtonSize.Small" Variant="Variant.Flat" />
+                    <RadzenButton Style="width: contain; cursor: default" Icon="check" Text="Đã nhập kho thành công" ButtonStyle="ButtonStyle.Success" Shade="Shade.Dark" Size="ButtonSize.Small" Variant="Variant.Flat" />
                 }
                 else
                 {
@@ -234,7 +234,6 @@
 
         // Check trang thai lenh (da hoan thanh hay chua)
         _ = int.TryParse(scanLNK.LNKIsDone.Value?.ToString(), out int scanlnkIsdone) ? scanlnkIsdone : -1;
-
         if (scanlnkIsdone != 0)
         {
             return;
@@ -242,7 +241,6 @@
 
         // Kiem tra so luong them vao
         int soluongThemvao = int.TryParse(scanLNK.LNKSoLuong.Value?.ToString(), out int slthem) ? slthem : 0;
-
         if (soluongThemvao == 0)
         {
             return;

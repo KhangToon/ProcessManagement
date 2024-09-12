@@ -3616,6 +3616,27 @@ namespace ProcessManagement.Services.SQLServer
             return phieunhapkho;
         }
 
+        // Get ma phieu nhap kho by ID
+        public string GetMaPhieuNhapKhoByID(object? pnkid)
+        {
+            string maPhieuNhapKho = string.Empty;
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                var command = connection.CreateCommand();
+                command.CommandText = $"SELECT [{Common.MaPhieuNhapKho}] FROM [{Common.Table_PhieuNhapKho}] WHERE [{Common.PNKID}] = @PNKid";
+                command.Parameters.AddWithValue("@PNKid", pnkid ?? DBNull.Value);
+
+                using var reader = command.ExecuteReader();
+
+                if (reader.Read())
+                {
+                    maPhieuNhapKho = reader[Common.MaPhieuNhapKho].ToString()?.Trim() ?? string.Empty;
+                }
+            }
+            return maPhieuNhapKho;
+        }
+
         // Get phiếu nhập kho by Mã phiếu 
         public PhieuNhapKho GetPhieuNhapKhoByMaPhieu(object? maPNK)
         {
@@ -4035,6 +4056,7 @@ namespace ProcessManagement.Services.SQLServer
 
             return lnkho;
         }
+
 
         // Get danh sách lệnh nhập kho by NVLPNKID and PNKID
         public List<LenhNhapKho> GetDSLenhNhapKho(object? nvlpnkId, object? pnkId)
