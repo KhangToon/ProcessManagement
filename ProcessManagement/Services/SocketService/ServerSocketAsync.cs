@@ -312,7 +312,10 @@ namespace ParamountBed_Warehouse.Services.SocketService
             {
                 HandleExcuteLenhNhapKho(ClientMesage, client);
             }
-
+            else if (CMDTYPE == Common.PNK_HANDLE_LNK_MANUAL)
+            {
+                HandleExcuteLenhNhapKho_Manual(ClientMesage, client);
+            }
 
         }
 
@@ -568,29 +571,35 @@ namespace ParamountBed_Warehouse.Services.SocketService
             }
         }
 
-        // Handle excute lenh nhap kho
-        private void HandleExcuteLenhNhapKho(SocketMessage? mess, ConnectedObject client)
+        // Handle excute lenh nhap kho - Auto
+        private void HandleExcuteLenhNhapKho(SocketMessage? mess, ConnectedObject client) // ErrorKey: HELNK
         {
             if (mess != null)
             {
                 string maPNK = mess.Data.FirstOrDefault()?[Common.PNK_MPNK].ToString() ?? string.Empty;
                 string maVitri = mess.Data.FirstOrDefault()?[Common.PNK_MVT].ToString() ?? string.Empty;
                 string maNVL = mess.Data.FirstOrDefault()?[Common.PNK_MNVL].ToString() ?? string.Empty;
-                int lnkSoluong = int.TryParse(mess.Data.FirstOrDefault()?[Common.PNK_LNKSL].ToString(), out int lnksl) ? lnksl : 0;
+                int soluongnhapfromClient = int.TryParse(mess.Data.FirstOrDefault()?[Common.PNK_LNKSL].ToString(), out int lnksl) ? lnksl : 0;
                 object? lnkid = mess.Data.FirstOrDefault()?[Common.PNK_LNKID];
 
                 if (string.IsNullOrWhiteSpace(maPNK)) { return; }
                 if (string.IsNullOrWhiteSpace(maVitri)) { return; }
                 if (string.IsNullOrWhiteSpace(maNVL)) { return; }
-                if (lnkSoluong == 0) { return; }
+                if (soluongnhapfromClient == 0) { return; }
 
                 // Load lenh nhap kho by ID
-                LenhNhapKho scanLNK = SQLServerServices.GetLenhNhapKhoByID(lnkid);
+                LenhNhapKho savedLNK = SQLServerServices.GetLenhNhapKhoByID(lnkid);
 
-                // Asign so luong from Handy
-                scanLNK.LNKSoLuong.Value = lnkSoluong;
+                //int savedLNKsoluongnhap = int.TryParse(savedLNK.LNKSoLuong.Value?.ToString(), out int sclnksln) ? sclnksln : 0;
 
-                if (scanLNK.LenhNKID.Value == null)
+                //// Truong hop nhap so luong khac voi so luong trong lenh da luu
+                //if (savedLNKsoluongnhap != soluongnhapfromClient)
+                //{
+                //    // Asign so luong from Handy
+                //    savedLNK.LNKSoLuong.Value = soluongnhapfromClient;
+                //}
+
+                if (savedLNK.LenhNKID.Value == null)
                 {
                     SendFeedBackToClient(client, Common.PNK_HANDLE_LNK_RETURN, Common.FAIL, "Không tồn tại lệnh nhập kho!", new Dictionary<string, object>());
                 }
@@ -599,8 +608,7 @@ namespace ParamountBed_Warehouse.Services.SocketService
                     // Handle lenh nhap kho
 
                     // Check trang thai lenh (da hoan thanh hay chua)
-                    _ = int.TryParse(scanLNK.LNKIsDone.Value?.ToString(), out int scanlnkIsdone) ? scanlnkIsdone : -1;
-
+                    _ = int.TryParse(savedLNK.LNKIsDone.Value?.ToString(), out int scanlnkIsdone) ? scanlnkIsdone : -1;
                     if (scanlnkIsdone != 0)
                     {
                         SendFeedBackToClient(client, Common.PNK_HANDLE_LNK_RETURN, Common.FAIL, "Không thể nhập (lệnh đã hoàn thành trước đó)!", new Dictionary<string, object>());
@@ -608,8 +616,7 @@ namespace ParamountBed_Warehouse.Services.SocketService
                     }
 
                     // Kiem tra so luong them vao
-                    int soluongThemvao = int.TryParse(scanLNK.LNKSoLuong.Value?.ToString(), out int slthem) ? slthem : 0;
-
+                    int soluongThemvao = int.TryParse(savedLNK.LNKSoLuong.Value?.ToString(), out int slthem) ? slthem : 0;
                     if (soluongThemvao == 0)
                     {
                         SendFeedBackToClient(client, Common.PNK_HANDLE_LNK_RETURN, Common.FAIL, "Số lượng không hợp lệ!", new Dictionary<string, object>());
@@ -617,7 +624,15 @@ namespace ParamountBed_Warehouse.Services.SocketService
                     }
 
                     // Kiem tra xem nvl da ton tai o vitri hay chua
-                    ViTriofNVL viTriofNVL = SQLServerServices.GetViTriOfNgVatLieuByNVLid_VTid(scanLNK.NVLID.Value, scanLNK.VTID.Value);
+                    ViTriofNVL viTriofNVL = SQLServerServices.GetViTriOfNgVatLieuByNVLid_VTid(savedLNK.NVLID.Value, savedLNK.VTID.Value);
+
+                    // Kiem tra qua so luong con trong cua vi tri
+                    int soluongcontrongvitri = savedLNK.TargertVitri.SLConTrong;
+                    if (soluongThemvao > soluongcontrongvitri)
+                    {
+                        SendFeedBackToClient(client, Common.PNK_HANDLE_LNK_RETURN, Common.FAIL, $"Qúa số lượng trống của vị trí ({soluongcontrongvitri})", new Dictionary<string, object>());
+                        return;
+                    }
 
                     // NVL da ton tai o vitri nay --> Update so luong
                     if (viTriofNVL != null && viTriofNVL.VTofNVLID.Value != null)
@@ -632,16 +647,16 @@ namespace ParamountBed_Warehouse.Services.SocketService
 
                         if (updateVTofNVLresult == -1)
                         {
-                            SendFeedBackToClient(client, Common.PNK_HANDLE_LNK_RETURN, Common.FAIL, "LNK Lỗi: (0001)!", new Dictionary<string, object>());
+                            SendFeedBackToClient(client, Common.PNK_HANDLE_LNK_RETURN, Common.FAIL, "LNK Lỗi: (HELNK0001)!", new Dictionary<string, object>());
                             return;
                         }
 
                         // Update lenh nhap kho status
-                        (int updatelnkResult, string updatelnkError) = SQLServerServices.UpdateLenhNhapKhoStatus(scanLNK.LenhNKID.Value, 1);
+                        (int updatelnkResult, string updatelnkError) = SQLServerServices.UpdateLenhNhapKhoStatus(savedLNK.LenhNKID.Value, 1);
 
                         if (updatelnkResult == -1)
                         {
-                            SendFeedBackToClient(client, Common.PNK_HANDLE_LNK_RETURN, Common.FAIL, "LNK Lỗi: (0002)!", new Dictionary<string, object>());
+                            SendFeedBackToClient(client, Common.PNK_HANDLE_LNK_RETURN, Common.FAIL, "LNK Lỗi: (HELNK0002)!", new Dictionary<string, object>());
                             return;
                         }
                     }
@@ -650,8 +665,8 @@ namespace ParamountBed_Warehouse.Services.SocketService
                         // Tao moi vitriofNVL
                         ViTriofNVL newviTriofNVL = new()
                         {
-                            VTID = { Value = scanLNK.VTID.Value },
-                            NVLID = { Value = scanLNK.NVLID.Value },
+                            VTID = { Value = savedLNK.VTID.Value },
+                            NVLID = { Value = savedLNK.NVLID.Value },
                             VTNVLSoLuong = { Value = soluongThemvao }
                         };
 
@@ -660,22 +675,22 @@ namespace ParamountBed_Warehouse.Services.SocketService
 
                         if (InsertVTofNVLstatus == -1)
                         {
-                            SendFeedBackToClient(client, Common.PNK_HANDLE_LNK_RETURN, Common.FAIL, "LNK Lỗi: (0003)!", new Dictionary<string, object>());
+                            SendFeedBackToClient(client, Common.PNK_HANDLE_LNK_RETURN, Common.FAIL, "LNK Lỗi: (HELNK0003)!", new Dictionary<string, object>());
                             return;
                         }
 
                         // Update lenh nhap kho status
-                        (int updatelnkResult, string updatelnkError) = SQLServerServices.UpdateLenhNhapKhoStatus(scanLNK.LenhNKID.Value, 1);
+                        (int updatelnkResult, string updatelnkError) = SQLServerServices.UpdateLenhNhapKhoStatus(savedLNK.LenhNKID.Value, 1);
 
                         if (updatelnkResult == -1)
                         {
-                            SendFeedBackToClient(client, Common.PNK_HANDLE_LNK_RETURN, Common.FAIL, "LNK Lỗi: (0004)!", new Dictionary<string, object>());
+                            SendFeedBackToClient(client, Common.PNK_HANDLE_LNK_RETURN, Common.FAIL, "LNK Lỗi: (HELNK0004)!", new Dictionary<string, object>());
                             return;
                         }
                     }
 
                     // update status to UI
-                    scanLNK.LNKIsDone.Value = 1;
+                    savedLNK.LNKIsDone.Value = 1;
 
                     // Logging nhap kho
                     HistoryXNKho logNhapKho = new HistoryXNKho()
@@ -684,13 +699,13 @@ namespace ParamountBed_Warehouse.Services.SocketService
                         LogMaPhieu = { Value = maPNK },
                         LogMaViTri = { Value = maVitri },
                         LogNgThucHien = { Value = "Khang" },
-                        LogSoLuong = { Value = scanLNK.LNKSoLuong.Value },
-                        LogTonKhoTruoc = { Value = scanLNK.TargetNgLieu.TonKho },
-                        LogTonKhoSau = { Value = scanLNK.TargetNgLieu.TonKho + soluongThemvao },
-                        LogTenNVL = { Value = scanLNK.TargetNgLieu.TenNVL.Value },
+                        LogSoLuong = { Value = savedLNK.LNKSoLuong.Value },
+                        LogTonKhoTruoc = { Value = savedLNK.TargetNgLieu.TonKho },
+                        LogTonKhoSau = { Value = savedLNK.TargetNgLieu.TonKho + soluongThemvao },
+                        LogTenNVL = { Value = savedLNK.TargetNgLieu.TenNVL.Value },
                         LogThoiDiem = { Value = DateTime.Now },
-                        NVLID = { Value = scanLNK.NVLID.Value },
-                        VTID = { Value = scanLNK.VTID.Value }
+                        NVLID = { Value = savedLNK.NVLID.Value },
+                        VTID = { Value = savedLNK.VTID.Value }
                     };
                     // Insert logging to Database
                     (int logId, string logErr) = SQLServerServices.InsertLogingXNKho(logNhapKho);
@@ -701,10 +716,122 @@ namespace ParamountBed_Warehouse.Services.SocketService
                     }
 
                     // Feedback nhap kho thanh cong
-                    SendFeedBackToClient(client, Common.PNK_HANDLE_LNK_RETURN, Common.SUCCESS, $"Đã nhập kho nguyên liệu: \n {maNVL} \n Số lượng : {lnkSoluong} (pcs)", new Dictionary<string, object>());
+                    SendFeedBackToClient(client, Common.PNK_HANDLE_LNK_RETURN, Common.SUCCESS, $"Đã nhập kho nguyên liệu: \n {maNVL} \n Số lượng : {soluongnhapfromClient} (pcs)", new Dictionary<string, object>());
                 }
             }
         }
+
+        // Handle excute lenh nhap kho - Manual
+        private void HandleExcuteLenhNhapKho_Manual(SocketMessage? mess, ConnectedObject client) // ErrorKey: HELNKM
+        {
+            if (mess != null)
+            {
+                string maVitri = mess.Data.FirstOrDefault()?[Common.PNK_MVT].ToString() ?? string.Empty;
+                string maNVL = mess.Data.FirstOrDefault()?[Common.PNK_MNVL].ToString() ?? string.Empty;
+                int soluongnhapfromClient = int.TryParse(mess.Data.FirstOrDefault()?[Common.PNK_LNKSL].ToString(), out int lnksl) ? lnksl : 0;
+
+                if (string.IsNullOrWhiteSpace(maVitri)) { return; }
+                if (string.IsNullOrWhiteSpace(maNVL)) { return; }
+                if (soluongnhapfromClient == 0) { return; }
+
+                // Handle lenh nhap kho
+
+                // Get vitri can nhap kho
+                VitriLuuTru targetVitri = SQLServerServices.GetViTriLuuTruByMaVitri(maVitri);
+                // Get nvl can nhap kho
+                NguyenVatLieu targetNVL = SQLServerServices.GetNguyenVatLieuByTenNVL(maNVL);
+
+                // Kiem tra vi tri co ton tai 
+                if (targetVitri.VTID.Value == null)
+                {
+                    SendFeedBackToClient(client, Common.PNK_HANDLE_LNK_RETURN, Common.FAIL, "Vị trí lưu kho không tồn tại!", new Dictionary<string, object>());
+                    return;
+                }
+
+                // Kiem tra NVL co ton tai
+                if (targetNVL.NVLID.Value == null)
+                {
+                    SendFeedBackToClient(client, Common.PNK_HANDLE_LNK_RETURN, Common.FAIL, "Nguyên vật liệu nhập kho không tồn tại!", new Dictionary<string, object>());
+                    return;
+                }
+
+                // Kiem tra qua so luong con trong cua vi tri
+                int soluongcontrongvitri = targetVitri.SLConTrong;
+                if (soluongnhapfromClient > soluongcontrongvitri)
+                {
+                    SendFeedBackToClient(client, Common.PNK_HANDLE_LNK_RETURN, Common.FAIL, $"Qúa số lượng trống của vị trí ({soluongcontrongvitri})", new Dictionary<string, object>());
+                    return;
+                }
+
+                // Kiem tra xem nvl da ton tai o vitri hay chua
+                ViTriofNVL viTriofNVL = SQLServerServices.GetViTriOfNgVatLieuByNVLid_VTid(targetNVL.NVLID.Value, targetVitri.VTID.Value);
+
+
+                // NVL da ton tai o vitri nay --> Update so luong
+                if (viTriofNVL != null && viTriofNVL.VTofNVLID.Value != null)
+                {
+                    int soluongHientaivitri = int.TryParse(viTriofNVL?.VTNVLSoLuong.Value?.ToString(), out int slhc) ? slhc : 0;
+
+                    // gan so luong sau khi nhap cho vi tri da luu
+                    int newtonkhotaivitri = soluongHientaivitri + soluongnhapfromClient;
+
+                    // Update so luong vi tri da co cua nvl
+                    (int updateVTofNVLresult, string updateVTofNVLerror) = SQLServerServices.UpdateSoluongNgVatLieuById(viTriofNVL?.VTofNVLID.Value, newtonkhotaivitri);
+
+                    if (updateVTofNVLresult == -1)
+                    {
+                        SendFeedBackToClient(client, Common.PNK_HANDLE_LNK_RETURN, Common.FAIL, "LNK Lỗi: (HELNKM0001)!", new Dictionary<string, object>());
+                        return;
+                    }
+                }
+                else // NVL chua co o vitri --> Them moi
+                {
+                    // Tao moi vitriofNVL
+                    ViTriofNVL newviTriofNVL = new()
+                    {
+                        VTID = { Value = targetVitri.VTID.Value },
+                        NVLID = { Value = targetNVL.NVLID.Value },
+                        VTNVLSoLuong = { Value = soluongnhapfromClient }
+                    };
+
+                    // Them vitriofNVL moi vao database
+                    (int InsertVTofNVLstatus, string InsertVTofNVLerror) = SQLServerServices.InsertNewViTriOfNgVatLieu(newviTriofNVL);
+
+                    if (InsertVTofNVLstatus == -1)
+                    {
+                        SendFeedBackToClient(client, Common.PNK_HANDLE_LNK_RETURN, Common.FAIL, "LNK Lỗi: (HELNKM0002)!", new Dictionary<string, object>());
+                        return;
+                    }
+                }
+
+                // Logging nhap kho
+                HistoryXNKho logNhapKho = new HistoryXNKho()
+                {
+                    LogLoaiPhieu = { Value = Common.LogTypePNK_Manual },
+                    LogMaViTri = { Value = maVitri },
+                    LogNgThucHien = { Value = "Khang" },
+                    LogSoLuong = { Value = soluongnhapfromClient },
+                    LogTonKhoTruoc = { Value = targetNVL.TonKho },
+                    LogTonKhoSau = { Value = targetNVL.TonKho + soluongnhapfromClient },
+                    LogTenNVL = { Value = targetNVL.TenNVL.Value },
+                    LogThoiDiem = { Value = DateTime.Now },
+                    NVLID = { Value = targetNVL.NVLID.Value },
+                    VTID = { Value = targetVitri.VTID.Value }
+                };
+                // Insert logging to Database
+                (int logId, string logErr) = SQLServerServices.InsertLogingXNKho(logNhapKho);
+
+                if (logId == -1)
+                {
+                    SendFeedBackToClient(client, Common.PNK_HANDLE_LNK_RETURN, Common.SUCCESS, $"Đã nhập kho nguyên liệu: \n {maNVL} \n Số lượng : {soluongnhapfromClient} (pcs) \n\n Loggin lỗi: {logErr}", new Dictionary<string, object>());
+                    return;
+                }
+
+                // Feedback nhap kho thanh cong
+                SendFeedBackToClient(client, Common.PNK_HANDLE_LNK_RETURN, Common.SUCCESS, $"Đã nhập kho nguyên liệu: \n {maNVL} \n Số lượng : {soluongnhapfromClient} (pcs)", new Dictionary<string, object>());
+            }
+        }
+
 
         private void SendPhieuXuatKhoDataToClient(ConnectedObject client, string cmdtype, string returnresult, string resultmess, List<Dictionary<string, object>> data)
         {

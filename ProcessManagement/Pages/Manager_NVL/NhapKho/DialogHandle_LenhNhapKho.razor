@@ -249,6 +249,13 @@
         // Kiem tra xem nvl da ton tai o vitri hay chua
         ViTriofNVL viTriofNVL = SQLServerServices.GetViTriOfNgVatLieuByNVLid_VTid(scanLNK.NVLID.Value, scanLNK.VTID.Value);
 
+        // Kiem tra qua so luong con trong cua vi tri
+        int soluongcontrongvitri = viTriofNVL.VitriInfor.SLConTrong;
+        if (soluongThemvao > soluongcontrongvitri)
+        {
+            return;
+        }
+
         // NVL da ton tai o vitri nay --> Update so luong
         if (viTriofNVL != null && viTriofNVL.VTofNVLID.Value != null)
         {
