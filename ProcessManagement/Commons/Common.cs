@@ -292,6 +292,7 @@ namespace ProcessManagement.Commons
         public const string LogThoiDiem = "Thời điểm";
         public const string LogTypePNK = "Nhập kho";
         public const string LogTypePNK_Manual = "Nhập tay";
+        public const string LogTypePXK_Manual = "Xuất tay";
         public const string LogTypePXK = "Xuất kho";
         //public const string NVLID = "NVLID";
         //public const string VTID = "VTID";
@@ -304,19 +305,24 @@ namespace ProcessManagement.Commons
         public const string RESULTMESS = "RESULTMESS";
         public const string SUCCESS = "SUCCESS";
         public const string FAIL = "FAIL";
+
         // Socket PXK Tags
-        public const string PXK_EXPORT = "PXK_EXPORT";
         public const string PXK_MPXK = "PXK_MPXK";
         public const string PXK_MVT = "PXK_MVT";
         public const string PXK_MNVL = "PXK_MNVL";
+        public const string PXK_LOAD = "PXK_LOAD";
         public const string PXK_RETURN = "PXK_RETURN";
+        public const string PXK_LXKSL = "PXK_LXKSL";
+        public const string PXK_LXKID = "PXK_LXKID";
+        public const string PXK_HANDLE_LXK = "PXK_HANDLE_LXK";
+        public const string PXK_HANDLE_LXK_RETURN = "PXK_HANDLE_LXK_RETURN";
+        public const string PXK_HANDLE_LXK_MANUAL = "PXK_HANDLE_LXK_MANUAL";
         // Socket PNK Tags
         public const string PNK_MPNK = "PNK_MPNK";
         public const string PNK_MVT = "PNK_MVT";
         public const string PNK_MNVL = "PNK_MNVL";
         public const string PNK_LOAD = "PNK_LOAD";
         public const string PNK_RETURN = "PNK_RETURN";
-
         public const string PNK_LNKSL = "PNK_LNKSL";
         public const string PNK_LNKID = "PNK_LNKID";
         public const string PNK_HANDLE_LNK = "PNK_HANDLE_LNK";

@@ -4381,6 +4381,27 @@ namespace ProcessManagement.Services.SQLServer
             return phieuxuatkho;
         }
 
+        // Get ma phieu xuat kho by ID
+        public string GetMaPhieuXuatKhoByID(object? pxkid)
+        {
+            string maPhieuXuatKho = string.Empty;
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                var command = connection.CreateCommand();
+                command.CommandText = $"SELECT [{Common.MaPhieuXuatKho}] FROM [{Common.Table_PhieuXuatKho}] WHERE [{Common.PXKID}] = @PXKid";
+                command.Parameters.AddWithValue("@PXKid", pxkid ?? DBNull.Value);
+
+                using var reader = command.ExecuteReader();
+
+                if (reader.Read())
+                {
+                    maPhieuXuatKho = reader[Common.MaPhieuXuatKho].ToString()?.Trim() ?? string.Empty;
+                }
+            }
+            return maPhieuXuatKho;
+        }
+
         // Get phiếu xuất kho by Mã phiếu 
         public PhieuXuatKho GetPhieuXuatKhoByMaPhieu(object? maPXK)
         {

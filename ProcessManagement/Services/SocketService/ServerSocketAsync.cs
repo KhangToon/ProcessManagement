@@ -304,6 +304,7 @@ namespace ParamountBed_Warehouse.Services.SocketService
 
             string CMDTYPE = ClientMesage?.Command[Common.CMDTYPE]?.ToString() ?? string.Empty;
 
+            // NHAP KHO
             if (CMDTYPE == Common.PNK_LOAD)
             {
                 HandleLoadPhieuNhapKhoDetails(ClientMesage, client);
@@ -317,6 +318,19 @@ namespace ParamountBed_Warehouse.Services.SocketService
                 HandleExcuteLenhNhapKho_Manual(ClientMesage, client);
             }
 
+            // XUAT KHO
+            if (CMDTYPE == Common.PXK_LOAD)
+            {
+                HandleLoadPhieuXuatKhoDetails(ClientMesage, client);
+            }
+            else if (CMDTYPE == Common.PXK_HANDLE_LXK)
+            {
+                HandleExcuteLenhXuatKho(ClientMesage, client);
+            }
+            else if (CMDTYPE == Common.PXK_HANDLE_LXK_MANUAL)
+            {
+                HandleExcuteLenhXuatKho_Manual(ClientMesage, client);
+            }
         }
 
         public string ConvertData(List<IDictionary<string, object>> data)
@@ -349,7 +363,7 @@ namespace ParamountBed_Warehouse.Services.SocketService
             }
         }
 
-
+        // Handle lenh xuat kho tren server
         private (int, string) OnExcuteLenhXuatKho(string maphieu, string mavitri, string tennvl)
         {
             if (String.IsNullOrEmpty(maphieu) || String.IsNullOrEmpty(mavitri) || String.IsNullOrEmpty(tennvl))
@@ -437,68 +451,35 @@ namespace ParamountBed_Warehouse.Services.SocketService
         }
 
 
-        public void HandleCheckOut(SocketMessage? mess, ConnectedObject client)
+        #region BT-HANDY COMMUNICATION
+
+        #region NHAP KHO
+
+        // Handle require load phieu nhap kho detail from client
+        private void HandleLoadPhieuNhapKhoDetails(SocketMessage? mess, ConnectedObject client)
         {
-            //if (mess != null && mess.Data != null)
-            //{
-            //    string scanCode = mess.Data.FirstOrDefault()?[Common.SCANCODE]?.ToString() ?? string.Empty;
-
-            //    int slOK = int.Parse(mess.Data.FirstOrDefault()?[Common.SLOK]?.ToString() ?? "0");
-
-            //    int slNG = int.Parse(mess.Data.FirstOrDefault()?[Common.SLNG]?.ToString() ?? "0");
-
-            //    if (scanCode != string.Empty && slOK > 0 && slNG >= 0)
-            //    {
-            //        // Update sl NG OK masp
-            //        (int result, string err) = SQLServerServices.UpdateNVLmoiCongdoan(slOK, slNG, scanCode, null, Common.CurrentCDid, Common.CurrentKHSXid);
-
-            //        if (result == -1)
-            //        {
-            //            SendFeedBackToClient(client, Common.RETURNCHECKOUT, Common.FAIL, $"{err}", new Dictionary<string, object>()); return;
-            //        }
-            //        else if (result == 0)
-            //        {
-            //            SendFeedBackToClient(client, Common.RETURNCHECKOUT, Common.FAIL, $"Mã không nằm trong danh sách", new Dictionary<string, object>()); return;
-            //        }
-            //        else
-            //        {
-            //            SendFeedBackToClient(client, Common.RETURNCHECKOUT, Common.SUCCESS, $"Cập nhật kết quả thành công!", new Dictionary<string, object>());
-
-            //            Im_Ex_Event?.Invoke(null, scanCode);
-
-            //            return;
-            //        }
-            //    }
-            //    else
-            //    {
-            //        SendFeedBackToClient(client, Common.RETURNCHECKOUT, Common.FAIL, "Thông tin chưa hợp lệ!", new Dictionary<string, object>()); return;
-            //    }
-            //}
-        }
-
-        private void SendFeedBackToClient(ConnectedObject client, string cmdtype, string returnresult, string resultmess, Dictionary<string, object> data)
-        {
-            Dictionary<string, object> HeaderSEND = new()
+            if (mess != null)
             {
-                { Common.CMDTYPE, cmdtype },
+                string maPNK = mess.Data.FirstOrDefault()?[Common.PNK_MPNK].ToString() ?? string.Empty;
 
-                { Common.RETURNRESULT, returnresult },
+                if (string.IsNullOrWhiteSpace(maPNK)) { return; }
 
-                { Common.RESULTMESS, resultmess }
-            };
+                // Load PNK details
+                PhieuNhapKho phieuNhapKho = SQLServerServices.GetPhieuNhapKhoByMaPhieu(maPNK);
 
-            SocketMessage sendingMess = new()
-            {
-                Command = HeaderSEND,
+                if (phieuNhapKho.PNKID.Value == null)
+                {
+                    SendFeedBackToClient(client, Common.PNK_RETURN, Common.FAIL, "Không tồn tại phiếu nhập kho!", new Dictionary<string, object>());
+                }
+                else
+                {
+                    // Sending list NVLofPNK
+                    List<Dictionary<string, object>> NVLofPNKdatas = CreateNVLofPNK_SocketData(phieuNhapKho.DSNVLofPNKs);
 
-                Data = new List<Dictionary<string, object>>() { data }
-            };
-            string datasending = JsonConvert.SerializeObject(sendingMess);
-
-            SendReply(client, datasending);
+                    SendFeedBackToClient(client, Common.PNK_RETURN, Common.SUCCESS, string.Empty, NVLofPNKdatas);
+                }
+            }
         }
-
-
 
         // Create PNK Infor sending to Handy
         private List<Dictionary<string, object>> CreateNVLofPNK_SocketData(List<NVLofPhieuNhapKho> nvlofpnks)
@@ -545,32 +526,6 @@ namespace ParamountBed_Warehouse.Services.SocketService
             return datas;
         }
 
-        // Handle require load phieu nhap kho detail from client
-        private void HandleLoadPhieuNhapKhoDetails(SocketMessage? mess, ConnectedObject client)
-        {
-            if (mess != null)
-            {
-                string maPNK = mess.Data.FirstOrDefault()?[Common.PNK_MPNK].ToString() ?? string.Empty;
-
-                if (string.IsNullOrWhiteSpace(maPNK)) { return; }
-
-                // Load PNK details
-                PhieuNhapKho phieuNhapKho = SQLServerServices.GetPhieuNhapKhoByMaPhieu(maPNK);
-
-                if (phieuNhapKho.PNKID.Value == null)
-                {
-                    SendFeedBackToClient(client, Common.PNK_RETURN, Common.FAIL, "Không tồn tại phiếu nhập kho!", new Dictionary<string, object>());
-                }
-                else
-                {
-                    // Sending list NVLofPNK
-                    List<Dictionary<string, object>> NVLofPNKdatas = CreateNVLofPNK_SocketData(phieuNhapKho.DSNVLofPNKs);
-
-                    SendPhieuXuatKhoDataToClient(client, Common.PNK_RETURN, Common.SUCCESS, string.Empty, NVLofPNKdatas);
-                }
-            }
-        }
-
         // Handle excute lenh nhap kho - Auto
         private void HandleExcuteLenhNhapKho(SocketMessage? mess, ConnectedObject client) // ErrorKey: HELNK
         {
@@ -589,15 +544,6 @@ namespace ParamountBed_Warehouse.Services.SocketService
 
                 // Load lenh nhap kho by ID
                 LenhNhapKho savedLNK = SQLServerServices.GetLenhNhapKhoByID(lnkid);
-
-                //int savedLNKsoluongnhap = int.TryParse(savedLNK.LNKSoLuong.Value?.ToString(), out int sclnksln) ? sclnksln : 0;
-
-                //// Truong hop nhap so luong khac voi so luong trong lenh da luu
-                //if (savedLNKsoluongnhap != soluongnhapfromClient)
-                //{
-                //    // Asign so luong from Handy
-                //    savedLNK.LNKSoLuong.Value = soluongnhapfromClient;
-                //}
 
                 if (savedLNK.LenhNKID.Value == null)
                 {
@@ -637,10 +583,10 @@ namespace ParamountBed_Warehouse.Services.SocketService
                     // NVL da ton tai o vitri nay --> Update so luong
                     if (viTriofNVL != null && viTriofNVL.VTofNVLID.Value != null)
                     {
-                        int soluongHientaivitri = int.TryParse(viTriofNVL?.VTNVLSoLuong.Value?.ToString(), out int slhc) ? slhc : 0;
+                        int soluongHiencotaivitri = int.TryParse(viTriofNVL?.VTNVLSoLuong.Value?.ToString(), out int slhc) ? slhc : 0;
 
                         // gan so luong sau khi nhap cho vi tri da luu
-                        int newtonkhotaivitri = soluongHientaivitri + soluongThemvao;
+                        int newtonkhotaivitri = soluongHiencotaivitri + soluongThemvao;
 
                         // Update so luong vi tri da co cua nvl
                         (int updateVTofNVLresult, string updateVTofNVLerror) = SQLServerServices.UpdateSoluongNgVatLieuById(viTriofNVL?.VTofNVLID.Value, newtonkhotaivitri);
@@ -766,14 +712,13 @@ namespace ParamountBed_Warehouse.Services.SocketService
                 // Kiem tra xem nvl da ton tai o vitri hay chua
                 ViTriofNVL viTriofNVL = SQLServerServices.GetViTriOfNgVatLieuByNVLid_VTid(targetNVL.NVLID.Value, targetVitri.VTID.Value);
 
-
                 // NVL da ton tai o vitri nay --> Update so luong
                 if (viTriofNVL != null && viTriofNVL.VTofNVLID.Value != null)
                 {
-                    int soluongHientaivitri = int.TryParse(viTriofNVL?.VTNVLSoLuong.Value?.ToString(), out int slhc) ? slhc : 0;
+                    int soluongHiencotaivitri = int.TryParse(viTriofNVL?.VTNVLSoLuong.Value?.ToString(), out int slhc) ? slhc : 0;
 
                     // gan so luong sau khi nhap cho vi tri da luu
-                    int newtonkhotaivitri = soluongHientaivitri + soluongnhapfromClient;
+                    int newtonkhotaivitri = soluongHiencotaivitri + soluongnhapfromClient;
 
                     // Update so luong vi tri da co cua nvl
                     (int updateVTofNVLresult, string updateVTofNVLerror) = SQLServerServices.UpdateSoluongNgVatLieuById(viTriofNVL?.VTofNVLID.Value, newtonkhotaivitri);
@@ -832,8 +777,296 @@ namespace ParamountBed_Warehouse.Services.SocketService
             }
         }
 
+        #endregion
 
-        private void SendPhieuXuatKhoDataToClient(ConnectedObject client, string cmdtype, string returnresult, string resultmess, List<Dictionary<string, object>> data)
+
+        #region XUAT KHO
+
+        // Handle require load phieu xuat kho detail from client
+        private void HandleLoadPhieuXuatKhoDetails(SocketMessage? mess, ConnectedObject client)
+        {
+            if (mess != null)
+            {
+                string maPXK = mess.Data.FirstOrDefault()?[Common.PXK_MPXK].ToString() ?? string.Empty;
+
+                if (string.IsNullOrWhiteSpace(maPXK)) { return; }
+
+                // Load PXK details
+                PhieuXuatKho phieuXuatKho = SQLServerServices.GetPhieuXuatKhoByMaPhieu(maPXK);
+
+                if (phieuXuatKho.PXKID.Value == null)
+                {
+                    SendFeedBackToClient(client, Common.PXK_RETURN, Common.FAIL, "Không tồn tại phiếu xuất kho!", new Dictionary<string, object>());
+                }
+                else
+                {
+                    // Sending list NVLofPXK
+                    List<Dictionary<string, object>> NVLofPXKdatas = CreateNVLofPXK_SocketData(phieuXuatKho.DSNVLofPXKs);
+
+                    SendFeedBackToClient(client, Common.PXK_RETURN, Common.SUCCESS, string.Empty, NVLofPXKdatas);
+                }
+            }
+        }
+
+        // Create PXK Info sending to Handy
+        private List<Dictionary<string, object>> CreateNVLofPXK_SocketData(List<NVLofPhieuXuatKho> nvlofpxks)
+        {
+            List<Dictionary<string, object>> datas = new();
+
+            List<LenhXuatKho> dsanhLXKs = new();
+
+            foreach (var nvlpxk in nvlofpxks)
+            {
+                foreach (var lxk in nvlpxk.DSLenhXKs)
+                {
+                    dsanhLXKs.Add(lxk);
+                }
+            }
+
+            string maPXK = SQLServerServices.GetMaPhieuXuatKhoByID(nvlofpxks.FirstOrDefault()?.PXKID.Value);
+
+            foreach (var lenh in dsanhLXKs)
+            {
+                _ = int.TryParse(lenh.PXKID.Value?.ToString(), out int pxkid) ? pxkid : -1;
+
+                _ = int.TryParse(lenh.LenhXKID.Value?.ToString(), out int lxkid) ? lxkid : -1;
+
+                string tennvl = lenh.ViTriofNVL.NgLieuInfor.TenNVL.Value?.ToString() ?? string.Empty;
+
+                string mavitri = lenh.ViTriofNVL.VitriInfor.MaViTri.Value?.ToString() ?? string.Empty;
+
+                _ = int.TryParse(lenh.LXKSoLuong.Value?.ToString(), out int soluongxuat) ? soluongxuat : 0;
+
+                _ = int.TryParse(lenh.LXKIsDone.Value?.ToString(), out int lxkstatus) ? lxkstatus : -1;
+
+                string lxkKey = $"LXK{dsanhLXKs.IndexOf(lenh) + 1}";
+
+                Dictionary<string, object> lxkData = new();
+
+                Dictionary<string, object> lxkdetails = new()
+                {
+                    {Common.PXK_MNVL, tennvl }, {Common.PXK_MVT, mavitri }, {Common.PXKID, pxkid }, {Common.PXK_MPXK, maPXK},
+                    {Common.PXK_LXKSL, soluongxuat }, {Common.LXKIsDone, lxkstatus }, {Common.PXK_LXKID, lxkid}
+                };
+                lxkData.Add(lxkKey, lxkdetails);
+
+                datas.Add(lxkData);
+            }
+
+            return datas;
+        }
+
+        // Handle excute lenh xuat kho - Auto
+        private void HandleExcuteLenhXuatKho(SocketMessage? mess, ConnectedObject client) // ErrorKey: HELXK
+        {
+            if (mess != null)
+            {
+                string maPXK = mess.Data.FirstOrDefault()?[Common.PXK_MPXK].ToString() ?? string.Empty;
+                string maVitri = mess.Data.FirstOrDefault()?[Common.PXK_MVT].ToString() ?? string.Empty;
+                string maNVL = mess.Data.FirstOrDefault()?[Common.PXK_MNVL].ToString() ?? string.Empty;
+                int soluongxuatfromClient = int.TryParse(mess.Data.FirstOrDefault()?[Common.PXK_LXKSL].ToString(), out int lxksl) ? lxksl : 0;
+                object? lxkid = mess.Data.FirstOrDefault()?[Common.PXK_LXKID];
+
+                if (string.IsNullOrWhiteSpace(maPXK)) { return; }
+                if (string.IsNullOrWhiteSpace(maVitri)) { return; }
+                if (string.IsNullOrWhiteSpace(maNVL)) { return; }
+                if (soluongxuatfromClient == 0) { return; }
+
+                // Load lenh xuat kho by ID
+                LenhXuatKho savedLXK = SQLServerServices.GetLenhXuatKhoByID(lxkid);
+
+                if (savedLXK.LenhXKID.Value == null)
+                {
+                    SendFeedBackToClient(client, Common.PXK_HANDLE_LXK_RETURN, Common.FAIL, "Không tồn tại lệnh xuất kho!", new Dictionary<string, object>());
+                }
+                else
+                {
+                    // Handle lenh xuat kho
+
+                    // Check trang thai lenh (da hoan thanh hay chua)
+                    _ = int.TryParse(savedLXK.LXKIsDone.Value?.ToString(), out int scanlxkIsdone) ? scanlxkIsdone : -1;
+                    if (scanlxkIsdone != 0)
+                    {
+                        SendFeedBackToClient(client, Common.PXK_HANDLE_LXK_RETURN, Common.FAIL, "Không thể xuất (lệnh đã hoàn thành trước đó)!", new Dictionary<string, object>());
+                        return;
+                    }
+
+                    // Kiem tra so luong xuat ra
+                    int soluongXuatra = int.TryParse(savedLXK.LXKSoLuong.Value?.ToString(), out int slxuat) ? slxuat : 0;
+                    if (soluongXuatra == 0)
+                    {
+                        SendFeedBackToClient(client, Common.PXK_HANDLE_LXK_RETURN, Common.FAIL, "Số lượng không hợp lệ!", new Dictionary<string, object>());
+                        return;
+                    }
+
+                    // Kiem tra xem nvl co ton tai o vitri hay khong
+                    ViTriofNVL viTriofNVL = SQLServerServices.GetViTriOfNgVatLieuByNVLid_VTid(savedLXK.NVLID.Value, savedLXK.VTID.Value);
+
+                    if (viTriofNVL == null || viTriofNVL.VTofNVLID.Value == null)
+                    {
+                        SendFeedBackToClient(client, Common.PXK_HANDLE_LXK_RETURN, Common.FAIL, "Không tồn tại nguyên vật liệu tại vị trí này!", new Dictionary<string, object>());
+                        return;
+                    }
+
+                    int soluongHiencotaivitri = int.TryParse(viTriofNVL?.VTNVLSoLuong.Value?.ToString(), out int slhc) ? slhc : 0;
+
+                    // Kiem tra so luong xuat co vuot qua so luong hien tai khong
+                    if (soluongXuatra > soluongHiencotaivitri)
+                    {
+                        SendFeedBackToClient(client, Common.PXK_HANDLE_LXK_RETURN, Common.FAIL, $"Số lượng xuất vượt quá số lượng hiện tại ({soluongHiencotaivitri})", new Dictionary<string, object>());
+                        return;
+                    }
+
+                    // Tinh so luong con lai sau khi xuat
+                    int newtonkhotaivitri = soluongHiencotaivitri - soluongXuatra;
+
+                    // Update so luong vi tri cua nvl
+                    (int updateVTofNVLresult, string updateVTofNVLerror) = SQLServerServices.UpdateSoluongNgVatLieuById(viTriofNVL?.VTofNVLID.Value, newtonkhotaivitri);
+
+                    if (updateVTofNVLresult == -1)
+                    {
+                        SendFeedBackToClient(client, Common.PXK_HANDLE_LXK_RETURN, Common.FAIL, "LXK Lỗi: (HELXK0001)!", new Dictionary<string, object>());
+                        return;
+                    }
+
+                    // Update lenh xuat kho status
+                    (int updatelxkResult, string updatelxkError) = SQLServerServices.UpdateLenhXuatKhoStatus(savedLXK.LenhXKID.Value, 1);
+
+                    if (updatelxkResult == -1)
+                    {
+                        SendFeedBackToClient(client, Common.PXK_HANDLE_LXK_RETURN, Common.FAIL, "LXK Lỗi: (HELXK0002)!", new Dictionary<string, object>());
+                        return;
+                    }
+
+                    // update status to UI
+                    savedLXK.LXKIsDone.Value = 1;
+
+                    // Logging xuat kho
+                    HistoryXNKho logXuatKho = new HistoryXNKho()
+                    {
+                        LogLoaiPhieu = { Value = Common.LogTypePXK },
+                        LogMaPhieu = { Value = maPXK },
+                        LogMaViTri = { Value = maVitri },
+                        LogNgThucHien = { Value = "Khang" },
+                        LogSoLuong = { Value = savedLXK.LXKSoLuong.Value },
+                        LogTonKhoTruoc = { Value = savedLXK.ViTriofNVL.NgLieuInfor.TonKho },
+                        LogTonKhoSau = { Value = savedLXK.ViTriofNVL.NgLieuInfor.TonKho - soluongXuatra },
+                        LogTenNVL = { Value = savedLXK.ViTriofNVL.NgLieuInfor.TenNVL.Value },
+                        LogThoiDiem = { Value = DateTime.Now },
+                        NVLID = { Value = savedLXK.NVLID.Value },
+                        VTID = { Value = savedLXK.VTID.Value }
+                    };
+                    // Insert logging to Database
+                    (int logId, string logErr) = SQLServerServices.InsertLogingXNKho(logXuatKho);
+
+                    if (logId == -1)
+                    {
+                        // Handle logging error if needed
+                    }
+
+                    // Feedback xuat kho thanh cong
+                    SendFeedBackToClient(client, Common.PXK_HANDLE_LXK_RETURN, Common.SUCCESS, $"Đã xuất kho nguyên liệu: \n {maNVL} \n Số lượng : {soluongxuatfromClient} (pcs)", new Dictionary<string, object>());
+                }
+            }
+        }
+
+        // Handle execute lenh xuat kho - Manual
+        private void HandleExcuteLenhXuatKho_Manual(SocketMessage? mess, ConnectedObject client) // ErrorKey: HELXKM
+        {
+            if (mess != null)
+            {
+                string maVitri = mess.Data.FirstOrDefault()?[Common.PXK_MVT].ToString() ?? string.Empty;
+                string maNVL = mess.Data.FirstOrDefault()?[Common.PXK_MNVL].ToString() ?? string.Empty;
+                int soluongxuatfromClient = int.TryParse(mess.Data.FirstOrDefault()?[Common.PXK_LXKSL].ToString(), out int lxksl) ? lxksl : 0;
+
+                if (string.IsNullOrWhiteSpace(maVitri)) { return; }
+                if (string.IsNullOrWhiteSpace(maNVL)) { return; }
+                if (soluongxuatfromClient == 0) { return; }
+
+                // Handle lenh xuat kho
+
+                // Get vitri can xuat kho
+                VitriLuuTru targetVitri = SQLServerServices.GetViTriLuuTruByMaVitri(maVitri);
+                // Get nvl can xuat kho
+                NguyenVatLieu targetNVL = SQLServerServices.GetNguyenVatLieuByTenNVL(maNVL);
+
+                // Kiem tra vi tri co ton tai 
+                if (targetVitri.VTID.Value == null)
+                {
+                    SendFeedBackToClient(client, Common.PXK_HANDLE_LXK_RETURN, Common.FAIL, "Vị trí lưu kho không tồn tại!", new Dictionary<string, object>());
+                    return;
+                }
+
+                // Kiem tra NVL co ton tai
+                if (targetNVL.NVLID.Value == null)
+                {
+                    SendFeedBackToClient(client, Common.PXK_HANDLE_LXK_RETURN, Common.FAIL, "Nguyên vật liệu xuất kho không tồn tại!", new Dictionary<string, object>());
+                    return;
+                }
+
+                // Kiem tra xem nvl co ton tai o vitri hay khong
+                ViTriofNVL viTriofNVL = SQLServerServices.GetViTriOfNgVatLieuByNVLid_VTid(targetNVL.NVLID.Value, targetVitri.VTID.Value);
+
+                if (viTriofNVL == null || viTriofNVL.VTofNVLID.Value == null)
+                {
+                    SendFeedBackToClient(client, Common.PXK_HANDLE_LXK_RETURN, Common.FAIL, "Không tồn tại nguyên vật liệu tại vị trí này!", new Dictionary<string, object>());
+                    return;
+                }
+
+                int soluongHiencotaivitri = int.TryParse(viTriofNVL?.VTNVLSoLuong.Value?.ToString(), out int slhc) ? slhc : 0;
+
+                // Kiem tra so luong xuat co vuot qua so luong hien tai khong
+                if (soluongxuatfromClient > soluongHiencotaivitri)
+                {
+                    SendFeedBackToClient(client, Common.PXK_HANDLE_LXK_RETURN, Common.FAIL, $"Số lượng xuất vượt quá số lượng hiện tại ({soluongHiencotaivitri})", new Dictionary<string, object>());
+                    return;
+                }
+
+                // Tinh so luong con lai sau khi xuat
+                int newtonkhotaivitri = soluongHiencotaivitri - soluongxuatfromClient;
+
+                // Update so luong vi tri cua nvl
+                (int updateVTofNVLresult, string updateVTofNVLerror) = SQLServerServices.UpdateSoluongNgVatLieuById(viTriofNVL?.VTofNVLID.Value, newtonkhotaivitri);
+
+                if (updateVTofNVLresult == -1)
+                {
+                    SendFeedBackToClient(client, Common.PXK_HANDLE_LXK_RETURN, Common.FAIL, "LXK Lỗi: (HELXKM0001)!", new Dictionary<string, object>());
+                    return;
+                }
+
+                // Logging xuat kho
+                HistoryXNKho logXuatKho = new HistoryXNKho()
+                {
+                    LogLoaiPhieu = { Value = Common.LogTypePXK_Manual },
+                    LogMaViTri = { Value = maVitri },
+                    LogNgThucHien = { Value = "Khang" },
+                    LogSoLuong = { Value = soluongxuatfromClient },
+                    LogTonKhoTruoc = { Value = targetNVL.TonKho },
+                    LogTonKhoSau = { Value = targetNVL.TonKho - soluongxuatfromClient },
+                    LogTenNVL = { Value = targetNVL.TenNVL.Value },
+                    LogThoiDiem = { Value = DateTime.Now },
+                    NVLID = { Value = targetNVL.NVLID.Value },
+                    VTID = { Value = targetVitri.VTID.Value }
+                };
+                // Insert logging to Database
+                (int logId, string logErr) = SQLServerServices.InsertLogingXNKho(logXuatKho);
+
+                if (logId == -1)
+                {
+                    SendFeedBackToClient(client, Common.PXK_HANDLE_LXK_RETURN, Common.SUCCESS, $"Đã xuất kho nguyên liệu: \n {maNVL} \n Số lượng : {soluongxuatfromClient} (pcs) \n\n Loggin lỗi: {logErr}", new Dictionary<string, object>());
+                    return;
+                }
+
+                // Feedback xuat kho thanh cong
+                SendFeedBackToClient(client, Common.PXK_HANDLE_LXK_RETURN, Common.SUCCESS, $"Đã xuất kho nguyên liệu: \n {maNVL} \n Số lượng : {soluongxuatfromClient} (pcs)", new Dictionary<string, object>());
+            }
+        }
+
+        #endregion
+
+
+        // Sending feedback kho to Client type 1
+        private void SendFeedBackToClient(ConnectedObject client, string cmdtype, string returnresult, string resultmess, List<Dictionary<string, object>> data)
         {
             Dictionary<string, object> HeaderSEND = new()
             {
@@ -855,5 +1088,32 @@ namespace ParamountBed_Warehouse.Services.SocketService
 
             SendReply(client, datasending);
         }
+
+        // Sending feedback kho to Client type 2
+        private void SendFeedBackToClient(ConnectedObject client, string cmdtype, string returnresult, string resultmess, Dictionary<string, object> data)
+        {
+            Dictionary<string, object> HeaderSEND = new()
+            {
+                { Common.CMDTYPE, cmdtype },
+
+                { Common.RETURNRESULT, returnresult },
+
+                { Common.RESULTMESS, resultmess }
+            };
+
+            SocketMessage sendingMess = new()
+            {
+                Command = HeaderSEND,
+
+                Data = new List<Dictionary<string, object>>() { data }
+            };
+            string datasending = JsonConvert.SerializeObject(sendingMess);
+
+            SendReply(client, datasending);
+        }
+        #endregion
+
+
+
     }
 }
