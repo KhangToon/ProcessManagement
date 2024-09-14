@@ -335,7 +335,6 @@ namespace ProcessManagement.Commons
 
         public static event EventHandler? ClickSaveEvent;
         public static event EventHandler<object?>? CongdoaUpdatedEvent;
-        public static event EventHandler<object?>? PXK_ExportEvent;
         public static event EventHandler? ReloadPNKEvent;
         public static event EventHandler? ReloadPXKEvent;
 
@@ -383,20 +382,6 @@ namespace ProcessManagement.Commons
         public static bool IsCongdoanUpdatedEventRegistered()
         {
             return CongdoaUpdatedEvent != null;
-        }
-
-        // Phieu xuat kho Export Event
-        public static void RaisePXK_Event(object? lenhxkid)
-        {
-            PXK_ExportEvent?.Invoke(null, lenhxkid);
-        }
-        public static void ResetPXK_Event()
-        {
-            PXK_ExportEvent = null;
-        }
-        public static bool IsPXK_EventRegistered()
-        {
-            return PXK_ExportEvent != null;
         }
 
         // Reload phieu nhap kho Event

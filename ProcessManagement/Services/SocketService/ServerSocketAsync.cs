@@ -16,6 +16,7 @@ using Radzen;
 using ProcessManagement.Models.KHO_NVL.NhapKho;
 using ProcessManagement.Models.KHO_NVL;
 using ProcessManagement.Models.KHO_NVL.Tracking;
+using Microsoft.AspNetCore.Components.Routing;
 
 namespace ParamountBed_Warehouse.Services.SocketService
 {
@@ -337,117 +338,6 @@ namespace ParamountBed_Warehouse.Services.SocketService
         {
             string jsonData = JsonConvert.SerializeObject(data);
             return jsonData;
-        }
-
-        public void HandleXuatKhoRequire(SocketMessage? mess, ConnectedObject client)
-        {
-            if (mess != null && mess.Data != null)
-            {
-                string maPXK = mess.Data.FirstOrDefault()?[Common.PXK_MPXK]?.ToString() ?? string.Empty;
-                string maViTri = mess.Data.FirstOrDefault()?[Common.PXK_MVT]?.ToString() ?? string.Empty;
-                string maNVL = mess.Data.FirstOrDefault()?[Common.PXK_MNVL]?.ToString() ?? string.Empty;
-
-                (int lenhxkid, string errorMess) = OnExcuteLenhXuatKho(maPXK, maViTri, maNVL);
-
-                if (lenhxkid == -1)
-                {
-                    SendFeedBackToClient(client, Common.PXK_RETURN, Common.FAIL, errorMess, new Dictionary<string, object>()); return;
-                }
-                else if (lenhxkid > 0)
-                {
-                    // Raising reload 
-                    Common.RaisePXK_Event(lenhxkid);
-
-                    SendFeedBackToClient(client, Common.PXK_RETURN, Common.SUCCESS, "Xuất kho thành công!", new Dictionary<string, object>()); return;
-                }
-            }
-        }
-
-        // Handle lenh xuat kho tren server
-        private (int, string) OnExcuteLenhXuatKho(string maphieu, string mavitri, string tennvl)
-        {
-            if (String.IsNullOrEmpty(maphieu) || String.IsNullOrEmpty(mavitri) || String.IsNullOrEmpty(tennvl))
-            {
-                return (-1, "Chưa đủ thông tin quét! (XKErr: 001)");
-            }
-
-            LenhXuatKho scanLXK = new();
-
-            // Load phieu xuat kho id
-            List<int> pxkIds = SQLServerServices.GetListPXKIds(maphieu.Trim());
-            if (pxkIds.Count == 0) { return (-1, "Không tìm thấy phiếu xuất kho! (XKErr: 002)"); }
-            int scanpxkID = pxkIds[0];
-
-
-            // Load nvl id
-            List<int> nvlIds = SQLServerServices.GetListNVLIds(tennvl.Trim());
-            if (nvlIds.Count == 0) { return (-1, "Không tìm thấy nguyên liệu! (XKErr: 003)"); }
-            int scannvlID = nvlIds[0];
-
-            // Load vitri ID
-            List<int> vitriIds = SQLServerServices.GetListVTriIds(mavitri.Trim());
-            if (vitriIds.Count == 0) { return (-1, "Không tìm thấy vị trí lưu kho! (XKErr: 004)"); }
-            int scanvitriID = vitriIds[0];
-
-            if (scanpxkID == 0 || scannvlID == 0 || scanvitriID == 0)
-            {
-                { return (-1, "Không thể xuất kho! (XKErr: 005)"); }
-            }
-
-            // Get scan lenh xuat kho
-            LenhXuatKho temLXK = new() { PXKID = { Value = scanpxkID }, NVLID = { Value = scannvlID }, VTID = { Value = scanvitriID } };
-
-            scanLXK = SQLServerServices.GetLenhXuatKho(temLXK);
-            scanLXK.ViTriofNVL = SQLServerServices.GetViTriOfNgVatLieuByNVLid_VTid(scanLXK.NVLID.Value, scanLXK.VTID.Value);
-
-            if (scanLXK.LenhXKID.Value == null)
-            {
-                { return (-1, "Không tìm thấy lệnh xuất kho! (XKErr: 005)"); }
-            }
-
-            // Update so luong nguyen vat lieu
-            int soluongXuatdi = int.TryParse(scanLXK.LXKSoLuong.Value?.ToString(), out int slxuat) ? slxuat : 0;
-
-            // Tinh so luong hien co cua nvl o vitri
-            int soluongHientai = int.TryParse(scanLXK.ViTriofNVL.VTNVLSoLuong.Value?.ToString(), out int slht) ? slht : 0;
-
-            // gan so luong sau khi xuat cho vi tri da luu
-            int newtonkho = soluongHientai - soluongXuatdi;
-
-            if (newtonkho < 0)
-            {
-                { return (-1, "Số lượng xuất kho không hợp lệ! (XKErr: 006)"); }
-            }
-
-
-            // Check trang thai lenh (da hoan thanh hay chua)
-            _ = int.TryParse(scanLXK.LXKIsDone.Value?.ToString(), out int scanlxkIsdone) ? scanlxkIsdone : -1;
-            if (scanlxkIsdone != 0)
-            {
-                { return (-1, "Lệnh đã xuất trước đó! (XKErr: 007)"); }
-            }
-
-            // Update so luong vi tri da co cua nvl
-            (int updateVTofNVLresult, string updateVTofNVLerror) = SQLServerServices.UpdateSoluongNgVatLieuById(scanLXK.ViTriofNVL.VTofNVLID.Value, newtonkho);
-
-            if (updateVTofNVLresult == -1)
-            {
-                { return (-1, "Không thể xuất kho! (XKErr: 008)"); }
-            }
-
-            // Update lenh xuat kho status
-            (int updatelxkResult, string updatelxkError) = SQLServerServices.UpdateLenhXuatKhoStatus(scanLXK.LenhXKID.Value, 1);
-
-            if (updatelxkResult != -1)
-            {
-                // update status to UI
-                scanLXK.LXKIsDone.Value = 1;
-
-                _ = int.TryParse(scanLXK.LenhXKID.Value.ToString(), out int lenhxkid) ? lenhxkid : -1;
-
-                { return (lenhxkid, "Xuất kho thành công!"); }
-            }
-            else { { return (-1, "Không thể xuất kho! (XKErr: 009)"); } }
         }
 
 
@@ -831,6 +721,8 @@ namespace ParamountBed_Warehouse.Services.SocketService
 
                 _ = int.TryParse(lenh.LenhXKID.Value?.ToString(), out int lxkid) ? lxkid : -1;
 
+                lenh.ViTriofNVL.NgLieuInfor = SQLServerServices.GetNguyenVatLieuByID(lenh.NVLID.Value);
+
                 string tennvl = lenh.ViTriofNVL.NgLieuInfor.TenNVL.Value?.ToString() ?? string.Empty;
 
                 string mavitri = lenh.ViTriofNVL.VitriInfor.MaViTri.Value?.ToString() ?? string.Empty;
@@ -961,7 +853,8 @@ namespace ParamountBed_Warehouse.Services.SocketService
 
                     if (logId == -1)
                     {
-                        // Handle logging error if needed
+                        SendFeedBackToClient(client, Common.PXK_HANDLE_LXK_RETURN, Common.SUCCESS, $"Đã xuất kho nguyên liệu: \n {maNVL} \n Số lượng : {soluongxuatfromClient} (pcs) \n\n Logging Error: {logErr}", new Dictionary<string, object>());
+                        return;
                     }
 
                     // Feedback xuat kho thanh cong
@@ -1018,7 +911,7 @@ namespace ParamountBed_Warehouse.Services.SocketService
                 // Kiem tra so luong xuat co vuot qua so luong hien tai khong
                 if (soluongxuatfromClient > soluongHiencotaivitri)
                 {
-                    SendFeedBackToClient(client, Common.PXK_HANDLE_LXK_RETURN, Common.FAIL, $"Số lượng xuất vượt quá số lượng hiện tại ({soluongHiencotaivitri})", new Dictionary<string, object>());
+                    SendFeedBackToClient(client, Common.PXK_HANDLE_LXK_RETURN, Common.FAIL, $"Số lượng xuất vượt quá số lượng hiện có ở vị trí ({maVitri}) ({soluongHiencotaivitri})", new Dictionary<string, object>());
                     return;
                 }
 

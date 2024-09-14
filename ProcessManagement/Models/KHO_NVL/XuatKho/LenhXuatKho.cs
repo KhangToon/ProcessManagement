@@ -1,5 +1,6 @@
 ﻿using ProcessManagement.Commons;
 using System.Reflection;
+using ProcessManagement.Services.SQLServer;
 
 namespace ProcessManagement.Models.KHO_NVL.XuatKho
 {
@@ -16,6 +17,28 @@ namespace ProcessManagement.Models.KHO_NVL.XuatKho
         public ViTriofNVL ViTriofNVL { get; set; } = new(); // Chi dung cho phieu xuat kho
 
         public bool isEditingLXK = false; // chi dung khi xuat kho
+
+
+        //public NguyenVatLieu NVLDetails { get; set; } = new();
+        //public VitriLuuTru ViTriDetails { get; set; } = new();
+
+
+
+        //public void LoadNVLDetails(SQLServerServices sQLServer)
+        //{
+        //    if (NVLID.Value != null)
+        //    {
+        //        NVLDetails = sQLServer.GetNguyenVatLieuByID(NVLID.Value);
+        //    }
+        //}
+
+        //public void LoadViTriDetails(SQLServerServices sQLServer)
+        //{
+        //    if (VTID.Value != null)
+        //    {
+        //        ViTriDetails = sQLServer.GetViTriLuuTruByID(VTID.Value);
+        //    }
+        //}
 
         public List<Propertyy> GetPropertiesValues()
         {

@@ -2915,12 +2915,12 @@ namespace ProcessManagement.Services.SQLServer
 
                         item.Value = columnValue.ToString()?.Trim();
                     }
-
                 }
             }
 
             // Get vitriluutru infor
             vitriofnvl.VitriInfor = GetViTriLuuTruByID(vitriofnvl.VTID.Value);
+            vitriofnvl.NgLieuInfor = GetNguyenVatLieuByID(vitriofnvl.NVLID.Value);
 
             return vitriofnvl;
         }
@@ -4820,6 +4820,10 @@ namespace ProcessManagement.Services.SQLServer
                         item.Value = columnValue;
                     }
                 }
+
+                // Get vitriofNVL infor
+                lxkho.ViTriofNVL = GetViTriOfNgVatLieuByNVLid_VTid(lxkho.NVLID.Value, lxkho.VTID.Value);
+
             }
 
             return lxkho;
