@@ -17,6 +17,7 @@ using ProcessManagement.Models.KHO_NVL.NhapKho;
 using ProcessManagement.Models.KHO_NVL;
 using ProcessManagement.Models.KHO_NVL.Tracking;
 using Microsoft.AspNetCore.Components.Routing;
+using ProcessManagement.Models;
 
 namespace ParamountBed_Warehouse.Services.SocketService
 {
@@ -331,6 +332,12 @@ namespace ParamountBed_Warehouse.Services.SocketService
             else if (CMDTYPE == Common.PXK_HANDLE_LXK_MANUAL)
             {
                 HandleExcuteLenhXuatKho_Manual(ClientMesage, client);
+            }
+
+            // CHECKING
+            if (CMDTYPE == Common.CHECK_LOAD)
+            {
+                HandleCheckingDataDetails(ClientMesage, client);
             }
         }
 
@@ -955,6 +962,115 @@ namespace ParamountBed_Warehouse.Services.SocketService
             }
         }
 
+        #endregion
+
+
+        #region CHECKING
+
+        // Handle checking data details
+        private void HandleCheckingDataDetails(SocketMessage? mess, ConnectedObject client)
+        {
+            if (mess != null)
+            {
+                string scanCode = mess.Data.FirstOrDefault()?[Common.CHECK_SCANCODE].ToString() ?? string.Empty;
+
+                if (string.IsNullOrWhiteSpace(scanCode)) { return; }
+
+                // Get NVL
+                NguyenVatLieu targetNVL = SQLServerServices.GetNguyenVatLieuByTenNVL(scanCode);
+
+                Dictionary<string, object> dataSend = new();
+
+                if (targetNVL.NVLID.Value != null)
+                {
+                    Dictionary<string, object> dataNVLDetails = new(); // thong tin nvl/vitri
+
+                    var nvlDetailsItems = targetNVL?.GetPropertiesValues().Where(nvl => nvl.AlowDisplay == true).ToList();
+
+                    // Add main details
+                    if (nvlDetailsItems != null)
+                    {
+                        foreach (var nvldetail in nvlDetailsItems)
+                        {
+                            if (nvldetail != null)
+                            {
+                                string key = nvldetail.DisplayName;
+                                object value = nvldetail.Value?.ToString()?.Trim() ?? string.Empty;
+
+                                if (!String.IsNullOrEmpty(key))
+                                {
+                                    dataNVLDetails.Add(key, value);
+                                }
+                            }
+                        }
+                    }
+
+                    // Add sub details
+                    if (targetNVL?.DSNguyenVatLieuDetails.Count > 0)
+                    {
+                        var dsngvldetails = targetNVL?.DSNguyenVatLieuDetails;
+
+                        if (dsngvldetails != null)
+                        {
+                            foreach (var nvldetail in dsngvldetails)
+                            {
+                                string key = nvldetail.NVLDetailItems?.TenThongTin.Value?.ToString()?.Trim() ?? string.Empty;
+                                object value = nvldetail.GiaTri.Value?.ToString() ?? string.Empty;
+
+                                if (!String.IsNullOrEmpty(key))
+                                {
+                                    dataNVLDetails.Add(key, value);
+                                }
+                            }
+                        }
+                    }
+
+                    dataSend.Add(targetNVL?.TenNVL.Value?.ToString() ?? "###", dataNVLDetails);
+                }
+                else
+                {
+                    // Get thong tin vi tri
+                    VitriLuuTru targetVT = SQLServerServices.GetViTriLuuTruByMaVitri(scanCode);
+                    targetVT.DSachViTriofNVL = SQLServerServices.GetListViTriOfNgVatLieuByVTid(targetVT.VTID.Value);
+
+                    if (targetVT.DSachViTriofNVL.Count > 0)
+                    {
+                        string mavitri = targetVT.MaViTri.Value?.ToString() ?? "###";
+
+                        foreach (var nvl in targetVT.DSachViTriofNVL)
+                        {
+                            Dictionary<string, object> vitridetails = new();
+
+                            nvl.NgLieuInfor = SQLServerServices.GetNguyenVatLieuByID(nvl.NVLID.Value);
+
+                            string tennvl = nvl.NgLieuInfor.TenNVL.Value?.ToString() ?? string.Empty;
+
+                            int soluongtaivitri = int.TryParse(nvl.VTNVLSoLuong.Value?.ToString(), out int sl) ? sl : 0;
+
+                            if (soluongtaivitri > 0)
+                            {
+                                vitridetails.Add("SL tại vị trí", soluongtaivitri + $"({nvl.NgLieuInfor.DonViTinh.Value?.ToString()})");
+
+                                if (!String.IsNullOrEmpty(tennvl))
+                                {
+                                    dataSend.Add(tennvl, vitridetails);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Send feedback data to client
+                if (dataSend.Count > 0)
+                {
+                    SendFeedBackToClient(client, Common.CHECK_LOAD_RETURN, Common.SUCCESS, string.Empty, dataSend);
+                }
+                else
+                {
+                    SendFeedBackToClient(client, Common.CHECK_LOAD_RETURN, Common.FAIL, "Không tìm thấy dữ liệu!", dataSend);
+                }
+            }
+        }
         #endregion
 
 

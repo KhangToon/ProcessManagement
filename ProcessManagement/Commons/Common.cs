@@ -329,6 +329,12 @@ namespace ProcessManagement.Commons
         public const string PNK_HANDLE_LNK_RETURN = "PNK_HANDLE_LNK_RETURN";
         public const string PNK_HANDLE_LNK_MANUAL = "PNK_HANDLE_LNK_MANUAL";
 
+
+        // Socket CHECKING Tags
+        public const string CHECK_LOAD = "CHECK_LOAD";
+        public const string CHECK_LOAD_RETURN = "CHECK_LOAD_RETURN";
+        public const string CHECK_SCANCODE = "CHECK_SCANCODE";
+
         public const int DispMode1 = 1;
         public const int DispMode2 = 2;
         public const int DispMode3 = 3;     // Mode them KHSX
