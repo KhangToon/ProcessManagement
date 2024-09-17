@@ -12,13 +12,50 @@ using ParamountBed_Warehouse.Services.SocketService;
 using ProcessManagement.Services.QRCodes;
 using System.Net;
 using ProcessManagement.Services.Modbus;
+using System.Net.Sockets;
+using System.Net.NetworkInformation;
+using System.Diagnostics;
+using System.Drawing;
+
+
+// enable khi deploy - disable khi use local 
+// Get local IP address
+string GetLocalIPAddress()
+{
+    var host = Dns.GetHostEntry(Dns.GetHostName());
+    foreach (var ip in host.AddressList)
+    {
+        if (ip.AddressFamily == AddressFamily.InterNetwork)
+        {
+            return ip.ToString();
+        }
+    }
+    throw new Exception("No network adapters with an IPv4 address in the system!");
+}
+// Find an available port
+int FindAvailablePort(int startingPort = 5000)
+{
+    var properties = IPGlobalProperties.GetIPGlobalProperties();
+    var usedPorts = properties.GetActiveTcpListeners().Select(l => l.Port).ToList();
+
+    for (int port = startingPort; port < 65535; port++)
+    {
+        if (!usedPorts.Contains(port))
+        {
+            return port;
+        }
+    }
+
+    throw new Exception("No available ports found.");
+}
+
+var localIP = GetLocalIPAddress();
+var port = FindAvailablePort();
+var url = $"http://{localIP}:{port}"; 
+// enable khi deploy - disable khi use local 
+
 
 var builder = WebApplication.CreateBuilder(args);
-
-//builder.WebHost.UseKestrel(serveroption =>
-//{
-//    serveroption.Listen(IPAddress.Loopback, port: 5002);
-//});
 
 // Identity config
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -58,12 +95,18 @@ builder.Services.AddSingleton<ModbusServices>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+else
 {
     app.UseExceptionHandler("/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
 
 app.UseHttpsRedirection();
 
@@ -79,6 +122,17 @@ app.MapControllers();
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 
-//app.Urls.Add("http://192.168.1.67:5000");
+//app.Urls.Add(url); // enable khi deploy - disable khi use local 
+
+// Open browser after application starts 
+//app.Lifetime.ApplicationStarted.Register(() =>  // enable khi deploy - disable khi use local 
+//{
+//    var psi = new ProcessStartInfo
+//    {
+//        FileName = url,
+//        UseShellExecute = true
+//    };
+//    Process.Start(psi);
+//});
 
 app.Run();

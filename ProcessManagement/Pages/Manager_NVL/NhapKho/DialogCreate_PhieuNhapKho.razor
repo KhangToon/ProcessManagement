@@ -260,11 +260,6 @@
                                                                             <RadzenText Text="@($"Đầy ({succhuavitri}/{succhuavitri})")" Style="color: var(--rz-warning-darker); font-weight: 600; font-size: 15px"></RadzenText>
                                                                         </RadzenStack>
                                                                     </RadzenStack>
-                                                                    <RadzenStack Style="width: 20%; height: contain; " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                        <RadzenButton Visible="@(false)" Style="width: contain; height: 100%; background-color: Highlight; color: white"
-                                                                                      Click="(() => AddNVlIntoVitriSelect(vitri))"
-                                                                                      Icon="add" Text="Thêm" ButtonStyle="ButtonStyle.Secondary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" />
-                                                                    </RadzenStack>
                                                                 </RadzenStack>
                                                             </RadzenCard>
                                                         }
@@ -302,7 +297,7 @@
                                                               Style="border-radius: 5px; height: 30px; width: contain; cursor: default;" />
                                                 <RadzenButton Visible="@(!isAddLocation)" Style="width: contain; height: 100%; background-color: white; color: black"
                                                               Click="(() => SelectVitriNhapKho())"
-                                                              Icon="add" Text="Thêm vị trí khác" ButtonStyle="ButtonStyle.Secondary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" />
+                                                              Icon="add" Text="Chỉ định vị trí" ButtonStyle="ButtonStyle.Secondary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" />
                                             </RadzenStack>
 
                                             <!--Hien thi danh sach lenh nhap kho-->
@@ -507,7 +502,7 @@
 
         SelectedNVLofPNK.DSLenhNKs = new List<LenhNhapKho>(SelectedNVLofPNK.DSLenhNKs);
 
-        SQLServerServices.DeleteLenhNhapKho(lnk.LenhNKID.Value);
+        //SQLServerServices.DeleteLenhNhapKho(lnk.LenhNKID.Value);
     }
 
     // Enable add new vitri luu kho
@@ -522,55 +517,6 @@
         else
         {
             isAddLocation = true;
-        }
-    }
-
-    // Button add nvl vao vitri da co truoc do
-
-    private void AddNVlIntoVitriSelect(ViTriofNVL selectVT)
-    {
-        // Kiem tra vi tri da ton tai
-        bool iscontain = SelectedNVLofPNK.DSLenhNKs.Select(lenh => lenh.TargertVitri.VTID.Value).ToList().Contains(selectVT.VTID.Value);
-
-        if (iscontain) return;
-
-        // so luong all can chi dinh
-        _ = int.TryParse(SelectedNVLofPNK.NVLNKSoLuongAll.Value?.ToString(), out int allslcanchidinh) ? allslcanchidinh : 0;
-
-        // tong so luong da chi dinh
-        int tongsldachidinh = SelectedNVLofPNK.DSLenhNKs.Sum(lenh => int.TryParse(lenh.LNKSoLuong.Value?.ToString(), out int sll) ? sll : 0);
-
-        // soluong can chi dinh con lai
-        int allslchidinhconlai = allslcanchidinh - tongsldachidinh;
-
-        int slchidinh = 0;
-
-        if (allslchidinhconlai <= selectVT.VitriInfor.SLConTrong)
-        {
-            slchidinh = allslchidinhconlai;
-        }
-        else slchidinh = (selectVT.VitriInfor.SLConTrong);
-
-        // Gan thong tin cua lenh nhap kho
-        LenhNhapKho newLenhNhapKho = new()
-            {
-                LNKSoLuong = { Value = slchidinh },    // soluong
-                NVLID = { Value = SelectedNVLofPNK.NVLID.Value },             // nvl id
-                VTID = { Value = selectVT.VTID.Value },    // vitri id
-                NVLPNKID = { Value = SelectedNVLofPNK.NVLPNKID.Value }, // nvlpnkid
-                PNKID = { Value = PNK.PNKID.Value }, // pnkid
-                LNKIsDone = { Value = 0 }   // status
-            };
-        newLenhNhapKho.TargertVitri = selectVT.VitriInfor;
-
-        (int lenhnkId, string lnkError) = SQLServerServices.InsertLenhNhapKho(newLenhNhapKho);
-
-        if (lenhnkId > 0)
-        {
-            // Gan ID cua lenh nhap kho sau khi insert
-            newLenhNhapKho.LenhNKID.Value = lenhnkId;
-            // Add new lenh to DB
-            SelectedNVLofPNK.DSLenhNKs.Add(newLenhNhapKho);
         }
     }
 
@@ -608,115 +554,25 @@
 
             foreach (var lenh in dslenh)
             {
+                SelectedNVLofPNK.DSLenhNKs.Add(lenh);
                 // Add new lenh to DB
-                (int lenhnkId, string lnkError) = SQLServerServices.InsertLenhNhapKho(lenh);
+                // (int lenhnkId, string lnkError) = SQLServerServices.InsertLenhNhapKho(lenh);
 
-                if (lenhnkId > 0)
-                {
-                    // Gan ID cua lenh nhap kho sau khi insert
-                    lenh.LenhNKID.Value = lenhnkId;
+                // if (lenhnkId > 0)
+                // {
+                //     // Gan ID cua lenh nhap kho sau khi insert
+                //     lenh.LenhNKID.Value = lenhnkId;
 
-                    SelectedNVLofPNK.DSLenhNKs.Add(lenh);
-                }
-                else
-                {
-                    await DialogService.Alert($"Lỗi: {lnkError}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
-                }
+                //     SelectedNVLofPNK.DSLenhNKs.Add(lenh);
+                // }
+                // else
+                // {
+                //     await DialogService.Alert($"Lỗi: {lnkError}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                // }
             }
         }
     }
 
-    // Save vitri luu kho cho NVLofPNK
-    private async Task OnThemNewLNKintoListLNK()
-    {
-        // Kiem tra vi tri da ton tai
-        bool iscontain = SelectedNVLofPNK.DSLenhNKs.Select(lenh => lenh.TargertVitri.VTID.Value).ToList().Contains(temporaryLenhNK.TargertVitri.VTID.Value);
-
-        if (!iscontain)
-        {
-            // Gan thong tin cua lenh nhap kho
-            LenhNhapKho newLenhNhapKho = new()
-                {
-                    LNKSoLuong = { Value = temporaryLenhNK.LNKSoLuong.Value },    // soluong
-                    NVLID = { Value = SelectedNVLofPNK.NVLID.Value },             // nvl id
-                    VTID = { Value = temporaryLenhNK.TargertVitri.VTID.Value },    // vitri id
-                    NVLPNKID = { Value = SelectedNVLofPNK.NVLPNKID.Value }, // nvlpnkid
-                    PNKID = { Value = PNK.PNKID.Value }, // pnkid
-                    LNKIsDone = { Value = 0 }   // status
-                };
-            newLenhNhapKho.TargertVitri = temporaryLenhNK.TargertVitri;
-
-            // Kiem tra cac dieu kien truoc khi insert DB
-
-            // So luong con trong cua vi tri
-            int slcontrong = newLenhNhapKho.TargertVitri.SLConTrong;
-            // So luong nhap cua vi tri
-            int soluongnhap = int.TryParse(newLenhNhapKho.LNKSoLuong.Value?.ToString(), out int sln) ? sln : 0;
-
-            if (soluongnhap == 0)
-            {
-                await DialogService.Alert($"Số lượng nhập kho phải lớn hơn 0", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
-                return;
-            }
-
-            // Tong so luong can nhap kho
-            int slallnhapkho = int.TryParse(SelectedNVLofPNK.NVLNKSoLuongAll.Value?.ToString(), out int slall) ? slall : 0;
-            // Tinh tong so luong nhap kho sau moi lan tao lenh moi
-            int slallnhapkhodatao = 0;
-            foreach (var lnk in SelectedNVLofPNK.DSLenhNKs)
-            {
-                int lnkslnhap = int.TryParse(lnk.LNKSoLuong.Value?.ToString(), out int lnksln) ? lnksln : 0;
-                slallnhapkhodatao += lnkslnhap;
-            }
-
-            // Kiem tra qua so luong can nhap kho
-            if ((slallnhapkhodatao + soluongnhap) > slallnhapkho)
-            {
-                await DialogService.Alert($"Qúa số lượng cần nhập kho ({slallnhapkho})", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
-                return;
-            }
-
-
-            if (soluongnhap > slcontrong)
-            {
-                await DialogService.Alert($"Số lượng nhập kho ({soluongnhap}) quá số lượng trống của vị trí ({slcontrong})", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
-            }
-            else
-            {
-                (int lenhnkId, string lnkError) = SQLServerServices.InsertLenhNhapKho(newLenhNhapKho);
-
-                if (lenhnkId > 0)
-                {
-                    // Gan ID cua lenh nhap kho sau khi insert
-                    newLenhNhapKho.LenhNKID.Value = lenhnkId;
-                    // Add new lenh to DB
-                    SelectedNVLofPNK.DSLenhNKs.Add(newLenhNhapKho);
-
-                    int slcontrongsaunhap = slcontrong - soluongnhap; // tinh so luong con trong cua vi tri sau khi tao lenh
-
-                    newLenhNhapKho.TargertVitri.SLConTrong = slcontrongsaunhap; // cap nhat so luong trong sau khi tao lenh
-
-                    // True bit da chi dinh day du vi tri (so luong cua lenh truoc do + so luong cua lenh moi)
-                    if ((slallnhapkhodatao + soluongnhap) == slallnhapkho)
-                    {
-                        SelectedNVLofPNK.IsAsignedVitri = true;
-                    }
-
-                    temporaryLenhNK = new(); isAddLocation = false;
-                }
-                else
-                {
-                    await DialogService.Alert($"Lỗi: {lnkError}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
-                }
-
-            }
-
-        }
-        else
-        {
-            await DialogService.Alert($"Đã chọn vị trí này trước đó", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
-        }
-    }
 
     // Button save phieu nhap kho
     private async Task ButtonSavePhieuNhapKho()
@@ -765,14 +621,23 @@
             isPNKinforOK = false;
         }
 
+       
 
         if (isAsignedVitriOK && isPNKinforOK)
-        {
+        {   
             // Update PNK infor
             (int updateResult, string errorMess) = SQLServerServices.UpdatePhieuNhapKhoInfor(PNK);
 
             if (updateResult > 0)
-            {
+            {   
+                // Them lenh nhap cua phieu vao Database
+                foreach (var nvlofpnk in PNK.DSNVLofPNKs)
+                {
+                    foreach (var lenh in nvlofpnk.DSLenhNKs)
+                    {
+                        SQLServerServices.InsertLenhNhapKho(lenh);
+                    }
+                }
                 isPNKSaved = true;
                 await DialogService.Alert($"Phiếu đã lưu thành công!", "<strong><span style='color: Darkgreen'>Success!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
             }

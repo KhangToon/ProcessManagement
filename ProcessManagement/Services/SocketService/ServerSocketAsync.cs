@@ -535,13 +535,17 @@ namespace ParamountBed_Warehouse.Services.SocketService
                     // update status to UI
                     savedLNK.LNKIsDone.Value = 1;
 
+                    // Get nguoi nhap kho
+                    string nguoiNhapkho = SQLServerServices.GetNguoiTaoPhieuNhapKhoByID(savedLNK.PNKID.Value);
+
+
                     // Logging nhap kho
                     HistoryXNKho logNhapKho = new HistoryXNKho()
                     {
                         LogLoaiPhieu = { Value = Common.LogTypePNK },
                         LogMaPhieu = { Value = maPNK },
                         LogMaViTri = { Value = maVitri },
-                        LogNgThucHien = { Value = "Khang" },
+                        LogNgThucHien = { Value = nguoiNhapkho },
                         LogSoLuong = { Value = savedLNK.LNKSoLuong.Value },
                         LogTonKhoTruoc = { Value = savedLNK.TargetNgLieu.TonKho },
                         LogTonKhoSau = { Value = savedLNK.TargetNgLieu.TonKho + soluongThemvao },
@@ -651,7 +655,7 @@ namespace ParamountBed_Warehouse.Services.SocketService
                 {
                     LogLoaiPhieu = { Value = Common.LogTypePNK_Manual },
                     LogMaViTri = { Value = maVitri },
-                    LogNgThucHien = { Value = "Khang" },
+                    LogNgThucHien = { Value = string.Empty },
                     LogSoLuong = { Value = soluongnhapfromClient },
                     LogTonKhoTruoc = { Value = targetNVL.TonKho },
                     LogTonKhoSau = { Value = targetNVL.TonKho + soluongnhapfromClient },
@@ -675,7 +679,6 @@ namespace ParamountBed_Warehouse.Services.SocketService
         }
 
         #endregion
-
 
         #region XUAT KHO
 
@@ -840,13 +843,16 @@ namespace ParamountBed_Warehouse.Services.SocketService
                     // update status to UI
                     savedLXK.LXKIsDone.Value = 1;
 
+                    // Get nguoi xuat kho
+                    string nguoiXuatkho = SQLServerServices.GetNguoiTaoPhieuXuatKhoByID(savedLXK.PXKID.Value);
+
                     // Logging xuat kho
                     HistoryXNKho logXuatKho = new HistoryXNKho()
                     {
                         LogLoaiPhieu = { Value = Common.LogTypePXK },
                         LogMaPhieu = { Value = maPXK },
                         LogMaViTri = { Value = maVitri },
-                        LogNgThucHien = { Value = "Khang" },
+                        LogNgThucHien = { Value = nguoiXuatkho },
                         LogSoLuong = { Value = savedLXK.LXKSoLuong.Value },
                         LogTonKhoTruoc = { Value = savedLXK.ViTriofNVL.NgLieuInfor.TonKho },
                         LogTonKhoSau = { Value = savedLXK.ViTriofNVL.NgLieuInfor.TonKho - soluongXuatra },
@@ -939,7 +945,7 @@ namespace ParamountBed_Warehouse.Services.SocketService
                 {
                     LogLoaiPhieu = { Value = Common.LogTypePXK_Manual },
                     LogMaViTri = { Value = maVitri },
-                    LogNgThucHien = { Value = "Khang" },
+                    LogNgThucHien = { Value = string.Empty },
                     LogSoLuong = { Value = soluongxuatfromClient },
                     LogTonKhoTruoc = { Value = targetNVL.TonKho },
                     LogTonKhoSau = { Value = targetNVL.TonKho - soluongxuatfromClient },
@@ -964,7 +970,6 @@ namespace ParamountBed_Warehouse.Services.SocketService
 
         #endregion
 
-
         #region CHECKING
 
         // Handle checking data details
@@ -983,9 +988,21 @@ namespace ParamountBed_Warehouse.Services.SocketService
 
                 if (targetNVL.NVLID.Value != null)
                 {
-                    Dictionary<string, object> dataNVLDetails = new(); // thong tin nvl/vitri
+
+                    // 1 - Add thong tin NVL
+                    Dictionary<string, object> dataNVLDetails = new(); // thong tin nvl
 
                     var nvlDetailsItems = targetNVL?.GetPropertiesValues().Where(nvl => nvl.AlowDisplay == true).ToList();
+
+                    // Add danh muc
+                    string dmuckey = "Danh mục";
+                    object dmucValue = targetNVL?.DanhMuc?.TenDanhMuc.Value?.ToString() ?? string.Empty;
+                    dataNVLDetails.Add(dmuckey, dmucValue);
+
+                    // Add ton kho
+                    string tonkhoKey = "Tồn kho";
+                    object tonkhoValue = $"{targetNVL?.TonKho ?? 0} ({targetNVL?.DonViTinh.Value?.ToString()})";
+                    dataNVLDetails.Add(tonkhoKey, tonkhoValue);
 
                     // Add main details
                     if (nvlDetailsItems != null)
@@ -1026,6 +1043,35 @@ namespace ParamountBed_Warehouse.Services.SocketService
                     }
 
                     dataSend.Add(targetNVL?.TenNVL.Value?.ToString() ?? "###", dataNVLDetails);
+
+                    // 2 - Add vitri luu kho
+                    if (targetNVL != null && targetNVL.DSViTri.Count > 0)
+                    {
+                        Dictionary<string, object> dataNVLvitris = new(); // thong tin/vitri
+
+                        int index = 0;
+
+                        foreach (var vitriluu in targetNVL.DSViTri)
+                        {
+                            string vitriKey = vitriluu.VitriInfor.MaViTri.Value?.ToString() ?? string.Empty;
+                            if (!String.IsNullOrEmpty(vitriKey))
+                            {
+                                _ = int.TryParse(vitriluu.VTNVLSoLuong.Value?.ToString(), out int soluongtaivitri) ? soluongtaivitri : 0;
+
+                                object vitriValue = $"{soluongtaivitri} ({targetNVL.DonViTinh.Value?.ToString()})";
+
+                                if (soluongtaivitri > 0)
+                                {
+                                    index++;
+                                    vitriKey = index.ToString() + "____" + vitriKey;
+                                    dataNVLvitris.Add(vitriKey, vitriValue);
+                                }
+                            }
+                        }
+
+                        if (dataNVLvitris.Count > 0) { dataSend.Add("DS vị trí lưu trữ", dataNVLvitris); };
+                    }
+
                 }
                 else
                 {

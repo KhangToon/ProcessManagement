@@ -3616,6 +3616,27 @@ namespace ProcessManagement.Services.SQLServer
             return phieunhapkho;
         }
 
+        // Get nguoi nhap kho by pnkid ID
+        public string GetNguoiTaoPhieuNhapKhoByID(object? pnkid)
+        {
+            string nguoilapphieu = string.Empty;
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                var command = connection.CreateCommand();
+                command.CommandText = $"SELECT [{Common.NguoiLapPNK}] FROM [{Common.Table_PhieuNhapKho}] WHERE [{Common.PNKID}] = @PNKid";
+                command.Parameters.AddWithValue("@PNKid", pnkid ?? DBNull.Value);
+
+                using var reader = command.ExecuteReader();
+
+                if (reader.Read())
+                {
+                    nguoilapphieu = reader[Common.NguoiLapPNK].ToString()?.Trim() ?? string.Empty;
+                }
+            }
+            return nguoilapphieu;
+        }
+
         // Get ma phieu nhap kho by ID
         public string GetMaPhieuNhapKhoByID(object? pnkid)
         {
@@ -4401,6 +4422,28 @@ namespace ProcessManagement.Services.SQLServer
             }
             return maPhieuXuatKho;
         }
+
+        // Get nguoi xuat kho by pxkid ID
+        public string GetNguoiTaoPhieuXuatKhoByID(object? pxkid)
+        {
+            string nguoilapphieu = string.Empty;
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                var command = connection.CreateCommand();
+                command.CommandText = $"SELECT [{Common.NguoiLapPXK}] FROM [{Common.Table_PhieuXuatKho}] WHERE [{Common.PXKID}] = @PXKid";
+                command.Parameters.AddWithValue("@PXKid", pxkid ?? DBNull.Value);
+
+                using var reader = command.ExecuteReader();
+
+                if (reader.Read())
+                {
+                    nguoilapphieu = reader[Common.NguoiLapPXK].ToString()?.Trim() ?? string.Empty;
+                }
+            }
+            return nguoilapphieu;
+        }
+
 
         // Get phiếu xuất kho by Mã phiếu 
         public PhieuXuatKho GetPhieuXuatKhoByMaPhieu(object? maPXK)
