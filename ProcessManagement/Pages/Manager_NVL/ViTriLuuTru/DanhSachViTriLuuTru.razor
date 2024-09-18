@@ -114,7 +114,7 @@
                             <RadzenText Visible="@(SelectedViTri.VTID.Value != null)" Text="@($"( {SelectedViTri.MaViTri.Value?.ToString()} )")" Style="color: darkblue; font-weight: 700; font-size: 18px; height: contain; width: contain; font-style: italic;"></RadzenText>
                             <RadzenText Visible="@(SelectedViTri.VTID.Value == null)" Text="Chọn ô vị trí để hiển thị thông tin" Style="color: red; font-weight: 600; font-size: 17px; height: contain; width: contain; font-style: italic;"></RadzenText>
                         </RadzenStack>
-                        <RadzenStack Visible="@(SelectedViTri.VTID.Value != null)" Style="height: 100%; width: 100%; padding: 5px; padding-top: 5px; padding-right: 0;" Gap="5px" Orientation="Orientation.Vertical">
+                        <RadzenStack Visible="@(SelectedViTri.VTID.Value != null)" Style="height: 100%; width: 100%; padding: 5px; padding-top: 5px; padding-right: 0;" Gap="5px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                             <RadzenStack Gap="20px" Style="height: contain; width: 100%; background-color: var(--rz-primary-darker); padding: 5px; padding-right: 20px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                                 <RadzenStack Gap="10px" Style="height: contain; width: contain; padding-left: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                     <RadzenText Text="Sức chứa: " Style="color: white; font-weight: 600; font-size: 16px"></RadzenText>
@@ -185,72 +185,70 @@
                                     <RadzenText Text="Danh sách nguyên vật liệu " Style="color: white; font-weight: 600; font-size: 16px"></RadzenText>
                                 </RadzenStack>
                                 <RadzenStack Gap="10px" Style="height: contain; width: contain; padding-left: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                    <RadzenButton Text="@($"Số lượng: {SelectedViTri.DSachViTriofNVL.Count}")" Size="ButtonSize.Small" Shade="Shade.Dark" Variant="Variant.Text"
+                                    <RadzenButton Text="@($"Số lượng: {SelectedViTri.DSachViTriofNVL.Where(vt => int.Parse(vt.VTNVLSoLuong.Value?.ToString() ?? "0") > 0).Count()}")" Size="ButtonSize.Small" Shade="Shade.Dark" Variant="Variant.Text"
                                                   Style="border-radius: 5px; --rz-icon-size: 18px; height: 20px; width: 100%; cursor: default; color: white; background-color: rgb(131,144,148); font-weight: 600" />
                                 </RadzenStack>
                             </RadzenStack>
                             <RadzenStack Style="width: 100%; height: contain; padding: 0" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                <RadzenCard Variant="Variant.Outlined" Style="height: contain; width: 100%; padding: 10px; margin-bottom: 10px">
-                                    <RadzenStack Gap="5px" Orientation="Orientation.Vertical" Style=" height: contain; width: 100%; padding: 0px;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                        <RadzenStack Gap="5px" Orientation="Orientation.Vertical" Style=" height: contain; width: 100%; max-height: 350px; padding-right: 0;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                            <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: contain; padding: 5px; padding-right: 0px;">
-                                                <RadzenStack Style="width: 100%; height: 100%; " Gap="5px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                                    <RadzenStack Style="width: 5%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                        <RadzenText Text="#" Style="color: black; font-weight: 500; font-size: 14px"></RadzenText>
-                                                    </RadzenStack>
-                                                    <RadzenStack Style="width: 25%; height: contain; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                        <RadzenText Text="Tên nguyên liệu" Style="color: black; font-weight: 500; font-size: 16px"></RadzenText>
-                                                    </RadzenStack>
-                                                    <RadzenStack Style="width: 30%; height: contain; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                        <RadzenText Text="Loại" Style="color: black; font-weight: 500; font-size: 16px"></RadzenText>
-                                                    </RadzenStack>
-                                                    <RadzenStack Style="width: 25%; height: contain; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                        <RadzenText Text="Hiện có ở vị trí" Style="color: black; font-weight: 500; font-size: 16px"></RadzenText>
-                                                    </RadzenStack>
-                                                    <RadzenStack Style="width: 10%; height: contain; " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                    </RadzenStack>
+                                <RadzenCard Variant="Variant.Outlined" Style="height: contain; width: 100%; padding: 10px; padding-right: 0; margin-bottom: 10px">
+                                    <RadzenStack Gap="5px" Orientation="Orientation.Vertical" Style=" height: contain; max-height: 250px; width: 100%; overflow-y: scroll; padding-right: 0;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                        <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: contain; padding: 5px; padding-right: 0px;">
+                                            <RadzenStack Style="width: 100%; height: 100%; " Gap="5px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                <RadzenStack Style="width: 5%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                    <RadzenText Text="#" Style="color: black; font-weight: 500; font-size: 14px"></RadzenText>
                                                 </RadzenStack>
-                                            </RadzenCard>
-                                            @{
-                                                if (SelectedViTri.DSachViTriofNVL.Count > 0)
+                                                <RadzenStack Style="width: 25%; height: contain; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                    <RadzenText Text="Tên nguyên liệu" Style="color: black; font-weight: 500; font-size: 16px"></RadzenText>
+                                                </RadzenStack>
+                                                <RadzenStack Style="width: 30%; height: contain; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                    <RadzenText Text="Loại" Style="color: black; font-weight: 500; font-size: 16px"></RadzenText>
+                                                </RadzenStack>
+                                                <RadzenStack Style="width: 25%; height: contain; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                    <RadzenText Text="Hiện có ở vị trí" Style="color: black; font-weight: 500; font-size: 16px"></RadzenText>
+                                                </RadzenStack>
+                                                <RadzenStack Style="width: 10%; height: contain; " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                </RadzenStack>
+                                            </RadzenStack>
+                                        </RadzenCard>
+                                        @{
+                                            if (SelectedViTri.DSachViTriofNVL.Count > 0)
+                                            {
+                                                foreach (var vitriofNVL in SelectedViTri.DSachViTriofNVL)
                                                 {
-                                                    foreach (var vitriofNVL in SelectedViTri.DSachViTriofNVL)
-                                                    {
-                                                        int slhientai = int.Parse(vitriofNVL.VTNVLSoLuong.Value?.ToString() ?? "0");
+                                                    int slhientai = int.Parse(vitriofNVL.VTNVLSoLuong.Value?.ToString() ?? "0");
 
-                                                        <RadzenCard Visible="@(slhientai > 0)" Variant="Variant.Outlined" Style="width: 100%; height: contain; padding: 5px; padding-right: 0px; background-color: white">
-                                                            <RadzenStack Style="width: 100%; height: 100%" Gap="5px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                                                <RadzenStack Style="width: 5%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                    <RadzenText Text="@($"{(SelectedViTri.DSachViTriofNVL.IndexOf(vitriofNVL) + 1).ToString()}")" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
-                                                                </RadzenStack>
-                                                                <RadzenStack Style="width: 25%; height: contain; border-left: var(--rz-grid-cell-border); border-right: var(--rz-grid-cell-border); padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                    <RadzenStack Style="height: 30px; width: 100%; border-radius: 5px; background-color: var(--rz-secondary-lighter); padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                        <RadzenText Text="@($"{vitriofNVL.NgLieuInfor.TenNVL.Value?.ToString()}")" Style="color: rgba(58, 71, 77); font-weight: 600; font-size: 15px"></RadzenText>
-                                                                    </RadzenStack>
-                                                                </RadzenStack>
-                                                                <RadzenStack Style="width: 30%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                    <RadzenText Text="@($"{vitriofNVL.NgLieuInfor.LoaiNVL?.TenLoaiNVL.Value?.ToString()}")" Style="font-weight: 600; font-size: 15px"></RadzenText>
-                                                                </RadzenStack>
-                                                                <RadzenStack Style="width: 25%; height: contain; border-left: var(--rz-grid-cell-border); border-right: var(--rz-grid-cell-border); padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                    <RadzenStack Style="height: 30px; width: 100%; border-radius: 5px; background-color: var(--rz-success-lighter); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                        <RadzenText Text="@($"{vitriofNVL.VTNVLSoLuong.Value?.ToString()} ({vitriofNVL.NgLieuInfor.DonViTinh.Value?.ToString()})")" Style="color: darkgreen; font-weight: 600; font-size: 15px"></RadzenText>
-                                                                    </RadzenStack>
-                                                                </RadzenStack>
-                                                                <RadzenStack Style="width: 10%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                    <RadzenText Visible="false" Text="Chi tiết" Style="color: Highlight; font-weight: 600; font-size: 14px; font-style: italic; text-decoration: underline; cursor: pointer"></RadzenText>
+                                                    <RadzenCard Visible="@(slhientai > 0)" Variant="Variant.Outlined" Style="width: 100%; height: contain; padding: 5px; padding-right: 0px; background-color: white">
+                                                        <RadzenStack Style="width: 100%; height: 100%" Gap="5px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                            <RadzenStack Style="width: 5%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                <RadzenText Text="@($"{(SelectedViTri.DSachViTriofNVL.IndexOf(vitriofNVL) + 1).ToString()}")" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                                                            </RadzenStack>
+                                                            <RadzenStack Style="width: 25%; height: contain; border-left: var(--rz-grid-cell-border); border-right: var(--rz-grid-cell-border); padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                <RadzenStack Style="height: 30px; width: 100%; border-radius: 5px; background-color: var(--rz-secondary-lighter); padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                    <RadzenText Text="@($"{vitriofNVL.NgLieuInfor.TenNVL.Value?.ToString()}")" Style="color: rgba(58, 71, 77); font-weight: 600; font-size: 15px"></RadzenText>
                                                                 </RadzenStack>
                                                             </RadzenStack>
-                                                        </RadzenCard>
-                                                    }
-                                                }
-                                                else
-                                                {
-                                                    <RadzenStack Style="width: 100%; height: contain; " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                        <RadzenText Text="Chưa có nguyên liệu trong vị trí này" Style="font-size: 16px; font-weight: 500; height: contain; color: red"></RadzenText>
-                                                    </RadzenStack>
+                                                            <RadzenStack Style="width: 30%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                <RadzenText Text="@($"{vitriofNVL.NgLieuInfor.LoaiNVL?.TenLoaiNVL.Value?.ToString()}")" Style="font-weight: 600; font-size: 15px"></RadzenText>
+                                                            </RadzenStack>
+                                                            <RadzenStack Style="width: 25%; height: contain; border-left: var(--rz-grid-cell-border); border-right: var(--rz-grid-cell-border); padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                <RadzenStack Style="height: 30px; width: 100%; border-radius: 5px; background-color: var(--rz-success-lighter); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                    <RadzenText Text="@($"{vitriofNVL.VTNVLSoLuong.Value?.ToString()} ({vitriofNVL.NgLieuInfor.DonViTinh.Value?.ToString()})")" Style="color: darkgreen; font-weight: 600; font-size: 15px"></RadzenText>
+                                                                </RadzenStack>
+                                                            </RadzenStack>
+                                                            <RadzenStack Style="width: 10%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                <RadzenText Visible="false" Text="Chi tiết" Style="color: Highlight; font-weight: 600; font-size: 14px; font-style: italic; text-decoration: underline; cursor: pointer"></RadzenText>
+                                                            </RadzenStack>
+                                                        </RadzenStack>
+                                                    </RadzenCard>
                                                 }
                                             }
-                                        </RadzenStack>
+                                            else
+                                            {
+                                                <RadzenStack Style="width: 100%; height: contain; " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                    <RadzenText Text="Chưa có nguyên liệu trong vị trí này" Style="font-size: 16px; font-weight: 500; height: contain; color: red"></RadzenText>
+                                                </RadzenStack>
+                                            }
+                                        }
                                     </RadzenStack>
                                 </RadzenCard>
                             </RadzenStack>
