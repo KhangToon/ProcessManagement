@@ -1,17 +1,22 @@
 ﻿using ProcessManagement.Commons;
 using System.Reflection;
 
-namespace ProcessManagement.Models
+namespace ProcessManagement.Models.MAYMOC
 {
-    public class MayMoc
+    public class ThongTinMayMoc
     {
-        public Propertyy MMID { get; set; } = new() { DBName = Common.MMID, Type = typeof(int), AlowDatabase = true };
-        public Propertyy MaMay { get; set; } = new() { DBName = Common.MaMay, Type = typeof(string), AlowDatabase = true };
-        public Propertyy TenMay { get; set; } = new() { DBName = Common.TenMay, Type = typeof(string), AlowDatabase = true };
+        public Propertyy TTMMID { get; set; } = new() { DBName = Common.MM_TTMMID, DisplayName = "TTMMID", Type = typeof(int), AlowDatabase = false, AlowDisplay = false, DispDatagrid = false }; // ID
+        public Propertyy GiaTri { get; set; } = new() { DBName = Common.MM_GiaTri, DisplayName = "Gía trị", Type = typeof(string), AlowDatabase = true };
+        public Propertyy MMID { get; set; } = new() { DBName = Common.MM_MMID, DisplayName = "MMID", Type = typeof(int), AlowDatabase = true, AlowDisplay = false, DispDatagrid = false };
+        public Propertyy LoaiTTMMID { get; set; } = new() { DBName = Common.MM_LoaiTTMMID, DisplayName = "LoaiTTMMID", Type = typeof(int), AlowDatabase = true, AlowDisplay = false, DispDatagrid = false };
+
+
+        // Loai thong tin may moc
+        public LoaiThongTinMayMoc LoaiThongTin { get; set; } = new();
 
         public List<Propertyy> GetPropertiesValues()
         {
-            Type propertyType = typeof(MayMoc);
+            Type propertyType = typeof(ThongTinMayMoc);
 
             FieldInfo[] fields = propertyType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 

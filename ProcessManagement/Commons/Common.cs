@@ -125,12 +125,6 @@ namespace ProcessManagement.Commons
         public const string MaNhanVien = "Mã nhân viên";
         public const string TenNhanVien = "Tên nhân viên";
 
-        // Table Maymoc //
-        public const string TableMayMoc = "Table_MayMoc";
-        public const string MMID = "MMID";
-        public const string MaMay = "Mã máy";
-        public const string TenMay = "Tên máy";
-
         // Table Nguyen Cong //
         public const string TableNguyenCong = "Table_DSNguyenCong";
         //public const string TileLoi = "Tỉ lệ lỗi";
@@ -296,6 +290,37 @@ namespace ProcessManagement.Commons
         public const string LogTypePXK = "Xuất kho";
         //public const string NVLID = "NVLID";
         //public const string VTID = "VTID";
+
+
+        // Table Maymoc //
+        public const string Table_MayMoc = "MAY_MayMoc";
+        public const string MM_MMID = "MMID";
+        public const string MM_MaMay = "Mã máy";
+        public const string MM_TenMay = "Tên máy";
+        public const string MM_Serial = "Serial";
+        public const string MM_NgaySuDung = "Ngày sử dụng";
+        public const string MM_BoPhanSuDung = "Bộ phận sử dụng";
+        //public const string MM_TinhTrang = "Tình trạng";
+        public const string MM_GhiChu = "Ghi chú";
+
+        // Table ThongTinMayMoc
+        public const string Table_ThongTinMayMoc = "MAY_ThongTinMayMoc";
+        public const string MM_TTMMID = "TTMMID";
+        public const string MM_GiaTri = "Gía trị";
+        //public const string MM_MMID = "MMID";
+        //public const string MM_LoaiTTMMID = "LoaiTTMMID";
+
+        // Table LoaiThongTinMayMoc
+        public const string Table_LoaiThongTinMayMoc = "MAY_LoaiThongTinMayMoc";
+        public const string MM_LoaiTTMMID = "LoaiTTMMID";
+        public const string MM_TenThongTin = "Tên thông tin";
+        public const string MM_KieuDuLieu = "Kiểu dữ liệu";
+        public const string MM_GiaTriMacDinh = "Gía trị mặc định";
+        public const string MM_IsDefault = "IsDefault";
+        public const string MM_TenTruyXuat = "Tên truy xuất";
+
+
+
 
         // Socket 
         public const string socketEndKey = "<END>";

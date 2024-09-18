@@ -5,6 +5,7 @@ using ProcessManagement.Models.KHO_NVL;
 using ProcessManagement.Models.KHO_NVL.NhapKho;
 using ProcessManagement.Models.KHO_NVL.Tracking;
 using ProcessManagement.Models.KHO_NVL.XuatKho;
+using ProcessManagement.Models.MAYMOC;
 using System.Data;
 using System.Text.RegularExpressions;
 
@@ -5157,6 +5158,181 @@ namespace ProcessManagement.Services.SQLServer
             return logs;
         }
 
+        #endregion
+
+        // ------------------------------------------------------------------------------------- //
+        #region Table_MAY_MayMoc
+        // Get may moc by mmid
+        public MayMoc GetMayMocbyID(object? mmID)
+        {
+            MayMoc mayMoc = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_MayMoc}] WHERE [{Common.MM_MMID}] = @MMID";
+
+                command.Parameters.AddWithValue("@MMID", mmID);
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    List<Propertyy> rowitems = mayMoc.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        if (reader.GetOrdinal(columnName) != -1) // Check if the column exists
+                        {
+                            object columnValue = reader[columnName];
+
+                            item.Value = columnValue == DBNull.Value ? null : columnValue.ToString()?.Trim();
+                        }
+                    }
+                }
+            }
+
+            // Get danh sach thong tin may moc
+            mayMoc.DSThongTin = GetDanhSachThongTinMayMoc(mayMoc.MMID.Value);
+
+            return mayMoc;
+        }
+        #endregion
+
+        // ------------------------------------------------------------------------------------- //
+        #region Table_MAY_ThongTinMayMoc
+        // Get danh sach thong tin may moc by mmid
+        public List<ThongTinMayMoc> GetDanhSachThongTinMayMoc(object? mmID)
+        {
+            List<ThongTinMayMoc> danhSachThongTinMayMoc = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_ThongTinMayMoc}] WHERE [{Common.MM_MMID}] = @MMID";
+
+                command.Parameters.AddWithValue("@MMID", mmID);
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    ThongTinMayMoc thongTinMayMoc = new();
+
+                    List<Propertyy> rowItems = thongTinMayMoc.GetPropertiesValues();
+
+                    foreach (var item in rowItems)
+                    {
+                        string? columnName = item.DBName;
+
+                        if (reader.GetOrdinal(columnName) != -1) // Check if the column exists
+                        {
+                            object columnValue = reader[columnName];
+
+                            item.Value = columnValue == DBNull.Value ? null : columnValue.ToString()?.Trim();
+                        }
+                    }
+
+                    // Get loai thong tin may moc 
+                    thongTinMayMoc.LoaiThongTin = GetLoaiThongTinMayMoc(thongTinMayMoc.LoaiTTMMID.Value);
+
+                    danhSachThongTinMayMoc.Add(thongTinMayMoc);
+                }
+            }
+
+            return danhSachThongTinMayMoc;
+        }
+
+        // Get thong tin may moc by mmid
+        public ThongTinMayMoc GetThongTinMayMocByID(object? ttmmID)
+        {
+            ThongTinMayMoc thongTinMayMoc = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_ThongTinMayMoc}] WHERE [{Common.MM_TTMMID}] = @TTMMID";
+
+                command.Parameters.AddWithValue("@TTMMID", ttmmID);
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    List<Propertyy> rowItems = thongTinMayMoc.GetPropertiesValues();
+
+                    foreach (var item in rowItems)
+                    {
+                        string? columnName = item.DBName;
+
+                        if (reader.GetOrdinal(columnName) != -1) // Check if the column exists
+                        {
+                            object columnValue = reader[columnName];
+
+                            item.Value = columnValue == DBNull.Value ? null : columnValue.ToString()?.Trim();
+                        }
+                    }
+                }
+            }
+
+            // Get loai thong tin may moc 
+            thongTinMayMoc.LoaiThongTin = GetLoaiThongTinMayMoc(thongTinMayMoc.LoaiTTMMID.Value);
+
+            return thongTinMayMoc;
+        }
+        #endregion
+
+        // ------------------------------------------------------------------------------------- //
+        #region Table_MAY_LoaiThongTinMayMoc
+        // Get loai thong tin may moc by loadittmmid
+        public LoaiThongTinMayMoc GetLoaiThongTinMayMoc(object? loadittmmid)
+        {
+            LoaiThongTinMayMoc loaiThongTinMayMoc = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_LoaiThongTinMayMoc}] WHERE [{Common.MM_LoaiTTMMID}] = @LoaiTTMMID";
+
+                command.Parameters.AddWithValue("@LoaiTTMMID", loadittmmid);
+
+                using var reader = command.ExecuteReader();
+
+                if (reader.Read()) // Use if since we're expecting a single result
+                {
+                    List<Propertyy> rowItems = loaiThongTinMayMoc.GetPropertiesValues();
+
+                    foreach (var item in rowItems)
+                    {
+                        string? columnName = item.DBName;
+
+                        if (reader.GetOrdinal(columnName) != -1) // Check if the column exists
+                        {
+                            object columnValue = reader[columnName];
+
+                            item.Value = columnValue == DBNull.Value ? null : columnValue.ToString()?.Trim();
+                        }
+                    }
+                }
+            }
+
+
+            return loaiThongTinMayMoc;
+        }
         #endregion
     }
 }
