@@ -1,6 +1,417 @@
-﻿
+﻿@using ProcessManagement.Commons
+@using ProcessManagement.Services.SQLServer
+@using Radzen.Blazor
+@using Radzen
+@using ProcessManagement.Models.MAYMOC
 
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject TooltipService TooltipService
+@inject SQLServerServices SQLServerServices
+
+<style>
+    .custom-placeholder::placeholder {
+        color: #888888;
+        font-size: 14px;
+        font-style: italic;
+    }
+</style>
+
+<RadzenCard Style="height: 100%; width: 100%; padding: 5px" Variant="Variant.Flat">
+    <RadzenStack Gap="0" Style="height: 100%; width: 100%; margin: 0; padding: 0; padding-bottom: 10px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start">
+        <RadzenStack Gap="20px" Style="height: contain; width: 100%; padding: 10px; background-color: var(--rz-primary-darker);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+            <RadzenText Text="THÊM MỚI MÁY MÓC/THIẾT BỊ" Style="color: white; font-weight: 500; font-size: 18px"></RadzenText>
+        </RadzenStack>
+        <RadzenRow Gap="10px" Style="height: contain; width: 100%; border-top: var(--rz-grid-cell-border); padding: 0; overflow-y: scroll">
+            <RadzenColumn Size="12" SizeMD="12" Style="height: 100%; width: 100%; padding: 15px; padding-right: 0">
+                <RadzenStack Gap="10px" Style="height: contain; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                    <RadzenText Text="Nhập thông tin máy móc/thiết bị" Style="color: var(--rz-primary-darker); font-size: 18px; font-weight: 600; height: contain; width: contain"></RadzenText>
+                    <RadzenButton Style="width: contain; height: contain;" Icon="add" Text="Thêm thông tin khác" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat"
+                                  Click="@(() => OnOpenDialogAddThongTinKhac())" />
+                </RadzenStack>
+                <RadzenCard Variant="Variant.Flat" Style="min-height: 300px; width: 100%; padding: 0px; margin-top: 10px; background-color: white">
+
+                    <RadzenStack Style="height: 100%; width: 100%; padding: 10px;" Gap="0" Orientation="Orientation.Vertical">
+                        <!--Hien thi thong tin mac dinh-->
+                        <!--Ten may moc/thiet bi-->
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 5px; border-bottom: var(--rz-grid-cell-border);">
+                            <RadzenStack Style="width: 20%;">
+                                <RadzenText Text="@(NewMayMoc.TenMay.DisplayName)" Style="color: var(--rz-primary-darker); font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
+                            </RadzenStack>
+                            <RadzenStack Style="width: 80%; padding-left: 10px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
+                                    @{
+                                        <RadzenStack Style="width: 50%;">
+                                            <RadzenTextBox class="custom-placeholder" Placeholder="@($" * nhập { NewMayMoc.TenMay.DisplayName}")" Value="@NewMayMoc.TenMay.Value?.ToString()" Style="font-size: 16px; height: contain; border-width: 1px;"
+                                                           @oninput="@(async (args) => { NewMayMoc.TenMay.Value = args.Value; await DefaultThongTinMayMoc_ValueIsOK(NewMayMoc.TenMay, false);})">
+                                            </RadzenTextBox>
+                                        </RadzenStack>
+
+                                        <RadzenStack Style="width: 50%;">
+                                            <RadzenAlert Visible="@(!NewMayMoc.TenMay.IsValueOK)" Text="@NewMayMoc.TenMay.NotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                                            <RadzenAlert Visible="@(NewMayMoc.TenMay.IsValueOK)" Text="@NewMayMoc.TenMay.NotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Success" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                                        </RadzenStack>
+                                    }
+                                </RadzenStack>
+                            </RadzenStack>
+                        </RadzenStack>
+                        <!--Ma may moc/thiet bi-->
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 5px; border-bottom: var(--rz-grid-cell-border);">
+                            <RadzenStack Style="width: 20%;">
+                                <RadzenText Text="@(NewMayMoc.MaMay.DisplayName)" Style="color: var(--rz-primary-darker); font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
+                            </RadzenStack>
+                            <RadzenStack Style="width: 80%; padding-left: 10px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
+                                    @{
+                                        <RadzenStack Style="width: 50%;">
+                                            <RadzenTextBox class="custom-placeholder" Placeholder="@($" * nhập { NewMayMoc.MaMay.DisplayName}")" Value="@NewMayMoc.MaMay.Value?.ToString()" Style="font-size: 16px; height: contain; border-width: 1px;"
+                                                           @oninput="@(async (args) => { NewMayMoc.MaMay.Value = args.Value; await DefaultThongTinMayMoc_ValueIsOK(NewMayMoc.MaMay, true);})">
+                                            </RadzenTextBox>
+                                        </RadzenStack>
+
+                                        <RadzenStack Style="width: 50%;">
+                                            <RadzenAlert Visible="@(!NewMayMoc.MaMay.IsValueOK)" Text="@NewMayMoc.MaMay.NotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                                            <RadzenAlert Visible="@(NewMayMoc.MaMay.IsValueOK)" Text="@NewMayMoc.MaMay.NotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Success" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                                        </RadzenStack>
+                                    }
+                                </RadzenStack>
+                            </RadzenStack>
+                        </RadzenStack>
+                        <!--Serial moc/thiet bi-->
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 5px; border-bottom: var(--rz-grid-cell-border);">
+                            <RadzenStack Style="width: 20%;">
+                                <RadzenText Text="@(NewMayMoc.Serial.DisplayName)" Style="color: var(--rz-primary-darker); font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
+                            </RadzenStack>
+                            <RadzenStack Style="width: 80%; padding-left: 10px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
+                                    @{
+                                        <RadzenStack Style="width: 50%;">
+                                            <RadzenTextBox class="custom-placeholder" Placeholder="@($" * nhập { NewMayMoc.Serial.DisplayName}")" Value="@NewMayMoc.Serial.Value?.ToString()" Style="font-size: 16px; height: contain; border-width: 1px;"
+                                                           @oninput="@(async (args) => { NewMayMoc.Serial.Value = args.Value; await DefaultThongTinMayMoc_ValueIsOK(NewMayMoc.Serial, true);})">
+                                            </RadzenTextBox>
+                                        </RadzenStack>
+
+                                        <RadzenStack Style="width: 50%;">
+                                            <RadzenAlert Visible="@(!NewMayMoc.Serial.IsValueOK)" Text="@NewMayMoc.Serial.NotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                                            <RadzenAlert Visible="@(NewMayMoc.Serial.IsValueOK)" Text="@NewMayMoc.Serial.NotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Success" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                                        </RadzenStack>
+                                    }
+                                </RadzenStack>
+                            </RadzenStack>
+                        </RadzenStack>
+
+                        <!--Hien thi thong tin khac-->
+                        @foreach (var thongtinMM in NewMayMoc.DSThongTin)
+                        {
+                            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 5px; border-bottom: var(--rz-grid-cell-border);">
+                                <RadzenStack Style="width: 20%;">
+                                    <RadzenText Text="@(thongtinMM.LoaiThongTin.TenThongTin.Value?.ToString())" Style="color: var(--rz-primary-darker); font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
+                                </RadzenStack>
+                                <RadzenStack Style="width: 80%; padding-left: 10px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                    <RadzenStack Gap="10px" Style="height: 100%; width: 100%; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                        @{
+                                            int kieudulieu = int.TryParse(thongtinMM.LoaiThongTin.KieuDuLieu.Value?.ToString(), out int kdl) ? kdl : 0;
+
+                                            if (kieudulieu == 1) // kieu ky tu
+                                            {
+                                                <RadzenStack Style="width: 50%;">
+                                                    <RadzenTextBox class="custom-placeholder" Placeholder="@($" * nhập {thongtinMM.LoaiThongTin.TenThongTin.Value?.ToString()}")" Value="@thongtinMM.GiaTri.Value?.ToString()" Style="font-size: 16px; height: contain; border-width: 1px;"
+                                                                   @oninput="@(async (args) => {thongtinMM.GiaTri.Value = args.Value; await AnotherThongTinMayMoc_ValueIsOK(thongtinMM, kieudulieu);})">
+                                                    </RadzenTextBox>
+                                                </RadzenStack>
+                                            }
+                                            else if (kieudulieu == 2) // Kieu so
+                                            {
+                                                <RadzenStack Style="width: 50%;">
+                                                    <RadzenNumeric class="custom-placeholder" Placeholder="@($" * nhập {thongtinMM.LoaiThongTin.TenThongTin.Value?.ToString()}")" TValue="int"
+                                                                   Value="@(int.Parse(thongtinMM.GiaTri.Value?.ToString()?? string.Empty))"
+                                                                   ValueChanged="@(async (args) =>
+                                                                        {   thongtinMM.GiaTri.Value = args;
+                                                                            await AnotherThongTinMayMoc_ValueIsOK(thongtinMM, kieudulieu);
+                                                                        })"
+                                                                   Style="font-size: 16px; height: contain;" Min="0" Max="999999" />
+                                                </RadzenStack>
+                                            }
+                                            else if (kieudulieu == 3) // kieu ngay thang
+                                            {
+                                                _ = DateTime.TryParse(thongtinMM.GiaTri.Value?.ToString(), out DateTime ngay);
+                                                <RadzenStack Style="width: 50%;">
+                                                    <RadzenDatePicker class="custom-placeholder" Placeholder="@($" * nhập {thongtinMM.LoaiThongTin.TenThongTin.Value?.ToString()}")" TValue="DateTime"
+                                                                      Value="@ngay"
+                                                                      ValueChanged="@(async (args) =>
+                                                                        {   args = args.Date.Add(DateTime.Now.TimeOfDay);
+                                                                            thongtinMM.GiaTri.Value = args;
+                                                                            await AnotherThongTinMayMoc_ValueIsOK(thongtinMM, kieudulieu);
+                                                                        })"
+                                                                      ShowTime="false" HourFormat="12" DateFormat="@Common.DayTimeFormatnoTime" AllowInput="true"
+                                                                      Style="font-size: 16px; height: contain;"></RadzenDatePicker>
+                                                </RadzenStack>
+                                            }
+
+                                            <RadzenStack Style="width: 40%;">
+                                                <RadzenAlert Visible="@(!thongtinMM.GiaTri.IsValueOK)" Text="@thongtinMM.GiaTri.NotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                                                <RadzenAlert Visible="@(thongtinMM.GiaTri.IsValueOK)" Text="@thongtinMM.GiaTri.NotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Success" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                                            </RadzenStack>
+                                            <RadzenStack Style="width: 8%; height: 100%" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                <RadzenButton Click="@(() => OnRemoveTruongThongTinMM(thongtinMM))" Icon="delete"
+                                                              ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 18px; width: 100%; height: 100%" />
+                                            </RadzenStack>
+                                        }
+                                    </RadzenStack>
+                                </RadzenStack>
+                            </RadzenStack>
+                        }
+                    </RadzenStack>
+
+                </RadzenCard>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding-right: 15px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+            <RadzenButton Disabled="@(!IsAllValueThongTinOK())" Click="@(() => OnAddnewMayMoc())" Style="width: contain; height: 80%;" Icon="check" Text="Xác nhận thêm" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Default" Size="ButtonSize.Small" Variant="Variant.Filled" />
+            <RadzenButton Style="width: contain; height: 80%;" Icon="close" Text="Thoát" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" Click="@(() => OnCancelAddnewMayMoc())" />
+        </RadzenStack>
+    </RadzenStack>
+</RadzenCard>
 
 @code {
+    private MayMoc NewMayMoc = new();
 
+    protected override Task OnInitializedAsync()
+    {
+        // Get default danh sach thong tin
+        NewMayMoc.DSThongTin = LoadDanhSachThongTinMacDinh().ToList();
+
+        return base.OnInitializedAsync();
+    }
+
+    // Add new thong tin may moc
+    private async Task OnOpenDialogAddThongTinKhac()
+    {
+        List<LoaiThongTinMayMoc> loaiThongTinMMs = await DialogService.OpenAsync<DialogAddnewThongTinMayMoc>(null, new Dictionary<string, object>() { { "TargetMayMoc", NewMayMoc } },
+        new DialogOptions() { ShowTitle = false, Width = "45%", Height = "contain", Resizable = false, Draggable = false, ShowClose = false, Style = "background-color: while; border-radius: 10px; padding: 0px" });
+
+        if (loaiThongTinMMs != null && loaiThongTinMMs.Count > 0)
+        {
+            foreach (var loaiThongTinMM in loaiThongTinMMs)
+            {
+                var isexisting = NewMayMoc.DSThongTin.Any(thongtin => thongtin.LoaiThongTin.TenTruyXuat.Value?.ToString() == loaiThongTinMM.TenTruyXuat.Value?.ToString());
+
+                if (!isexisting)
+                {
+                    await Task.Delay(100);
+                    ThongTinMayMoc thongTin = new()
+                        {
+                            LoaiTTMMID = { Value = loaiThongTinMM.LoaiTTMMID.Value },
+                            LoaiThongTin = loaiThongTinMM,
+                            GiaTri = { Value = loaiThongTinMM.GiaTriMacDinh.Value }
+                        };
+                    await AnotherThongTinMayMoc_ValueIsOK(thongTin, int.Parse(thongTin.LoaiThongTin.KieuDuLieu.Value?.ToString() ?? "0"));
+                    NewMayMoc.DSThongTin.Add(thongTin);
+                }
+            }
+
+            //StateHasChanged();
+
+            ShowNotification("Đã thêm thông tin mới!", NotificationSeverity.Success, 3000);
+        }
+    }
+
+    // Kiem tra thong tin mac dinh cua may moc da ton tai
+    private async Task DefaultThongTinMayMoc_ValueIsOK(Propertyy propertyy, bool checkExisting)
+    {
+        await Task.Run(() =>
+        {
+            string value = propertyy.Value?.ToString() ?? string.Empty;
+            string? dbname = propertyy.DBName ?? string.Empty;
+            string? displayName = propertyy.DisplayName ?? string.Empty;
+
+            if (!string.IsNullOrEmpty(value.Trim()))
+            {
+                if (checkExisting)
+                {
+                    bool isExisting = SQLServerServices.DefaultThongTinMayMoc_ValueIsExisting(value, dbname);
+
+                    if (isExisting)
+                    {
+                        propertyy.IsValueOK = false; propertyy.NotifyMess = $"{displayName} đã tồn tại";
+                    }
+                    else
+                    {
+                        propertyy.IsValueOK = true; propertyy.NotifyMess = $"Giá trị hợp lệ";
+                    }
+                }
+                else
+                {
+                    propertyy.IsValueOK = true; propertyy.NotifyMess = $"Giá trị hợp lệ";
+                }
+            }
+            else
+            {
+                propertyy.IsValueOK = false; propertyy.NotifyMess = $"{displayName} không được để trống";
+            }
+        });
+    }
+
+    // Kiem tra thong tin khac cua may moc da ton tai
+    private async Task AnotherThongTinMayMoc_ValueIsOK(ThongTinMayMoc thongTin, int kieudulieu)
+    {
+        await Task.Run(() =>
+        {
+            string value = thongTin.GiaTri.Value?.ToString() ?? string.Empty; ;
+            string? displayName = thongTin.LoaiThongTin.TenThongTin.Value?.ToString() ?? string.Empty;
+
+            if (string.IsNullOrEmpty(value.Trim()))
+            {
+                thongTin.GiaTri.IsValueOK = false; thongTin.GiaTri.NotifyMess = $"{displayName} không được để trống";
+            }
+            else
+            {
+                bool isValueOK = false;
+
+                if (kieudulieu == 1) // Kieu ki tu
+                {
+                    isValueOK = !string.IsNullOrEmpty(value.Trim());
+                }
+                else if (kieudulieu == 2) // Kieu so luong
+                {
+                    isValueOK = int.TryParse(value, out int soluong) && soluong > 0;
+                }
+                else if (kieudulieu == 3) // Kieu ngay thang
+                {
+                    isValueOK = DateTime.TryParse(value, out DateTime ngay);
+                }
+                else isValueOK = false;
+
+                if (isValueOK)
+                {
+                    thongTin.GiaTri.IsValueOK = true; thongTin.GiaTri.NotifyMess = "Gía trị hợp lệ";
+                }
+                else
+                {
+                    thongTin.GiaTri.IsValueOK = false; thongTin.GiaTri.NotifyMess = "Gía trị không hợp lệ";
+                }
+            }
+        });
+    }
+
+    // Check trang thai gia tri cua tat ca truong thong tin isOK
+    private bool IsAllValueThongTinOK()
+    {
+        bool isOK = true;
+
+        isOK = (NewMayMoc.TenMay.IsValueOK == true) && (NewMayMoc.MaMay.IsValueOK == true) && (NewMayMoc.Serial.IsValueOK == true);
+
+        if (NewMayMoc.DSThongTin.Count > 0)
+        {
+            foreach (var thongtin in NewMayMoc.DSThongTin)
+            {
+                bool valueok = thongtin.GiaTri.IsValueOK;
+                if (!valueok)
+                {
+                    isOK = thongtin.GiaTri.IsValueOK;
+                }
+            }
+        }
+
+        return isOK;
+    }
+
+    // Load danh sach thong tin mac dinh
+    private List<ThongTinMayMoc> LoadDanhSachThongTinMacDinh()
+    {
+        List<LoaiThongTinMayMoc> loaiThongTinMays = SQLServerServices.GetDanhSachLoaiThongTinMayMoc(1);
+
+        List<ThongTinMayMoc> thongTinMays = new();
+
+        foreach (var loaitt in loaiThongTinMays)
+        {
+            ThongTinMayMoc thongtin = new() { LoaiThongTin = loaitt, LoaiTTMMID = { Value = loaitt.LoaiTTMMID.Value } };
+
+            thongTinMays.Add(thongtin);
+        }
+
+        return thongTinMays;
+    }
+
+    private async Task OnRemoveTruongThongTinMM(ThongTinMayMoc removeTTMM)
+    {
+        bool? comfirm = await DialogService.Confirm($"Loại bỏ trường thông tin này?", "Xác nhận", new ConfirmOptions() { OkButtonText = "Đồng ý", CancelButtonText = "Hủy" });
+
+        if (comfirm.Value)
+        {
+            NewMayMoc.DSThongTin.Remove(removeTTMM);
+        }
+    }
+
+    private async Task OnAddnewMayMoc()
+    {
+        bool? comfirm = await DialogService.Confirm($"Xác nhận thêm loại máy này?", "Xác nhận", new ConfirmOptions() { OkButtonText = "Đồng ý", CancelButtonText = "Hủy" });
+
+        if (comfirm.Value)
+        {
+            // Add new maymoc
+            (int mmid, string errorMess) = SQLServerServices.InsertNewMayMoc(NewMayMoc);
+
+            if (mmid > 0)
+            {
+                int result = mmid;
+                // Link danh sach thong tin voi maymoc vua tao
+                foreach (var thongtin in NewMayMoc.DSThongTin)
+                {
+                    // Gan mmID
+                    thongtin.MMID.Value = result;
+
+                    (int ttmmid, string err) = SQLServerServices.InsertThongTinMayMoc(thongtin);
+
+                    if (ttmmid < 0)
+                    {
+                        result = -1;
+                        errorMess = err;
+                        break;
+                    }
+                }
+
+                // Recheck sau khi link danh sach thongtinmaymoc
+                if (result < 0)
+                {
+                    SQLServerServices.DeleteMayMoc(mmid);
+                    await DialogService.Alert($"{errorMess}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                }
+                else
+                {
+                    ShowNotification("Thêm mới máy móc thành công!", NotificationSeverity.Success, 3000);
+
+                    bool? thoat = await DialogService.Alert($"Thêm mới máy {NewMayMoc.TenMay.Value?.ToString()} thành công", "<strong><span style='color: green'>Success!</span></strong>", new AlertOptions() { OkButtonText = "Thoát", ShowClose = true });
+
+                    if (thoat.Value)
+                    {
+                        DialogService.Close();
+                    }
+                }
+            }
+            else
+            {
+                await DialogService.Alert($"{errorMess}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+            }
+        }
+    }
+
+    private void OnCancelAddnewMayMoc()
+    {
+        DialogService.Close(null);
+    }
+
+    // Notification
+    void ShowNotification(string message, NotificationSeverity notifytype, double time)
+    {
+        NotificationMessage notify = new NotificationMessage
+            {
+                Style = "position: fixed; top: 0; right: 0;",
+                Severity = notifytype,
+                Summary = message,
+                Duration = time
+            };
+
+        NotificationService.Notify(notify);
+    }
 }

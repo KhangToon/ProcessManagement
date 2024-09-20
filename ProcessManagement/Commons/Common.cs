@@ -313,7 +313,7 @@ namespace ProcessManagement.Commons
         // Table LoaiThongTinMayMoc
         public const string Table_LoaiThongTinMayMoc = "MAY_LoaiThongTinMayMoc";
         public const string MM_LoaiTTMMID = "LoaiTTMMID";
-        public const string MM_TenThongTin = "Tên thông tin";
+        public const string MM_TenLoaiThongTin = "Tên loại thông tin";
         public const string MM_KieuDuLieu = "Kiểu dữ liệu";
         public const string MM_GiaTriMacDinh = "Gía trị mặc định";
         public const string MM_IsDefault = "IsDefault";

@@ -9,13 +9,14 @@ namespace ProcessManagement.Models.MAYMOC
         public Propertyy MaMay { get; set; } = new() { DBName = Common.MM_MaMay, DisplayName = "Mã máy", Type = typeof(string), AlowDatabase = true };
         public Propertyy TenMay { get; set; } = new() { DBName = Common.MM_TenMay, DisplayName = "Tên máy/Thiết bị", Type = typeof(string), AlowDatabase = true };
         public Propertyy Serial { get; set; } = new() { DBName = Common.MM_Serial, DisplayName = "Serial", Type = typeof(string), AlowDatabase = true };
-        public Propertyy NgaySuDung { get; set; } = new() { DBName = Common.MM_NgaySuDung, DisplayName = "Ngày sử dụng", Type = typeof(DateTime), AlowDatabase = true };
-        public Propertyy BoPhanSuDung { get; set; } = new() { DBName = Common.MM_BoPhanSuDung, DisplayName = "Bộ phận sử dụng", Type = typeof(string), AlowDatabase = true };
-        public Propertyy GhiChu { get; set; } = new() { DBName = Common.MM_GhiChu, DisplayName = "Ghi chú", Type = typeof(string), AlowDatabase = true };
+        //public Propertyy NgaySuDung { get; set; } = new() { DBName = Common.MM_NgaySuDung, DisplayName = "Ngày sử dụng", Type = typeof(DateTime), AlowDatabase = true };
+        //public Propertyy BoPhanSuDung { get; set; } = new() { DBName = Common.MM_BoPhanSuDung, DisplayName = "Bộ phận sử dụng", Type = typeof(string), AlowDatabase = true };
+        //public Propertyy GhiChu { get; set; } = new() { DBName = Common.MM_GhiChu, DisplayName = "Ghi chú", Type = typeof(string), AlowDatabase = true };
 
         // Danh sach thong tin may moc
         public List<ThongTinMayMoc> DSThongTin = new();
 
+        
         // Return thong tin may moc by tentruyxuat
         public ThongTinMayMoc GetThongTinMayMocByName(string tentruyxuat)
         {

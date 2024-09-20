@@ -5202,6 +5202,117 @@ namespace ProcessManagement.Services.SQLServer
 
             return mayMoc;
         }
+        // Check ten may moc da ton tai 
+        public bool IsTenMayMocExisting(string? tenMayMoc)
+        {
+            using (var connection = new SqlConnection(connectionString))
+            {
+                string query = $"SELECT COUNT(*) FROM [{Common.Table_MayMoc}] WHERE [{Common.MM_TenMay}] = N'{tenMayMoc?.Trim()}'";
+
+                using (var command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+
+                    int count = (int)command.ExecuteScalar();
+
+                    return count > 0;
+                }
+            }
+        }
+        // Check gia tri truong thong tin mac dinh may moc is exsting? 
+        public bool DefaultThongTinMayMoc_ValueIsExisting(string? proValue, string proName)
+        {
+            using (var connection = new SqlConnection(connectionString))
+            {
+                string query = $"SELECT COUNT(*) FROM [{Common.Table_MayMoc}] WHERE [{proName}] = N'{proValue?.Trim()}'";
+
+                using (var command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+
+                    int count = (int)command.ExecuteScalar();
+
+                    return count > 0;
+                }
+            }
+        }
+        // Insert new may moc
+        public (int, string) InsertNewMayMoc(MayMoc? newmaymoc)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            if (newmaymoc == null) return (result, "Error");
+
+            List<Propertyy> newMMItems = newmaymoc.GetPropertiesValues().Where(po => po.AlowDatabase == true && po.Value != null).ToList();
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                string columnNames = string.Join(",", newMMItems.Select(key => $"[{key.DBName}]"));
+
+                string parameterNames = string.Join(",", newMMItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $"INSERT INTO [{Common.Table_MayMoc}] ({columnNames}) OUTPUT INSERTED.{Common.MM_MMID} VALUES ({parameterNames})";
+
+                foreach (var item in newMMItems)
+                {
+                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
+
+                    object? parameterValue = item.Value;
+
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                object? rs = command.ExecuteScalar();
+
+                result = Convert.ToInt32(rs);
+
+                if (result == 0) result = -1;
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
+        // Delete maymoc by mmid
+        public (int, string) DeleteMayMoc(object? mmID)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"DELETE FROM {Common.Table_MayMoc} WHERE [{Common.MM_MMID}] = '{mmID}'";
+
+                object rs = command.ExecuteScalar();
+
+                result = Convert.ToInt32(rs);
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
         #endregion
 
         // ------------------------------------------------------------------------------------- //
@@ -5291,6 +5402,53 @@ namespace ProcessManagement.Services.SQLServer
 
             return thongTinMayMoc;
         }
+        // Insert thong tin may moc
+        public (int, string) InsertThongTinMayMoc(ThongTinMayMoc? ttmm)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            if (ttmm == null) return (result, "Error");
+
+            List<Propertyy> items = ttmm.GetPropertiesValues().Where(po => po.AlowDatabase == true && po.Value != null).ToList();
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                string columnNames = string.Join(",", items.Select(key => $"[{key.DBName}]"));
+
+                string parameterNames = string.Join(",", items.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $"INSERT INTO [{Common.Table_ThongTinMayMoc}] ({columnNames}) OUTPUT INSERTED.{Common.MM_TTMMID} VALUES ({parameterNames})";
+
+                foreach (var item in items)
+                {
+                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
+
+                    object? parameterValue = item.Value;
+
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                object? rs = command.ExecuteScalar();
+
+                result = Convert.ToInt32(rs);
+
+                if (result == 0) result = -1;
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
         #endregion
 
         // ------------------------------------------------------------------------------------- //
@@ -5332,6 +5490,148 @@ namespace ProcessManagement.Services.SQLServer
 
 
             return loaiThongTinMayMoc;
+        }
+        // Get danh sach loai thong tin may moc
+        public List<LoaiThongTinMayMoc> GetDanhSachLoaiThongTinMayMoc()
+        {
+            List<LoaiThongTinMayMoc> danhSachLoaiThongTinMayMoc = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_LoaiThongTinMayMoc}]";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    LoaiThongTinMayMoc loaithongTinMayMoc = new();
+
+                    List<Propertyy> rowItems = loaithongTinMayMoc.GetPropertiesValues();
+
+                    foreach (var item in rowItems)
+                    {
+                        string? columnName = item.DBName;
+
+                        if (reader.GetOrdinal(columnName) != -1) // Check if the column exists
+                        {
+                            object columnValue = reader[columnName];
+
+                            item.Value = columnValue == DBNull.Value ? null : columnValue.ToString()?.Trim();
+                        }
+                    }
+
+                    danhSachLoaiThongTinMayMoc.Add(loaithongTinMayMoc);
+                }
+            }
+
+            return danhSachLoaiThongTinMayMoc;
+        }
+
+        public List<LoaiThongTinMayMoc> GetDanhSachLoaiThongTinMayMoc(object isDefault)
+        {
+            List<LoaiThongTinMayMoc> danhSachLoaiThongTinMayMoc = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_LoaiThongTinMayMoc}] WHERE [{Common.MM_IsDefault}] = '{isDefault}'";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    LoaiThongTinMayMoc loaithongTinMayMoc = new();
+
+                    List<Propertyy> rowItems = loaithongTinMayMoc.GetPropertiesValues();
+
+                    foreach (var item in rowItems)
+                    {
+                        string? columnName = item.DBName;
+
+                        if (reader.GetOrdinal(columnName) != -1) // Check if the column exists
+                        {
+                            object columnValue = reader[columnName];
+
+                            item.Value = columnValue == DBNull.Value ? null : columnValue.ToString()?.Trim();
+                        }
+                    }
+
+                    danhSachLoaiThongTinMayMoc.Add(loaithongTinMayMoc);
+                }
+            }
+
+            return danhSachLoaiThongTinMayMoc;
+        }
+
+        // Them moi loai thong tin may moc
+        public (int, string) InsertNewLoaiThongTinMayMoc(LoaiThongTinMayMoc loaithongtinmm)
+        {
+            List<Propertyy> newItems = loaithongtinmm.GetPropertiesValues().Where(po => po.AlowDatabase == true && po.Value != null).ToList();
+
+            int result = -1; string errorMess = string.Empty;
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                string columnNames = string.Join(",", newItems.Select(key => $"[{key.DBName}]"));
+
+                string parameterNames = string.Join(",", newItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $"INSERT INTO [{Common.Table_LoaiThongTinMayMoc}] ({columnNames}) OUTPUT INSERTED.{Common.MM_LoaiTTMMID} VALUES ({parameterNames})";
+
+                foreach (var item in newItems)
+                {
+                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
+
+                    object? parameterValue = item.Value;
+
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                object? rs = command.ExecuteScalar();
+
+                result = Convert.ToInt32(rs);
+
+                if (result == 0) result = -1;
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
+        // Kiem tra ten loai thong tin may moc da ton tai
+        public bool IsExisting_LoaiThongTinMayMoc_Name(string? proValue)
+        {
+            using (var connection = new SqlConnection(connectionString))
+            {
+                string query = $"SELECT COUNT(*) FROM [{Common.Table_LoaiThongTinMayMoc}] WHERE [{Common.MM_TenTruyXuat}] = N'{proValue?.Trim()}'";
+
+                using (var command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+
+                    int count = (int)command.ExecuteScalar();
+
+                    return count > 0;
+                }
+            }
         }
         #endregion
     }
