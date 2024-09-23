@@ -138,7 +138,8 @@
                                     <RadzenStack Visible="@(currentKieudulieu.Equals(3))" Style="width: 50%;">
                                         <RadzenDatePicker Disabled="@(!IsAddWithValue_mode1)" class="custom-placeholder" Placeholder="@($" * nhập giá trị { NewLoaiTTMM_mode1.TenThongTin.Value?.ToString()}")" TValue="DateTime"
                                                           ValueChanged="@(async (args) =>
-                                                                        {   args = args.Date.Add(DateTime.Now.TimeOfDay);
+                                                                        {
+                                                                            args = args.Date.Add(DateTime.Now.TimeOfDay);
                                                                             NewLoaiTTMM_mode1.GiaTriMacDinh.Value = args;
                                                                             await CheckLoaiThongTinMayMoc_ValueIsOK(NewLoaiTTMM_mode1, currentKieudulieu);
                                                                         })"
@@ -192,6 +193,10 @@
                             </RadzenPickList>
                             <!--Button save danh sach chon truong thong tin da co-->
                             <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding-top: 10px; margin-top: 10px; border-top: var(--rz-grid-cell-border) " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                                <RadzenStack Visible="@(!IsAddThongTinInCreateNewMayMocMode)" Style="width: 100%; padding: 10px" Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                    <RadzenCheckBox Disabled="@(DSachLoaiTTMM_get == null)" TValue="bool" Value=@IsAddAll Change=@(args => IsAddAll = args) Name="isaddallproperty" />
+                                    <RadzenLabel Text="Thêm cho tất cả máy móc khác" Style="font-size: 14px; font-weight: bold; font-style: italic" Component="isaddallproperty" />
+                                </RadzenStack>
                                 <RadzenButton Disabled="@(DSachLoaiTTMM_get == null)" Click="(() => SaveLoaiThongTinMayMoc_Mode2())"
                                               Style="width: 120px;" Icon="check" Text="Thêm" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Dark" Variant="Variant.Flat" />
                                 <RadzenButton Style="width: 120px;" Icon="close" Text="Thoát" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" Click="@(() => DialogService.Close(new List<LoaiThongTinMayMoc>()))" />
@@ -208,6 +213,9 @@
 @code {
     [Parameter]
     public MayMoc TargetMayMoc { get; set; } = new();
+    [Parameter]
+    public bool IsAddThongTinInCreateNewMayMocMode { get; set; } = false;
+
     private IEnumerable<LoaiThongTinMayMoc>? DSachLoaiTTMM = null;
     private IEnumerable<LoaiThongTinMayMoc>? DSachLoaiTTMM_get = null;
 
@@ -230,6 +238,7 @@
     private bool IsAddForAll_mode1 = false;
     private bool IsAddWithValue_mode1 = false;
     private bool IsDefault = false;
+    private bool IsAddAll = false; // them truong thong tin cho tat ca may moc
 
     protected override Task OnInitializedAsync()
     {
@@ -252,19 +261,24 @@
     {
         await Task.Run(() =>
         {
-            string? value = propertyy.Value?.ToString();
+            string? namevalue = propertyy.Value?.ToString()?.Trim();
 
             string? displayName = propertyy.DisplayName ?? string.Empty;
 
-            if (!string.IsNullOrEmpty(value))
+            if (!string.IsNullOrEmpty(namevalue))
             {
                 // Get ten truy xuat
-                string tentruyxuat = Common.RemoveDiacriticsAndSpaces(value);
+                string tentruyxuat = Common.RemoveDiacriticsAndSpaces(namevalue);
 
-                // Kiem tra ten truy xuat
+                List<Propertyy> columns = TargetMayMoc?.GetPropertiesValues() ?? new();
+
+                // Kiem tra ten trong danh sach main detail
+                bool isMainNameExisting = columns.Any(cl => Common.RemoveDiacriticsAndSpaces(cl.DBName ?? string.Empty) == tentruyxuat);
+
+                // Kiem tra ten truy xuat trong danh sach extra details
                 bool isExisting = SQLServerServices.IsExisting_LoaiThongTinMayMoc_Name(tentruyxuat);
 
-                if (isExisting)
+                if (isExisting || isMainNameExisting)
                 {
                     tenOK = -1; tenNotifyMess = $"{displayName} đã tồn tại";
                 }
@@ -372,11 +386,14 @@
     // Select mode changed
     private void OnModeAddLoaiThongTinMayMocSelectChanged(bool mode)
     {
+        IsAddAll = false;
+
         if (IsCreateNew)
         {
             NewLoaiTTMM_mode1 = new() { KieuDuLieu = { Value = 1 } };
             IsAddForAll_mode1 = false;
             IsAddWithValue_mode1 = false;
+            IsDefault = false;
             tenOK = -1;
             tenNotifyMess = "Gía trị không được để trống";
             giatriOK = -1;
