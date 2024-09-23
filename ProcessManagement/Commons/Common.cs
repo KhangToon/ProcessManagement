@@ -7,8 +7,8 @@ namespace ProcessManagement.Commons
 {
     public static class Common
     {
-        public const string DayTimeFormat = "yyyy-MM-dd HH:mm:ss";
-        public const string DayTimeFormatnoTime = "yyyy-MM-dd";
+        public const string DayTimeFormat = "dd-MM-yyyy HH:mm:ss";
+        public const string DayTimeFormatnoTime = "dd-MM-yyyy";
 
         // Table Sanpham //
         public const string TableSanPham = "Table_SanPham";
@@ -378,6 +378,9 @@ namespace ProcessManagement.Commons
         // NVL management static variable
         public static object? SelectedNVLid;
 
+        // MayMoc management static variable
+        public static object? SelectedMayMocid;
+
         // PhieuXuatKho static variable
         public static object? SelectedPXKID;
         public static object? SelectedPNKID;
@@ -470,6 +473,21 @@ namespace ProcessManagement.Commons
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
             return new string(Enumerable.Repeat(chars, 5)
                 .Select(s => s[random.Next(s.Length)]).ToArray());
+        }
+
+        public static DateTime? ParseDate(string? input)
+        {
+            string[] formats = { "d/M/yyyy", "dd-MM-yyyy", "dd/MM/yyyy", "dd-MM-yy", "dd/MM/yy", "ddMMyyyy", "ddMMyy", "dd-MM", "dd/MM", "ddMM" };
+
+            foreach (var format in formats)
+            {
+                if (DateTime.TryParseExact(input, format, null, DateTimeStyles.None, out var result))
+                {
+                    return result;
+                }
+            }
+
+            return null;
         }
     }
 }

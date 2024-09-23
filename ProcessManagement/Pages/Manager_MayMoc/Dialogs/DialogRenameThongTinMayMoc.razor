@@ -1,0 +1,135 @@
+﻿@using ProcessManagement.Commons
+@using ProcessManagement.Models.MAYMOC
+@using ProcessManagement.Services.SQLServer
+@using Radzen.Blazor
+@using Radzen
+@using ProcessManagement.Models
+
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject TooltipService TooltipService
+@inject SQLServerServices SQLServerServices
+
+<RadzenCard Variant="Variant.Filled" Style="height: 100%; width: 100%; padding: 10px;">
+    <RadzenStack Gap="20px" Style="height: contain; width: contain; border-radius: 5px; background-color: var(--rz-success-lighter); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+        <RadzenText Text="@($"Đổi tên trường thông tin")" Style="font-weight: 600; font-size: 16px; color: darkgreen; font-style: italic"></RadzenText>
+    </RadzenStack>
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 5px; border-bottom: var(--rz-grid-cell-border);">
+        <RadzenStack Style="width: 20%;">
+            <RadzenText Text="Tên thông tin" Style="color: var(--rz-primary-darker); font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
+        </RadzenStack>
+        <RadzenStack Style="width: 80%; padding-left: 10px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+            <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
+                @{
+                    <RadzenStack Style="width: 50%;">
+                        <RadzenTextBox class="custom-placeholder" Placeholder="@($" * nhập tên thông tin")" Value="@ThongTinMayMoc.LoaiThongTin.TenThongTin.Value?.ToString()" Style="font-size: 16px; height: contain; border-width: 1px;"
+                                       @oninput="@(async (args) => { ThongTinMayMoc.LoaiThongTin.TenThongTin.Value = args.Value; await DefaultThongTinMayMoc_ValueIsOK(ThongTinMayMoc.LoaiThongTin.TenThongTin);})">
+                        </RadzenTextBox>
+                    </RadzenStack>
+
+                    <RadzenStack Style="width: 50%;">
+                        <RadzenAlert Visible="@(!ThongTinMayMoc.LoaiThongTin.TenThongTin.IsValueOK)" Text="@ThongTinMayMoc.LoaiThongTin.TenThongTin.NotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                        <RadzenAlert Visible="@(ThongTinMayMoc.LoaiThongTin.TenThongTin.IsValueOK)" Text="@ThongTinMayMoc.LoaiThongTin.TenThongTin.NotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Success" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                    </RadzenStack>
+                }
+            </RadzenStack>
+        </RadzenStack>
+    </RadzenStack>
+    <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding-top: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+        <RadzenButton Disabled="@(!(ThongTinMayMoc.LoaiThongTin.TenThongTin.IsValueOK))" Style="width: contain;" Icon="check" Text="Lưu thay đổi" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Dark" Variant="Variant.Flat" Click="@(() => OnSaveNewName())" />
+        <RadzenButton Style="width: 120px;" Icon="close" Text="Hủy" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" Click="@(() => { ThongTinMayMoc.LoaiThongTin.TenThongTin.Value = oldName; DialogService.Close(null); })" />
+    </RadzenStack>
+</RadzenCard>
+
+@code {
+    [Parameter]
+    public ThongTinMayMoc ThongTinMayMoc { get; set; } = new();
+    [Parameter]
+    public MayMoc TargetMayMoc { get; set; } = new();
+
+    private string oldName = string.Empty;
+
+    protected async override Task OnInitializedAsync()
+    {
+        oldName = ThongTinMayMoc.LoaiThongTin.TenThongTin.Value?.ToString() ?? string.Empty;
+
+        await DefaultThongTinMayMoc_ValueIsOK(ThongTinMayMoc.LoaiThongTin.TenThongTin);
+
+        await base.OnInitializedAsync();
+    }
+
+    private async Task OnSaveNewName()
+    {
+        string newName = (ThongTinMayMoc.LoaiThongTin.TenThongTin.Value?.ToString() ?? string.Empty).Trim();
+
+        // Get ten truy xuat
+        string newtentruyxuat = Common.RemoveDiacriticsAndSpaces(newName);
+
+        (int result, string error) = SQLServerServices.UpdateLoaiThongTinMayMocName(ThongTinMayMoc.LoaiThongTin.LoaiTTMMID.Value, newName, newtentruyxuat);
+
+        if (result > 0)
+        {
+            ShowNotification("Đổi tên thành công!", NotificationSeverity.Success, 3000);
+
+            DialogService.Close(newName);
+        }
+        else await DialogService.Alert($"Lỗi: {error}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+
+    }
+
+    // Kiem tra thong tin mac dinh cua may moc da ton tai
+    private async Task DefaultThongTinMayMoc_ValueIsOK(Propertyy propertyy)
+    {
+        await Task.Run(() =>
+        {
+            string value = (propertyy.Value?.ToString() ?? string.Empty).Trim();
+
+            if (!string.IsNullOrEmpty(value))
+            {
+                if (value == oldName.Trim())
+                {
+                    propertyy.IsValueOK = false; propertyy.NotifyMess = $"Trùng với tên trước đó";
+                    return;
+                }
+
+                // Get ten truy xuat
+                string tentruyxuat = Common.RemoveDiacriticsAndSpaces(value);
+
+                List<Propertyy> columns = TargetMayMoc?.GetPropertiesValues() ?? new();
+
+                // Kiem tra ten trong danh sach main detail
+                bool isMainNameExisting = columns.Any(cl => Common.RemoveDiacriticsAndSpaces(cl.DBName ?? string.Empty) == tentruyxuat);
+
+                // Kiem tra ten trong danh sach extra detail
+                bool isExisting = SQLServerServices.IsExisting_LoaiThongTinMayMoc_Name(tentruyxuat);
+
+                if (isExisting || isMainNameExisting)
+                {
+                    propertyy.IsValueOK = false; propertyy.NotifyMess = $"Trường thông tin đã tồn tại";
+                }
+                else
+                {
+                    propertyy.IsValueOK = true; propertyy.NotifyMess = $"Tên hợp lệ";
+                }
+            }
+            else
+            {
+                propertyy.IsValueOK = false; propertyy.NotifyMess = $"Tên không được để trống";
+            }
+        });
+    }
+
+    // Notification
+    void ShowNotification(string message, NotificationSeverity notifytype, double time)
+    {
+        NotificationMessage notify = new NotificationMessage
+            {
+                Style = "position: fixed; top: 0; right: 0;",
+                Severity = notifytype,
+                Summary = message,
+                Duration = time
+            };
+
+        NotificationService.Notify(notify);
+    }
+}

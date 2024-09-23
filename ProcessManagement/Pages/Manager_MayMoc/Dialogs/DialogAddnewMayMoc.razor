@@ -124,7 +124,7 @@
                                             {
                                                 <RadzenStack Style="width: 50%;">
                                                     <RadzenNumeric class="custom-placeholder" Placeholder="@($" * nhập {thongtinMM.LoaiThongTin.TenThongTin.Value?.ToString()}")" TValue="int"
-                                                                   Value="@(int.Parse(thongtinMM.GiaTri.Value?.ToString()?? string.Empty))"
+                                                                   Value="@(int.Parse(thongtinMM.GiaTri.Value?.ToString()?? "0"))"
                                                                    ValueChanged="@(async (args) =>
                                                                         {   thongtinMM.GiaTri.Value = args;
                                                                             await AnotherThongTinMayMoc_ValueIsOK(thongtinMM, kieudulieu);
@@ -137,13 +137,14 @@
                                                 _ = DateTime.TryParse(thongtinMM.GiaTri.Value?.ToString(), out DateTime ngay);
                                                 <RadzenStack Style="width: 50%;">
                                                     <RadzenDatePicker class="custom-placeholder" Placeholder="@($" * nhập {thongtinMM.LoaiThongTin.TenThongTin.Value?.ToString()}")" TValue="DateTime"
-                                                                      Value="@ngay"
+                                                                      Value="ngay"
                                                                       ValueChanged="@(async (args) =>
-                                                                        {   args = args.Date.Add(DateTime.Now.TimeOfDay);
+                                                                        {
+                                                                            args = args.Date.Add(DateTime.Now.TimeOfDay);
                                                                             thongtinMM.GiaTri.Value = args;
                                                                             await AnotherThongTinMayMoc_ValueIsOK(thongtinMM, kieudulieu);
                                                                         })"
-                                                                      ShowTime="false" HourFormat="12" DateFormat="@Common.DayTimeFormatnoTime" AllowInput="true"
+                                                                      ShowTime="false" HourFormat="12" DateFormat="@Common.DayTimeFormatnoTime" ParseInput="@Common.ParseDate" AllowInput="true"
                                                                       Style="font-size: 16px; height: contain;"></RadzenDatePicker>
                                                 </RadzenStack>
                                             }
@@ -187,7 +188,7 @@
     // Add new thong tin may moc
     private async Task OnOpenDialogAddThongTinKhac()
     {
-        List<LoaiThongTinMayMoc> loaiThongTinMMs = await DialogService.OpenAsync<DialogAddnewThongTinMayMoc>(null, new Dictionary<string, object>() { { "TargetMayMoc", NewMayMoc } },
+        List<LoaiThongTinMayMoc> loaiThongTinMMs = await DialogService.OpenAsync<DialogAddnewThongTinMayMoc>(null, new Dictionary<string, object>() { { "TargetMayMoc", NewMayMoc }, { "IsAddThongTinInCreateNewMayMocMode", true } },
         new DialogOptions() { ShowTitle = false, Width = "45%", Height = "contain", Resizable = false, Draggable = false, ShowClose = false, Style = "background-color: while; border-radius: 10px; padding: 0px" });
 
         if (loaiThongTinMMs != null && loaiThongTinMMs.Count > 0)
@@ -257,7 +258,7 @@
     {
         await Task.Run(() =>
         {
-            string value = thongTin.GiaTri.Value?.ToString() ?? string.Empty; ;
+            string value = thongTin.GiaTri.Value?.ToString() ?? string.Empty;
             string? displayName = thongTin.LoaiThongTin.TenThongTin.Value?.ToString() ?? string.Empty;
 
             if (string.IsNullOrEmpty(value.Trim()))
@@ -343,6 +344,7 @@
         }
     }
 
+    // Save new may moc to database
     private async Task OnAddnewMayMoc()
     {
         bool? comfirm = await DialogService.Confirm($"Xác nhận thêm loại máy này?", "Xác nhận", new ConfirmOptions() { OkButtonText = "Đồng ý", CancelButtonText = "Hủy" });
@@ -354,6 +356,8 @@
 
             if (mmid > 0)
             {
+                // Gan id newmaymoc
+                NewMayMoc.MMID.Value = mmid;
                 int result = mmid;
                 // Link danh sach thong tin voi maymoc vua tao
                 foreach (var thongtin in NewMayMoc.DSThongTin)
@@ -385,7 +389,7 @@
 
                     if (thoat.Value)
                     {
-                        DialogService.Close();
+                        DialogService.Close(NewMayMoc);
                     }
                 }
             }
