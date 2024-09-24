@@ -219,7 +219,7 @@ namespace ProcessManagement.Commons
         public const string TTNVLID = "TTNVLID";
         //public const string NVLID = "NVLID";
         //public const string TenTTID = "TenTTID";
-        public const string GiaTri = "Gía trị";
+        public const string GiaTri = "Giá trị";
 
         // Table KHO_PhieuNhapKho
         public const string Table_PhieuNhapKho = "KHO_PhieuNhapKho";
@@ -306,7 +306,7 @@ namespace ProcessManagement.Commons
         // Table ThongTinMayMoc
         public const string Table_ThongTinMayMoc = "MAY_ThongTinMayMoc";
         public const string MM_TTMMID = "TTMMID";
-        public const string MM_GiaTri = "Gía trị";
+        public const string MM_GiaTri = "Giá trị";
         //public const string MM_MMID = "MMID";
         //public const string MM_LoaiTTMMID = "LoaiTTMMID";
 

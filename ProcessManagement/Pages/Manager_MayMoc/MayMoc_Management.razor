@@ -20,6 +20,20 @@
 @inject QRCodeServices QRCodeServices
 @inject IJSRuntime JSRuntime
 
+<style>
+    .custom-placeholder::placeholder {
+        color: #888888;
+        font-size: 14px;
+        font-style: italic;
+    }
+
+    .custom-datepicker input[type="text"]::placeholder {
+        color: #888888;
+        font-size: 14px;
+        font-style: italic;
+    }
+</style>
+
 <RadzenRow Gap="0" Style="height: 100%; width: 100%; overflow-y: auto; background-color: white; border-radius: 10px;">
     <RadzenColumn Size="12" SizeMD="12" Style="height: 100%; width: 100%; padding-right: 0">
         <RadzenTabs Style="width: 100%; height: 100%; padding-right: 0">
@@ -38,6 +52,11 @@
                                     <RadzenButton Click="@(async() => { await LoadAllDanhsachMayMocBase(); ReSelectCurrentMayMoc(Common.SelectedMayMocid); })" IsBusy="@isLoadingDSMM" BusyText=" Loading..." Style="border-radius: 20px;" Icon="autorenew" ButtonStyle="ButtonStyle.Primary" />
                                 </RadzenStack>
                             </RadzenStack>
+                            <!--Filter-->
+                            <RadzenStack Gap="0px" Orientation="Orientation.Horizontal" Style="height: 50px; width: 100%; padding-top: 5px; padding-bottom: 0px; border-top: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+
+                            </RadzenStack>
+
                             <!--Danh sach may moc-->
                             <RadzenRow Gap="10px" Style="height: contain; width: 100%; border-top: var(--rz-grid-cell-border); padding: 0;">
                                 <!--Column bang danh sach may moc-->
@@ -107,7 +126,7 @@
                                                                     <span style="font-weight: 600; font-size: 15px; color: white">@displayName</span>
                                                                 </HeaderTemplate>
                                                                 <Template Context="may">
-                                                                    <span style="color: darkblue; font-weight: 600;">@(may.GetPropertyValue(colName))</span>
+                                                                    <RadzenText Text="@($"{may.GetPropertyValue(colName)}")" Style="font-size: 15px; height: contain; color: darkblue; font-weight: bold"></RadzenText>
                                                                 </Template>
                                                             </RadzenDataGridColumn>
                                                         }
@@ -119,7 +138,7 @@
                                                                     <span style="font-weight: 600; font-size: 15px; color: white">@displayName</span>
                                                                 </HeaderTemplate>
                                                                 <Template Context="may">
-                                                                    <span style="color: black; font-weight: 500;">@(may.GetPropertyValue(colName))</span>
+                                                                    <RadzenText Text="@($"{may.GetPropertyValue(colName)}")" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
                                                                 </Template>
                                                             </RadzenDataGridColumn>
                                                         }
@@ -131,7 +150,7 @@
                                                                     <span style="font-weight: 600; font-size: 15px; color: white">@displayName</span>
                                                                 </HeaderTemplate>
                                                                 <Template Context="may">
-                                                                    <span style="color: black; font-weight: 500;">@(may.GetPropertyValue(colName))</span>
+                                                                    <RadzenText Text="@($"{may.GetPropertyValue(colName)}")" Style="font-size: 15px; height: contain; color: black; font-weight: bold"></RadzenText>
                                                                 </Template>
                                                             </RadzenDataGridColumn>
                                                         }
@@ -146,9 +165,12 @@
                                                         <Template Context="may">
                                                             @{
                                                                 string valuensd = may.DSThongTin.FirstOrDefault(tt => tt.LoaiThongTin.TenThongTin.Value?.ToString()?.Trim() == Common.MM_NgaySuDung)?.GiaTri.Value?.ToString() ?? string.Empty;
-                                                                DateTime ngaysd = DateTime.TryParse(valuensd, out DateTime nsd) ? nsd : DateTime.Now;
+                                                                bool ishaveValueOfday = DateTime.TryParse(valuensd, out DateTime vldate);
+
+                                                                <RadzenText Visible="@ishaveValueOfday" Text="@vldate.ToString("dd/MM/yyyy")" Style="font-size: 15px; height: contain; color: black; font-weight: 500"></RadzenText>
+                                                                <RadzenText Visible="@(!ishaveValueOfday)" Text="@string.Empty" Style="font-size: 15px; height: contain; color: black; font-weight: 500"></RadzenText>
                                                             }
-                                                            <span style="color: black; font-weight: 500;">@($"{ngaysd.ToString("dd/MM/yyyy")}")</span>
+
                                                         </Template>
                                                     </RadzenDataGridColumn>
 
@@ -159,7 +181,7 @@
                                                             <span style="font-weight: 600; font-size: 15px; color: white">#ID</span>
                                                         </HeaderTemplate>
                                                         <Template Context="may">
-                                                            <span style="color: black; font-weight: 500;">@($"#{may.GetPropertyValue(Common.MM_MMID)}")</span>
+                                                            <RadzenText Text="@($"#{may.GetPropertyValue(Common.MM_MMID)}")" Style="font-size: 15px; height: contain; color: black; font-weight: 500"></RadzenText>
                                                         </Template>
                                                     </RadzenDataGridColumn>
                                                 }
@@ -219,27 +241,35 @@
 
                                                                     @if (thongtinmm.Type == typeof(string))
                                                                     {
-                                                                        <RadzenTextBox Placeholder="@($"*Nhập {thongtinmm.DisplayName}")" Value="@thongtinmm.Value?.ToString()" ValueChanged="@((args) => { thongtinmm.Value = args; } )"
+                                                                        <RadzenTextBox Placeholder="@($"* nhập {thongtinmm.DisplayName}")" Value="@thongtinmm.Value?.ToString()" ValueChanged="@((args) => { thongtinmm.Value = args; } )"
                                                                                        Style="font-size: 16px; height: contain; border-width: 1px; width: 100% "></RadzenTextBox>
                                                                     }
                                                                     else if (thongtinmm.Type == typeof(int))
                                                                     {
-                                                                        <RadzenNumeric Placeholder="@($"*Nhập {thongtinmm.DisplayName}")" TValue="int" Value="@int.Parse(thongtinmm.Value?.ToString()?? "0")" Min="0" Max="999999" ValueChanged="@((args) => { thongtinmm.Value = args; })"
+                                                                        <RadzenNumeric Placeholder="@($"* nhập {thongtinmm.DisplayName}")" TValue="int" Value="@int.Parse(thongtinmm.Value?.ToString()?? "0")" Min="0" Max="999999" ValueChanged="@((args) => { thongtinmm.Value = args; })"
                                                                                        Style="font-size: 16px; height: contain; border-width: 1px; width: 100%" />
                                                                     }
                                                                     else if (thongtinmm.Type == typeof(DateTime))
                                                                     {
-                                                                        DateTime selectday = DateTime.TryParse(thongtinmm.Value?.ToString(), out DateTime sld) ? sld : DateTime.Now;
-                                                                        selectday = selectday.Date.Add(DateTime.Now.TimeOfDay);
+                                                                        bool ishaveValueOfday = DateTime.TryParse(thongtinmm.Value?.ToString(), out DateTime selectday);
+                                                                        if (ishaveValueOfday) selectday = selectday.Date.Add(DateTime.Now.TimeOfDay);
 
-                                                                        <RadzenDatePicker TValue="DateTime"
-                                                                                          ValueChanged="@((args) =>
-                                                                                                    {
-                                                                                                        args = args.Date.Add(DateTime.Now.TimeOfDay); thongtinmm.Value = args;
-                                                                                                    })"
-                                                                                          Value="selectday"
+                                                                        <RadzenDatePicker class="custom-datepicker" Placeholder="@($"* nhập {thongtinmm.DisplayName}")"
+                                                                                          TValue="DateTime" Value="selectday" AllowClear="true"
+                                                                                          Change="@((args) =>
+                                                                                                        {
+                                                                                                            if (args != null)
+                                                                                                            {
+                                                                                                                DateTime value = args.Value.Date.Add(DateTime.Now.TimeOfDay);
+                                                                                                                thongtinmm.Value = value;
+                                                                                                            }
+                                                                                                            else
+                                                                                                            {
+                                                                                                                thongtinmm.Value = string.Empty;
+                                                                                                            }
+                                                                                                        })"
                                                                                           ShowTime="false" HourFormat="12" DateFormat="@Common.DayTimeFormatnoTime" ParseInput="@Common.ParseDate" AllowInput="true"
-                                                                                          Name="DatePicker" Style="width: 100%;  font-size: 16px"></RadzenDatePicker>
+                                                                                          Style="width: 100%;  font-size: 16px"></RadzenDatePicker>
                                                                     }
                                                                 </RadzenStack>
                                                             </RadzenStack>
@@ -269,30 +299,38 @@
 
                                                                                 if (kieudulieu == 1) // kieu ki tu
                                                                                 {
-                                                                                    <RadzenTextBox Placeholder="@($"*Nhập {mmdetail.LoaiThongTin.TenThongTin.Value?.ToString()}")"
+                                                                                    <RadzenTextBox class="custom-placeholder" Placeholder="@($"* nhập {mmdetail.LoaiThongTin.TenThongTin.Value?.ToString()}")"
                                                                                                    Value="@mmdetail.GiaTri.Value?.ToString()" ValueChanged="@((args) => { mmdetail.GiaTri.Value = args; } )"
                                                                                                    Style="font-size: 16px; height: contain; border-width: 1px; width: 100% "></RadzenTextBox>
                                                                                 }
                                                                                 else if (kieudulieu == 2) // kieu so
                                                                                 {
-                                                                                    <RadzenNumeric Placeholder="@($"*Nhập {mmdetail.LoaiThongTin.TenThongTin.Value?.ToString()}")" TValue="int"
+                                                                                    <RadzenNumeric class="custom-placeholder" Placeholder="@($"* nhập {mmdetail.LoaiThongTin.TenThongTin.Value?.ToString()}")" TValue="int"
                                                                                                    Value="@int.Parse(mmdetail.GiaTri.Value?.ToString()?? "0")" Min="1" Max="999999"
                                                                                                    ValueChanged="@((args) => { mmdetail.GiaTri.Value = args; })"
                                                                                                    Style="font-size: 16px; height: contain; border-width: 1px; width: 100%" />
                                                                                 }
                                                                                 else if (kieudulieu == 3) // datetime
                                                                                 {
-                                                                                    _ = DateTime.TryParse(mmdetail.GiaTri.Value?.ToString(), out DateTime selectday) ? selectday : DateTime.Now;
-                                                                                    selectday = selectday.Date.Add(DateTime.Now.TimeOfDay);
+                                                                                    bool ishaveValueOfday = DateTime.TryParse(mmdetail.GiaTri.Value?.ToString(), out DateTime selectday);
+                                                                                    if (ishaveValueOfday) selectday = selectday.Date.Add(DateTime.Now.TimeOfDay);
 
-                                                                                    <RadzenDatePicker TValue="DateTime"
-                                                                                                      ValueChanged="@((args) =>
+                                                                                    <RadzenDatePicker class="custom-datepicker" Placeholder="@($"* nhập {mmdetail.LoaiThongTin.TenThongTin.Value?.ToString()}")"
+                                                                                                      TValue="DateTime" Value="selectday" AllowClear="true"
+                                                                                                      Change="@((args) =>
                                                                                                         {
-                                                                                                            args = args.Date.Add(DateTime.Now.TimeOfDay); mmdetail.GiaTri.Value = args;
+                                                                                                            if (args != null)
+                                                                                                            {
+                                                                                                                DateTime value = args.Value.Date.Add(DateTime.Now.TimeOfDay);
+                                                                                                                mmdetail.GiaTri.Value = value;
+                                                                                                            }
+                                                                                                            else
+                                                                                                            {
+                                                                                                                mmdetail.GiaTri.Value = string.Empty;
+                                                                                                            }
                                                                                                         })"
-                                                                                                      Value="selectday"
                                                                                                       ShowTime="false" HourFormat="12" DateFormat="@Common.DayTimeFormatnoTime" ParseInput="@Common.ParseDate" AllowInput="true"
-                                                                                                      Name="DatePicker" Style="width: 100%;  font-size: 16px"></RadzenDatePicker>
+                                                                                                      Style="width: 100%;  font-size: 16px"></RadzenDatePicker>
                                                                                 }
                                                                             }
                                                                             else
@@ -300,9 +338,10 @@
                                                                                 <!--Normal mode-->
                                                                                 if (kieudulieu == 3)
                                                                                 {
-                                                                                    DateTime valueDate = DateTime.TryParse(mmdetail.GiaTri.Value?.ToString(), out DateTime vldate) ? vldate : DateTime.Now;
+                                                                                    bool ishaveValueOfday = DateTime.TryParse(mmdetail.GiaTri.Value?.ToString(), out DateTime vldate);
 
-                                                                                    <RadzenText Text="@valueDate.ToString("dd/MM/yyyy")" Style="font-size: 16px; height: contain; color: black; font-weight: 500"></RadzenText>
+                                                                                    <RadzenText Visible="@ishaveValueOfday" Text="@vldate.ToString("dd/MM/yyyy")" Style="font-size: 16px; height: contain; color: black; font-weight: 500"></RadzenText>
+                                                                                    <RadzenText Visible="@(!ishaveValueOfday)" Text="@string.Empty" Style="font-size: 16px; height: contain; color: black; font-weight: 500"></RadzenText>
                                                                                 }
                                                                                 else
                                                                                 {
@@ -332,7 +371,7 @@
                                                                   Icon="check" Text="Lưu thay đổi" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Size="ButtonSize.Small" Variant="Variant.Flat"
                                                                   Click=@(() => OnUpdateThongTinMayMoc(SelectedMayMoc))
                                                                   BusyText="Saving ..." IsBusy=@isSavingMMdetails />
-                                                    <RadzenButton Style="width: contain; min-width: 120px; height: contain;" Click="@(() => EnableEditMMDetail())" 
+                                                    <RadzenButton Style="width: contain; min-width: 120px; height: contain;" Click="@(() => EnableEditMMDetail())"
                                                                   Icon="@((isEditMayMocDetail)? "clear" : "edit")" Text="@((isEditMayMocDetail)? "Hủy" : "Chỉnh sửa")" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" />
                                                 </RadzenStack>
                                                 <RadzenStack Gap="10px" Style="height: contain; width: contain; padding: 0px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
@@ -569,7 +608,6 @@
         if (mainUDresult == -1)
         {
             await DialogService.Alert($"Lỗi: {mainUDerror}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
-            return;
         }
         else
         {
@@ -577,26 +615,24 @@
 
             (int subUDresult, string subUDerror) = SQLServerServices.UpdateListExtraMayMocDetails(selectedmaymoc.DSThongTin);
 
-            if (mainUDresult == -1)
+            if (subUDresult == -1)
             {
-                await DialogService.Alert($"Lỗi: {mainUDerror}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
-                return;
+                await DialogService.Alert($"Lỗi: {subUDerror}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
             }
-            // else
-            // {
-            //     await DialogService.Alert($"Cập nhật thành công!", "<strong><span style='color: darkgreen'>Success!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
-            // }
+            else
+            {
+                // await DialogService.Alert($"Cập nhật thành công!", "<strong><span style='color: darkgreen'>Success!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                await LoadAllDanhsachMayMocBase();
+
+                ReSelectCurrentMayMoc(Common.SelectedMayMocid);
+
+                ShowNotification("Đã lưu thay đổi!", NotificationSeverity.Success, 3000);
+            }
         }
 
         isSavingMMdetails = false;
 
         isEditMayMocDetail = false;
-
-        await LoadAllDanhsachMayMocBase();
-
-        ReSelectCurrentMayMoc(Common.SelectedMayMocid);
-
-        ShowNotification("Đã lưu thay đổi!", NotificationSeverity.Success, 3000);
     }
 
     // Delete maymoc
@@ -626,12 +662,16 @@
     }
 
     // Press button Edit/Cancel
-    private void EnableEditMMDetail()
+    private async Task EnableEditMMDetail()
     {
         if (isEditMayMocDetail)
         {
             // Press cancel button
             isEditMayMocDetail = false;
+
+            await LoadAllDanhsachMayMocBase();
+
+            ReSelectCurrentMayMoc(Common.SelectedMayMocid);
         }
         else
         {

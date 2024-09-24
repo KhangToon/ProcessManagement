@@ -135,16 +135,27 @@
                                                        Style="font-size: 16px; height: contain;" Min="0" Max="999999" />
                                     </RadzenStack>
                                     // Kieu ngay thang
+                                    bool ishaveValueOfday = DateTime.TryParse(NewLoaiTTMM_mode1.GiaTriMacDinh.Value?.ToString(), out DateTime selectday);
+                                    if (ishaveValueOfday) selectday = selectday.Date.Add(DateTime.Now.TimeOfDay);
                                     <RadzenStack Visible="@(currentKieudulieu.Equals(3))" Style="width: 50%;">
-                                        <RadzenDatePicker Disabled="@(!IsAddWithValue_mode1)" class="custom-placeholder" Placeholder="@($" * nhập giá trị { NewLoaiTTMM_mode1.TenThongTin.Value?.ToString()}")" TValue="DateTime"
-                                                          ValueChanged="@(async (args) =>
-                                                                        {
-                                                                            args = args.Date.Add(DateTime.Now.TimeOfDay);
-                                                                            NewLoaiTTMM_mode1.GiaTriMacDinh.Value = args;
-                                                                            await CheckLoaiThongTinMayMoc_ValueIsOK(NewLoaiTTMM_mode1, currentKieudulieu);
-                                                                        })"
-                                                          ShowTime="false" HourFormat="12" DateFormat="@Common.DayTimeFormatnoTime" AllowInput="false"
-                                                          Style="font-size: 16px; height: contain;"></RadzenDatePicker>
+                                        <RadzenDatePicker Disabled="@(!IsAddWithValue_mode1)" class="custom-datepicker" Placeholder="@($"* nhập {NewLoaiTTMM_mode1.TenThongTin.Value?.ToString()}")"
+                                                          TValue="DateTime" Value="selectday" AllowClear="true"
+                                                          Change="@(async (args) =>
+                                                                                {
+                                                                                    if (args != null)
+                                                                                    {
+                                                                                        DateTime value = args.Value.Date.Add(DateTime.Now.TimeOfDay);
+                                                                                        NewLoaiTTMM_mode1.GiaTriMacDinh.Value = args;
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        NewLoaiTTMM_mode1.GiaTriMacDinh.Value = string.Empty;
+                                                                                    }
+                                                                                    await CheckLoaiThongTinMayMoc_ValueIsOK(NewLoaiTTMM_mode1, currentKieudulieu);
+                                                                                })"
+                                                          ShowTime="false" HourFormat="12" DateFormat="@Common.DayTimeFormatnoTime" ParseInput="@Common.ParseDate" AllowInput="true"
+                                                          Style="height: contain; font-size: 16px">
+                                        </RadzenDatePicker>
                                     </RadzenStack>
 
                                     <RadzenStack Style="width: 50%;">
@@ -303,7 +314,7 @@
 
             if (loaittmm.GiaTriMacDinh.Value == null)
             {
-                giatriOK = -1; giatriNotifyMess = "Gía trị không được để trống";
+                giatriOK = -1; giatriNotifyMess = "Giá trị không được để trống";
             }
 
             if (kieudulieu == 1) // Kieu ki tu
@@ -395,9 +406,9 @@
             IsAddWithValue_mode1 = false;
             IsDefault = false;
             tenOK = -1;
-            tenNotifyMess = "Gía trị không được để trống";
+            tenNotifyMess = "Giá trị không được để trống";
             giatriOK = -1;
-            giatriNotifyMess = "Gía trị không được để trống";
+            giatriNotifyMess = "Giá trị không được để trống";
         }
         else
         {

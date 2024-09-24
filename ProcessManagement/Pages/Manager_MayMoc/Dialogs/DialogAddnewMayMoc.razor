@@ -15,6 +15,12 @@
         font-size: 14px;
         font-style: italic;
     }
+
+    .custom-datepicker input[type="text"]::placeholder {
+        color: #888888;
+        font-size: 14px;
+        font-style: italic;
+    }
 </style>
 
 <RadzenCard Style="height: 100%; width: 100%; padding: 5px" Variant="Variant.Flat">
@@ -134,18 +140,27 @@
                                             }
                                             else if (kieudulieu == 3) // kieu ngay thang
                                             {
-                                                _ = DateTime.TryParse(thongtinMM.GiaTri.Value?.ToString(), out DateTime ngay);
+                                                bool ishaveValueOfday = DateTime.TryParse(thongtinMM.GiaTri.Value?.ToString(), out DateTime selectday);
+                                                if (ishaveValueOfday) selectday = selectday.Date.Add(DateTime.Now.TimeOfDay);
                                                 <RadzenStack Style="width: 50%;">
-                                                    <RadzenDatePicker class="custom-placeholder" Placeholder="@($" * nhập {thongtinMM.LoaiThongTin.TenThongTin.Value?.ToString()}")" TValue="DateTime"
-                                                                      Value="ngay"
-                                                                      ValueChanged="@(async (args) =>
-                                                                        {
-                                                                            args = args.Date.Add(DateTime.Now.TimeOfDay);
-                                                                            thongtinMM.GiaTri.Value = args;
-                                                                            await AnotherThongTinMayMoc_ValueIsOK(thongtinMM, kieudulieu);
-                                                                        })"
+                                                    <RadzenDatePicker class="custom-datepicker" Placeholder="@($"* nhập {thongtinMM.LoaiThongTin.TenThongTin.Value?.ToString()}")"
+                                                                      TValue="DateTime" Value="selectday" AllowClear="true"
+                                                                      Change="@(async (args) =>
+                                                                                {
+                                                                                    if (args != null)
+                                                                                    {
+                                                                                        DateTime value = args.Value.Date.Add(DateTime.Now.TimeOfDay);
+                                                                                        thongtinMM.GiaTri.Value = value;
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        thongtinMM.GiaTri.Value = string.Empty;
+                                                                                    }
+                                                                                    await AnotherThongTinMayMoc_ValueIsOK(thongtinMM, kieudulieu);
+                                                                                })"
                                                                       ShowTime="false" HourFormat="12" DateFormat="@Common.DayTimeFormatnoTime" ParseInput="@Common.ParseDate" AllowInput="true"
-                                                                      Style="font-size: 16px; height: contain;"></RadzenDatePicker>
+                                                                      Style="height: contain; font-size: 16px">
+                                                    </RadzenDatePicker>
                                                 </RadzenStack>
                                             }
 
@@ -285,11 +300,11 @@
 
                 if (isValueOK)
                 {
-                    thongTin.GiaTri.IsValueOK = true; thongTin.GiaTri.NotifyMess = "Gía trị hợp lệ";
+                    thongTin.GiaTri.IsValueOK = true; thongTin.GiaTri.NotifyMess = "Giá trị hợp lệ";
                 }
                 else
                 {
-                    thongTin.GiaTri.IsValueOK = false; thongTin.GiaTri.NotifyMess = "Gía trị không hợp lệ";
+                    thongTin.GiaTri.IsValueOK = false; thongTin.GiaTri.NotifyMess = "Giá trị không hợp lệ";
                 }
             }
         });

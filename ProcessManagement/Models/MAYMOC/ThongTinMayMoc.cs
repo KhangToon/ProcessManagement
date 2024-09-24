@@ -6,7 +6,7 @@ namespace ProcessManagement.Models.MAYMOC
     public class ThongTinMayMoc
     {
         public Propertyy TTMMID { get; set; } = new() { DBName = Common.MM_TTMMID, DisplayName = "TTMMID", Type = typeof(int), AlowDatabase = false, AlowDisplay = false, DispDatagrid = false }; // ID
-        public Propertyy GiaTri { get; set; } = new() { DBName = Common.MM_GiaTri, DisplayName = "Gía trị", Type = typeof(string), AlowDatabase = true };
+        public Propertyy GiaTri { get; set; } = new() { DBName = Common.MM_GiaTri, DisplayName = "Giá trị", Type = typeof(string), AlowDatabase = true };
         public Propertyy MMID { get; set; } = new() { DBName = Common.MM_MMID, DisplayName = "MMID", Type = typeof(int), AlowDatabase = true, AlowDisplay = false, DispDatagrid = false };
         public Propertyy LoaiTTMMID { get; set; } = new() { DBName = Common.MM_LoaiTTMMID, DisplayName = "LoaiTTMMID", Type = typeof(int), AlowDatabase = true, AlowDisplay = false, DispDatagrid = false };
 
