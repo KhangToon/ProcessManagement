@@ -1,29 +1,21 @@
 ﻿using ProcessManagement.Commons;
 using System.Reflection;
 
-namespace ProcessManagement.Models.MAYMOC
+namespace ProcessManagement.Models.NHANVIEN
 {
-    public class MayMoc
+    public class ThongTinNhanVien
     {
-        public Propertyy MMID { get; set; } = new() { DBName = Common.MM_MMID, DisplayName = "MMID", Type = typeof(int), AlowDatabase = false, AlowDisplay = false, DispDatagrid = false }; // ID
-        public Propertyy MaMay { get; set; } = new() { DBName = Common.MM_MaMay, DisplayName = "Mã máy", Type = typeof(string), AlowDatabase = true };
-        public Propertyy TenMay { get; set; } = new() { DBName = Common.MM_TenMay, DisplayName = "Tên máy/Thiết bị", Type = typeof(string), AlowDatabase = true };
-        public Propertyy Serial { get; set; } = new() { DBName = Common.MM_Serial, DisplayName = "Serial", Type = typeof(string), AlowDatabase = true };
+        public Propertyy TTNVID { get; set; } = new() { DBName = Common.NV_TTNVID, DisplayName = "TTNVID", Type = typeof(int), AlowDatabase = false, AlowDisplay = false, DispDatagrid = false }; // ID
+        public Propertyy GiaTri { get; set; } = new() { DBName = Common.NV_GiaTriThongTin, DisplayName = "Giá trị", Type = typeof(string), AlowDatabase = true };
+        public Propertyy NVID { get; set; } = new() { DBName = Common.NV_NVID, DisplayName = "NVID", Type = typeof(int), AlowDatabase = true, AlowDisplay = false, DispDatagrid = false };
+        public Propertyy LoaiTTNVID { get; set; } = new() { DBName = Common.NV_LoaiTTNVID, DisplayName = "LoaiTTNVID", Type = typeof(int), AlowDatabase = true, AlowDisplay = false, DispDatagrid = false };
 
-        // Danh sach thong tin may moc
-        public List<ThongTinMayMoc> DSThongTin = new();
-
-        // Return thong tin may moc by tentruyxuat
-        public ThongTinMayMoc GetThongTinMayMocByName(string tentruyxuat)
-        {
-            ThongTinMayMoc targetThongTin = DSThongTin.FirstOrDefault(thongtin => thongtin.LoaiThongTin.TenTruyXuat.Value?.ToString()?.Trim() == tentruyxuat) ?? new();
-
-            return targetThongTin;
-        }
+        // Loai thong tin nhan vien
+        public LoaiThongTinNhanVien LoaiThongTin { get; set; } = new();
 
         public List<Propertyy> GetPropertiesValues()
         {
-            Type propertyType = typeof(MayMoc);
+            Type propertyType = typeof(ThongTinNhanVien);
 
             FieldInfo[] fields = propertyType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 

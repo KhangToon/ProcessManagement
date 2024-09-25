@@ -1,0 +1,156 @@
+﻿@page "/nvmanagement"
+@attribute [Authorize(Roles = "Admin, User")]
+@* this limited access into page *@
+
+@using ProcessManagement.Commons
+@using ProcessManagement.Models
+@using ProcessManagement.Models.NHANVIEN
+@using ProcessManagement.Services.QRCodes
+@using ProcessManagement.Services.SQLServer
+@using Radzen.Blazor
+@using Radzen
+
+@inject NotificationService NotificationService
+@inject TooltipService TooltipService
+@inject ContextMenuService ContextMenuService
+@inject DialogService DialogService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject SQLServerServices SQLServerServices
+@inject QRCodeServices QRCodeServices
+@inject IJSRuntime JSRuntime
+
+<style>
+    .custom-placeholder::placeholder {
+        color: #888888;
+        font-size: 14px;
+        font-style: italic;
+    }
+
+    .custom-datepicker input[type="text"]::placeholder {
+        color: #888888;
+        font-size: 14px;
+        font-style: italic;
+    }
+</style>
+
+<RadzenRow Gap="0" Style="height: 100%; width: 100%; overflow-y: auto; background-color: white; border-radius: 10px;">
+    <RadzenColumn Size="12" SizeMD="12" Style="height: 100%; width: 100%; padding-right: 0">
+        <RadzenTabs Style="width: 100%; height: 100%; padding-right: 0">
+            <Tabs>
+                <RadzenTabsItem Selected="true" Text="Quản lý nhân viên">
+                    <RadzenCard Variant="Variant.Flat" Style="height: 100%; width: 100%; padding-top: 15px">
+                        <RadzenStack Gap="5" Style="height: 100%; width: 100%;">
+                            <!--Thanh tim kiem-->
+                            <RadzenStack Style="height: contain; width: 100%; padding-bottom: 5px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                <RadzenStack Style="height: 100%; width: 20%; border-radius: 10px; background-color: var(--rz-success-lighter); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                    <RadzenText Text="QUẢN LÝ NHÂN VIÊN" Style="color: green; font-weight: 600; font-size: 18px"></RadzenText>
+                                </RadzenStack>
+                                <RadzenStack Gap="15px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: 100%; width: 60%;">
+
+                                </RadzenStack>
+                            </RadzenStack>
+                            <!--Filter-->
+                            <RadzenStack Gap="0px" Orientation="Orientation.Horizontal" Style="height: 50px; width: 100%; padding-top: 5px; padding-bottom: 0px; border-top: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+
+                            </RadzenStack>
+                        </RadzenStack>
+                    </RadzenCard>
+                </RadzenTabsItem>
+            </Tabs>
+        </RadzenTabs>
+    </RadzenColumn>
+</RadzenRow>
+
+@code {
+    private List<NhanVien> DSachNhanViensBase = new();
+    private List<NhanVien> DSachNhanViens = new();
+    private NhanVien SelectedNhanVien = new();
+    private ThongTinNhanVien SelectedThongtinNV = new();
+    private IList<NhanVien>? DatagridSeleted;
+
+    private DateTime startSearchDay = DateTime.Today;
+    private DateTime endSearchDay = DateTime.Today;
+    private string pagingSummaryFormat = "Displaying page {0} of {1} <b>(total {2} records)</b>";
+    private bool isEditNhanVienDetail = false;
+    private bool isSavingNVdetails = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Load ds nhan vien base/ hien thi
+        await LoadAllDanhsachNhanVienBase();
+
+        // Reslect nhan vien
+        ReSelectCurrentNhanVien(Common.SelectedNhanVienid); // re-selected
+
+        await base.OnInitializedAsync();
+    }
+
+    private bool isLoadingDSNV = false;
+    // Load all danh sach nhanvien base
+    private async Task LoadAllDanhsachNhanVienBase()
+    {
+        await Task.Run(async () =>
+        {
+            if (isLoadingDSNV == false)
+            {
+                isLoadingDSNV = true;
+
+                DSachNhanViensBase = SQLServerServices.GetDanhSachNhanVien(); // load dach mac dinh
+
+                DSachNhanViens = DSachNhanViensBase.ToList(); // gan cho ds hien thi
+
+                await Task.Delay(300);
+
+                isLoadingDSNV = false;
+            }
+        });
+    }
+
+    // Re-selected current nhan vien
+    private void ReSelectCurrentNhanVien(object? targetID)
+    {
+        if (DSachNhanViens != null)
+        {
+            if (targetID == null) // get fist row
+            {
+                var fistitem = DSachNhanViens.FirstOrDefault();
+
+                if (fistitem != null) { DatagridSeleted = new List<NhanVien>() { fistitem }; }
+            }
+            else
+            {
+                var selectedID = targetID;
+                // load last selected item
+                var selecteditem = DSachNhanViens.FirstOrDefault(nv => nv.NVID.Value?.ToString() == selectedID.ToString());
+
+                if (selecteditem != null) { DatagridSeleted = new List<NhanVien>() { selecteditem }; }
+                else { DatagridSeleted = new List<NhanVien>(); }
+            }
+
+            SelectedNhanVien = DatagridSeleted?.FirstOrDefault() ?? new();
+        }
+    }
+
+    // Notification
+    void ShowNotification(string message, NotificationSeverity notifytype, double time)
+    {
+        NotificationMessage notify = new NotificationMessage
+            {
+                Style = "position: fixed; top: 0; right: 0;",
+                Severity = notifytype,
+                Summary = message,
+                Duration = time
+            };
+
+        NotificationService.Notify(notify);
+    }
+
+    // Tooltip
+    void ShowToolTip(ElementReference elementReference, TooltipPosition position, string content)
+    {
+        TooltipOptions options = new TooltipOptions() { Position = position, Delay = 500, Style = "background-color: black" };
+
+        TooltipService.Open(elementReference, content, options);
+    }
+
+}

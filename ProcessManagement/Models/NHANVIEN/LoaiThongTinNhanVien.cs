@@ -1,29 +1,21 @@
 ﻿using ProcessManagement.Commons;
 using System.Reflection;
 
-namespace ProcessManagement.Models.MAYMOC
+namespace ProcessManagement.Models.NHANVIEN
 {
-    public class MayMoc
+    public class LoaiThongTinNhanVien
     {
-        public Propertyy MMID { get; set; } = new() { DBName = Common.MM_MMID, DisplayName = "MMID", Type = typeof(int), AlowDatabase = false, AlowDisplay = false, DispDatagrid = false }; // ID
-        public Propertyy MaMay { get; set; } = new() { DBName = Common.MM_MaMay, DisplayName = "Mã máy", Type = typeof(string), AlowDatabase = true };
-        public Propertyy TenMay { get; set; } = new() { DBName = Common.MM_TenMay, DisplayName = "Tên máy/Thiết bị", Type = typeof(string), AlowDatabase = true };
-        public Propertyy Serial { get; set; } = new() { DBName = Common.MM_Serial, DisplayName = "Serial", Type = typeof(string), AlowDatabase = true };
-
-        // Danh sach thong tin may moc
-        public List<ThongTinMayMoc> DSThongTin = new();
-
-        // Return thong tin may moc by tentruyxuat
-        public ThongTinMayMoc GetThongTinMayMocByName(string tentruyxuat)
-        {
-            ThongTinMayMoc targetThongTin = DSThongTin.FirstOrDefault(thongtin => thongtin.LoaiThongTin.TenTruyXuat.Value?.ToString()?.Trim() == tentruyxuat) ?? new();
-
-            return targetThongTin;
-        }
+        public Propertyy LoaiTTNVID { get; set; } = new() { DBName = Common.NV_LoaiTTNVID, DisplayName = "LoaiTTNVID", Type = typeof(int), AlowDatabase = false, AlowDisplay = false, DispDatagrid = false }; // ID
+        public Propertyy TenLoaiThongTin { get; set; } = new() { DBName = Common.NV_TenLoaiThongTin, DisplayName = "Tên loại thông tin", Type = typeof(string), AlowDatabase = true };
+        public Propertyy KieuDuLieu { get; set; } = new() { DBName = Common.NV_KieuDuLieu, DisplayName = "Kiểu dữ liệu", Type = typeof(string), AlowDatabase = true };
+        public Propertyy GiaTriMacDinh { get; set; } = new() { DBName = Common.NV_GiaTriMacDinh, DisplayName = "Gía trị mặc định", Type = typeof(string), AlowDatabase = true };
+        public Propertyy IsDefault { get; set; } = new() { DBName = Common.NV_IsDefault, DisplayName = "IsDefault", Type = typeof(bool), AlowDatabase = true };
+        public Propertyy TenTruyXuat { get; set; } = new() { DBName = Common.NV_TenTruyXuat, DisplayName = "Tên truy xuất", Type = typeof(string), AlowDatabase = true };
+        public Propertyy IndexDisplay { get; set; } = new() { DBName = Common.NV_IndexDisplay, DisplayName = "IndexDisplay", Type = typeof(int), AlowDatabase = true };
 
         public List<Propertyy> GetPropertiesValues()
         {
-            Type propertyType = typeof(MayMoc);
+            Type propertyType = typeof(LoaiThongTinNhanVien);
 
             FieldInfo[] fields = propertyType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 

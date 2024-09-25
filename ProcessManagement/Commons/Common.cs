@@ -118,13 +118,6 @@ namespace ProcessManagement.Commons
         //public const string SoLuong = "Số lượng";
         public const string ThoiDiem = "Thời điểm";
 
-
-        // Table Nhanvien //
-        public const string TableNhanVien = "Table_NhanVien";
-        public const string NVID = "NVID";
-        public const string MaNhanVien = "Mã nhân viên";
-        public const string TenNhanVien = "Tên nhân viên";
-
         // Table Nguyen Cong //
         public const string TableNguyenCong = "Table_DSNguyenCong";
         //public const string TileLoi = "Tỉ lệ lỗi";
@@ -245,7 +238,6 @@ namespace ProcessManagement.Commons
         public const string LNKSoLuong = "Số lượng";
         public const string LNKIsDone = "IsDone";
 
-
         // Table KHO_PhieuXuatKho
         public const string Table_PhieuXuatKho = "KHO_PhieuXuatKho";
         public const string PXKID = "PXKID";
@@ -291,7 +283,6 @@ namespace ProcessManagement.Commons
         //public const string NVLID = "NVLID";
         //public const string VTID = "VTID";
 
-
         // Table Maymoc //
         public const string Table_MayMoc = "MAY_MayMoc";
         public const string MM_MMID = "MMID";
@@ -303,13 +294,6 @@ namespace ProcessManagement.Commons
         //public const string MM_TinhTrang = "Tình trạng";
         public const string MM_GhiChu = "Ghi chú";
 
-        // Table ThongTinMayMoc
-        public const string Table_ThongTinMayMoc = "MAY_ThongTinMayMoc";
-        public const string MM_TTMMID = "TTMMID";
-        public const string MM_GiaTri = "Giá trị";
-        //public const string MM_MMID = "MMID";
-        //public const string MM_LoaiTTMMID = "LoaiTTMMID";
-
         // Table LoaiThongTinMayMoc
         public const string Table_LoaiThongTinMayMoc = "MAY_LoaiThongTinMayMoc";
         public const string MM_LoaiTTMMID = "LoaiTTMMID";
@@ -318,9 +302,36 @@ namespace ProcessManagement.Commons
         public const string MM_GiaTriMacDinh = "Gía trị mặc định";
         public const string MM_IsDefault = "IsDefault";
         public const string MM_TenTruyXuat = "Tên truy xuất";
+        public const string MM_IndexDisplay = "IndexDisplay";
 
+        // Table ThongTinMayMoc
+        public const string Table_ThongTinMayMoc = "MAY_ThongTinMayMoc";
+        public const string MM_TTMMID = "TTMMID";
+        public const string MM_GiaTriThongTin = "Giá trị";
+        //public const string MM_MMID = "MMID";
+        //public const string MM_LoaiTTMMID = "LoaiTTMMID";
 
+        // Table Nhanvien
+        public const string Table_NhanVien = "NV_NhanVien";
+        public const string NV_NVID = "NVID";
+        public const string NV_MaNhanVien = "Mã nhân viên";
 
+        // Table LoaiThongTinNhanVien
+        public const string Table_LoaiThongTinNhanVien = "NV_LoaiThongTinNhanVien";
+        public const string NV_LoaiTTNVID = "LoaiTTNVID";
+        public const string NV_TenLoaiThongTin = "Tên loại thông tin";
+        public const string NV_KieuDuLieu = "Kiểu dữ liệu";
+        public const string NV_GiaTriMacDinh = "Gía trị mặc định";
+        public const string NV_IsDefault = "IsDefault";
+        public const string NV_TenTruyXuat = "Tên truy xuất";
+        public const string NV_IndexDisplay = "IndexDisplay";
+
+        // Table ThongTinNhanVien
+        public const string Table_ThongTinNhanVien = "NV_ThongTinNhanVien";
+        public const string NV_TTNVID = "TTNVID";
+        public const string NV_GiaTriThongTin = "Giá trị";
+        //public const string NV_NVID = "NVID";
+        //public const string NV_LoaiTTNVID = "LoaiTTNVID";
 
         // Socket 
         public const string socketEndKey = "<END>";
@@ -380,6 +391,9 @@ namespace ProcessManagement.Commons
 
         // MayMoc management static variable
         public static object? SelectedMayMocid;
+
+        // NhanVien management static variable
+        public static object? SelectedNhanVienid;
 
         // PhieuXuatKho static variable
         public static object? SelectedPXKID;

@@ -1,14 +1,15 @@
 ﻿using ProcessManagement.Commons;
 using System.Reflection;
 
-namespace ProcessManagement.Models
+namespace ProcessManagement.Models.NHANVIEN
 {
     public class NhanVien
-    {
-        public Propertyy NVID { get; set; } = new() { DBName = Common.NVID, Type = typeof(int), AlowDatabase = true };
-        public Propertyy MaNhanVien { get; set; } = new() { DBName = Common.MaNhanVien, Type = typeof(string), AlowDatabase = true };
-        public Propertyy TenNhanVien { get; set; } = new() { DBName = Common.TenNhanVien, Type = typeof(string), AlowDatabase = true };
+    {   
+        public Propertyy NVID { get; set; } = new() { DBName = Common.NV_NVID, DisplayName = "NVID", Type = typeof(int), AlowDatabase = false, AlowDisplay = false, DispDatagrid = false }; // ID
+        public Propertyy MaNhanVien { get; set; } = new() { DBName = Common.NV_MaNhanVien, DisplayName = "Mã nhân viên", Type = typeof(string), AlowDatabase = true };
 
+        // Danh sach thong tin nha vien
+        public List<ThongTinNhanVien> DSThongTin = new();
 
         public List<Propertyy> GetPropertiesValues()
         {
