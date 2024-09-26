@@ -5883,7 +5883,7 @@ namespace ProcessManagement.Services.SQLServer
         // ------------------------------------------------------------------------------------- //
         #region Table_NV_NhanVien
         // Check gia tri truong thong tin nhan vien 
-        public bool DefaultNhanVien_ValueIsExisting(string? proValue, string proName)
+        public bool DefaultThongTinNhanVien_ValueIsExisting(string? proValue, string proName)
         {
             using (var connection = new SqlConnection(connectionString))
             {
@@ -6011,8 +6011,8 @@ namespace ProcessManagement.Services.SQLServer
                     }
 
                     // Load danh sach thong tin nhan vien
-                    // You might need to implement a similar method to GetDanhSachThongTinMayMoc for nhanvien
-                    // nhanVien.DSThongTin = GetDanhSachThongTinNhanVien(nhanVien.NVID.Value);
+                    
+                    nhanVien.DSThongTin = GetDanhSachThongTinNhanVien(nhanVien.NVID.Value);
 
                     danhSachNhanVien.Add(nhanVien);
                 }

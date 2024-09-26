@@ -36,7 +36,6 @@
                                   Click="@(() => OnOpenDialogAddThongTinKhac())" />
                 </RadzenStack>
                 <RadzenCard Variant="Variant.Flat" Style="min-height: 300px; width: 100%; padding: 0px; margin-top: 10px; background-color: white">
-
                     <RadzenStack Style="height: 100%; width: 100%; padding: 10px;" Gap="0" Orientation="Orientation.Vertical">
                         <!--Hien thi thong tin mac dinh-->
                         <!--Ten may moc/thiet bi-->
@@ -111,7 +110,7 @@
                         {
                             <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 5px; border-bottom: var(--rz-grid-cell-border);">
                                 <RadzenStack Style="width: 20%;">
-                                    <RadzenText Text="@(thongtinMM.LoaiThongTin.TenThongTin.Value?.ToString())" Style="color: var(--rz-primary-darker); font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
+                                    <RadzenText Text="@(thongtinMM.LoaiThongTin.TenLoaiThongTin.Value?.ToString())" Style="color: var(--rz-primary-darker); font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
                                 </RadzenStack>
                                 <RadzenStack Style="width: 80%; padding-left: 10px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                     <RadzenStack Gap="10px" Style="height: 100%; width: 100%; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
@@ -121,7 +120,7 @@
                                             if (kieudulieu == 1) // kieu ky tu
                                             {
                                                 <RadzenStack Style="width: 50%;">
-                                                    <RadzenTextBox class="custom-placeholder" Placeholder="@($" * nhập {thongtinMM.LoaiThongTin.TenThongTin.Value?.ToString()}")" Value="@thongtinMM.GiaTri.Value?.ToString()" Style="font-size: 16px; height: contain; border-width: 1px;"
+                                                    <RadzenTextBox class="custom-placeholder" Placeholder="@($" * nhập {thongtinMM.LoaiThongTin.TenLoaiThongTin.Value?.ToString()}")" Value="@thongtinMM.GiaTri.Value?.ToString()" Style="font-size: 16px; height: contain; border-width: 1px;"
                                                                    @oninput="@(async (args) => {thongtinMM.GiaTri.Value = args.Value; await AnotherThongTinMayMoc_ValueIsOK(thongtinMM, kieudulieu);})">
                                                     </RadzenTextBox>
                                                 </RadzenStack>
@@ -129,7 +128,7 @@
                                             else if (kieudulieu == 2) // Kieu so
                                             {
                                                 <RadzenStack Style="width: 50%;">
-                                                    <RadzenNumeric class="custom-placeholder" Placeholder="@($" * nhập {thongtinMM.LoaiThongTin.TenThongTin.Value?.ToString()}")" TValue="int"
+                                                    <RadzenNumeric class="custom-placeholder" Placeholder="@($" * nhập {thongtinMM.LoaiThongTin.TenLoaiThongTin.Value?.ToString()}")" TValue="int"
                                                                    Value="@(int.Parse(thongtinMM.GiaTri.Value?.ToString()?? "0"))"
                                                                    ValueChanged="@(async (args) =>
                                                                         {   thongtinMM.GiaTri.Value = args;
@@ -143,7 +142,7 @@
                                                 bool ishaveValueOfday = DateTime.TryParse(thongtinMM.GiaTri.Value?.ToString(), out DateTime selectday);
                                                 if (ishaveValueOfday) selectday = selectday.Date.Add(DateTime.Now.TimeOfDay);
                                                 <RadzenStack Style="width: 50%;">
-                                                    <RadzenDatePicker class="custom-datepicker" Placeholder="@($"* nhập {thongtinMM.LoaiThongTin.TenThongTin.Value?.ToString()}")"
+                                                    <RadzenDatePicker class="custom-datepicker" Placeholder="@($"* nhập {thongtinMM.LoaiThongTin.TenLoaiThongTin.Value?.ToString()}")"
                                                                       TValue="DateTime" Value="selectday" AllowClear="true"
                                                                       Change="@(async (args) =>
                                                                                 {
@@ -274,7 +273,7 @@
         await Task.Run(() =>
         {
             string value = thongTin.GiaTri.Value?.ToString() ?? string.Empty;
-            string? displayName = thongTin.LoaiThongTin.TenThongTin.Value?.ToString() ?? string.Empty;
+            string? displayName = thongTin.LoaiThongTin.TenLoaiThongTin.Value?.ToString() ?? string.Empty;
 
             if (string.IsNullOrEmpty(value.Trim()))
             {
@@ -349,6 +348,7 @@
         return thongTinMays;
     }
 
+    // Remove truong thong tin
     private async Task OnRemoveTruongThongTinMM(ThongTinMayMoc removeTTMM)
     {
         bool? comfirm = await DialogService.Confirm($"Loại bỏ trường thông tin này?", "Xác nhận", new ConfirmOptions() { OkButtonText = "Đồng ý", CancelButtonText = "Hủy" });
@@ -415,6 +415,7 @@
         }
     }
 
+    // Cancel add new maymoc
     private void OnCancelAddnewMayMoc()
     {
         DialogService.Close(null);

@@ -1,0 +1,396 @@
+﻿@using ProcessManagement.Commons
+@using ProcessManagement.Services.SQLServer
+@using Radzen.Blazor
+@using Radzen
+@using ProcessManagement.Models.NHANVIEN
+
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject TooltipService TooltipService
+@inject SQLServerServices SQLServerServices
+
+<style>
+    .custom-placeholder::placeholder {
+        color: #888888;
+        font-size: 14px;
+        font-style: italic;
+    }
+
+    .custom-datepicker input[type="text"]::placeholder {
+        color: #888888;
+        font-size: 14px;
+        font-style: italic;
+    }
+</style>
+
+<RadzenCard Style="height: 100%; width: 100%; padding: 5px" Variant="Variant.Flat">
+    <RadzenStack Gap="0" Style="height: 100%; width: 100%; margin: 0; padding: 0; padding-bottom: 10px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start">
+        <RadzenStack Gap="20px" Style="height: contain; width: 100%; padding: 10px; background-color: var(--rz-primary-darker);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+            <RadzenText Text="THÊM MỚI NHÂN VIÊN" Style="color: white; font-weight: 500; font-size: 18px"></RadzenText>
+        </RadzenStack>
+
+        <RadzenRow Gap="10px" Style="height: contain; width: 100%; border-top: var(--rz-grid-cell-border); padding: 0; overflow-y: scroll">
+            <RadzenColumn Size="12" SizeMD="12" Style="height: 100%; width: 100%; padding: 15px; padding-right: 0">
+                <RadzenStack Gap="10px" Style="height: contain; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                    <RadzenText Text="Nhập thông tin nhân viên" Style="color: var(--rz-primary-darker); font-size: 18px; font-weight: 600; height: contain; width: contain"></RadzenText>
+                    <RadzenButton Style="width: contain; height: contain;" Icon="add" Text="Thêm thông tin khác" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat"
+                                  Click="@(() => OnOpenDialogAddThongTinKhac())" />
+                </RadzenStack>
+
+                <RadzenCard Variant="Variant.Flat" Style="min-height: 300px; width: 100%; padding: 0px; margin-top: 10px; background-color: white">
+                    <RadzenStack Style="height: 100%; width: 100%; padding: 10px;" Gap="0" Orientation="Orientation.Vertical">
+                        <!--Hien thi thong tin mac dinh-->
+                        <!--Ma may moc/thiet bi-->
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 5px; border-bottom: var(--rz-grid-cell-border);">
+                            <RadzenStack Style="width: 20%;">
+                                <RadzenText Text="@(NewNhanVien.MaNhanVien.DisplayName)" Style="color: var(--rz-primary-darker); font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
+                            </RadzenStack>
+                            <RadzenStack Style="width: 80%; padding-left: 10px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
+                                    @{
+                                        <RadzenStack Style="width: 50%;">
+                                            <RadzenTextBox class="custom-placeholder" Placeholder="@($" * nhập { NewNhanVien.MaNhanVien.DisplayName}")" Value="@NewNhanVien.MaNhanVien.Value?.ToString()" Style="font-size: 16px; height: contain; border-width: 1px;"
+                                                           @oninput="@(async (args) => { NewNhanVien.MaNhanVien.Value = args.Value; await DefaultThongTinNhanVien_ValueIsOK(NewNhanVien.MaNhanVien, true);})">
+                                            </RadzenTextBox>
+                                        </RadzenStack>
+
+                                        <RadzenStack Style="width: 50%;">
+                                            <RadzenAlert Visible="@(!NewNhanVien.MaNhanVien.IsValueOK)" Text="@NewNhanVien.MaNhanVien.NotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                                            <RadzenAlert Visible="@(NewNhanVien.MaNhanVien.IsValueOK)" Text="@NewNhanVien.MaNhanVien.NotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Success" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                                        </RadzenStack>
+                                    }
+                                </RadzenStack>
+                            </RadzenStack>
+                        </RadzenStack>
+
+                        <!--Hien thi thong tin khac-->
+                        @foreach (var thongtinNV in NewNhanVien.DSThongTin)
+                        {
+                            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 5px; border-bottom: var(--rz-grid-cell-border);">
+                                <RadzenStack Style="width: 20%;">
+                                    <RadzenText Text="@(thongtinNV.LoaiThongTin.TenLoaiThongTin.Value?.ToString())" Style="color: var(--rz-primary-darker); font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
+                                </RadzenStack>
+                                <RadzenStack Style="width: 80%; padding-left: 10px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                    <RadzenStack Gap="10px" Style="height: 100%; width: 100%; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                        @{
+                                            int kieudulieu = int.TryParse(thongtinNV.LoaiThongTin.KieuDuLieu.Value?.ToString(), out int kdl) ? kdl : 0;
+
+                                            if (kieudulieu == 1) // kieu ky tu
+                                            {
+                                                <RadzenStack Style="width: 50%;">
+                                                    <RadzenTextBox class="custom-placeholder" Placeholder="@($" * nhập {thongtinNV.LoaiThongTin.TenLoaiThongTin.Value?.ToString()}")" Value="@thongtinNV.GiaTri.Value?.ToString()" Style="font-size: 16px; height: contain; border-width: 1px;"
+                                                                   @oninput="@(async (args) => {thongtinNV.GiaTri.Value = args.Value; await AnotherThongTinNhanVien_ValueIsOK(thongtinNV, kieudulieu);})">
+                                                    </RadzenTextBox>
+                                                </RadzenStack>
+                                            }
+                                            else if (kieudulieu == 2) // Kieu so
+                                            {
+                                                <RadzenStack Style="width: 50%;">
+                                                    <RadzenNumeric class="custom-placeholder" Placeholder="@($" * nhập {thongtinNV.LoaiThongTin.TenLoaiThongTin.Value?.ToString()}")" TValue="int"
+                                                                   Value="@(int.Parse(thongtinNV.GiaTri.Value?.ToString()?? "0"))"
+                                                                   ValueChanged="@(async (args) =>
+                                                                        {   thongtinNV.GiaTri.Value = args;
+                                                                            await AnotherThongTinNhanVien_ValueIsOK(thongtinNV, kieudulieu);
+                                                                        })"
+                                                                   Style="font-size: 16px; height: contain;" Min="0" Max="999999" />
+                                                </RadzenStack>
+                                            }
+                                            else if (kieudulieu == 3) // kieu ngay thang
+                                            {
+                                                bool ishaveValueOfday = DateTime.TryParse(thongtinNV.GiaTri.Value?.ToString(), out DateTime selectday);
+                                                if (ishaveValueOfday) selectday = selectday.Date.Add(DateTime.Now.TimeOfDay);
+                                                <RadzenStack Style="width: 50%;">
+                                                    <RadzenDatePicker class="custom-datepicker" Placeholder="@($"* nhập {thongtinNV.LoaiThongTin.TenLoaiThongTin.Value?.ToString()}")"
+                                                                      TValue="DateTime" Value="selectday" AllowClear="true"
+                                                                      Change="@(async (args) =>
+                                                                                {
+                                                                                    if (args != null)
+                                                                                    {
+                                                                                        DateTime value = args.Value.Date.Add(DateTime.Now.TimeOfDay);
+                                                                                        thongtinNV.GiaTri.Value = value;
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        thongtinNV.GiaTri.Value = string.Empty;
+                                                                                    }
+                                                                                    await AnotherThongTinNhanVien_ValueIsOK(thongtinNV, kieudulieu);
+                                                                                })"
+                                                                      ShowTime="false" HourFormat="12" DateFormat="@Common.DayTimeFormatnoTime" ParseInput="@Common.ParseDate" AllowInput="true"
+                                                                      Style="height: contain; font-size: 16px">
+                                                    </RadzenDatePicker>
+                                                </RadzenStack>
+                                            }
+
+                                            <RadzenStack Style="width: 40%;">
+                                                <RadzenAlert Visible="@(!thongtinNV.GiaTri.IsValueOK)" Text="@thongtinNV.GiaTri.NotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                                                <RadzenAlert Visible="@(thongtinNV.GiaTri.IsValueOK)" Text="@thongtinNV.GiaTri.NotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Success" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                                            </RadzenStack>
+                                            <RadzenStack Style="width: 8%; height: 100%" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                <RadzenButton Click="@(() => OnRemoveTruongThongTinNV(thongtinNV))" Icon="delete"
+                                                              ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 18px; width: 100%; height: 100%" />
+                                            </RadzenStack>
+                                        }
+                                    </RadzenStack>
+                                </RadzenStack>
+                            </RadzenStack>
+                        }
+                    </RadzenStack>
+                </RadzenCard>
+            </RadzenColumn>
+        </RadzenRow>
+
+        <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding-right: 15px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+            <RadzenButton Disabled="@(!IsAllValueThongTinOK())" Click="@(() => OnAddnewNhanVien())" Style="width: contain; height: 80%;" Icon="check" Text="Xác nhận thêm" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Default" Size="ButtonSize.Small" Variant="Variant.Filled" />
+            <RadzenButton Style="width: contain; height: 80%;" Icon="close" Text="Thoát" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" Click="@(() => OnCancelAddnewNhanVien())" />
+        </RadzenStack>
+    </RadzenStack>
+</RadzenCard>
+
+@code {
+    private NhanVien NewNhanVien = new();
+
+    protected override Task OnInitializedAsync()
+    {
+        // Get default danh sach nhan vien
+        NewNhanVien.DSThongTin = LoadDanhSachThongTinMacDinh().ToList();
+
+        return base.OnInitializedAsync();
+    }
+
+    // Add new thong tin nhan vien
+    private async Task OnOpenDialogAddThongTinKhac()
+    {
+        List<LoaiThongTinNhanVien> loaiThongTinNVs = await DialogService.OpenAsync<DialogAddNewThongTinNhanVien>(null, new Dictionary<string, object>() { { "TargetNhanVien", NewNhanVien }, { "IsAddThongTinInCreateNewNhanVienMode", true } },
+        new DialogOptions() { ShowTitle = false, Width = "45%", Height = "contain", Resizable = false, Draggable = false, ShowClose = false, Style = "background-color: while; border-radius: 10px; padding: 0px" });
+
+        if (loaiThongTinNVs != null && loaiThongTinNVs.Count > 0)
+        {
+            foreach (var loaiThongTinNV in loaiThongTinNVs)
+            {
+                var isexisting = NewNhanVien.DSThongTin.Any(thongtin => thongtin.LoaiThongTin.TenTruyXuat.Value?.ToString() == loaiThongTinNV.TenTruyXuat.Value?.ToString());
+
+                if (!isexisting)
+                {
+                    await Task.Delay(100);
+                    ThongTinNhanVien thongTin = new()
+                        {
+                            LoaiTTNVID = { Value = loaiThongTinNV.LoaiTTNVID.Value },
+                            LoaiThongTin = loaiThongTinNV,
+                            GiaTri = { Value = loaiThongTinNV.GiaTriMacDinh.Value }
+                        };
+                    await AnotherThongTinNhanVien_ValueIsOK(thongTin, int.Parse(thongTin.LoaiThongTin.KieuDuLieu.Value?.ToString() ?? "0"));
+                    NewNhanVien.DSThongTin.Add(thongTin);
+                }
+            }
+
+            //StateHasChanged();
+
+            ShowNotification("Đã thêm thông tin mới!", NotificationSeverity.Success, 3000);
+        }
+    }
+
+    // Kiem tra thong tin khac cua nhan vien da ton tai
+    private async Task AnotherThongTinNhanVien_ValueIsOK(ThongTinNhanVien thongTin, int kieudulieu)
+    {
+        await Task.Run(() =>
+        {
+            string value = thongTin.GiaTri.Value?.ToString() ?? string.Empty;
+            string? displayName = thongTin.LoaiThongTin.TenLoaiThongTin.Value?.ToString() ?? string.Empty;
+
+            if (string.IsNullOrEmpty(value.Trim()))
+            {
+                thongTin.GiaTri.IsValueOK = false; thongTin.GiaTri.NotifyMess = $"{displayName} không được để trống";
+            }
+            else
+            {
+                bool isValueOK = false;
+
+                if (kieudulieu == 1) // Kieu ki tu
+                {
+                    isValueOK = !string.IsNullOrEmpty(value.Trim());
+                }
+                else if (kieudulieu == 2) // Kieu so luong
+                {
+                    isValueOK = int.TryParse(value, out int soluong) && soluong > 0;
+                }
+                else if (kieudulieu == 3) // Kieu ngay thang
+                {
+                    isValueOK = DateTime.TryParse(value, out DateTime ngay);
+                }
+                else isValueOK = false;
+
+                if (isValueOK)
+                {
+                    thongTin.GiaTri.IsValueOK = true; thongTin.GiaTri.NotifyMess = "Giá trị hợp lệ";
+                }
+                else
+                {
+                    thongTin.GiaTri.IsValueOK = false; thongTin.GiaTri.NotifyMess = "Giá trị không hợp lệ";
+                }
+            }
+        });
+    }
+
+    // Kiem tra thong tin mac dinh cua nhan vien da ton tai
+    private async Task DefaultThongTinNhanVien_ValueIsOK(Propertyy propertyy, bool checkExisting)
+    {
+        await Task.Run(() =>
+        {
+            string value = propertyy.Value?.ToString() ?? string.Empty;
+            string? dbname = propertyy.DBName ?? string.Empty;
+            string? displayName = propertyy.DisplayName ?? string.Empty;
+
+            if (!string.IsNullOrEmpty(value.Trim()))
+            {
+                if (checkExisting)
+                {
+                    bool isExisting = SQLServerServices.DefaultThongTinNhanVien_ValueIsExisting(value, dbname);
+
+                    if (isExisting)
+                    {
+                        propertyy.IsValueOK = false; propertyy.NotifyMess = $"{displayName} đã tồn tại";
+                    }
+                    else
+                    {
+                        propertyy.IsValueOK = true; propertyy.NotifyMess = $"Giá trị hợp lệ";
+                    }
+                }
+                else
+                {
+                    propertyy.IsValueOK = true; propertyy.NotifyMess = $"Giá trị hợp lệ";
+                }
+            }
+            else
+            {
+                propertyy.IsValueOK = false; propertyy.NotifyMess = $"{displayName} không được để trống";
+            }
+        });
+    }
+
+    // Load danh sach thong tin mac dinh
+    private List<ThongTinNhanVien> LoadDanhSachThongTinMacDinh()
+    {
+        List<LoaiThongTinNhanVien> loaiThongTinNVs = SQLServerServices.GetDanhSachLoaiThongTinNhanVien(1);
+
+        List<ThongTinNhanVien> thongTinNVs = new();
+
+        foreach (var loaitt in loaiThongTinNVs)
+        {
+            ThongTinNhanVien thongtin = new() { LoaiThongTin = loaitt, LoaiTTNVID = { Value = loaitt.LoaiTTNVID.Value } };
+
+            thongTinNVs.Add(thongtin);
+        }
+
+        return thongTinNVs;
+    }
+
+    // Check trang thai gia tri cua tat ca truong thong tin isOK
+    private bool IsAllValueThongTinOK()
+    {
+        bool isOK = true;
+
+        isOK = (NewNhanVien.MaNhanVien.IsValueOK == true);
+
+        if (NewNhanVien.DSThongTin.Count > 0)
+        {
+            foreach (var thongtin in NewNhanVien.DSThongTin)
+            {
+                bool valueok = thongtin.GiaTri.IsValueOK;
+
+                if (!valueok)
+                {
+                    isOK = thongtin.GiaTri.IsValueOK;
+                }
+            }
+        }
+
+        return isOK;
+    }
+
+    // Remove truong thong tin
+    private async Task OnRemoveTruongThongTinNV(ThongTinNhanVien removeTTNV)
+    {
+        bool? comfirm = await DialogService.Confirm($"Loại bỏ trường thông tin này?", "Xác nhận", new ConfirmOptions() { OkButtonText = "Đồng ý", CancelButtonText = "Hủy" });
+
+        if (comfirm.Value)
+        {
+            NewNhanVien.DSThongTin.Remove(removeTTNV);
+        }
+    }
+
+    // Save new nhan vien to database
+    private async Task OnAddnewNhanVien()
+    {
+        bool? comfirm = await DialogService.Confirm($"Xác nhận thêm nhân viên?", "Xác nhận", new ConfirmOptions() { OkButtonText = "Đồng ý", CancelButtonText = "Hủy" });
+
+        if (comfirm.Value)
+        {
+            // Add new nhanvien
+            (int newNVid, string errorMess) = SQLServerServices.InsertNewNhanVien(NewNhanVien);
+
+            if (newNVid > 0)
+            {
+                // Gan id
+                NewNhanVien.NVID.Value = newNVid;
+                int result = newNVid;
+                // Link danh sach thong tin voi nhan vien vua tao
+                foreach (var thongtin in NewNhanVien.DSThongTin)
+                {
+                    // Gan nvid
+                    thongtin.NVID.Value = result;
+
+                    (int ttNVid, string err) = SQLServerServices.InsertThongTinNhanVien(thongtin);
+
+                    if (ttNVid < 0)
+                    {
+                        result = -1;
+                        errorMess = err;
+                        break;
+                    }
+                }
+
+                // Recheck sau khi link danh sach thongtinnhanvien
+                if (result < 0)
+                {
+                    SQLServerServices.DeleteNhanVien(newNVid);
+                    await DialogService.Alert($"{errorMess}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                }
+                else
+                {
+                    ShowNotification("Thêm nhân viên thành công!", NotificationSeverity.Success, 3000);
+
+                    bool? thoat = await DialogService.Alert($"Thêm mới nhân viên thành công", "<strong><span style='color: green'>Success!</span></strong>", new AlertOptions() { OkButtonText = "Thoát", ShowClose = true });
+
+                    if (thoat.Value)
+                    {
+                        DialogService.Close(NewNhanVien);
+                    }
+                }
+            }
+            else
+            {
+                await DialogService.Alert($"{errorMess}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+            }
+        }
+    }
+
+    // Cancel add new nhan vien
+    private void OnCancelAddnewNhanVien()
+    {
+        DialogService.Close(null);
+    }
+
+    // Notification
+    void ShowNotification(string message, NotificationSeverity notifytype, double time)
+    {
+        NotificationMessage notify = new NotificationMessage
+            {
+                Style = "position: fixed; top: 0; right: 0;",
+                Severity = notifytype,
+                Summary = message,
+                Duration = time
+            };
+
+        NotificationService.Notify(notify);
+    }
+}

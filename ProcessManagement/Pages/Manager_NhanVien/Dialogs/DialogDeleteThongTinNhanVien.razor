@@ -1,5 +1,5 @@
 ﻿@using ProcessManagement.Commons
-@using ProcessManagement.Models.MAYMOC
+@using ProcessManagement.Models.NHANVIEN
 @using ProcessManagement.Services.SQLServer
 @using Radzen.Blazor
 @using Radzen
@@ -13,12 +13,12 @@
 <RadzenCard Variant="Variant.Filled" Style="height: 100%; width: 100%; padding: 10px;">
     <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style=" height: 100%; width: 100%; padding: 0px; padding-bottom: 10px " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
         <RadzenStack Gap="20px" Style="height: contain; width: 100%; padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-            <RadzenText Text="Xóa trường thông tin này của máy móc/thiết bị?" Style="color: black; font-weight: 600; font-size: 18px"></RadzenText>
-            <RadzenText Text="@($"(Trường thông tin: {DeleteThongTinMM.LoaiThongTin.TenLoaiThongTin.Value?.ToString()})")" Style="font-weight: 600; font-style: italic; font-size: 18px"></RadzenText>
+            <RadzenText Text="Xóa trường thông tin này của nhân viên?" Style="color: black; font-weight: 600; font-size: 18px"></RadzenText>
+            <RadzenText Text="@($"(Trường thông tin: {DeleteThongTinNV.LoaiThongTin.TenLoaiThongTin.Value?.ToString()})")" Style="font-weight: 600; font-style: italic; font-size: 18px"></RadzenText>
         </RadzenStack>
         <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding: 5px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-            <RadzenCheckBox TValue="bool" Value=@IsDeleteForAllMayMoc Change=@(args => IsDeleteForAllMayMoc = args) Name="deleteForAllNVL" />
-            <RadzenLabel Text="Xóa trường thông tin này ở máy móc/thiết bị khác" Style="font-size: 16px; font-weight: 600; color: red; font-style: italic" Component="deleteForAllNVL" />
+            <RadzenCheckBox TValue="bool" Value=@IsDeleteForAllNhanVien Change=@(args => IsDeleteForAllNhanVien = args) Name="deleteForAllNVL" />
+            <RadzenLabel Text="Xóa trường thông tin này ở nhân viên khác" Style="font-size: 16px; font-weight: 600; color: red; font-style: italic" Component="deleteForAllNVL" />
         </RadzenStack>
     </RadzenStack>
     <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding-top: 10px; border-top: var(--rz-grid-cell-border) " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
@@ -29,16 +29,16 @@
 
 @code {
     [Parameter]
-    public ThongTinMayMoc DeleteThongTinMM { get; set; } = new();
-    private bool IsDeleteForAllMayMoc = false;
+    public ThongTinNhanVien DeleteThongTinNV { get; set; } = new();
+    private bool IsDeleteForAllNhanVien = false;
 
     private async Task OnDelete()
     {
-        if (DeleteThongTinMM.TTMMID.Value != null)
+        if (DeleteThongTinNV.TTNVID.Value != null)
         {
-            if (IsDeleteForAllMayMoc) // xoa loai thong tin for all may moc
+            if (IsDeleteForAllNhanVien) // xoa loai thong tin for all nhan vien
             {
-                (int result, string error) = SQLServerServices.DeleteLoaiThongTinMayMoc(DeleteThongTinMM.LoaiThongTin.LoaiTTMMID.Value);
+                (int result, string error) = SQLServerServices.DeleteLoaiThongTinNhanVien(DeleteThongTinNV.LoaiThongTin.LoaiTTNVID.Value);
 
                 if (result == -1)
                 {
@@ -51,9 +51,9 @@
                     DialogService.Close(result);
                 }
             }
-            else // chi xoa loai thong tin may moc hien tai
+            else // chi xoa loai thong tin hien tai
             {
-                (int result, string error) = SQLServerServices.DeleteThongTinMayMoc(DeleteThongTinMM.TTMMID.Value);
+                (int result, string error) = SQLServerServices.DeleteThongTinNhanVien(DeleteThongTinNV.TTNVID.Value);
 
                 if (result == -1)
                 {

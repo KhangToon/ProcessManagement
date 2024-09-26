@@ -1,5 +1,5 @@
 ﻿@using ProcessManagement.Commons
-@using ProcessManagement.Models.MAYMOC
+@using ProcessManagement.Models.NHANVIEN
 @using ProcessManagement.Services.SQLServer
 @using Radzen.Blazor
 @using Radzen
@@ -22,50 +22,50 @@
             <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
                 @{
                     <RadzenStack Style="width: 50%;">
-                        <RadzenTextBox class="custom-placeholder" Placeholder="@($" * nhập tên thông tin")" Value="@ThongTinMayMoc.LoaiThongTin.TenLoaiThongTin.Value?.ToString()" Style="font-size: 16px; height: contain; border-width: 1px;"
-                                       @oninput="@(async (args) => { ThongTinMayMoc.LoaiThongTin.TenLoaiThongTin.Value = args.Value; await DefaultThongTinMayMoc_ValueIsOK(ThongTinMayMoc.LoaiThongTin.TenLoaiThongTin);})">
+                        <RadzenTextBox class="custom-placeholder" Placeholder="@($" * nhập tên thông tin")" Value="@ThongTinNhanVien.LoaiThongTin.TenLoaiThongTin.Value?.ToString()" Style="font-size: 16px; height: contain; border-width: 1px;"
+                                       @oninput="@(async (args) => { ThongTinNhanVien.LoaiThongTin.TenLoaiThongTin.Value = args.Value; await DefaultThongTinNhanVien_ValueIsOK(ThongTinNhanVien.LoaiThongTin.TenLoaiThongTin);})">
                         </RadzenTextBox>
                     </RadzenStack>
 
                     <RadzenStack Style="width: 50%;">
-                        <RadzenAlert Visible="@(!ThongTinMayMoc.LoaiThongTin.TenLoaiThongTin.IsValueOK)" Text="@ThongTinMayMoc.LoaiThongTin.TenLoaiThongTin.NotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
-                        <RadzenAlert Visible="@(ThongTinMayMoc.LoaiThongTin.TenLoaiThongTin.IsValueOK)" Text="@ThongTinMayMoc.LoaiThongTin.TenLoaiThongTin.NotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Success" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                        <RadzenAlert Visible="@(!ThongTinNhanVien.LoaiThongTin.TenLoaiThongTin.IsValueOK)" Text="@ThongTinNhanVien.LoaiThongTin.TenLoaiThongTin.NotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                        <RadzenAlert Visible="@(ThongTinNhanVien.LoaiThongTin.TenLoaiThongTin.IsValueOK)" Text="@ThongTinNhanVien.LoaiThongTin.TenLoaiThongTin.NotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Success" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
                     </RadzenStack>
                 }
             </RadzenStack>
         </RadzenStack>
     </RadzenStack>
     <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding-top: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
-        <RadzenButton Disabled="@(!(ThongTinMayMoc.LoaiThongTin.TenLoaiThongTin.IsValueOK))" Style="width: contain;" Icon="check" Text="Lưu thay đổi" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Dark" Variant="Variant.Flat" Click="@(() => OnSaveNewName())" />
-        <RadzenButton Style="width: 120px;" Icon="close" Text="Hủy" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" Click="@(() => { ThongTinMayMoc.LoaiThongTin.TenLoaiThongTin.Value = oldName; DialogService.Close(null); })" />
+        <RadzenButton Disabled="@(!(ThongTinNhanVien.LoaiThongTin.TenLoaiThongTin.IsValueOK))" Style="width: contain;" Icon="check" Text="Lưu thay đổi" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Dark" Variant="Variant.Flat" Click="@(() => OnSaveNewName())" />
+        <RadzenButton Style="width: 120px;" Icon="close" Text="Hủy" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" Click="@(() => { ThongTinNhanVien.LoaiThongTin.TenLoaiThongTin.Value = oldName; DialogService.Close(null); })" />
     </RadzenStack>
 </RadzenCard>
 
 @code {
     [Parameter]
-    public ThongTinMayMoc ThongTinMayMoc { get; set; } = new();
+    public ThongTinNhanVien ThongTinNhanVien { get; set; } = new();
     [Parameter]
-    public MayMoc TargetMayMoc { get; set; } = new();
+    public NhanVien TargetNhanVien { get; set; } = new();
 
     private string oldName = string.Empty;
 
     protected async override Task OnInitializedAsync()
     {
-        oldName = ThongTinMayMoc.LoaiThongTin.TenLoaiThongTin.Value?.ToString() ?? string.Empty;
+        oldName = ThongTinNhanVien.LoaiThongTin.TenLoaiThongTin.Value?.ToString() ?? string.Empty;
 
-        await DefaultThongTinMayMoc_ValueIsOK(ThongTinMayMoc.LoaiThongTin.TenLoaiThongTin);
+        await DefaultThongTinNhanVien_ValueIsOK(ThongTinNhanVien.LoaiThongTin.TenLoaiThongTin);
 
         await base.OnInitializedAsync();
     }
 
     private async Task OnSaveNewName()
     {
-        string newName = (ThongTinMayMoc.LoaiThongTin.TenLoaiThongTin.Value?.ToString() ?? string.Empty).Trim();
+        string newName = (ThongTinNhanVien.LoaiThongTin.TenLoaiThongTin.Value?.ToString() ?? string.Empty).Trim();
 
         // Get ten truy xuat
         string newtentruyxuat = Common.RemoveDiacriticsAndSpaces(newName);
 
-        (int result, string error) = SQLServerServices.UpdateLoaiThongTinMayMocName(ThongTinMayMoc.LoaiThongTin.LoaiTTMMID.Value, newName, newtentruyxuat);
+        (int result, string error) = SQLServerServices.UpdateLoaiThongTinNhanVienName(ThongTinNhanVien.LoaiThongTin.LoaiTTNVID.Value, newName, newtentruyxuat);
 
         if (result > 0)
         {
@@ -77,8 +77,8 @@
 
     }
 
-    // Kiem tra thong tin mac dinh cua may moc da ton tai
-    private async Task DefaultThongTinMayMoc_ValueIsOK(Propertyy propertyy)
+    // Kiem tra thong tin mac dinh cua nhan vien da ton tai
+    private async Task DefaultThongTinNhanVien_ValueIsOK(Propertyy propertyy)
     {
         await Task.Run(() =>
         {
@@ -95,13 +95,13 @@
                 // Get ten truy xuat
                 string tentruyxuat = Common.RemoveDiacriticsAndSpaces(value);
 
-                List<Propertyy> columns = TargetMayMoc?.GetPropertiesValues() ?? new();
+                List<Propertyy> columns = TargetNhanVien?.GetPropertiesValues() ?? new();
 
                 // Kiem tra ten trong danh sach main detail
                 bool isMainNameExisting = columns.Any(cl => Common.RemoveDiacriticsAndSpaces(cl.DBName ?? string.Empty) == tentruyxuat);
 
                 // Kiem tra ten trong danh sach extra detail
-                bool isExisting = SQLServerServices.IsExisting_LoaiThongTinMayMoc_Name(tentruyxuat);
+                bool isExisting = SQLServerServices.IsExisting_LoaiThongTinNhanVien_Name(tentruyxuat);
 
                 if (isExisting || isMainNameExisting)
                 {

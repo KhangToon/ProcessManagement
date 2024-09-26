@@ -32,6 +32,12 @@
         font-size: 14px;
         font-style: italic;
     }
+
+    .rz-grid-table-fixed-2 {
+        table-layout: auto;
+        border-radius: 10px;
+        padding: 10px;
+    }
 </style>
 
 <RadzenRow Gap="0" Style="height: 100%; width: 100%; overflow-y: auto; background-color: white; border-radius: 10px;">
@@ -47,7 +53,7 @@
                                     <RadzenText Text="QUẢN LÝ MÁY MÓC/THIẾT BỊ" Style="color: green; font-weight: 600; font-size: 18px"></RadzenText>
                                 </RadzenStack>
                                 <RadzenStack Gap="15px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: 100%; width: 60%;">
-                                    <RadzenTextBox @oninput="@((args) => FilterNVL(args?.Value))" Placeholder="Tìm theo tên, mã, serial máy/thiết bị" Style="border-radius: 20px; padding-left: 20px; border-width: 2px; border-color: var(--rz-primary-light); width: 50% "></RadzenTextBox>
+                                    <RadzenTextBox @oninput="@((args) => FilterNV(args?.Value))" Placeholder="Tìm theo tên, mã, serial máy/thiết bị" Style="border-radius: 20px; padding-left: 20px; border-width: 2px; border-color: var(--rz-primary-light); width: 50% "></RadzenTextBox>
                                     <RadzenButton Icon="search" ButtonStyle="ButtonStyle.Primary" Style="border-radius: 20px;" />
                                     <RadzenButton Click="@(async() => { await LoadAllDanhsachMayMocBase(); ReSelectCurrentMayMoc(Common.SelectedMayMocid); })" IsBusy="@isLoadingDSMM" BusyText=" Loading..." Style="border-radius: 20px;" Icon="autorenew" ButtonStyle="ButtonStyle.Primary" />
                                 </RadzenStack>
@@ -87,8 +93,8 @@
 
                                     <!--Datagrid danh sach may moc-->
                                     <RadzenStack Visible="@(DSachMayMocs?.Count > 0)" Style="height: 450px; width: 100%; padding-top: 10px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start">
-                                        <RadzenDataGrid Data="@(DSachMayMocs)" TItem="MayMoc" IsLoading="@isLoadingDSMM"
-                                                        EmptyText="Danh sách máy móc trống." Style="padding-right: 0; overflow-x: scroll; width: 100%; height: 100%"
+                                        <RadzenDataGrid class="rz-grid-table-fixed-2" Data="@(DSachMayMocs)" TItem="MayMoc" IsLoading="@isLoadingDSMM"
+                                                        EmptyText="Danh sách máy móc trống." Style="overflow-x: scroll; width: 100%; height: 100%"
                                                         ShowColumnTitleAsTooltip="true" ShowCellDataAsTooltip="true"
                                                         AllowFiltering="false" FilterMode="FilterMode.Simple"
                                                         AllowPaging="true" AllowSorting="false" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
@@ -164,7 +170,7 @@
                                                         </HeaderTemplate>
                                                         <Template Context="may">
                                                             @{
-                                                                string valuensd = may.DSThongTin.FirstOrDefault(tt => tt.LoaiThongTin.TenThongTin.Value?.ToString()?.Trim() == Common.MM_NgaySuDung)?.GiaTri.Value?.ToString() ?? string.Empty;
+                                                                string valuensd = may.DSThongTin.FirstOrDefault(tt => tt.LoaiThongTin.TenLoaiThongTin.Value?.ToString()?.Trim() == Common.MM_NgaySuDung)?.GiaTri.Value?.ToString() ?? string.Empty;
                                                                 bool ishaveValueOfday = DateTime.TryParse(valuensd, out DateTime vldate);
 
                                                                 <RadzenText Visible="@ishaveValueOfday" Text="@vldate.ToString("dd/MM/yyyy")" Style="font-size: 15px; height: contain; color: black; font-weight: 500"></RadzenText>
@@ -287,7 +293,7 @@
                                                             {
                                                                 <RadzenStack Gap="0" Style="height: contain; width: 100%; padding-bottom: 5px; padding-top: 5px; padding-left: 20px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                                                     <RadzenStack Style="width: 30%;">
-                                                                        <RadzenText Text="@(mmdetail.LoaiThongTin.TenThongTin.Value?.ToString())" Style="font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
+                                                                        <RadzenText Text="@(mmdetail.LoaiThongTin.TenLoaiThongTin.Value?.ToString())" Style="font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
                                                                     </RadzenStack>
                                                                     <RadzenStack Style="width: 55%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="@((isEditMayMocDetail)? JustifyContent.Start : JustifyContent.Center)">
                                                                         @{
@@ -299,13 +305,13 @@
 
                                                                                 if (kieudulieu == 1) // kieu ki tu
                                                                                 {
-                                                                                    <RadzenTextBox class="custom-placeholder" Placeholder="@($"* nhập {mmdetail.LoaiThongTin.TenThongTin.Value?.ToString()}")"
+                                                                                    <RadzenTextBox class="custom-placeholder" Placeholder="@($"* nhập {mmdetail.LoaiThongTin.TenLoaiThongTin.Value?.ToString()}")"
                                                                                                    Value="@mmdetail.GiaTri.Value?.ToString()" ValueChanged="@((args) => { mmdetail.GiaTri.Value = args; } )"
                                                                                                    Style="font-size: 16px; height: contain; border-width: 1px; width: 100% "></RadzenTextBox>
                                                                                 }
                                                                                 else if (kieudulieu == 2) // kieu so
                                                                                 {
-                                                                                    <RadzenNumeric class="custom-placeholder" Placeholder="@($"* nhập {mmdetail.LoaiThongTin.TenThongTin.Value?.ToString()}")" TValue="int"
+                                                                                    <RadzenNumeric class="custom-placeholder" Placeholder="@($"* nhập {mmdetail.LoaiThongTin.TenLoaiThongTin.Value?.ToString()}")" TValue="int"
                                                                                                    Value="@int.Parse(mmdetail.GiaTri.Value?.ToString()?? "0")" Min="1" Max="999999"
                                                                                                    ValueChanged="@((args) => { mmdetail.GiaTri.Value = args; })"
                                                                                                    Style="font-size: 16px; height: contain; border-width: 1px; width: 100%" />
@@ -315,7 +321,7 @@
                                                                                     bool ishaveValueOfday = DateTime.TryParse(mmdetail.GiaTri.Value?.ToString(), out DateTime selectday);
                                                                                     if (ishaveValueOfday) selectday = selectday.Date.Add(DateTime.Now.TimeOfDay);
 
-                                                                                    <RadzenDatePicker class="custom-datepicker" Placeholder="@($"* nhập {mmdetail.LoaiThongTin.TenThongTin.Value?.ToString()}")"
+                                                                                    <RadzenDatePicker class="custom-datepicker" Placeholder="@($"* nhập {mmdetail.LoaiThongTin.TenLoaiThongTin.Value?.ToString()}")"
                                                                                                       TValue="DateTime" Value="selectday" AllowClear="true"
                                                                                                       Change="@((args) =>
                                                                                                         {
@@ -437,7 +443,7 @@
 
     bool isSearching = false;
     // Searching
-    private async Task FilterNVL(object? args)
+    private async Task FilterNV(object? args)
     {
         await Task.Run(() =>
         {
