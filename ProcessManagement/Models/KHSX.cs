@@ -1,5 +1,7 @@
 ﻿using ProcessManagement.Commons;
 using ProcessManagement.Models.KHO_NVL;
+using ProcessManagement.Models.NHANVIEN;
+using ProcessManagement.Models.SANPHAM;
 using System.Reflection;
 
 namespace ProcessManagement.Models

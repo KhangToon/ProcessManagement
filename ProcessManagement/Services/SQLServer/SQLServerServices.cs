@@ -7,6 +7,7 @@ using ProcessManagement.Models.KHO_NVL.Tracking;
 using ProcessManagement.Models.KHO_NVL.XuatKho;
 using ProcessManagement.Models.MAYMOC;
 using ProcessManagement.Models.NHANVIEN;
+using ProcessManagement.Models.SANPHAM;
 using System.Data;
 using System.Text.RegularExpressions;
 
@@ -474,9 +475,9 @@ namespace ProcessManagement.Services.SQLServer
         }
 
         // Load danh sach chi tiet san pham
-        public List<SanPham.ChitietSanPham> GetDSachChitietSanPham(SanPham sanPham)
+        public List<ChitietSanPham> GetDSachChitietSanPham(SanPham sanPham)
         {
-            List<SanPham.ChitietSanPham> listChitietSanphams = new();
+            List<ChitietSanPham> listChitietSanphams = new();
 
             using (var connection = new SqlConnection(connectionString))
             {
@@ -490,7 +491,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 while (reader.Read())
                 {
-                    SanPham.ChitietSanPham rowSP = new();
+                    ChitietSanPham rowSP = new();
 
                     List<Propertyy> rowSPitems = rowSP.GetPropertiesValues();
 
@@ -511,7 +512,7 @@ namespace ProcessManagement.Services.SQLServer
         }
 
         // Kiem tra newchitietsp da co hay chua 
-        public (int, string) CheckNewChitietSanpham(SanPham.ChitietSanPham newChitietSP)
+        public (int, string) CheckNewChitietSanpham(ChitietSanPham newChitietSP)
         {
             string errorMess = string.Empty;
 
@@ -586,7 +587,7 @@ namespace ProcessManagement.Services.SQLServer
         }
 
         // Them moi chi tiet san pham
-        public (int, string) InsertNewChitietSanPham(SanPham.ChitietSanPham newchitietSP)
+        public (int, string) InsertNewChitietSanPham(ChitietSanPham newchitietSP)
         {
             List<Propertyy> newctspItems = newchitietSP.GetPropertiesValues().Where(po => po.AlowDatabase == true && po.Value != null).ToList();
 
@@ -632,7 +633,7 @@ namespace ProcessManagement.Services.SQLServer
         }
 
         // Update danh sach chi tiet san pham
-        public (int, string) UpdateDanhSachChitietSanpham(List<SanPham.ChitietSanPham>? chitietSanphamList)
+        public (int, string) UpdateDanhSachChitietSanpham(List<ChitietSanPham>? chitietSanphamList)
         {
             int result = -1; string errorMess = string.Empty;
 
@@ -708,7 +709,7 @@ namespace ProcessManagement.Services.SQLServer
         }
 
         // Delete chi tiet san pham
-        public (int, string) DeleteChitietSanPham(SanPham.ChitietSanPham? removeChitiet)
+        public (int, string) DeleteChitietSanPham(ChitietSanPham? removeChitiet)
         {
             int result = -1; string errorMess = string.Empty;
 

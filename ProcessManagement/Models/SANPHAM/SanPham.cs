@@ -1,21 +1,20 @@
 ﻿using ProcessManagement.Commons;
-using ProcessManagement.Models.KHO_NVL;
 using System.Reflection;
 
-namespace ProcessManagement.Models
+namespace ProcessManagement.Models.SANPHAM
 {
-    public class NVLofSanPham
+    public class SanPham
     {
-        public Propertyy NVLSPID { get; set; } = new() { DBName = Common.NVLID, DisplayName = "NVLSPID", Type = typeof(int), AlowDatabase = false, AlowDisplay = false }; // ID
-        public Propertyy SPID { get; set; } = new() { DBName = Common.SPID, DisplayName = "SP ID", Type = typeof(int), AlowDatabase = true, };
-        public Propertyy NVLID { get; set; } = new() { DBName = Common.NVLID, DisplayName = "NVL ID", Type = typeof(int), AlowDatabase = true, };
-        public Propertyy NgayThem { get; set; } = new() { DBName = Common.NgayThem, DisplayName = "Ngày thêm", Type = typeof(DateTime), AlowDatabase = true };
-
-        public NguyenVatLieu TargetNgLieu { get; set; } = new();
+        public Propertyy SPID { get; set; } = new() { DBName = Common.SPID, Type = typeof(int), AlowDatabase = false };
+        public Propertyy MaSP { get; set; } = new() { DBName = Common.MaSP, Type = typeof(string), AlowDatabase = true };
+        public Propertyy TenSanPham { get; set; } = new() { DBName = Common.TenSanPham, Type = typeof(string), AlowDatabase = true };
+        public Propertyy NgayTao { get; set; } = new() { DBName = Common.NgayTao, Type = typeof(DateTime), AlowDatabase = true };
+        public List<ChitietSanPham>? ChitietSanPhams { get; set; }
+        public List<NVLofSanPham>? DanhSachNVLs { get; set; }
 
         public List<Propertyy> GetPropertiesValues()
         {
-            Type propertyType = typeof(NVLofSanPham);
+            Type propertyType = typeof(SanPham);
 
             FieldInfo[] fields = propertyType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
@@ -56,5 +55,7 @@ namespace ProcessManagement.Models
 
             return tagetProperty?.Value;
         }
+
+        
     }
 }

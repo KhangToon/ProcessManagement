@@ -11,15 +11,15 @@ namespace ProcessManagement.Commons
         public const string DayTimeFormatnoTime = "dd-MM-yyyy";
 
         // Table Sanpham //
-        public const string TableSanPham = "Table_SanPham";
+        public const string TableSanPham = "SP_SanPham";
         public const string SPID = "SPID";
         public const string MaSP = "Mã SP";
         public const string TenSanPham = "Tên SP";
         public const string SoLuong = "Số lượng";
         public const string NgayTao = "Ngày tạo";
 
-        // Table Sanpham //
-        public const string TableChitietSanPham = "Table_ChitietSanPham";
+        // Table ChitietSanPham //
+        public const string TableChitietSanPham = "SP_ChitietSanPham";
         public const string CTSPID = "CTSPID";
         //public const string SPID = "SPID";
         public const string PropertyName = "PropertyName";
@@ -27,7 +27,7 @@ namespace ProcessManagement.Commons
         public const string PropertyType = "PropertyType";
 
         // Table NVL of Sanpham
-        public const string TableNVLofSanPham = "Table_NVLofSanPham";
+        public const string TableNVLofSanPham = "SP_NVLofSanPham";
         //public const string NVLID = "NVLID";
         //public const string SPID = "SPID";
         //public const string MaLoaiSP = "MaLoaiSP";

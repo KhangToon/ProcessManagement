@@ -1,4 +1,5 @@
-﻿@using ProcessManagement.Services.SQLServer
+﻿@using ProcessManagement.Models.SANPHAM
+@using ProcessManagement.Services.SQLServer
 @using Radzen.Blazor
 @using Radzen
 @using ProcessManagement.Commons
@@ -89,7 +90,7 @@
     [Parameter]
     public string? Tensanpham { get; set; }
 
-    private SanPham.ChitietSanPham NewchitietSanpham = new();
+    private ChitietSanPham NewchitietSanpham = new();
 
     private Dictionary<string, int> Itemtypes = new Dictionary<string, int>() { { "Ký tự", 1 }, { "Số lượng", 2 }, { "Ngày tháng", 3 } };
 
@@ -100,7 +101,7 @@
         await base.OnInitializedAsync();
     }
 
-    private async Task OnSubmitNewItems(SanPham.ChitietSanPham? chitietSanpham)
+    private async Task OnSubmitNewItems(ChitietSanPham? chitietSanpham)
     {
         foreach (var property in NewchitietSanpham.GetPropertiesValues())
         {
