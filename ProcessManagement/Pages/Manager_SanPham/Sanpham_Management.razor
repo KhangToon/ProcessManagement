@@ -90,7 +90,7 @@
                                             {
                                                 foreach (var property in sp_properties)
                                                 {
-                                                    if (property.DBName != Common.SPID && property.DBName != Common.SoLuong)
+                                                    if (property.DBName != Common.SP_SPID && property.DBName != Common.SoLuong)
                                                     {
                                                         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: contain; width: 25%; padding-right: 10px; border-right: var(--rz-grid-cell-border);">
                                                             <RadzenStack Style="width: 30%; height: contain" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
@@ -179,9 +179,9 @@
                                                     <span style="font-weight: bold; font-size: 16px; color: white">@colName</span>
                                                 </HeaderTemplate>
                                                 <Template Context="sp">
-                                                    @if (colName.Contains(Common.MaSP))
+                                                    @if (colName.Contains(Common.SP_MaSP))
                                                     {
-                                                        <span style="color: darkred; font-weight: bolder;">@sp.MaSP.Value</span>
+                                                        <span style="color: darkred; font-weight: bolder;">@sp.SP_MaSP.Value</span>
                                                     }
                                                     else if (colName == Common.NgayTao)
                                                     {
@@ -269,14 +269,14 @@
         {
             <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center" Style="width: 100%; height: contain; padding-top: 10px ">
                 <RadzenText Text="Thông tin chi tiết sản phẩm" Style="font-size: 16px; font-weight: 600; height: contain; color: darkred"></RadzenText>
-                <RadzenText Text="@SelectedSanPham?.MaSP.Value?.ToString()" Style="font-size: 18px; font-weight: 600; height: contain; color: darkblue"></RadzenText>
+                <RadzenText Text="@SelectedSanPham?.SP_MaSP.Value?.ToString()" Style="font-size: 18px; font-weight: 600; height: contain; color: darkblue"></RadzenText>
             </RadzenStack>
         }
         else if (mode == 2)
         {
             <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center" Style="width: 100%; height: contain; padding-top: 10px">
                 <RadzenText Text="Sửa thông tin sản phẩm" Style="font-size: 16px; font-weight: 600; height: contain; color: darkred "></RadzenText>
-                <RadzenText Text="@SelectedSanPham?.TenSanPham.Value?.ToString()" Style="font-size: 16px; font-weight: 600; height: contain; color: darkblue"></RadzenText>
+                <RadzenText Text="@SelectedSanPham?.SP_TenSanPham.Value?.ToString()" Style="font-size: 16px; font-weight: 600; height: contain; color: darkblue"></RadzenText>
             </RadzenStack>
         }
 
@@ -302,7 +302,7 @@
                                 {
                                     <!--Mode 1-->
                                     <RadzenStack Style="width: 70%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);">
-                                        @if (item.PropertyName.Value?.ToString() == Common.TenSanPham)
+                                        @if (item.PropertyName.Value?.ToString() == Common.SP_TenSanPham)
                                         {
                                             <RadzenText Text="@item.PropertyValue.Value?.ToString()" Style="color: darkblue; font-size: 14px; font-weight: bold; height: contain; width: 100%"></RadzenText>
                                         }
@@ -317,7 +317,7 @@
                                     <RadzenStack Style="width: 70%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);">
                                         @if (item.PropertyType.Value?.ToString() == "1")
                                         {
-                                            @if (item.PropertyName.Value?.ToString() == Common.TenSanPham)
+                                            @if (item.PropertyName.Value?.ToString() == Common.SP_TenSanPham)
                                             {
                                                 <RadzenText Text="@item.PropertyValue.Value?.ToString()" Style="color: darkblue; font-size: 16px; font-weight: bold; height: contain; width: 100%"></RadzenText>
                                             }
@@ -393,8 +393,8 @@
 
         await Task.Delay(100);
 
-        List<SanPham>? sanphamsFilter = ListSanPhams?.FindAll(cl => (cl.MaSP.Value?.ToString()?.IndexOf(keysearch, StringComparison.OrdinalIgnoreCase) >= 0
-                                                                    || cl.TenSanPham.Value?.ToString()?.IndexOf(keysearch, StringComparison.OrdinalIgnoreCase) >= 0));
+        List<SanPham>? sanphamsFilter = ListSanPhams?.FindAll(cl => (cl.SP_MaSP.Value?.ToString()?.IndexOf(keysearch, StringComparison.OrdinalIgnoreCase) >= 0
+                                                                    || cl.SP_TenSanPham.Value?.ToString()?.IndexOf(keysearch, StringComparison.OrdinalIgnoreCase) >= 0));
 
         ListSanPhams = sanphamsFilter;
     }
@@ -405,7 +405,7 @@
 
         if (displaybyDay)
         {
-            ListSanPhams = SQLServerServices.GetlistSanphams().Where(sp => (startSearchDay <= Convert.ToDateTime(sp.NgayTao.Value) && Convert.ToDateTime(sp.NgayTao.Value) < offsetendDay)).ToList();
+            ListSanPhams = SQLServerServices.GetlistSanphams().Where(sp => (startSearchDay <= Convert.ToDateTime(sp.SP_NgayTao.Value) && Convert.ToDateTime(sp.SP_NgayTao.Value) < offsetendDay)).ToList();
         }
         else ListSanPhams = SQLServerServices.GetlistSanphams();
     }
@@ -414,7 +414,7 @@
     {
         foreach (var property in NewSanpham.GetPropertiesValues())
         {
-            if (property.DBName != Common.SPID && property.DBName != Common.SoLuong)
+            if (property.DBName != Common.SP_SPID && property.DBName != Common.SoLuong)
             {
                 if (property.Value == null || property.Value.ToString()?.Trim() == string.Empty)
                 {
@@ -448,11 +448,11 @@
     {
         if (SelectedSanPham != null)
         {
-            string? productid = SelectedSanPham.SPID.Value?.ToString();
+            string? productid = SelectedSanPham.SP_SPID.Value?.ToString();
 
             if (!string.IsNullOrEmpty(productid))
             {
-                string tensanpham = SelectedSanPham.TenSanPham.Value?.ToString() ?? string.Empty;
+                string tensanpham = SelectedSanPham.SP_TenSanPham.Value?.ToString() ?? string.Empty;
 
                 int result = await DialogService.OpenAsync<DialogThemthongtinSanPham>(null, new Dictionary<string, object>() { { "Tensanpham", tensanpham }, { "ProductID", int.Parse(productid) } },
                 new DialogOptions() { ShowTitle = false, Width = "50%", Height = "contain", Resizable = false, Draggable = false, ShowClose = false, Style = "background-color: while; border-radius: 0px; padding: 0px" });
@@ -461,7 +461,7 @@
                 {
                     OnSearchProductListFromDayRange();
 
-                    SelectedSanPham = ListSanPhams?.Find(sp => sp.SPID.Value?.ToString() == productid.ToString());
+                    SelectedSanPham = ListSanPhams?.Find(sp => sp.SP_SPID.Value?.ToString() == productid.ToString());
                 }
             }
         }
@@ -481,7 +481,7 @@
         {
             OnSearchProductListFromDayRange();
 
-            SelectedSanPham = ListSanPhams?.Find(sp => sp.SPID.Value?.ToString() == sanPham.SPID.Value?.ToString());
+            SelectedSanPham = ListSanPhams?.Find(sp => sp.SP_SPID.Value?.ToString() == sanPham.SP_SPID.Value?.ToString());
 
             mode = 1;
 
@@ -508,7 +508,7 @@
             {
                 OnSearchProductListFromDayRange();
 
-                SelectedSanPham = ListSanPhams?.Find(sp => sp.SPID.Value?.ToString() == removeItem.SPID.Value?.ToString());
+                SelectedSanPham = ListSanPhams?.Find(sp => sp.SP_SPID.Value?.ToString() == removeItem.SPID.Value?.ToString());
 
                 ShowNotification("Xóa thành công!", NotificationSeverity.Success, 2000);
             }

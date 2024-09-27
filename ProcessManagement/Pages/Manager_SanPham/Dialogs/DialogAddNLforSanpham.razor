@@ -15,7 +15,7 @@
     <RadzenStack Gap="0" Style="height: 100%; width: 100%; margin: 0" Orientation="Orientation.Vertical" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start">
         <RadzenStack Orientation="Orientation.Horizontal" Gap="10px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: 5%; width: 100%; padding-bottom: 10px">
             <RadzenText Text="@($"Thêm loại nguyên liệu cho sản phẩm")" Style="font-size: 20px; font-weight: 600; color: darkred"></RadzenText>
-            <RadzenText Text="@($"{Sanpham?.TenSanPham.Value?.ToString()}")" Style="font-size: 18px; font-weight: 600; color: darkblue"></RadzenText>
+            <RadzenText Text="@($"{Sanpham?.SP_TenSanPham.Value?.ToString()}")" Style="font-size: 18px; font-weight: 600; color: darkblue"></RadzenText>
         </RadzenStack>
         <RadzenRow Gap="10px" Style="height: contain; width: 100%; border-radius: 10px; border-top: var(--rz-grid-cell-border); border-bottom: var(--rz-grid-cell-border); overflow-y: scroll; padding: 0;">
             <RadzenColumn Size="12" SizeMD="5" Style="height: 100%; width: 100%; padding: 15px; padding-right: 5px">
@@ -96,7 +96,7 @@
                     <RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: 100%; width: 100%;">
                         <RadzenStack Orientation="Orientation.Horizontal" Gap="10px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: contain; width: 100%;">
                             <RadzenText Text="@($"Danh sách nguyên liệu đã có của sản phẩm")" Style="font-size: 18px; font-weight: 500; color: black"></RadzenText>
-                            <RadzenText Text="@($"{Sanpham?.TenSanPham.Value?.ToString()}")" Style="font-size: 18px; font-weight: 600; color: darkblue"></RadzenText>
+                            <RadzenText Text="@($"{Sanpham?.SP_TenSanPham.Value?.ToString()}")" Style="font-size: 18px; font-weight: 600; color: darkblue"></RadzenText>
                         </RadzenStack>
                         <RadzenCard Variant="Variant.Flat" Style="min-height: 290px; width: 100%; border-radius: 10px; margin-top: 10px">
                             <RadzenStack Style="height: 100%; width: 100%; padding: 5px;" Gap="0" Orientation="Orientation.Vertical">
@@ -136,10 +136,10 @@
                                                     <RadzenText Text="@nguyenvatlieu.TenNVL.Value?.ToString()" Style="font-size: 16px; font-weight: 600; color: darkred"></RadzenText>
                                                 </RadzenStack>
                                                 <RadzenStack Style="width: 30%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                    <RadzenText Text="@Sanpham?.TenSanPham.Value?.ToString()" Style="font-size: 16px; font-weight: 600; color: darkblue"></RadzenText>
+                                                    <RadzenText Text="@Sanpham?.SP_TenSanPham.Value?.ToString()" Style="font-size: 16px; font-weight: 600; color: darkblue"></RadzenText>
                                                 </RadzenStack>
                                                 <RadzenStack Style="width: 30%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                    <RadzenText Text="@nvlofSP.NgayThem.Value?.ToString()" Style="font-size: 16px; font-weight: 500;"></RadzenText>
+                                                    <RadzenText Text="@nvlofSP.SP_NgayThem.Value?.ToString()" Style="font-size: 16px; font-weight: 500;"></RadzenText>
                                                 </RadzenStack>
                                                 <RadzenStack Style="width: 5%; height: contain; padding-bottom: 5px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                     <RadzenButton Click="@(() => OnDeleteNVLofSP(nvlofSP))" Style="background-color: black;" Icon="delete" Size="ButtonSize.Small" Variant="Variant.Filled"></RadzenButton>
@@ -225,8 +225,8 @@
                 NVLofSanPham newNVLofSP = new()
                     {
                         NVLID = { Value = selectNguyenVL.NVLID.Value },
-                        SPID = { Value = Sanpham?.SPID.Value },
-                        NgayThem = { Value = DateTime.Now }
+                        SP_SPID = { Value = Sanpham?.SP_SPID.Value },
+                        SP_NgayThem = { Value = DateTime.Now }
                     };
 
                 // Check nvl da co trong dsnvl cua san pham
@@ -240,7 +240,7 @@
                     {
                         ShowNotification("Thêm thành công!", NotificationSeverity.Success, 2000);
 
-                        newNVLofSP.NVLSPID.Value = result;
+                        newNVLofSP.SP_NVLSPID.Value = result;
 
                         Sanpham?.DanhSachNVLs?.Add(newNVLofSP);
                     }
@@ -251,7 +251,7 @@
                 }
                 else
                 {
-                    await DialogService.Alert($"Sản phẩm {Sanpham?.TenSanPham.Value?.ToString()} đã tồn tại nguyên liệu này!<br>Hãy chọn nguyên liệu khác", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                    await DialogService.Alert($"Sản phẩm {Sanpham?.SP_TenSanPham.Value?.ToString()} đã tồn tại nguyên liệu này!<br>Hãy chọn nguyên liệu khác", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
                 }
             }
             else

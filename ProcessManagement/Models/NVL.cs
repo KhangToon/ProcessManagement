@@ -11,7 +11,7 @@ namespace ProcessManagement.Models
 
         public Propertyy LoaiNVL = new() { DBName = Common.LoaiNL, Type = typeof(string), AlowDatabase = true };
 
-        public Propertyy MaSP = new() { DBName = Common.MaSP, Type = typeof(string), AlowDatabase = true };
+        public Propertyy MaSP = new() { DBName = Common.SP_MaSP, Type = typeof(string), AlowDatabase = true };
 
         public Propertyy MaQuanLy = new() { DBName = Common.MaQuanLy, Type = typeof(string), AlowDatabase = true };
 

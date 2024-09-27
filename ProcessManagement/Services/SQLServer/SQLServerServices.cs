@@ -112,7 +112,7 @@ namespace ProcessManagement.Services.SQLServer
         {
             List<NVL> listNVL = new();
 
-            if (sanpham == null || sanpham.MaSP.Value == null) { return listNVL; }
+            if (sanpham == null || sanpham.SP_MaSP.Value == null) { return listNVL; }
 
             using (var connection = new SqlConnection(connectionString))
             {
@@ -120,7 +120,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"SELECT * FROM [{Common.TableNVL}] WHERE [{Common.MaSP}] = '{sanpham.MaSP.Value}'";
+                command.CommandText = $"SELECT * FROM [{Common.TableNVL}] WHERE [{Common.SP_MaSP}] = '{sanpham.SP_MaSP.Value}'";
 
                 using var reader = command.ExecuteReader();
 
@@ -405,7 +405,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"SELECT * FROM [{Common.TableSanPham}]";
+                command.CommandText = $"SELECT * FROM [{Common.Table_SanPham}]";
 
                 using var reader = command.ExecuteReader();
 
@@ -431,7 +431,7 @@ namespace ProcessManagement.Services.SQLServer
             Parallel.ForEach(listSanphams, sp =>
             {
                 sp.ChitietSanPhams = GetDSachChitietSanPham(sp);
-                sp.DanhSachNVLs = GetDSachNVLofSanPham(sp.SPID.Value);
+                sp.DanhSachNVLs = GetDSachNVLofSanPham(sp.SP_SPID.Value);
             });
 
             return listSanphams;
@@ -448,7 +448,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"SELECT * FROM [{Common.TableSanPham}] WHERE [{Common.SPID}] = '{spid}'";
+                command.CommandText = $"SELECT * FROM [{Common.Table_SanPham}] WHERE [{Common.SP_SPID}] = '{spid}'";
 
                 using var reader = command.ExecuteReader();
 
@@ -469,7 +469,7 @@ namespace ProcessManagement.Services.SQLServer
             }
 
             sanpham.ChitietSanPhams = GetDSachChitietSanPham(sanpham);
-            sanpham.DanhSachNVLs = GetDSachNVLofSanPham(sanpham.SPID.Value);
+            sanpham.DanhSachNVLs = GetDSachNVLofSanPham(sanpham.SP_SPID.Value);
 
             return sanpham;
         }
@@ -485,7 +485,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"SELECT * FROM [{Common.TableChitietSanPham}] WHERE [{Common.SPID}] = '{sanPham.SPID.Value}'";
+                command.CommandText = $"SELECT * FROM [{Common.TableChitietSanPham}] WHERE [{Common.SP_SPID}] = '{sanPham.SP_SPID.Value}'";
 
                 using var reader = command.ExecuteReader();
 
@@ -524,7 +524,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"SELECT COUNT(*) FROM [{Common.TableChitietSanPham}] WHERE [{Common.SPID}] = '{newChitietSP.SPID.Value}' AND [{Common.PropertyName}] = '{newChitietSP.PropertyName.Value}'";
+                command.CommandText = $"SELECT COUNT(*) FROM [{Common.TableChitietSanPham}] WHERE [{Common.SP_SPID}] = '{newChitietSP.SPID.Value}' AND [{Common.PropertyName}] = '{newChitietSP.PropertyName.Value}'";
 
                 int count = Convert.ToInt32(command.ExecuteScalar());
 
@@ -559,7 +559,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 string parameterNames = string.Join(",", newspItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
 
-                command.CommandText = $"INSERT INTO [{Common.TableSanPham}] ({columnNames}) OUTPUT INSERTED.{Common.SPID} VALUES ({parameterNames})";
+                command.CommandText = $"INSERT INTO [{Common.Table_SanPham}] ({columnNames}) OUTPUT INSERTED.{Common.SP_SPID} VALUES ({parameterNames})";
 
                 foreach (var item in newspItems)
                 {
@@ -692,7 +692,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"DELETE FROM {Common.TableSanPham} WHERE [{Common.SPID}] = '{removeSanpham.SPID.Value}'";
+                command.CommandText = $"DELETE FROM {Common.Table_SanPham} WHERE [{Common.SP_SPID}] = '{removeSanpham.SP_SPID.Value}'";
 
                 object rs = command.ExecuteScalar();
 
@@ -1620,7 +1620,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"SELECT * FROM [{Common.TableNVLofSanPham}] WHERE [{Common.SPID}] = '{spID}'";
+                command.CommandText = $"SELECT * FROM [{Common.Table_NVLofSanPham}] WHERE [{Common.SP_SPID}] = '{spID}'";
 
                 using var reader = command.ExecuteReader();
 
@@ -1660,7 +1660,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"SELECT * FROM [{Common.TableNVLofSanPham}] WHERE [{Common.NVLID}] = '{nvlspid}'";
+                command.CommandText = $"SELECT * FROM [{Common.Table_NVLofSanPham}] WHERE [{Common.NVLID}] = '{nvlspid}'";
 
                 using var reader = command.ExecuteReader();
 
@@ -1688,7 +1688,7 @@ namespace ProcessManagement.Services.SQLServer
         {
             using (var connection = new SqlConnection(connectionString))
             {
-                string query = $"SELECT COUNT(*) FROM [{Common.TableNVLofSanPham}] WHERE [{Common.SPID}] = '{nVLofSanPham.SPID.Value}' AND [{Common.NVLID}] = '{nVLofSanPham.NVLID.Value}'";
+                string query = $"SELECT COUNT(*) FROM [{Common.Table_NVLofSanPham}] WHERE [{Common.SP_SPID}] = '{nVLofSanPham.SP_SPID.Value}' AND [{Common.NVLID}] = '{nVLofSanPham.NVLID.Value}'";
 
                 using (var command = new SqlCommand(query, connection))
                 {
@@ -1720,7 +1720,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 string parameterNames = string.Join(",", newNVLItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
 
-                command.CommandText = $"INSERT INTO [{Common.TableNVLofSanPham}] ({columnNames}) OUTPUT INSERTED.{Common.NVLID} VALUES ({parameterNames})";
+                command.CommandText = $"INSERT INTO [{Common.Table_NVLofSanPham}] ({columnNames}) OUTPUT INSERTED.{Common.NVLID} VALUES ({parameterNames})";
 
                 foreach (var item in newNVLItems)
                 {
@@ -1762,7 +1762,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"DELETE FROM {Common.TableNVLofSanPham} WHERE [{Common.NVLID}] = '{removeNVLofSP.NVLSPID.Value}'";
+                command.CommandText = $"DELETE FROM {Common.Table_NVLofSanPham} WHERE [{Common.NVLID}] = '{removeNVLofSP.SP_NVLSPID.Value}'";
 
                 object rs = command.ExecuteScalar();
 
@@ -5162,6 +5162,7 @@ namespace ProcessManagement.Services.SQLServer
 
         #endregion
 
+
         // ------------------------------------------------------------------------------------- //
         #region Table_MAY_MayMoc
         // Get may moc by mmid
@@ -5426,10 +5427,9 @@ namespace ProcessManagement.Services.SQLServer
             return (result, errorMess);
         }
         #endregion
-
         // ------------------------------------------------------------------------------------- //
         #region Table_MAY_ThongTinMayMoc
-        
+
         // Get danh sach thong tin may moc by mmid
         public List<ThongTinMayMoc> GetDanhSachThongTinMayMoc(object? mmID)
         {
@@ -5634,9 +5634,8 @@ namespace ProcessManagement.Services.SQLServer
 
             return (result, errorMess);
         }
-        
-        #endregion
 
+        #endregion
         // ------------------------------------------------------------------------------------- //
         #region Table_MAY_LoaiThongTinMayMoc
         // Get loai thong tin may moc by loadittmmid
@@ -5881,6 +5880,7 @@ namespace ProcessManagement.Services.SQLServer
         }
         #endregion
 
+
         // ------------------------------------------------------------------------------------- //
         #region Table_NV_NhanVien
         // Check gia tri truong thong tin nhan vien 
@@ -6012,7 +6012,7 @@ namespace ProcessManagement.Services.SQLServer
                     }
 
                     // Load danh sach thong tin nhan vien
-                    
+
                     nhanVien.DSThongTin = GetDanhSachThongTinNhanVien(nhanVien.NVID.Value);
 
                     danhSachNhanVien.Add(nhanVien);
@@ -6064,7 +6064,6 @@ namespace ProcessManagement.Services.SQLServer
             return (result, errorMess);
         }
         #endregion
-
         // ------------------------------------------------------------------------------------- //
         #region Table_LoaiThongTinNhanVien
 
@@ -6309,7 +6308,6 @@ namespace ProcessManagement.Services.SQLServer
             }
         }
         #endregion
-
         // ------------------------------------------------------------------------------------- //
         #region Table_ThongTinNhanVien
 
@@ -6357,7 +6355,7 @@ namespace ProcessManagement.Services.SQLServer
 
             return danhSachThongTinNhanVien;
         }
-        
+
         // Insert thong tin nhan vien
         public (int, string) InsertThongTinNhanVien(ThongTinNhanVien? ttNhanVien)
         {
@@ -6405,7 +6403,7 @@ namespace ProcessManagement.Services.SQLServer
 
             return (result, errorMess);
         }
-        
+
         // Delete thong tin nhan vien
         public (int, string) DeleteThongTinNhanVien(object? thongtinNVID)
         {
@@ -6434,7 +6432,7 @@ namespace ProcessManagement.Services.SQLServer
 
             return (result, errorMess);
         }
-        
+
         // Update danh sach thong tin nhan vien
         public (int, string) UpdateListExtraNhanVienDetails(List<ThongTinNhanVien> thongtinnhanviens)
         {
@@ -6479,7 +6477,602 @@ namespace ProcessManagement.Services.SQLServer
 
             return (result, errorMess);
         }
-        
+
+        #endregion
+
+
+        #region Table_SanPham2
+        // Check gia tri truong thong tin san pham 
+        public bool DefaultThongTinSanPham_ValueIsExisting(string? proValue, string proName)
+        {
+            using (var connection = new SqlConnection(connectionString))
+            {
+                string query = $"SELECT COUNT(*) FROM [{Common.Table_SanPham}] WHERE [{proName}] = N'{proValue?.Trim()}'";
+
+                using (var command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+
+                    int count = (int)command.ExecuteScalar();
+
+                    return count > 0;
+                }
+            }
+        }
+
+        // Insert new san pham
+        public (int, string) InsertNewSanPham2(SanPham? newsanpham)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            if (newsanpham == null) return (result, "Error");
+
+            List<Propertyy> newSPItems = newsanpham.GetPropertiesValues().Where(po => po.AlowDatabase == true && po.Value != null).ToList();
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+
+                    connection.Open();
+
+                    var command = connection.CreateCommand();
+
+                    string columnNames = string.Join(",", newSPItems.Select(key => $"[{key.DBName}]"));
+
+                    string parameterNames = string.Join(",", newSPItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                    command.CommandText = $"INSERT INTO [{Common.Table_SanPham}] ({columnNames}) OUTPUT INSERTED.{Common.SP_SPID} VALUES ({parameterNames})";
+
+                    foreach (var item in newSPItems)
+                    {
+                        string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
+
+                        object? parameterValue = item.Value;
+
+                        command.Parameters.AddWithValue(parameterName, parameterValue);
+                    }
+
+                    object? rs = command.ExecuteScalar();
+
+                    result = Convert.ToInt32(rs);
+
+                    if (result == 0) result = -1;
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
+        // Delete san pham by ID
+        public (int, string) DeleteSanPham(object? spID)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"DELETE FROM {Common.Table_SanPham} WHERE [{Common.SP_SPID}] = '{spID}'";
+
+                object rs = command.ExecuteScalar();
+
+                result = Convert.ToInt32(rs);
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
+        // Load danh sach san pham
+        public List<SanPham> GetDanhSachSanPham()
+        {
+            List<SanPham> danhSachSanPham = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_SanPham}]";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    SanPham sanPham = new();
+
+                    List<Propertyy> rowItems = sanPham.GetPropertiesValues();
+
+                    foreach (var item in rowItems)
+                    {
+                        string? columnName = item.DBName;
+
+                        if (reader.GetOrdinal(columnName) != -1) // Check if the column exists
+                        {
+                            object columnValue = reader[columnName];
+
+                            item.Value = columnValue == DBNull.Value ? null : columnValue.ToString()?.Trim();
+                        }
+                    }
+
+                    // Load danh sach thong tin san pham
+
+                    sanPham.DSThongTin = GetDanhSachThongTinSanPham(sanPham.SP_SPID.Value);
+
+                    danhSachSanPham.Add(sanPham);
+                }
+            }
+
+            return danhSachSanPham;
+        }
+
+        // Update thong tin san pham
+        public (int, string) UpdateSanPhamMainDetails(SanPham sanPham)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            if (sanPham == null) return (result, errorMess);
+
+            List<Propertyy> Items = sanPham.GetPropertiesValues().Where(pro => pro.AlowDatabase == true).ToList();
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                string setClause = string.Join(",", Items.Select(key => $"[{key.DBName}] = @{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $"UPDATE [{Common.Table_SanPham}] SET {setClause} WHERE [{Common.SP_SPID}] = '{sanPham.SP_SPID.Value}'";
+
+                foreach (var item in Items)
+                {
+                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
+
+                    object? parameterValue = item.Value;
+
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                result = command.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
+        #endregion
+        // ------------------------------------------------------------------------------------- //
+        #region Table_LoaiThongTinSanPham
+
+        // Get loai thong tin san pham by ID
+        public LoaiThongTinSanPham GetLoaiThongTinSanPham(object? loaiTTSPID)
+        {
+            LoaiThongTinSanPham loaiThongTinSanPham = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_LoaiThongTinSanPham}] WHERE [{Common.SP_LoaiTTSPID}] = @LoaiTTSPID";
+
+                command.Parameters.AddWithValue("@LoaiTTSPID", loaiTTSPID);
+
+                using var reader = command.ExecuteReader();
+
+                if (reader.Read()) // Use if since we're expecting a single result
+                {
+                    List<Propertyy> rowItems = loaiThongTinSanPham.GetPropertiesValues();
+
+                    foreach (var item in rowItems)
+                    {
+                        string? columnName = item.DBName;
+
+                        if (reader.GetOrdinal(columnName) != -1) // Check if the column exists
+                        {
+                            object columnValue = reader[columnName];
+
+                            item.Value = columnValue == DBNull.Value ? null : columnValue.ToString()?.Trim();
+                        }
+                    }
+                }
+            }
+
+            return loaiThongTinSanPham;
+        }
+
+        // Load danh sach loai thong tin san pham
+        public List<LoaiThongTinSanPham> GetDanhSachLoaiThongTinSanPham()
+        {
+            List<LoaiThongTinSanPham> danhSachLoaiThongTinSanPham = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_LoaiThongTinSanPham}]";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    LoaiThongTinSanPham loaithongTinSanPham = new();
+
+                    List<Propertyy> rowItems = loaithongTinSanPham.GetPropertiesValues();
+
+                    foreach (var item in rowItems)
+                    {
+                        string? columnName = item.DBName;
+
+                        if (reader.GetOrdinal(columnName) != -1) // Check if the column exists
+                        {
+                            object columnValue = reader[columnName];
+
+                            item.Value = columnValue == DBNull.Value ? null : columnValue.ToString()?.Trim();
+                        }
+                    }
+
+                    danhSachLoaiThongTinSanPham.Add(loaithongTinSanPham);
+                }
+            }
+
+            return danhSachLoaiThongTinSanPham;
+        }
+
+        // Load danh sach loai thong tin san pham - macdinh 
+        public List<LoaiThongTinSanPham> GetDanhSachLoaiThongTinSanPham(object isDefault)
+        {
+            List<LoaiThongTinSanPham> danhSachLoaiThongTinSanPham = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_LoaiThongTinSanPham}] WHERE [{Common.SP_IsDefault}] = '{isDefault}'";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    LoaiThongTinSanPham loaithongTinSanPham = new();
+
+                    List<Propertyy> rowItems = loaithongTinSanPham.GetPropertiesValues();
+
+                    foreach (var item in rowItems)
+                    {
+                        string? columnName = item.DBName;
+
+                        if (reader.GetOrdinal(columnName) != -1) // Check if the column exists
+                        {
+                            object columnValue = reader[columnName];
+
+                            item.Value = columnValue == DBNull.Value ? null : columnValue.ToString()?.Trim();
+                        }
+                    }
+
+                    danhSachLoaiThongTinSanPham.Add(loaithongTinSanPham);
+                }
+            }
+
+            return danhSachLoaiThongTinSanPham;
+        }
+
+        // Insert loai thong tin san pham
+        public (int, string) InsertNewLoaiThongTinSanPham(LoaiThongTinSanPham loaithongtin)
+        {
+            List<Propertyy> newItems = loaithongtin.GetPropertiesValues().Where(po => po.AlowDatabase == true && po.Value != null).ToList();
+
+            int result = -1; string errorMess = string.Empty;
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                string columnNames = string.Join(",", newItems.Select(key => $"[{key.DBName}]"));
+
+                string parameterNames = string.Join(",", newItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $"INSERT INTO [{Common.Table_LoaiThongTinSanPham}] ({columnNames}) OUTPUT INSERTED.{Common.SP_LoaiTTSPID} VALUES ({parameterNames})";
+
+                foreach (var item in newItems)
+                {
+                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
+
+                    object? parameterValue = item.Value;
+
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                object? rs = command.ExecuteScalar();
+
+                result = Convert.ToInt32(rs);
+
+                if (result == 0) result = -1;
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
+        // Delete loai thong tin san pham
+        public (int, string) DeleteLoaiThongTinSanPham(object? loaiTTSPID)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"DELETE FROM {Common.Table_LoaiThongTinSanPham} WHERE [{Common.SP_LoaiTTSPID}] = '{loaiTTSPID}'";
+
+                object rs = command.ExecuteScalar();
+
+                result = Convert.ToInt32(rs);
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
+        // Check ten loai thong tin san pham isExisting 
+        public bool IsExisting_LoaiThongTinSanPham_Name(string? tentruyxuat)
+        {
+            using (var connection = new SqlConnection(connectionString))
+            {
+                string query = $"SELECT COUNT(*) FROM [{Common.Table_LoaiThongTinSanPham}] WHERE [{Common.SP_TenTruyXuat}] = N'{tentruyxuat?.Trim()}'";
+
+                using (var command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+
+                    int count = (int)command.ExecuteScalar();
+
+                    return count > 0;
+                }
+            }
+        }
+
+        // Update loai thong tin san pham name
+        public (int, string) UpdateLoaiThongTinSanPhamName(object? loaittnvid, string newName, string tentruyxuat)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+
+                    string sqlQuery = $"UPDATE {Common.Table_LoaiThongTinSanPham} SET [{Common.SP_TenLoaiThongTin}] = N'{newName}', [{Common.SP_TenTruyXuat}] = '{tentruyxuat}' WHERE [{Common.SP_LoaiTTSPID}] = '{loaittnvid}' ";
+
+                    var command = new SqlCommand(sqlQuery, connection);
+
+                    result = command.ExecuteNonQuery();
+
+                    connection.Close();
+
+                    return (result, string.Empty);
+                }
+            }
+            catch (Exception ex)
+            {
+                string err = ex.Message;
+
+                return (-1, err);
+            }
+        }
+
+        #endregion
+        // ------------------------------------------------------------------------------------- //
+        #region Table_ThongTinSanPham
+        public List<ThongTinSanPham> GetDanhSachThongTinSanPham(object? spID)
+        {
+            List<ThongTinSanPham> danhSachThongTinSanPham = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_ThongTinSanPham}] WHERE [{Common.SP_SPID}] = @SPID";
+
+                command.Parameters.AddWithValue("@SPID", spID);
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    ThongTinSanPham thongTinSanPham = new();
+
+                    List<Propertyy> rowItems = thongTinSanPham.GetPropertiesValues();
+
+                    foreach (var item in rowItems)
+                    {
+                        string? columnName = item.DBName;
+
+                        if (reader.GetOrdinal(columnName) != -1) // Check if the column exists
+                        {
+                            object columnValue = reader[columnName];
+
+                            item.Value = columnValue == DBNull.Value ? null : columnValue.ToString()?.Trim();
+                        }
+                    }
+
+                    // Get loai thong tin san pham
+                    thongTinSanPham.LoaiThongTin = GetLoaiThongTinSanPham(thongTinSanPham.LoaiTTSPID.Value);
+
+                    danhSachThongTinSanPham.Add(thongTinSanPham);
+                }
+            }
+            return danhSachThongTinSanPham;
+        }
+
+        // Insert thong tin san pham
+        public (int, string) InsertThongTinSanPham(ThongTinSanPham? ttSanPham)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            if (ttSanPham == null) return (result, "Error");
+
+            List<Propertyy> items = ttSanPham.GetPropertiesValues().Where(po => po.AlowDatabase == true && po.Value != null).ToList();
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                string columnNames = string.Join(",", items.Select(key => $"[{key.DBName}]"));
+
+                string parameterNames = string.Join(",", items.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $"INSERT INTO [{Common.Table_ThongTinSanPham}] ({columnNames}) OUTPUT INSERTED.{Common.SP_TTSPID} VALUES ({parameterNames})";
+
+                foreach (var item in items)
+                {
+                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
+
+                    object? parameterValue = item.Value;
+
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                object? rs = command.ExecuteScalar();
+
+                result = Convert.ToInt32(rs);
+
+                if (result == 0) result = -1;
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+                return (-1, errorMess);
+            }
+            return (result, errorMess);
+        }
+
+        // Delete thong tin san pham
+        public (int, string) DeleteThongTinSanPham(object? thongtinSPID)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"DELETE FROM {Common.Table_ThongTinSanPham} WHERE [{Common.SP_TTSPID}] = @ThongTinSPID";
+
+                command.Parameters.AddWithValue("@ThongTinSPID", thongtinSPID);
+
+                result = command.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+                return (-1, errorMess);
+            }
+            return (result, errorMess);
+        }
+
+        // Update thong tin san pham
+        public (int, string) UpdateListExtraSanPhamDetails(List<ThongTinSanPham> thongtinsanphams)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            if (thongtinsanphams == null) return (result, errorMess);
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                foreach (var thongtin in thongtinsanphams)
+                {
+                    List<Propertyy> items = thongtin.GetPropertiesValues().Where(pro => pro.DBName == Common.SP_GiaTriThongTin).ToList();
+
+                    var command = connection.CreateCommand();
+
+                    string setClause = string.Join(",", items.Select(key => $"[{key.DBName}] = @{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                    command.CommandText = $"UPDATE [{Common.Table_ThongTinSanPham}] SET {setClause} WHERE [{Common.SP_TTSPID}] = @TTSPID";
+
+                    command.Parameters.AddWithValue("@TTSPID", thongtin.TTSPID.Value);
+
+                    foreach (var item in items)
+                    {
+                        string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
+
+                        object? parameterValue = item.Value;
+
+                        command.Parameters.AddWithValue(parameterName, parameterValue);
+                    }
+
+                    result = command.ExecuteNonQuery();
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+                return (-1, errorMess);
+            }
+            return (result, errorMess);
+        }
         #endregion
     }
 }

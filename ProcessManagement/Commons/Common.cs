@@ -11,12 +11,33 @@ namespace ProcessManagement.Commons
         public const string DayTimeFormatnoTime = "dd-MM-yyyy";
 
         // Table Sanpham //
-        public const string TableSanPham = "SP_SanPham";
-        public const string SPID = "SPID";
-        public const string MaSP = "Mã SP";
-        public const string TenSanPham = "Tên SP";
-        public const string SoLuong = "Số lượng";
-        public const string NgayTao = "Ngày tạo";
+        public const string Table_SanPham = "SP_SanPham";
+        public const string SP_SPID = "SPID";
+        public const string SP_MaSP = "Mã SP";
+        public const string SP_TenSanPham = "Tên SP";
+        public const string SP_SoLuong = "Số lượng";
+        public const string SP_NgayTao = "Ngày tạo";
+
+        // Table LoaiThongTinSanPham
+        public const string Table_LoaiThongTinSanPham = "SP_LoaiThongTinSanPham";
+        public const string SP_LoaiTTSPID = "LoaiTTSPID";
+        public const string SP_TenLoaiThongTin = "Tên loại thông tin";
+        public const string SP_KieuDuLieu = "Kiểu dữ liệu";
+        public const string SP_GiaTriMacDinh = "Gía trị mặc định";
+        public const string SP_IsDefault = "IsDefault";
+        public const string SP_TenTruyXuat = "Tên truy xuất";
+        public const string SP_IndexDisplay = "IndexDisplay";
+
+        // Table ThongTinSanPham
+        public const string Table_ThongTinSanPham = "SP_ThongTinSanPham";
+        public const string SP_TTSPID = "TTSPID";
+        public const string SP_GiaTriThongTin = "Giá trị";
+
+        // Table NVL of Sanpham
+        public const string Table_NVLofSanPham = "SP_NVLofSanPham";
+        public const string SP_NVLSPID = "NVLSPID";
+        public const string SP_NgayThem = "NgayThem";
+        public const string SP_SLforSP = "SLforSanPham";
 
         // Table ChitietSanPham //
         public const string TableChitietSanPham = "SP_ChitietSanPham";
@@ -26,13 +47,6 @@ namespace ProcessManagement.Commons
         public const string PropertyValue = "PropertyValue";
         public const string PropertyType = "PropertyType";
 
-        // Table NVL of Sanpham
-        public const string TableNVLofSanPham = "SP_NVLofSanPham";
-        //public const string NVLID = "NVLID";
-        //public const string SPID = "SPID";
-        //public const string MaLoaiSP = "MaLoaiSP";
-        public const string NgayThem = "NgayThem";
-
         // Table NVL //
         public const string TableNVL = "Table_NVL";
         //public const string NVLID = "NVLID";
@@ -40,7 +54,7 @@ namespace ProcessManagement.Commons
         //public const string TenSanPham = "Tên sản phẩm";
         public const string MaQuanLy = "Mã quản lý";
         public const string LotNVL = "Lot NVL";
-        //public const string SoLuong = "Số lượng";
+        public const string SoLuong = "Số lượng";
         public const string NgayNhap = "Ngày nhập";
         public const string NgayXuat = "Ngày xuất";
         public const string SoLuongXuat = "Số lượng xuất";
@@ -58,7 +72,7 @@ namespace ProcessManagement.Commons
         public const string TableNguyenLieu = "Table_NguyenLieu";
         public const string NLID = "NLID";
         //public const string LotNVL = "Lot NVL";
-        //public const string NgayTao = "Ngày tạo";
+        public const string NgayTao = "Ngày tạo";
         //public const string SoLuongNVL = "Số lượng NVL";
 
         // Table KHSX Nguyen cong //
@@ -147,6 +161,7 @@ namespace ProcessManagement.Commons
         public const string MoTa = "MoTa";
         public const string DonViTinh = "DonViTinh";
         public const string NgayCapNhat = "NgayCapNhat";
+        
 
         // Table KHO_NhaCungCap //
         public const string TableNhaCungCap = "KHO_NhaCungCap";

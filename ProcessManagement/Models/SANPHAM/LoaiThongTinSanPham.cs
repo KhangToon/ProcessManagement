@@ -1,17 +1,22 @@
 ﻿using ProcessManagement.Commons;
 using System.Reflection;
 
-namespace ProcessManagement.Models.KHO_NVL
+namespace ProcessManagement.Models.SANPHAM
 {
-    public class DanhMucNVL
+    public class LoaiThongTinSanPham
     {
-        public Propertyy DMID { get; set; } = new() { DBName = Common.DMID, DisplayName = "Danh mục", Type = typeof(int), AlowDatabase = true }; // ID
-        public Propertyy TenDanhMuc { get; set; } = new() { DBName = Common.TenDanhMuc, DisplayName = "Tên danh mục", Type = typeof(string), AlowDatabase = true };
-        public Propertyy NgayThem { get; set; } = new() { DBName = Common.SP_NgayThem, DisplayName = "Ngày tạo", Type = typeof(DateTime), AlowDatabase = true };
+        public Propertyy LoaiTTSPID { get; set; } = new() { DBName = Common.SP_LoaiTTSPID, DisplayName = "LoaiTTSPID", Type = typeof(int), AlowDatabase = false, AlowDisplay = false, DispDatagrid = false }; // ID
+        public Propertyy TenLoaiThongTin { get; set; } = new() { DBName = Common.SP_TenLoaiThongTin, DisplayName = "Tên loại thông tin", Type = typeof(string), AlowDatabase = true };
+        public Propertyy KieuDuLieu { get; set; } = new() { DBName = Common.SP_KieuDuLieu, DisplayName = "Kiểu dữ liệu", Type = typeof(string), AlowDatabase = true };
+        public Propertyy GiaTriMacDinh { get; set; } = new() { DBName = Common.SP_GiaTriMacDinh, DisplayName = "Gía trị mặc định", Type = typeof(string), AlowDatabase = true };
+        public Propertyy IsDefault { get; set; } = new() { DBName = Common.SP_IsDefault, DisplayName = "IsDefault", Type = typeof(bool), AlowDatabase = true };
+        public Propertyy TenTruyXuat { get; set; } = new() { DBName = Common.SP_TenTruyXuat, DisplayName = "Tên truy xuất", Type = typeof(string), AlowDatabase = true };
+        public Propertyy IndexDisplay { get; set; } = new() { DBName = Common.SP_IndexDisplay, DisplayName = "IndexDisplay", Type = typeof(int), AlowDatabase = true };
+
 
         public List<Propertyy> GetPropertiesValues()
         {
-            Type propertyType = typeof(DanhMucNVL);
+            Type propertyType = typeof(LoaiThongTinSanPham);
 
             FieldInfo[] fields = propertyType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 

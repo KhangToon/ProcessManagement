@@ -11,7 +11,7 @@ namespace ProcessManagement.Models
         public Propertyy TenCongDoan { get; set; } = new() { DBName = Common.NguyenCong, Type = typeof(string), AlowDatabase = true };
 
         public Propertyy LoaiNVL = new() { DBName = Common.LoaiNL, Type = typeof(string), AlowDatabase = true };
-        public Propertyy MaSP { get; set; } = new() { DBName = Common.MaSP, Type = typeof(string), AlowDatabase = true };
+        public Propertyy MaSP { get; set; } = new() { DBName = Common.SP_MaSP, Type = typeof(string), AlowDatabase = true };
         public Propertyy MaQuanLy { get; set; } = new() { DBName = Common.MaQuanLy, Type = typeof(string), AlowDatabase = true };
         public Propertyy SLGoccuaLOTNVL { get; set; } = new() { DBName = Common.SLGoccuaLOTNVL, Type = typeof(int), AlowDatabase = true };
         public Propertyy SLTruocGiaCong { get; set; } = new() { DBName = Common.SLTruocGiaCong, Type = typeof(int), AlowDatabase = true };

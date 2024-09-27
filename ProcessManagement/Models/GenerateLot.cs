@@ -185,7 +185,7 @@ namespace ProcessManagement.Models
 
         public void SetCurrentKHSXsanPham(string tenSP)
         {
-            NewKHSX.SanPham = DSachSanPhams.FirstOrDefault(sp => sp.TenSanPham.Value?.ToString() == tenSP) ?? new();
+            NewKHSX.SanPham = DSachSanPhams.FirstOrDefault(sp => sp.SP_TenSanPham.Value?.ToString() == tenSP) ?? new();
         }
 
         public void SetCurrentKHSXloaiNVL(string tenloainvl)
@@ -205,7 +205,7 @@ namespace ProcessManagement.Models
             NewKHSX.SLperLotChan.Value = SLperLotChan;
             NewKHSX.SLLotLe.Value = SLLotLe;
             NewKHSX.SLperLotLe.Value = SLperLotLe;
-            NewKHSX.SPID.Value = NewKHSX.SanPham?.SPID.Value;
+            NewKHSX.SPID.Value = NewKHSX.SanPham?.SP_SPID.Value;
             NewKHSX.NgayTao.Value = NgayTao;
         }
 
@@ -213,7 +213,7 @@ namespace ProcessManagement.Models
         {
             DSachSanPhams = SQLServerServices.GetlistSanphams();
 
-            List<string> result = DSachSanPhams.Select(sp => sp.TenSanPham.Value?.ToString() ?? string.Empty).ToList();
+            List<string> result = DSachSanPhams.Select(sp => sp.SP_TenSanPham.Value?.ToString() ?? string.Empty).ToList();
 
             return result;
         }
@@ -365,8 +365,8 @@ namespace ProcessManagement.Models
             {
                 NVL nVL = new();
                 nVL.LoaiNVL.Value = NewKHSX.LoaiNVL?.TenLoaiNVL.Value;
-                nVL.MaSP.Value = NewKHSX.SanPham?.MaSP.Value;
-                nVL.MaQuanLy.Value = MaLSX + NewKHSX.SanPham?.MaSP.Value + "-" + index.ToString(NumberDigit);
+                nVL.MaSP.Value = NewKHSX.SanPham?.SP_MaSP.Value;
+                nVL.MaQuanLy.Value = MaLSX + NewKHSX.SanPham?.SP_MaSP.Value + "-" + index.ToString(NumberDigit);
                 nVL.SoLuong.Value = SLperLotChan;
                 nVL.NgayXuat.Value = DateTime.Now;
                 ListNVLs?.Add(nVL);
@@ -382,8 +382,8 @@ namespace ProcessManagement.Models
                 // Add lot le
                 NVL lotnvlle = new();
                 lotnvlle.LoaiNVL.Value = NewKHSX.LoaiNVL?.TenLoaiNVL.Value;
-                lotnvlle.MaSP.Value = NewKHSX.SanPham?.MaSP.Value;
-                lotnvlle.MaQuanLy.Value = MaLSX + NewKHSX.SanPham?.MaSP.Value + "-" + (SLLotChan + 1).ToString(NumberDigit);
+                lotnvlle.MaSP.Value = NewKHSX.SanPham?.SP_MaSP.Value;
+                lotnvlle.MaQuanLy.Value = MaLSX + NewKHSX.SanPham?.SP_MaSP.Value + "-" + (SLLotChan + 1).ToString(NumberDigit);
                 lotnvlle.SoLuong.Value = SLperLotLe;
                 lotnvlle.NgayXuat.Value = DateTime.Now;
                 ListNVLs?.Add(lotnvlle);

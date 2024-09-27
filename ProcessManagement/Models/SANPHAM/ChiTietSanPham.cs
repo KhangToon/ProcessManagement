@@ -6,7 +6,7 @@ namespace ProcessManagement.Models.SANPHAM
     public class ChitietSanPham
     {
         public Propertyy CTSPID { get; set; } = new() { DBName = Common.CTSPID, Type = typeof(int), AlowDatabase = false };
-        public Propertyy SPID { get; set; } = new() { DBName = Common.SPID, Type = typeof(int), AlowDatabase = true };
+        public Propertyy SPID { get; set; } = new() { DBName = Common.SP_SPID, Type = typeof(int), AlowDatabase = true };
         public Propertyy PropertyName { get; set; } = new() { DBName = Common.PropertyName, Type = typeof(string), AlowDatabase = true };
         public Propertyy PropertyValue { get; set; } = new() { DBName = Common.PropertyValue, Type = typeof(string), AlowDatabase = true };
         public Propertyy PropertyType { get; set; } = new() { DBName = Common.PropertyType, Type = typeof(string), AlowDatabase = true };

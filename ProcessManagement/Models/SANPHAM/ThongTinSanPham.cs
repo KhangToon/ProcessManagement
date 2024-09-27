@@ -1,17 +1,21 @@
 ﻿using ProcessManagement.Commons;
 using System.Reflection;
 
-namespace ProcessManagement.Models.KHO_NVL
+namespace ProcessManagement.Models.SANPHAM
 {
-    public class DanhMucNVL
+    public class ThongTinSanPham
     {
-        public Propertyy DMID { get; set; } = new() { DBName = Common.DMID, DisplayName = "Danh mục", Type = typeof(int), AlowDatabase = true }; // ID
-        public Propertyy TenDanhMuc { get; set; } = new() { DBName = Common.TenDanhMuc, DisplayName = "Tên danh mục", Type = typeof(string), AlowDatabase = true };
-        public Propertyy NgayThem { get; set; } = new() { DBName = Common.SP_NgayThem, DisplayName = "Ngày tạo", Type = typeof(DateTime), AlowDatabase = true };
+        public Propertyy TTSPID { get; set; } = new() { DBName = Common.SP_TTSPID, DisplayName = "TTSPID", Type = typeof(int), AlowDatabase = false, AlowDisplay = false, DispDatagrid = false }; // ID
+        public Propertyy GiaTriThongTin { get; set; } = new() { DBName = Common.SP_GiaTriThongTin, DisplayName = "Giá trị", Type = typeof(string), AlowDatabase = true };
+        public Propertyy SPID { get; set; } = new() { DBName = "SPID", DisplayName = "SPID", Type = typeof(int), AlowDatabase = true, AlowDisplay = false, DispDatagrid = false };
+        public Propertyy LoaiTTSPID { get; set; } = new() { DBName = "LoaiTTSPID", DisplayName = "LoaiTTSPID", Type = typeof(int), AlowDatabase = true, AlowDisplay = false, DispDatagrid = false };
+
+        // Loai thong tin san pham
+        public LoaiThongTinSanPham LoaiThongTin { get; set; } = new();
 
         public List<Propertyy> GetPropertiesValues()
         {
-            Type propertyType = typeof(DanhMucNVL);
+            Type propertyType = typeof(ThongTinSanPham);
 
             FieldInfo[] fields = propertyType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 

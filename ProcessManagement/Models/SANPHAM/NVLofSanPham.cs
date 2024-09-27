@@ -6,11 +6,11 @@ namespace ProcessManagement.Models.SANPHAM
 {
     public class NVLofSanPham
     {
-        public Propertyy NVLSPID { get; set; } = new() { DBName = Common.NVLID, DisplayName = "NVLSPID", Type = typeof(int), AlowDatabase = false, AlowDisplay = false }; // ID
-        public Propertyy SPID { get; set; } = new() { DBName = Common.SPID, DisplayName = "SP ID", Type = typeof(int), AlowDatabase = true, };
-        public Propertyy NVLID { get; set; } = new() { DBName = Common.NVLID, DisplayName = "NVL ID", Type = typeof(int), AlowDatabase = true, };
-        public Propertyy NgayThem { get; set; } = new() { DBName = Common.NgayThem, DisplayName = "Ngày thêm", Type = typeof(DateTime), AlowDatabase = true };
-
+        public Propertyy SP_NVLSPID { get; set; } = new() { DBName = Common.SP_NVLSPID, Type = typeof(int), AlowDatabase = false, AlowDisplay = false }; // ID
+        public Propertyy SP_SPID { get; set; } = new() { DBName = Common.SP_SPID, Type = typeof(int), AlowDatabase = true, };
+        public Propertyy NVLID { get; set; } = new() { DBName = Common.NVLID, Type = typeof(int), AlowDatabase = true, };
+        public Propertyy SP_NgayThem { get; set; } = new() { DBName = Common.SP_NgayThem, DisplayName = "Ngày thêm", Type = typeof(DateTime), AlowDatabase = true };
+        public Propertyy SP_SLforSP { get; set; } = new() { DBName = Common.SP_SLforSP, DisplayName = "Số lượng/sản phẩm", Type = typeof(int), AlowDatabase = true, };
         public NguyenVatLieu TargetNgLieu { get; set; } = new();
 
         public List<Propertyy> GetPropertiesValues()

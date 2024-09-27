@@ -19,7 +19,7 @@ namespace ProcessManagement.Models
         public Propertyy SLperLotChan { get; set; } = new() { DBName = Common.SLperLotChan, Type = typeof(int), AlowDatabase = true };
         public Propertyy SLLotLe { get; set; } = new() { DBName = Common.SLLotLe, Type = typeof(int), AlowDatabase = true };
         public Propertyy SLperLotLe { get; set; } = new() { DBName = Common.SLperLotLe, Type = typeof(int), AlowDatabase = true };
-        public Propertyy SPID { get; set; } = new() { DBName = Common.SPID, Type = typeof(int), AlowDatabase = true };
+        public Propertyy SPID { get; set; } = new() { DBName = Common.SP_SPID, Type = typeof(int), AlowDatabase = true };
 
         public Propertyy NgayTao = new() { DBName = Common.NgayTao, Type = typeof(DateTime), AlowDatabase = true };
 
