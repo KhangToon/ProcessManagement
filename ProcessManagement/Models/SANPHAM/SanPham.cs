@@ -5,12 +5,11 @@ namespace ProcessManagement.Models.SANPHAM
 {
     public class SanPham
     {
-        public Propertyy SP_SPID { get; set; } = new() { DBName = Common.SP_SPID, Type = typeof(int), AlowDatabase = false };
-        public Propertyy SP_MaSP { get; set; } = new() { DBName = Common.SP_MaSP, Type = typeof(string), AlowDatabase = true };
-        public Propertyy SP_TenSanPham { get; set; } = new() { DBName = Common.SP_TenSanPham, Type = typeof(string), AlowDatabase = true };
-        public Propertyy SP_NgayTao { get; set; } = new() { DBName = Common.SP_NgayTao, Type = typeof(DateTime), AlowDatabase = true };
+        public Propertyy SP_SPID { get; set; } = new() { DBName = Common.SP_SPID, Type = typeof(int), AlowDisplay = false, AlowDatabase = false };
+        public Propertyy SP_MaSP { get; set; } = new() { DBName = Common.SP_MaSP, DisplayName = "Mã sản phẩm", Type = typeof(string), AlowDatabase = true };
+        public Propertyy SP_TenSanPham { get; set; } = new() { DBName = Common.SP_TenSanPham, DisplayName = "Tên sản phẩm", Type = typeof(string), AlowDatabase = true };
         public List<ChitietSanPham>? ChitietSanPhams { get; set; }
-        public List<NVLofSanPham>? DanhSachNVLs { get; set; }
+        public List<NVLofSanPham> DanhSachNVLs { get; set; } = new();
 
 
         // Danh sach thong tin san pham

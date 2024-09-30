@@ -13,6 +13,7 @@ namespace ProcessManagement.Models.SANPHAM
         public Propertyy SP_SLforSP { get; set; } = new() { DBName = Common.SP_SLforSP, DisplayName = "Số lượng/sản phẩm", Type = typeof(int), AlowDatabase = true, };
         public NguyenVatLieu TargetNgLieu { get; set; } = new();
 
+        public bool isEditingSoluong = false;
         public List<Propertyy> GetPropertiesValues()
         {
             Type propertyType = typeof(NVLofSanPham);

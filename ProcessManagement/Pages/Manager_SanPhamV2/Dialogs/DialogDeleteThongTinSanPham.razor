@@ -1,0 +1,85 @@
+﻿@using ProcessManagement.Commons
+@using ProcessManagement.Models.SANPHAM
+@using ProcessManagement.Services.SQLServer
+@using Radzen.Blazor
+@using Radzen
+@using ProcessManagement.Models
+
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject TooltipService TooltipService
+@inject SQLServerServices SQLServerServices
+
+<RadzenCard Variant="Variant.Filled" Style="height: 100%; width: 100%; padding: 10px;">
+    <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style=" height: 100%; width: 100%; padding: 0px; padding-bottom: 10px " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+        <RadzenStack Gap="20px" Style="height: contain; width: 100%; padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+            <RadzenText Text="Xóa trường thông tin này của sản phẩm?" Style="color: black; font-weight: 600; font-size: 18px"></RadzenText>
+            <RadzenText Text="@($"(Trường thông tin: {DeleteThongTinSP.LoaiThongTin.TenLoaiThongTin.Value?.ToString()})")" Style="font-weight: 600; font-style: italic; font-size: 18px"></RadzenText>
+        </RadzenStack>
+        <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding: 5px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+            <RadzenCheckBox TValue="bool" Value=@IsDeleteForAllSanPham Change=@(args => IsDeleteForAllSanPham = args) Name="deleteForAllNVL" />
+            <RadzenLabel Text="Xóa trường thông tin này ở sản phẩm khác" Style="font-size: 16px; font-weight: 600; color: red; font-style: italic" Component="deleteForAllNVL" />
+        </RadzenStack>
+    </RadzenStack>
+    <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding-top: 10px; border-top: var(--rz-grid-cell-border) " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+        <RadzenButton Style="width: 120px;" Icon="check" Text="Xóa" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Dark" Variant="Variant.Flat" Click="@(() => OnDelete())" />
+        <RadzenButton Style="width: 120px;" Icon="close" Text="Hủy" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" Click="@(() => DialogService.Close(null))" />
+    </RadzenStack>
+</RadzenCard>
+
+@code {
+    [Parameter]
+    public ThongTinSanPham DeleteThongTinSP { get; set; } = new();
+    private bool IsDeleteForAllSanPham = false;
+
+    private async Task OnDelete()
+    {
+        if (DeleteThongTinSP.TTSPID.Value != null)
+        {
+            if (IsDeleteForAllSanPham) // xoa loai thong tin for all san pham
+            {
+                (int result, string error) = SQLServerServices.DeleteLoaiThongTinSanPham(DeleteThongTinSP.LoaiThongTin.LoaiTTSPID.Value);
+
+                if (result == -1)
+                {
+                    await DialogService.Alert($"Lỗi, không thể xóa: {error}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                }
+                else
+                {
+                    ShowNotification("Đã xóa!", NotificationSeverity.Success, 3000);
+
+                    DialogService.Close(result);
+                }
+            }
+            else // chi xoa loai thong tin san pham hien tai
+            {
+                (int result, string error) = SQLServerServices.DeleteThongTinSanPham(DeleteThongTinSP.TTSPID.Value);
+
+                if (result == -1)
+                {
+                    await DialogService.Alert($"Lỗi, không thể xóa: {error}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                }
+                else
+                {
+                    ShowNotification("Đã xóa!", NotificationSeverity.Success, 3000);
+
+                    DialogService.Close(result);
+                }
+            }
+        }
+    }
+
+    // Notification
+    void ShowNotification(string message, NotificationSeverity notifytype, double time)
+    {
+        NotificationMessage notify = new NotificationMessage
+            {
+                Style = "position: fixed; top: 0; right: 0;",
+                Severity = notifytype,
+                Summary = message,
+                Duration = time
+            };
+
+        NotificationService.Notify(notify);
+    }
+}

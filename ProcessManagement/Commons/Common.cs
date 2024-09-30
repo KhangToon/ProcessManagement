@@ -7,16 +7,14 @@ namespace ProcessManagement.Commons
 {
     public static class Common
     {
-        public const string DayTimeFormat = "dd-MM-yyyy HH:mm:ss";
-        public const string DayTimeFormatnoTime = "dd-MM-yyyy";
+        public const string DayTimeFormat = "yyyy-MM-dd HH:mm:ss";
+        public const string DayTimeFormatnoTime = "yyyy-MM-dd";
 
         // Table Sanpham //
         public const string Table_SanPham = "SP_SanPham";
         public const string SP_SPID = "SPID";
         public const string SP_MaSP = "Mã SP";
-        public const string SP_TenSanPham = "Tên SP";
-        public const string SP_SoLuong = "Số lượng";
-        public const string SP_NgayTao = "Ngày tạo";
+        public const string SP_TenSanPham = "Tên sản phẩm";
 
         // Table LoaiThongTinSanPham
         public const string Table_LoaiThongTinSanPham = "SP_LoaiThongTinSanPham";
@@ -409,6 +407,9 @@ namespace ProcessManagement.Commons
 
         // NhanVien management static variable
         public static object? SelectedNhanVienid;
+        
+        // SanPham management static variable
+        public static object? SelectedSanPhamid;
 
         // PhieuXuatKho static variable
         public static object? SelectedPXKID;

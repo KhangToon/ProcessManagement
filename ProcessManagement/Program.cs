@@ -124,7 +124,7 @@ app.MapFallbackToPage("/_Host");
 
 //app.Urls.Add(url); // enable khi deploy - disable khi use local 
 
-// Open browser after application starts 
+//// Open browser after application starts 
 //app.Lifetime.ApplicationStarted.Register(() =>  // enable khi deploy - disable khi use local 
 //{
 //    var psi = new ProcessStartInfo

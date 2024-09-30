@@ -393,7 +393,7 @@ namespace ProcessManagement.Services.SQLServer
         }
 
         // ------------------------------------------------------------------------------------- //
-        #region Table_SanPham
+        #region Table_SanPham_
         // Lay danh sach san pham
         public List<SanPham> GetlistSanphams()
         {
@@ -541,7 +541,7 @@ namespace ProcessManagement.Services.SQLServer
         }
 
         // Them moi chi tiet san pham
-        public (int, string) InsertNewSanPham(SanPham newSanpham)
+        public (int, string) InsertNewSanPham_(SanPham newSanpham)
         {
             List<Propertyy> newspItems = newSanpham.GetPropertiesValues().Where(po => po.AlowDatabase == true && po.Value != null).ToList();
 
@@ -6481,7 +6481,7 @@ namespace ProcessManagement.Services.SQLServer
         #endregion
 
 
-        #region Table_SanPham2
+        #region Table_SanPham
         // Check gia tri truong thong tin san pham 
         public bool DefaultThongTinSanPham_ValueIsExisting(string? proValue, string proName)
         {
@@ -6501,7 +6501,7 @@ namespace ProcessManagement.Services.SQLServer
         }
 
         // Insert new san pham
-        public (int, string) InsertNewSanPham2(SanPham? newsanpham)
+        public (int, string) InsertNewSanPham(SanPham? newsanpham)
         {
             int result = -1; string errorMess = string.Empty;
 
@@ -6613,8 +6613,9 @@ namespace ProcessManagement.Services.SQLServer
                     }
 
                     // Load danh sach thong tin san pham
-
                     sanPham.DSThongTin = GetDanhSachThongTinSanPham(sanPham.SP_SPID.Value);
+                    // Load danh sach NVL of san pham
+                    sanPham.DanhSachNVLs = GetDSachNVLofSanPham(sanPham.SP_SPID.Value);
 
                     danhSachSanPham.Add(sanPham);
                 }

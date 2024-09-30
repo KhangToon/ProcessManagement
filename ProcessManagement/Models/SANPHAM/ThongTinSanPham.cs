@@ -6,7 +6,7 @@ namespace ProcessManagement.Models.SANPHAM
     public class ThongTinSanPham
     {
         public Propertyy TTSPID { get; set; } = new() { DBName = Common.SP_TTSPID, DisplayName = "TTSPID", Type = typeof(int), AlowDatabase = false, AlowDisplay = false, DispDatagrid = false }; // ID
-        public Propertyy GiaTriThongTin { get; set; } = new() { DBName = Common.SP_GiaTriThongTin, DisplayName = "Giá trị", Type = typeof(string), AlowDatabase = true };
+        public Propertyy GiaTri { get; set; } = new() { DBName = Common.SP_GiaTriThongTin, DisplayName = "Giá trị", Type = typeof(string), AlowDatabase = true };
         public Propertyy SPID { get; set; } = new() { DBName = "SPID", DisplayName = "SPID", Type = typeof(int), AlowDatabase = true, AlowDisplay = false, DispDatagrid = false };
         public Propertyy LoaiTTSPID { get; set; } = new() { DBName = "LoaiTTSPID", DisplayName = "LoaiTTSPID", Type = typeof(int), AlowDatabase = true, AlowDisplay = false, DispDatagrid = false };
 
