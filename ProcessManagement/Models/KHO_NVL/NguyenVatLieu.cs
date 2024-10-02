@@ -11,7 +11,7 @@ namespace ProcessManagement.Models.KHO_NVL
         public Propertyy LOAINVLID { get; set; } = new() { DBName = Common.LOAINVLID, DisplayName = "Loại nguyên liệu", Type = typeof(int), AlowDatabase = true, AlowDisplay = false, DispDatagrid = false };
         public Propertyy DMID { get; set; } = new() { DBName = Common.DMID, DisplayName = "Danh mục", Type = typeof(int), AlowDatabase = true, AlowDisplay = false, DispDatagrid = false };
         public Propertyy DonViTinh { get; set; } = new() { DBName = Common.DonViTinh, DisplayName = "Đơn vị tính", Type = typeof(string), AlowDatabase = true, DispDatagrid = false };
-        public Propertyy NgayCapNhat { get; set; } = new() { DBName = Common.NgayCapNhat, DisplayName = "Ngày cập nhật", Type = typeof(DateTime), AlowDatabase = true };
+        public Propertyy NgaySuDung { get; set; } = new() { DBName = Common.NgaySuDung, DisplayName = "Ngày sử dụng", Type = typeof(DateTime), AlowDatabase = true };
 
         public int SLSanXuat = 0;
 
@@ -20,14 +20,14 @@ namespace ProcessManagement.Models.KHO_NVL
         public DanhMucNVL? DanhMuc { get; set; }
         public LoaiNVL? LoaiNVL { get; set; }
 
-        public List<NguyenVatLieuDetail> DSNguyenVatLieuDetails { get; set; } = new();
+        public List<ThongTinNVL> DSThongTin { get; set; } = new();
 
         public List<ViTriofNVL> DSViTri { get; set; } = new();
 
         // Get nvl details infor by detail name
         public string GetValue(string proName)
         {
-            var tagertItem = this?.DSNguyenVatLieuDetails.FirstOrDefault(dt => dt.NVLDetailItems?.TenTruyXuat.Value?.ToString()?.Trim() == proName);
+            var tagertItem = this?.DSThongTin.FirstOrDefault(dt => dt.LoaiThongTin?.TenTruyXuat.Value?.ToString()?.Trim() == proName);
 
             if (tagertItem != null)
             {

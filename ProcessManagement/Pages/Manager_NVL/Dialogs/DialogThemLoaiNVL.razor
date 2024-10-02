@@ -104,10 +104,12 @@
             {
                 newloainvl.DMID.Value = madanhmuc;
 
-                (int result, string error) = SQLServerServices.InsertNewLoaiNguyenVatLieu(newloainvl);
+                (int loainvlID, string error) = SQLServerServices.InsertNewLoaiNguyenVatLieu(newloainvl);
 
-                if (result > 0)
+                if (loainvlID > 0)
                 {
+                    newloainvl.LOAINVLID.Value = loainvlID;
+
                     ShowNotification("Thêm thành công!", NotificationSeverity.Success, 2000);
 
                     DialogService.Close(newloainvl);

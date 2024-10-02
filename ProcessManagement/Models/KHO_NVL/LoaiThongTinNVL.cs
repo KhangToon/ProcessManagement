@@ -3,20 +3,22 @@ using System.Reflection;
 
 namespace ProcessManagement.Models.KHO_NVL
 {
-    public class NVLDetailsName
+    public class LoaiThongTinNVL
     {
-        public Propertyy TenTTID { get; set; } = new() { DBName = Common.TenTTID, DisplayName = "TenTTID", Type = typeof(int), AlowDatabase = false, AlowDisplay = false, DispDatagrid = false }; // ID
-        public Propertyy TenThongTin { get; set; } = new() { DBName = Common.TenThongTin, DisplayName = "Tên thông tin", Type = typeof(string), AlowDatabase = true, };
-        public Propertyy KieuDulieu { get; set; } = new() { DBName = Common.KieuDulieu, DisplayName = "Kiểu dữ liệu", Type = typeof(int), AlowDatabase = true, };
+        public Propertyy LoaiTTNVLID { get; set; } = new() { DBName = Common.LoaiTTNVLID, DisplayName = "LoaiTTNVLID", Type = typeof(int), AlowDatabase = false, AlowDisplay = false, DispDatagrid = false }; // ID
+        public Propertyy TenLoaiThongTin { get; set; } = new() { DBName = Common.TenLoaiThongTin, DisplayName = "Tên loại thông tin", Type = typeof(string), AlowDatabase = true, };
+        public Propertyy KieuDuLieu { get; set; } = new() { DBName = Common.KieuDuLieu, DisplayName = "Kiểu dữ liệu", Type = typeof(int), AlowDatabase = true, };
         // Kieudulieu :  1-string, 2-number, 3-datetime
-        public Propertyy GiatriMacDinh { get; set; } = new() { DBName = Common.MacDinh, DisplayName = "Gía trị mặc định", Type = typeof(string), AlowDatabase = true, };
-        public Propertyy IsDefault { get; set; } = new() { DBName = Common.IsDefault, DisplayName = "IsDefault", Type = typeof(string), AlowDatabase = true, };
+        public Propertyy GiaTriMacDinh { get; set; } = new() { DBName = Common.MacDinh, DisplayName = "Gía trị mặc định", Type = typeof(string), AlowDatabase = true, };
+        public Propertyy IsDefault { get; set; } = new() { DBName = Common.IsDefault, DisplayName = "IsDefault", Type = typeof(bool), AlowDatabase = true, };
         public Propertyy TenTruyXuat { get; set; } = new() { DBName = Common.TenTruyXuat, DisplayName = "Tên truy xuất", Type = typeof(string), AlowDatabase = true, AlowDisplay = false, DispDatagrid = false };
+        public Propertyy IsDisplayDatagrid { get; set; } = new() { DBName = Common.IsDisplayDatagrid, DisplayName = "IsDisplayDatagrid", Type = typeof(bool), AlowDatabase = true, };
 
+        public bool IsAddForAll { get; set; } = false; // Add truong thong tin cho tat cac NVL (chi dung luc them moi truong thong tin)
 
         public List<Propertyy> GetPropertiesValues()
         {
-            Type propertyType = typeof(NVLDetailsName);
+            Type propertyType = typeof(LoaiThongTinNVL);
 
             FieldInfo[] fields = propertyType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 

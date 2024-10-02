@@ -14,73 +14,116 @@
     <RadzenStack Gap="20px" Style="height: contain; width: contain; border-radius: 5px; background-color: var(--rz-success-lighter); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
         <RadzenText Text="@($"Đổi tên trường thông tin")" Style="font-weight: 600; font-size: 16px; color: darkgreen; font-style: italic"></RadzenText>
     </RadzenStack>
-    <RadzenStack Gap="0" Style="height: contain; width: 100%; padding: 10px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-        <RadzenStack Style="width: 30%;">
-            <RadzenText Text="Tên hiện tại" Style="font-size: 16px; font-weight: 600; color: black; height: contain; width: 100% "></RadzenText>
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 5px; border-bottom: var(--rz-grid-cell-border);">
+        <RadzenStack Style="width: 20%;">
+            <RadzenText Text="Tên thông tin" Style="color: var(--rz-primary-darker); font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
         </RadzenStack>
-        <RadzenStack Style="width: 55%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-            <RadzenText Text="@NgVLieuDetail?.NVLDetailItems?.TenThongTin.Value?.ToString()" Style="font-size: 16px; height: contain;"></RadzenText>
+        <RadzenStack Style="width: 80%; padding-left: 10px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+            <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
+                @{
+                    <RadzenStack Style="width: 50%;">
+                        <RadzenTextBox class="custom-placeholder" Placeholder="@($" * nhập tên thông tin")" Value="@ThongTinNVL.LoaiThongTin.TenLoaiThongTin.Value?.ToString()" Style="font-size: 16px; height: contain; border-width: 1px;"
+                                       @oninput="@(async (args) => { ThongTinNVL.LoaiThongTin.TenLoaiThongTin.Value = args.Value; await DefaultThongTinNguyenVatLieu_ValueIsOK(ThongTinNVL.LoaiThongTin.TenLoaiThongTin);})">
+                        </RadzenTextBox>
+                    </RadzenStack>
+
+                    <RadzenStack Style="width: 50%;">
+                        <RadzenAlert Visible="@(!ThongTinNVL.LoaiThongTin.TenLoaiThongTin.IsValueOK)" Text="@ThongTinNVL.LoaiThongTin.TenLoaiThongTin.NotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                        <RadzenAlert Visible="@(ThongTinNVL.LoaiThongTin.TenLoaiThongTin.IsValueOK)" Text="@ThongTinNVL.LoaiThongTin.TenLoaiThongTin.NotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Success" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                    </RadzenStack>
+                }
+            </RadzenStack>
         </RadzenStack>
     </RadzenStack>
-    <RadzenStack Gap="0" Style="height: contain; width: 100%; padding: 10px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-        <RadzenStack Style="width: 30%;">
-            <RadzenText Text="Tên mới" Style="font-size: 16px; font-weight: 600; color: black; height: contain; width: 100% "></RadzenText>
-        </RadzenStack>
-        <RadzenStack Style="width: 55%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-            <RadzenTextBox Placeholder="@($"*Nhập tên mới")" Value="@newName" ValueChanged="@((args) => { newName = args; } )"
-                           Style="font-size: 16px; height: contain; border-width: 1px; width: 100% "></RadzenTextBox>
-        </RadzenStack>
-    </RadzenStack>
-    <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding-top: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-        <RadzenButton Disabled="@(String.IsNullOrEmpty(newName))" Style="width: contain;" Icon="save" Text="Lưu thay đổi" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Dark" Variant="Variant.Flat" Click="@(() => OnSaveNewName())" />
-        <RadzenButton Style="width: 120px;" Icon="close" Text="Hủy" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" Click="@(() => DialogService.Close(null))" />
+    <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding-top: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+        <RadzenButton Disabled="@(!(ThongTinNVL.LoaiThongTin.TenLoaiThongTin.IsValueOK))" Style="width: contain;" Icon="check" Text="Lưu thay đổi" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Dark" Variant="Variant.Flat" Click="@(() => OnSaveNewName())" />
+        <RadzenButton Style="width: 120px;" Icon="close" Text="Hủy" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" Click="@(() => { ThongTinNVL.LoaiThongTin.TenLoaiThongTin.Value = oldName; DialogService.Close(null); })" />
     </RadzenStack>
 </RadzenCard>
 
 @code {
     [Parameter]
-    public NguyenVatLieuDetail? NgVLieuDetail { get; set; }
+    public ThongTinNVL ThongTinNVL { get; set; } = new();
 
-    private string newName = string.Empty;
+    [Parameter]
+    public NguyenVatLieu TargetNVL { get; set; } = new();
+
+    private string oldName = string.Empty;
+
+    protected async override Task OnInitializedAsync()
+    {
+        oldName = ThongTinNVL.LoaiThongTin.TenLoaiThongTin.Value?.ToString() ?? string.Empty;
+
+        await DefaultThongTinNguyenVatLieu_ValueIsOK(ThongTinNVL.LoaiThongTin.TenLoaiThongTin);
+
+        await base.OnInitializedAsync();
+    }
 
     private async Task OnSaveNewName()
     {
-        if (!String.IsNullOrEmpty(newName))
+        string newName = (ThongTinNVL.LoaiThongTin.TenLoaiThongTin.Value?.ToString() ?? string.Empty).Trim();
+
+        // Get tên truy xuất
+        string newtentruyxuat = Common.RemoveDiacriticsAndSpaces(newName);
+
+        (int result, string error) = SQLServerServices.UpdateLoaiThongTinNguyenVatLieuName(ThongTinNVL.LoaiThongTin.LoaiTTNVLID.Value, newName, newtentruyxuat);
+
+        if (result > 0)
         {
-            if (NgVLieuDetail?.NVLDetailItems?.TenThongTin.Value?.ToString() != newName)
+            ShowNotification("Đổi tên thành công!", NotificationSeverity.Success, 3000);
+
+            DialogService.Close(newName);
+        }
+        else
+        {
+            await DialogService.Alert($"Lỗi: {error}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+        }
+    }
+
+    // Kiểm tra thông tin mặc định của nguyên vật liệu đã tồn tại
+    private async Task DefaultThongTinNguyenVatLieu_ValueIsOK(Propertyy propertyy)
+    {
+        await Task.Run(() =>
+        {
+            string value = (propertyy.Value?.ToString() ?? string.Empty).Trim();
+
+            if (!string.IsNullOrEmpty(value))
             {
-                // Check ten is existing
-
-                bool isexisting = SQLServerServices.IsNVLDetailExisting(newName.Trim());
-
-                if (isexisting)
+                if (value == oldName.Trim())
                 {
-                    await DialogService.Alert($"Lỗi: đã tồn tại tên trường thông tin này", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                    propertyy.IsValueOK = false;
+                    propertyy.NotifyMess = $"Trùng với tên trước đó";
+                    return;
+                }
+
+                // Get tên truy xuất
+                string tentruyxuat = Common.RemoveDiacriticsAndSpaces(value);
+
+                List<Propertyy> columns = TargetNVL?.GetPropertiesValues() ?? new();
+
+                // Kiểm tra tên trong danh sách main detail
+                bool isMainNameExisting = columns.Any(cl => Common.RemoveDiacriticsAndSpaces(cl.DBName ?? string.Empty) == tentruyxuat);
+
+                // Kiểm tra tên trong danh sách extra detail
+                bool isExisting = SQLServerServices.IsExisting_LoaiThongTinNguyenVatLieu_Name(tentruyxuat);
+
+                if (isExisting || isMainNameExisting)
+                {
+                    propertyy.IsValueOK = false;
+                    propertyy.NotifyMess = $"Trường thông tin đã tồn tại";
                 }
                 else
                 {
-                    // Change ten thong tin // Change ten truy xuat
-                    string tentruyxuat = Common.RemoveDiacriticsAndSpaces(newName.Trim());
-                    (int result, string error) = SQLServerServices.UpdateNVLDetailName(NgVLieuDetail?.NVLDetailItems?.TenTTID.Value, newName, tentruyxuat);
-
-                    if (result > 0)
-                    {
-                        ShowNotification("Đổi tên thành công!", NotificationSeverity.Success, 3000);
-
-                        DialogService.Close(newName);
-                    }
-                    else await DialogService.Alert($"Lỗi: {error}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                    propertyy.IsValueOK = true;
+                    propertyy.NotifyMess = $"Tên hợp lệ";
                 }
             }
             else
             {
-                await DialogService.Alert($"Lỗi: tên trùng với tên hiện tại", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                propertyy.IsValueOK = false;
+                propertyy.NotifyMess = $"Tên không được để trống";
             }
-        }
-        else
-        {
-            await DialogService.Alert($"Lỗi: tên không được để trống", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
-        }
+        });
     }
 
     // Notification

@@ -1,21 +1,21 @@
 ﻿using ProcessManagement.Commons;
+using ProcessManagement.Pages.KehoachSX;
 using System.Reflection;
 
 namespace ProcessManagement.Models.KHO_NVL
 {
-    public class KhoLuuTru
+    public class ThongTinNVL
     {
-        public Propertyy KHOID { get; set; } = new() { DBName = Common.KHOID, DisplayName = "Kho ID", Type = typeof(int), AlowDatabase = true }; // ID
-        public Propertyy TenKho { get; set; } = new() { DBName = Common.TenKho, DisplayName = "Tên kho", Type = typeof(string), AlowDatabase = true };
-        public Propertyy DiaChiKho { get; set; } = new() { DBName = Common.DiaChi, DisplayName = "Địa chỉ", Type = typeof(string), AlowDatabase = true };
-        public Propertyy SucChua { get; set; } = new() { DBName = Common.SucChua, DisplayName = "Sức chứa", Type = typeof(int), AlowDatabase = true };
-        public Propertyy NguoiQuanLy { get; set; } = new() { DBName = Common.NguoiQuanLy, DisplayName = "Người quản lý", Type = typeof(string), AlowDatabase = true };
-        public Propertyy SoDienThoaiKho { get; set; } = new() { DBName = Common.SoDienThoai, DisplayName = "Số điện thoại", Type = typeof(int), AlowDatabase = true };
-        public Propertyy TrangThai { get; set; } = new() { DBName = Common.TrangThai, DisplayName = "Trạng thái", Type = typeof(string), AlowDatabase = true };
+        public Propertyy TTNVLID { get; set; } = new() { DBName = Common.TTNVLID, DisplayName = "TTNVLID", Type = typeof(int), AlowDatabase = false, AlowDisplay = false }; // ID
+        public Propertyy NVLID { get; set; } = new() { DBName = Common.NVLID, DisplayName = "NVL ID", Type = typeof(int), AlowDisplay = false, AlowDatabase = true };
+        public Propertyy LoaiTTNVLID { get; set; } = new() { DBName = Common.LoaiTTNVLID, DisplayName = "LoaiTTNVLID", Type = typeof(int), AlowDisplay = false, AlowDatabase = true };
+        public Propertyy GiaTri { get; set; } = new() { DBName = Common.GiaTri, DisplayName = "Giá trị", Type = typeof(string), AlowDatabase = true };
+
+        public LoaiThongTinNVL LoaiThongTin { get; set; } = new();
 
         public List<Propertyy> GetPropertiesValues()
         {
-            Type propertyType = typeof(KhoLuuTru);
+            Type propertyType = typeof(ThongTinNVL);
 
             FieldInfo[] fields = propertyType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 

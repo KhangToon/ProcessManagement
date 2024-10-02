@@ -1023,15 +1023,15 @@ namespace ParamountBed_Warehouse.Services.SocketService
                     }
 
                     // Add sub details
-                    if (targetNVL?.DSNguyenVatLieuDetails.Count > 0)
+                    if (targetNVL?.DSThongTin.Count > 0)
                     {
-                        var dsngvldetails = targetNVL?.DSNguyenVatLieuDetails;
+                        var dsngvldetails = targetNVL?.DSThongTin;
 
                         if (dsngvldetails != null)
                         {
                             foreach (var nvldetail in dsngvldetails)
                             {
-                                string key = nvldetail.NVLDetailItems?.TenThongTin.Value?.ToString()?.Trim() ?? string.Empty;
+                                string key = nvldetail.LoaiThongTin?.TenLoaiThongTin.Value?.ToString()?.Trim() ?? string.Empty;
                                 object value = nvldetail.GiaTri.Value?.ToString() ?? string.Empty;
 
                                 if (!String.IsNullOrEmpty(key))

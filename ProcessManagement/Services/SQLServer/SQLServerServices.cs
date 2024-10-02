@@ -430,7 +430,6 @@ namespace ProcessManagement.Services.SQLServer
 
             Parallel.ForEach(listSanphams, sp =>
             {
-                sp.ChitietSanPhams = GetDSachChitietSanPham(sp);
                 sp.DanhSachNVLs = GetDSachNVLofSanPham(sp.SP_SPID.Value);
             });
 
@@ -468,275 +467,9 @@ namespace ProcessManagement.Services.SQLServer
                 }
             }
 
-            sanpham.ChitietSanPhams = GetDSachChitietSanPham(sanpham);
             sanpham.DanhSachNVLs = GetDSachNVLofSanPham(sanpham.SP_SPID.Value);
 
             return sanpham;
-        }
-
-        // Load danh sach chi tiet san pham
-        public List<ChitietSanPham> GetDSachChitietSanPham(SanPham sanPham)
-        {
-            List<ChitietSanPham> listChitietSanphams = new();
-
-            using (var connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-
-                var command = connection.CreateCommand();
-
-                command.CommandText = $"SELECT * FROM [{Common.TableChitietSanPham}] WHERE [{Common.SP_SPID}] = '{sanPham.SP_SPID.Value}'";
-
-                using var reader = command.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    ChitietSanPham rowSP = new();
-
-                    List<Propertyy> rowSPitems = rowSP.GetPropertiesValues();
-
-                    foreach (var item in rowSPitems)
-                    {
-                        string? columnName = item.DBName;
-
-                        object columnValue = reader[columnName];
-
-                        item.Value = columnValue;
-                    }
-
-                    listChitietSanphams.Add(rowSP);
-                }
-            }
-
-            return listChitietSanphams;
-        }
-
-        // Kiem tra newchitietsp da co hay chua 
-        public (int, string) CheckNewChitietSanpham(ChitietSanPham newChitietSP)
-        {
-            string errorMess = string.Empty;
-
-            try
-            {
-                using var connection = new SqlConnection(connectionString);
-
-                connection.Open();
-
-                var command = connection.CreateCommand();
-
-                command.CommandText = $"SELECT COUNT(*) FROM [{Common.TableChitietSanPham}] WHERE [{Common.SP_SPID}] = '{newChitietSP.SPID.Value}' AND [{Common.PropertyName}] = '{newChitietSP.PropertyName.Value}'";
-
-                int count = Convert.ToInt32(command.ExecuteScalar());
-
-                return (count, errorMess);
-            }
-            catch (Exception ex)
-            {
-                errorMess = ex.Message;
-
-                return (-1, errorMess);
-            }
-
-            // chua co return > 0
-        }
-
-        // Them moi chi tiet san pham
-        public (int, string) InsertNewSanPham_(SanPham newSanpham)
-        {
-            List<Propertyy> newspItems = newSanpham.GetPropertiesValues().Where(po => po.AlowDatabase == true && po.Value != null).ToList();
-
-            int result = -1; string errorMess = string.Empty;
-
-            try
-            {
-                using var connection = new SqlConnection(connectionString);
-
-                connection.Open();
-
-                var command = connection.CreateCommand();
-
-                string columnNames = string.Join(",", newspItems.Select(key => $"[{key.DBName}]"));
-
-                string parameterNames = string.Join(",", newspItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
-
-                command.CommandText = $"INSERT INTO [{Common.Table_SanPham}] ({columnNames}) OUTPUT INSERTED.{Common.SP_SPID} VALUES ({parameterNames})";
-
-                foreach (var item in newspItems)
-                {
-                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
-
-                    object? parameterValue = item.Value;
-
-                    command.Parameters.AddWithValue(parameterName, parameterValue);
-                }
-
-                object? rs = command.ExecuteScalar();
-
-                result = Convert.ToInt32(rs);
-
-                if (result == 0) result = -1;
-            }
-            catch (Exception ex)
-            {
-                errorMess = ex.Message;
-
-                return (-1, errorMess);
-            }
-
-            return (result, errorMess);
-        }
-
-        // Them moi chi tiet san pham
-        public (int, string) InsertNewChitietSanPham(ChitietSanPham newchitietSP)
-        {
-            List<Propertyy> newctspItems = newchitietSP.GetPropertiesValues().Where(po => po.AlowDatabase == true && po.Value != null).ToList();
-
-            int result = -1; string errorMess = string.Empty;
-
-            try
-            {
-                using var connection = new SqlConnection(connectionString);
-
-                connection.Open();
-
-                var command = connection.CreateCommand();
-
-                string columnNames = string.Join(",", newctspItems.Select(key => $"[{key.DBName}]"));
-
-                string parameterNames = string.Join(",", newctspItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
-
-                command.CommandText = $"INSERT INTO [{Common.TableChitietSanPham}] ({columnNames}) OUTPUT INSERTED.{Common.CTSPID} VALUES ({parameterNames})";
-
-                foreach (var item in newctspItems)
-                {
-                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
-
-                    object? parameterValue = item.Value;
-
-                    command.Parameters.AddWithValue(parameterName, parameterValue);
-                }
-
-                object? rs = command.ExecuteScalar();
-
-                result = Convert.ToInt32(rs);
-
-                if (result == 0) result = -1;
-            }
-            catch (Exception ex)
-            {
-                errorMess = ex.Message;
-
-                return (-1, errorMess);
-            }
-
-            return (result, errorMess);
-        }
-
-        // Update danh sach chi tiet san pham
-        public (int, string) UpdateDanhSachChitietSanpham(List<ChitietSanPham>? chitietSanphamList)
-        {
-            int result = -1; string errorMess = string.Empty;
-
-            if (chitietSanphamList == null) return (result, errorMess);
-
-            try
-            {
-                using var connection = new SqlConnection(connectionString);
-
-                connection.Open();
-
-                foreach (var chitietSanpham in chitietSanphamList)
-                {
-                    List<Propertyy> chitietItems = chitietSanpham.GetPropertiesValues().Where(pro => pro.AlowDatabase == true).ToList();
-
-                    var command = connection.CreateCommand();
-
-                    string setClause = string.Join(",", chitietItems.Select(key => $"[{key.DBName}] = @{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
-
-                    command.CommandText = $"UPDATE [{Common.TableChitietSanPham}] SET {setClause} WHERE [{Common.CTSPID}] = '{chitietSanpham.CTSPID.Value}'";
-
-                    foreach (var item in chitietItems)
-                    {
-                        string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
-
-                        object? parameterValue = item.Value;
-
-                        command.Parameters.AddWithValue(parameterName, parameterValue);
-                    }
-
-                    result = command.ExecuteNonQuery();
-                }
-            }
-            catch (Exception ex)
-            {
-                errorMess = ex.Message;
-
-                return (-1, errorMess);
-            }
-
-            return (result, errorMess);
-        }
-
-        // Delete san pham
-        public (int, string) DeleteSanpham(SanPham? removeSanpham)
-        {
-            int result = -1; string errorMess = string.Empty;
-
-            if (removeSanpham == null) return (result, errorMess);
-
-            try
-            {
-                using var connection = new SqlConnection(connectionString);
-
-                connection.Open();
-
-                var command = connection.CreateCommand();
-
-                command.CommandText = $"DELETE FROM {Common.Table_SanPham} WHERE [{Common.SP_SPID}] = '{removeSanpham.SP_SPID.Value}'";
-
-                object rs = command.ExecuteScalar();
-
-                result = Convert.ToInt32(rs);
-            }
-            catch (Exception ex)
-            {
-                errorMess = ex.Message;
-
-                return (-1, errorMess);
-            }
-
-            return (result, errorMess);
-        }
-
-        // Delete chi tiet san pham
-        public (int, string) DeleteChitietSanPham(ChitietSanPham? removeChitiet)
-        {
-            int result = -1; string errorMess = string.Empty;
-
-            if (removeChitiet == null) return (result, errorMess);
-
-            try
-            {
-                using var connection = new SqlConnection(connectionString);
-
-                connection.Open();
-
-                var command = connection.CreateCommand();
-
-                command.CommandText = $"DELETE FROM {Common.TableChitietSanPham} WHERE [{Common.CTSPID}] = '{removeChitiet.CTSPID.Value}'";
-
-                object rs = command.ExecuteScalar();
-
-                result = Convert.ToInt32(rs);
-            }
-            catch (Exception ex)
-            {
-                errorMess = ex.Message;
-
-                return (-1, errorMess);
-            }
-
-            return (result, errorMess);
         }
 
         #endregion Table_SanPham
@@ -1474,7 +1207,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"SELECT COUNT(*) FROM [{Common.TableNguyenCong}] WHERE [{Common.NguyenCong}] = N'{nguyenCong.TenNguyenCong.Value}'";
+                command.CommandText = $"SELECT COUNT(*) FROM [{Common.Table_NguyenCong}] WHERE [{Common.NguyenCong}] = N'{nguyenCong.TenNguyenCong.Value}'";
 
                 int count = Convert.ToInt32(command.ExecuteScalar());
 
@@ -1509,7 +1242,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 string parameterNames = string.Join(",", newNCItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
 
-                command.CommandText = $"INSERT INTO [{Common.TableNguyenCong}] ({columnNames}) OUTPUT INSERTED.{Common.NCID} VALUES ({parameterNames})";
+                command.CommandText = $"INSERT INTO [{Common.Table_NguyenCong}] ({columnNames}) OUTPUT INSERTED.{Common.NCID} VALUES ({parameterNames})";
 
                 foreach (var item in newNCItems)
                 {
@@ -1547,7 +1280,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"SELECT * FROM [{Common.TableNguyenCong}] WHERE [{Common.NCID}] = '{ncid}'";
+                command.CommandText = $"SELECT * FROM [{Common.Table_NguyenCong}] WHERE [{Common.NCID}] = '{ncid}'";
 
                 using var reader = command.ExecuteReader();
 
@@ -1580,7 +1313,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"SELECT * FROM [{Common.TableNguyenCong}]";
+                command.CommandText = $"SELECT * FROM [{Common.Table_NguyenCong}]";
 
                 using var reader = command.ExecuteReader();
 
@@ -1762,9 +1495,9 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"DELETE FROM {Common.Table_NVLofSanPham} WHERE [{Common.NVLID}] = '{removeNVLofSP.SP_NVLSPID.Value}'";
+                command.CommandText = $"DELETE FROM {Common.Table_NVLofSanPham} WHERE [{Common.SP_NVLSPID}] = '{removeNVLofSP.SP_NVLSPID.Value}'";
 
-                object rs = command.ExecuteScalar();
+                object rs = command.ExecuteNonQuery();
 
                 result = Convert.ToInt32(rs);
             }
@@ -1890,7 +1623,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 string parameterNames = string.Join(",", newNVLItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
 
-                command.CommandText = $"INSERT INTO [{Common.TableNguyenVatLieu}] ({columnNames}) OUTPUT INSERTED.{Common.NVLID} VALUES ({parameterNames})";
+                command.CommandText = $"INSERT INTO [{Common.Table_NguyenVatLieu}] ({columnNames}) OUTPUT INSERTED.{Common.NVLID} VALUES ({parameterNames})";
 
                 foreach (var item in newNVLItems)
                 {
@@ -1930,7 +1663,7 @@ namespace ProcessManagement.Services.SQLServer
                 {
                     connection.Open();
 
-                    string sqlQuery = $"UPDATE {Common.TableNguyenVatLieu} SET [{Common.NVLTonKho}] = [{Common.NVLTonKho}] - '{soluongLay}' WHERE [{Common.NVLID}] = '{nvlid}'";
+                    string sqlQuery = $"UPDATE {Common.Table_NguyenVatLieu} SET [{Common.NVLTonKho}] = [{Common.NVLTonKho}] - '{soluongLay}' WHERE [{Common.NVLID}] = '{nvlid}'";
 
                     var command = new SqlCommand(sqlQuery, connection);
 
@@ -1954,7 +1687,7 @@ namespace ProcessManagement.Services.SQLServer
         {
             using (var connection = new SqlConnection(connectionString))
             {
-                string query = $"SELECT COUNT(*) FROM [{Common.TableNguyenVatLieu}] WHERE [{Common.TenNVL}] = N'{tenNVL}'";
+                string query = $"SELECT COUNT(*) FROM [{Common.Table_NguyenVatLieu}] WHERE [{Common.TenNVL}] = N'{tenNVL}'";
 
                 using (var command = new SqlCommand(query, connection))
                 {
@@ -1978,7 +1711,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"SELECT * FROM [{Common.TableNguyenVatLieu}] WHERE [{Common.NVLID}] = '{nvlID}'";
+                command.CommandText = $"SELECT * FROM [{Common.Table_NguyenVatLieu}] WHERE [{Common.NVLID}] = '{nvlID}'";
 
                 using var reader = command.ExecuteReader();
 
@@ -1999,7 +1732,7 @@ namespace ProcessManagement.Services.SQLServer
             }
 
             // Load Details NVL 
-            nvl.DSNguyenVatLieuDetails = GetNguyenVatLieuDetails(nvl.NVLID.Value);
+            nvl.DSThongTin = GetNguyenVatLieuDetails(nvl.NVLID.Value);
             // Load Danh muc
             nvl.DanhMuc = GetDanhMucbyID(nvl.DMID.Value);
             // Load Loai NVL
@@ -2023,7 +1756,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"SELECT * FROM [{Common.TableNguyenVatLieu}] WHERE [{Common.TenNVL}] = '{tenNVL}'";
+                command.CommandText = $"SELECT * FROM [{Common.Table_NguyenVatLieu}] WHERE [{Common.TenNVL}] = '{tenNVL}'";
 
                 using var reader = command.ExecuteReader();
 
@@ -2044,7 +1777,7 @@ namespace ProcessManagement.Services.SQLServer
             }
 
             // Load Details NVL 
-            nvl.DSNguyenVatLieuDetails = GetNguyenVatLieuDetails(nvl.NVLID.Value);
+            nvl.DSThongTin = GetNguyenVatLieuDetails(nvl.NVLID.Value);
             // Load Danh muc
             nvl.DanhMuc = GetDanhMucbyID(nvl.DMID.Value);
             // Load Loai NVL
@@ -2068,7 +1801,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"SELECT * FROM [{Common.TableNguyenVatLieu}] WHERE [{Common.LOAINVLID}] = '{loainvlID}'";
+                command.CommandText = $"SELECT * FROM [{Common.Table_NguyenVatLieu}] WHERE [{Common.LOAINVLID}] = '{loainvlID}'";
 
                 using var reader = command.ExecuteReader();
 
@@ -2088,7 +1821,7 @@ namespace ProcessManagement.Services.SQLServer
                     }
 
                     // Load Details NVL 
-                    nvl.DSNguyenVatLieuDetails = GetNguyenVatLieuDetails(nvl.NVLID.Value);
+                    nvl.DSThongTin = GetNguyenVatLieuDetails(nvl.NVLID.Value);
                     // Load Danh muc
                     nvl.DanhMuc = GetDanhMucbyID(nvl.DMID.Value);
                     // Load Loai NVL
@@ -2116,7 +1849,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"SELECT * FROM [{Common.TableNguyenVatLieu}] WHERE [{Common.DMID}] = '{dmucID}'";
+                command.CommandText = $"SELECT * FROM [{Common.Table_NguyenVatLieu}] WHERE [{Common.DMID}] = '{dmucID}'";
 
                 using var reader = command.ExecuteReader();
 
@@ -2136,7 +1869,7 @@ namespace ProcessManagement.Services.SQLServer
                     }
 
                     // Load Details NVL 
-                    nvl.DSNguyenVatLieuDetails = GetNguyenVatLieuDetails(nvl.NVLID.Value);
+                    nvl.DSThongTin = GetNguyenVatLieuDetails(nvl.NVLID.Value);
                     // Load Danh muc
                     nvl.DanhMuc = GetDanhMucbyID(nvl.DMID.Value);
                     // Load Loai NVL
@@ -2164,7 +1897,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"SELECT [{Common.NVLID}] FROM [{Common.TableNguyenVatLieu}] WHERE [{Common.TenNVL}] = '{tenNVL}'";
+                command.CommandText = $"SELECT [{Common.NVLID}] FROM [{Common.Table_NguyenVatLieu}] WHERE [{Common.TenNVL}] = '{tenNVL}'";
 
                 using var reader = command.ExecuteReader();
 
@@ -2193,7 +1926,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"SELECT [{Common.NVLID}] FROM [{Common.TableNguyenVatLieu}]";
+                command.CommandText = $"SELECT [{Common.NVLID}] FROM [{Common.Table_NguyenVatLieu}]";
 
                 using var reader = command.ExecuteReader();
 
@@ -2230,7 +1963,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 string setClause = string.Join(",", Items.Select(key => $"[{key.DBName}] = @{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
 
-                command.CommandText = $"UPDATE [{Common.TableNguyenVatLieu}] SET {setClause} WHERE [{Common.NVLID}] = '{ngVatLieu.NVLID.Value}'";
+                command.CommandText = $"UPDATE [{Common.Table_NguyenVatLieu}] SET {setClause} WHERE [{Common.NVLID}] = '{ngVatLieu.NVLID.Value}'";
 
                 foreach (var item in Items)
                 {
@@ -2253,6 +1986,534 @@ namespace ProcessManagement.Services.SQLServer
             return (result, errorMess);
         }
 
+
+
+        // Get all ds nguyen vat lieu
+        public List<NguyenVatLieu> GetDanhSachNguyenVatLieu()
+        {
+            List<NguyenVatLieu> danhSachNguyenVatLieu = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_NguyenVatLieu}]";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    NguyenVatLieu nguyenVatLieu = new();
+
+                    List<Propertyy> rowItems = nguyenVatLieu.GetPropertiesValues();
+
+                    foreach (var item in rowItems)
+                    {
+                        string? columnName = item.DBName;
+
+                        if (reader.GetOrdinal(columnName) != -1) // Check if the column exists
+                        {
+                            object columnValue = reader[columnName];
+
+                            item.Value = columnValue == DBNull.Value ? null : columnValue.ToString()?.Trim();
+                        }
+                    }
+
+                    // Load danh sach thong tin nguyen vat lieu
+                    nguyenVatLieu.DSThongTin = GetDanhSachThongTinNguyenVatLieu(nguyenVatLieu.NVLID.Value);
+
+                    danhSachNguyenVatLieu.Add(nguyenVatLieu);
+                }
+            }
+
+            return danhSachNguyenVatLieu;
+        }
+        // Check gia tri truong thong tin mac dinh nvl is exsting? 
+        public bool DefaultThongTinNguyenVatLieu_ValueIsExisting(string? proValue, string proName)
+        {
+            using (var connection = new SqlConnection(connectionString))
+            {
+                string query = $"SELECT COUNT(*) FROM [{Common.Table_NguyenVatLieu}] WHERE [{proName}] = N'{proValue?.Trim()}'";
+
+                using (var command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+
+                    int count = (int)command.ExecuteScalar();
+
+                    return count > 0;
+                }
+            }
+        }
+        // Insert new nguyen vat lieu
+        public (int, string) InsertNewNguyenVatLieu(NguyenVatLieu? newNguyenVatLieu)
+        {
+            int result = -1;
+            string errorMess = string.Empty;
+
+            if (newNguyenVatLieu == null) return (result, "Error");
+
+            List<Propertyy> newNVLItems = newNguyenVatLieu.GetPropertiesValues().Where(po => po.AlowDatabase == true && po.Value != null).ToList();
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                string columnNames = string.Join(",", newNVLItems.Select(key => $"[{key.DBName}]"));
+                string parameterNames = string.Join(",", newNVLItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $"INSERT INTO [{Common.Table_NguyenVatLieu}] ({columnNames}) OUTPUT INSERTED.{Common.NVLID} VALUES ({parameterNames})";
+
+                foreach (var item in newNVLItems)
+                {
+                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
+                    object? parameterValue = item.Value;
+
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                object? rs = command.ExecuteScalar();
+                result = Convert.ToInt32(rs);
+
+                if (result == 0) result = -1;
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+        // Delete nguyen vat lieu by nvlid
+        public (int, string) DeleteNguyenVatLieu(object? nvlID)
+        {
+            int result = -1;
+            string errorMess = string.Empty;
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+                connection.Open();
+
+                var command = connection.CreateCommand();
+                command.CommandText = $"DELETE FROM {Common.Table_NguyenVatLieu} WHERE [{Common.NVLID}] = '{nvlID}'";
+
+                object rs = command.ExecuteScalar();
+                result = Convert.ToInt32(rs);
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+        #endregion
+
+        #region Table_KHO_ThongTinNVL
+        // Delete thong tin nguyen vat lieu
+        public (int, string) DeleteThongTinNguyenVatLieu(object? thongtinNVLid)
+        {
+            int result = -1;
+            string errorMess = string.Empty;
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+                connection.Open();
+
+                var command = connection.CreateCommand();
+                command.CommandText = $"DELETE FROM {Common.Table_ThongTinNVL} WHERE [{Common.TTNVLID}] = '{thongtinNVLid}'";
+
+                object rs = command.ExecuteScalar();
+                result = Convert.ToInt32(rs);
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
+        // Insert thong tin nguyen vat lieu
+        public (int, string) InsertThongTinNguyenVatLieu(ThongTinNVL? ttNVL)
+        {
+            int result = -1;
+            string errorMess = string.Empty;
+
+            if (ttNVL == null) return (result, "Error");
+
+            List<Propertyy> items = ttNVL.GetPropertiesValues().Where(po => po.AlowDatabase == true && po.Value != null).ToList();
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                string columnNames = string.Join(",", items.Select(key => $"[{key.DBName}]"));
+                string parameterNames = string.Join(",", items.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $"INSERT INTO [{Common.Table_ThongTinNVL}] ({columnNames}) OUTPUT INSERTED.{Common.TTNVLID} VALUES ({parameterNames})";
+
+                foreach (var item in items)
+                {
+                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
+                    object? parameterValue = item.Value;
+
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                object? rs = command.ExecuteScalar();
+                result = Convert.ToInt32(rs);
+
+                if (result == 0) result = -1;
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
+        // Update danh sach thong tin nguyen vat lieu
+        public (int, string) UpdateListExtraNguyenVatLieuDetails(List<ThongTinNVL> thongtinNguyenVatLieus)
+        {
+            int result = -1;
+            string errorMess = string.Empty;
+
+            if (thongtinNguyenVatLieus == null) return (result, errorMess);
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+                connection.Open();
+
+                foreach (var thongtin in thongtinNguyenVatLieus)
+                {
+                    List<Propertyy> items = thongtin.GetPropertiesValues().Where(pro => pro.DBName == Common.GiaTri).ToList();
+                    var command = connection.CreateCommand();
+
+                    string setClause = string.Join(",", items.Select(key => $"[{key.DBName}] = @{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
+                    command.CommandText = $"UPDATE [{Common.Table_ThongTinNVL}] SET {setClause} WHERE [{Common.TTNVLID}] = '{thongtin.TTNVLID.Value}'";
+
+                    foreach (var item in items)
+                    {
+                        string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
+                        object? parameterValue = item.Value;
+
+                        command.Parameters.AddWithValue(parameterName, parameterValue);
+                    }
+
+                    result = command.ExecuteNonQuery();
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
+        // Get danh sach thong tin nguyen vat lieu by nvlid
+        public List<ThongTinNVL> GetDanhSachThongTinNguyenVatLieu(object? nvlID)
+        {
+            List<ThongTinNVL> danhSachThongTinNguyenVatLieu = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_ThongTinNVL}] WHERE [{Common.NVLID}] = @NVLID";
+
+                command.Parameters.AddWithValue("@NVLID", nvlID);
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    ThongTinNVL thongTinNguyenVatLieu = new();
+
+                    List<Propertyy> rowItems = thongTinNguyenVatLieu.GetPropertiesValues();
+
+                    foreach (var item in rowItems)
+                    {
+                        string? columnName = item.DBName;
+
+                        if (reader.GetOrdinal(columnName) != -1) // Check if the column exists
+                        {
+                            object columnValue = reader[columnName];
+
+                            item.Value = columnValue == DBNull.Value ? null : columnValue.ToString()?.Trim();
+                        }
+                    }
+
+                    // Get loai thong tin nguyen vat lieu
+                    thongTinNguyenVatLieu.LoaiThongTin = GetLoaiThongTinNguyenVatLieu(thongTinNguyenVatLieu.LoaiTTNVLID.Value);
+
+                    danhSachThongTinNguyenVatLieu.Add(thongTinNguyenVatLieu);
+                }
+            }
+
+            return danhSachThongTinNguyenVatLieu;
+        }
+        
+        #endregion
+
+        #region Table_KHO_LoaiThongTinNVL
+        // Thêm mới loại thông tin nguyên vật liệu
+        public (int, string) InsertNewLoaiThongTinNguyenVatLieu(LoaiThongTinNVL loaithongtinnvl)
+        {
+            List<Propertyy> newItems = loaithongtinnvl.GetPropertiesValues().Where(po => po.AlowDatabase == true && po.Value != null).ToList();
+
+            int result = -1;
+            string errorMess = string.Empty;
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                string columnNames = string.Join(",", newItems.Select(key => $"[{key.DBName}]"));
+                string parameterNames = string.Join(",", newItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $"INSERT INTO [{Common.Table_LoaiThongTinNVL}] ({columnNames}) OUTPUT INSERTED.{Common.LoaiTTNVLID} VALUES ({parameterNames})";
+
+                foreach (var item in newItems)
+                {
+                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
+
+                    object? parameterValue = item.Value;
+
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                object? rs = command.ExecuteScalar();
+
+                result = Convert.ToInt32(rs);
+
+                if (result == 0) result = -1;
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+        // Get loai thong tin nguyen vat lieu by loaditnvlid
+        public LoaiThongTinNVL GetLoaiThongTinNguyenVatLieu(object? loaditnvlid)
+        {
+            LoaiThongTinNVL loaiThongTinNguyenVatLieu = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_LoaiThongTinNVL}] WHERE [{Common.LoaiTTNVLID}] = @LoaiTTNVLID";
+
+                command.Parameters.AddWithValue("@LoaiTTNVLID", loaditnvlid);
+
+                using var reader = command.ExecuteReader();
+
+                if (reader.Read()) // Use if since we're expecting a single result
+                {
+                    List<Propertyy> rowItems = loaiThongTinNguyenVatLieu.GetPropertiesValues();
+
+                    foreach (var item in rowItems)
+                    {
+                        string? columnName = item.DBName;
+
+                        if (reader.GetOrdinal(columnName) != -1) // Check if the column exists
+                        {
+                            object columnValue = reader[columnName];
+
+                            item.Value = columnValue == DBNull.Value ? null : columnValue.ToString()?.Trim();
+                        }
+                    }
+                }
+            }
+
+            return loaiThongTinNguyenVatLieu;
+        }
+        // Get danh sach loai thong tin nguyen vat lieu
+        public List<LoaiThongTinNVL> GetDanhSachLoaiThongTinNguyenVatLieu()
+        {
+            List<LoaiThongTinNVL> danhSachLoaiThongTinNguyenVatLieu = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_LoaiThongTinNVL}]";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    LoaiThongTinNVL loaiThongTinNguyenVatLieu = new();
+
+                    List<Propertyy> rowItems = loaiThongTinNguyenVatLieu.GetPropertiesValues();
+
+                    foreach (var item in rowItems)
+                    {
+                        string? columnName = item.DBName;
+
+                        if (reader.GetOrdinal(columnName) != -1) // Check if the column exists
+                        {
+                            object columnValue = reader[columnName];
+
+                            item.Value = columnValue == DBNull.Value ? null : columnValue.ToString()?.Trim();
+                        }
+                    }
+
+                    danhSachLoaiThongTinNguyenVatLieu.Add(loaiThongTinNguyenVatLieu);
+                }
+            }
+
+            return danhSachLoaiThongTinNguyenVatLieu;
+        }
+        // Get danh sach loai thong tin nguyen vat lieu - mac dinh
+        public List<LoaiThongTinNVL> GetDanhSachLoaiThongTinNguyenVatLieu(object isDefault)
+        {
+            List<LoaiThongTinNVL> danhSachLoaiThongTinNguyenVatLieu = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_LoaiThongTinNVL}] WHERE [{Common.IsDefault}] = '{isDefault}'";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    LoaiThongTinNVL loaiThongTinNguyenVatLieu = new();
+
+                    List<Propertyy> rowItems = loaiThongTinNguyenVatLieu.GetPropertiesValues();
+
+                    foreach (var item in rowItems)
+                    {
+                        string? columnName = item.DBName;
+
+                        if (reader.GetOrdinal(columnName) != -1) // Check if the column exists
+                        {
+                            object columnValue = reader[columnName];
+
+                            item.Value = columnValue == DBNull.Value ? null : columnValue.ToString()?.Trim();
+                        }
+                    }
+
+                    danhSachLoaiThongTinNguyenVatLieu.Add(loaiThongTinNguyenVatLieu);
+                }
+            }
+
+            return danhSachLoaiThongTinNguyenVatLieu;
+        }
+        // Kiem tra ten loai thong tin nguyen vat lieu da ton tai
+        public bool IsExisting_LoaiThongTinNguyenVatLieu_Name(string? proValue)
+        {
+            using (var connection = new SqlConnection(connectionString))
+            {
+                string query = $"SELECT COUNT(*) FROM [{Common.Table_LoaiThongTinNVL}] WHERE [{Common.TenTruyXuat}] = N'{proValue?.Trim()}'";
+
+                using (var command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+
+                    int count = (int)command.ExecuteScalar();
+
+                    return count > 0;
+                }
+            }
+        }
+        // Thay đổi tên của loại thông tin nguyên vật liệu
+        public (int, string) UpdateLoaiThongTinNguyenVatLieuName(object? loaittnvlid, string newName, string tentruyxuat)
+        {
+            int result = -1;
+            string errorMess = string.Empty;
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+
+                    string sqlQuery = $"UPDATE {Common.Table_LoaiThongTinNVL} SET [{Common.TenLoaiThongTin}] = N'{newName}', [{Common.TenTruyXuat}] = '{tentruyxuat}' WHERE [{Common.LoaiTTNVLID}] = '{loaittnvlid}'";
+
+                    var command = new SqlCommand(sqlQuery, connection);
+
+                    result = command.ExecuteNonQuery();
+
+                    connection.Close();
+
+                    return (result, string.Empty);
+                }
+            }
+            catch (Exception ex)
+            {
+                string err = ex.Message;
+
+                return (-1, err);
+            }
+        }
+        // Xóa loại thông tin trong bảng danh sách thông tin NVL
+        public (int, string) DeleteLoaiThongTinNVL(object? tenttID)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"DELETE FROM {Common.Table_LoaiThongTinNVL} WHERE [{Common.LoaiTTNVLID}] = '{tenttID}'";
+
+                object rs = command.ExecuteScalar();
+
+                result = Convert.ToInt32(rs);
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
         #endregion
 
         // ------------------------------------------------------------------------------------- //
@@ -2263,7 +2524,7 @@ namespace ProcessManagement.Services.SQLServer
         {
             using (var connection = new SqlConnection(connectionString))
             {
-                string query = $"SELECT COUNT(*) FROM [{Common.Table_NguyenLieuDetails}] WHERE [{Common.TenTTID}] = N'{tenttid}' AND [{Common.NVLID}] = {nvlid}";
+                string query = $"SELECT COUNT(*) FROM [{Common.Table_ThongTinNVL}] WHERE [{Common.LoaiTTNVLID}] = N'{tenttid}' AND [{Common.NVLID}] = {nvlid}";
 
                 using (var command = new SqlCommand(query, connection))
                 {
@@ -2277,9 +2538,9 @@ namespace ProcessManagement.Services.SQLServer
         }
 
         // Load thong tin of nguyen vat lieu
-        public List<NguyenVatLieuDetail> GetNguyenVatLieuDetails(object? nvlid)
+        public List<ThongTinNVL> GetNguyenVatLieuDetails(object? nvlid)
         {
-            List<NguyenVatLieuDetail> nvlDetails = new();
+            List<ThongTinNVL> nvlDetails = new();
 
             using (var connection = new SqlConnection(connectionString))
             {
@@ -2287,13 +2548,13 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"SELECT * FROM [{Common.Table_NguyenLieuDetails}] WHERE [{Common.NVLID}] = '{nvlid}'";
+                command.CommandText = $"SELECT * FROM [{Common.Table_ThongTinNVL}] WHERE [{Common.NVLID}] = '{nvlid}'";
 
                 using var reader = command.ExecuteReader();
 
                 while (reader.Read())
                 {
-                    NguyenVatLieuDetail detail = new();
+                    ThongTinNVL detail = new();
 
                     List<Propertyy> rowitems = detail.GetPropertiesValues();
 
@@ -2307,7 +2568,7 @@ namespace ProcessManagement.Services.SQLServer
                     }
 
                     // Load ten thong tin 
-                    detail.NVLDetailItems = GetNVLdetailsNamebyID(detail.TenTTID.Value);
+                    detail.LoaiThongTin = GetNVLdetailsNamebyID(detail.LoaiTTNVLID.Value);
 
                     nvlDetails.Add(detail);
                 }
@@ -2317,7 +2578,7 @@ namespace ProcessManagement.Services.SQLServer
         }
 
         // Thêm trường thông tin chi tiết mới cho nguyên vật liệu
-        public (int, string) InsertNewNguyenVatLieuDetail(NguyenVatLieuDetail newnvldetail)
+        public (int, string) InsertNewNguyenVatLieuDetail(ThongTinNVL newnvldetail)
         {
             List<Propertyy> newItems = newnvldetail.GetPropertiesValues().Where(po => po.AlowDatabase == true && po.Value != null).ToList();
 
@@ -2335,7 +2596,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 string parameterNames = string.Join(",", newItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
 
-                command.CommandText = $"INSERT INTO [{Common.Table_NguyenLieuDetails}] ({columnNames}) OUTPUT INSERTED.{Common.TTNVLID} VALUES ({parameterNames})";
+                command.CommandText = $"INSERT INTO [{Common.Table_ThongTinNVL}] ({columnNames}) OUTPUT INSERTED.{Common.TTNVLID} VALUES ({parameterNames})";
 
                 foreach (var item in newItems)
                 {
@@ -2362,36 +2623,6 @@ namespace ProcessManagement.Services.SQLServer
             return (result, errorMess);
         }
 
-        // Xóa trường thông tin của nguyên vật liệu
-        public (int, string) DeleteThongTinNgVatLieu(NguyenVatLieuDetail? removeNVLdetail)
-        {
-            int result = -1; string errorMess = string.Empty;
-
-            if (removeNVLdetail == null) return (result, errorMess);
-
-            try
-            {
-                using var connection = new SqlConnection(connectionString);
-
-                connection.Open();
-
-                var command = connection.CreateCommand();
-
-                command.CommandText = $"DELETE FROM {Common.Table_NguyenLieuDetails} WHERE [{Common.TTNVLID}] = '{removeNVLdetail.TTNVLID.Value}'";
-
-                object rs = command.ExecuteScalar();
-
-                result = Convert.ToInt32(rs);
-            }
-            catch (Exception ex)
-            {
-                errorMess = ex.Message;
-
-                return (-1, errorMess);
-            }
-
-            return (result, errorMess);
-        }
 
         // Xóa trường thông tin ở các nguyên vật liệu khác
         public (int, string) DeleteThongTinNgVatLieuByTenTTID(object? tenttID)
@@ -2406,7 +2637,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"DELETE FROM {Common.Table_NguyenLieuDetails} WHERE [{Common.TenTTID}] = '{tenttID}'";
+                command.CommandText = $"DELETE FROM {Common.Table_ThongTinNVL} WHERE [{Common.LoaiTTNVLID}] = '{tenttID}'";
 
                 object rs = command.ExecuteScalar();
 
@@ -2423,7 +2654,7 @@ namespace ProcessManagement.Services.SQLServer
         }
 
         // Cập nhật danh sách thông tin phụ của nguyên vật liệu
-        public (int, string) UpdateListNguyenVatLieuDetails(List<NguyenVatLieuDetail> ngvatlieudetails)
+        public (int, string) UpdateListNguyenVatLieuDetails(List<ThongTinNVL> ngvatlieudetails)
         {
             int result = -1; string errorMess = string.Empty;
 
@@ -2443,7 +2674,7 @@ namespace ProcessManagement.Services.SQLServer
 
                     string setClause = string.Join(",", items.Select(key => $"[{key.DBName}] = @{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
 
-                    command.CommandText = $"UPDATE [{Common.Table_NguyenLieuDetails}] SET {setClause} WHERE [{Common.TTNVLID}] = '{nvldetail.TTNVLID.Value}'";
+                    command.CommandText = $"UPDATE [{Common.Table_ThongTinNVL}] SET {setClause} WHERE [{Common.TTNVLID}] = '{nvldetail.TTNVLID.Value}'";
 
                     foreach (var item in items)
                     {
@@ -2472,9 +2703,9 @@ namespace ProcessManagement.Services.SQLServer
         // ------------------------------------------------------------------------------------- //
         #region Table_KHO_NVLDetailsListName
         // Load list name of thong tin nguyen vat lieu 
-        public List<NVLDetailsName> GetListNVLdetailsName()
+        public List<LoaiThongTinNVL> GetListNVLdetailsName()
         {
-            List<NVLDetailsName> names = new();
+            List<LoaiThongTinNVL> names = new();
 
             using (var connection = new SqlConnection(connectionString))
             {
@@ -2482,13 +2713,13 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"SELECT * FROM [{Common.Table_NVLDetailsListName}]";
+                command.CommandText = $"SELECT * FROM [{Common.Table_LoaiThongTinNVL}]";
 
                 using var reader = command.ExecuteReader();
 
                 while (reader.Read())
                 {
-                    NVLDetailsName name = new();
+                    LoaiThongTinNVL name = new();
 
                     List<Propertyy> rowitems = name.GetPropertiesValues();
 
@@ -2509,9 +2740,9 @@ namespace ProcessManagement.Services.SQLServer
         }
 
         // Get name of nguyen vat lieu detail column 
-        public NVLDetailsName GetNVLdetailsNamebyID(object? tenttID)
+        public LoaiThongTinNVL GetNVLdetailsNamebyID(object? tenttID)
         {
-            NVLDetailsName detailname = new();
+            LoaiThongTinNVL detailname = new();
 
             using (var connection = new SqlConnection(connectionString))
             {
@@ -2519,7 +2750,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"SELECT * FROM [{Common.Table_NVLDetailsListName}] WHERE [{Common.TenTTID}] = '{tenttID}'";
+                command.CommandText = $"SELECT * FROM [{Common.Table_LoaiThongTinNVL}] WHERE [{Common.LoaiTTNVLID}] = '{tenttID}'";
 
                 using var reader = command.ExecuteReader();
 
@@ -2547,7 +2778,7 @@ namespace ProcessManagement.Services.SQLServer
         {
             using (var connection = new SqlConnection(connectionString))
             {
-                string query = $"SELECT COUNT(*) FROM [{Common.Table_NVLDetailsListName}] WHERE [{Common.TenThongTin}] = N'{tenNVLDetail}'";
+                string query = $"SELECT COUNT(*) FROM [{Common.Table_LoaiThongTinNVL}] WHERE [{Common.TenLoaiThongTin}] = N'{tenNVLDetail}'";
 
                 using (var command = new SqlCommand(query, connection))
                 {
@@ -2561,7 +2792,7 @@ namespace ProcessManagement.Services.SQLServer
         }
 
         // Them NVL detail name moi
-        public (int, string) InsertNewNVLDetailName(NVLDetailsName newnvldetailName)
+        public (int, string) InsertNewNVLDetailName(LoaiThongTinNVL newnvldetailName)
         {
             List<Propertyy> newItems = newnvldetailName.GetPropertiesValues().Where(po => po.AlowDatabase == true && po.Value != null).ToList();
 
@@ -2579,7 +2810,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 string parameterNames = string.Join(",", newItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
 
-                command.CommandText = $"INSERT INTO [{Common.Table_NVLDetailsListName}] ({columnNames}) OUTPUT INSERTED.{Common.TenTTID} VALUES ({parameterNames})";
+                command.CommandText = $"INSERT INTO [{Common.Table_LoaiThongTinNVL}] ({columnNames}) OUTPUT INSERTED.{Common.LoaiTTNVLID} VALUES ({parameterNames})";
 
                 foreach (var item in newItems)
                 {
@@ -2606,34 +2837,7 @@ namespace ProcessManagement.Services.SQLServer
             return (result, errorMess);
         }
 
-        // Xóa loại thông tin trong bảng danh sách thông tin NVL
-        public (int, string) DeleteNVLDetailName(object? tenttID)
-        {
-            int result = -1; string errorMess = string.Empty;
-
-            try
-            {
-                using var connection = new SqlConnection(connectionString);
-
-                connection.Open();
-
-                var command = connection.CreateCommand();
-
-                command.CommandText = $"DELETE FROM {Common.Table_NVLDetailsListName} WHERE [{Common.TenTTID}] = '{tenttID}'";
-
-                object rs = command.ExecuteScalar();
-
-                result = Convert.ToInt32(rs);
-            }
-            catch (Exception ex)
-            {
-                errorMess = ex.Message;
-
-                return (-1, errorMess);
-            }
-
-            return (result, errorMess);
-        }
+        
 
         // Thay đổi tên của trường thông tin nguyên vật liệu
         public (int, string) UpdateNVLDetailName(object? tenttid, string newName, string tentruyxuat)
@@ -2646,7 +2850,7 @@ namespace ProcessManagement.Services.SQLServer
                 {
                     connection.Open();
 
-                    string sqlQuery = $"UPDATE {Common.Table_NVLDetailsListName} SET [{Common.TenThongTin}] = N'{newName}', [{Common.TenTruyXuat}] = '{tentruyxuat}' WHERE [{Common.TenTTID}] = '{tenttid}' ";
+                    string sqlQuery = $"UPDATE {Common.Table_LoaiThongTinNVL} SET [{Common.TenLoaiThongTin}] = N'{newName}', [{Common.TenTruyXuat}] = '{tentruyxuat}' WHERE [{Common.LoaiTTNVLID}] = '{tenttid}' ";
 
                     var command = new SqlCommand(sqlQuery, connection);
 
@@ -2681,7 +2885,7 @@ namespace ProcessManagement.Services.SQLServer
 
                     var command = connection.CreateCommand();
 
-                    command.CommandText = $"SELECT SUM(CAST([{Common.SoLuong}] AS INT)) AS TongSoLuong FROM [{Common.TableVitriOfNVL}] WHERE [{Common.VTID}] = '{vtltID}'";
+                    command.CommandText = $"SELECT SUM(CAST([{Common.SoLuong}] AS INT)) AS TongSoLuong FROM [{Common.Table_VitriOfNVL}] WHERE [{Common.VTID}] = '{vtltID}'";
 
                     object result = command.ExecuteScalar();
 
@@ -2718,7 +2922,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"SELECT [{Common.VTID}] FROM [{Common.TableViTriLuuTru}] WHERE [{Common.MaViTri}] = '{mavitri}'";
+                command.CommandText = $"SELECT [{Common.VTID}] FROM [{Common.Table_ViTriLuuTru}] WHERE [{Common.MaViTri}] = '{mavitri}'";
 
                 using var reader = command.ExecuteReader();
 
@@ -2747,7 +2951,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"SELECT * FROM [{Common.TableViTriLuuTru}] WHERE [{Common.VTID}] = '{vtltID}'";
+                command.CommandText = $"SELECT * FROM [{Common.Table_ViTriLuuTru}] WHERE [{Common.VTID}] = '{vtltID}'";
 
                 using var reader = command.ExecuteReader();
 
@@ -2787,7 +2991,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"SELECT * FROM [{Common.TableViTriLuuTru}] WHERE [{Common.MaViTri}] = '{mavitri}'";
+                command.CommandText = $"SELECT * FROM [{Common.Table_ViTriLuuTru}] WHERE [{Common.MaViTri}] = '{mavitri}'";
 
                 using var reader = command.ExecuteReader();
 
@@ -2824,7 +3028,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"SELECT * FROM [{Common.TableViTriLuuTru}]";
+                command.CommandText = $"SELECT * FROM [{Common.Table_ViTriLuuTru}]";
 
                 using var reader = command.ExecuteReader();
 
@@ -2867,7 +3071,7 @@ namespace ProcessManagement.Services.SQLServer
                 {
                     connection.Open();
 
-                    string sqlQuery = $"UPDATE {Common.TableViTriLuuTru} SET [{Common.VTSLTrong}] = ([{Common.VTSLTrong}] - '{slnhapkho}') WHERE [{Common.VTID}] = '{vtid}'";
+                    string sqlQuery = $"UPDATE {Common.Table_ViTriLuuTru} SET [{Common.VTSLTrong}] = ([{Common.VTSLTrong}] - '{slnhapkho}') WHERE [{Common.VTID}] = '{vtid}'";
 
                     var command = new SqlCommand(sqlQuery, connection);
 
@@ -2902,7 +3106,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"SELECT * FROM [{Common.TableVitriOfNVL}] WHERE [{Common.NVLID}] = '{nvlid}' AND [{Common.VTID}] = '{vtid}'";
+                command.CommandText = $"SELECT * FROM [{Common.Table_VitriOfNVL}] WHERE [{Common.NVLID}] = '{nvlid}' AND [{Common.VTID}] = '{vtid}'";
 
                 using var reader = command.ExecuteReader();
 
@@ -2939,7 +3143,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"SELECT * FROM [{Common.TableVitriOfNVL}] WHERE [{Common.NVLID}] = '{nvlID}'";
+                command.CommandText = $"SELECT * FROM [{Common.Table_VitriOfNVL}] WHERE [{Common.NVLID}] = '{nvlID}'";
 
                 using var reader = command.ExecuteReader();
 
@@ -2978,7 +3182,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"SELECT * FROM [{Common.TableVitriOfNVL}] WHERE [{Common.VTID}] = '{vtID}'";
+                command.CommandText = $"SELECT * FROM [{Common.Table_VitriOfNVL}] WHERE [{Common.VTID}] = '{vtID}'";
 
                 using var reader = command.ExecuteReader();
 
@@ -3026,7 +3230,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 string parameterNames = string.Join(",", newItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
 
-                command.CommandText = $"INSERT INTO [{Common.TableVitriOfNVL}] ({columnNames}) OUTPUT INSERTED.{Common.VTofNVLID} VALUES ({parameterNames})";
+                command.CommandText = $"INSERT INTO [{Common.Table_VitriOfNVL}] ({columnNames}) OUTPUT INSERTED.{Common.VTofNVLID} VALUES ({parameterNames})";
 
                 foreach (var item in newItems)
                 {
@@ -3072,7 +3276,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 string setClause = string.Join(",", Items.Select(key => $"[{key.DBName}] = @{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
 
-                command.CommandText = $"UPDATE [{Common.TableVitriOfNVL}] SET {setClause} WHERE [{Common.VTofNVLID}] = '{vitriofNVL.VTofNVLID.Value}'";
+                command.CommandText = $"UPDATE [{Common.Table_VitriOfNVL}] SET {setClause} WHERE [{Common.VTofNVLID}] = '{vitriofNVL.VTofNVLID.Value}'";
 
                 foreach (var item in Items)
                 {
@@ -3108,7 +3312,7 @@ namespace ProcessManagement.Services.SQLServer
                 {
                     connection.Open();
 
-                    string sqlQuery = $"UPDATE {Common.TableVitriOfNVL} SET [{Common.SoLuong}] = '{tonkho}' WHERE [{Common.VTofNVLID}] = '{vitriofnvlId}'";
+                    string sqlQuery = $"UPDATE {Common.Table_VitriOfNVL} SET [{Common.SoLuong}] = '{tonkho}' WHERE [{Common.VTofNVLID}] = '{vitriofnvlId}'";
 
                     var command = new SqlCommand(sqlQuery, connection);
 
@@ -3140,7 +3344,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"DELETE FROM {Common.TableVitriOfNVL} WHERE [{Common.VTofNVLID}] = '{vtofnvllid}'";
+                command.CommandText = $"DELETE FROM {Common.Table_VitriOfNVL} WHERE [{Common.VTofNVLID}] = '{vtofnvllid}'";
 
                 object rs = command.ExecuteScalar();
 
@@ -3169,7 +3373,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"SELECT * FROM [{Common.TableDanhMucNVL}]";
+                command.CommandText = $"SELECT * FROM [{Common.Table_DanhMucNVL}]";
 
                 using var reader = command.ExecuteReader();
 
@@ -3205,7 +3409,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"SELECT * FROM [{Common.TableDanhMucNVL}] WHERE [{Common.DMID}] = '{danhmucID}'";
+                command.CommandText = $"SELECT * FROM [{Common.Table_DanhMucNVL}] WHERE [{Common.DMID}] = '{danhmucID}'";
 
                 using var reader = command.ExecuteReader();
 
@@ -3246,7 +3450,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 string parameterNames = string.Join(",", newItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
 
-                command.CommandText = $"INSERT INTO [{Common.TableDanhMucNVL}] ({columnNames}) OUTPUT INSERTED.{Common.DMID} VALUES ({parameterNames})";
+                command.CommandText = $"INSERT INTO [{Common.Table_DanhMucNVL}] ({columnNames}) OUTPUT INSERTED.{Common.DMID} VALUES ({parameterNames})";
 
                 foreach (var item in newItems)
                 {
@@ -3278,7 +3482,7 @@ namespace ProcessManagement.Services.SQLServer
         {
             using (var connection = new SqlConnection(connectionString))
             {
-                string query = $"SELECT COUNT(*) FROM [{Common.TableDanhMucNVL}] WHERE [{Common.TenDanhMuc}] = N'{tendmnvl}'";
+                string query = $"SELECT COUNT(*) FROM [{Common.Table_DanhMucNVL}] WHERE [{Common.TenDanhMuc}] = N'{tendmnvl}'";
 
                 using (var command = new SqlCommand(query, connection))
                 {
@@ -3307,7 +3511,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"SELECT * FROM [{Common.TableLoaiNVL}] WHERE [{Common.LOAINVLID}] = '{maloaiNVL}'";
+                command.CommandText = $"SELECT * FROM [{Common.Table_LoaiNVL}] WHERE [{Common.LOAINVLID}] = '{maloaiNVL}'";
 
                 using var reader = command.ExecuteReader();
 
@@ -3341,7 +3545,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"SELECT * FROM [{Common.TableLoaiNVL}]";
+                command.CommandText = $"SELECT * FROM [{Common.Table_LoaiNVL}]";
 
                 using var reader = command.ExecuteReader();
 
@@ -3378,7 +3582,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"SELECT * FROM [{Common.TableLoaiNVL}] WHERE [{Common.DMID}] = '{dmid}'";
+                command.CommandText = $"SELECT * FROM [{Common.Table_LoaiNVL}] WHERE [{Common.DMID}] = '{dmid}'";
 
                 using var reader = command.ExecuteReader();
 
@@ -3409,7 +3613,7 @@ namespace ProcessManagement.Services.SQLServer
         {
             using (var connection = new SqlConnection(connectionString))
             {
-                string query = $"SELECT COUNT(*) FROM [{Common.TableLoaiNVL}] WHERE [{Common.TenLoaiNVL}] = N'{tenloainvl}'";
+                string query = $"SELECT COUNT(*) FROM [{Common.Table_LoaiNVL}] WHERE [{Common.TenLoaiNVL}] = N'{tenloainvl}'";
 
                 using (var command = new SqlCommand(query, connection))
                 {
@@ -3441,7 +3645,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 string parameterNames = string.Join(",", newItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
 
-                command.CommandText = $"INSERT INTO [{Common.TableLoaiNVL}] ({columnNames}) OUTPUT INSERTED.{Common.LOAINVLID} VALUES ({parameterNames})";
+                command.CommandText = $"INSERT INTO [{Common.Table_LoaiNVL}] ({columnNames}) OUTPUT INSERTED.{Common.LOAINVLID} VALUES ({parameterNames})";
 
                 foreach (var item in newItems)
                 {
@@ -3483,7 +3687,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"DELETE FROM {Common.TableLoaiNVL} WHERE [{Common.LOAINVLID}] = '{removeloainvl.LOAINVLID.Value}'";
+                command.CommandText = $"DELETE FROM {Common.Table_LoaiNVL} WHERE [{Common.LOAINVLID}] = '{removeloainvl.LOAINVLID.Value}'";
 
                 object rs = command.ExecuteScalar();
 

@@ -6,7 +6,6 @@ namespace ProcessManagement.Models.KHO_NVL
     public class VitriLuuTru
     {
         public Propertyy VTID { get; set; } = new() { DBName = Common.VTID, Type = typeof(int), AlowDatabase = false }; // ID
-        public Propertyy KHOID { get; set; } = new() { DBName = Common.KHOID, Type = typeof(string), AlowDatabase = true };
         public Propertyy MaViTri { get; set; } = new() { DBName = Common.MaViTri, Type = typeof(string), AlowDatabase = true };
         public Propertyy VTSucChua { get; set; } = new() { DBName = Common.VTSucChua, Type = typeof(int), AlowDatabase = true };
         public Propertyy ViTriHang { get; set; } = new() { DBName = Common.ViTriHang, Type = typeof(string), AlowDatabase = true };

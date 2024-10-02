@@ -37,13 +37,13 @@
                             <RadzenText Text="Tồn kho" Style="font-size: 16px; color: white; font-weight: 500;"></RadzenText>
                         </RadzenStack>
                         <RadzenStack Style="width: 20%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                            <RadzenText Text="Ngày thêm" Style="font-size: 16px; color: white; font-weight: 500;"></RadzenText>
+                            <RadzenText Text="Quy cách" Style="font-size: 16px; color: white; font-weight: 500;"></RadzenText>
+                        </RadzenStack>
+                        <RadzenStack Style="width: 15%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenText Text="" Style="font-size: 14px; font-weight: 600; height: contain;"></RadzenText>
                         </RadzenStack>
                         <RadzenStack Style="width: 5%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                             <RadzenText Text="" Style="font-size: 16px; color: white; font-weight: 500;"></RadzenText>
-                        </RadzenStack>
-                        <RadzenStack Style="width: 10%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                            <RadzenText Text="" Style="font-size: 14px; font-weight: 600; height: contain;"></RadzenText>
                         </RadzenStack>
                     </RadzenStack>
                     foreach (var nvlofSP in Sanpham.DanhSachNVLs)
@@ -62,16 +62,19 @@
                                 <RadzenText Text="@Sanpham?.SP_TenSanPham.Value?.ToString()" Style="font-size: 16px; font-weight: 600; color: darkblue"></RadzenText>
                             </RadzenStack>
                             <RadzenStack Style="width: 20%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                <RadzenText Text="@(GetTonKhoNVL(nvlofSP))" Style="font-size: 16px; font-weight: 600; color: darkblue"></RadzenText>
+                                <RadzenText Text="@(GetTonKhoNVL(nvlofSP))" Style="font-size: 16px; font-weight: 600; color: black"></RadzenText>
                             </RadzenStack>
                             <RadzenStack Style="width: 20%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                <RadzenText Text="@nvlofSP.SP_NgayThem.Value?.ToString()" Style="font-size: 16px; font-weight: 500;"></RadzenText>
+                                @{
+                                    bool isokslforsp = int.TryParse(nvlofSP.SP_SLforSP.Value?.ToString(), out int slforsp);
+                                }
+                                <RadzenText Text="@($"{((isokslforsp)? slforsp : 0)} ({nvlofSP.TargetNgLieu.DonViTinh.Value?.ToString()})")" Style="font-size: 16px; font-weight: 600; color: black"></RadzenText>
+                            </RadzenStack>
+                            <RadzenStack Style="width: 15%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenText Text="(Xem chi tiết)" @onclick="@(() => OnOpenDialogXemChitietNVL(nguyenvatlieu))" Style="font-size: 14px; font-weight: 600; height: contain; color: Highlight; font-style: italic; cursor: pointer"></RadzenText>
                             </RadzenStack>
                             <RadzenStack Style="width: 5%; height: contain; padding-bottom: 5px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                 <RadzenButton Click="@(() => OnDeleteNVLofSP(nvlofSP))" Style="background-color: black;" Icon="delete" Size="ButtonSize.Small" Variant="Variant.Filled"></RadzenButton>
-                            </RadzenStack>
-                            <RadzenStack Style="width: 10%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                <RadzenText Text="(Xem chi tiết)" @onclick="@(() => OnOpenDialogXemChitietNVL(nguyenvatlieu))" Style="font-size: 14px; font-weight: 600; height: contain; color: Highlight; font-style: italic; cursor: pointer"></RadzenText>
                             </RadzenStack>
                         </RadzenStack>
                     }
@@ -110,7 +113,7 @@
         {
             (int result, string errormess) = SQLServerServices.DeleteNVLofSanpham(removeNVLofSP);
 
-            if (result != -1)
+            if (result > 0)
             {
                 ShowNotification("Đã xóa!", NotificationSeverity.Success, 2000);
 

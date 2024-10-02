@@ -1,0 +1,460 @@
+﻿@using ProcessManagement.Commons
+@using ProcessManagement.Services.SQLServer
+@using Radzen.Blazor
+@using Radzen
+@using ProcessManagement.Models.KHO_NVL
+
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject TooltipService TooltipService
+@inject SQLServerServices SQLServerServices
+
+<style>
+
+    .custom-placeholder::placeholder {
+        color: #888888; /* Change this to your desired color */
+        font-size: 14px; /* Change this to your desired font size */
+    }
+</style>
+
+<RadzenCard Variant="Variant.Filled" Style="height: 100%; width: 100%; padding: 10px;">
+    <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style="height: 100%; width: 100%; padding: 0px;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+        <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style="height: 100%; width: 100%; padding: 0px;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+            <RadzenStack Gap="20px" Style="height: contain; width: 100%; padding: 10px; background-color: var(--rz-primary-dark);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                <RadzenText Text="THÊM TRƯỜNG THÔNG TIN NGUYÊN VẬT LIỆU" Style="color: white; font-weight: 500; font-size: 18px" />
+            </RadzenStack>
+        </RadzenStack>
+        <RadzenStack Style="height: contain; width: 100%; padding: 10px; border-top: var(--rz-grid-cell-border); border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+            <RadzenStack Gap="20px" Style="height: contain; width: contain; padding: 0;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                <RadzenRadioButtonList Value="@IsCreateNew" TValue="bool" ValueChanged="@((args) => OnModeAddLoaiThongTinNguyenVatLieuSelectChanged(args))">
+                    <Items>
+                        <RadzenRadioButtonListItem Text="Trường thông tin đã có" Value="false" />
+                        <RadzenRadioButtonListItem Text="Tạo trường thông tin mới" Value="true" />
+                    </Items>
+                </RadzenRadioButtonList>
+            </RadzenStack>
+        </RadzenStack>
+
+        <RadzenCard Variant="Variant.Text" Style="height: 370px; width: 100%; padding: 10px; border-radius: 10px;">
+            <RadzenStack Style="height: 100%; width: 100%; padding: 0px;" Gap="0" Orientation="Orientation.Vertical">
+                @if (IsCreateNew) // Tao moi truong thong tin
+                {
+                    <!-- Tên thông tin mode 1 -->
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 5px; border-bottom: var(--rz-grid-cell-border);">
+                        <RadzenStack Style="width: 20%;">
+                            <RadzenText Text="Tên thông tin" Style="color: var(--rz-primary-darker); font-size: 16px; font-weight: 600; height: contain; width: 100%" />
+                        </RadzenStack>
+                        <RadzenStack Style="width: 80%; padding-left: 10px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
+                                @{
+                                    <RadzenStack Style="width: 50%;">
+                                        <RadzenTextBox class="custom-placeholder" Placeholder="@($" * nhập {NewLoaiTTNVL_mode1.TenLoaiThongTin.DisplayName}")" Value="@NewLoaiTTNVL_mode1.TenLoaiThongTin.Value?.ToString()" Style="font-size: 16px; height: contain; border-width: 1px;"
+                                                       @oninput="@(async (args) => { NewLoaiTTNVL_mode1.TenLoaiThongTin.Value = args.Value; await CheckLoaiThongTinNguyenVatLieu_NameIsOK(NewLoaiTTNVL_mode1.TenLoaiThongTin); })">
+                                        </RadzenTextBox>
+                                    </RadzenStack>
+
+                                    <RadzenStack Style="width: 50%;">
+                                        <RadzenAlert Visible="@(tenOK.Equals(-1))" Text="@tenNotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter" />
+                                        <RadzenAlert Visible="@(tenOK.Equals(1))" Text="@tenNotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Success" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter" />
+                                    </RadzenStack>
+                                }
+                            </RadzenStack>
+                        </RadzenStack>
+                    </RadzenStack>
+
+                    <!-- Kiểu dữ liệu M1 -->
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 5px; border-bottom: var(--rz-grid-cell-border);">
+                        <RadzenStack Style="width: 20%;">
+                            <RadzenText Text="Kiểu dữ liệu" Style="color: var(--rz-primary-darker); font-size: 16px; font-weight: 600; height: contain; width: 100%" />
+                        </RadzenStack>
+                        <RadzenStack Style="width: 80%; padding-left: 10px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
+                                <RadzenDropDown class="custom-placeholder" Style="width: 50%; height: contain; font-size: 16px;"
+                                                Value="@(DataTypes[int.Parse(NewLoaiTTNVL_mode1.KieuDuLieu.Value?.ToString() ?? "1")])"
+                                                Data="@DataTypes.Values" AllowClear="false" Placeholder="@("* chọn kiểu dữ liệu")" TValue="string"
+                                                Change="@(args =>
+                            {
+                                if (NewLoaiTTNVL_mode1 != null)
+                                {
+                                    NewLoaiTTNVL_mode1.GiaTriMacDinh.Value = null;
+
+                                    if (args != null)
+                                    {
+                                        if (args.ToString() == Kytu)
+                                        {
+                                            NewLoaiTTNVL_mode1.KieuDuLieu.Value = 1;
+                                        }
+                                        else if (args.ToString() == Soluong)
+                                        {
+                                            NewLoaiTTNVL_mode1.KieuDuLieu.Value = 2;
+                                        }
+                                        else if (args.ToString() == Ngaythang)
+                                        {
+                                            NewLoaiTTNVL_mode1.KieuDuLieu.Value = 3;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        NewLoaiTTNVL_mode1.KieuDuLieu.Value = null;
+                                    }
+
+                                    giatriOK = -1;
+                                }
+                            })">
+                                </RadzenDropDown>
+                                <RadzenStack Style="width: 50%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                    <RadzenCheckBox TValue="bool" Value="@IsAddWithValue_mode1" Change="@((args) => IsAddWithValue_mode1 = args)" Name="isallowemptymode1" />
+                                    <RadzenLabel Text="Thêm với giá trị" Style="font-size: 14px; font-weight: bold; font-style: italic" Component="isallowemptymode1" />
+                                </RadzenStack>
+                            </RadzenStack>
+                        </RadzenStack>
+                    </RadzenStack>
+
+                    <!-- Giá trị M1 -->
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 5px; padding-bottom: 15px">
+                        <RadzenStack Style="width: 20%;">
+                            <RadzenText Text="Giá trị" Style="color: var(--rz-primary-darker); font-size: 16px; font-weight: 600; height: contain; width: 100%" />
+                        </RadzenStack>
+                        <RadzenStack Style="width: 80%; padding-left: 10px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
+                                @{
+                                    currentKieudulieu = int.TryParse(NewLoaiTTNVL_mode1.KieuDuLieu.Value?.ToString(), out int kdl) ? kdl : 0;
+
+                                    // Kieu ki tu
+                                    <RadzenStack Visible="@(currentKieudulieu.Equals(1))" Style="width: 50%;">
+                                        <RadzenTextBox Disabled="@(!IsAddWithValue_mode1)" class="custom-placeholder" Placeholder="@($" * nhập giá trị {NewLoaiTTNVL_mode1.TenLoaiThongTin.Value?.ToString()}")"
+                                                       Value="@NewLoaiTTNVL_mode1.GiaTriMacDinh.Value?.ToString()" Style="font-size: 16px; height: contain; border-width: 1px;"
+                                                       @oninput="@(async (args) => { NewLoaiTTNVL_mode1.GiaTriMacDinh.Value = args.Value; await CheckLoaiThongTinNguyenVatLieu_ValueIsOK(NewLoaiTTNVL_mode1, currentKieudulieu); })">
+                                        </RadzenTextBox>
+                                    </RadzenStack>
+
+                                    // Kieu so
+                                    <RadzenStack Visible="@(currentKieudulieu.Equals(2))" Style="width: 50%;">
+                                        <RadzenNumeric Disabled="@(!IsAddWithValue_mode1)" class="custom-placeholder" Placeholder="@($" * nhập giá trị {NewLoaiTTNVL_mode1.TenLoaiThongTin.Value?.ToString()}")" TValue="int"
+                                                       ValueChanged="@(async (args) =>
+                                                    {
+                                                        NewLoaiTTNVL_mode1.GiaTriMacDinh.Value = args;
+                                                        await CheckLoaiThongTinNguyenVatLieu_ValueIsOK(NewLoaiTTNVL_mode1, currentKieudulieu);
+                                                    })"
+                                                       Style="font-size: 16px; height: contain;" Min="0" Max="999999" />
+                                    </RadzenStack>
+
+                                    // Kieu ngay thang
+                                    bool ishaveValueOfday = DateTime.TryParse(NewLoaiTTNVL_mode1.GiaTriMacDinh.Value?.ToString(), out DateTime selectday);
+                                    if (ishaveValueOfday) selectday = selectday.Date.Add(DateTime.Now.TimeOfDay);
+                                    <RadzenStack Visible="@(currentKieudulieu.Equals(3))" Style="width: 50%;">
+                                        <RadzenDatePicker Disabled="@(!IsAddWithValue_mode1)" class="custom-datepicker" Placeholder="@($"* nhập giá trị {NewLoaiTTNVL_mode1.TenLoaiThongTin.Value?.ToString()}")"
+                                                          TValue="DateTime" Value="selectday" AllowClear="true"
+                                                          Change="@(async (args) =>
+                                                            {
+                                                                if (args != null)
+                                                                {
+                                                                    DateTime value = args.Value.Date.Add(DateTime.Now.TimeOfDay);
+                                                                    NewLoaiTTNVL_mode1.GiaTriMacDinh.Value = args;
+                                                                }
+                                                                else
+                                                                {
+                                                                    NewLoaiTTNVL_mode1.GiaTriMacDinh.Value = string.Empty;
+                                                                }
+                                                                await CheckLoaiThongTinNguyenVatLieu_ValueIsOK(NewLoaiTTNVL_mode1, currentKieudulieu);
+                                                            })"
+                                                          ShowTime="false" HourFormat="12" DateFormat="@Common.DayTimeFormatnoTime" ParseInput="@Common.ParseDate" AllowInput="true"
+                                                          Style="height: contain; font-size: 16px">
+                                        </RadzenDatePicker>
+                                    </RadzenStack>
+
+                                    <RadzenStack Style="width: 50%;">
+                                        <RadzenAlert Visible="@(giatriOK.Equals(-1) && IsAddWithValue_mode1)" Text="@giatriNotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter" />
+                                        <RadzenAlert Visible="@(giatriOK.Equals(1) && IsAddWithValue_mode1)" Text="@giatriNotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Success" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter" />
+                                    </RadzenStack>
+                                }
+                            </RadzenStack>
+                        </RadzenStack>
+                    </RadzenStack>
+
+                    <RadzenStack Style="width: 100%; padding: 10px; border-top: var(--rz-grid-cell-border)" Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                        <RadzenCheckBox TValue="bool" Value="@IsDefault" Change="@((args) => IsDefault = args)" Name="isdefaultproperty" />
+                        <RadzenLabel Text="Đặt làm trường thông tin mặc định" Style="font-size: 14px; font-weight: bold; font-style: italic" Component="isdefaultproperty" />
+                    </RadzenStack>
+                    <RadzenStack Style="width: 100%; padding: 10px; padding-top: 0" Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                        <RadzenCheckBox TValue="bool" Value="@IsDisplayDatagrid" Change="@((args) => IsDisplayDatagrid = args)" Name="isdisplaydatagridproperty" />
+                        <RadzenLabel Text="Đặt làm trường thông tin hiển thị chính" Style="font-size: 14px; font-weight: bold; font-style: italic" Component="isdisplaydatagridproperty" />
+                    </RadzenStack>
+                    <RadzenStack Style="width: 100%; padding: 10px; padding-top: 0" Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                        <RadzenCheckBox TValue="bool" Value="@IsAddForAll_mode1" Change="@((args) => IsAddForAll_mode1 = args)" Name="isaddallpropertymode1" />
+                        <RadzenLabel Text="Thêm cho tất cả nguyên vật liệu khác" Style="font-size: 14px; font-weight: bold; font-style: italic" Component="isaddallpropertymode1" />
+                    </RadzenStack>
+
+                    <!-- Button save Trường thông tin tạo mới -->
+                    <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding-top: 10px; border-top: var(--rz-grid-cell-border)" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                        <RadzenButton Disabled="@(tenOK == -1 || (giatriOK == -1 && IsAddWithValue_mode1 == true))" Click="(() => SaveNewLoaiThongTinNguyenVatLieu_Mode1())"
+                                      Style="width: 120px;" Icon="check" Text="Thêm" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Dark" Variant="Variant.Flat" />
+                        <RadzenButton Style="width: 120px;" Icon="close" Text="Thoát" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" Click="@(() => DialogService.Close(new List<LoaiThongTinNVL>()))" />
+                    </RadzenStack>
+                }
+                else
+                {
+                    <RadzenCard class="rz-shadow-4" Style="width: 100%; height: 100%; padding: 10px; padding-top: 0px; border-radius: 10px">
+                        <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style="height: 100%; width: 100%; padding: 0px;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenPickList @bind-Source="@(DSachLoaiTTNVL)" @bind-Target="@DSachLoaiTTNVL_get" Style="height: 75%; width: 100%;" Orientation="Orientation.Horizontal"
+                                            AllowFiltering="true" Multiple="false" ShowHeader="true"
+                                            ButtonGap="10px" ButtonJustifyContent="JustifyContent.Center" ButtonStyle="ButtonStyle.Secondary" ButtonSize="ButtonSize.Small" ButtonShade="Shade.Default" ButtonVariant="Variant.Filled">
+                                <SourceHeader>
+                                    <RadzenText Text="Danh sách trường thông tin:" Style="color: black; font-weight: 500; font-size: 16px" />
+                                </SourceHeader>
+                                <TargetHeader>
+                                    <RadzenText Text="Trường thông tin đã chọn:" Style="color: black; font-weight: 500; font-size: 16px" />
+                                </TargetHeader>
+                                <Template>
+                                    <RadzenStack Style="height: contain; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                        <RadzenText Text="@($"{context.TenLoaiThongTin.Value?.ToString()}")" Style="color: black; font-weight: 500; font-size: 16px" />
+                                        @{
+                                            int index = DSachLoaiTTNVL_get?.ToList().IndexOf(context) ?? -1;
+                                        }
+                                        <RadzenText Text="@((index == -1) ? string.Empty : "[" + (index + 1).ToString() + "]")" Style="color: darkblue; font-weight: 600; font-size: 16px" />
+                                    </RadzenStack>
+                                </Template>
+                            </RadzenPickList>
+
+                            <!-- Button save danh sách chọn trường thông tin đã có -->
+                            <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding-top: 10px; margin-top: 10px; border-top: var(--rz-grid-cell-border)" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                                <RadzenStack Visible="@(!IsAddThongTinInCreateNewNVLMode)" Style="width: 100%; padding: 10px" Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                    <RadzenCheckBox Disabled="@(DSachLoaiTTNVL_get == null)" TValue="bool" Value="@IsAddForAll_mode2" Change="@((args) => IsAddForAll_mode2 = args)" Name="isaddallpropertymode2" />
+                                    <RadzenLabel Text="Thêm cho tất cả nguyên vật liệu khác" Style="font-size: 14px; font-weight: bold; font-style: italic" Component="isaddallpropertymode2" />
+                                </RadzenStack>
+                                <RadzenButton Disabled="@(DSachLoaiTTNVL_get == null)" Click="(() => SaveLoaiThongTinNguyenVatLieu_Mode2())"
+                                              Style="width: 120px;" Icon="check" Text="Thêm" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Dark" Variant="Variant.Flat" />
+                                <RadzenButton Style="width: 120px;" Icon="close" Text="Thoát" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" Click="@(() => DialogService.Close(new List<LoaiThongTinNVL>()))" />
+                            </RadzenStack>
+                        </RadzenStack>
+                    </RadzenCard>
+                }
+
+            </RadzenStack>
+        </RadzenCard>
+    </RadzenStack>
+</RadzenCard>
+
+@code {
+
+    [Parameter]
+    public NguyenVatLieu TargetNguyenVatLieu { get; set; } = new();
+    [Parameter]
+    public bool IsAddThongTinInCreateNewNVLMode { get; set; } = false;
+
+    private IEnumerable<LoaiThongTinNVL>? DSachLoaiTTNVL = null;
+    private IEnumerable<LoaiThongTinNVL>? DSachLoaiTTNVL_get = null;
+
+    private const string Kytu = "Ký tự";
+    private const string Soluong = "Số lượng";
+    private const string Ngaythang = "Ngày tháng";
+    private int currentKieudulieu = 1;
+
+    private Dictionary<int, string> DataTypes = new() { { 1, Kytu }, { 2, Soluong }, { 3, Ngaythang } };
+
+    private bool IsCreateNew = false; // true (tao thong tin moi) // false (lay thong tin da co)
+
+    private int tenOK = -1;
+    private string tenNotifyMess = "Giá trị không được để trống";
+    private int giatriOK = -1;
+    private string giatriNotifyMess = "Giá trị không được để trống";
+
+    // Mode 1 - Create new
+    private LoaiThongTinNVL NewLoaiTTNVL_mode1 = new() { KieuDuLieu = { Value = 1 } };
+
+    private bool IsAddWithValue_mode1 = false;
+    private bool IsDefault = false;         // set truong thong tin mac dinh
+    private bool IsDisplayDatagrid = false; // set hien thi len datagrid
+    private bool IsAddForAll_mode1 = false; // them truong thong tin cho tat ca NVL mode 1
+    private bool IsAddForAll_mode2 = false; // them truong thong tin cho tat ca NVL mode 2
+
+    protected override Task OnInitializedAsync()
+    {
+        DSachLoaiTTNVL = LoadDSachLoaiThongTinNguyenVatLieuFromDB();
+
+        return base.OnInitializedAsync();
+    }
+
+    // Tai danh sach loai thong tin nguyen vat lieu
+    private List<LoaiThongTinNVL> LoadDSachLoaiThongTinNguyenVatLieuFromDB()
+    {
+        // Tai danh sach loai thong tin nguyen vat lieu
+        var dsLoaiTTNVL = SQLServerServices.GetDanhSachLoaiThongTinNguyenVatLieu();
+
+        return dsLoaiTTNVL;
+    }
+
+    // Kiem tra ten loai thong tin nguyen vat lieu is OK
+    private async Task CheckLoaiThongTinNguyenVatLieu_NameIsOK(Propertyy propertyy)
+    {
+        await Task.Run(() =>
+        {
+            string? namevalue = propertyy.Value?.ToString()?.Trim();
+            string? displayName = propertyy.DisplayName ?? string.Empty;
+
+            if (!string.IsNullOrEmpty(namevalue))
+            {
+                // Get ten truy xuat
+                string tentruyxuat = Common.RemoveDiacriticsAndSpaces(namevalue);
+
+                List<Propertyy> columns = TargetNguyenVatLieu?.GetPropertiesValues() ?? new();
+
+                // Kiem tra ten trong danh sach main detail
+                bool isMainNameExisting = columns.Any(cl => Common.RemoveDiacriticsAndSpaces(cl.DBName ?? string.Empty) == tentruyxuat);
+
+                // Kiem tra ten truy xuat trong danh sach extra details
+                bool isExisting = SQLServerServices.IsExisting_LoaiThongTinNguyenVatLieu_Name(tentruyxuat);
+
+                if (isExisting || isMainNameExisting)
+                {
+                    tenOK = -1;
+                    tenNotifyMess = $"{displayName} đã tồn tại";
+                }
+                else
+                {
+                    tenOK = 1;
+                    tenNotifyMess = $"{displayName} hợp lệ";
+                }
+            }
+            else
+            {
+                tenOK = -1;
+                tenNotifyMess = $"{displayName} không được để trống";
+            }
+        });
+    }
+
+    // Kiem tra gia tri cua loai thong tin nguyen vat lieu is OK
+    private async Task CheckLoaiThongTinNguyenVatLieu_ValueIsOK(LoaiThongTinNVL loaittnvl, int kieudulieu)
+    {
+        await Task.Run(() =>
+        {
+            bool isValueOK = false;
+
+            if (loaittnvl.GiaTriMacDinh.Value == null)
+            {
+                giatriOK = -1;
+                giatriNotifyMess = "Giá trị không được để trống";
+            }
+            else
+            {
+                if (kieudulieu == 1) // Kieu ki tu
+                {
+                    isValueOK = !string.IsNullOrEmpty(loaittnvl.GiaTriMacDinh.Value?.ToString());
+                }
+                else if (kieudulieu == 2) // Kieu so luong
+                {
+                    isValueOK = int.TryParse(loaittnvl.GiaTriMacDinh.Value?.ToString(), out int soluong) && soluong > 0;
+                }
+                else if (kieudulieu == 3) // Kieu ngay thang
+                {
+                    isValueOK = DateTime.TryParse(loaittnvl.GiaTriMacDinh.Value?.ToString(), out DateTime ngay);
+                }
+
+                // Return result
+                if (isValueOK)
+                {
+                    giatriOK = 1;
+                    giatriNotifyMess = "Giá trị hợp lệ";
+                }
+                else
+                {
+                    giatriOK = -1;
+                    giatriNotifyMess = "Giá trị không hợp lệ";
+                }
+            }
+        });
+    }
+
+    // Button save new loai thong tin
+    private async Task SaveNewLoaiThongTinNguyenVatLieu_Mode1()
+    {
+        bool? confirm = await DialogService.Confirm($"Thêm mới trường thông tin này?", "Xác nhận", new ConfirmOptions() { OkButtonText = "Đồng ý", CancelButtonText = "Hủy" });
+
+        if (confirm.Value)
+        {
+            if (IsCreateNew)
+            {
+                // Gán tên truy xuất
+                NewLoaiTTNVL_mode1.TenTruyXuat.Value = Common.RemoveDiacriticsAndSpaces(NewLoaiTTNVL_mode1.TenLoaiThongTin.Value?.ToString() ?? string.Empty);
+                // IsDefault?
+                NewLoaiTTNVL_mode1.IsDefault.Value = (IsDefault) ? 1 : 0;
+                // IsDisplayDatagrid?
+                NewLoaiTTNVL_mode1.IsDisplayDatagrid.Value = (IsDisplayDatagrid) ? 1 : 0;
+                // IsAddforAll? --> Them cho tat ca nguyen vat lieu
+                NewLoaiTTNVL_mode1.IsAddForAll = (IsAddForAll_mode1);
+
+                // Thêm vào database
+                (int newloaittnvlID, string error) = SQLServerServices.InsertNewLoaiThongTinNguyenVatLieu(NewLoaiTTNVL_mode1);
+
+                if (newloaittnvlID > 0)
+                {
+                    NewLoaiTTNVL_mode1.LoaiTTNVLID.Value = newloaittnvlID;
+
+                    DialogService.Close(new List<LoaiThongTinNVL>() { NewLoaiTTNVL_mode1 });
+                }
+                else
+                {
+                    await DialogService.Alert($"Lỗi: {error}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                }
+            }
+        }
+    }
+
+    // Button save new loai thong tin
+    private async Task SaveLoaiThongTinNguyenVatLieu_Mode2()
+    {
+        bool? confirm = await DialogService.Confirm($"Thêm danh sách trường thông tin này?", "Xác nhận", new ConfirmOptions() { OkButtonText = "Đồng ý", CancelButtonText = "Hủy" });
+
+        if (confirm.Value)
+        {
+            if (!IsCreateNew)
+            {
+                if (DSachLoaiTTNVL_get != null)
+                {
+                    if (IsAddForAll_mode2) // Them truong thong tin cho tat ca NVL
+                    {
+                        foreach (var loaittnvl in DSachLoaiTTNVL_get)
+                        {
+                            loaittnvl.IsAddForAll = IsAddForAll_mode2;
+                        }
+                    }
+
+                    DialogService.Close(DSachLoaiTTNVL_get.ToList());
+                }
+                else
+                {
+                    await DialogService.Alert($"Lỗi: Danh sách trường thông tin trống!", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                }
+            }
+        }
+    }
+
+    // Select mode changed
+    private void OnModeAddLoaiThongTinNguyenVatLieuSelectChanged(bool mode)
+    {
+        IsAddForAll_mode2 = false;
+
+        if (IsCreateNew)
+        {
+            NewLoaiTTNVL_mode1 = new() { KieuDuLieu = { Value = 1 } };
+            IsAddForAll_mode1 = false;
+            IsAddWithValue_mode1 = false;
+            IsDefault = false;
+            IsDisplayDatagrid = false;
+            tenOK = -1;
+            tenNotifyMess = "Giá trị không được để trống";
+            giatriOK = -1;
+            giatriNotifyMess = "Giá trị không được để trống";
+        }
+        else
+        {
+            DSachLoaiTTNVL = null;
+            DSachLoaiTTNVL_get = null;
+            // Reload danh sach truong thong tin nguyen vat lieu
+            DSachLoaiTTNVL = LoadDSachLoaiThongTinNguyenVatLieuFromDB();
+        }
+
+        IsCreateNew = mode;
+    }
+}

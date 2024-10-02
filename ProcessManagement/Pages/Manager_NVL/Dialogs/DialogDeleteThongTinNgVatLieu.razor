@@ -14,7 +14,7 @@
     <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style=" height: 100%; width: 100%; padding: 0px; padding-bottom: 10px " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
         <RadzenStack Gap="20px" Style="height: contain; width: 100%; padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
             <RadzenText Text="Xóa trường thông tin này của nguyên liệu?" Style="color: black; font-weight: 600; font-size: 18px"></RadzenText>
-            <RadzenText Text="@($"(Trường thông tin: {NgVLieuDetail?.NVLDetailItems?.TenThongTin.Value?.ToString()})")" Style="font-weight: 600; font-style: italic; font-size: 18px"></RadzenText>
+            <RadzenText Text="@($"(Trường thông tin: {DeleteThongTinNVL?.LoaiThongTin?.TenLoaiThongTin.Value?.ToString()})")" Style="font-weight: 600; font-style: italic; font-size: 18px"></RadzenText>
         </RadzenStack>
         <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding: 5px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
             <RadzenCheckBox TValue="bool" Value=@IsDeleteForAllNVL Change=@(args => IsDeleteForAllNVL = args) Name="deleteForAllNVL" />
@@ -29,35 +29,35 @@
 
 @code {
     [Parameter]
-    public NguyenVatLieuDetail? NgVLieuDetail { get; set; }
+    public ThongTinNVL DeleteThongTinNVL { get; set; } = new();
     private bool IsDeleteForAllNVL = false;
 
     private async Task OnDelete()
     {
-        if (NgVLieuDetail != null)
+        if (DeleteThongTinNVL.TTNVLID.Value != null)
         {
-            (int result, string error) = SQLServerServices.DeleteThongTinNgVatLieu(NgVLieuDetail);
+            if (IsDeleteForAllNVL) // xóa loại thông tin cho tất cả nguyên vật liệu
+            {
+                (int result, string error) = SQLServerServices.DeleteLoaiThongTinNVL(DeleteThongTinNVL.LoaiThongTin.LoaiTTNVLID.Value);
 
-            if (result == -1)
-            {
-                await DialogService.Alert($"Lỗi, không thể xóa: {error}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
-            }
-            else
-            {
-                if (IsDeleteForAllNVL)
+                if (result == -1)
                 {
-                    (result, error) = SQLServerServices.DeleteNVLDetailName(NgVLieuDetail.TenTTID.Value);
+                    await DialogService.Alert($"Lỗi, không thể xóa: {error}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                }
+                else
+                {
+                    ShowNotification("Đã xóa!", NotificationSeverity.Success, 3000);
 
-                    if (result == -1)
-                    {
-                        await DialogService.Alert($"Lỗi, không thể xóa: {error}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
-                    }
-                    else
-                    {
-                        ShowNotification("Đã xóa!", NotificationSeverity.Success, 3000);
+                    DialogService.Close(result);
+                }
+            }
+            else // chỉ xóa loại thông tin nguyên vật liệu hiện tại
+            {
+                (int result, string error) = SQLServerServices.DeleteThongTinNguyenVatLieu(DeleteThongTinNVL.TTNVLID.Value);
 
-                        DialogService.Close(result);
-                    }
+                if (result == -1)
+                {
+                    await DialogService.Alert($"Lỗi, không thể xóa: {error}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
                 }
                 else
                 {

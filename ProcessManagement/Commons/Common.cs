@@ -66,12 +66,7 @@ namespace ProcessManagement.Commons
         public const string SoLuongNVL = "Số lượng NVL";
         //public const string GhiChu = "Ghi chú";
 
-        // Table NguyenLieu //
-        public const string TableNguyenLieu = "Table_NguyenLieu";
-        public const string NLID = "NLID";
-        //public const string LotNVL = "Lot NVL";
         public const string NgayTao = "Ngày tạo";
-        //public const string SoLuongNVL = "Số lượng NVL";
 
         // Table KHSX Nguyen cong //
         public const string TableCongDoan = "Table_NguyenCongofKHSX";
@@ -131,7 +126,7 @@ namespace ProcessManagement.Commons
         public const string ThoiDiem = "Thời điểm";
 
         // Table Nguyen Cong //
-        public const string TableNguyenCong = "Table_DSNguyenCong";
+        public const string Table_NguyenCong = "Table_DSNguyenCong";
         //public const string TileLoi = "Tỉ lệ lỗi";
         public const string SoluongNG = "Số lượng lỗi";
         public const string NCID = "NCID";
@@ -140,50 +135,27 @@ namespace ProcessManagement.Commons
 
         // QUAN LY KHO NVL TABLES //
         // Table KHO_DanhMucNguyenVatLieu //
-        public const string TableDanhMucNVL = "KHO_DanhMucNguyenVatLieu";
+        public const string Table_DanhMucNVL = "KHO_DanhMucNguyenVatLieu";
         public const string DMID = "DMID";
         public const string TenDanhMuc = "TenDanhMuc";
         public const string DanhMucNguyenLieuGiaCong = "Nguyên liệu gia công";
 
         // Table KHO_LoaiNguyenVatLieu //
-        public const string TableLoaiNVL = "KHO_LoaiNguyenVatLieu";
+        public const string Table_LoaiNVL = "KHO_LoaiNguyenVatLieu";
         public const string LOAINVLID = "LOAINVLID";
         //public const string MaDanhMuc = "MaDanhMuc";
         public const string TenLoaiNVL = "TenLoaiNVL";
 
         // Table KHO_NguyenVatLieu //
-        public const string TableNguyenVatLieu = "KHO_NguyenVatLieu";
+        public const string Table_NguyenVatLieu = "KHO_NguyenVatLieu";
         public const string NVLID = "NVLID";
         public const string TenNVL = "TenNVL";
         public const string NVLTonKho = "Tồn kho";
-        public const string MoTa = "MoTa";
         public const string DonViTinh = "DonViTinh";
-        public const string NgayCapNhat = "NgayCapNhat";
-        
-
-        // Table KHO_NhaCungCap //
-        public const string TableNhaCungCap = "KHO_NhaCungCap";
-        public const string NCCID = "MaNCC";
-        public const string TenNCC = "TenNCC";
-        public const string DiaChi = "DiaChi";
-        public const string SoDienThoai = "SoDienThoai";
-        public const string Email = "Email";
-        public const string NguoiLienHe = "NguoiLienHe";
-        public const string MaSoThue = "MaSoThue";
-        public const string GhiChuNCC = "GhiChu";
-
-        // Table KHO_KhoLuuTru //
-        public const string TableKhoLuuTru = "KHO_KhoLuuTru";
-        public const string KHOID = "KHOID";
-        public const string TenKho = "TenKho";
-        //public const string DiaChi = "DiaChi";
-        public const string SucChua = "SucChua";
-        public const string NguoiQuanLy = "NguoiQuanLy";
-        //public const string SoDienThoai = "SoDienThoai";
-        public const string TrangThai = "TrangThai";
-
+        public const string NgaySuDung = "NgaySuDung";
+       
         // Table KHO_ViTriLuuTru //
-        public const string TableViTriLuuTru = "KHO_ViTriLuuTru";
+        public const string Table_ViTriLuuTru = "KHO_ViTriLuuTru";
         public const string VTID = "VTID";
         public const string MaViTri = "Mã vị trí";
         public const string ViTriKe = "Vị trí kệ";
@@ -193,38 +165,26 @@ namespace ProcessManagement.Commons
         public const string VTSLTrong = "SL trống";
 
         // Table KHO_VitriOfNVL //
-        public const string TableVitriOfNVL = "KHO_VitriOfNVL";
+        public const string Table_VitriOfNVL = "KHO_VitriOfNVL";
         public const string VTofNVLID = "VTofNVLID";
         public const string VTNVLSoLuong = "Số lượng";
 
-        // Table KHO_KiemKe //
-        public const string TableKiemKe = "KHO_KiemKe";
-        public const string KIEMKEID = "KIEMKEID";
-        //public const string MaNVL = "MaNVL";
-        //public const string MaKho = "MaKho";
-        public const string NgayKiemKe = "NgayKiemKe";
-        public const string SoLuongThucTe = "SoLuongThucTe";
-        public const string SoLuongHeThong = "SoLuongHeThong";
-        public const string ChenhLech = "ChenhLech";
-        public const string NguyenNhan = "NguyenNhan";
-        public const string NguoiKiemKe = "NguoiKiemKe";
-
-        // Table KHO_NVLDetailsListName
-        public const string Table_NVLDetailsListName = "KHO_NVLDetailsListName";
-        public const string TenTTID = "TenTTID";
-        public const string TenThongTin = "Tên thông tin";
-        public const string KieuDulieu = "Kiểu dữ liệu";
+        
+        // Table KHO_LoaiThongTinNVL
+        public const string Table_LoaiThongTinNVL = "KHO_LoaiThongTinNVL";
+        public const string LoaiTTNVLID = "LoaiTTNVLID";
+        public const string TenLoaiThongTin = "Tên loại thông tin";
+        public const string KieuDuLieu = "Kiểu dữ liệu";
         public const string MacDinh = "Mặc định";
         public const string IsDefault = "IsDefault";
+        public const string IsDisplayDatagrid = "IsDisplayDataGrid";
         public const string TenTruyXuat = "Tên truy xuất";
-        // Danh sach TenTruyXuat cac cot duoc su dung
-        public const string TTX_Donvitinh = "donvitinh";
 
-        // Table KHO_NguyenLieuDetails
-        public const string Table_NguyenLieuDetails = "KHO_NguyenLieuDetails";
+        // Table KHO_ThongTinNVL
+        public const string Table_ThongTinNVL = "KHO_ThongTinNVL";
         public const string TTNVLID = "TTNVLID";
         //public const string NVLID = "NVLID";
-        //public const string TenTTID = "TenTTID";
+        //public const string LoaiTTNVLID = "LoaiTTNVLID";
         public const string GiaTri = "Giá trị";
 
         // Table KHO_PhieuNhapKho
