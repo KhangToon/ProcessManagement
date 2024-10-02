@@ -1480,6 +1480,48 @@ namespace ProcessManagement.Services.SQLServer
             return (result, errorMess);
         }
 
+        // Update NVL cho san pham
+        public (int, string) UpdateNVLofSanPham(NVLofSanPham updateNVLofSP)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            if (updateNVLofSP == null) return (result, errorMess);
+
+            List<Propertyy> Items = updateNVLofSP.GetPropertiesValues().Where(pro => pro.AlowDatabase == true).ToList();
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                string setClause = string.Join(",", Items.Select(key => $"[{key.DBName}] = @{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $"UPDATE [{Common.Table_NVLofSanPham}] SET {setClause} WHERE [{Common.SP_NVLSPID}] = '{updateNVLofSP.SP_NVLSPID.Value}'";
+
+                foreach (var item in Items)
+                {
+                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
+
+                    object? parameterValue = item.Value;
+
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                result = command.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
         // Xoa NVL cua SP // Table Table_NVLofSanPham //
         public (int, string) DeleteNVLofSanpham(NVLofSanPham? removeNVLofSP)
         {

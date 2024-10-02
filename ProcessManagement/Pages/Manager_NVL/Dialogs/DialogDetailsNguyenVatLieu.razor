@@ -9,7 +9,7 @@
 @inject SQLServerServices SQLServerServices
 
 <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center" Style="width: 100%; height: contain; padding-top: 10px">
-    <RadzenText Text="Thông tin chi tiết nguyên vật liệu" Style="font-size: 16px; font-weight: 600; height: contain; color: darkred"></RadzenText>
+    <RadzenText Text="Thông tin chi tiết nguyên vật liệu" Style="font-size: 18px; font-weight: 600; height: contain; color: black"></RadzenText>
     <RadzenText Text="@NgVLieu?.TenNVL.Value?.ToString()" Style="font-size: 18px; font-weight: 600; height: contain; color: darkblue"></RadzenText>
 </RadzenStack>
 <RadzenCard Variant="Variant.Outlined" Style="height: contain; width: 100%; padding: 10px; overflow: scroll ">
@@ -17,7 +17,7 @@
         @if (NgVLieu != null)
         {
             var nvlitems = NgVLieu.GetPropertiesValues().Where(nvl => nvl.AlowDisplay == true).ToList();
-
+            // Display Main details
             foreach (var ngvl in nvlitems)
             {
                 <RadzenStack Gap="0" Style="height: contain; width: 90%; padding-bottom: 5px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
@@ -30,23 +30,39 @@
                 </RadzenStack>
             }
 
+            // Ton kho NVL
             <RadzenStack Gap="0" Style="height: contain; width: 90%; padding-bottom: 5px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                 <RadzenStack Style="width: 30%;">
-                    <RadzenText Text="Danh mục" Style="font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
+                    <RadzenText Text="Tồn kho" Style="font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
                 </RadzenStack>
                 <RadzenStack Style="width: 70%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);">
-                    <RadzenText Text="@DanhMucNVL?.TenDanhMuc.Value?.ToString()" Style="font-size: 16px; height: contain; width: 100%"></RadzenText>
+                    <RadzenText Text="@($"{NgVLieu?.TonKho} ({NgVLieu?.DonViTinh.Value?.ToString()})")" Style="color: darkred; font-size: 16px; height: contain;"></RadzenText>
                 </RadzenStack>
             </RadzenStack>
 
+            // Loai NVL
             <RadzenStack Gap="0" Style="height: contain; width: 90%; padding-bottom: 5px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                 <RadzenStack Style="width: 30%;">
                     <RadzenText Text="Loại nguyên vật liệu" Style="font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
                 </RadzenStack>
                 <RadzenStack Style="width: 70%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);">
-                    <RadzenText Text="@LoaiNVL?.TenLoaiNVL.Value?.ToString()" Style="font-size: 16px; height: contain; width: 100%"></RadzenText>
+                    <RadzenText Text="@NgVLieu.LoaiNVL?.TenLoaiNVL.Value?.ToString()" Style="font-size: 16px; height: contain; width: 100%"></RadzenText>
                 </RadzenStack>
             </RadzenStack>
+
+            // Display Extra detail
+
+            foreach (var extradetail in NgVLieu.DSThongTin)
+            {
+                <RadzenStack Gap="0" Style="height: contain; width: 90%; padding-bottom: 5px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                    <RadzenStack Style="width: 30%;">
+                        <RadzenText Text="@extradetail.LoaiThongTin.TenLoaiThongTin.Value?.ToString()" Style="font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
+                    </RadzenStack>
+                    <RadzenStack Style="width: 70%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);">
+                        <RadzenText Text="@extradetail.GiaTri.Value?.ToString()" Style="font-size: 16px; height: contain; width: 100%"></RadzenText>
+                    </RadzenStack>
+                </RadzenStack>
+            }
         }
     </RadzenStack>
 </RadzenCard>
@@ -58,18 +74,8 @@
     [Parameter]
     public NguyenVatLieu? NgVLieu { get; set; }
 
-    private DanhMucNVL? DanhMucNVL;
-
-    private LoaiNVL? LoaiNVL;
-
     protected override Task OnInitializedAsync()
     {
-        int dmid = int.TryParse(NgVLieu?.DMID.Value?.ToString(), out int dm) ? dm : 0;
-        int loainvlid = int.TryParse(NgVLieu?.LOAINVLID.Value?.ToString(), out int lnvl) ? lnvl : 0;
-
-        DanhMucNVL = SQLServerServices.GetDanhMucbyID(dmid);
-        LoaiNVL = SQLServerServices.GetLoaiNVLbyID(loainvlid);
-
         return base.OnInitializedAsync();
     }
 }

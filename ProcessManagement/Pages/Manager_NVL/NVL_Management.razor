@@ -155,7 +155,7 @@
                                     <!--Table listNVL-->
                                     <RadzenStack Visible="@(DSNguyenVatLieus != null && DSNguyenVatLieus.Count > 0)" Style="height: 450px; width: 100%; padding-top: 10px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                         <RadzenDataGrid class="rz-grid-table-fixed-2" Data="@(DSNguyenVatLieus)" TItem="NguyenVatLieu"
-                                                        EmptyText="Danh sách nguyên liệu trống." Style="padding-right: 0;"
+                                                        EmptyText="Danh sách nguyên liệu trống." Style="overflow-x: scroll; width: 100%; height: 100%"
                                                         ShowColumnTitleAsTooltip="true" ShowCellDataAsTooltip="true"
                                                         AllowFiltering="false" FilterMode="FilterMode.Simple"
                                                         AllowPaging="true" AllowSorting="false" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
@@ -170,7 +170,7 @@
                                                     List<Propertyy> columns = DSNguyenVatLieus.FirstOrDefault()?.GetPropertiesValues() ?? new();
                                                     List<ThongTinNVL>? extracolumns = DSNguyenVatLieus.FirstOrDefault()?.DSThongTin.Where(tt => tt.LoaiThongTin.IsDisplayDatagrid.Value?.ToString() == "1")?.ToList();
 
-                                                    <RadzenDataGridColumn Width="50px" Frozen="true" FrozenPosition="FrozenColumnPosition.Left" Filterable="false"
+                                                    <RadzenDataGridColumn Width="40px" Frozen="true" FrozenPosition="FrozenColumnPosition.Left" Filterable="false"
                                                                           TItem="NguyenVatLieu" Title="#"
                                                                           Property="STT" TextAlign="TextAlign.Center">
                                                         <HeaderTemplate>
@@ -182,7 +182,7 @@
                                                     </RadzenDataGridColumn>
 
                                                     <!--Ten NVL-->
-                                                    <RadzenDataGridColumn Width="contain" TItem="NguyenVatLieu" Title="Tên NVL"
+                                                    <RadzenDataGridColumn Width="110px" TItem="NguyenVatLieu" Title="Tên NVL"
                                                                           Property="tennvl" TextAlign="TextAlign.Center">
                                                         <HeaderTemplate>
                                                             <span style="font-weight: 600; font-size: 15px; color: white">Tên NVL</span>
@@ -193,10 +193,10 @@
                                                     </RadzenDataGridColumn>
 
                                                     <!--Loai NVL-->
-                                                    <RadzenDataGridColumn Width="contain" TItem="NguyenVatLieu" Title="Loại nguyên liệu"
+                                                    <RadzenDataGridColumn Width="110px" TItem="NguyenVatLieu" Title="Loại NVL"
                                                                           Property="loainglieu" TextAlign="TextAlign.Center">
                                                         <HeaderTemplate>
-                                                            <span style="font-weight: 600; font-size: 15px; color: white">Loại nguyên liệu</span>
+                                                            <span style="font-weight: 600; font-size: 15px; color: white">Loại NVL</span>
                                                         </HeaderTemplate>
                                                         <Template Context="nvl">
                                                             <span style="color: black; font-weight: 500;">@($"{nvl.LoaiNVL?.TenLoaiNVL.Value?.ToString()}")</span>
@@ -204,10 +204,10 @@
                                                     </RadzenDataGridColumn>
 
                                                     <!--Ton Kho-->
-                                                    <RadzenDataGridColumn Width="contain" TItem="NguyenVatLieu" Title="Tổng tồn kho"
+                                                    <RadzenDataGridColumn Width="110px" TItem="NguyenVatLieu" Title="Tồn kho"
                                                                           Property="tongtonkho" TextAlign="TextAlign.Center">
                                                         <HeaderTemplate>
-                                                            <span style="font-weight: 600; font-size: 15px; color: white">Tổng tồn kho</span>
+                                                            <span style="font-weight: 600; font-size: 15px; color: white">Tồn kho</span>
                                                         </HeaderTemplate>
                                                         <Template Context="nvl">
                                                             @{
@@ -231,7 +231,7 @@
                                                         {
                                                             string colName = column.LoaiThongTin.TenLoaiThongTin.Value?.ToString() ?? string.Empty;
 
-                                                            <RadzenDataGridColumn Width="contain" TItem="NguyenVatLieu" Title="@colName"
+                                                            <RadzenDataGridColumn Width="110px" TItem="NguyenVatLieu" Title="@colName"
                                                                                   Property="@colName" TextAlign="TextAlign.Center">
                                                                 <HeaderTemplate>
                                                                     <span style="font-weight: 600; font-size: 15px; color: white">@colName</span>
@@ -272,7 +272,7 @@
 
                                                         if (colName != Common.TenNVL)
                                                         {
-                                                            <RadzenDataGridColumn Width="contain" TItem="NguyenVatLieu" Title="@displayName"
+                                                            <RadzenDataGridColumn Width="110px" TItem="NguyenVatLieu" Title="@displayName"
                                                                                   Property="@colName" TextAlign="TextAlign.Center">
                                                                 <HeaderTemplate>
                                                                     <span style="font-weight: 600; font-size: 15px; color: white">@displayName</span>
@@ -298,7 +298,7 @@
                                                     }
 
                                                     <!--ID-->
-                                                    <RadzenDataGridColumn Width="60px" TItem="NguyenVatLieu" Title="#ID" Frozen="true"
+                                                    <RadzenDataGridColumn Width="40px" TItem="NguyenVatLieu" Title="#ID" Frozen="true"
                                                                           Property="#ID" TextAlign="TextAlign.Center">
                                                         <HeaderTemplate>
                                                             <span style="font-weight: 600; font-size: 15px; color: white">#ID</span>
@@ -341,11 +341,11 @@
                                                                             <RadzenStack Gap="10" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                                                 <RadzenText Text="@($"{SelectedNgVatLieu?.TenNVL.Value?.ToString()}")" Style="font-weight: 600; font-size: 16px; color: darkblue;"></RadzenText>
                                                                             </RadzenStack>
-                                                                            <RadzenImage Style="max-width: 130px; max-height: 130px; padding: 0px; margin: 0" Path="@($"data:image/png;base64,{qrBase64string}")"></RadzenImage>
+                                                                            <RadzenImage Style="max-width: 100px; max-height: 100px; padding: 0px; margin: 0" Path="@($"data:image/png;base64,{qrBase64string}")"></RadzenImage>
                                                                         }
                                                                         else
                                                                         {
-                                                                            <RadzenIcon Icon="image_not_supported" Style="font-size: 150px; color: #ccc;"></RadzenIcon>
+                                                                            <RadzenIcon Icon="image_not_supported" Style="font-size: 100px; color: #ccc;"></RadzenIcon>
                                                                         }
                                                                     }
                                                                 </RadzenStack>
