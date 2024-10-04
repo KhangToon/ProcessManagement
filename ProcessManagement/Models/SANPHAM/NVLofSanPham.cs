@@ -14,6 +14,7 @@ namespace ProcessManagement.Models.SANPHAM
         public NguyenVatLieu TargetNgLieu { get; set; } = new();
 
         public bool isEditingSoluong = false;
+        public int allsoLuongcanLay = 0; // dung khi chi ding so luong sp trong KHSX
         public List<Propertyy> GetPropertiesValues()
         {
             Type propertyType = typeof(NVLofSanPham);

@@ -1,11 +1,10 @@
 ﻿using ProcessManagement.Models.KHO_NVL;
-using ProcessManagement.Models.NHANVIEN;
 using ProcessManagement.Models.SANPHAM;
 using ProcessManagement.Services.SQLServer;
 
 namespace ProcessManagement.Models
 {
-    public class GenerateLot
+    public class GenerateLot2
     {
         private static readonly SQLServerServices SQLServerServices = new();
         private static readonly int LimitRange = 999;
@@ -22,7 +21,6 @@ namespace ProcessManagement.Models
         public int SLLotChan { get; set; } = 0;
         public int SLLotLe { get; set; } = 0;
         public int SLperLotLe { get; set; } = 0;
-
         public DateTime NgayTao { get; set; } = DateTime.Now;
         public KHSX NewKHSX { get; set; } = new KHSX();
 
@@ -85,7 +83,7 @@ namespace ProcessManagement.Models
         }
 
         // First step for initial KHSX 
-        public GenerateLot()
+        public GenerateLot2()
         {
             // Tao LSX unique id
             MaLSX = AutoGenerateLSXCode();
@@ -93,34 +91,13 @@ namespace ProcessManagement.Models
             LoadListTenNguyenCong();
         }
 
-        public bool IsAllowPickSLnvlofKHSX()
-        {
-            if (DinhMuc != 0 && NewKHSX.SanPham != null && NewKHSX.LoaiNVL != null)
-            {
-                return true;
-            }
-            else { return false; }
-        }
-
         public bool CheckSLNVLisOK()
         {
-            int sumSL = NewKHSX.DSachNVLs?.Sum(nvl => (int.TryParse(nvl.SoLuong.Value?.ToString(), out int sl) ? sl : 0)) ?? 0;
+            int sumSL = NewKHSX.DSachNVLofKHSXs?.Sum(nvl => (int.TryParse(nvl.SoLuong.Value?.ToString(), out int sl) ? sl : 0)) ?? 0;
 
             int dinhmuc = int.TryParse(NewKHSX?.DinhMuc.Value?.ToString(), out int vl) ? vl : 0;
 
-            if ((dinhmuc > 0) && ((sumSL - dinhmuc) == 0))
-            {
-                return true;
-            }
-            else return false;
-        }
-
-        public void AsignNVLofKHSX(List<NVLofKHSX> dsNVLofkhsx)
-        {
-            foreach (var nvlofkhsx in dsNVLofkhsx)
-            {
-                NewKHSX.DSachNVLs.Add(nvlofkhsx);
-            }
+            return (sumSL > 0);
         }
 
         public bool CheckSoluongLoiChophep()
@@ -189,11 +166,6 @@ namespace ProcessManagement.Models
             NewKHSX.SanPham = DSachSanPhams.FirstOrDefault(sp => sp.SP_TenSanPham.Value?.ToString() == tenSP) ?? new();
         }
 
-        public void SetCurrentKHSXloaiNVL(string tenloainvl)
-        {
-            NewKHSX.LoaiNVL = DSachLoaiNVLs.FirstOrDefault(nl => nl.TenLoaiNVL.Value?.ToString() == tenloainvl) ?? new();
-        }
-
         public void AsignKHSXdata()
         {
             NewKHSX.MaLSX.Value = MaLSX;
@@ -210,20 +182,27 @@ namespace ProcessManagement.Models
             NewKHSX.NgayTao.Value = NgayTao;
         }
 
+        public void ResetDefault()
+        {
+            //SLSanPhamSX = 0; 
+            SLNgVatLieuSX = 0;
+            TiLeLoi = 0;
+            SLLoi = 0;
+            DinhMuc = 0;
+            SLLot = 0;
+            SLperLotChan = 0;
+            SLLotChan = 0;
+            SLLotLe = 0;
+            SLperLotLe = 0;
+            ListNVLs = new();
+            NewKHSX.DSachNVLofKHSXs = new();
+        }
+
         public List<string> GetDSMaSPs()
         {
             DSachSanPhams = SQLServerServices.GetlistSanphams();
 
             List<string> result = DSachSanPhams.Select(sp => sp.SP_TenSanPham.Value?.ToString() ?? string.Empty).ToList();
-
-            return result;
-        }
-
-        public List<string> GetDSMaLoaiNVLs()
-        {
-            DSachLoaiNVLs = SQLServerServices.GetListLoaiNVLs();
-
-            List<string> result = DSachLoaiNVLs.Select(nl => nl.TenLoaiNVL.Value?.ToString() ?? string.Empty).ToList();
 
             return result;
         }

@@ -27,7 +27,7 @@ namespace ProcessManagement.Models
         public LoaiNVL? LoaiNVL { get; set; }   
         public List<NguyenCongofKHSX> DSachCongDoans { get; set; } = new();
 
-        public List<NVLofKHSX> DSachNVLs { get; set; } = new(); // Danh sach NVL cua KHSX (so luong, loai nvl, sp, ngay tao)
+        public List<NVLofKHSX> DSachNVLofKHSXs { get; set; } = new(); // Danh sach NVL cua KHSX (so luong, loai nvl, sp, ngay tao)
 
         public KHSX()
         {

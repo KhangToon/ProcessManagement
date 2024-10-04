@@ -620,7 +620,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 khsx.LoaiNVL = GetLoaiNVLbyID(int.TryParse(khsx.LOAINVLID.Value?.ToString(), out int loainvlid) ? loainvlid : 0);
 
-                khsx.DSachNVLs = GetListNVLofKHSXbyID(khsx.KHSXID.Value);
+                khsx.DSachNVLofKHSXs = GetListNVLofKHSXbyID(khsx.KHSXID.Value);
 
                 khsx.DSachCongDoans = GetlistCongdoans(khsx.KHSXID.Value);
             }
@@ -662,7 +662,7 @@ namespace ProcessManagement.Services.SQLServer
 
                     khsx.LoaiNVL = GetLoaiNVLbyID(int.TryParse(khsx.LOAINVLID.Value?.ToString(), out int loainvlid) ? loainvlid : 0);
 
-                    khsx.DSachNVLs = GetListNVLofKHSXbyID(khsx.KHSXID.Value);
+                    khsx.DSachNVLofKHSXs = GetListNVLofKHSXbyID(khsx.KHSXID.Value);
 
                     khsx.DSachCongDoans = GetlistCongdoans(khsx.KHSXID.Value);
 
@@ -707,7 +707,7 @@ namespace ProcessManagement.Services.SQLServer
 
                     khsx.LoaiNVL = GetLoaiNVLbyID(int.TryParse(khsx.LOAINVLID.Value?.ToString(), out int loainvlid) ? loainvlid : 0);
 
-                    khsx.DSachNVLs = GetListNVLofKHSXbyID(khsx.KHSXID.Value);
+                    khsx.DSachNVLofKHSXs = GetListNVLofKHSXbyID(khsx.KHSXID.Value);
 
                     khsx.DSachCongDoans = GetlistCongdoans(khsx.KHSXID.Value);
 
