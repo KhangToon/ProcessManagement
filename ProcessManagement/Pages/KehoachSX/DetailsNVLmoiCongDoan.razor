@@ -206,6 +206,9 @@
     [Parameter]
     public bool IsEditCaDem { get; set; } = false;
 
+    [Parameter]
+    public bool IsAllowUpdate { get; set; } = false; // chi cho phep update khi NVL cua PXK of KHSX is OK
+
     private TemNVLMCDValues CaNgayItems = new(Common.Cangay);
     private TemNVLMCDValues CaDemItems = new(Common.Cadem);
     private NVLmoiNguyenCong TemSelectNVLmoiCD = new();
@@ -240,7 +243,13 @@
     }
 
     private async Task OnOpenUpdateCaNgay()
-    {
+    {   
+        if (!IsAllowUpdate)
+        {
+            await DialogService.Alert($"Chưa hoàn thành xuất NVL cho KHSX, hãy tiến hành xuất NVL", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+            return;
+        }
+
         if (!IsEditCaNgay)
         {
             GetValuebeforeOpenEdit();
@@ -298,7 +307,13 @@
     }
 
     private async Task OnOpenUpdateCaDem()
-    {
+    {   
+        if (!IsAllowUpdate)
+        {
+            await DialogService.Alert($"Chưa hoàn thành xuất NVL cho KHSX, hãy tiến hành xuất NVL", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+            return;
+        }
+
         if (!IsEditCaDem)
         {
             GetValuebeforeOpenEdit();

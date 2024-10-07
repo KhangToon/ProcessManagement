@@ -369,7 +369,7 @@
                                 </RadzenStack>
                             </RadzenStack>
                             <RadzenStack Visible=@(nvlmcd.NVLMCDID.Value == SelectedNVLmcd.NVLMCDID.Value && IsDisplayDetails) Style="height: contain; width: 100%; padding: 5px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                <DetailsNVLmoiCongDoan _selectNVLmoiCD="SelectNVLcuaCongdoan" _selectedNguyenCong="SelectedNguyenCong" IsEditCaNgay=false IsEditCaDem=false></DetailsNVLmoiCongDoan>
+                                <DetailsNVLmoiCongDoan IsAllowUpdate="@(PXKofKHSX.PXKID.Value != null && PXKofKHSX.IsChiDinhDuSLXuatKho && PXKofKHSX.IsPXKDoneXuatKho)" _selectNVLmoiCD="SelectNVLcuaCongdoan" _selectedNguyenCong="SelectedNguyenCong" IsEditCaNgay=false IsEditCaDem=false></DetailsNVLmoiCongDoan>
                             </RadzenStack>
                         </RadzenStack>
                     }
@@ -562,6 +562,8 @@
         {
             await DialogService.OpenAsync<Manager_NVL.XuatKho.DialogCreate_PhieuXuatKho>(null, new Dictionary<string, object>() { { "DSNVLofKHSX", SelectedKHSX.DSachNVLofKHSXs }, { "CreatedWithKHSX", true }, { "KHSX", SelectedKHSX } },
             new DialogOptions() { ShowTitle = false, Width = "70%", Height = "100%", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
+
+            await LoadKeHoachSanXuat();
         }
         else
         {

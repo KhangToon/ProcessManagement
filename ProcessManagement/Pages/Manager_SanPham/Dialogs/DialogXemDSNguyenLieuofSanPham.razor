@@ -33,6 +33,9 @@
                         <RadzenStack Style="width: 20%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                             <RadzenText Text="Quy cách" Style="font-size: 16px; color: white; font-weight: 500;"></RadzenText>
                         </RadzenStack>
+                        <RadzenStack Style="width: 20%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenText Text="Tồn kho" Style="font-size: 16px; color: white; font-weight: 500;"></RadzenText>
+                        </RadzenStack>
                         <RadzenStack Style="width: 15%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                             <RadzenText Text="Chi tiết" Style="font-size: 16px; color: white; font-weight: 600; height: contain;"></RadzenText>
                         </RadzenStack>
@@ -44,6 +47,7 @@
                     {
                         int nvlid = int.TryParse(nvlofSP.NVLID.Value?.ToString(), out int id) ? id : 0;
                         var nguyenvatlieu = SQLServerServices.GetNguyenVatLieuByID(nvlid);
+                        
 
                         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: contain; width: 100%; border-bottom: var(--rz-grid-cell-border);">
                             <RadzenStack Style="width: 5%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
@@ -56,7 +60,11 @@
                                 @{
                                     bool isokslforsp = int.TryParse(nvlofSP.SP_SLforSP.Value?.ToString(), out int slforsp);
                                 }
-                                <RadzenText Text="@($"{((isokslforsp)? slforsp : 0)} ({nvlofSP.TargetNgLieu.DonViTinh.Value?.ToString()})")" Style="font-size: 16px; font-weight: 600; color: black"></RadzenText>
+                                <RadzenText Text="@($"{((isokslforsp)? slforsp : 0)} ({nguyenvatlieu.DonViTinh.Value?.ToString()})")" Style="font-size: 16px; font-weight: 600; color: black"></RadzenText>
+                            </RadzenStack>
+                            <RadzenStack Style="width: 20%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenText Visible="(nguyenvatlieu.TonKho > 0)" Text="@($"{nguyenvatlieu.TonKho.ToString()} ({nguyenvatlieu.DonViTinh.Value?.ToString()})")" Style="font-size: 16px; color: darkgreen; font-weight: 600;"></RadzenText>
+                                <RadzenText Visible="(nguyenvatlieu.TonKho == 0)" Text="@($"{nguyenvatlieu.TonKho.ToString()} ({nguyenvatlieu.DonViTinh.Value?.ToString()})")" Style="font-size: 16px; color: red; font-weight: 500;"></RadzenText>
                             </RadzenStack>
                             <RadzenStack Style="width: 15%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                 <RadzenText Text="(Xem chi tiết)" @onclick="@(() => OnOpenDialogXemChitietNVL(nguyenvatlieu))" Style="font-size: 14px; font-weight: 600; height: contain; color: Highlight; font-style: italic; cursor: pointer"></RadzenText>
