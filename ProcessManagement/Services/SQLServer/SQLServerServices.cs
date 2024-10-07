@@ -794,7 +794,35 @@ namespace ProcessManagement.Services.SQLServer
 
             return (result, errorMess);
         }
+        // Update KHSX property
+        public (int, string) UpdateKHSXProperty(object? khsxid, string propertyName, object? value)
+        {
+            int result = -1; string errorMess = string.Empty;
 
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+
+                    string sqlQuery = $"UPDATE {Common.TableKHSX} SET [{propertyName}] = N'{value}' WHERE [{Common.KHSXID}] = '{khsxid}' ";
+
+                    var command = new SqlCommand(sqlQuery, connection);
+
+                    result = command.ExecuteNonQuery();
+
+                    connection.Close();
+
+                    return (result, string.Empty);
+                }
+            }
+            catch (Exception ex)
+            {
+                string err = ex.Message;
+
+                return (-1, err);
+            }
+        }
         #endregion
 
         // ------------------------------------------------------------------------------------- //
@@ -2316,7 +2344,7 @@ namespace ProcessManagement.Services.SQLServer
 
             return danhSachThongTinNguyenVatLieu;
         }
-        
+
         #endregion
 
         #region Table_KHO_LoaiThongTinNVL
@@ -2879,7 +2907,7 @@ namespace ProcessManagement.Services.SQLServer
             return (result, errorMess);
         }
 
-        
+
 
         // Thay đổi tên của trường thông tin nguyên vật liệu
         public (int, string) UpdateNVLDetailName(object? tenttid, string newName, string tentruyxuat)
@@ -4636,21 +4664,30 @@ namespace ProcessManagement.Services.SQLServer
             // Load danh sach nguyen vat lieu pxk
             phieuxuatkho.DSNVLofPXKs = GetListNVLofPXKs(pxkid);
 
+            // Kiem tra phieu xuat kho da chi dinh du NVL chua
+            phieuxuatkho.IsChiDinhDuSLXuatKho = !(phieuxuatkho.DSNVLofPXKs.Any(nvlofpxk => IsChidinhDuSoLuongXuatKho(nvlofpxk) == false));
+
             // Check PXK isdone
-            foreach (var nvlofpxk in phieuxuatkho.DSNVLofPXKs)
-            {
-                if (!nvlofpxk.IsXuatKhoDone)
-                {
-                    phieuxuatkho.IsPXKDoneXuatKho = false; break;
-                }
-                else if (nvlofpxk.IsXuatKhoDone)
-                {
-                    phieuxuatkho.IsPXKDoneXuatKho = true;
-                }
-            }
+            phieuxuatkho.IsPXKDoneXuatKho = !(phieuxuatkho.DSNVLofPXKs.Any(nvlofpxk => nvlofpxk.IsXuatKhoDone == false));
+
             return phieuxuatkho;
         }
+        // Kiem tra tong so luong chi dinh bang tong so luong can lay
+        private bool IsChidinhDuSoLuongXuatKho(NVLofPhieuXuatKho nvlofpxk)
+        {
+            bool isSlgAsigned = false;
 
+            int sumsoluongtake = nvlofpxk.DSLenhXKs.Sum(lenh => int.TryParse(lenh.LXKSoLuong.Value?.ToString(), out int slt) ? slt : 0);
+
+            int slallNVLxuatkho = int.TryParse(nvlofpxk.NVLXKSoLuongAll.Value?.ToString(), out int slall) ? slall : 0;
+
+            if (slallNVLxuatkho > 0 && sumsoluongtake == slallNVLxuatkho)
+            {
+                isSlgAsigned = true;
+            }
+
+            return isSlgAsigned;
+        }
         // Get ma phieu xuat kho by ID
         public string GetMaPhieuXuatKhoByID(object? pxkid)
         {
@@ -4671,6 +4708,7 @@ namespace ProcessManagement.Services.SQLServer
             }
             return maPhieuXuatKho;
         }
+
 
         // Get nguoi xuat kho by pxkid ID
         public string GetNguoiTaoPhieuXuatKhoByID(object? pxkid)
@@ -4726,18 +4764,11 @@ namespace ProcessManagement.Services.SQLServer
             // Load danh sach nguyen vat lieu pxk
             phieuxuatkho.DSNVLofPXKs = GetListNVLofPXKs(phieuxuatkho.PXKID.Value);
 
+            // Kiem tra phieu xuat kho da chi dinh du NVL chua
+            phieuxuatkho.IsChiDinhDuSLXuatKho = !(phieuxuatkho.DSNVLofPXKs.Any(nvlofpxk => IsChidinhDuSoLuongXuatKho(nvlofpxk) == false));
+
             // Check PXK isdone
-            foreach (var nvlofpxk in phieuxuatkho.DSNVLofPXKs)
-            {
-                if (!nvlofpxk.IsXuatKhoDone)
-                {
-                    phieuxuatkho.IsPXKDoneXuatKho = false; break;
-                }
-                else if (nvlofpxk.IsXuatKhoDone)
-                {
-                    phieuxuatkho.IsPXKDoneXuatKho = true;
-                }
-            }
+            phieuxuatkho.IsPXKDoneXuatKho = !(phieuxuatkho.DSNVLofPXKs.Any(nvlofpxk => nvlofpxk.IsXuatKhoDone == false));
 
             return phieuxuatkho;
         }
@@ -4775,18 +4806,11 @@ namespace ProcessManagement.Services.SQLServer
                     // Load danh sach nguyen vat lieu pxk
                     phieuxuatkho.DSNVLofPXKs = GetListNVLofPXKs(phieuxuatkho.PXKID.Value);
 
+                    // Kiem tra phieu xuat kho da chi dinh du NVL chua
+                    phieuxuatkho.IsChiDinhDuSLXuatKho = !(phieuxuatkho.DSNVLofPXKs.Any(nvlofpxk => IsChidinhDuSoLuongXuatKho(nvlofpxk) == false));
+
                     // Check PXK isdone
-                    foreach (var nvlofpxk in phieuxuatkho.DSNVLofPXKs)
-                    {
-                        if (!nvlofpxk.IsXuatKhoDone)
-                        {
-                            phieuxuatkho.IsPXKDoneXuatKho = false; break;
-                        }
-                        else if (nvlofpxk.IsXuatKhoDone)
-                        {
-                            phieuxuatkho.IsPXKDoneXuatKho = true;
-                        }
-                    }
+                    phieuxuatkho.IsPXKDoneXuatKho = !(phieuxuatkho.DSNVLofPXKs.Any(nvlofpxk => nvlofpxk.IsXuatKhoDone == false));
 
                     dsPXKho.Add(phieuxuatkho);
                 }

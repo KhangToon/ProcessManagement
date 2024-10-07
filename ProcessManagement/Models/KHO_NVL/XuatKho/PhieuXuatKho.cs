@@ -15,6 +15,8 @@ namespace ProcessManagement.Models.KHO_NVL.XuatKho
 
         public bool IsPXKDoneXuatKho = false; // Da load o SQLServices
 
+        public bool IsChiDinhDuSLXuatKho = false; // Da load o SQLServices
+
         public List<NVLofPhieuXuatKho> DSNVLofPXKs { get; set; } = new();
 
         public List<Propertyy> GetPropertiesValues()

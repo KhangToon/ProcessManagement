@@ -107,7 +107,8 @@ namespace ProcessManagement.Commons
         public const string TableKHSX = "Table_KHSX";
         public const string KHSXID = "KHSXID";
         public const string MaLSX = "Mã lệnh SX";
-        public const string SLSanXuat = "SL sản xuất";
+        public const string SLNVLSanXuat = "SL sản xuất";
+        public const string SLSanPhamSX = "SLSanPhamSX";
         public const string DinhMuc = "Định mức";
         public const string TileLoi = "Tỉ lệ lỗi";
         public const string SLLot = "SL lot";
@@ -115,6 +116,7 @@ namespace ProcessManagement.Commons
         public const string SLperLotChan = "SL mỗi lot chẳn";
         public const string SLLotLe = "SL lot lẻ";
         public const string SLperLotLe = "SL mỗi lot lẻ";
+        //public const string PXKID = "PXKID";
 
         // Table KHSXpickNVL //
         public const string TableNVLofKHSX = "Table_NVLofKHSX";

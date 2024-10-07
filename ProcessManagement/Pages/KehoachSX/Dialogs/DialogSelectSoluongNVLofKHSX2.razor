@@ -24,7 +24,7 @@
             <RadzenNumeric TValue="int" TextAlign=TextAlign.Center
                            Min="0" Max="999999"
                            Value="@(generate.SLSanPhamSX)"
-                           ValueChanged="@((args) => { generate.SLSanPhamSX = args; OnNumOfSanPhamChanged(); })"
+                           ValueChanged="@((args) => { OnNumOfSanPhamChanged(args); })"
                            Style="--rz-input-font-size: 18px; font-weight: 600; height: 35px; border-width: 1px; width: 15%" />
         </RadzenStack>
 
@@ -166,14 +166,18 @@
     }
 
     // Soluong san pham changed
-    private void OnNumOfSanPhamChanged()
-    {
+    private void OnNumOfSanPhamChanged(int args)
+    {   
+        // Update SL Sanpham can SX
+        generate.SLSanPhamSX = args;
+
         foreach (var nvlofsp in TargetSP.DanhSachNVLs)
         {
             bool iscanconvert = int.TryParse(nvlofsp.SP_SLforSP.Value?.ToString(), out int slforsp);
 
             if (iscanconvert)
             {
+                // Update so luong can lay cua moi NVL
                 nvlofsp.allsoLuongcanLay = generate.SLSanPhamSX * slforsp;
             }
             else { nvlofsp.allsoLuongcanLay = 0; }
@@ -226,10 +230,11 @@
                         SoLuong = { Value = nvl.allsoLuongcanLay }
                     };
 
-                generate.SLNgVatLieuSX += nvl.allsoLuongcanLay;
-
                 generate.NewKHSX.DSachNVLofKHSXs?.Add(nVLofKHSX);
             }
+
+            // Update so luong NVL da lay
+            generate.SLNgVatLieuSX = generate.NewKHSX.DSachNVLofKHSXs?.Sum(item => int.Parse(item.SoLuong.Value?.ToString() ?? "0")) ?? 0;
 
             DialogService.Close(generate.NewKHSX.DSachNVLofKHSXs);
         }

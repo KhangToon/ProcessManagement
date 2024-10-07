@@ -41,9 +41,9 @@
 
 <RadzenRow class="rowbackground-style" Gap="0" Style="height: 100%; width: 100%; overflow-y: auto;">
     <RadzenColumn Size="12" SizeMD="12" Style="height: 100%; width: 100%; padding-right: 0">
-        <RadzenTabs Style="width: 100%; height: 100%; padding-right: 0">
+        <RadzenTabs Style="width: 100%; height: 100%; padding-right: 0" SelectedIndex="@SeletedTabIndex">
             <Tabs>
-                <RadzenTabsItem Selected="true" Text="Kho nguyên liệu">
+                <RadzenTabsItem Text="Kho nguyên liệu">
                     <RadzenCard Variant="Variant.Flat" Style="height: contain; width: 100%; padding-top: 10px">
                         <RadzenStack Gap="5" Style="height: contain; width: 100%;">
                             <!--Search by maquanly-->
@@ -640,6 +640,10 @@
 </RadzenRow>
 
 @code {
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "tabindxex")]
+    public int SeletedTabIndex { get; set; } = 0;
+
     private List<string>? UserRoles;
     private DateTime startSearchDay = DateTime.Today;
     private DateTime endSearchDay = DateTime.Today;
@@ -906,7 +910,7 @@
                         LoaiTTNVLID = { Value = loaiThongTinNVL.LoaiTTNVLID.Value },
                         // Chưa gan NVLID
                         LoaiThongTin = loaiThongTinNVL,
-                        GiaTri = { Value = (loaiThongTinNVL.IsDefault.Value?.ToString() == "1")? loaiThongTinNVL.GiaTriMacDinh.Value : string.Empty }
+                        GiaTri = { Value = (loaiThongTinNVL.IsDefault.Value?.ToString() == "1") ? loaiThongTinNVL.GiaTriMacDinh.Value : string.Empty }
                     };
 
                 if (loaiThongTinNVL.IsAddForAll) // Them cho tat ca NVL

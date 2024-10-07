@@ -11,7 +11,8 @@ namespace ProcessManagement.Models
         public Propertyy KHSXID { get; set; } = new() { DBName = Common.KHSXID, Type = typeof(int), AlowDatabase = true };
         public Propertyy MaLSX { get; set; } = new() { DBName = Common.MaLSX, Type = typeof(string), AlowDatabase = true };
         public Propertyy LOAINVLID { get; set; } = new() { DBName = Common.LOAINVLID, DisplayName = "Loại NVL", Type = typeof(int), AlowDatabase = true };
-        public Propertyy SLSanXuat { get; set; } = new() { DBName = Common.SLSanXuat, Type = typeof(int), AlowDatabase = true };
+        public Propertyy SLNVLSanXuat { get; set; } = new() { DBName = Common.SLNVLSanXuat, Type = typeof(int), AlowDatabase = true };
+        public Propertyy SLSanPhamSX { get; set; } = new() { DBName = Common.SLSanPhamSX, Type = typeof(int), AlowDatabase = true };
         public Propertyy DinhMuc { get; set; } = new() { DBName = Common.DinhMuc, Type = typeof(int), AlowDatabase = true };
         public Propertyy TileLoi { get; set; } = new() { DBName = Common.TileLoi, Type = typeof(double), AlowDatabase = true };
         public Propertyy SLLot { get; set; } = new() { DBName = Common.SLLot, Type = typeof(int), AlowDatabase = true };
@@ -22,7 +23,7 @@ namespace ProcessManagement.Models
         public Propertyy SPID { get; set; } = new() { DBName = Common.SP_SPID, Type = typeof(int), AlowDatabase = true };
 
         public Propertyy NgayTao = new() { DBName = Common.NgayTao, Type = typeof(DateTime), AlowDatabase = true };
-
+        public Propertyy PXKID { get; set; } = new() { DBName = Common.PXKID, DisplayName = "PXKID", Type = typeof(int), AlowDatabase = true };
         public SanPham? SanPham { get; set; }
         public LoaiNVL? LoaiNVL { get; set; }   
         public List<NguyenCongofKHSX> DSachCongDoans { get; set; } = new();

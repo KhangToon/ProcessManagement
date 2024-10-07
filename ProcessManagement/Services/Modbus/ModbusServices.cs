@@ -184,7 +184,7 @@ namespace ProcessManagement.Services.Modbus
 
                 // SLSanxuat to device01 // 4x46
                 // Maximum num is 32767 for short
-                string slSX = Common.CurrentKHSX?.SLSanXuat.Value?.ToString() ?? "0";
+                string slSX = Common.CurrentKHSX?.SLNVLSanXuat.Value?.ToString() ?? "0";
                 WriteRegData(Regs.Server.SLSanXuat, Regs.RegTypes.RegHoldingRegisters, slSX);
 
                 // SLLotNVL to device 01 // 4x51

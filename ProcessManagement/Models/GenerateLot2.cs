@@ -30,6 +30,8 @@ namespace ProcessManagement.Models
 
         public bool isErrorSLloiChophep = true;
         public bool isComfirmSLLoiNguyenCong = false;
+        public bool isGenerateListLotOK = false;
+        public bool isCheckSLNVLisOK = false;
 
         IEnumerable<string>? _defaultListCDnames = new List<string>();
         public IEnumerable<string>? DefaultListCDnames
@@ -118,8 +120,6 @@ namespace ProcessManagement.Models
             else { isErrorSLloiChophep = false; return true; }
         }
 
-
-
         public void AddNewNguyenCongtoList(string newnguyencong)
         {
             if (newnguyencong == string.Empty) { return; }
@@ -170,7 +170,8 @@ namespace ProcessManagement.Models
         {
             NewKHSX.MaLSX.Value = MaLSX;
             NewKHSX.LOAINVLID.Value = NewKHSX.LoaiNVL?.LOAINVLID.Value;
-            NewKHSX.SLSanXuat.Value = SLNgVatLieuSX;
+            NewKHSX.SLSanPhamSX.Value = SLSanPhamSX;    
+            NewKHSX.SLNVLSanXuat.Value = SLNgVatLieuSX;
             NewKHSX.DinhMuc.Value = DinhMuc;
             NewKHSX.TileLoi.Value = TiLeLoi;
             NewKHSX.SLLot.Value = SLLot;
@@ -184,7 +185,7 @@ namespace ProcessManagement.Models
 
         public void ResetDefault()
         {
-            //SLSanPhamSX = 0; 
+            SLSanPhamSX = 0;
             SLNgVatLieuSX = 0;
             TiLeLoi = 0;
             SLLoi = 0;
@@ -286,9 +287,12 @@ namespace ProcessManagement.Models
                 return letters[0].ToString();
         }
 
-
-        public (int, string) ReCalculate()
+        public (int, string) ReCalculate() // Tinh Dinhmuc, SLLot, SLperLot,...
         {
+            // Reset so luong cua moi nvl cua lsx khi bat ki thong so nao thay doi (loai nvl, ti le loi, slsx, ...)
+            isGenerateListLotOK = false; // false bit generate LOT
+            ListNVLs = new(); // reset danh sach LOT NVL
+
             int result = -1; string error = string.Empty;
 
             // Tinh dinh muc
