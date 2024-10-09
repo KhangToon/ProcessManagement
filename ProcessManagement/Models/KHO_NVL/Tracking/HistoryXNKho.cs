@@ -60,7 +60,7 @@ namespace ProcessManagement.Models.KHO_NVL.Tracking
             [DisplayName("Tồn Kho Sau")]
             public int LogTonKhoSau { get; set; }
 
-            [DisplayName("Người Thực Hiện")]
+            [DisplayName("Thực Hiện")]
             public string LogNgThucHien { get; set; } = string.Empty;
 
             [DisplayName("Thời Điểm")]

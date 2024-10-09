@@ -12,6 +12,9 @@
             LSXNotexist = 6, // LSX khong ton tai
             IsUpdated = 7, // MQL da duoc update truoc do
             UpdateFailed = 8, // Update SQL calamviec error
+            MMayNotexist = 10, // Ma may khong ton tai
+            MNVNotexist = 11, // Ma nhan vien khong ton tai
+            NotAllowUpdate = 12, // Chua duoc phep gia cong
         }
 
         public class NguyenCongID // Nguyen cong code
@@ -37,6 +40,8 @@
             public const string RegWriteString = "Write String";
         }
 
+        // Dia chi thanh ghi ben Modbus Inovance Client hon dia chi ben Server 1 don vi
+
         public static class Server // server common register
         {
             // Server datetime
@@ -44,17 +49,17 @@
             // Ma LSX
             public const int LSXCode = 17;          // 4x 16
             // Ma san pham
-            public const int MaSanPham = 23;        // 4x 22
+            public const int MaSanPham = 81;        // 4x 80
             // Loai NVL
             public const int LoaiNVL01 = 29;        // 4x 28
-            // SL san xuat
-            public const int SLSanXuat = 47;        // 4x 46
+            // DinhMuc san xuat
+            public const int DinhMucSX = 47;        // 4x 46
             // SL da san xuat
             public const int SLDaSanXuat = 48;      // 4x 47
             // SL lot hoan thanh
             public const int SLLotDone = 50;        // 4x 49
             // SL lot
-            public const int SLLot = 52;          // 4x 51
+            public const int SLLot = 52;            // 4x 51
         }
 
         public static class Device01 // device 01 register
@@ -71,8 +76,10 @@
             // SL lot hien tai
             public const int SLLoihientai01 = 56;   // 4x 55
 
-            // nguyen cong
+            // nguyen cong Required 
             public const int NgCongRequiredLoadLSX01 = 54;     // 4x 53
+            // nguyen cong ID
+            public const int NgCongIDCode01 = 72;     // 4x 71
             // ma may
             public const int MaMay01 = 41;          // 4x 40
             // ma quan ly lot

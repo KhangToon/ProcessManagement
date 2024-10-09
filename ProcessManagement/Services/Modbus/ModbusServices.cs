@@ -1,6 +1,8 @@
 ﻿using EasyModbus;
 using ProcessManagement.Commons;
 using ProcessManagement.Models;
+using ProcessManagement.Models.MAYMOC;
+using ProcessManagement.Models.NHANVIEN;
 using ProcessManagement.Pages.KehoachSX;
 using ProcessManagement.Services.SQLServer;
 using Radzen;
@@ -11,7 +13,7 @@ namespace ProcessManagement.Services.Modbus
 {
     public class ModbusServices
     {
-        private readonly IPAddress address = IPAddress.Parse("192.168.0.17");
+        private readonly IPAddress address = IPAddress.Parse("192.168.0.17"); // IP PC // "192.168.0.87" - IP Device 01 
         public bool IsServerRunning { get; set; } = false;
         public int NumofConectedClient = 0;
         public ModbusServer? ModbusServer;
@@ -92,7 +94,10 @@ namespace ProcessManagement.Services.Modbus
                 {
                     if (ModbusServer.holdingRegisters[Regs.Device01.NgCongRequiredLoadLSX01] == 1) // Is required load LSX from device 
                     {
-                        int nguyencongID = ModbusServer.holdingRegisters[Regs.Device01.NgCongRequiredLoadLSX01];
+                        // Lay target nguyen cong tu device 01
+                        //int nguyencongID = ModbusServer.holdingRegisters[Regs.Device01.NgCongRequiredLoadLSX01];
+
+                        int nguyencongID = ModbusServer.holdingRegisters[Regs.Device01.NgCongIDCode01];
 
                         // Send LSX to device 01
                         WriteLSXdetailstoDevice01(nguyencongID);
@@ -133,7 +138,8 @@ namespace ProcessManagement.Services.Modbus
             }
 
             // Get nguyen cong
-            var tagertNgCong = SQLServerServices.GetNguyenCong(Regs.NguyenCongID.IDs[nguyencongID]);
+            //var tagertNgCong = SQLServerServices.GetNguyenCong(Regs.NguyenCongID.IDs[nguyencongID]);
+            var tagertNgCong = SQLServerServices.GetNguyenCong(nguyencongID);
 
             var nguyencong = Common.CurrentKHSX?.DSachCongDoans.FirstOrDefault(x => x.TenCongDoan.Value?.ToString()?.Trim() == tagertNgCong.TenNguyenCong.Value?.ToString()?.Trim()) ?? null;
 
@@ -174,7 +180,7 @@ namespace ProcessManagement.Services.Modbus
                 string maLSX = Common.CurrentKHSX?.MaLSX.Value?.ToString() ?? string.Empty;
                 WriteRegData(Regs.Server.LSXCode, Regs.RegTypes.RegWriteString, maLSX);
 
-                // Masanpham to device01 // 4x22
+                // Masanpham to device01 // 4x80
                 string maSP = Common.CurrentKHSX?.SanPham?.SP_MaSP.Value?.ToString() ?? string.Empty;
                 WriteRegData(Regs.Server.MaSanPham, Regs.RegTypes.RegWriteString, maSP);
 
@@ -182,10 +188,10 @@ namespace ProcessManagement.Services.Modbus
                 string loaiNVL = Common.CurrentKHSX?.LoaiNVL?.TenLoaiNVL.Value?.ToString() ?? string.Empty;
                 WriteRegData(Regs.Server.LoaiNVL01, Regs.RegTypes.RegWriteString, loaiNVL);
 
-                // SLSanxuat to device01 // 4x46
+                // DinhMucSX to device01 // 4x46
                 // Maximum num is 32767 for short
-                string slSX = Common.CurrentKHSX?.SLNVLSanXuat.Value?.ToString() ?? "0";
-                WriteRegData(Regs.Server.SLSanXuat, Regs.RegTypes.RegHoldingRegisters, slSX);
+                string slSX = Common.CurrentKHSX?.DinhMuc.Value?.ToString() ?? "0";
+                WriteRegData(Regs.Server.DinhMucSX, Regs.RegTypes.RegHoldingRegisters, slSX);
 
                 // SLLotNVL to device 01 // 4x51
                 string slLotNVL = Common.CurrentKHSX?.SLLot.Value?.ToString() ?? "0";
@@ -216,7 +222,7 @@ namespace ProcessManagement.Services.Modbus
             // MaLSX to device01 // 4x16
             WriteRegData(Regs.Server.LSXCode, Regs.RegTypes.RegWriteString, "0");
 
-            // Masanpham to device01 // 4x22
+            // Masanpham to device01 // 4x80
             WriteRegData(Regs.Server.MaSanPham, Regs.RegTypes.RegWriteString, "0");
 
             // LoaiNVL to device01 // 4x28
@@ -224,7 +230,7 @@ namespace ProcessManagement.Services.Modbus
 
             // SLSanxuat to device01 // 4x46
             // Maximum num is 32767 for short
-            WriteRegData(Regs.Server.SLSanXuat, Regs.RegTypes.RegHoldingRegisters, "0");
+            WriteRegData(Regs.Server.DinhMucSX, Regs.RegTypes.RegHoldingRegisters, "0");
 
             // SLLotNVL to device 01 // 4x51
             WriteRegData(Regs.Server.SLLot, Regs.RegTypes.RegHoldingRegisters, "0");
@@ -235,14 +241,16 @@ namespace ProcessManagement.Services.Modbus
         {
             if (ModbusServer != null && IsServerRunning)
             {
-                // Read Tennguyencong // 4x 71
-                var clientngcongID = ModbusServer.holdingRegisters[72];
 
-                var nguyencongID = Regs.NguyenCongID.IDs[clientngcongID];
+                // Read Tennguyencong // 4x 71
+                int nguyencongID = ModbusServer.holdingRegisters[Regs.Device01.NgCongIDCode01];
 
                 NguyenCong targetngcong = SQLServerServices.GetNguyenCong(nguyencongID);
 
                 string tenngcong = targetngcong.TenNguyenCong.Value?.ToString()?.Trim() ?? string.Empty;
+
+                // Read Mamay // 4x40 - lenght 11
+                string mamay = ReadStringData(40, 11);
 
                 // Read Maquanlylot (QRCode) // 4x0 - lenght 31
                 string maquanlylot = ReadStringData(0, 31);
@@ -262,14 +270,14 @@ namespace ProcessManagement.Services.Modbus
                 //ModbusServer.coils[1] = false; // disable device 01 // 0x0
 
                 // calling update method
-                Regs.AlarmCode result = UpdateCalamviec(tenngcong, calamviec, maquanlylot, manhanvien, slOK, slNG);
+                Regs.AlarmCode result = UpdateCalamviec(tenngcong, calamviec, maquanlylot, manhanvien, mamay, slOK, slNG);
 
                 // feedback update result to client
                 SendAlarmLogToDevice01(result);
             }
         }
 
-        private Regs.AlarmCode UpdateCalamviec(string tenngcong, bool iscadem, string maquanlylot, string manhanvien, int slOK, int slNG)
+        private Regs.AlarmCode UpdateCalamviec(string tenngcong, bool iscadem, string maquanlylot, string manhanvien, string mamay, int slOK, int slNG)
         {
             // iscadem == 1 (ca dem) // iscadem = 0 (ca ngay)
 
@@ -283,6 +291,14 @@ namespace ProcessManagement.Services.Modbus
                 return Regs.AlarmCode.ErrorSLOKNG;
             }
 
+            // Checking mamay
+            MayMoc targetMaymoc = SQLServerServices.GetMayMocbyMaMay(mamay);
+            if (targetMaymoc.MMID.Value == null) return Regs.AlarmCode.MMayNotexist;
+
+            // Checking manhanvien
+            NhanVien targetNhanvien = SQLServerServices.GetNhanVienbyMaNhanVien(manhanvien);
+            if (targetNhanvien.NVID.Value == null) return Regs.AlarmCode.MNVNotexist;
+
             // Get target NVLmoiNguyencong by maquanly and tennguyencong
             var targetLotNVLItems = Common.CurrentKHSX?.DSachCongDoans.SelectMany(item => item.DSachNVLCongDoans)
                             .FirstOrDefault(mql => mql.MaQuanLy.Value?.ToString()?.Trim() == maquanlylot && mql.TenCongDoan.Value?.ToString()?.Trim() == tenngcong) ?? null;
@@ -290,7 +306,10 @@ namespace ProcessManagement.Services.Modbus
             // Checking maquanlylot
             if (targetLotNVLItems == null) return Regs.AlarmCode.MQLNotexist; // ma quan ly khong ton tai
 
-            // Checking manhanvien
+            if (targetLotNVLItems.SLTruocGiaCong.Value?.ToString() == "0")
+            {
+                return Regs.AlarmCode.NotAllowUpdate;
+            }
 
             // Checking maquanlylot cua nguyen cong da update hay chua
             var isupdated = (targetLotNVLItems.IsUpdated.Value?.ToString() == "1");

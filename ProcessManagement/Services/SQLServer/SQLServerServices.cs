@@ -5476,6 +5476,49 @@ namespace ProcessManagement.Services.SQLServer
             return mayMoc;
         }
 
+        public MayMoc GetMayMocbyMaMay(string? mamay)
+        {
+            MayMoc mayMoc = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_MayMoc}] WHERE [{Common.MM_MaMay}] = @MAMAY";
+
+                command.Parameters.AddWithValue("@MAMAY", mamay?.Trim());
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    List<Propertyy> rowitems = mayMoc.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        if (reader.GetOrdinal(columnName) != -1) // Check if the column exists
+                        {
+                            object columnValue = reader[columnName];
+
+                            item.Value = columnValue == DBNull.Value ? null : columnValue.ToString()?.Trim();
+                        }
+                    }
+                }
+            }
+
+            if (mayMoc.MMID.Value != null)
+            {
+                // Get danh sach thong tin may moc
+                mayMoc.DSThongTin = GetDanhSachThongTinMayMoc(mayMoc.MMID.Value);
+            }
+
+            return mayMoc;
+        }
+
         // Check gia tri truong thong tin mac dinh may moc is exsting? 
         public bool DefaultThongTinMayMoc_ValueIsExisting(string? proValue, string proName)
         {
@@ -6153,6 +6196,51 @@ namespace ProcessManagement.Services.SQLServer
 
         // ------------------------------------------------------------------------------------- //
         #region Table_NV_NhanVien
+
+        // Get nhan vien by ma nhan vien
+        public NhanVien GetNhanVienbyMaNhanVien(object? maNV)
+        {
+            NhanVien nhanVien = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_NhanVien}] WHERE [{Common.NV_MaNhanVien}] = @MANHANVIEN";
+
+                command.Parameters.AddWithValue("@MANHANVIEN", maNV);
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    List<Propertyy> rowitems = nhanVien.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        if (reader.GetOrdinal(columnName) != -1) // Check if the column exists
+                        {
+                            object columnValue = reader[columnName];
+
+                            item.Value = columnValue == DBNull.Value ? null : columnValue.ToString()?.Trim();
+                        }
+                    }
+                }
+            }
+
+            if (nhanVien.NVID.Value != null)
+            {
+                // Get danh sach thong tin nhan vien
+                nhanVien.DSThongTin = GetDanhSachThongTinNhanVien(nhanVien.NVID.Value);
+            }
+
+            return nhanVien;
+        }
+
         // Check gia tri truong thong tin nhan vien 
         public bool DefaultThongTinNhanVien_ValueIsExisting(string? proValue, string proName)
         {
