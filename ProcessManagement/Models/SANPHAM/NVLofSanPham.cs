@@ -15,6 +15,9 @@ namespace ProcessManagement.Models.SANPHAM
 
         public bool isEditingSoluong = false;
         public int allsoLuongcanLay = 0; // dung khi chi ding so luong sp trong KHSX
+        public double tileloi = 0; // dung khi chi ding so luong sp trong KHSX
+        public int slloichophep = 0; // dung khi chi ding so luong sp trong KHSX
+        public int dinhmuc = 0; // dung khi chi ding so luong sp trong KHSX
         public List<Propertyy> GetPropertiesValues()
         {
             Type propertyType = typeof(NVLofSanPham);

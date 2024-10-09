@@ -90,9 +90,8 @@
                                         <RadzenText Text="Tỉ lệ lỗi (%)" Style="font-size: 16px; font-weight: 600; color: black"></RadzenText>
                                     </RadzenStack>
                                     <RadzenStack Style="width: 50%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                        <RadzenNumeric Placeholder="*Nhập tỉ lệ lỗi" TValue="double" Min="0" Max="100000"
-                                                       Value="@generLot.TiLeLoi" ValueChanged="@((args) => { generLot.TiLeLoi = args ; generLot.ReCalculate();})"
-                                                       Style="font-size: 16px; border-radius: 0; border-width: 1px; width: 50%" />
+                                        <RadzenText Text="@($"{generLot.TiLeLoi.ToString()} (%)")" Style="font-size: 16px; font-weight: 600; width: 50%; height: contain; color: darkblue"></RadzenText>
+
                                         <RadzenStack Visible="(generLot.TiLeLoi != 0)" Style="width: 50%; height: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                             <RadzenText Text="@($"{generLot.DinhMuc - generLot.SLNgVatLieuSX} (PCS)")" Style="font-size: 16px; font-weight: 600; color: black"></RadzenText>
                                         </RadzenStack>
@@ -419,7 +418,7 @@
     private async Task OpenDialogSelectNVLofKHSX()
     {
         List<NVLofKHSX> nVLofKHSXs = await DialogService.OpenAsync<DialogSelectSoluongNVLofKHSX2>(null, new Dictionary<string, object>() { { "generate", generLot } },
-        new DialogOptions() { Width = "50%", Height = "contain", Resizable = false, Draggable = true, ShowTitle = false, ShowClose = false, Style = "background-color: while; border-radius: 0px; padding: 0px" });
+        new DialogOptions() { Width = "80%", Height = "contain", Resizable = false, Draggable = true, ShowTitle = false, ShowClose = false, Style = "background-color: while; border-radius: 0px; padding: 0px" });
 
         // Recalculate variable
         generLot.ReCalculate();

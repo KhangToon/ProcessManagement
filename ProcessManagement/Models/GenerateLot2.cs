@@ -296,7 +296,7 @@ namespace ProcessManagement.Models
             int result = -1; string error = string.Empty;
 
             // Tinh dinh muc
-            DinhMuc = (int)(SLNgVatLieuSX + SLNgVatLieuSX * (TiLeLoi / 100));
+            //DinhMuc = (int)(SLNgVatLieuSX + SLNgVatLieuSX * (TiLeLoi / 100));
 
             if (SLNgVatLieuSX == 0 || SLperLotChan == 0 || (DinhMuc / SLperLotChan < 1))
             {
@@ -339,7 +339,7 @@ namespace ProcessManagement.Models
             ListNVLs = new();
 
             // Tinh dinh muc
-            DinhMuc = (int)(SLNgVatLieuSX + SLNgVatLieuSX * (TiLeLoi / 100));
+            //DinhMuc = (int)(SLNgVatLieuSX + SLNgVatLieuSX * (TiLeLoi / 100));
 
             // Tinh so luong lot chan
             SLLotChan = DinhMuc / SLperLotChan;
@@ -350,7 +350,7 @@ namespace ProcessManagement.Models
                 NVL nVL = new();
                 nVL.LoaiNVL.Value = NewKHSX.LoaiNVL?.TenLoaiNVL.Value;
                 nVL.MaSP.Value = NewKHSX.SanPham?.SP_MaSP.Value;
-                nVL.MaQuanLy.Value = MaLSX + NewKHSX.SanPham?.SP_MaSP.Value + "-" + index.ToString(NumberDigit);
+                nVL.MaQuanLy.Value = MaLSX + "-" + NewKHSX.SanPham?.SP_MaSP.Value + "-" + index.ToString(NumberDigit);
                 nVL.SoLuong.Value = SLperLotChan;
                 nVL.NgayXuat.Value = DateTime.Now;
                 ListNVLs?.Add(nVL);

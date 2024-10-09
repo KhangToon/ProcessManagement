@@ -1,0 +1,116 @@
+﻿@page "/phieu-xac-dinh-cong-doan"
+
+@using Radzen.Blazor
+@using Radzen
+
+@inject NotificationService NotificationService
+@inject TooltipService TooltipService
+@inject ContextMenuService ContextMenuService
+@inject DialogService DialogService
+@inject IJSRuntime JSRuntime
+
+<style>
+    .table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        .table td, .table th {
+            border: 1px solid black;
+            padding: 5px;
+            text-align: left;
+        }
+</style>
+
+
+<RadzenCard>
+    <div id="printing-component">
+        <div style="text-align:center">
+            <h1>PHIẾU XÁC ĐỊNH CÔNG ĐOẠN</h1>
+        </div>
+
+        <table class="table" style="width: 100%; border-collapse: collapse;">
+            <tr>
+                <td colspan="3">Tên sản phẩm: Khớp nối</td>
+                <td>Mã số SP: P5053-500-1</td>
+                <td colspan="2">MSNB</td>
+                <td>A010</td>
+            </tr>
+            <tr>
+                <td colspan="7">Lot NVL</td>
+            </tr>
+            <tr>
+                <td>Tên công đoạn</td>
+                <td>Ngày gia công</td>
+                <td>Nhân viên</td>
+                <td>Mã máy/ vị trí</td>
+                <td>Ca</td>
+                <td>Số lượng</td>
+                <td>Xác nhận</td>
+                <td>Ghi chú</td>
+            </tr>
+            @foreach (var step in manufacturingSteps)
+            {
+                <tr>
+                    <td>@step.Name</td>
+                    <td>@step.Date</td>
+                    <td>@step.Employee</td>
+                    <td>@step.Machine</td>
+                    <td>@step.Shift</td>
+                    <td>@step.Quantity</td>
+                    <td>@step.Confirmation</td>
+                    <td>@step.Notes</td>
+                </tr>
+            }
+            <tr>
+                <td colspan="2">QP54/F01/Khớp nối</td>
+                <td colspan="2">Lần BH: 3</td>
+                <td colspan="4" style="text-align:right">@DateTime.Now.ToString("yyyy/MM/dd")</td>
+            </tr>
+        </table>
+    </div>
+    <RadzenStack Style="width: 100%; height: contain" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+        <RadzenButton Click="@(() => PrintComponent())" Icon="print" Text="Print" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Size="ButtonSize.Small" Variant="Variant.Filled"
+                      Style="height: contain; width: contain; font-size: 14px;" />
+    </RadzenStack>
+</RadzenCard>
+
+
+
+@code {
+
+    private List<ManufacturingStep> manufacturingSteps = new List<ManufacturingStep>
+    {
+        new ManufacturingStep { Name = "1. NC1 (Tiện phi), kiểm pin 100%", Date = "", Employee = "", Machine = "", Shift = "", Quantity = "", Confirmation = "", Notes = "" },
+        new ManufacturingStep { Name = "2. MC1 (Khoan lỗ), kiểm JIG 100%", Date = "", Employee = "", Machine = "", Shift = "", Quantity = "", Confirmation = "", Notes = "" },
+        new ManufacturingStep { Name = "3. NC2 (Tiện ren), kiểm ren 5pcs/11", Date = "", Employee = "", Machine = "", Shift = "", Quantity = "", Confirmation = "", Notes = "" },
+        new ManufacturingStep { Name = "4. Rửa", Date = "", Employee = "", Machine = "", Shift = "", Quantity = "", Confirmation = "", Notes = "" },
+        new ManufacturingStep { Name = "5. Kiểm Pin, M3, ren RC3/8 100%", Date = "", Employee = "", Machine = "", Shift = "", Quantity = "", Confirmation = "", Notes = "" },
+        new ManufacturingStep { Name = "6. Ngoại quan + đóng thùng", Date = "", Employee = "", Machine = "", Shift = "", Quantity = "", Confirmation = "", Notes = "" }
+    };
+
+    public class ManufacturingStep
+    {
+        public string? Name { get; set; }
+        public string? Date { get; set; }
+        public string? Employee { get; set; }
+        public string? Machine { get; set; }
+        public string? Shift { get; set; }
+        public string? Quantity { get; set; }
+        public string? Confirmation { get; set; }
+        public string? Notes { get; set; }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("import", "/js/printBlazorComponent.js");
+        }
+    }
+
+    private async Task PrintComponent()
+    {
+        await JSRuntime.InvokeVoidAsync("printBlazorComponent", "printing-component");
+    }
+}
