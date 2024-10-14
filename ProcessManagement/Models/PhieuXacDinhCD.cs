@@ -8,5 +8,6 @@
         public string MaKHSX { get; set; } = string.Empty;
 
         public List<NVLmoiNguyenCong> DSNVLofNguyenCongs { get; set; } = new();
+
     }
 }

@@ -300,6 +300,7 @@ namespace ProcessManagement.Commons
         public const string NV_IsDefault = "IsDefault";
         public const string NV_TenTruyXuat = "Tên truy xuất";
         public const string NV_IndexDisplay = "IndexDisplay";
+        public const string NV_IsDisplay = "IsDisplay";
 
         // Table ThongTinNhanVien
         public const string Table_ThongTinNhanVien = "NV_ThongTinNhanVien";

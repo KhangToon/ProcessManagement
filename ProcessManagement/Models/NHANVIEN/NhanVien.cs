@@ -21,6 +21,35 @@ namespace ProcessManagement.Models.NHANVIEN
             return targetThongTin;
         }
 
+        // Get all property of this class
+        public static List<Propertyy> GetClassProperties()
+        {
+            Type propertyType = typeof(NhanVien);
+
+            NhanVien instance = new();
+
+            FieldInfo[] fields = propertyType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
+            List<Propertyy> propertiesValue = new();
+
+            foreach (FieldInfo field in fields)
+            {
+                Type ob = field.FieldType;
+
+                if (ob == typeof(Propertyy))
+                {
+                    Propertyy? fieldValue = (Propertyy?)field.GetValue(instance);
+
+                    if (fieldValue != null)
+                    {
+                        propertiesValue.Add(fieldValue);
+                    }
+                }
+            }
+
+            return propertiesValue;
+        }
+
         public List<Propertyy> GetPropertiesValues()
         {
             Type propertyType = typeof(NhanVien);

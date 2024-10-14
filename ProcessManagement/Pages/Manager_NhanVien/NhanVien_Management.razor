@@ -60,7 +60,7 @@
                                 <RadzenStack Gap="15px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: 100%; width: 60%;">
                                     <RadzenTextBox @oninput="@((args) => FilterNV(args?.Value))" Placeholder="Tìm theo mã nhân viên" Style="border-radius: 20px; padding-left: 20px; border-width: 2px; border-color: var(--rz-primary-light); width: 50% "></RadzenTextBox>
                                     <RadzenButton Icon="search" ButtonStyle="ButtonStyle.Primary" Style="border-radius: 20px;" />
-                                    <RadzenButton Click="@(async() => { await LoadAllDanhsachNhanVienBase(); ReSelectCurrentNhanVien(Common.SelectedNhanVienid); })" IsBusy="@isLoadingDSNV" BusyText=" Loading..." Style="border-radius: 20px;" Icon="autorenew" ButtonStyle="ButtonStyle.Primary" />
+                                    <RadzenButton Click="@(async() => { await LoadAllDanhsachNhanVienBase(); await FilterDSachNhanVienProcessing(); ReSelectCurrentNhanVien(Common.SelectedNhanVienid);})" IsBusy="@isLoadingDSNV" BusyText=" Loading..." Style="border-radius: 20px;" Icon="autorenew" ButtonStyle="ButtonStyle.Primary" />
                                 </RadzenStack>
                             </RadzenStack>
 
@@ -74,6 +74,22 @@
                                                 <RadzenText Text="Danh sách nhân viên" Style="color: darkred; font-weight: 600; font-size: 17px; height: contain; width: contain; font-style: italic;"></RadzenText>
                                                 <RadzenText Text="@($"( {DSachNhanViens.Count} nhân viên )")" Style="color: black; font-weight: 600; font-size: 16px; height: contain; width: contain; font-style: italic;"></RadzenText>
                                             </RadzenStack>
+                                            <!--Button enable advance filter-->
+                                            <RadzenStack Style="height: 100%; width: contain; padding-left: 10px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                <RadzenButton Icon="@(filterActive ? "filter_alt_off" : "filter_alt")" Text="Bộ lọc nâng cao" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="@(filterActive ? Shade.Darker : Shade.Lighter)"
+                                                              Style="height: contain; width: contain; font-size: 14px;"
+                                                              Click="@( async () =>
+                                                                {
+                                                                    if (filterActive)
+                                                                    {
+                                                                        await LoadAllDanhsachNhanVienBase(); ReSelectCurrentNhanVien(Common.SelectedNhanVienid);
+                                                                    }
+                                                                    filterActive = !filterActive;
+                                                                })" />
+                                                <RadzenButton Click="@(async () => {keyFilterExtraColumns = new(); keyFilterMainColumns = new(); await LoadAllDanhsachNhanVienBase(); ReSelectCurrentNhanVien(Common.SelectedNhanVienid);})"
+                                                              Icon="reset_settings" Text="Reset bộ lọc" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
+                                                              Style="height: contain; width: contain; font-size: 14px;" />
+                                            </RadzenStack>
                                             <!--Button them nhan vien moi-->
                                             <RadzenStack Style="height: 100%; width: contain; padding-left: 10px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                 <RadzenButton Click="OnThemMoiNhanVien" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Thêm nhân viên mới"))" Icon="add" Text="Thêm nhân viên mới" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
@@ -86,7 +102,7 @@
                                             <RadzenDataGrid class="rz-grid-table-fixed-2" Data="@(DSachNhanViens)" TItem="NhanVien" IsLoading="@isLoadingDSNV"
                                                             EmptyText="Danh sách nhân viên trống." Style="overflow-x: scroll; width: 100%; height: 100%"
                                                             ShowColumnTitleAsTooltip="true" ShowCellDataAsTooltip="true"
-                                                            AllowFiltering="false" FilterMode="FilterMode.Simple"
+                                                            AllowFiltering="@filterActive" FilterMode="FilterMode.Simple"
                                                             AllowPaging="true" AllowSorting="false" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
                                                             ShowPagingSummary="true" PagingSummaryFormat="@pagingSummaryFormat" PagerPosition="PagerPosition.Bottom"
                                                             GridLines="DataGridGridLines.Both" PageSize="10" Density="Density.Default"
@@ -95,10 +111,10 @@
                                                 <Columns>
                                                     @if (DSachNhanViens?.Count > 0)
                                                     {
-                                                        List<Propertyy> columns = DSachNhanViens.FirstOrDefault()?.GetPropertiesValues() ?? new();
+                                                        List<Propertyy> columns = NhanVien.GetClassProperties() ?? new();
 
                                                         <!--STT-->
-                                                        <RadzenDataGridColumn Width="50px" Frozen="true" FrozenPosition="FrozenColumnPosition.Left" Filterable="false"
+                                                        <RadzenDataGridColumn Width="30px" Frozen="true" FrozenPosition="FrozenColumnPosition.Left" Filterable="false"
                                                                               TItem="NhanVien" Title="#"
                                                                               Property="STT" TextAlign="TextAlign.Center">
                                                             <HeaderTemplate>
@@ -114,67 +130,73 @@
                                                             string colName = column.DBName ?? string.Empty;
                                                             string displayName = column.DisplayName ?? string.Empty;
 
-                                                            if (colName == Common.NV_MaNhanVien)
+                                                            <RadzenDataGridColumn Width="100px" TItem="NhanVien" Title="@displayName" FilterMode="FilterMode.CheckBoxList"
+                                                                                  Property="@colName" TextAlign="TextAlign.Center">
+                                                                <HeaderTemplate>
+                                                                    <span style="font-weight: 600; font-size: 15px; color: white">@displayName</span>
+                                                                </HeaderTemplate>
+                                                                <FilterTemplate>
+                                                                    <RadzenDropDown AllowClear="true"
+                                                                                    Style="width: 100%; height: contain; font-size: 14px; font-weight: 600; background-color: white"
+                                                                                    AllowVirtualization="true"
+                                                                                    AllowFiltering="true"
+                                                                                    FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                                                                    FilterOperator="StringFilterOperator.Contains"
+                                                                                    AllowSelectAll="true"
+                                                                                    TValue="IEnumerable<string>"
+                                                                                    Data="@(GetMainColumnKeysSearch(colName))"
+                                                                                    Multiple="true"
+                                                                                    SelectedItem="@(keyFilterMainColumns.ContainsKey(colName)? keyFilterMainColumns[colName] : null)"
+                                                                                    Value="@(keyFilterMainColumns.ContainsKey(colName)? keyFilterMainColumns[colName] : null)"
+                                                                                    ValueChanged="@((IEnumerable<string> args) => OnComboboxMainColumnSelectedChanged(args, colName))">
+                                                                    </RadzenDropDown>
+                                                                </FilterTemplate>
+                                                                <Template Context="nv">
+                                                                    <RadzenText Visible="@(colName == Common.NV_MaNhanVien)" Text="@($"{nv.GetPropertyValue(colName)}")" Style="font-size: 15px; height: contain; color: darkblue; font-weight: bold"></RadzenText>
+                                                                    <RadzenText Visible="@(colName != Common.NV_MaNhanVien)" Text="@($"{nv.GetPropertyValue(colName)}")" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
+                                                                </Template>
+                                                            </RadzenDataGridColumn>
+                                                        }
+
+                                                        List<LoaiThongTinNhanVien> loaiThongTins = SQLServerServices.GetDanhSachLoaiThongTinNhanVien();
+
+                                                        foreach (var loaitt in loaiThongTins)
+                                                        {
+                                                            _ = int.TryParse(loaitt.IsDisplay.Value?.ToString(), out int isdisplay) ? isdisplay : 0;
+                                                            string tenloaitt = loaitt.TenLoaiThongTin.Value?.ToString() ?? string.Empty;
+
+                                                            if (isdisplay == 1)
                                                             {
-                                                                <RadzenDataGridColumn Width="100px" TItem="NhanVien" Title="@displayName"
-                                                                                      Property="@colName" TextAlign="TextAlign.Center">
+                                                                <RadzenDataGridColumn Width="100px" TItem="NhanVien" Title="@tenloaitt" Filterable="true"
+                                                                                      Property="@tenloaitt" TextAlign="TextAlign.Center">
                                                                     <HeaderTemplate>
-                                                                        <span style="font-weight: 600; font-size: 15px; color: white">@displayName</span>
+                                                                        <span style="font-weight: 600; font-size: 15px; color: white">@tenloaitt</span>
                                                                     </HeaderTemplate>
                                                                     <Template Context="nv">
-                                                                        <RadzenText Text="@($"{nv.GetPropertyValue(colName)}")" Style="font-size: 15px; height: contain; color: darkblue; font-weight: bold"></RadzenText>
+                                                                        <RadzenText Text="@(nv.GetThongTinNhanVienByName(tenloaitt).GiaTri.Value?.ToString())" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
                                                                     </Template>
-                                                                </RadzenDataGridColumn>
-                                                            }
-                                                            else
-                                                            {
-                                                                <RadzenDataGridColumn Width="200px" TItem="NhanVien" Title="@displayName"
-                                                                                      Property="@colName" TextAlign="TextAlign.Center">
-                                                                    <HeaderTemplate>
-                                                                        <span style="font-weight: 600; font-size: 15px; color: white">@displayName</span>
-                                                                    </HeaderTemplate>
-                                                                    <Template Context="nv">
-                                                                        <RadzenText Text="@($"{nv.GetPropertyValue(colName)}")" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
-                                                                    </Template>
+                                                                    <FilterTemplate>
+                                                                        <RadzenDropDown AllowClear="true"
+                                                                                        Style="width: 100%; height: contain; font-size: 14px; font-weight: 600; background-color: white"
+                                                                                        AllowVirtualization="true"
+                                                                                        AllowFiltering="true"
+                                                                                        FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                                                                        FilterOperator="StringFilterOperator.Contains"
+                                                                                        AllowSelectAll="true"
+                                                                                        TValue="IEnumerable<string>"
+                                                                                        Data="@(GetExtraColumnKeysSearch(tenloaitt))"
+                                                                                        Multiple="true"
+                                                                                        SelectedItem="@(keyFilterExtraColumns.ContainsKey(tenloaitt)? keyFilterExtraColumns[tenloaitt] : null)"
+                                                                                        Value="@(keyFilterExtraColumns.ContainsKey(tenloaitt)? keyFilterExtraColumns[tenloaitt] : null)"
+                                                                                        ValueChanged="@((IEnumerable<string> args) => OnComboboxExtraColumnSelectedChanged(args, tenloaitt))">
+                                                                        </RadzenDropDown>
+                                                                    </FilterTemplate>
                                                                 </RadzenDataGridColumn>
                                                             }
                                                         }
 
-                                                        <!--Tên nhân viên-->
-                                                        <RadzenDataGridColumn Width="100px" TItem="NhanVien" Title="Tên"
-                                                                              Property="tennhanvien" TextAlign="TextAlign.Center">
-                                                            <HeaderTemplate>
-                                                                <span style="font-weight: 600; font-size: 15px; color: white">Tên</span>
-                                                            </HeaderTemplate>
-                                                            <Template Context="nv">
-                                                                <RadzenText Text="@(nv.GetThongTinNhanVienByName("Tên nhân viên").GiaTri.Value?.ToString())" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
-                                                            </Template>
-                                                        </RadzenDataGridColumn>
-
-                                                        <!--Chuc vu-->
-                                                        <RadzenDataGridColumn Width="100px" TItem="NhanVien" Title="Chức vụ"
-                                                                              Property="chucvu" TextAlign="TextAlign.Center">
-                                                            <HeaderTemplate>
-                                                                <span style="font-weight: 600; font-size: 15px; color: white">Chức vụ</span>
-                                                            </HeaderTemplate>
-                                                            <Template Context="nv">
-                                                                <RadzenText Text="@(nv.GetThongTinNhanVienByName("Chức vụ").GiaTri.Value?.ToString())" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
-                                                            </Template>
-                                                        </RadzenDataGridColumn>
-
-                                                        <!--Trang thai-->
-                                                        <RadzenDataGridColumn Width="100px" TItem="NhanVien" Title="Trạng thái"
-                                                                              Property="trangthai" TextAlign="TextAlign.Center">
-                                                            <HeaderTemplate>
-                                                                <span style="font-weight: 600; font-size: 15px; color: white">Trạng thái</span>
-                                                            </HeaderTemplate>
-                                                            <Template Context="nv">
-                                                                <RadzenText Text="@(nv.GetThongTinNhanVienByName("Trạng thái").GiaTri.Value?.ToString())" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
-                                                            </Template>
-                                                        </RadzenDataGridColumn>
-
                                                         <!--ID-->
-                                                        <RadzenDataGridColumn Width="60px" TItem="NhanVien" Title="#ID" Frozen="true"
+                                                        <RadzenDataGridColumn Width="30px" TItem="NhanVien" Title="#ID" Frozen="true" Filterable="false"
                                                                               Property="#ID" TextAlign="TextAlign.Center">
                                                             <HeaderTemplate>
                                                                 <span style="font-weight: 600; font-size: 15px; color: white">#ID</span>
@@ -309,7 +331,7 @@
                                                                                     <RadzenNumeric class="custom-placeholder" Placeholder="@($"* nhập {nvdetail.LoaiThongTin.TenLoaiThongTin.Value?.ToString()}")" TValue="int"
                                                                                                    Value="@int.Parse(nvdetail.GiaTri.Value?.ToString()?? "0")" Min="1" Max="999999"
                                                                                                    ValueChanged="@((args) => { nvdetail.GiaTri.Value = args; })"
-                                                                                    Style="font-size: 16px; height: contain; border-width: 1px; width: 100%" />
+                                                                                                   Style="font-size: 16px; height: contain; border-width: 1px; width: 100%" />
                                                                                 }
                                                                                 else if (kieudulieu == 3) // datetime
                                                                                 {
@@ -407,6 +429,10 @@
     private bool isEditNhanVienDetail = false;
     private bool isSavingNVdetails = false;
 
+    private Dictionary<string, List<string>> keyFilterMainColumns = new();
+    private Dictionary<string, List<string>> keyFilterExtraColumns = new();
+    private bool filterActive = false;
+
     protected override async Task OnInitializedAsync()
     {
         // Load ds nhan vien base/ hien thi
@@ -415,8 +441,138 @@
         // Reslect nhan vien
         ReSelectCurrentNhanVien(Common.SelectedNhanVienid); // re-selected
 
+        // Khoi tao bien luu danh sach key search
+        await CreateCurrentSelectedKeyVariable();
+
         await base.OnInitializedAsync();
     }
+
+    #region Main/Extra Column Filtering
+    // Khoi tao bien luu danh sach key search
+    private async Task CreateCurrentSelectedKeyVariable()
+    {
+        await Task.Run(() =>
+        {
+            // Get main key colum
+            List<Propertyy> columns = NhanVien.GetClassProperties() ?? new();
+            foreach (var column in columns)
+            {
+                string key = column.DBName ?? string.Empty;
+                if (key != string.Empty && !keyFilterMainColumns.ContainsKey(key))
+                {
+                    keyFilterMainColumns.Add(key, new());
+                }
+            }
+
+            // Get extra key column
+            List<LoaiThongTinNhanVien> dsloaittnv = SQLServerServices.GetDanhSachLoaiThongTinNhanVien();
+            foreach (var loaittnv in dsloaittnv)
+            {
+                string key = loaittnv.TenLoaiThongTin.Value?.ToString()?.Trim() ?? string.Empty;
+                if (key != string.Empty && !keyFilterExtraColumns.ContainsKey(key))
+                {
+                    keyFilterExtraColumns.Add(key, new());
+                }
+            }
+        });
+    }
+
+    // Lay danh sach key search Main column
+    private List<string> GetMainColumnKeysSearch(string targetColumn)
+    {
+        List<string> keys = DSachNhanViensBase
+            .Select(nv => nv.GetPropertyValue(targetColumn)?.ToString() ?? string.Empty)
+            .Where(result => !string.IsNullOrEmpty(result)).Distinct()
+            .ToList();
+
+        return keys;
+    }
+
+    // Lay danh sach key search Extra column
+    private List<string> GetExtraColumnKeysSearch(string targetColumn)
+    {
+        List<string> keys = DSachNhanViensBase
+                            .Select(nv => nv.GetThongTinNhanVienByName(targetColumn).GiaTri.Value?.ToString() ?? string.Empty)
+                            .Where(result => !string.IsNullOrEmpty(result)).Distinct()
+                            .ToList();
+
+        return keys;
+    }
+
+    // Update selected Main column key
+    private async Task OnComboboxMainColumnSelectedChanged(IEnumerable<string> values, string targetColumn)
+    {
+        if (values != null)
+        {
+            keyFilterMainColumns[targetColumn] = values.ToList();
+        }
+        else
+        {
+            keyFilterMainColumns[targetColumn] = new();
+        }
+
+        await FilterDSachNhanVienProcessing();
+    }
+
+    // Update selected Extra column key
+    private async Task OnComboboxExtraColumnSelectedChanged(IEnumerable<string> values, string targetColumn)
+    {
+        if (values != null)
+        {
+            keyFilterExtraColumns[targetColumn] = values.ToList();
+        }
+        else
+        {
+            keyFilterExtraColumns[targetColumn] = new();
+        }
+
+        await FilterDSachNhanVienProcessing();
+    }
+
+    // Filtering processing
+    private async Task FilterDSachNhanVienProcessing()
+    {
+        await Task.Run(() =>
+        {
+            DSachNhanViens = DSachNhanViensBase.ToList();
+
+            // Main column filtering
+            foreach (var column in keyFilterMainColumns)
+            {
+                List<string> selectedkeys = column.Value;
+
+                if (selectedkeys != null && selectedkeys.Count > 0)
+                {
+                    DSachNhanViens = DSachNhanViens
+                            .Where(nv =>
+                            {
+                                var value = nv.GetPropertyValue(column.Key);
+                                var valueString = value?.ToString();
+                                return valueString != null && selectedkeys.Contains(valueString);
+                            }).ToList();
+                }
+            }
+
+            // Extra column filtering
+            foreach (var column in keyFilterExtraColumns)
+            {
+                List<string> selectedkeys = column.Value;
+
+                if (selectedkeys != null && selectedkeys.Count > 0)
+                {
+                    DSachNhanViens = DSachNhanViens
+                            .Where(nv =>
+                            {
+                                var value = nv.GetThongTinNhanVienByName(column.Key);
+                                var valueString = value.GiaTri.Value?.ToString();
+                                return valueString != null && selectedkeys.Contains(valueString);
+                            }).ToList();
+                }
+            }
+        });
+    }
+    #endregion
+
 
     // Them moi nhan vien
     private async Task OnThemMoiNhanVien()
@@ -506,14 +662,14 @@
                 }
                 else
                 {
-                    List<NhanVien>? dsmaymocFilterResult = DSachNhanViensBase?.FindAll(mm => mm.MaNhanVien.Value?.ToString()?.IndexOf(keysearch, StringComparison.OrdinalIgnoreCase) >= 0);
+                    List<NhanVien>? dsnhanvienFilterResult = DSachNhanViensBase?.FindAll(nv => nv.MaNhanVien.Value?.ToString()?.IndexOf(keysearch, StringComparison.OrdinalIgnoreCase) >= 0);
 
-                    if (dsmaymocFilterResult?.Count == 0)
+                    if (dsnhanvienFilterResult?.Count == 0)
                     {
 
                     }
 
-                    DSachNhanViens = dsmaymocFilterResult ?? new();
+                    DSachNhanViens = dsnhanvienFilterResult ?? new();
                 }
 
                 isSearching = false;
@@ -571,7 +727,7 @@
                             LoaiTTNVID = { Value = loaiThongTinNV.LoaiTTNVID.Value },
                             NVID = { Value = SelectedNhanVien.NVID.Value },
                             LoaiThongTin = loaiThongTinNV,
-                            GiaTri = { Value = loaiThongTinNV.GiaTriMacDinh.Value?? string.Empty }
+                            GiaTri = { Value = loaiThongTinNV.GiaTriMacDinh.Value ?? string.Empty }
                         };
 
                     (ttnvid, err) = SQLServerServices.InsertThongTinNhanVien(thongTin);

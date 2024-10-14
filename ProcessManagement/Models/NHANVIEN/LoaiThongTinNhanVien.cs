@@ -12,6 +12,7 @@ namespace ProcessManagement.Models.NHANVIEN
         public Propertyy IsDefault { get; set; } = new() { DBName = Common.NV_IsDefault, DisplayName = "IsDefault", Type = typeof(bool), AlowDatabase = true };
         public Propertyy TenTruyXuat { get; set; } = new() { DBName = Common.NV_TenTruyXuat, DisplayName = "Tên truy xuất", Type = typeof(string), AlowDatabase = true };
         public Propertyy IndexDisplay { get; set; } = new() { DBName = Common.NV_IndexDisplay, DisplayName = "IndexDisplay", Type = typeof(int), AlowDatabase = true };
+        public Propertyy IsDisplay { get; set; } = new() { DBName = Common.NV_IsDisplay, DisplayName = "IsDisplay", Type = typeof(bool), AlowDatabase = true };
 
         public List<Propertyy> GetPropertiesValues()
         {

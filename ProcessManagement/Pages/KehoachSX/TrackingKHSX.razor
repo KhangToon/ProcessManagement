@@ -1,0 +1,260 @@
+﻿@page "/trackingkhsx"
+@attribute [Authorize(Roles = "Admin, User")]
+@* this limited access into page *@
+
+@using ParamountBed_Warehouse.Services.SocketService
+@using ProcessManagement.Commons
+@using ProcessManagement.Models
+@using ProcessManagement.Models.KHO_NVL.XuatKho
+@using ProcessManagement.Models.KHSXs
+@using ProcessManagement.Pages.KehoachSX.Dialogs
+@using ProcessManagement.Services.SQLServer
+@using Radzen.Blazor
+@using Radzen
+@using Microsoft.AspNetCore.Components
+
+@inject NotificationService NotificationService
+@inject DialogService DialogService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject SQLServerServices SQLServerServices
+@inject ServerSocketAsync ServerSocketAsync
+@inject NavigationManager NavigationManager
+
+
+
+
+<RadzenDataGrid @ref="ketquagcsGrid" AllowAlternatingRows="false" AllowFiltering="true" AllowPaging="true" PageSize="5" AllowSorting="true" EditMode="@editMode"
+                Data="@ketquagcs" TItem="KetquaGC" RowUpdate="@OnUpdateRow" RowCreate="@OnCreateRow" Sort="@Reset" Page="@Reset" Filter="@Reset" ColumnWidth="150px">
+
+    <HeaderTemplate>
+        <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle" Text="Add New" Click="@ButtonInsertRow" Disabled="@(editMode == DataGridEditMode.Single && ketquagcsToInsert.Count() > 0)" />
+    </HeaderTemplate>
+    <Columns>
+        <RadzenDataGridColumn TItem="KetquaGC" Property="@nameof(KetquaGC.KQGCID)" Title="ID" Width="70px" />
+
+        <RadzenDataGridColumn TItem="KetquaGC" Property="@nameof(KetquaGC.SubMitDay)" Title="Ngày/Tháng/Năm" Width="150px">
+            <Template Context="ketquaGC">
+                @String.Format("{0:d}", ketquaGC.SubMitDay)
+            </Template>
+            <EditTemplate Context="ketquaGC">
+                <RadzenDatePicker @bind-Value="ketquaGC.SubMitDay" Style="width:100%" InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Select submit date" }})" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="KetquaGC" Property="@nameof(KetquaGC.TenSanPham)" Title="Tên sản phẩm" Width="150px">
+            <EditTemplate Context="ketquaGC">
+                <RadzenTextBox @bind-Value="ketquaGC.TenSanPham" Style="width:100%" Name="TenSanPham" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="KetquaGC" Property="@nameof(KetquaGC.TenNguyenCong)" Title="Công đoạn" Width="150px">
+            <EditTemplate Context="ketquaGC">
+                <RadzenTextBox @bind-Value="ketquaGC.TenNguyenCong" Style="width:100%" Name="TenNguyenCong" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="KetquaGC" Property="@nameof(KetquaGC.MaMay)" Title="Mã máy/Vị trí" Width="150px">
+            <EditTemplate Context="ketquaGC">
+                <RadzenTextBox @bind-Value="ketquaGC.MaMay" Style="width:100%" Name="MaMay" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="KetquaGC" Property="@nameof(KetquaGC.ThoiGianGC)" Title="Thời gian GC" Width="50px">
+            <EditTemplate Context="ketquaGC">
+                <RadzenNumeric @bind-Value="ketquaGC.ThoiGianGC" Style="width:100%" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="KetquaGC" Property="@nameof(KetquaGC.MaQuanLyLOT)" Title="LOT NVL" Width="150px">
+            <EditTemplate Context="ketquaGC">
+                <RadzenTextBox @bind-Value="ketquaGC.MaQuanLyLOT" Style="width:100%" Name="MaQuanLyLOT" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="KetquaGC" Property="@nameof(KetquaGC.SLOK)" Title="Số lượng OK" Width="50px">
+            <EditTemplate Context="ketquaGC">
+                <RadzenNumeric @bind-Value="ketquaGC.SLOK" Style="width:100%" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="KetquaGC" Property="@nameof(KetquaGC.SLNG)" Title="Số lượng NG" Width="50px">
+            <EditTemplate Context="ketquaGC">
+                <RadzenNumeric @bind-Value="ketquaGC.SLNG" Style="width:100%" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="KetquaGC" Property="@nameof(KetquaGC.SLperLOT)" Title="Tổng" Width="50px">
+            <EditTemplate Context="ketquaGC">
+                <RadzenNumeric @bind-Value="ketquaGC.SLperLOT" Style="width:100%" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="KetquaGC" Property="@nameof(KetquaGC.LoaiNG)" Title="Nội dung NG" Width="150px">
+            <EditTemplate Context="ketquaGC">
+                <RadzenTextBox @bind-Value="ketquaGC.LoaiNG" Style="width:100%" Name="LoaiNG" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="KetquaGC" Property="@nameof(KetquaGC.ThoiGianLamViec)" Title="Thời gian làm việc" Width="50px">
+            <EditTemplate Context="ketquaGC">
+                <RadzenNumeric @bind-Value="ketquaGC.ThoiGianLamViec" Style="width:100%" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="KetquaGC" Property="@nameof(KetquaGC.TenNhanVien)" Title="Nhân viên" Width="150px">
+            <EditTemplate Context="ketquaGC">
+                <RadzenTextBox @bind-Value="ketquaGC.TenNhanVien" Style="width:100%" Name="TenNhanVien" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="KetquaGC" Property="@nameof(KetquaGC.GhiChu)" Title="Ghi chú" Width="150px">
+            <EditTemplate Context="ketquaGC">
+                <RadzenTextArea @bind-Value="ketquaGC.GhiChu" Style="width:100%" Rows="4" Name="GhiChu" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+
+        <RadzenDataGridColumn Context="KetquaGC" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Frozen="true" FrozenPosition="FrozenColumnPosition.Right">
+            <Template Context="ketquaGC">
+                <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => EditRow(ketquaGC))" @onclick:stopPropagation="true">
+                </RadzenButton>
+                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="rz-my-1 rz-ms-1" Click="@(args => DeleteRow(ketquaGC))" @onclick:stopPropagation="true">
+                </RadzenButton>
+            </Template>
+            <EditTemplate Context="ketquaGC">
+                <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@((args) => SaveRow(ketquaGC))" aria-label="Save">
+                </RadzenButton>
+                <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" class="rz-my-1 rz-ms-1" Click="@((args) => CancelEdit(ketquaGC))" aria-label="Cancel">
+                </RadzenButton>
+                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="rz-my-1 rz-ms-1" Click="@(args => DeleteRow(ketquaGC))" aria-label="Delete">
+                </RadzenButton>
+            </EditTemplate>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+
+
+
+
+
+
+
+@code {
+    RadzenDataGrid<KetquaGC> ketquagcsGrid = new();
+    private List<KetquaGC> ketquagcs = new List<KetquaGC>();
+    private IList<KetquaGC> DatagridSeletedKetquaGC = new List<KetquaGC>();
+    private string pagingSummaryFormat = "Displaying page {0} of {1} <b>(total {2} records)</b>";
+    DataGridEditMode editMode = DataGridEditMode.Single;
+
+    List<KetquaGC> ketquagcsToInsert = new List<KetquaGC>();
+    List<KetquaGC> ketquagcsToUpdate = new List<KetquaGC>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        // lay danh sach ketquagiacong from DB
+        ketquagcs = SQLServerServices.GetListKetquaGC();
+    }
+
+    #region Datagrid Handle
+    void Reset()
+    {
+        ketquagcsToInsert.Clear();
+        ketquagcsToUpdate.Clear();
+    }
+
+    void Reset(KetquaGC ketquagc)
+    {
+        ketquagcsToInsert.Remove(ketquagc);
+        ketquagcsToUpdate.Remove(ketquagc);
+    }
+
+    // Insert Button
+    private async Task ButtonInsertRow()
+    {
+        if (editMode == DataGridEditMode.Single)
+        {
+            Reset();
+        }
+
+        var ketquagc = new KetquaGC();
+
+        ketquagcsToInsert.Add(ketquagc);
+
+        await ketquagcsGrid.InsertRow(ketquagc);
+    }
+
+    async Task SaveRow(KetquaGC ketquagc)
+    {
+        await ketquagcsGrid.UpdateRow(ketquagc);
+    }
+
+    async Task EditRow(KetquaGC ketquagc)
+    {
+        if (editMode == DataGridEditMode.Single && ketquagcsToInsert.Count() > 0)
+        {
+            Reset();
+        }
+
+        ketquagcsToUpdate.Add(ketquagc);
+
+        await ketquagcsGrid.EditRow(ketquagc);
+    }
+
+    void CancelEdit(KetquaGC ketquagc)
+    {
+        Reset(ketquagc);
+
+        ketquagcsGrid.CancelEditRow(ketquagc);
+
+        // var ketquagcEntry = dbContext.Entry(ketquagc);
+
+        // if (ketquagcEntry.State == EntityState.Modified)
+        // {
+        //     ketquagcEntry.CurrentValues.SetValues(ketquagcEntry.OriginalValues);
+        //     ketquagcEntry.State = EntityState.Unchanged;
+        // }
+    }
+    #endregion
+
+    #region Database Handle
+    // Update row (do when press comfirm button)
+    void OnUpdateRow(KetquaGC ketquagc)
+    {
+        Reset(ketquagc);
+
+        //dbContext.Update(ketquagc);
+
+        //dbContext.SaveChanges();
+    }
+
+    // Delete row
+    async Task DeleteRow(KetquaGC ketquagc)
+    {
+        Reset(ketquagc);
+
+        if (ketquagcs.Contains(ketquagc))
+        {
+            // dbContext.Remove<KetquaGC>(ketquagc);
+
+            // dbContext.SaveChanges();
+
+            await ketquagcsGrid.Reload();
+        }
+        else
+        {
+            ketquagcsGrid.CancelEditRow(ketquagc);
+            await ketquagcsGrid.Reload();
+        }
+    }
+
+    // Create new (do when press comfirm button in Insert Mode)
+    void OnCreateRow(KetquaGC ketquagc)
+    {
+        int newKetquagcID = SQLServerServices.InsertKetquaGC(ketquagc);
+
+        ketquagcsToInsert.Remove(ketquagc);
+    }
+    #endregion
+}

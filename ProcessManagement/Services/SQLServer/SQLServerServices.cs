@@ -5,10 +5,12 @@ using ProcessManagement.Models.KHO_NVL;
 using ProcessManagement.Models.KHO_NVL.NhapKho;
 using ProcessManagement.Models.KHO_NVL.Tracking;
 using ProcessManagement.Models.KHO_NVL.XuatKho;
+using ProcessManagement.Models.KHSXs;
 using ProcessManagement.Models.MAYMOC;
 using ProcessManagement.Models.NHANVIEN;
 using ProcessManagement.Models.SANPHAM;
 using System.Data;
+using System.Reflection;
 using System.Text.RegularExpressions;
 
 namespace ProcessManagement.Services.SQLServer
@@ -7431,6 +7433,192 @@ namespace ProcessManagement.Services.SQLServer
                 return (-1, errorMess);
             }
             return (result, errorMess);
+        }
+        #endregion
+
+        // ------------------------------------------------------------------------------------- //
+        #region Table_KetquaGC
+        // Insert new KetquaGC
+        public int InsertKetquaGC(KetquaGC ketquaGC)
+        {
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var properties = typeof(KetquaGC).GetProperties()
+                    .Where(p => p.GetCustomAttribute<KetquaGC.IsAllowDatabaseAttribute>()?.Value == true)
+                    .ToList();
+
+                string columns = string.Join(", ", properties.Select(p => p.Name));
+                string parameters = string.Join(", ", properties.Select(p => "@" + p.Name));
+
+                string query = $@"
+                INSERT INTO {KetquaGC.TableKetquaGC} ({columns})
+                OUTPUT INSERTED.{KetquaGC.DBKQID}
+                VALUES ({parameters})";
+
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    foreach (var prop in properties)
+                    {
+                        var value = prop.GetValue(ketquaGC) ?? DBNull.Value;
+                        command.Parameters.AddWithValue("@" + prop.Name, value);
+                    }
+
+                    int newId = (int)command.ExecuteScalar();
+
+                    // Insert DongThung
+                    if (ketquaGC.DongThung != null)
+                    {
+                        //InsertDongThung(connection, newId, ketquaGC.DongThung);
+                    }
+
+                    return newId;
+                }
+            }
+        }
+
+        // Delete KetquaGC
+        public bool DeleteKetquaGC(int kqgcId)
+        {
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                string query = $"DELETE FROM {KetquaGC.TableKetquaGC} WHERE {KetquaGC.DBKQID} = @KQGCID";
+
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@KQGCID", kqgcId);
+
+                    int rowsAffected = command.ExecuteNonQuery();
+
+                    return rowsAffected > 0;
+                }
+            }
+        }
+        // Update KetquaGC
+        public bool UpdateKetquaGC(KetquaGC ketquaGC)
+        {
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var properties = typeof(KetquaGC).GetProperties()
+                    .Where(p => p.GetCustomAttribute<KetquaGC.IsAllowDatabaseAttribute>()?.Value == true)
+                    .ToList();
+
+                var updateClauses = properties.Select(p => $"{p.Name} = @{p.Name}");
+                string setClause = string.Join(", ", updateClauses);
+
+                string query = $@"
+                UPDATE {KetquaGC.TableKetquaGC}
+                SET {setClause}
+                WHERE {KetquaGC.DBKQID} = @KQGCID";
+
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    foreach (var prop in properties)
+                    {
+                        var value = prop.GetValue(ketquaGC) ?? DBNull.Value;
+                        command.Parameters.AddWithValue("@" + prop.Name, value);
+                    }
+
+                    command.Parameters.AddWithValue("@KQGCID", ketquaGC.KQGCID);
+
+                    int rowsAffected = command.ExecuteNonQuery();
+
+                    // Update DongThung if it exists
+                    if (ketquaGC.DongThung != null)
+                    {
+                        //UpdateDongThung(connection, ketquaGC.KQGCID, ketquaGC.DongThung);
+                    }
+
+                    return rowsAffected > 0;
+                }
+            }
+        }
+        // Get KetquaGC by propertyName and propertyValue
+        public List<KetquaGC> GetListKetquaGCByProperty(string propertyName, object propertyValue)
+        {
+            var property = typeof(KetquaGC).GetProperty(propertyName);
+            if (property == null || property.GetCustomAttribute<KetquaGC.IsAllowDatabaseAttribute>()?.Value != true)
+            {
+                throw new ArgumentException($"Property {propertyName} does not exist or is not allowed for database operations.");
+            }
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                string query = $"SELECT * FROM [{KetquaGC.TableKetquaGC}] WHERE [{propertyName}] = @PropertyValue";
+
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@PropertyValue", propertyValue ?? DBNull.Value);
+
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        var results = new List<KetquaGC>();
+                        while (reader.Read())
+                        {
+                            var ketquaGC = new KetquaGC();
+                            foreach (var prop in typeof(KetquaGC).GetProperties())
+                            {
+                                if (prop.GetCustomAttribute<KetquaGC.IsAllowDatabaseAttribute>()?.Value == true)
+                                {
+                                    var value = reader[prop.Name];
+                                    if (value != DBNull.Value)
+                                    {
+                                        prop.SetValue(ketquaGC, Convert.ChangeType(value, prop.PropertyType));
+                                    }
+                                }
+                            }
+
+                            results.Add(ketquaGC);
+                        }
+                        return results;
+                    }
+                }
+            }
+        }
+
+        // Get list all KetquaGC
+        public List<KetquaGC> GetListKetquaGC()
+        {
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                string query = $"SELECT * FROM [{KetquaGC.TableKetquaGC}]";
+
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        var results = new List<KetquaGC>();
+                        while (reader.Read())
+                        {
+                            var ketquaGC = new KetquaGC();
+                            foreach (var prop in typeof(KetquaGC).GetProperties())
+                            {
+                                if (prop.GetCustomAttribute<KetquaGC.IsAllowDatabaseAttribute>()?.Value == true)
+                                {
+                                    var value = reader[prop.Name];
+                                    if (value != DBNull.Value)
+                                    {
+                                        prop.SetValue(ketquaGC, Convert.ChangeType(value, prop.PropertyType));
+                                    }
+                                }
+                            }
+
+                            results.Add(ketquaGC);
+                        }
+                        return results;
+                    }
+                }
+            }
         }
         #endregion
     }
