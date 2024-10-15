@@ -1,87 +1,143 @@
-﻿using System.Reflection;
+﻿using ProcessManagement.Commons;
+using System.Reflection;
 
 namespace ProcessManagement.Models.KHSXs
 {
-    public class KetquaGC
+    public class KetQuaGC
     {
-        public const string TableKetquaGC = "KHSX_KetquaGC";
+        public Propertyy KQGCID { get; set; } = new() { DBName = KQGCDBName.KQGCID, DisplayName = KQGCDisplayName.KQGCID, Type = typeof(int), AlowDatabase = false, AlowDisplay = false, DispDatagrid = false }; // Identity ID
+        public Propertyy KHSXID { get; set; } = new() { DBName = KQGCDBName.KHSXID, DisplayName = KQGCDisplayName.KHSXID, Type = typeof(int), AlowDatabase = true, AlowDisplay = false, DispDatagrid = false };
+        public Propertyy SubMitDay { get; set; } = new() { DBName = KQGCDBName.SubMitDay, DisplayName = KQGCDisplayName.SubMitDay, Type = typeof(DateTime), AlowDatabase = true, CheckErrors = new() { Propertyy.ErrType.NotEmptyValue } };
+        public Propertyy TenSanPham { get; set; } = new() { DBName = KQGCDBName.TenSanPham, DisplayName = KQGCDisplayName.TenSanPham, Type = typeof(string), AlowDatabase = true, CheckErrors = new() { Propertyy.ErrType.NotEmptyValue } };
+        public Propertyy TenNguyenCong { get; set; } = new() { DBName = KQGCDBName.TenNguyenCong, DisplayName = KQGCDisplayName.TenNguyenCong, Type = typeof(string), AlowDatabase = true, CheckErrors = new() { Propertyy.ErrType.NotEmptyValue } };
+        public Propertyy MaMay { get; set; } = new() { DBName = KQGCDBName.MaMay, DisplayName = KQGCDisplayName.MaMay, Type = typeof(string), AlowDatabase = true, CheckErrors = new() { Propertyy.ErrType.NotEmptyValue } };
+        public Propertyy CaLamViec { get; set; } = new() { DBName = KQGCDBName.CaLamViec, DisplayName = KQGCDisplayName.CaLamViec, Type = typeof(int), AlowDatabase = true, CheckErrors = new() { Propertyy.ErrType.NotEmptyValue } };
+        public Propertyy ThoiGianGC { get; set; } = new() { DBName = KQGCDBName.ThoiGianGC, DisplayName = KQGCDisplayName.ThoiGianGC, Type = typeof(int), AlowDatabase = true, CheckErrors = new() { Propertyy.ErrType.NotEmptyValue, Propertyy.ErrType.NotAllowEqualsZero } };
+        public Propertyy MaQuanLyLOT { get; set; } = new() { DBName = KQGCDBName.MaQuanLyLOT, DisplayName = KQGCDisplayName.MaQuanLyLOT, Type = typeof(string), AlowDatabase = true, CheckErrors = new() { Propertyy.ErrType.NotEmptyValue } };
+        public Propertyy SLOK { get; set; } = new() { DBName = KQGCDBName.SLOK, DisplayName = KQGCDisplayName.SLOK, Type = typeof(int), AlowDatabase = true, CheckErrors = new() { Propertyy.ErrType.NotEmptyValue, Propertyy.ErrType.NotAllowEqualsZero } };
+        public Propertyy SLNG { get; set; } = new() { DBName = KQGCDBName.SLNG, DisplayName = KQGCDisplayName.SLNG, Type = typeof(int), AlowDatabase = true, CheckErrors = new() { Propertyy.ErrType.NotEmptyValue } };
+        public Propertyy SLperLOT { get; set; } = new() { DBName = KQGCDBName.SLperLOT, DisplayName = KQGCDisplayName.SLperLOT, Type = typeof(int), AlowDatabase = true, CheckErrors = new() { Propertyy.ErrType.NotEmptyValue, Propertyy.ErrType.NotAllowEqualsZero } };
+        public Propertyy LoaiNG { get; set; } = new() { DBName = KQGCDBName.LoaiNG, DisplayName = KQGCDisplayName.LoaiNG, Type = typeof(string), AlowDatabase = true, CheckErrors = new() { Propertyy.ErrType.NotEmptyValue } };
+        public Propertyy ThoiGianLamViec { get; set; } = new() { DBName = KQGCDBName.ThoiGianLamViec, DisplayName = KQGCDisplayName.ThoiGianLamViec, Type = typeof(int), AlowDatabase = true, CheckErrors = new() { Propertyy.ErrType.NotEmptyValue, Propertyy.ErrType.NotAllowEqualsZero } };
+        public Propertyy TenNhanVien { get; set; } = new() { DBName = KQGCDBName.TenNhanVien, DisplayName = KQGCDisplayName.TenNhanVien, Type = typeof(string), AlowDatabase = true, CheckErrors = new() { Propertyy.ErrType.NotEmptyValue } };
+        public Propertyy GhiChu { get; set; } = new() { DBName = KQGCDBName.GhiChu, DisplayName = KQGCDisplayName.GhiChu, Type = typeof(string), AlowDatabase = true, CheckErrors = new() { Propertyy.ErrType.NotEmptyValue } };
 
-        [IsAllowDatabase(false)]
-        public int KQGCID { get; set; }
-        public const string DBKQID = "KQGCID";
+        public List<DongThung> DSDongThung { get; set; } = new();
 
-        [IsAllowDatabase(true)]
-        public DateTime SubMitDay { get; set; }
-        public const string DBSubMitDay = "SubMitDay";
-
-        [IsAllowDatabase(true)]
-        public string TenSanPham { get; set; } = string.Empty; public const string DBTenSanPham = "TenSanPham";
-
-        [IsAllowDatabase(true)]
-        public string TenNguyenCong { get; set; } = string.Empty; public const string DBTenNguyenCong = "TenNguyenCong";
-
-        [IsAllowDatabase(true)]
-        public string MaMay { get; set; } = string.Empty; public const string DBMaMay = "MaMay";
-
-        [IsAllowDatabase(false)]
-        public Calamviec CaLamViec { get; set; }
-        public const string DBCaLamViec = "MaMay";
-
-        [IsAllowDatabase(true)]
-        public int ThoiGianGC { get; set; }
-        public const string DBThoiGianGC = "ThoiGianGC";
-
-        [IsAllowDatabase(true)]
-        public string MaQuanLyLOT { get; set; } = string.Empty; public const string DBMaQuanLyLOT = "MaQuanLyLOT";
-
-        [IsAllowDatabase(true)]
-        public int SLOK { get; set; } = 0; public const string DBSLOK = "SLOK";
-
-        [IsAllowDatabase(true)]
-        public int SLNG { get; set; } = 0; public const string DBSLNG = "SLNG";
-
-        [IsAllowDatabase(true)]
-        public int SLperLOT { get; set; }
-        public const string DBSLperLOT = "SLperLOT";
-
-        [IsAllowDatabase(true)]
-        public string LoaiNG { get; set; } = string.Empty; public const string DBLoaiNG = "LoaiNG";
-
-        [IsAllowDatabase(true)]
-        public int ThoiGianLamViec { get; set; }
-        public const string DBThoiGianLamViec = "ThoiGianLamViec";
-        [IsAllowDatabase(true)]
-        public string TenNhanVien { get; set; } = string.Empty; public const string DBTenNhanVien = "TenNhanVien";
-
-        [IsAllowDatabase(true)]
-        public string GhiChu { get; set; } = string.Empty; public const string DBGhiChu = "GhiChu";
-
-        [IsAllowDatabase(false)]
-        public DongThung DongThung { get; set; } = new();
-
-        public class IsAllowDatabaseAttribute : Attribute
+        public static class KQGCDBName
         {
-            public bool Value { get; set; }
+            public const string Table_KetQuaGC = "KHSX_KetQuaGC";
+            public const string KQGCID = "KQGCID";
+            public const string KHSXID = "KHSXID";
+            public const string SubMitDay = "SubMitDay";
+            public const string TenSanPham = "TenSanPham";
+            public const string TenNguyenCong = "TenNguyenCong";
+            public const string MaMay = "MaMay";
+            public const string CaLamViec = "CaLamViec";
+            public const string ThoiGianGC = "ThoiGianGC";
+            public const string MaQuanLyLOT = "MaQuanLyLOT";
+            public const string SLOK = "SLOK";
+            public const string SLNG = "SLNG";
+            public const string SLperLOT = "SLperLOT";
+            public const string LoaiNG = "LoaiNG";
+            public const string ThoiGianLamViec = "ThoiGianLamViec";
+            public const string TenNhanVien = "TenNhanVien";
+            public const string GhiChu = "GhiChu";
+        }
 
-            public IsAllowDatabaseAttribute(bool value)
+        private class KQGCDisplayName
+        {
+            public const string KQGCID = "KQGCID";
+            public const string KHSXID = "KHSXID";
+            public const string SubMitDay = "Ngày GC";
+            public const string TenSanPham = "Sản phẩm";
+            public const string TenNguyenCong = "Nguyên công";
+            public const string MaMay = "Mã máy";
+            public const string CaLamViec = "Ca";
+            public const string ThoiGianGC = "Thời gian GC";
+            public const string MaQuanLyLOT = "Mã LOT";
+            public const string SLOK = "SLOK";
+            public const string SLNG = "SLNG";
+            public const string SLperLOT = "Tổng";
+            public const string LoaiNG = "Nội dung NG";
+            public const string ThoiGianLamViec = "Thời gian làm việc";
+            public const string TenNhanVien = "Nhân viên";
+            public const string GhiChu = "GhiChu";
+        }
+
+        // Get all property of this class
+        public static List<Propertyy> GetClassProperties()
+        {
+            Type propertyType = typeof(KetQuaGC);
+
+            KetQuaGC instance = new();
+
+            FieldInfo[] fields = propertyType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
+            List<Propertyy> propertiesValue = new();
+
+            foreach (FieldInfo field in fields)
             {
-                Value = value;
+                Type ob = field.FieldType;
+
+                if (ob == typeof(Propertyy))
+                {
+                    Propertyy? fieldValue = (Propertyy?)field.GetValue(instance);
+
+                    if (fieldValue != null)
+                    {
+                        propertiesValue.Add(fieldValue);
+                    }
+                }
             }
+
+            return propertiesValue;
+        }
+
+        public List<Propertyy> GetPropertiesValues()
+        {
+            Type propertyType = typeof(KetQuaGC);
+
+            FieldInfo[] fields = propertyType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
+            List<Propertyy> propertiesValue = new();
+
+            foreach (FieldInfo field in fields)
+            {
+                Type ob = field.FieldType;
+
+                if (ob == typeof(Propertyy))
+                {
+                    Propertyy? fieldValue = (Propertyy?)field.GetValue(this);
+
+                    if (fieldValue != null) { propertiesValue.Add(fieldValue); }
+                }
+            }
+
+            return propertiesValue;
+        }
+
+        public void SetPropertyValue(string propertyName, object newValue)
+        {
+            List<Propertyy> propertiesValue = GetPropertiesValues();
+
+            Propertyy? tagetProperty = propertiesValue.FirstOrDefault(f => f.DBName == propertyName);
+
+            if (tagetProperty != null)
+            {
+                tagetProperty.Value = newValue;
+            }
+        }
+
+        public object? GetPropertyValue(string propertyName)
+        {
+            List<Propertyy> propertiesValue = GetPropertiesValues();
+
+            Propertyy? tagetProperty = propertiesValue.FirstOrDefault(f => f.DBName == propertyName);
+
+            return tagetProperty?.Value;
         }
     }
 
-    public enum Calamviec
-    {
-        Ngay = 0,
-        Dem = 1,
-    }
 
-    public class DongThung
-    {
-        //public int DTID { get; set; }
-        public int KQGCID { get; set; }
-        public string SoIDThung { get; set; } = string.Empty;
-        public int SoLuong { get; set; }
-        public DateTime NgayDongThung { get; set; }
-    }
 }

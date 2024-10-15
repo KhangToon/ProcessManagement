@@ -378,6 +378,9 @@ namespace ProcessManagement.Commons
         public static object? SelectedPXKID;
         public static object? SelectedPNKID;
 
+        // KQGC management static variable
+        public static object? SelectedKQGCid;
+
         public static class Tentruyxuat
         {
             public const string VitriKe = "vitrike";

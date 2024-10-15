@@ -17,5 +17,13 @@
 
         public bool IsValueOK { get; set; } = false; // Dung khi check value ok 
         public string NotifyMess { get; set; } = string.Empty; // Dung khi check value ok 
+
+        public List<ErrType> CheckErrors { get; set; } = new() { ErrType.NotEmptyValue };
+
+        public enum ErrType
+        {
+            NotEmptyValue,
+            NotAllowEqualsZero
+        }
     }
 }

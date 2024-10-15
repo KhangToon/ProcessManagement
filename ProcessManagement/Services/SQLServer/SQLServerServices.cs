@@ -12,6 +12,8 @@ using ProcessManagement.Models.SANPHAM;
 using System.Data;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using static ProcessManagement.Models.KHSXs.DongThung;
+using static ProcessManagement.Models.KHSXs.KetQuaGC;
 
 namespace ProcessManagement.Services.SQLServer
 {
@@ -7437,188 +7439,519 @@ namespace ProcessManagement.Services.SQLServer
         #endregion
 
         // ------------------------------------------------------------------------------------- //
-        #region Table_KetquaGC
-        // Insert new KetquaGC
-        public int InsertKetquaGC(KetquaGC ketquaGC)
+        #region Table_KetQuaGC
+        // Insert new KetQuaGC
+        public (int, string) InsertKetQuaGC(KetQuaGC ketquaGC)
         {
-            using (SqlConnection connection = new SqlConnection(connectionString))
+            int result = -1;
+            string errorMess = string.Empty;
+
+            // Check for null input
+            if (ketquaGC == null) return (result, "Error: KetQuaGC is null");
+
+            List<Propertyy> properties = ketquaGC.GetPropertiesValues()
+                .Where(po => po.AlowDatabase == true && po.Value != null)
+                .ToList();
+
+            // Validate properties before proceeding
+            if (properties.Count == 0)
             {
-                connection.Open();
+                return (result, "Error: No valid properties to insert.");
+            }
 
-                var properties = typeof(KetquaGC).GetProperties()
-                    .Where(p => p.GetCustomAttribute<KetquaGC.IsAllowDatabaseAttribute>()?.Value == true)
-                    .ToList();
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
 
-                string columns = string.Join(", ", properties.Select(p => p.Name));
-                string parameters = string.Join(", ", properties.Select(p => "@" + p.Name));
+            using var transaction = connection.BeginTransaction(); // Start transaction
 
-                string query = $@"
-                INSERT INTO {KetquaGC.TableKetquaGC} ({columns})
-                OUTPUT INSERTED.{KetquaGC.DBKQID}
-                VALUES ({parameters})";
+            try
+            {
+                var command = connection.CreateCommand();
+                command.Transaction = transaction; // Associate command with the transaction
 
-                using (SqlCommand command = new SqlCommand(query, connection))
+                string columns = string.Join(", ", properties.Select(p => $"[{p.DBName}]"));
+                string parameters = string.Join(", ", properties.Select(p => $"@{Regex.Replace(p.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $@"INSERT INTO [{KQGCDBName.Table_KetQuaGC}] ({columns}) OUTPUT INSERTED.{KQGCDBName.KQGCID} VALUES ({parameters})";
+
+                foreach (var prop in properties)
                 {
-                    foreach (var prop in properties)
-                    {
-                        var value = prop.GetValue(ketquaGC) ?? DBNull.Value;
-                        command.Parameters.AddWithValue("@" + prop.Name, value);
-                    }
+                    string parameterName = $"@{Regex.Replace(prop.DBName ?? string.Empty, @"[^\w]+", "")}";
+                    object? parameterValue = prop.Value ?? DBNull.Value;
 
-                    int newId = (int)command.ExecuteScalar();
-
-                    // Insert DongThung
-                    if (ketquaGC.DongThung != null)
-                    {
-                        //InsertDongThung(connection, newId, ketquaGC.DongThung);
-                    }
-
-                    return newId;
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
                 }
-            }
-        }
 
-        // Delete KetquaGC
-        public bool DeleteKetquaGC(int kqgcId)
-        {
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-
-                string query = $"DELETE FROM {KetquaGC.TableKetquaGC} WHERE {KetquaGC.DBKQID} = @KQGCID";
-
-                using (SqlCommand command = new SqlCommand(query, connection))
+                // Execute and handle potential null result
+                object? rs = command.ExecuteScalar();
+                if (rs != null && int.TryParse(rs.ToString(), out result) && result > 0)
                 {
-                    command.Parameters.AddWithValue("@KQGCID", kqgcId);
-
-                    int rowsAffected = command.ExecuteNonQuery();
-
-                    return rowsAffected > 0;
-                }
-            }
-        }
-        // Update KetquaGC
-        public bool UpdateKetquaGC(KetquaGC ketquaGC)
-        {
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-
-                var properties = typeof(KetquaGC).GetProperties()
-                    .Where(p => p.GetCustomAttribute<KetquaGC.IsAllowDatabaseAttribute>()?.Value == true)
-                    .ToList();
-
-                var updateClauses = properties.Select(p => $"{p.Name} = @{p.Name}");
-                string setClause = string.Join(", ", updateClauses);
-
-                string query = $@"
-                UPDATE {KetquaGC.TableKetquaGC}
-                SET {setClause}
-                WHERE {KetquaGC.DBKQID} = @KQGCID";
-
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    foreach (var prop in properties)
+                    // Successfully inserted; proceed with DongThung insertion if necessary
+                    if (ketquaGC.DSDongThung != null && ketquaGC.DSDongThung.Any())
                     {
-                        var value = prop.GetValue(ketquaGC) ?? DBNull.Value;
-                        command.Parameters.AddWithValue("@" + prop.Name, value);
-                    }
-
-                    command.Parameters.AddWithValue("@KQGCID", ketquaGC.KQGCID);
-
-                    int rowsAffected = command.ExecuteNonQuery();
-
-                    // Update DongThung if it exists
-                    if (ketquaGC.DongThung != null)
-                    {
-                        //UpdateDongThung(connection, ketquaGC.KQGCID, ketquaGC.DongThung);
-                    }
-
-                    return rowsAffected > 0;
-                }
-            }
-        }
-        // Get KetquaGC by propertyName and propertyValue
-        public List<KetquaGC> GetListKetquaGCByProperty(string propertyName, object propertyValue)
-        {
-            var property = typeof(KetquaGC).GetProperty(propertyName);
-            if (property == null || property.GetCustomAttribute<KetquaGC.IsAllowDatabaseAttribute>()?.Value != true)
-            {
-                throw new ArgumentException($"Property {propertyName} does not exist or is not allowed for database operations.");
-            }
-
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-
-                string query = $"SELECT * FROM [{KetquaGC.TableKetquaGC}] WHERE [{propertyName}] = @PropertyValue";
-
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@PropertyValue", propertyValue ?? DBNull.Value);
-
-                    using (SqlDataReader reader = command.ExecuteReader())
-                    {
-                        var results = new List<KetquaGC>();
-                        while (reader.Read())
+                        foreach (var dongThung in ketquaGC.DSDongThung)
                         {
-                            var ketquaGC = new KetquaGC();
-                            foreach (var prop in typeof(KetquaGC).GetProperties())
+                            var (dongThungResult, dongThungError) = InsertDongThung(connection, result, dongThung);
+                            if (dongThungResult == -1)
                             {
-                                if (prop.GetCustomAttribute<KetquaGC.IsAllowDatabaseAttribute>()?.Value == true)
-                                {
-                                    var value = reader[prop.Name];
-                                    if (value != DBNull.Value)
-                                    {
-                                        prop.SetValue(ketquaGC, Convert.ChangeType(value, prop.PropertyType));
-                                    }
-                                }
+                                // If there's an error inserting DongThung, rollback and return the error
+                                transaction.Rollback();
+                                return (-1, $"Error inserting DongThung: {dongThungError}");
                             }
-
-                            results.Add(ketquaGC);
                         }
-                        return results;
                     }
+
+                    // Commit transaction if all operations were successful
+                    transaction.Commit();
                 }
+                else
+                {
+                    result = -1; // Set to -1 if insertion was not successful
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMess = $"Error: {ex.Message}";
+                // Rollback transaction in case of error
+                try
+                {
+                    transaction.Rollback();
+                }
+                catch (Exception rollbackEx)
+                {
+                    errorMess += $" | Rollback Error: {rollbackEx.Message}";
+                }
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
+        // Delete KetQuaGC
+        public (bool, string) DeleteKetQuaGC(int kqgcId)
+        {
+            // Check for valid ID
+            if (kqgcId <= 0)
+            {
+                return (false, "Error: Invalid KQGCID.");
+            }
+
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+
+            string query = $"DELETE FROM [{KQGCDBName.Table_KetQuaGC}] WHERE [{KQGCDBName.KQGCID}] = @KQGCID";
+
+            using var command = new SqlCommand(query, connection);
+            command.Parameters.AddWithValue("@KQGCID", kqgcId);
+
+            try
+            {
+                int rowsAffected = command.ExecuteNonQuery();
+                return (rowsAffected > 0, string.Empty); // Return true if a row was deleted
+            }
+            catch (Exception ex)
+            {
+                return (false, $"Error: {ex.Message}"); // Return false and the error message
             }
         }
 
-        // Get list all KetquaGC
-        public List<KetquaGC> GetListKetquaGC()
+        // Update KetQuaGC
+        public (int, string) UpdateKetQuaGC(KetQuaGC ketquaGC, int ketquaGCId)
         {
-            using (SqlConnection connection = new SqlConnection(connectionString))
+            int result = -1;
+            string errorMess = string.Empty;
+
+            // Check for null input
+            if (ketquaGC == null) return (result, "Error: KetQuaGC is null");
+
+            List<Propertyy> properties = ketquaGC.GetPropertiesValues()
+                .Where(po => po.AlowDatabase == true && po.Value != null)
+                .ToList();
+
+            // Validate properties before proceeding
+            if (properties.Count == 0)
             {
-                connection.Open();
+                return (result, "Error: No valid properties to update.");
+            }
 
-                string query = $"SELECT * FROM [{KetquaGC.TableKetquaGC}]";
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+            using var transaction = connection.BeginTransaction(); // Start transaction
 
-                using (SqlCommand command = new SqlCommand(query, connection))
+            try
+            {
+                var command = connection.CreateCommand();
+                command.Transaction = transaction; // Associate command with the transaction
+
+                string updateSet = string.Join(", ", properties.Select(p => $"[{p.DBName}] = @{Regex.Replace(p.DBName ?? string.Empty, @"[^\w]+", "")}"));
+                command.CommandText = $@"UPDATE [{KQGCDBName.Table_KetQuaGC}] SET {updateSet} WHERE {KQGCDBName.KQGCID} = @KetQuaGCId";
+
+                foreach (var prop in properties)
                 {
+                    string parameterName = $"@{Regex.Replace(prop.DBName ?? string.Empty, @"[^\w]+", "")}";
+                    object? parameterValue = prop.Value ?? DBNull.Value;
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+                command.Parameters.AddWithValue("@KetQuaGCId", ketquaGCId);
 
-                    using (SqlDataReader reader = command.ExecuteReader())
+                // Execute update command
+                result = command.ExecuteNonQuery();
+
+                if (result > 0)
+                {
+                    // Successfully updated; proceed with DongThung update if necessary
+                    if (ketquaGC.DSDongThung != null && ketquaGC.DSDongThung.Any())
                     {
-                        var results = new List<KetquaGC>();
-                        while (reader.Read())
+                        foreach (var dongThung in ketquaGC.DSDongThung)
                         {
-                            var ketquaGC = new KetquaGC();
-                            foreach (var prop in typeof(KetquaGC).GetProperties())
+                            var (dongThungResult, dongThungError) = UpdateDongThung(connection, ketquaGCId, dongThung);
+                            if (dongThungResult == -1)
                             {
-                                if (prop.GetCustomAttribute<KetquaGC.IsAllowDatabaseAttribute>()?.Value == true)
-                                {
-                                    var value = reader[prop.Name];
-                                    if (value != DBNull.Value)
-                                    {
-                                        prop.SetValue(ketquaGC, Convert.ChangeType(value, prop.PropertyType));
-                                    }
-                                }
+                                // If there's an error updating DongThung, rollback and return the error
+                                transaction.Rollback();
+                                return (-1, $"Error updating DongThung: {dongThungError}");
                             }
-
-                            results.Add(ketquaGC);
                         }
-                        return results;
                     }
+                    // Commit transaction if all operations were successful
+                    transaction.Commit();
+                }
+                else
+                {
+                    result = -1; // Set to -1 if update was not successful
+                    errorMess = "No rows were updated. The specified KetQuaGC may not exist.";
                 }
             }
+            catch (Exception ex)
+            {
+                errorMess = $"Error: {ex.Message}";
+                // Rollback transaction in case of error
+                try
+                {
+                    transaction.Rollback();
+                }
+                catch (Exception rollbackEx)
+                {
+                    errorMess += $" | Rollback Error: {rollbackEx.Message}";
+                }
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
+        // Get list all KetQuaGC
+        public (List<KetQuaGC>, string) GetListKetQuaGC(object? kqgcId = null)
+        {
+            List<KetQuaGC> listKetQuaGC = new();
+            string errorMessage = string.Empty;
+            using (var connection = new SqlConnection(connectionString))
+            {
+                try
+                {
+                    connection.Open();
+                    using var command = connection.CreateCommand();
+                    command.CommandText = $"SELECT * FROM [{KQGCDBName.Table_KetQuaGC}]";
+                    if (kqgcId != null)
+                    {
+                        command.CommandText += $" WHERE [{KQGCDBName.KQGCID}] = @KQGCID";
+                        command.Parameters.AddWithValue("@KQGCID", kqgcId);
+                    }
+                    using var reader = command.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        KetQuaGC ketQuaGC = new();
+                        List<Propertyy> rowItems = ketQuaGC.GetPropertiesValues();
+                        foreach (var item in rowItems)
+                        {
+                            string? columnName = item.DBName;
+                            if (!string.IsNullOrEmpty(columnName) && reader.GetOrdinal(columnName) != -1)
+                            {
+                                object columnValue = reader[columnName];
+                                item.Value = columnValue == DBNull.Value ? null : columnValue;
+                            }
+                        }
+                        // Get DongThung for this KetQuaGC
+                        if (ketQuaGC.KQGCID.Value != null)
+                        {
+                            ketQuaGC.DSDongThung = GetListDongThung(ketQuaGC.KQGCID.Value);
+                        }
+                        listKetQuaGC.Add(ketQuaGC);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    errorMessage = $"Error: {ex.Message}";
+                    listKetQuaGC.Clear(); // Clear the list in case of error
+                }
+            }
+            return (listKetQuaGC, errorMessage);
+        }
+
+        // Get KetQuaGC by propertyName and propertyValue
+        public (List<KetQuaGC>, string) GetListKetQuaGCByProperty(string propertyName, object propertyValue)
+        {
+            List<KetQuaGC> listKetQuaGC = new();
+            string errorMessage = string.Empty;
+
+            if (string.IsNullOrEmpty(propertyName) || propertyValue == null)
+            {
+                return (listKetQuaGC, "Error input value");
+            }
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                SqlTransaction? transaction = null;
+                try
+                {
+                    connection.Open();
+                    transaction = connection.BeginTransaction();
+
+                    var command = connection.CreateCommand();
+                    command.Transaction = transaction;
+                    command.CommandText = $"SELECT * FROM [{KQGCDBName.Table_KetQuaGC}]";
+
+                    if (!string.IsNullOrEmpty(propertyName) && propertyValue != null)
+                    {
+                        command.CommandText += $" WHERE [{propertyName}] = @PropertyValue";
+                        command.Parameters.AddWithValue("@PropertyValue", propertyValue ?? DBNull.Value);
+                    }
+
+                    using var reader = command.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        KetQuaGC ketQuaGC = new();
+                        List<Propertyy> rowItems = ketQuaGC.GetPropertiesValues();
+                        foreach (var item in rowItems)
+                        {
+                            string? columnName = item.DBName;
+                            if (!string.IsNullOrEmpty(columnName) && reader.GetOrdinal(columnName) != -1) // Check if the column exists
+                            {
+                                object columnValue = reader[columnName];
+                                item.Value = columnValue == DBNull.Value ? null : columnValue;
+                            }
+                        }
+
+                        // Get DongThung for this KetQuaGC
+                        if (ketQuaGC.KQGCID.Value != null)
+                        {
+                            ketQuaGC.DSDongThung = GetListDongThung(ketQuaGC.KQGCID.Value);
+                        }
+
+                        listKetQuaGC.Add(ketQuaGC);
+                    }
+
+                    transaction.Commit();
+                }
+                catch (Exception ex)
+                {
+                    errorMessage = $"Error: {ex.Message}";
+                    transaction?.Rollback();
+                    listKetQuaGC.Clear(); // Clear the list in case of error
+                }
+                finally
+                {
+                    transaction?.Dispose();
+                }
+            }
+
+            return (listKetQuaGC, errorMessage);
+        }
+
+        #endregion
+
+        #region KHSX_DongThung
+        // Insert new DongThung for KetQuaGC
+        public (int, string) InsertDongThung(SqlConnection connection, int kqgcId, DongThung dongThung)
+        {
+            int result = -1;
+            string errorMess = string.Empty;
+
+            // Check for null input
+            if (dongThung == null) return (result, "Error: DongThung is null");
+
+            List<Propertyy> properties = dongThung.GetPropertiesValues()
+                .Where(po => po.AlowDatabase == true && po.Value != null)
+                .ToList();
+
+            // Validate properties before proceeding
+            if (properties.Count == 0)
+            {
+                return (result, "Error: No valid properties to insert.");
+            }
+
+            using var transaction = connection.BeginTransaction(); // Start transaction for DongThung
+
+            try
+            {
+                var command = connection.CreateCommand();
+                command.Transaction = transaction; // Associate command with the transaction
+
+                string columns = string.Join(", ", properties.Select(p => $"[{p.DBName}]"));
+                string parameters = string.Join(", ", properties.Select(p => $"@{Regex.Replace(p.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $@"INSERT INTO [{DongThungDBName.Table_DongThung}] ({columns}, [{DongThungDBName.KQGCID}]) VALUES ({parameters}, @KQGCID)";
+
+                // Add parameters
+                foreach (var prop in properties)
+                {
+                    string parameterName = $"@{Regex.Replace(prop.DBName ?? string.Empty, @"[^\w]+", "")}";
+                    object? parameterValue = prop.Value ?? DBNull.Value;
+
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                // Add KQGCID parameter
+                command.Parameters.AddWithValue("@KQGCID", kqgcId);
+
+                // Execute command
+                object? rs = command.ExecuteScalar();
+                if (rs != null && int.TryParse(rs.ToString(), out result) && result > 0)
+                {
+                    // Successfully inserted
+                    transaction.Commit(); // Commit the transaction
+                }
+                else
+                {
+                    result = -1; // Set to -1 if insertion was not successful
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMess = $"Error: {ex.Message}";
+                try
+                {
+                    transaction.Rollback(); // Rollback transaction in case of error
+                }
+                catch (Exception rollbackEx)
+                {
+                    errorMess += $" | Rollback Error: {rollbackEx.Message}";
+                }
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+        // Update DongThung
+
+        public (int, string) UpdateDongThung(SqlConnection connection, int kqgcId, DongThung dongThung)
+        {
+            int result = -1;
+            string errorMess = string.Empty;
+
+            // Check for null input
+            if (dongThung == null) return (result, "Error: DongThung is null");
+
+            List<Propertyy> properties = dongThung.GetPropertiesValues()
+                .Where(po => po.AlowDatabase == true && po.Value != null)
+                .ToList();
+
+            // Validate properties before proceeding
+            if (properties.Count == 0)
+            {
+                return (result, "Error: No valid properties to update.");
+            }
+
+            using var transaction = connection.BeginTransaction(); // Start transaction for DongThung
+
+            try
+            {
+                var command = connection.CreateCommand();
+                command.Transaction = transaction; // Associate command with the transaction
+
+                string updateSet = string.Join(", ", properties.Select(p => $"[{p.DBName}] = @{Regex.Replace(p.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $@"UPDATE [{DongThungDBName.Table_DongThung}] SET {updateSet} WHERE [{DongThungDBName.KQGCID}] = @KQGCID";
+
+                // Add parameters
+                foreach (var prop in properties)
+                {
+                    string parameterName = $"@{Regex.Replace(prop.DBName ?? string.Empty, @"[^\w]+", "")}";
+                    object? parameterValue = prop.Value ?? DBNull.Value;
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                // Add KQGCID parameter
+                command.Parameters.AddWithValue("@KQGCID", kqgcId);
+
+                // Execute command
+                result = command.ExecuteNonQuery();
+
+                if (result > 0)
+                {
+                    // Successfully updated
+                    transaction.Commit(); // Commit the transaction
+                }
+                else
+                {
+                    result = -1; // Set to -1 if update was not successful
+                    errorMess = "No rows were updated. The specified DongThung may not exist.";
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMess = $"Error: {ex.Message}";
+                try
+                {
+                    transaction.Rollback(); // Rollback transaction in case of error
+                }
+                catch (Exception rollbackEx)
+                {
+                    errorMess += $" | Rollback Error: {rollbackEx.Message}";
+                }
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
+        // GetDongThung
+        private List<DongThung> GetListDongThung(object ketQuaGCID)
+        {
+            List<DongThung> listDongThung = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                try
+                {
+                    connection.Open();
+
+                    using var command = connection.CreateCommand();
+
+                    command.CommandText = $"SELECT * FROM [{DongThungDBName.Table_DongThung}] WHERE [{DongThungDBName.KQGCID}] = @KQGCID";
+
+                    command.Parameters.AddWithValue("@KQGCID", ketQuaGCID);
+
+                    using var reader = command.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        DongThung dongThung = new();
+
+                        List<Propertyy> rowItems = dongThung.GetPropertiesValues();
+
+                        foreach (var item in rowItems)
+                        {
+                            string? columnName = item.DBName;
+
+                            if (!string.IsNullOrEmpty(columnName) && reader.GetOrdinal(columnName) != -1)
+                            {
+                                object columnValue = reader[columnName];
+
+                                item.Value = columnValue == DBNull.Value ? null : columnValue;
+                            }
+                        }
+
+                        listDongThung.Add(dongThung);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Log the exception or handle it as appropriate
+                    Console.WriteLine($"Error in GetListDongThung: {ex.Message}");
+                }
+            }
+            return listDongThung;
         }
         #endregion
     }
