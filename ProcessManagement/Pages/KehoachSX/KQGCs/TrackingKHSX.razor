@@ -21,6 +21,13 @@
 @inject ServerSocketAsync ServerSocketAsync
 @inject NavigationManager NavigationManager
 
+<style>
+    .rz-grid-table-fixed-2 {
+        border-radius: 10px;
+        padding: 10px;
+    }
+</style>
+
 <RadzenCard Variant="Variant.Flat" Style="height: 100%; width: 100%; padding-top: 15px">
     <RadzenStack Gap="5" Style="height: 100%; width: 100%;">
         <!--Thanh tim kiem-->
@@ -55,7 +62,7 @@
                                 <RadzenButton Text="Reload" Click="@(async() => { await LoadAllDanhsachKQGCBase(300); await FilterDSachKetQuaGCProcessing(); })" IsBusy="@isLoadingKQGCs" BusyText=" Loading..." Style="border-radius: 20px;" Icon="autorenew" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />
                             </RadzenStack>
 
-                            <RadzenButton Icon="@(filterActive ? "filter_alt_off" : "filter_alt")" Text="Bộ lọc nâng cao" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="@(filterActive ? Shade.Darker : Shade.Lighter)"
+                            <RadzenButton Icon="@(filterActive ? "filter_alt" : "filter_alt_off")" Text="Bộ lọc nâng cao" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="@(filterActive ? Shade.Darker : Shade.Lighter)"
                                           Style="height: contain; width: contain; font-size: 14px;"
                                           Click="@( async () =>
                                                                 {
@@ -105,7 +112,7 @@
                                         string displayName = column.DisplayName ?? string.Empty;
                                         Type? columnType = column.Type;
 
-                                        <RadzenDataGridColumn Width="100px" TItem="KetQuaGC" Title="@displayName" FilterMode="FilterMode.CheckBoxList"
+                                        <RadzenDataGridColumn TItem="KetQuaGC" Title="@displayName" MinWidth="100px"
                                                               Property="@colName" TextAlign="TextAlign.Center">
                                             <HeaderTemplate>
                                                 <span style="font-weight: 600; font-size: 15px; color: white">@displayName</span>
@@ -137,7 +144,14 @@
                                                     }
                                                     else
                                                     {
-                                                        <RadzenText Text="@($"{kqgc.GetPropertyValue(colName)}")" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
+                                                        if (colName == KetQuaGC.KQGCDBName.SPID || colName == KetQuaGC.KQGCDBName.MMID || colName == KetQuaGC.KQGCDBName.NCID || colName == KetQuaGC.KQGCDBName.NVID)
+                                                        {
+                                                            <RadzenText Text="@(GetColumnValueByID(kqgc.GetPropertyValue(colName), colName))" Style="font-size: 15px; height: contain; font-weight: 500;"></RadzenText>
+                                                        }
+                                                        else
+                                                        {
+                                                            <RadzenText Text="@($"{kqgc.GetPropertyValue(colName)}")" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
+                                                        }
                                                     }
                                                 }
                                             </Template>
@@ -182,6 +196,31 @@
         await base.OnInitializedAsync();
     }
 
+    // Convert ID to stringValue
+    private string GetColumnValueByID(object? id, string colName)
+    {
+        string value = string.Empty;
+
+        if (colName == KetQuaGC.KQGCDBName.SPID)
+        {
+            value = SQLServerServices.GetTenSanPhamByID(id);
+        }
+        else if (colName == KetQuaGC.KQGCDBName.NCID)
+        {
+            value = SQLServerServices.GetNguyenCongByID(id);
+        }
+        else if (colName == KetQuaGC.KQGCDBName.MMID)
+        {
+            value = SQLServerServices.GetMaMayMocbyID(id);
+        }
+        else if (colName == KetQuaGC.KQGCDBName.NVID)
+        {
+            value = SQLServerServices.GetMaNhanVienbyID(id);
+        }
+
+        return value;
+    }
+
     #region Main Column Filtering
     // Khoi tao bien luu danh sach key search
     private async Task CreateCurrentSelectedKeyVariable()
@@ -204,10 +243,23 @@
     // Lay danh sach key search Main column
     private List<string> GetMainColumnKeysSearch(string targetColumn)
     {
-        List<string> keys = DSachKetQuaGCs
+        List<string> keys = new();
+
+        if (targetColumn == KetQuaGC.KQGCDBName.SPID || targetColumn == KetQuaGC.KQGCDBName.MMID || targetColumn == KetQuaGC.KQGCDBName.NCID || targetColumn == KetQuaGC.KQGCDBName.NVID)
+        {
+            // Convert ID to stringValue
+            keys = DSachKetQuaGCsBase
+            .Select(nv => GetColumnValueByID(nv.GetPropertyValue(targetColumn), targetColumn) ?? string.Empty)
+            .Where(result => !string.IsNullOrEmpty(result)).Distinct()
+            .ToList();
+        }
+        else
+        {
+            keys = DSachKetQuaGCsBase
             .Select(nv => nv.GetPropertyValue(targetColumn)?.ToString() ?? string.Empty)
             .Where(result => !string.IsNullOrEmpty(result)).Distinct()
             .ToList();
+        }
 
         return keys;
     }
@@ -241,13 +293,27 @@
 
                 if (selectedkeys != null && selectedkeys.Count > 0)
                 {
-                    DSachKetQuaGCs = DSachKetQuaGCs
+                    if (column.Key == KetQuaGC.KQGCDBName.SPID || column.Key == KetQuaGC.KQGCDBName.MMID || column.Key == KetQuaGC.KQGCDBName.NCID || column.Key == KetQuaGC.KQGCDBName.NVID)
+                    {
+                        // Convert ID to stringValue
+                        DSachKetQuaGCs = DSachKetQuaGCs
+                            .Where(nv =>
+                            {
+                                var value = nv.GetPropertyValue(column.Key);
+                                var valueString = GetColumnValueByID(value, column.Key);
+                                return valueString != null && selectedkeys.Contains(valueString);
+                            }).ToList();
+                    }
+                    else
+                    {
+                        DSachKetQuaGCs = DSachKetQuaGCs
                             .Where(nv =>
                             {
                                 var value = nv.GetPropertyValue(column.Key);
                                 var valueString = value?.ToString();
                                 return valueString != null && selectedkeys.Contains(valueString);
                             }).ToList();
+                    }
                 }
             }
         });

@@ -397,7 +397,7 @@ namespace ProcessManagement.Services.SQLServer
         }
 
         // ------------------------------------------------------------------------------------- //
-        #region Table_SanPham_
+        #region Table_SanPham_ not Use
         // Lay danh sach san pham
         public List<SanPham> GetlistSanphams()
         {
@@ -1332,6 +1332,26 @@ namespace ProcessManagement.Services.SQLServer
             }
 
             return nguyencong;
+        }
+        // Get nguyen cong by ID
+        public string GetNguyenCongByID(object? id)
+        {
+            string result = string.Empty;
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                var command = connection.CreateCommand();
+                command.CommandText = $"SELECT [{Common.NguyenCong}] FROM [{Common.Table_NguyenCong}] WHERE [{Common.NCID}] = @ID";
+                command.Parameters.AddWithValue("@ID", id ?? DBNull.Value);
+
+                using var reader = command.ExecuteReader();
+
+                if (reader.Read())
+                {
+                    result = reader[Common.NguyenCong].ToString()?.Trim() ?? string.Empty;
+                }
+            }
+            return result;
         }
 
         // Load danh sach nguyen cong
@@ -5480,6 +5500,27 @@ namespace ProcessManagement.Services.SQLServer
             return mayMoc;
         }
 
+        // Get may moc by ID
+        public string GetMaMayMocbyID(object? id)
+        {
+            string result = string.Empty;
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                var command = connection.CreateCommand();
+                command.CommandText = $"SELECT [{Common.MM_MaMay}] FROM [{Common.Table_MayMoc}] WHERE [{Common.MM_MMID}] = @ID";
+                command.Parameters.AddWithValue("@ID", id ?? DBNull.Value);
+
+                using var reader = command.ExecuteReader();
+
+                if (reader.Read())
+                {
+                    result = reader[Common.MM_MaMay].ToString()?.Trim() ?? string.Empty;
+                }
+            }
+            return result;
+        }
+
         public MayMoc GetMayMocbyMaMay(string? mamay)
         {
             MayMoc mayMoc = new();
@@ -6245,6 +6286,26 @@ namespace ProcessManagement.Services.SQLServer
             return nhanVien;
         }
 
+        // Get ma nhan vien by ID
+        public string GetMaNhanVienbyID(object? id)
+        {
+            string result = string.Empty;
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                var command = connection.CreateCommand();
+                command.CommandText = $"SELECT [{Common.NV_MaNhanVien}] FROM [{Common.Table_NhanVien}] WHERE [{Common.NV_NVID}] = @ID";
+                command.Parameters.AddWithValue("@ID", id ?? DBNull.Value);
+
+                using var reader = command.ExecuteReader();
+
+                if (reader.Read())
+                {
+                    result = reader[Common.NV_MaNhanVien].ToString()?.Trim() ?? string.Empty;
+                }
+            }
+            return result;
+        }
         // Check gia tri truong thong tin nhan vien 
         public bool DefaultThongTinNhanVien_ValueIsExisting(string? proValue, string proName)
         {
@@ -6984,6 +7045,71 @@ namespace ProcessManagement.Services.SQLServer
             }
 
             return danhSachSanPham;
+        }
+
+        public List<SanPham> GetDanhSachSanPham_ID_Name()
+        {
+            List<SanPham> danhSachSanPham = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_SanPham}]";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    SanPham sanPham = new();
+
+                    List<Propertyy> rowItems = sanPham.GetPropertiesValues();
+
+                    foreach (var item in rowItems)
+                    {
+                        string? columnName = item.DBName;
+
+                        if (reader.GetOrdinal(columnName) != -1) // Check if the column exists
+                        {
+                            object columnValue = reader[columnName];
+
+                            item.Value = columnValue == DBNull.Value ? null : columnValue.ToString()?.Trim();
+                        }
+                    }
+
+                    //// Load danh sach thong tin san pham
+                    //sanPham.DSThongTin = GetDanhSachThongTinSanPham(sanPham.SP_SPID.Value);
+                    //// Load danh sach NVL of san pham
+                    //sanPham.DanhSachNVLs = GetDSachNVLofSanPham(sanPham.SP_SPID.Value);
+
+                    danhSachSanPham.Add(sanPham);
+                }
+            }
+
+            return danhSachSanPham;
+        }
+
+        // Get ten sanpham by ID
+        public string GetTenSanPhamByID(object? id)
+        {
+            string result = string.Empty;
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                var command = connection.CreateCommand();
+                command.CommandText = $"SELECT [{Common.SP_TenSanPham}] FROM [{Common.Table_SanPham}] WHERE [{Common.SP_SPID}] = @ID";
+                command.Parameters.AddWithValue("@ID", id ?? DBNull.Value);
+
+                using var reader = command.ExecuteReader();
+
+                if (reader.Read())
+                {
+                    result = reader[Common.SP_TenSanPham].ToString()?.Trim() ?? string.Empty;
+                }
+            }
+            return result;
         }
 
         // Update thong tin san pham

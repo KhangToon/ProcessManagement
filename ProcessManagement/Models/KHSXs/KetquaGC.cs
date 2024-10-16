@@ -8,9 +8,9 @@ namespace ProcessManagement.Models.KHSXs
         public Propertyy KQGCID { get; set; } = new() { DBName = KQGCDBName.KQGCID, DisplayName = KQGCDisplayName.KQGCID, Type = typeof(int), AlowDatabase = false, AlowDisplay = false, DispDatagrid = false }; // Identity ID
         public Propertyy KHSXID { get; set; } = new() { DBName = KQGCDBName.KHSXID, DisplayName = KQGCDisplayName.KHSXID, Type = typeof(int), AlowDatabase = true, AlowDisplay = false, DispDatagrid = false };
         public Propertyy SubMitDay { get; set; } = new() { DBName = KQGCDBName.SubMitDay, DisplayName = KQGCDisplayName.SubMitDay, Type = typeof(DateTime), AlowDatabase = true, CheckErrors = new() { Propertyy.ErrType.NotEmptyValue } };
-        public Propertyy TenSanPham { get; set; } = new() { DBName = KQGCDBName.TenSanPham, DisplayName = KQGCDisplayName.TenSanPham, Type = typeof(string), AlowDatabase = true, CheckErrors = new() { Propertyy.ErrType.NotEmptyValue } };
-        public Propertyy TenNguyenCong { get; set; } = new() { DBName = KQGCDBName.TenNguyenCong, DisplayName = KQGCDisplayName.TenNguyenCong, Type = typeof(string), AlowDatabase = true, CheckErrors = new() { Propertyy.ErrType.NotEmptyValue } };
-        public Propertyy MaMay { get; set; } = new() { DBName = KQGCDBName.MaMay, DisplayName = KQGCDisplayName.MaMay, Type = typeof(string), AlowDatabase = true, CheckErrors = new() { Propertyy.ErrType.NotEmptyValue } };
+        public Propertyy SPID { get; set; } = new() { DBName = KQGCDBName.SPID, DisplayName = KQGCDisplayName.TenSanPham, Type = typeof(string), AlowDatabase = true, CheckErrors = new() { Propertyy.ErrType.NotEmptyValue } };
+        public Propertyy NCID { get; set; } = new() { DBName = KQGCDBName.NCID, DisplayName = KQGCDisplayName.TenNguyenCong, Type = typeof(string), AlowDatabase = true, CheckErrors = new() { Propertyy.ErrType.NotEmptyValue } };
+        public Propertyy MMID { get; set; } = new() { DBName = KQGCDBName.MMID, DisplayName = KQGCDisplayName.MaMay, Type = typeof(string), AlowDatabase = true, CheckErrors = new() { Propertyy.ErrType.NotEmptyValue } };
         public Propertyy CaLamViec { get; set; } = new() { DBName = KQGCDBName.CaLamViec, DisplayName = KQGCDisplayName.CaLamViec, Type = typeof(int), AlowDatabase = true, CheckErrors = new() { Propertyy.ErrType.NotEmptyValue } };
         public Propertyy ThoiGianGC { get; set; } = new() { DBName = KQGCDBName.ThoiGianGC, DisplayName = KQGCDisplayName.ThoiGianGC, Type = typeof(int), AlowDatabase = true, CheckErrors = new() { Propertyy.ErrType.NotEmptyValue, Propertyy.ErrType.NotAllowEqualsZero } };
         public Propertyy MaQuanLyLOT { get; set; } = new() { DBName = KQGCDBName.MaQuanLyLOT, DisplayName = KQGCDisplayName.MaQuanLyLOT, Type = typeof(string), AlowDatabase = true, CheckErrors = new() { Propertyy.ErrType.NotEmptyValue } };
@@ -19,7 +19,7 @@ namespace ProcessManagement.Models.KHSXs
         public Propertyy SLperLOT { get; set; } = new() { DBName = KQGCDBName.SLperLOT, DisplayName = KQGCDisplayName.SLperLOT, Type = typeof(int), AlowDatabase = true, CheckErrors = new() { Propertyy.ErrType.NotEmptyValue, Propertyy.ErrType.NotAllowEqualsZero } };
         public Propertyy LoaiNG { get; set; } = new() { DBName = KQGCDBName.LoaiNG, DisplayName = KQGCDisplayName.LoaiNG, Type = typeof(string), AlowDatabase = true, CheckErrors = new() { Propertyy.ErrType.NotEmptyValue } };
         public Propertyy ThoiGianLamViec { get; set; } = new() { DBName = KQGCDBName.ThoiGianLamViec, DisplayName = KQGCDisplayName.ThoiGianLamViec, Type = typeof(int), AlowDatabase = true, CheckErrors = new() { Propertyy.ErrType.NotEmptyValue, Propertyy.ErrType.NotAllowEqualsZero } };
-        public Propertyy TenNhanVien { get; set; } = new() { DBName = KQGCDBName.TenNhanVien, DisplayName = KQGCDisplayName.TenNhanVien, Type = typeof(string), AlowDatabase = true, CheckErrors = new() { Propertyy.ErrType.NotEmptyValue } };
+        public Propertyy NVID { get; set; } = new() { DBName = KQGCDBName.NVID, DisplayName = KQGCDisplayName.TenNhanVien, Type = typeof(string), AlowDatabase = true, CheckErrors = new() { Propertyy.ErrType.NotEmptyValue } };
         public Propertyy GhiChu { get; set; } = new() { DBName = KQGCDBName.GhiChu, DisplayName = KQGCDisplayName.GhiChu, Type = typeof(string), AlowDatabase = true, CheckErrors = new() { Propertyy.ErrType.NotEmptyValue } };
 
         public List<DongThung> DSDongThung { get; set; } = new();
@@ -30,9 +30,9 @@ namespace ProcessManagement.Models.KHSXs
             public const string KQGCID = "KQGCID";
             public const string KHSXID = "KHSXID";
             public const string SubMitDay = "SubMitDay";
-            public const string TenSanPham = "TenSanPham";
-            public const string TenNguyenCong = "TenNguyenCong";
-            public const string MaMay = "MaMay";
+            public const string SPID = "SPID";
+            public const string NCID = "NCID";
+            public const string MMID = "MMID";
             public const string CaLamViec = "CaLamViec";
             public const string ThoiGianGC = "ThoiGianGC";
             public const string MaQuanLyLOT = "MaQuanLyLOT";
@@ -41,7 +41,7 @@ namespace ProcessManagement.Models.KHSXs
             public const string SLperLOT = "SLperLOT";
             public const string LoaiNG = "LoaiNG";
             public const string ThoiGianLamViec = "ThoiGianLamViec";
-            public const string TenNhanVien = "TenNhanVien";
+            public const string NVID = "NVID";
             public const string GhiChu = "GhiChu";
         }
 
@@ -62,7 +62,7 @@ namespace ProcessManagement.Models.KHSXs
             public const string LoaiNG = "Nội dung NG";
             public const string ThoiGianLamViec = "Thời gian làm việc";
             public const string TenNhanVien = "Nhân viên";
-            public const string GhiChu = "GhiChu";
+            public const string GhiChu = "Ghi chú";
         }
 
         // Get all property of this class

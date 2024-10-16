@@ -1,4 +1,8 @@
 ﻿@using ProcessManagement.Commons
+@using ProcessManagement.Models
+@using ProcessManagement.Models.MAYMOC
+@using ProcessManagement.Models.NHANVIEN
+@using ProcessManagement.Models.SANPHAM
 @using ProcessManagement.Services.SQLServer
 @using Radzen.Blazor
 @using Radzen
@@ -42,9 +46,34 @@
                                 {
                                     string displayName = property.DisplayName;
 
-                                    if (property.DBName == KetQuaGC.KQGCDBName.TenSanPham)
+                                    if (property.DBName == KetQuaGC.KQGCDBName.SPID || property.DBName == KetQuaGC.KQGCDBName.MMID || property.DBName == KetQuaGC.KQGCDBName.NCID || property.DBName == KetQuaGC.KQGCDBName.NVID)
                                     {
-
+                                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 5px; border-bottom: var(--rz-grid-cell-border);">
+                                            <RadzenStack Style="width: 20%;">
+                                                <RadzenText Text="@(displayName)" Style="color: var(--rz-primary-darker); font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
+                                            </RadzenStack>
+                                            <RadzenStack Style="width: 80%; padding-left: 10px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
+                                                    <RadzenStack Style="width: 50%;">
+                                                        <RadzenDropDown AllowClear="true"
+                                                                        Style="width: 100%; height: contain; font-size: 14px; font-weight: 600; background-color: white"
+                                                                        AllowVirtualization="true"
+                                                                        AllowFiltering="true"
+                                                                        FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                                                        FilterOperator="StringFilterOperator.Contains"
+                                                                        AllowSelectAll="true"
+                                                                        TValue="string"
+                                                                        Data="@(ComboboxDSachKeys(property.DBName))"
+                                                                        ValueChanged="@((args) => OnComboboxDSachKeysSelectedChanged(args, property))">
+                                                        </RadzenDropDown>
+                                                    </RadzenStack>
+                                                    <RadzenStack Style="width: 50%;">
+                                                        <RadzenAlert Visible="@(!property.IsValueOK)" Text="@property.NotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                                                        <RadzenAlert Visible="@(property.IsValueOK)" Text="@property.NotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Success" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                                                    </RadzenStack>
+                                                </RadzenStack>
+                                            </RadzenStack>
+                                        </RadzenStack>
                                     }
                                     else
                                     {
@@ -128,15 +157,20 @@
 
 @code {
     [Parameter]
-    public int KHSXID { get; set; } = 1; // Gia su = 1 
+    public int KHSXID { get; set; } = 1; // Gia su = 1
     [Parameter]
     public int SPID { get; set; } // ID San pham
-    [Parameter] 
+    [Parameter]
     public int CDID { get; set; } // ID Cong doan
     [Parameter]
     public int MMID { get; set; } // ID May moc
 
     private KetQuaGC newKetQuaGC = new();
+
+    private List<SanPham> dsachSanPhams = new();
+    private List<NguyenCong> dsachNguyenCongs = new();
+    private List<MayMoc> dsachMayMocs = new();
+    private List<NhanVien> dsachNhanViens = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -155,6 +189,92 @@
 
         await base.OnInitializedAsync();
     }
+
+    #region Combobox
+
+    // Get danh sach keys
+    private List<string> ComboboxDSachKeys(string? colName)
+    {
+        List<string> results = new();
+
+        if (colName == KetQuaGC.KQGCDBName.SPID)
+        {
+            dsachSanPhams = SQLServerServices.GetDanhSachSanPham_ID_Name();
+
+            results = dsachSanPhams.Select(sp => sp.SP_TenSanPham.Value?.ToString()?.Trim() ?? string.Empty).Where(result => !string.IsNullOrEmpty(result)).Distinct().ToList();
+        }
+        else if (colName == KetQuaGC.KQGCDBName.NCID)
+        {
+            dsachNguyenCongs = SQLServerServices.GetListNguyenCongs();
+
+            results = dsachNguyenCongs.Select(x => x.TenNguyenCong.Value?.ToString()?.Trim() ?? string.Empty).Where(result => !string.IsNullOrEmpty(result)).Distinct().ToList();
+        }
+        else if (colName == KetQuaGC.KQGCDBName.MMID)
+        {
+            dsachMayMocs = SQLServerServices.GetDanhSachMayMoc();
+
+            results = dsachMayMocs.Select(x => x.MaMay.Value?.ToString()?.Trim() ?? string.Empty).Where(result => !string.IsNullOrEmpty(result)).Distinct().ToList();
+        }
+        else if (colName == KetQuaGC.KQGCDBName.NVID)
+        {
+            dsachNhanViens = SQLServerServices.GetDanhSachNhanVien();
+
+            results = dsachNhanViens.Select(x => x.MaNhanVien.Value?.ToString()?.Trim() ?? string.Empty).Where(result => !string.IsNullOrEmpty(result)).Distinct().ToList();
+        }
+
+        return results;
+    }
+
+    // Selected item changed
+    private async Task OnComboboxDSachKeysSelectedChanged(string selectedValue, Propertyy propertyy)
+    {
+        if (propertyy.DBName == KetQuaGC.KQGCDBName.SPID)
+        {
+            var targetItem = dsachSanPhams.FirstOrDefault(sp => sp.SP_TenSanPham.Value?.ToString()?.Trim() == selectedValue);
+
+            if (targetItem != null)
+            {
+                newKetQuaGC.SPID.Value = targetItem.SP_SPID.Value;
+            }
+            else newKetQuaGC.SPID.Value = null;
+        }
+        else if (propertyy.DBName == KetQuaGC.KQGCDBName.NCID)
+        {
+            var targetItem = dsachNguyenCongs.FirstOrDefault(sp => sp.TenNguyenCong.Value?.ToString()?.Trim() == selectedValue);
+
+            if (targetItem != null)
+            {
+                newKetQuaGC.NCID.Value = targetItem.NCID.Value;
+            }
+            else newKetQuaGC.NCID.Value = null;
+        }
+        else if (propertyy.DBName == KetQuaGC.KQGCDBName.MMID)
+        {
+            var targetItem = dsachMayMocs.FirstOrDefault(sp => sp.MaMay.Value?.ToString()?.Trim() == selectedValue);
+
+            if (targetItem != null)
+            {
+                newKetQuaGC.MMID.Value = targetItem.MMID.Value;
+            }
+            else newKetQuaGC.MMID.Value = null;
+        }
+        else if (propertyy.DBName == KetQuaGC.KQGCDBName.NVID)
+        {
+            var targetItem = dsachNhanViens.FirstOrDefault(sp => sp.MaNhanVien.Value?.ToString()?.Trim() == selectedValue);
+
+            if (targetItem != null)
+            {
+                newKetQuaGC.NVID.Value = targetItem.NVID.Value;
+            }
+            else newKetQuaGC.NVID.Value = null;
+        }
+
+        await DefaultThongTinKetQuaGC_ValueIsOK(propertyy);
+    }
+
+    #endregion
+
+
 
     // Kiem tra thong tin mac dinh
     private async Task DefaultThongTinKetQuaGC_ValueIsOK(Propertyy propertyy)
@@ -229,7 +349,8 @@
     }
 
     // Check trang thai gia tri cua tat ca truong thong tin isOK
-    private bool IsAllValueThongTinOK(List<Propertyy> propertyys)
+    private bool IsAllValueThongTinOK(List<Propertyy>
+        propertyys)
     {
         bool isOK = true;
 
@@ -249,6 +370,7 @@
     {
         DialogService.Close(null);
     }
+
 
     // Notification
     void ShowNotification(string message, NotificationSeverity notifytype, double time)
