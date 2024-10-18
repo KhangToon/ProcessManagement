@@ -82,7 +82,7 @@
                     <RadzenStack Visible="@(DSachKetQuaGCs?.Count > 0)" Style="height: contain; width: 100%; padding-top: 10px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start">
                         <RadzenDataGrid class="rz-grid-table-fixed-2" Data="@(DSachKetQuaGCs)" TItem="KetQuaGC" IsLoading="@isLoadingKQGCs"
                                         EmptyText="Danh sách theo dõi gia công trống." Style="overflow: scroll; width: 100%; height: 100%"
-                                        ShowColumnTitleAsTooltip="true" ShowCellDataAsTooltip="true" AllowVirtualization = "true"
+                                        ShowColumnTitleAsTooltip="true" ShowCellDataAsTooltip="true" AllowVirtualization="true"
                                         AllowFiltering="@filterActive" FilterMode="FilterMode.Simple" AllowColumnResize="true"
                                         AllowPaging="false" AllowSorting="false" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
                                         ShowPagingSummary="true" PagingSummaryFormat="@pagingSummaryFormat" PagerPosition="PagerPosition.Bottom"
@@ -144,7 +144,7 @@
                                                     }
                                                     else
                                                     {
-                                                        if (colName == KetQuaGC.KQGCDBName.SPID || colName == KetQuaGC.KQGCDBName.MMID || colName == KetQuaGC.KQGCDBName.NCID || colName == KetQuaGC.KQGCDBName.NVIDs)
+                                                        if (colName == KetQuaGC.KQGCDBName.SPID || colName == KetQuaGC.KQGCDBName.MMID || colName == KetQuaGC.KQGCDBName.NCID || colName == KetQuaGC.KQGCDBName.NVIDs || colName == KetQuaGC.KQGCDBName.NGIDs)
                                                         {
                                                             <RadzenText Text="@(GetColumnValueByID(kqgc.GetPropertyValue(colName), colName))" Style="font-size: 15px; height: contain; font-weight: 500;"></RadzenText>
                                                         }
@@ -221,8 +221,22 @@
             {
                 List<string> nvids = ids.Split(",").ToList();
 
-                value = string.Join(",", nvids
+                value = string.Join(", ", nvids
                         .Select(nvid => SQLServerServices.GetMaNhanVienbyID(nvid))
+                        .Where(name => !string.IsNullOrEmpty(name)))
+                        .Trim(',');
+            }
+        }
+        else if (colName == KetQuaGC.KQGCDBName.NGIDs)
+        {
+            string ids = id?.ToString()?.Trim() ?? string.Empty;
+
+            if (!string.IsNullOrEmpty(ids))
+            {
+                List<string> ngids = ids.Split(",").ToList();
+
+                value = string.Join(", ", ngids
+                        .Select(ngid => SQLServerServices.GetNoiDungNGbyID(ngid))
                         .Where(name => !string.IsNullOrEmpty(name)))
                         .Trim(',');
             }
@@ -255,7 +269,7 @@
     {
         List<string> keys = new();
 
-        if (targetColumn == KetQuaGC.KQGCDBName.SPID || targetColumn == KetQuaGC.KQGCDBName.MMID || targetColumn == KetQuaGC.KQGCDBName.NCID || targetColumn == KetQuaGC.KQGCDBName.NVIDs)
+        if (targetColumn == KetQuaGC.KQGCDBName.SPID || targetColumn == KetQuaGC.KQGCDBName.MMID || targetColumn == KetQuaGC.KQGCDBName.NCID || targetColumn == KetQuaGC.KQGCDBName.NVIDs || targetColumn == KetQuaGC.KQGCDBName.NGIDs)
         {
             // Convert ID to stringValue
             keys = DSachKetQuaGCsBase
@@ -303,7 +317,7 @@
 
                 if (selectedkeys != null && selectedkeys.Count > 0)
                 {
-                    if (column.Key == KetQuaGC.KQGCDBName.SPID || column.Key == KetQuaGC.KQGCDBName.MMID || column.Key == KetQuaGC.KQGCDBName.NCID || column.Key == KetQuaGC.KQGCDBName.NVIDs)
+                    if (column.Key == KetQuaGC.KQGCDBName.SPID || column.Key == KetQuaGC.KQGCDBName.MMID || column.Key == KetQuaGC.KQGCDBName.NCID || column.Key == KetQuaGC.KQGCDBName.NVIDs || column.Key == KetQuaGC.KQGCDBName.NGIDs)
                     {
                         // Convert ID to stringValue
                         DSachKetQuaGCs = DSachKetQuaGCs

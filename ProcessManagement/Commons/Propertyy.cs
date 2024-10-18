@@ -16,6 +16,8 @@
         public bool AlowDisplay { get; set; } = true;
 
         public bool IsValueOK { get; set; } = false; // Dung khi check value ok 
+        public bool IsDisable { get; set; } = false; // Dung khi check value ok 
+        
         public string NotifyMess { get; set; } = string.Empty; // Dung khi check value ok 
 
         public List<ErrType> CheckErrors { get; set; } = new() { ErrType.NotEmptyValue };

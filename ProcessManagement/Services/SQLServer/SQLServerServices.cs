@@ -6238,7 +6238,6 @@ namespace ProcessManagement.Services.SQLServer
         }
         #endregion
 
-
         // ------------------------------------------------------------------------------------- //
         #region Table_NV_NhanVien
 
@@ -8078,6 +8077,162 @@ namespace ProcessManagement.Services.SQLServer
                 }
             }
             return listDongThung;
+        }
+        #endregion
+
+        // ------------------------------------------------------------------------------------- //
+        #region Table_NGType
+        // Insert new NGType
+        public (int, string) InsertNGType(NGType NGtype)
+        {
+            int result = -1;
+            string errorMess = string.Empty;
+
+            // Check for null input
+            if (NGtype == null) return (result, "Error: NGType is null");
+
+            List<Propertyy> properties = NGtype.GetPropertiesValues()
+                .Where(po => po.AlowDatabase == true && po.Value != null)
+                .ToList();
+
+            // Validate properties before proceeding
+            if (properties.Count == 0)
+            {
+                return (result, "Error: No valid properties to insert.");
+            }
+
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+
+            using var transaction = connection.BeginTransaction(); // Start transaction
+
+            try
+            {
+                var command = connection.CreateCommand();
+                command.Transaction = transaction; // Associate command with the transaction
+
+                string columns = string.Join(", ", properties.Select(p => $"[{p.DBName}]"));
+                string parameters = string.Join(", ", properties.Select(p => $"@{Regex.Replace(p.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $@"INSERT INTO [{NGType.NGTypeDBName.Table_NGType}] ({columns}) OUTPUT INSERTED.{NGType.NGTypeDBName.NGID} VALUES ({parameters})";
+
+                foreach (var prop in properties)
+                {
+                    string parameterName = $"@{Regex.Replace(prop.DBName ?? string.Empty, @"[^\w]+", "")}";
+                    object? parameterValue = prop.Value ?? DBNull.Value;
+
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                // Execute and handle potential null result
+                object? rs = command.ExecuteScalar();
+                if (rs != null && int.TryParse(rs.ToString(), out result) && result > 0)
+                {
+                    // Commit transaction if all operations were successful
+                    transaction.Commit();
+                }
+                else
+                {
+                    result = -1; // Set to -1 if insertion was not successful
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMess = $"Error: {ex.Message}";
+                // Rollback transaction in case of error
+                try
+                {
+                    transaction.Rollback();
+                }
+                catch (Exception rollbackEx)
+                {
+                    errorMess += $" | Rollback Error: {rollbackEx.Message}";
+                }
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
+        // Get list all NGType
+        public (List<NGType>, string) GetDanhSachNGType(object? ngtypeId = null)
+        {
+            List<NGType> listNGType = new();
+
+            string errorMessage = string.Empty;
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                try
+                {
+                    connection.Open();
+
+                    using var command = connection.CreateCommand();
+
+                    command.CommandText = $"SELECT * FROM [{NGType.NGTypeDBName.Table_NGType}]";
+
+                    if (ngtypeId != null)
+                    {
+                        command.CommandText += $" WHERE [{NGType.NGTypeDBName.NGID}] = @ID";
+
+                        command.Parameters.AddWithValue("@ID", ngtypeId);
+                    }
+
+                    using var reader = command.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        NGType ngType = new();
+
+                        List<Propertyy> rowItems = ngType.GetPropertiesValues();
+
+                        foreach (var item in rowItems)
+                        {
+                            string? columnName = item.DBName;
+
+                            if (!string.IsNullOrEmpty(columnName) && reader.GetOrdinal(columnName) != -1)
+                            {
+                                object columnValue = reader[columnName];
+
+                                item.Value = columnValue == DBNull.Value ? null : columnValue;
+                            }
+                        }
+
+                        listNGType.Add(ngType);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    errorMessage = $"Error: {ex.Message}";
+
+                    listNGType.Clear(); // Clear the list in case of error
+                }
+            }
+            return (listNGType, errorMessage);
+        }
+        // Get noi dung NG by ID
+        public string GetNoiDungNGbyID(object? id)
+        {
+            string result = string.Empty;
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT [{NGType.NGTypeDBName.NoiDungNG}] FROM [{NGType.NGTypeDBName.Table_NGType}] WHERE [{NGType.NGTypeDBName.NGID}] = @ID";
+                
+                command.Parameters.AddWithValue("@ID", id ?? DBNull.Value);
+
+                using var reader = command.ExecuteReader();
+
+                if (reader.Read())
+                {
+                    result = reader[NGType.NGTypeDBName.NoiDungNG].ToString()?.Trim() ?? string.Empty;
+                }
+            }
+            return result;
         }
         #endregion
     }
