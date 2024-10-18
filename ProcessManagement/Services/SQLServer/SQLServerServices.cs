@@ -7091,22 +7091,22 @@ namespace ProcessManagement.Services.SQLServer
             return danhSachSanPham;
         }
 
-        // Get ten sanpham by ID
-        public string GetTenSanPhamByID(object? id)
+        // Get ma sanpham by ID
+        public string GetMaSanphamByID(object? id)
         {
             string result = string.Empty;
             using (var connection = new SqlConnection(connectionString))
             {
                 connection.Open();
                 var command = connection.CreateCommand();
-                command.CommandText = $"SELECT [{Common.SP_TenSanPham}] FROM [{Common.Table_SanPham}] WHERE [{Common.SP_SPID}] = @ID";
+                command.CommandText = $"SELECT [{Common.SP_MaSP}] FROM [{Common.Table_SanPham}] WHERE [{Common.SP_SPID}] = @ID";
                 command.Parameters.AddWithValue("@ID", id ?? DBNull.Value);
 
                 using var reader = command.ExecuteReader();
 
                 if (reader.Read())
                 {
-                    result = reader[Common.SP_TenSanPham].ToString()?.Trim() ?? string.Empty;
+                    result = reader[Common.SP_MaSP].ToString()?.Trim() ?? string.Empty;
                 }
             }
             return result;

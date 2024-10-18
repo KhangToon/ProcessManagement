@@ -1,4 +1,5 @@
 ﻿using ProcessManagement.Commons;
+using ProcessManagement.Models.NHANVIEN;
 using System.Reflection;
 
 namespace ProcessManagement.Models.KHSXs
@@ -19,11 +20,11 @@ namespace ProcessManagement.Models.KHSXs
         public Propertyy SLperLOT { get; set; } = new() { DBName = KQGCDBName.SLperLOT, DisplayName = KQGCDisplayName.SLperLOT, Type = typeof(int), AlowDatabase = true, CheckErrors = new() { Propertyy.ErrType.NotEmptyValue, Propertyy.ErrType.NotAllowEqualsZero } };
         public Propertyy LoaiNG { get; set; } = new() { DBName = KQGCDBName.LoaiNG, DisplayName = KQGCDisplayName.LoaiNG, Type = typeof(string), AlowDatabase = true, CheckErrors = new() { Propertyy.ErrType.NotEmptyValue } };
         public Propertyy ThoiGianLamViec { get; set; } = new() { DBName = KQGCDBName.ThoiGianLamViec, DisplayName = KQGCDisplayName.ThoiGianLamViec, Type = typeof(int), AlowDatabase = true, CheckErrors = new() { Propertyy.ErrType.NotEmptyValue, Propertyy.ErrType.NotAllowEqualsZero } };
-        public Propertyy NVID { get; set; } = new() { DBName = KQGCDBName.NVID, DisplayName = KQGCDisplayName.TenNhanVien, Type = typeof(string), AlowDatabase = true, CheckErrors = new() { Propertyy.ErrType.NotEmptyValue } };
+        public Propertyy NVIDs { get; set; } = new() { DBName = KQGCDBName.NVIDs, DisplayName = KQGCDisplayName.DSTenNV, Type = typeof(string), AlowDatabase = true, CheckErrors = new() { Propertyy.ErrType.NotEmptyValue } };
         public Propertyy GhiChu { get; set; } = new() { DBName = KQGCDBName.GhiChu, DisplayName = KQGCDisplayName.GhiChu, Type = typeof(string), AlowDatabase = true, CheckErrors = new() { Propertyy.ErrType.NotEmptyValue } };
 
         public List<DongThung> DSDongThung { get; set; } = new();
-
+        public List<NhanVien> DSNhanVien { get; set; } = new();
         public static class KQGCDBName
         {
             public const string Table_KetQuaGC = "KHSX_KetQuaGC";
@@ -41,7 +42,7 @@ namespace ProcessManagement.Models.KHSXs
             public const string SLperLOT = "SLperLOT";
             public const string LoaiNG = "LoaiNG";
             public const string ThoiGianLamViec = "ThoiGianLamViec";
-            public const string NVID = "NVID";
+            public const string NVIDs = "NVIDs";
             public const string GhiChu = "GhiChu";
         }
 
@@ -54,14 +55,14 @@ namespace ProcessManagement.Models.KHSXs
             public const string TenNguyenCong = "Nguyên công";
             public const string MaMay = "Mã máy";
             public const string CaLamViec = "Ca";
-            public const string ThoiGianGC = "Thời gian GC";
+            public const string ThoiGianGC = "TGian GC";
             public const string MaQuanLyLOT = "Mã LOT";
-            public const string SLOK = "SLOK";
-            public const string SLNG = "SLNG";
+            public const string SLOK = "SL OK";
+            public const string SLNG = "SL NG";
             public const string SLperLOT = "Tổng";
             public const string LoaiNG = "Nội dung NG";
-            public const string ThoiGianLamViec = "Thời gian làm việc";
-            public const string TenNhanVien = "Nhân viên";
+            public const string ThoiGianLamViec = "TGian làm việc";
+            public const string DSTenNV = "Nhân viên";
             public const string GhiChu = "Ghi chú";
         }
 
