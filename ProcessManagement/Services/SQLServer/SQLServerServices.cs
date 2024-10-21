@@ -6285,6 +6285,50 @@ namespace ProcessManagement.Services.SQLServer
             return nhanVien;
         }
 
+        // Get nhan vien by ma nhan vien
+        public NhanVien GetNhanVienbyID(object? id)
+        {
+            NhanVien nhanVien = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_NhanVien}] WHERE [{Common.NV_NVID}] = @ID";
+
+                command.Parameters.AddWithValue("@ID", id);
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    List<Propertyy> rowitems = nhanVien.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        if (reader.GetOrdinal(columnName) != -1) // Check if the column exists
+                        {
+                            object columnValue = reader[columnName];
+
+                            item.Value = columnValue == DBNull.Value ? null : columnValue.ToString()?.Trim();
+                        }
+                    }
+                }
+            }
+
+            if (nhanVien.NVID.Value != null)
+            {
+                // Get danh sach thong tin nhan vien
+                nhanVien.DSThongTin = GetDanhSachThongTinNhanVien(nhanVien.NVID.Value);
+            }
+
+            return nhanVien;
+        }
+
         // Get ma nhan vien by ID
         public string GetMaNhanVienbyID(object? id)
         {
@@ -6305,6 +6349,7 @@ namespace ProcessManagement.Services.SQLServer
             }
             return result;
         }
+
         // Check gia tri truong thong tin nhan vien 
         public bool DefaultThongTinNhanVien_ValueIsExisting(string? proValue, string proName)
         {

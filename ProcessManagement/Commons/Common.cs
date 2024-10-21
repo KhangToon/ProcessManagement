@@ -170,6 +170,7 @@ namespace ProcessManagement.Commons
         public const string Table_VitriOfNVL = "KHO_VitriOfNVL";
         public const string VTofNVLID = "VTofNVLID";
         public const string VTNVLSoLuong = "Số lượng";
+        public const string NgayNhapKho = "Ngày nhập kho";
 
         
         // Table KHO_LoaiThongTinNVL

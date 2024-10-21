@@ -39,7 +39,7 @@
     }
 
     .custom-datepicker input[type="text"]::placeholder {
-        color: #888888;
+        color: black;
         font-size: 14px;
         font-style: italic;
     }
@@ -309,11 +309,25 @@
             newKetQuaGC.KHSXID.Value = KHSXID;
             newKetQuaGC.SubMitDay.Value = DateTime.Now;
             newKetQuaGC.SLNG.Value = 0;
+
+            // temp
+            // newKetQuaGC.SPID.Value = 56;
+            // newKetQuaGC.NCID.Value = 2;
+            // newKetQuaGC.ThoiGianGC.Value = 65;
+            // newKetQuaGC.SubMitDay.Value = DateTime.Parse("08/04/2024").Add(DateTime.Now.TimeOfDay);
         }
 
         // Check re-asign value
         foreach (var property in newKetQuaGC.GetPropertiesValues().Where(pro => pro.Value != null && pro.AlowDisplay == true))
-        {
+        {   
+            if (property.DBName == KetQuaGC.KQGCDBName.SLNG)
+            {
+                if (property.Value != null)
+                {
+                    newKetQuaGC.NGIDs.IsDisable = property.Value.Equals(0);
+                    NGTypesSelected = null;
+                }
+            }
             await DefaultThongTinKetQuaGC_ValueIsOK(property);
         }
 

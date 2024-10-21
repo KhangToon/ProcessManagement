@@ -9,6 +9,7 @@ namespace ProcessManagement.Models.KHO_NVL
         public Propertyy VTID { get; set; } = new() { DBName = Common.VTID, Type = typeof(int), AlowDatabase = true };
         public Propertyy NVLID { get; set; } = new() { DBName = Common.NVLID, Type = typeof(int), AlowDatabase = true };
         public Propertyy VTNVLSoLuong { get; set; } = new() { DBName = Common.VTNVLSoLuong, Type = typeof(int), AlowDatabase = true };
+        public Propertyy NgayNhapKho { get; set; } = new() { DBName = Common.NgayNhapKho, Type = typeof(string), AlowDatabase = true };
 
         public VitriLuuTru VitriInfor = new();
 

@@ -222,7 +222,7 @@
                 List<string> nvids = ids.Split(",").ToList();
 
                 value = string.Join(", ", nvids
-                        .Select(nvid => SQLServerServices.GetMaNhanVienbyID(nvid))
+                        .Select(nvid => (SQLServerServices.GetNhanVienbyID(nvid).GetThongTinNhanVienByName("Tên nhân viên")).GiaTri.Value?.ToString() ?? string.Empty)
                         .Where(name => !string.IsNullOrEmpty(name)))
                         .Trim(',');
             }
@@ -355,6 +355,14 @@
 
                 (DSachKetQuaGCsBase, string resultMess) = SQLServerServices.GetListKetQuaGC(); // load dach mac dinh
 
+                foreach (var ketQuaGC in DSachKetQuaGCsBase)
+                {
+                    if (DateTime.TryParse(ketQuaGC.SubMitDay.Value?.ToString(), out DateTime submitday))
+                    {
+                        ketQuaGC.SubMitDay.Value = submitday.Date.ToShortDateString();
+                    }
+                }
+
                 DSachKetQuaGCs = DSachKetQuaGCsBase.ToList(); // gan cho ds hien thi
 
                 await Task.Delay(delay);
@@ -368,7 +376,7 @@
     private async Task OnThemMoiKetQuaGC()
     {
         object newKetQuaGCid = await DialogService.OpenAsync<DialogAddNewKetQuaGC>(null, null,
-        new DialogOptions() { ShowTitle = false, Width = "50%", Height = "95%", Resizable = false, Draggable = false, ShowClose = false, Style = "background-color: while; border-radius: 0px; padding: 0px" });
+        new DialogOptions() { ShowTitle = true, Width = "50%", Height = "95%", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 0px; padding: 0px" });
 
         await LoadAllDanhsachKQGCBase(300);
 

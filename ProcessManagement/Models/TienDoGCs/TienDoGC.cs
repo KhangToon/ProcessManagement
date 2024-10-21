@@ -1,0 +1,136 @@
+﻿using ProcessManagement.Commons;
+using System.Reflection;
+
+namespace ProcessManagement.Models.TienDoGCs
+{
+    public class TienDoGC
+    {
+        public Propertyy TDGCID { get; set; } = new() { DBName = DBName.TDGCID, DisplayName = DispName.TDGCID, Type = typeof(int), AlowDatabase = false, AlowDisplay = false, DispDatagrid = false };
+        public Propertyy KHSXID { get; set; } = new() { DBName = DBName.KHSXID, DisplayName = DispName.KHSXID, Type = typeof(int), AlowDatabase = true, AlowDisplay = false };
+        public Propertyy SPID { get; set; } = new() { DBName = DBName.SPID, DisplayName = DispName.SPID, Type = typeof(int), AlowDatabase = true, AlowDisplay = true };
+        public Propertyy TonDau { get; set; } = new() { DBName = DBName.TonDau, DisplayName = DispName.TonDau, Type = typeof(int), AlowDatabase = true, AlowDisplay = true };
+        public Propertyy DonHang { get; set; } = new() { DBName = DBName.DonHang, DisplayName = DispName.DonHang, Type = typeof(int), AlowDatabase = true, AlowDisplay = true };
+        public Propertyy XuatNVL { get; set; } = new() { DBName = DBName.XuatNVL, DisplayName = DispName.XuatNVL, Type = typeof(int), AlowDatabase = true, AlowDisplay = true };
+        public Propertyy NangLucMay { get; set; } = new() { DBName = DBName.NangLucMay, DisplayName = DispName.NangLucMay, Type = typeof(int), AlowDatabase = true, AlowDisplay = true };
+        public Propertyy NhanCong { get; set; } = new() { DBName = DBName.NhanCong, DisplayName = DispName.NhanCong, Type = typeof(int), AlowDatabase = true, AlowDisplay = true };
+        public Propertyy ThoiGianHanhChinh { get; set; } = new() { DBName = DBName.ThoiGianHanhChinh, DisplayName = DispName.ThoiGianHanhChinh, Type = typeof(double), AlowDatabase = true, AlowDisplay = true };
+        public Propertyy NgayXuatHang { get; set; } = new() { DBName = DBName.NgayXuatHang, DisplayName = DispName.NgayXuatHang, Type = typeof(DateTime), AlowDatabase = true, AlowDisplay = true };
+        public Propertyy NgayBatDau { get; set; } = new() { DBName = DBName.NgayBatDau, DisplayName = DispName.NgayBatDau, Type = typeof(DateTime), AlowDatabase = true, AlowDisplay = true };
+        public Propertyy NgayKetThuc { get; set; } = new() { DBName = DBName.NgayKetThuc, DisplayName = DispName.NgayKetThuc, Type = typeof(DateTime), AlowDatabase = true, AlowDisplay = true };
+        public Propertyy NgayLap { get; set; } = new() { DBName = DBName.NgayLap, DisplayName = DispName.NgayLap, Type = typeof(DateTime), AlowDatabase = true, AlowDisplay = true };
+        public Propertyy ThoiGianTangCa { get; set; } = new() { DBName = DBName.ThoiGianTangCa, DisplayName = DispName.ThoiGianTangCa, Type = typeof(double), AlowDatabase = true, AlowDisplay = true };
+
+        public List<TienDoGCRow> DSachTienDoRows { get; set; } = new();
+
+        // Get all property of this class
+        public static List<Propertyy> GetClassProperties()
+        {
+            Type propertyType = typeof(TienDoGC);
+
+            TienDoGC instance = new();
+
+            FieldInfo[] fields = propertyType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
+            List<Propertyy> propertiesValue = new();
+
+            foreach (FieldInfo field in fields)
+            {
+                Type ob = field.FieldType;
+
+                if (ob == typeof(Propertyy))
+                {
+                    Propertyy? fieldValue = (Propertyy?)field.GetValue(instance);
+
+                    if (fieldValue != null)
+                    {
+                        propertiesValue.Add(fieldValue);
+                    }
+                }
+            }
+
+            return propertiesValue;
+        }
+
+        public List<Propertyy> GetPropertiesValues()
+        {
+            Type propertyType = typeof(TienDoGC);
+
+            FieldInfo[] fields = propertyType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
+            List<Propertyy> propertiesValue = new();
+
+            foreach (FieldInfo field in fields)
+            {
+                Type ob = field.FieldType;
+
+                if (ob == typeof(Propertyy))
+                {
+                    Propertyy? fieldValue = (Propertyy?)field.GetValue(this);
+
+                    if (fieldValue != null) { propertiesValue.Add(fieldValue); }
+                }
+            }
+
+            return propertiesValue;
+        }
+
+        public void SetPropertyValue(string propertyName, object newValue)
+        {
+            List<Propertyy> propertiesValue = GetPropertiesValues();
+
+            Propertyy? tagetProperty = propertiesValue.FirstOrDefault(f => f.DBName == propertyName);
+
+            if (tagetProperty != null)
+            {
+                tagetProperty.Value = newValue;
+            }
+        }
+
+        public object? GetPropertyValue(string propertyName)
+        {
+            List<Propertyy> propertiesValue = GetPropertiesValues();
+
+            Propertyy? tagetProperty = propertiesValue.FirstOrDefault(f => f.DBName == propertyName);
+
+            return tagetProperty?.Value;
+        }
+
+        public static class DBName
+        {
+            public const string Table_TienDoGC = "KHSX_TienDoGC";
+            public const string TDGCID = "TDGCID";
+            public const string SPID = "SPID";
+            public const string KHSXID = "KHSXID";
+            public const string TonDau = "tondau";
+            public const string DonHang = "donhang";
+            public const string XuatNVL = "xuatnvl";
+            public const string NangLucMay = "nanglucmay";
+            public const string NhanCong = "nhancong";
+            public const string ThoiGianHanhChinh = "tghanhchinh";
+            public const string NgayXuatHang = "ngayxuathang";
+            public const string NgayBatDau = "ngaybatdau";
+            public const string NgayKetThuc = "ngayketthuc";
+            public const string NgayLap = "ngaylap";
+            public const string ThoiGianTangCa = "tgtangca";
+        }
+
+        public static class DispName
+        {
+            public const string Table_KetQuaGC = "KHSX_TienDoGC";
+            public const string TDGCID = "TDGCID";
+            public const string SPID = "SPID";
+            public const string KHSXID = "KHSXID";
+            public const string TonDau = "Tồn đầu";
+            public const string DonHang = "Đơn hàng";
+            public const string XuatNVL = "Xuất NVL";
+            public const string NangLucMay = "Năng lực máy";
+            public const string NhanCong = "Nhân công";
+            public const string ThoiGianHanhChinh = "Thời gian hành chính";
+            public const string NgayXuatHang = "Ngày xuất hàng";
+            public const string NgayBatDau = "Ngày bắt đầu";
+            public const string NgayKetThuc = "Ngày kết thúc";
+            public const string NgayLap = "Ngày lập";
+            public const string ThoiGianTangCa = "Thời gian tăng ca";
+        }
+    }
+}
