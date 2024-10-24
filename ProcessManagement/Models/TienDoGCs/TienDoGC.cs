@@ -8,6 +8,7 @@ namespace ProcessManagement.Models.TienDoGCs
         public Propertyy TDGCID { get; set; } = new() { DBName = DBName.TDGCID, DisplayName = DispName.TDGCID, Type = typeof(int), AlowDatabase = false, AlowDisplay = false, DispDatagrid = false };
         public Propertyy KHSXID { get; set; } = new() { DBName = DBName.KHSXID, DisplayName = DispName.KHSXID, Type = typeof(int), AlowDatabase = true, AlowDisplay = false };
         public Propertyy SPID { get; set; } = new() { DBName = DBName.SPID, DisplayName = DispName.SPID, Type = typeof(int), AlowDatabase = true, AlowDisplay = true };
+        public Propertyy NCID { get; set; } = new() { DBName = DBName.NCID, DisplayName = DispName.NCID, Type = typeof(int), AlowDatabase = true, AlowDisplay = true };
         public Propertyy TonDau { get; set; } = new() { DBName = DBName.TonDau, DisplayName = DispName.TonDau, Type = typeof(int), AlowDatabase = true, AlowDisplay = true };
         public Propertyy DonHang { get; set; } = new() { DBName = DBName.DonHang, DisplayName = DispName.DonHang, Type = typeof(int), AlowDatabase = true, AlowDisplay = true };
         public Propertyy XuatNVL { get; set; } = new() { DBName = DBName.XuatNVL, DisplayName = DispName.XuatNVL, Type = typeof(int), AlowDatabase = true, AlowDisplay = true };
@@ -19,8 +20,20 @@ namespace ProcessManagement.Models.TienDoGCs
         public Propertyy NgayKetThuc { get; set; } = new() { DBName = DBName.NgayKetThuc, DisplayName = DispName.NgayKetThuc, Type = typeof(DateTime), AlowDatabase = true, AlowDisplay = true };
         public Propertyy NgayLap { get; set; } = new() { DBName = DBName.NgayLap, DisplayName = DispName.NgayLap, Type = typeof(DateTime), AlowDatabase = true, AlowDisplay = true };
         public Propertyy ThoiGianTangCa { get; set; } = new() { DBName = DBName.ThoiGianTangCa, DisplayName = DispName.ThoiGianTangCa, Type = typeof(double), AlowDatabase = true, AlowDisplay = true };
+        public Propertyy TiLeNG_CD { get; set; } = new() { DBName = DBName.TiLeNG_CD, DisplayName = DispName.TiLeNG_CD, Type = typeof(double), AlowDatabase = true };
+        public Propertyy TiLeNG_TT { get; set; } = new() { DBName = DBName.TiLeNG_TT, DisplayName = DispName.TiLeNG_TT, Type = typeof(double), AlowDatabase = true };
 
         public List<TienDoGCRow> DSachTienDoRows { get; set; } = new();
+
+        public string MaSanPham { get; set; } = string.Empty;
+        public string TenCongDoan { get; set; } = string.Empty;
+
+        public int FooterSumKeHoach { get; set; }
+        public int FooterSumThucTe { get; set; }
+        public int FooterSumNG { get; set; }
+        public int FooterSumTienDo { get; set; }
+        public double TiLeNGCD { get; set; }
+        public double TiLeNGTT { get; set; }
 
         // Get all property of this class
         public static List<Propertyy> GetClassProperties()
@@ -97,28 +110,32 @@ namespace ProcessManagement.Models.TienDoGCs
 
         public static class DBName
         {
-            public const string Table_TienDoGC = "KHSX_TienDoGC";
+            public const string Table_TienDoGC = "TDGC_TienDoGC";
             public const string TDGCID = "TDGCID";
             public const string SPID = "SPID";
+            public const string NCID = "NCID";
             public const string KHSXID = "KHSXID";
             public const string TonDau = "tondau";
             public const string DonHang = "donhang";
             public const string XuatNVL = "xuatnvl";
             public const string NangLucMay = "nanglucmay";
             public const string NhanCong = "nhancong";
-            public const string ThoiGianHanhChinh = "tghanhchinh";
+            public const string ThoiGianHanhChinh = "thoigianhanhchinh";
             public const string NgayXuatHang = "ngayxuathang";
             public const string NgayBatDau = "ngaybatdau";
             public const string NgayKetThuc = "ngayketthuc";
             public const string NgayLap = "ngaylap";
-            public const string ThoiGianTangCa = "tgtangca";
+            public const string ThoiGianTangCa = "thoigiantangca";
+            public const string TiLeNG_CD = "tile_ngcd";
+            public const string TiLeNG_TT = "tile_ngtt";
         }
 
         public static class DispName
         {
-            public const string Table_KetQuaGC = "KHSX_TienDoGC";
+            public const string Table_KetQuaGC = "TDGC_TienDoGC";
             public const string TDGCID = "TDGCID";
             public const string SPID = "SPID";
+            public const string NCID = "NCID";
             public const string KHSXID = "KHSXID";
             public const string TonDau = "Tồn đầu";
             public const string DonHang = "Đơn hàng";
@@ -131,6 +148,8 @@ namespace ProcessManagement.Models.TienDoGCs
             public const string NgayKetThuc = "Ngày kết thúc";
             public const string NgayLap = "Ngày lập";
             public const string ThoiGianTangCa = "Thời gian tăng ca";
+            public const string TiLeNG_CD = "% NG CĐ";
+            public const string TiLeNG_TT = "% NG TT";
         }
     }
 }

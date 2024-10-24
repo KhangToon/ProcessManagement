@@ -7,6 +7,7 @@
 @using ProcessManagement.Models
 @using ProcessManagement.Models.KHO_NVL.XuatKho
 @using ProcessManagement.Models.KHSXs
+@using ProcessManagement.Models.SANPHAM
 @using ProcessManagement.Pages.KehoachSX.Dialogs
 @using ProcessManagement.Pages.KehoachSX.KQGCs.Dialogs
 @using ProcessManagement.Services.SQLServer
@@ -31,14 +32,14 @@
 <RadzenCard Variant="Variant.Flat" Style="height: 100%; width: 100%; padding-top: 15px">
     <RadzenStack Gap="5" Style="height: 100%; width: 100%;">
         <!--Thanh tim kiem-->
-        <RadzenStack Style="height: contain; width: 100%; padding-bottom: 5px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+        <RadzenStack Style="width: 100%; padding-bottom: 5px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
             <RadzenStack Style="height: 100%; width: 100%; border-radius: 10px; background-color: var(--rz-success-lighter); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                 <RadzenText Text="THEO DÕI QUÁ TRÌNH GIA CÔNG" Style="color: green; font-weight: 600; font-size: 20px"></RadzenText>
             </RadzenStack>
         </RadzenStack>
 
         <!--Danh sach KetQuaGC-->
-        <RadzenRow Gap="10px" Style="height: contain; width: 100%; border-top: var(--rz-grid-cell-border); padding: 0;">
+        <RadzenRow Gap="10px" Style=" width: 100%; border-top: var(--rz-grid-cell-border); padding: 10px;">
             <!--Column bang danh sach ket qua gia cong-->
             <RadzenColumn Size="12" SizeMD="12" Style="height: contain; width: 100%;">
                 <RadzenStack Gap="0px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start" Style="height: 100%; width: 100%;">
@@ -60,6 +61,12 @@
                             <!--Button Reload-->
                             <RadzenStack Gap="15px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: 100%; width: contain; padding-right: 20px; border-right: var(--rz-grid-cell-border);">
                                 <RadzenButton Text="Reload" Click="@(async() => { await LoadAllDanhsachKQGCBase(300); await FilterDSachKetQuaGCProcessing(); })" IsBusy="@isLoadingKQGCs" BusyText=" Loading..." Style="border-radius: 20px;" Icon="autorenew" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />
+                            </RadzenStack>
+
+                            <!--Button xem tien do gia cong-->
+                            <RadzenStack Style="height: 100%; width: contain; padding-left: 10px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenButton Click="OnNavigateToTienDoGCPage" Icon="visibility" Text="Tiến độ gia công" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Success" Variant="Variant.Filled" Shade="Shade.Darker"
+                                              Style="height: contain; width: contain; font-size: 14px;" />
                             </RadzenStack>
 
                             <RadzenButton Icon="@(filterActive ? "filter_alt" : "filter_alt_off")" Text="Bộ lọc nâng cao" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="@(filterActive ? Shade.Darker : Shade.Lighter)"
@@ -139,7 +146,7 @@
                                                     {
                                                         bool ishaveValueOfday = DateTime.TryParse(kqgc.GetPropertyValue(colName)?.ToString(), out DateTime vldate);
 
-                                                        <RadzenText Visible="@ishaveValueOfday" Text="@vldate.ToString("dd/MM/yyyy")" Style="font-size: 16px; height: contain; color: black; font-weight: 500"></RadzenText>
+                                                        <RadzenText Visible="@ishaveValueOfday" Text="@vldate.ToString(Common.FormatNoTime_yyyddMM)" Style="font-size: 16px; height: contain; color: black; font-weight: 500"></RadzenText>
                                                         <RadzenText Visible="@(!ishaveValueOfday)" Text="@string.Empty" Style="font-size: 16px; height: contain; color: black; font-weight: 500"></RadzenText>
                                                     }
                                                     else
@@ -183,7 +190,6 @@
     private bool filterActive = false;
 
     private bool isLoadingKQGCs = false;
-
 
     protected override async Task OnInitializedAsync()
     {
@@ -385,6 +391,19 @@
             Common.SelectedKQGCid = newKetQuaGCid;
 
             ShowNotification("Reload success!", NotificationSeverity.Success, 2000);
+        }
+    }
+
+    // Xem tien do gia cong
+    private void OnNavigateToTienDoGCPage()
+    {
+        int spid = 56;
+        int ncid = 2;
+        int khsxid = 1;
+
+        if (spid > 0)
+        {
+            NavigationManager.NavigateTo($"tiendogiacong?spid={spid}&ncid={ncid}&khsxid={khsxid}");
         }
     }
 

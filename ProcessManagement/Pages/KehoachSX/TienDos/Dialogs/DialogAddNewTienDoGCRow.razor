@@ -6,7 +6,7 @@
 @using ProcessManagement.Services.SQLServer
 @using Radzen.Blazor
 @using Radzen
-@using ProcessManagement.Models.KHSXs
+@using ProcessManagement.Models.TienDoGCs
 
 @inject DialogService DialogService
 @inject NotificationService NotificationService
@@ -47,15 +47,16 @@
 <RadzenCard Style="height: 100%; width: 100%; padding: 5px" Variant="Variant.Flat">
     <RadzenStack Gap="0" Style="height: 100%; width: 100%; margin: 0; padding: 0; padding-bottom: 10px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start">
         <RadzenStack Gap="20px" Style="height: contain; width: 100%; padding: 10px; background-color: var(--rz-primary-darker);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-            <RadzenText Text="THÊM MỚI KẾT QUẢ GIA CÔNG" Style="color: white; font-weight: 500; font-size: 18px"></RadzenText>
+            <RadzenText Text="THEO DÕI TIẾN ĐỘ GIA CÔNG THEO NGÀY" Style="color: white; font-weight: 500; font-size: 18px"></RadzenText>
         </RadzenStack>
+
         @{
-            List<Propertyy> properties = newKetQuaGC.GetPropertiesValues().Where(pro => pro.AlowDisplay == true).ToList();
+            List<Propertyy> properties = newTDGCRow.GetPropertiesValues().Where(pro => pro.AlowDisplay == true).ToList();
 
             <RadzenRow Gap="10px" Style="height: contain; width: 100%; border-top: var(--rz-grid-cell-border); padding: 0; overflow-y: scroll">
                 <RadzenColumn Size="12" SizeMD="12" Style="height: 100%; width: 100%; padding: 15px; padding-right: 0">
                     <RadzenStack Gap="10px" Style="height: contain; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                        <RadzenText Text="Nhập thông tin kết quả gia công" Style="color: var(--rz-primary-darker); font-size: 18px; font-weight: 600; height: contain; width: contain"></RadzenText>
+                        <RadzenText Text="Nhập thông tin ngày gia công" Style="color: var(--rz-primary-darker); font-size: 18px; font-weight: 600; height: contain; width: contain"></RadzenText>
                     </RadzenStack>
                     <RadzenCard Variant="Variant.Flat" Style="min-height: 300px; width: 100%; padding: 0px; margin-top: 10px; background-color: white">
                         <RadzenStack Style="height: 100%; width: 100%; padding: 10px;" Gap="0" Orientation="Orientation.Vertical">
@@ -64,7 +65,7 @@
                                 {
                                     string displayName = property.DisplayName;
 
-                                    if (property.DBName == KetQuaGC.KQGCDBName.SPID || property.DBName == KetQuaGC.KQGCDBName.MMID || property.DBName == KetQuaGC.KQGCDBName.NCID)
+                                    if (property.DBName == TienDoGCRow.DBName.MMID)
                                     {
                                         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 5px; border-bottom: var(--rz-grid-cell-border);">
                                             <RadzenStack Style="width: 20%;">
@@ -103,7 +104,7 @@
                                             </RadzenStack>
                                         </RadzenStack>
                                     }
-                                    else if (property.DBName == KetQuaGC.KQGCDBName.NVIDs || property.DBName == KetQuaGC.KQGCDBName.NGIDs) // Danh sach Nhan vien thuc hien // Danh sach NGType
+                                    else if (property.DBName == TienDoGCRow.DBName.NVIDs)
                                     {
                                         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 5px; border-bottom: var(--rz-grid-cell-border);">
                                             <RadzenStack Style="width: 20%;">
@@ -122,8 +123,8 @@
                                                                         AllowSelectAll="true" Multiple="true"
                                                                         TValue="IEnumerable<KeyValuePair<string, string>>"
                                                                         Data="@(ComboboxDSachKeys(property.DBName))"
-                                                                        SelectedItem="@((property.DBName == KetQuaGC.KQGCDBName.NVIDs)? NhanviensSelected : NGTypesSelected)"
-                                                                        Value="@((property.DBName == KetQuaGC.KQGCDBName.NVIDs)? NhanviensSelected : NGTypesSelected)"
+                                                                        SelectedItem="NhanviensSelected"
+                                                                        Value="NhanviensSelected"
                                                                         ValueChanged="@((IEnumerable<KeyValuePair<string, string>> args) => OnComboboxDSachKeysSelectedChanged(args, property))">
 
                                                             <!--Custom style off dropdownbox items-->
@@ -150,7 +151,7 @@
                                             </RadzenStack>
                                         </RadzenStack>
                                     }
-                                    else if (property.DBName == KetQuaGC.KQGCDBName.CaLamViec)
+                                    else if (property.DBName == TienDoGCRow.DBName.CaLamViec)
                                     {
                                         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 5px; border-bottom: var(--rz-grid-cell-border);">
                                             <RadzenStack Style="width: 20%;">
@@ -163,7 +164,7 @@
                                                                         Style="width: 100%; height: contain; font-size: 14px; font-weight: 600; color: black; background-color: white"
                                                                         Placeholder="@($" * chọn {displayName}")"
                                                                         TValue="string" Data="@(new List<string>(){"Ngày", "Đêm"})"
-                                                                        ValueChanged="@(async (args) =>{newKetQuaGC.CaLamViec.Value = args;await DefaultThongTinKetQuaGC_ValueIsOK(property);})">
+                                                                        ValueChanged="@(async (args) =>{newTDGCRow.CaLamViec.Value = args;await DefaultThongTinTienDoGCRow_ValueIsOK(property);})">
                                                             <!--Custom style off dropdownbox items-->
                                                             <Template>
                                                                 <span style="font-size: 14px; font-weight: 500; font-style: normal; color: black">@($"{context}")</span>
@@ -183,6 +184,21 @@
                                             </RadzenStack>
                                         </RadzenStack>
                                     }
+                                    else if (property.DBName == TienDoGCRow.DBName.SPID || property.DBName == TienDoGCRow.DBName.NCID)
+                                    {
+                                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 5px; padding-top: 10px; padding-bottom: 10px; border-bottom: var(--rz-grid-cell-border);">
+                                            <RadzenStack Style="width: 20%;">
+                                                <RadzenText Text="@(displayName)" Style="color: var(--rz-primary-darker); font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
+                                            </RadzenStack>
+                                            <RadzenStack Style="width: 80%; padding-left: 10px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
+                                                    <RadzenStack Style="width: 50%;">
+                                                        <RadzenText Text="@((property.DBName == TienDoGCRow.DBName.SPID) ? newTDGCRow.MaSanPham : newTDGCRow.TenCongDoan)" Style="color: var(--rz-primary-darker); font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
+                                                    </RadzenStack>
+                                                </RadzenStack>
+                                            </RadzenStack>
+                                        </RadzenStack>
+                                    }
                                     else
                                     {
                                         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 5px; border-bottom: var(--rz-grid-cell-border);">
@@ -196,7 +212,7 @@
                                                         {
                                                             <RadzenStack Style="width: 50%;">
                                                                 <RadzenTextBox class="custom-placeholder" Placeholder="@($" * nhập {displayName}")" Value="@property.Value?.ToString()" Style="font-size: 14px; height: contain; border-width: 1px; color: black; font-weight: 500"
-                                                                               @oninput="@(async (args) => { property.Value = args.Value; await DefaultThongTinKetQuaGC_ValueIsOK(property);})">
+                                                                               @oninput="@(async (args) => { property.Value = args.Value; await DefaultThongTinTienDoGCRow_ValueIsOK(property);})">
                                                                 </RadzenTextBox>
                                                             </RadzenStack>
                                                         }
@@ -209,7 +225,7 @@
                                                                                {
                                                                                     property.Value = args;
 
-                                                                                    await DefaultThongTinKetQuaGC_ValueIsOK(property);
+                                                                                    await DefaultThongTinTienDoGCRow_ValueIsOK(property);
                                                                                })" />
                                                             </RadzenStack>
                                                         }
@@ -222,13 +238,7 @@
                                                                                {
                                                                                     property.Value = args;
 
-                                                                                    if (property.DBName == KetQuaGC.KQGCDBName.SLNG)
-                                                                                    {
-                                                                                        newKetQuaGC.NGIDs.IsDisable = property.Value.Equals(0);
-                                                                                        NGTypesSelected = null;
-                                                                                    }
-
-                                                                                    await DefaultThongTinKetQuaGC_ValueIsOK(property);
+                                                                                    await DefaultThongTinTienDoGCRow_ValueIsOK(property);
                                                                                })" />
                                                             </RadzenStack>
                                                         }
@@ -239,6 +249,9 @@
                                                             <RadzenStack Style="width: 50%;">
                                                                 <RadzenDatePicker class="custom-datepicker custom-datepicker" Placeholder="@($"* nhập {displayName}")"
                                                                                   TValue="DateTime" Value="selectday" AllowClear="true"
+                                                                                  Min="@((property.DBName == TienDoGCRow.DBName.NgayGC)? DayStart.AddDays(-1) : DateTime.MinValue)"
+                                                                                  Max="@((property.DBName == TienDoGCRow.DBName.NgayGC)? DayEnd : DateTime.MaxValue)"
+                                                                                  InitialViewDate="DayStart.AddDays(-1)"
                                                                                   Change="@(async (args) =>
                                                                                     {
                                                                                         if (args != null)
@@ -250,7 +263,7 @@
                                                                                         {
                                                                                             property.Value = string.Empty;
                                                                                         }
-                                                                                        await DefaultThongTinKetQuaGC_ValueIsOK(property);
+                                                                                        await DefaultThongTinTienDoGCRow_ValueIsOK(property);
                                                                                     })"
                                                                                   ShowTime="false" HourFormat="12" DateFormat="@Common.FormatNoTime_yyyddMM" ParseInput="@Common.ParseDate_MMddyyyy" AllowInput="true"
                                                                                   Style="height: contain;">
@@ -274,63 +287,50 @@
                 </RadzenColumn>
             </RadzenRow>
             <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding-right: 15px; padding-top: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
-                <RadzenButton Disabled="@(!IsAllValueThongTinOK(properties))" Click="@(() => OnAddNewKetQuaGC())" Style="width: contain; height: 80%;" Icon="check" Text="Xác nhận thêm" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Default" Size="ButtonSize.Small" Variant="Variant.Filled" />
-                <RadzenButton Style="width: contain; height: 80%;" Icon="close" Text="Thoát" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" Click="@(() => OnCancelAddnewKetQuaGC())" />
+                <RadzenButton Disabled="@(!IsAllValueThongTinOK(properties))" Click="@(() => OnAddnewTienDoGCRow())" Style="width: contain; height: 80%;" Icon="check" Text="Xác nhận thêm" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Default" Size="ButtonSize.Small" Variant="Variant.Filled" />
+                <RadzenButton Style="width: contain; height: 80%;" Icon="close" Text="Thoát" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" Click="@(() => OnCancelAddnewTienDoGCRow())" />
             </RadzenStack>
         }
 
     </RadzenStack>
 </RadzenCard>
 
+
+
 @code {
-    [Parameter]
-    public int KHSXID { get; set; } = 1; // Gia su = 1
-    [Parameter]
-    public int SPID { get; set; } // ID San pham
-    [Parameter]
-    public int CDID { get; set; } // ID Cong doan
-    [Parameter]
-    public int MMID { get; set; } // ID May moc
 
-    private KetQuaGC newKetQuaGC = new();
+    [Parameter]
+    public int TDGCID { get; set; }
+    [Parameter]
+    public int SPID { get; set; }
+    [Parameter]
+    public int NCID { get; set; }
 
-    private List<SanPham> dsachSanPhams = new();
-    private List<NguyenCong> dsachNguyenCongs = new();
+    [Parameter]
+    public DateTime DayStart { get; set; }
+    [Parameter]
+    public DateTime DayEnd { get; set; }
+
+    private TienDoGCRow newTDGCRow = new();
     private List<MayMoc> dsachMayMocs = new();
     private List<NhanVien> dsachNhanViens = new();
-    private List<NGType> dsachNGTypes = new();
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        // Check KHSXID
-        if (KHSXID > 0)
-        {
-            newKetQuaGC.KHSXID.Value = KHSXID;
-            newKetQuaGC.SubMitDay.Value = DateTime.Now;
-            newKetQuaGC.SLNG.Value = 0;
+        // Load target ma san pham
+        newTDGCRow.SPID.Value = SPID;
+        newTDGCRow.MaSanPham = SQLServerServices.GetMaSanphamByID(SPID);
+        newTDGCRow.SPID.IsCheckValueOK = true;
+        newTDGCRow.SPID.NotifyMess = $"Giá trị hợp lệ";
+        // Load target cong doan
+        newTDGCRow.NCID.Value = NCID;
+        newTDGCRow.TenCongDoan = SQLServerServices.GetNguyenCongByID(NCID);
+        newTDGCRow.NCID.IsCheckValueOK = true;
+        newTDGCRow.NCID.NotifyMess = $"Giá trị hợp lệ";
+        //
+        newTDGCRow.TDGCID.Value = TDGCID;
 
-            // temp
-            // newKetQuaGC.SPID.Value = 56;
-            // newKetQuaGC.NCID.Value = 2;
-            // newKetQuaGC.ThoiGianGC.Value = 65;
-            // newKetQuaGC.SubMitDay.Value = DateTime.Parse("08/04/2024").Add(DateTime.Now.TimeOfDay);
-        }
-
-        // Check re-asign value
-        foreach (var property in newKetQuaGC.GetPropertiesValues().Where(pro => pro.Value != null && pro.AlowDisplay == true))
-        {
-            if (property.DBName == KetQuaGC.KQGCDBName.SLNG)
-            {
-                if (property.Value != null)
-                {
-                    newKetQuaGC.NGIDs.IsDisable = property.Value.Equals(0);
-                    NGTypesSelected = null;
-                }
-            }
-            await DefaultThongTinKetQuaGC_ValueIsOK(property);
-        }
-
-        await base.OnInitializedAsync();
+        base.OnInitialized();
     }
 
     #region Combobox
@@ -357,31 +357,7 @@
     {
         IEnumerable<KeyValuePair<string, string>> results = new List<KeyValuePair<string, string>>();
 
-        if (colName == KetQuaGC.KQGCDBName.SPID)
-        {
-            dsachSanPhams = SQLServerServices.GetDanhSachSanPham_ID_Name();
-            results = dsachSanPhams
-                    .Where(item => item.SP_SPID.Value != null)
-                    .Select(item => new KeyValuePair<string, string>(
-                        item.SP_SPID.Value?.ToString() ?? string.Empty,
-                        $"{item.SP_MaSP.Value?.ToString()?.Trim()} ({item.SP_TenSanPham.Value?.ToString()?.Trim()})"
-                    ))
-                    .Where(x => !string.IsNullOrEmpty(x.Value) && !string.IsNullOrEmpty(x.Key))
-                    .Distinct();
-        }
-        else if (colName == KetQuaGC.KQGCDBName.NCID)
-        {
-            dsachNguyenCongs = SQLServerServices.GetListNguyenCongs();
-            results = dsachNguyenCongs
-                    .Where(item => item.NCID.Value != null)
-                    .Select(item => new KeyValuePair<string, string>(
-                        item.NCID.Value?.ToString() ?? string.Empty,
-                        item.TenNguyenCong.Value?.ToString()?.Trim() ?? string.Empty
-                    ))
-                    .Where(x => !string.IsNullOrEmpty(x.Value) && !string.IsNullOrEmpty(x.Key))
-                    .Distinct();
-        }
-        else if (colName == KetQuaGC.KQGCDBName.MMID)
+        if (colName == TienDoGCRow.DBName.MMID)
         {
             dsachMayMocs = SQLServerServices.GetDanhSachMayMoc();
             results = dsachMayMocs
@@ -393,7 +369,7 @@
                     .Where(x => !string.IsNullOrEmpty(x.Value) && !string.IsNullOrEmpty(x.Key))
                     .Distinct();
         }
-        else if (colName == KetQuaGC.KQGCDBName.NVIDs)
+        else if (colName == TienDoGCRow.DBName.NVIDs)
         {
             dsachNhanViens = SQLServerServices.GetDanhSachNhanVien();
             results = dsachNhanViens
@@ -402,16 +378,6 @@
                         item.NVID.Value?.ToString() ?? string.Empty,
                         $"{item.MaNhanVien.Value?.ToString()?.Trim()} ({item.GetThongTinNhanVienByName("Tên nhân viên").GiaTri.Value?.ToString()?.Trim()})"
                     ))
-                    .Where(x => !string.IsNullOrEmpty(x.Value) && !string.IsNullOrEmpty(x.Key))
-                    .Distinct();
-        }
-        else if (colName == KetQuaGC.KQGCDBName.NGIDs)
-        {
-            (dsachNGTypes, string errorMess) = SQLServerServices.GetDanhSachNGType();
-
-            results = dsachNGTypes
-                    .Where(item => item.NGID.Value != null)
-                    .Select(item => new KeyValuePair<string, string>(item.NGID.Value?.ToString() ?? string.Empty, $"{item.NoiDungNG.Value?.ToString()?.Trim()}"))
                     .Where(x => !string.IsNullOrEmpty(x.Value) && !string.IsNullOrEmpty(x.Key))
                     .Distinct();
         }
@@ -424,37 +390,17 @@
 
     private async Task OnComboboxDSachKeysSelectedChanged(IEnumerable<KeyValuePair<string, string>> selectedValues, Propertyy propertyy)
     {
-        if (propertyy.DBName == KetQuaGC.KQGCDBName.SPID)
-        {
-            var targetItem = dsachSanPhams.FirstOrDefault(sp => sp.SP_SPID.Value?.ToString()?.Trim() == selectedValues.FirstOrDefault().Key);
-
-            if (targetItem != null)
-            {
-                newKetQuaGC.SPID.Value = targetItem.SP_SPID.Value;
-            }
-            else newKetQuaGC.SPID.Value = null;
-        }
-        else if (propertyy.DBName == KetQuaGC.KQGCDBName.NCID)
-        {
-            var targetItem = dsachNguyenCongs.FirstOrDefault(sp => sp.NCID.Value?.ToString()?.Trim() == selectedValues.FirstOrDefault().Key);
-
-            if (targetItem != null)
-            {
-                newKetQuaGC.NCID.Value = targetItem.NCID.Value;
-            }
-            else newKetQuaGC.NCID.Value = null;
-        }
-        else if (propertyy.DBName == KetQuaGC.KQGCDBName.MMID)
+        if (propertyy.DBName == TienDoGCRow.DBName.MMID)
         {
             var targetItem = dsachMayMocs.FirstOrDefault(sp => sp.MMID.Value?.ToString()?.Trim() == selectedValues.FirstOrDefault().Key);
 
             if (targetItem != null)
             {
-                newKetQuaGC.MMID.Value = targetItem.MMID.Value;
+                newTDGCRow.MMID.Value = targetItem.MMID.Value;
             }
-            else newKetQuaGC.MMID.Value = null;
+            else newTDGCRow.MMID.Value = null;
         }
-        else if (propertyy.DBName == KetQuaGC.KQGCDBName.NVIDs)
+        else if (propertyy.DBName == TienDoGCRow.DBName.NVIDs)
         {
             if (selectedValues != null && selectedValues.Any())
             {
@@ -462,7 +408,7 @@
 
                 var targetItems = dsachNhanViens.Where(nv =>
                 {
-                    var nvid = nv.NVID.Value?.ToString() ?? string.Empty;
+                    var nvid = nv.NVID.Value?.ToString()?.Trim() ?? string.Empty;
                     return selectedNvids.Contains(nvid);
                 });
 
@@ -470,64 +416,31 @@
                 {
                     NhanviensSelected = selectedValues.ToList();
 
-                    newKetQuaGC.DSNhanVien.AddRange(targetItems);
+                    newTDGCRow.DSNhanVien.AddRange(targetItems);
 
-                    newKetQuaGC.NVIDs.Value = string.Join(",", targetItems
+                    newTDGCRow.NVIDs.Value = string.Join(",", targetItems
                                             .Select(nv => nv.NVID.Value?.ToString()?.Trim() ?? string.Empty)
                                             .Where(id => !string.IsNullOrEmpty(id)));
                 }
-                else newKetQuaGC.NVIDs.Value = null;
+                else newTDGCRow.NVIDs.Value = null;
             }
             else
             {
                 NhanviensSelected = null;
 
-                newKetQuaGC.DSNhanVien = new();
-                newKetQuaGC.NVIDs.Value = null;
-            }
-        }
-        else if (propertyy.DBName == KetQuaGC.KQGCDBName.NGIDs)
-        {
-            if (selectedValues != null && selectedValues.Any())
-            {
-                var selectedNGTypeids = selectedValues.Select(vl => vl.Key).ToHashSet();
-
-                var targetItems = dsachNGTypes.Where(ng =>
-                {
-                    var ngid = ng.NGID.Value?.ToString() ?? string.Empty;
-                    return selectedNGTypeids.Contains(ngid);
-                });
-
-                if (targetItems.Any())
-                {
-                    NGTypesSelected = selectedValues.ToList();
-
-                    newKetQuaGC.DSNGType.AddRange(targetItems);
-
-                    newKetQuaGC.NGIDs.Value = string.Join(",", targetItems
-                                            .Select(ng => ng.NGID.Value?.ToString()?.Trim() ?? string.Empty)
-                                            .Where(id => !string.IsNullOrEmpty(id)));
-                }
-                else newKetQuaGC.NGIDs.Value = null;
-            }
-            else
-            {
-                NGTypesSelected = null;
-
-                newKetQuaGC.DSNGType = new();
-                newKetQuaGC.NGIDs.Value = null;
+                newTDGCRow.DSNhanVien = new();
+                newTDGCRow.NVIDs.Value = null;
             }
         }
 
-        await DefaultThongTinKetQuaGC_ValueIsOK(propertyy);
+
+        await DefaultThongTinTienDoGCRow_ValueIsOK(propertyy);
     }
 
     #endregion
 
-
-
     // Kiem tra thong tin mac dinh
-    private async Task DefaultThongTinKetQuaGC_ValueIsOK(Propertyy propertyy)
+    private async Task DefaultThongTinTienDoGCRow_ValueIsOK(Propertyy propertyy)
     {
         await Task.Run(() =>
         {
@@ -575,38 +488,14 @@
         });
     }
 
-    // Insert new KetQuaGC to database
-    private async Task OnAddNewKetQuaGC()
+    // Insert new TienDoGCRow to database
+    private async Task OnAddnewTienDoGCRow()
     {
-        bool? confirm = await DialogService.Confirm($"Xác nhận thêm kết quả gia công này?", "Xác nhận", new ConfirmOptions() { OkButtonText = "Đồng ý", CancelButtonText = "Hủy" });
+        bool? confirm = await DialogService.Confirm($"Xác nhận thêm?", "Xác nhận", new ConfirmOptions() { OkButtonText = "Đồng ý", CancelButtonText = "Hủy" });
 
         if (confirm.Value)
         {
-            // Insert new KetQuaGC
-            (int newkqgcID, string errorMess) = SQLServerServices.InsertKetQuaGC(newKetQuaGC);
-
-            if (newkqgcID > 0)
-            {
-                if (newkqgcID < 0)
-                {
-                    await DialogService.Alert($"{errorMess}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
-                }
-                else
-                {
-                    ShowNotification("Success!", NotificationSeverity.Success, 3000);
-
-                    bool? success = await DialogService.Alert($"Đã thêm kết quả gia công!", "<strong><span style='color: green'>Success!</span></strong>", new AlertOptions() { OkButtonText = "Thoát", ShowClose = true });
-
-                    if (success.Value)
-                    {
-                        DialogService.Close(newkqgcID);
-                    }
-                }
-            }
-            else
-            {
-                await DialogService.Alert($"{errorMess}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
-            }
+            DialogService.Close(newTDGCRow);
         }
     }
 
@@ -627,23 +516,9 @@
     }
 
     // Cancel add new
-    private void OnCancelAddnewKetQuaGC()
+    private void OnCancelAddnewTienDoGCRow()
     {
         DialogService.Close(null);
     }
 
-
-    // Notification
-    void ShowNotification(string message, NotificationSeverity notifytype, double time)
-    {
-        NotificationMessage notify = new NotificationMessage
-            {
-                Style = "position: fixed; top: 0; right: 0;",
-                Severity = notifytype,
-                Summary = message,
-                Duration = time
-            };
-
-        NotificationService.Notify(notify);
-    }
 }

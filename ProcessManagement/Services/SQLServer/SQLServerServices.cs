@@ -9,6 +9,7 @@ using ProcessManagement.Models.KHSXs;
 using ProcessManagement.Models.MAYMOC;
 using ProcessManagement.Models.NHANVIEN;
 using ProcessManagement.Models.SANPHAM;
+using ProcessManagement.Models.TienDoGCs;
 using System.Data;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -7444,6 +7445,7 @@ namespace ProcessManagement.Services.SQLServer
         }
 
         #endregion
+
         // ------------------------------------------------------------------------------------- //
         #region Table_ThongTinSanPham
         public List<ThongTinSanPham> GetDanhSachThongTinSanPham(object? spID)
@@ -7610,7 +7612,7 @@ namespace ProcessManagement.Services.SQLServer
 
         // ------------------------------------------------------------------------------------- //
         #region Table_KetQuaGC
-        // Insert new KetQuaGC
+        // Insert 
         public (int, string) InsertKetQuaGC(KetQuaGC ketquaGC)
         {
             int result = -1;
@@ -7696,8 +7698,7 @@ namespace ProcessManagement.Services.SQLServer
 
             return (result, errorMess);
         }
-
-        // Delete KetQuaGC
+        // Delete 
         public (bool, string) DeleteKetQuaGC(int kqgcId)
         {
             // Check for valid ID
@@ -7724,8 +7725,7 @@ namespace ProcessManagement.Services.SQLServer
                 return (false, $"Error: {ex.Message}"); // Return false and the error message
             }
         }
-
-        // Update KetQuaGC
+        // Update 
         public (int, string) UpdateKetQuaGC(KetQuaGC ketquaGC, int ketquaGCId)
         {
             int result = -1;
@@ -7809,35 +7809,46 @@ namespace ProcessManagement.Services.SQLServer
 
             return (result, errorMess);
         }
-
-        // Get list all KetQuaGC
+        // Get  
         public (List<KetQuaGC>, string) GetListKetQuaGC(object? kqgcId = null)
         {
             List<KetQuaGC> listKetQuaGC = new();
+
             string errorMessage = string.Empty;
+
             using (var connection = new SqlConnection(connectionString))
             {
                 try
                 {
                     connection.Open();
+
                     using var command = connection.CreateCommand();
+
                     command.CommandText = $"SELECT * FROM [{KQGCDBName.Table_KetQuaGC}]";
+
                     if (kqgcId != null)
                     {
                         command.CommandText += $" WHERE [{KQGCDBName.KQGCID}] = @KQGCID";
+
                         command.Parameters.AddWithValue("@KQGCID", kqgcId);
                     }
+
                     using var reader = command.ExecuteReader();
+
                     while (reader.Read())
                     {
                         KetQuaGC ketQuaGC = new();
+
                         List<Propertyy> rowItems = ketQuaGC.GetPropertiesValues();
+
                         foreach (var item in rowItems)
                         {
                             string? columnName = item.DBName;
+
                             if (!string.IsNullOrEmpty(columnName) && reader.GetOrdinal(columnName) != -1)
                             {
                                 object columnValue = reader[columnName];
+
                                 item.Value = columnValue == DBNull.Value ? null : columnValue;
                             }
                         }
@@ -7846,62 +7857,73 @@ namespace ProcessManagement.Services.SQLServer
                         {
                             ketQuaGC.DSDongThung = GetListDongThung(ketQuaGC.KQGCID.Value);
                         }
+
                         listKetQuaGC.Add(ketQuaGC);
                     }
                 }
                 catch (Exception ex)
                 {
                     errorMessage = $"Error: {ex.Message}";
+
                     listKetQuaGC.Clear(); // Clear the list in case of error
                 }
             }
             return (listKetQuaGC, errorMessage);
         }
 
-        // Get KetQuaGC by propertyName and propertyValue
-        public (List<KetQuaGC>, string) GetListKetQuaGCByProperty(string propertyName, object propertyValue)
+        public (List<KetQuaGC>, string) GetListKetQuaGC(Dictionary<string, object?> parameters)
         {
             List<KetQuaGC> listKetQuaGC = new();
-            string errorMessage = string.Empty;
 
-            if (string.IsNullOrEmpty(propertyName) || propertyValue == null)
-            {
-                return (listKetQuaGC, "Error input value");
-            }
+            string errorMessage = string.Empty;
 
             using (var connection = new SqlConnection(connectionString))
             {
-                SqlTransaction? transaction = null;
                 try
                 {
                     connection.Open();
-                    transaction = connection.BeginTransaction();
 
-                    var command = connection.CreateCommand();
-                    command.Transaction = transaction;
+                    var conditions = new List<string>();
+
+                    using var command = connection.CreateCommand();
+
                     command.CommandText = $"SELECT * FROM [{KQGCDBName.Table_KetQuaGC}]";
 
-                    if (!string.IsNullOrEmpty(propertyName) && propertyValue != null)
+                    // Process each parameter in the dictionary
+                    foreach (var param in parameters)
                     {
-                        command.CommandText += $" WHERE [{propertyName}] = @PropertyValue";
-                        command.Parameters.AddWithValue("@PropertyValue", propertyValue ?? DBNull.Value);
+                        if (param.Value != null)
+                        {
+                            conditions.Add($"[{param.Key}] = @{param.Key}");
+
+                            command.Parameters.AddWithValue($"@{param.Key}", param.Value);
+                        }
+                    }
+
+                    if (conditions.Any())
+                    {
+                        command.CommandText += " WHERE " + string.Join(" AND ", conditions);
                     }
 
                     using var reader = command.ExecuteReader();
+
                     while (reader.Read())
                     {
                         KetQuaGC ketQuaGC = new();
+
                         List<Propertyy> rowItems = ketQuaGC.GetPropertiesValues();
+
                         foreach (var item in rowItems)
                         {
                             string? columnName = item.DBName;
-                            if (!string.IsNullOrEmpty(columnName) && reader.GetOrdinal(columnName) != -1) // Check if the column exists
+
+                            if (!string.IsNullOrEmpty(columnName) && reader.GetOrdinal(columnName) != -1)
                             {
                                 object columnValue = reader[columnName];
+
                                 item.Value = columnValue == DBNull.Value ? null : columnValue;
                             }
                         }
-
                         // Get DongThung for this KetQuaGC
                         if (ketQuaGC.KQGCID.Value != null)
                         {
@@ -7910,28 +7932,21 @@ namespace ProcessManagement.Services.SQLServer
 
                         listKetQuaGC.Add(ketQuaGC);
                     }
-
-                    transaction.Commit();
                 }
                 catch (Exception ex)
                 {
                     errorMessage = $"Error: {ex.Message}";
-                    transaction?.Rollback();
+
                     listKetQuaGC.Clear(); // Clear the list in case of error
                 }
-                finally
-                {
-                    transaction?.Dispose();
-                }
             }
-
             return (listKetQuaGC, errorMessage);
         }
-
         #endregion
 
+        // ------------------------------------------------------------------------------------- //
         #region KHSX_DongThung
-        // Insert new DongThung for KetQuaGC
+        // Insert 
         public (int, string) InsertDongThung(SqlConnection connection, int kqgcId, DongThung dongThung)
         {
             int result = -1;
@@ -8002,8 +8017,7 @@ namespace ProcessManagement.Services.SQLServer
 
             return (result, errorMess);
         }
-        // Update DongThung
-
+        // Update 
         public (int, string) UpdateDongThung(SqlConnection connection, int kqgcId, DongThung dongThung)
         {
             int result = -1;
@@ -8031,7 +8045,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 string updateSet = string.Join(", ", properties.Select(p => $"[{p.DBName}] = @{Regex.Replace(p.DBName ?? string.Empty, @"[^\w]+", "")}"));
 
-                command.CommandText = $@"UPDATE [{DongThungDBName.Table_DongThung}] SET {updateSet} WHERE [{DongThungDBName.KQGCID}] = @KQGCID";
+                command.CommandText = $@"UPDATE [{DongThungDBName.Table_DongThung}] SET {updateSet} WHERE [{DongThungDBName.DTID}] = '{dongThung.DTID.Value}' AND [{DongThungDBName.KQGCID}] = @KQGCID";
 
                 // Add parameters
                 foreach (var prop in properties)
@@ -8074,8 +8088,7 @@ namespace ProcessManagement.Services.SQLServer
 
             return (result, errorMess);
         }
-
-        // GetDongThung
+        // Get
         private List<DongThung> GetListDongThung(object ketQuaGCID)
         {
             List<DongThung> listDongThung = new();
@@ -8122,6 +8135,558 @@ namespace ProcessManagement.Services.SQLServer
                 }
             }
             return listDongThung;
+        }
+        #endregion
+
+        // ------------------------------------------------------------------------------------- //
+        #region TDGC_TienDoGC
+        // Insert
+        public (int, string) InsertTienDoGC(TienDoGC tiendoGC)
+        {
+            int result = -1;
+            string errorMess = string.Empty;
+
+            if (tiendoGC == null) return (result, "Error: TienDoGC is null");
+
+            List<Propertyy> properties = tiendoGC.GetPropertiesValues()
+                .Where(po => po.AlowDatabase == true && po.Value != null)
+                .ToList();
+
+            if (properties.Count == 0)
+            {
+                return (result, "Error: No valid properties to insert.");
+            }
+
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+            using var transaction = connection.BeginTransaction();
+
+            try
+            {
+                var command = connection.CreateCommand();
+                command.Transaction = transaction;
+
+                string columns = string.Join(", ", properties.Select(p => $"[{p.DBName}]"));
+                string parameters = string.Join(", ", properties.Select(p => $"@{Regex.Replace(p.DBName ?? string.Empty, @"[^\w]+", "")}"));
+                command.CommandText = $@"INSERT INTO [{TienDoGC.DBName.Table_TienDoGC}] ({columns}) OUTPUT INSERTED.{TienDoGC.DBName.TDGCID} VALUES ({parameters})";
+
+                foreach (var prop in properties)
+                {
+                    string parameterName = $"@{Regex.Replace(prop.DBName ?? string.Empty, @"[^\w]+", "")}";
+                    object? parameterValue = prop.Value ?? DBNull.Value;
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                object? rs = command.ExecuteScalar();
+                if (rs != null && int.TryParse(rs.ToString(), out result) && result > 0)
+                {
+                    if (tiendoGC.DSachTienDoRows != null && tiendoGC.DSachTienDoRows.Any())
+                    {
+                        foreach (var tiendorow in tiendoGC.DSachTienDoRows)
+                        {
+                            // asign tdgcid
+                            tiendorow.TDGCID.Value = result;
+                            // Pass the transaction here
+                            var (tiendorowResult, tiendogcrowError) = InsertTienDoGCRow(connection, transaction, tiendorow);
+                            if (tiendorowResult == -1)
+                            {
+                                transaction.Rollback();
+                                return (-1, $"Error inserting TienDoGCRow: {tiendogcrowError}");
+                            }
+                        }
+                    }
+                    transaction.Commit();
+                }
+                else
+                {
+                    result = -1;
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMess = $"Error: {ex.Message}";
+                try
+                {
+                    transaction.Rollback();
+                }
+                catch (Exception rollbackEx)
+                {
+                    errorMess += $" | Rollback Error: {rollbackEx.Message}";
+                }
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+        // Delete
+        public (bool, string) DeleteTienDoGC(int tdgcid)
+        {
+            // Check for valid ID
+            if (tdgcid <= 0)
+            {
+                return (false, "Error: Invalid TDGCID.");
+            }
+
+            using var connection = new SqlConnection(connectionString);
+
+            connection.Open();
+
+            string query = $"DELETE FROM [{TienDoGC.DBName.Table_TienDoGC}] WHERE [{TienDoGC.DBName.TDGCID}] = @TDGCID";
+
+            using var command = new SqlCommand(query, connection);
+
+            command.Parameters.AddWithValue("@TDGCID", tdgcid);
+
+            try
+            {
+                int rowsAffected = command.ExecuteNonQuery();
+
+                return (rowsAffected > 0, string.Empty); // Return true if a row was deleted
+            }
+            catch (Exception ex)
+            {
+                return (false, $"Error: {ex.Message}"); // Return false and the error message
+            }
+        }
+        // Update
+        public (int, string) UpdateTienDoGC(TienDoGC tiendoGC)
+        {
+            int result = -1;
+            string errorMess = string.Empty;
+
+            if (tiendoGC == null) return (result, "Error: TienDoGC is null");
+
+            List<Propertyy> properties = tiendoGC.GetPropertiesValues()
+                .Where(po => po.AlowDatabase == true && po.Value != null)
+                .ToList();
+
+            if (properties.Count == 0)
+            {
+                return (result, "Error: No valid properties to update.");
+            }
+
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+            using var transaction = connection.BeginTransaction();
+
+            try
+            {
+                var command = connection.CreateCommand();
+                command.Transaction = transaction;
+
+                // Update main TienDoGC record
+                string updateSet = string.Join(", ", properties.Select(p =>
+                    $"[{p.DBName}] = @{Regex.Replace(p.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $@"UPDATE [{TienDoGC.DBName.Table_TienDoGC}] 
+                                        SET {updateSet} 
+                                        WHERE [{TienDoGC.DBName.TDGCID}] = @TDGCID";
+
+                foreach (var prop in properties)
+                {
+                    string parameterName = $"@{Regex.Replace(prop.DBName ?? string.Empty, @"[^\w]+", "")}";
+                    object? parameterValue = prop.Value ?? DBNull.Value;
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                command.Parameters.AddWithValue("@TDGCID", tiendoGC.TDGCID.Value);
+
+                result = command.ExecuteNonQuery();
+                if (result > 0)
+                {
+                    // Update child records if they exist
+                    if (tiendoGC.DSachTienDoRows != null && tiendoGC.DSachTienDoRows.Any())
+                    {
+                        foreach (var tiendorow in tiendoGC.DSachTienDoRows)
+                        {
+                            var (rowResult, rowError) = UpdateTienDoGCRow(connection, transaction, tiendoGC.TDGCID.Value, tiendorow);
+
+                            if (rowResult == -1)
+                            {
+                                transaction.Rollback();
+                                return (-1, $"Error updating TienDoGCRow: {rowError}");
+                            }
+                        }
+                    }
+
+                    transaction.Commit();
+                }
+                else
+                {
+                    result = -1;
+                    errorMess = "No rows were updated. The specified TienDoGC may not exist.";
+                    transaction.Rollback();
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMess = $"Error: {ex.Message}";
+                try
+                {
+                    transaction.Rollback();
+                }
+                catch (Exception rollbackEx)
+                {
+                    errorMess += $" | Rollback Error: {rollbackEx.Message}";
+                }
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+        // Get 
+        public (List<TienDoGC>, string) GetListTienDoGC(object? tdgcid = null, object? ncid = null, object? khsxid = null)
+        {
+            List<TienDoGC> listTienDoGC = new();
+
+            string errorMessage = string.Empty;
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                try
+                {
+                    connection.Open();
+
+                    var conditions = new List<string>();
+                    var command = connection.CreateCommand();
+                    command.CommandText = $"SELECT * FROM [{TienDoGC.DBName.Table_TienDoGC}]";
+
+                    // Helper function to add condition if value is not null
+                    void AddCondition(object? value, string fieldName, string paramName)
+                    {
+                        if (value != null)
+                        {
+                            conditions.Add($"[{fieldName}] = @{paramName}");
+                            command.Parameters.AddWithValue($"@{paramName}", value);
+                        }
+                    }
+
+                    // Add all potential conditions
+                    AddCondition(tdgcid, TienDoGC.DBName.TDGCID, "TDGCID");
+                    AddCondition(khsxid, TienDoGC.DBName.KHSXID, "KHSXID");
+                    AddCondition(ncid, TienDoGC.DBName.NCID, "NCID");
+                    // Add more conditions as needed...
+
+                    // Combine all conditions with AND
+                    if (conditions.Any())
+                    {
+                        command.CommandText += " WHERE " + string.Join(" AND ", conditions);
+                    }
+
+                    using var reader = command.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        TienDoGC tiendoGC = new();
+
+                        List<Propertyy> rowItems = tiendoGC.GetPropertiesValues();
+
+                        foreach (var item in rowItems)
+                        {
+                            string? columnName = item.DBName;
+
+                            if (!string.IsNullOrEmpty(columnName) && reader.GetOrdinal(columnName) != -1)
+                            {
+                                object columnValue = reader[columnName];
+
+                                item.Value = columnValue == DBNull.Value ? null : columnValue;
+                            }
+                        }
+                        // Get danh sach TienDoGCRow
+                        if (tiendoGC.TDGCID.Value != null)
+                        {
+                            // Load ma san pham
+                            tiendoGC.MaSanPham = GetMaSanphamByID(tiendoGC.SPID.Value);
+                            // Load cong doan
+                            tiendoGC.TenCongDoan = GetNguyenCongByID(tiendoGC.NCID.Value);
+
+                            tiendoGC.DSachTienDoRows = GetListTienDoGCRow(tiendoGC.TDGCID.Value);
+                        }
+                        listTienDoGC.Add(tiendoGC);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    errorMessage = $"Error: {ex.Message}";
+                    listTienDoGC.Clear(); // Clear the list in case of error
+                }
+            }
+            return (listTienDoGC, errorMessage);
+        }
+
+        public (List<TienDoGC>, string) GetListTienDoGC(Dictionary<string, object?> parameters)
+        {
+            List<TienDoGC> listTienDoGC = new();
+
+            string errorMessage = string.Empty;
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                try
+                {
+                    connection.Open();
+
+                    var conditions = new List<string>();
+                    var command = connection.CreateCommand();
+                    command.CommandText = $"SELECT * FROM [{TienDoGC.DBName.Table_TienDoGC}]";
+
+                    // Process each parameter in the dictionary
+                    foreach (var param in parameters)
+                    {
+                        if (param.Value != null)
+                        {
+                            conditions.Add($"[{param.Key}] = @{param.Key}");
+
+                            command.Parameters.AddWithValue($"@{param.Key}", param.Value);
+                        }
+                    }
+
+                    if (conditions.Any())
+                    {
+                        command.CommandText += " WHERE " + string.Join(" AND ", conditions);
+                    }
+
+                    using var reader = command.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        TienDoGC tiendoGC = new();
+
+                        List<Propertyy> rowItems = tiendoGC.GetPropertiesValues();
+
+                        foreach (var item in rowItems)
+                        {
+                            string? columnName = item.DBName;
+
+                            if (!string.IsNullOrEmpty(columnName) && reader.GetOrdinal(columnName) != -1)
+                            {
+                                object columnValue = reader[columnName];
+
+                                item.Value = columnValue == DBNull.Value ? null : columnValue;
+                            }
+                        }
+                        // Get danh sach TienDoGCRow
+                        if (tiendoGC.TDGCID.Value != null)
+                        {
+                            // Load ma san pham
+                            tiendoGC.MaSanPham = GetMaSanphamByID(tiendoGC.SPID.Value);
+                            // Load cong doan
+                            tiendoGC.TenCongDoan = GetNguyenCongByID(tiendoGC.NCID.Value);
+
+                            tiendoGC.DSachTienDoRows = GetListTienDoGCRow(tiendoGC.TDGCID.Value);
+                        }
+                        listTienDoGC.Add(tiendoGC);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    errorMessage = $"Error: {ex.Message}";
+                    listTienDoGC.Clear(); // Clear the list in case of error
+                }
+            }
+            return (listTienDoGC, errorMessage);
+        }
+
+        #endregion
+
+        // ------------------------------------------------------------------------------------- //
+        #region TDGC_TienDoGCRow
+        // Insert
+        public (int, string) InsertTienDoGCRow(SqlConnection connection, SqlTransaction transaction, TienDoGCRow tiendogcRow)
+        {
+            int result = -1;
+            string errorMess = string.Empty;
+
+            if (tiendogcRow == null) return (result, "Error: TienDoGCRow is null");
+
+            List<Propertyy> properties = tiendogcRow.GetPropertiesValues()
+                .Where(po => po.AlowDatabase == true && po.Value != null)
+                .ToList();
+
+            if (properties.Count == 0)
+            {
+                return (result, "Error: No valid properties to insert.");
+            }
+
+            try
+            {
+                var command = connection.CreateCommand();
+                command.Transaction = transaction; // Set the transaction from parent
+
+                string columns = string.Join(", ", properties.Select(p => $"[{p.DBName}]"));
+                string parameters = string.Join(", ", properties.Select(p => $"@{Regex.Replace(p.DBName ?? string.Empty, @"[^\w]+", "")}"));
+                command.CommandText = $@"INSERT INTO [{TienDoGCRow.DBName.Table_TienDoGCRow}] ({columns}) OUTPUT INSERTED.{TienDoGCRow.DBName.TDGCRowID} VALUES ({parameters})";
+
+                foreach (var prop in properties)
+                {
+                    string parameterName = $"@{Regex.Replace(prop.DBName ?? string.Empty, @"[^\w]+", "")}";
+                    object? parameterValue = prop.Value ?? DBNull.Value;
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                object? tdgcrowid = command.ExecuteScalar();
+                if (tdgcrowid != null && int.TryParse(tdgcrowid.ToString(), out result) && result > 0)
+                {
+
+                }
+                else result = -1;
+
+            }
+            catch (Exception ex)
+            {
+                errorMess = $"Error: {ex.Message}";
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
+        public (int, string) InsertSingleTienDoGCRow(int tdgcid, TienDoGCRow tiendoGCRow)
+        {
+            int result = -1;
+            string errorMess = string.Empty;
+
+            if (tiendoGCRow == null)
+                return (result, "Error: TienDoGCRow is null");
+
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+            using var transaction = connection.BeginTransaction();
+
+            try
+            {
+                var (tdgcrowID, rowError) = InsertTienDoGCRow(connection, transaction, tiendoGCRow);
+                if (tdgcrowID == -1)
+                {
+                    transaction.Rollback();
+                    return (-1, $"Error inserting TienDoGCRow: {rowError}");
+                }
+
+                transaction.Commit();
+                result = tdgcid;
+            }
+            catch (Exception ex)
+            {
+                errorMess = $"Error: {ex.Message}";
+                try
+                {
+                    transaction.Rollback();
+                }
+                catch (Exception rollbackEx)
+                {
+                    errorMess += $" | Rollback Error: {rollbackEx.Message}";
+                }
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+        // Update
+        public (int, string) UpdateTienDoGCRow(SqlConnection connection, SqlTransaction transaction, object? tiendogcID, TienDoGCRow tiendogcRow)
+        {
+            int result = -1;
+            string errorMess = string.Empty;
+
+            // Check for null input
+            if (tiendogcRow == null) return (result, "Error: TienDoGCRow is null");
+
+            List<Propertyy> properties = tiendogcRow.GetPropertiesValues()
+                .Where(po => po.AlowDatabase == true && po.Value != null)
+                .ToList();
+
+            // Validate properties before proceeding
+            if (properties.Count == 0)
+            {
+                return (result, "Error: No valid properties to update.");
+            }
+
+            try
+            {
+                var command = connection.CreateCommand();
+                command.Transaction = transaction; // Use the transaction passed from parent
+
+                string updateSet = string.Join(", ", properties.Select(p =>
+                    $"[{p.DBName}] = @{Regex.Replace(p.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $@"UPDATE [{TienDoGCRow.DBName.Table_TienDoGCRow}] 
+                                        SET {updateSet} 
+                                        WHERE [{TienDoGCRow.DBName.TDGCRowID}] = '{tiendogcRow.TDGCRowID.Value}' 
+                                        AND [{TienDoGCRow.DBName.TDGCID}] = @TDGCID";
+
+                // Add parameters
+                foreach (var prop in properties)
+                {
+                    string parameterName = $"@{Regex.Replace(prop.DBName ?? string.Empty, @"[^\w]+", "")}";
+                    object? parameterValue = prop.Value ?? DBNull.Value;
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                // Add TDGCID parameter
+                command.Parameters.AddWithValue("@TDGCID", tiendogcID);
+
+                // Execute command
+                result = command.ExecuteNonQuery();
+                if (result <= 0)
+                {
+                    result = -1;
+                    errorMess = "No rows were updated. The specified TienDoGCRow may not exist.";
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMess = $"Error: {ex.Message}";
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+        // Get 
+        private List<TienDoGCRow> GetListTienDoGCRow(object tdgcID)
+        {
+            List<TienDoGCRow> listTienDoGCRow = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                try
+                {
+                    connection.Open();
+
+                    using var command = connection.CreateCommand();
+
+                    command.CommandText = $"SELECT * FROM [{TienDoGCRow.DBName.Table_TienDoGCRow}] WHERE [{TienDoGCRow.DBName.TDGCID}] = @TDGCID";
+
+                    command.Parameters.AddWithValue("@TDGCID", tdgcID);
+
+                    using var reader = command.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        TienDoGCRow tiendogcrow = new();
+
+                        List<Propertyy> rowItems = tiendogcrow.GetPropertiesValues();
+
+                        foreach (var item in rowItems)
+                        {
+                            string? columnName = item.DBName;
+
+                            if (!string.IsNullOrEmpty(columnName) && reader.GetOrdinal(columnName) != -1)
+                            {
+                                object columnValue = reader[columnName];
+
+                                item.Value = columnValue == DBNull.Value ? null : columnValue;
+                            }
+                        }
+
+                        listTienDoGCRow.Add(tiendogcrow);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Log the exception or handle it as appropriate
+                    Console.WriteLine($"Error in GetListDongThung: {ex.Message}");
+                }
+            }
+            return listTienDoGCRow;
         }
         #endregion
 
@@ -8198,7 +8763,6 @@ namespace ProcessManagement.Services.SQLServer
 
             return (result, errorMess);
         }
-
         // Get list all NGType
         public (List<NGType>, string) GetDanhSachNGType(object? ngtypeId = null)
         {
@@ -8267,7 +8831,7 @@ namespace ProcessManagement.Services.SQLServer
                 var command = connection.CreateCommand();
 
                 command.CommandText = $"SELECT [{NGType.NGTypeDBName.NoiDungNG}] FROM [{NGType.NGTypeDBName.Table_NGType}] WHERE [{NGType.NGTypeDBName.NGID}] = @ID";
-                
+
                 command.Parameters.AddWithValue("@ID", id ?? DBNull.Value);
 
                 using var reader = command.ExecuteReader();

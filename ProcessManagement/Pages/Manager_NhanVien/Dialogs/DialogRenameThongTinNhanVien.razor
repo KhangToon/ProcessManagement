@@ -28,15 +28,15 @@
                     </RadzenStack>
 
                     <RadzenStack Style="width: 50%;">
-                        <RadzenAlert Visible="@(!ThongTinNhanVien.LoaiThongTin.TenLoaiThongTin.IsValueOK)" Text="@ThongTinNhanVien.LoaiThongTin.TenLoaiThongTin.NotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
-                        <RadzenAlert Visible="@(ThongTinNhanVien.LoaiThongTin.TenLoaiThongTin.IsValueOK)" Text="@ThongTinNhanVien.LoaiThongTin.TenLoaiThongTin.NotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Success" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                        <RadzenAlert Visible="@(!ThongTinNhanVien.LoaiThongTin.TenLoaiThongTin.IsCheckValueOK)" Text="@ThongTinNhanVien.LoaiThongTin.TenLoaiThongTin.NotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                        <RadzenAlert Visible="@(ThongTinNhanVien.LoaiThongTin.TenLoaiThongTin.IsCheckValueOK)" Text="@ThongTinNhanVien.LoaiThongTin.TenLoaiThongTin.NotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Success" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
                     </RadzenStack>
                 }
             </RadzenStack>
         </RadzenStack>
     </RadzenStack>
     <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding-top: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
-        <RadzenButton Disabled="@(!(ThongTinNhanVien.LoaiThongTin.TenLoaiThongTin.IsValueOK))" Style="width: contain;" Icon="check" Text="Lưu thay đổi" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Dark" Variant="Variant.Flat" Click="@(() => OnSaveNewName())" />
+        <RadzenButton Disabled="@(!(ThongTinNhanVien.LoaiThongTin.TenLoaiThongTin.IsCheckValueOK))" Style="width: contain;" Icon="check" Text="Lưu thay đổi" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Dark" Variant="Variant.Flat" Click="@(() => OnSaveNewName())" />
         <RadzenButton Style="width: 120px;" Icon="close" Text="Hủy" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" Click="@(() => { ThongTinNhanVien.LoaiThongTin.TenLoaiThongTin.Value = oldName; DialogService.Close(null); })" />
     </RadzenStack>
 </RadzenCard>
@@ -88,7 +88,7 @@
             {
                 if (value == oldName.Trim())
                 {
-                    propertyy.IsValueOK = false; propertyy.NotifyMess = $"Trùng với tên trước đó";
+                    propertyy.IsCheckValueOK = false; propertyy.NotifyMess = $"Trùng với tên trước đó";
                     return;
                 }
 
@@ -105,16 +105,16 @@
 
                 if (isExisting || isMainNameExisting)
                 {
-                    propertyy.IsValueOK = false; propertyy.NotifyMess = $"Trường thông tin đã tồn tại";
+                    propertyy.IsCheckValueOK = false; propertyy.NotifyMess = $"Trường thông tin đã tồn tại";
                 }
                 else
                 {
-                    propertyy.IsValueOK = true; propertyy.NotifyMess = $"Tên hợp lệ";
+                    propertyy.IsCheckValueOK = true; propertyy.NotifyMess = $"Tên hợp lệ";
                 }
             }
             else
             {
-                propertyy.IsValueOK = false; propertyy.NotifyMess = $"Tên không được để trống";
+                propertyy.IsCheckValueOK = false; propertyy.NotifyMess = $"Tên không được để trống";
             }
         });
     }

@@ -71,7 +71,7 @@
                                         <RadzenText Text="From" Style="font-weight: 500; font-size: 14px; color: black;"></RadzenText>
                                         <RadzenDatePicker Disabled="@(!isDisplaybyDay)" Style="width: 120px" TValue="DateTime" Value="@startSearchDay"
                                                           ValueChanged="@((args) => { startSearchDay = args; LoadList_LoaiNVL(); LoadList_NguyenVatLieu();})"
-                                                          ShowTime="false" HourFormat="12" DateFormat="@Common.DayTimeFormatnoTime" AllowInput="false">
+                                                          ShowTime="false" HourFormat="12" DateFormat="@Common.FormatNoTime_yyyMMdd" AllowInput="false">
                                             <FooterTemplate>
                                                 <RadzenStack Style="height: 100%; width: contain; padding: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                     <RadzenButton Style="height: 100%; width: 50%;" Text="To day"
@@ -86,7 +86,7 @@
                                         <RadzenText Text="To" Style="font-weight: 500; font-size: 14px; color: black;"></RadzenText>
                                         <RadzenDatePicker Disabled="@(!isDisplaybyDay)" Style="width: 120px" TValue="DateTime" Value="@endSearchDay"
                                                           ValueChanged="@((args) => { endSearchDay = args; LoadList_LoaiNVL(); LoadList_NguyenVatLieu();})"
-                                                          ShowTime="false" HourFormat="12" DateFormat="@Common.DayTimeFormatnoTime" AllowInput="false">
+                                                          ShowTime="false" HourFormat="12" DateFormat="@Common.FormatNoTime_yyyMMdd" AllowInput="false">
                                             <FooterTemplate>
                                                 <RadzenStack Style="height: 100%; width: contain; padding: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                     <RadzenButton Style="height: 100%; width: 50%;" Text="To day"
@@ -156,16 +156,16 @@
                                     <RadzenStack Visible="@(DSNguyenVatLieus != null && DSNguyenVatLieus.Count > 0)" Style="height: 450px; width: 100%; padding-top: 10px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                         <RadzenDataGrid class="rz-grid-table-fixed-2" Data="@(DSNguyenVatLieus)" TItem="NguyenVatLieu"
                                                         EmptyText="Danh sách nguyên liệu trống." Style="overflow-x: scroll; width: 100%; height: 100%"
-                                                        ShowColumnTitleAsTooltip="true" ShowCellDataAsTooltip="true" 
+                                                        ShowColumnTitleAsTooltip="true" ShowCellDataAsTooltip="true"
                                                         AllowFiltering="false" FilterMode="FilterMode.Simple"
                                                         AllowPaging="true" AllowSorting="false" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
                                                         ShowPagingSummary="true" PagingSummaryFormat="@pagingSummaryFormat" PagerPosition="PagerPosition.Bottom"
                                                         GridLines="DataGridGridLines.Both" PageSize="10" Density="Density.Default" CellContextMenu="@OnDatagridCellContextMenu"
                                                         HeaderCellRender="@(args => args.Attributes.Add("style", $"background-color: rgba(58, 71, 77)"))"
                                                         CellRender="@OnCellRender" Value="@DatagridSelected" ValueChanged="@((args) => OnDatagridSelectChanged(args))">
-                                            
-                                                        <Columns>
-                                                
+
+                                            <Columns>
+
                                                 @if (DSNguyenVatLieus != null && DSNguyenVatLieus.Count > 0)
                                                 {
                                                     List<Propertyy> columns = DSNguyenVatLieus.FirstOrDefault()?.GetPropertiesValues() ?? new();
@@ -471,7 +471,7 @@
                                                                                                                 ngVatlieu.Value = string.Empty;
                                                                                                             }
                                                                                                         })"
-                                                                                                  ShowTime="false" HourFormat="12" DateFormat="@Common.DayTimeFormatnoTime" ParseInput="@Common.ParseDate" AllowInput="true"
+                                                                                                  ShowTime="false" HourFormat="12" DateFormat="@Common.FormatNoTime_yyyMMdd" ParseInput="@Common.ParseDate_ddMMyyyy" AllowInput="true"
                                                                                                   Style="width: 100%;  font-size: 16px"></RadzenDatePicker>
                                                                             }
                                                                         }
@@ -547,7 +547,7 @@
                                                                                                                 nvldetail.GiaTri.Value = string.Empty;
                                                                                                             }
                                                                                                         })"
-                                                                                                          ShowTime="false" HourFormat="12" DateFormat="@Common.DayTimeFormatnoTime" ParseInput="@Common.ParseDate" AllowInput="true"
+                                                                                                          ShowTime="false" HourFormat="12" DateFormat="@Common.FormatNoTime_yyyMMdd" ParseInput="@Common.ParseDate_ddMMyyyy" AllowInput="true"
                                                                                                           Style="width: 100%;  font-size: 16px"></RadzenDatePicker>
                                                                                     }
                                                                                 }

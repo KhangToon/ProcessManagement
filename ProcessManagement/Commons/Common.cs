@@ -7,8 +7,10 @@ namespace ProcessManagement.Commons
 {
     public static class Common
     {
-        public const string DayTimeFormat = "yyyy-MM-dd HH:mm:ss";
-        public const string DayTimeFormatnoTime = "yyyy-MM-dd";
+        public const string Format_yyyyMMdd = "yyyy-MM-dd HH:mm:ss";
+        public const string Format_yyyyddMM = "MM-dd-yyyy HH:mm:ss";
+        public const string FormatNoTime_yyyMMdd = "yyyy-MM-dd";
+        public const string FormatNoTime_yyyddMM = "MM-dd-yyyy";
 
         // Table Sanpham //
         public const string Table_SanPham = "SP_SanPham";
@@ -155,7 +157,7 @@ namespace ProcessManagement.Commons
         public const string NVLTonKho = "Tồn kho";
         public const string DonViTinh = "DonViTinh";
         public const string NgaySuDung = "NgaySuDung";
-       
+
         // Table KHO_ViTriLuuTru //
         public const string Table_ViTriLuuTru = "KHO_ViTriLuuTru";
         public const string VTID = "VTID";
@@ -172,7 +174,7 @@ namespace ProcessManagement.Commons
         public const string VTNVLSoLuong = "Số lượng";
         public const string NgayNhapKho = "Ngày nhập kho";
 
-        
+
         // Table KHO_LoaiThongTinNVL
         public const string Table_LoaiThongTinNVL = "KHO_LoaiThongTinNVL";
         public const string LoaiTTNVLID = "LoaiTTNVLID";
@@ -371,7 +373,7 @@ namespace ProcessManagement.Commons
 
         // NhanVien management static variable
         public static object? SelectedNhanVienid;
-        
+
         // SanPham management static variable
         public static object? SelectedSanPhamid;
 
@@ -472,13 +474,28 @@ namespace ProcessManagement.Commons
                 .Select(s => s[random.Next(s.Length)]).ToArray());
         }
 
-        public static DateTime? ParseDate(string? input)
+        public static DateTime? ParseDate_ddMMyyyy(string? input)
         {
             string[] formats = { "d/M/yyyy", "dd-MM-yyyy", "dd/MM/yyyy", "dd-MM-yy", "dd/MM/yy", "ddMMyyyy", "ddMMyy", "dd-MM", "dd/MM", "ddMM" };
 
             foreach (var format in formats)
             {
-                if (DateTime.TryParseExact(input, format, null, DateTimeStyles.None, out var result))
+                if (DateTime.TryParseExact(input?.Trim(), format, null, DateTimeStyles.None, out var result))
+                {
+                    return result;
+                }
+            }
+
+            return null;
+        }
+
+        public static DateTime? ParseDate_MMddyyyy(string? input)
+        {
+            string[] formats = { "M/d/yyyy", "MM-dd-yyyy", "MM/dd/yyyy", "MM-dd-yy", "MM/dd/yy", "MMddyyyy", "MMddyy", "MMdd", "MM/dd", "MMdd" };
+
+            foreach (var format in formats)
+            {
+                if (DateTime.TryParseExact(input?.Trim(), format, null, DateTimeStyles.None, out var result))
                 {
                     return result;
                 }
