@@ -27,6 +27,8 @@ namespace ProcessManagement.Models
 
         public Propertyy GhiChu = new() { DBName = Common.GhiChu, Type = typeof(string), AlowDatabase = true };
 
+        // Dung lam temp de auto tao list LOT khi tao KHSX
+
         public List<Propertyy> GetPropertiesValues()
         {
             Type propertyType = typeof(NVL);

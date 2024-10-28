@@ -1,0 +1,641 @@
+﻿@page "/tiendogiacong"
+@attribute [Authorize(Roles = "Admin, User")]
+@* this limited access into page *@
+
+@using ParamountBed_Warehouse.Services.SocketService
+@using ProcessManagement.Commons
+@using ProcessManagement.Models
+@using ProcessManagement.Models.KHSXs
+@using ProcessManagement.Models.SANPHAM
+@using ProcessManagement.Models.TienDoGCs
+@using ProcessManagement.Pages.KehoachSX.Dialogs
+@using ProcessManagement.Pages.KehoachSX.TienDos.Dialogs
+@using ProcessManagement.Services.SQLServer
+@using Radzen.Blazor
+@using Radzen
+@using Microsoft.AspNetCore.Components
+
+@inject NotificationService NotificationService
+@inject DialogService DialogService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject SQLServerServices SQLServerServices
+@inject NavigationManager NavigationManager
+
+<RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style=" height: 100%; width: 100%; padding: 0px; padding-bottom: 10px " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+    <!--Header-->
+    <RadzenStack Gap="30px" Style="height: contain; width: 100%; background-color: var(--rz-success-lighter); padding: 10px; padding-top: 15px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+        <RadzenText Text="@($"THEO DÕI TIẾN ĐỘ KẾ HOẠCH SẢN XUẤT {TargetTienDoGC.MaSanPham}")" Style="color: green; font-weight: 600; font-size: 20px"></RadzenText>
+        <RadzenText Text="@($"Công đoạn:")" Style="color: green; font-weight: 600; font-size: 20px"></RadzenText>
+        <RadzenText Text="@($"{TargetTienDoGC.TenCongDoan.ToUpper()}")" Style="color: black; font-weight: 600; font-size: 22px"></RadzenText>
+    </RadzenStack>
+    <RadzenStack Gap="35px" Style="height: contain; width: 100%; padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+        <RadzenStack Gap="5px" Style="height: 100%; width: 235px; padding: 0px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+            <RadzenStack Gap="0" Style="height: contain; width: 100%; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                <RadzenStack Style="width: 50%;">
+                    <RadzenText Text="@($"Tồn đầu (TP): ")" Style="font-weight: 600; font-size: 15px; font-style: italic;"></RadzenText>
+                </RadzenStack>
+                <RadzenStack Style="width: 50%; height: 100%; padding-left: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                    <RadzenNumeric Visible=@(iscreatenew) ShowUpDown="false" TValue="int" Value="@int.Parse(TargetTienDoGC.TonDau.Value?.ToString()?? "0")" Min="0" Max="999999"
+                                   ValueChanged="@((args) => { TargetTienDoGC.TonDau.Value = args; })"
+                                   Style="font-size: 15px; height: 35px; border-width: 1px; width: 100%" />
+                    <RadzenText Visible=@(!iscreatenew) Text="@(TargetTienDoGC.TonDau.Value?.ToString())" Style="font-weight: 600; font-size: 15px; font-style: italic;"></RadzenText>
+                </RadzenStack>
+            </RadzenStack>
+
+            <RadzenStack Gap="0" Style="height: contain; width: 100%; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                <RadzenStack Style="width: 50%;">
+                    <RadzenText Text="@($"Đơn hàng: ")" Style="font-weight: 600; font-size: 15px; font-style: italic;"></RadzenText>
+                </RadzenStack>
+                <RadzenStack Style="width: 50%; height: 100%; padding-left: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                    <RadzenNumeric Visible=@(iscreatenew) ShowUpDown="false" TValue="int" Value="@int.Parse(TargetTienDoGC.DonHang.Value?.ToString()?? "0")" Min="0" Max="999999"
+                                   ValueChanged="@((args) => { TargetTienDoGC.DonHang.Value = args; })"
+                                   Style="font-size: 15px; height: 35px; border-width: 1px; width: 100%" />
+                    <RadzenText Visible=@(!iscreatenew) Text="@(TargetTienDoGC.DonHang.Value?.ToString())" Style="font-weight: 600; font-size: 15px; font-style: italic;"></RadzenText>
+
+                </RadzenStack>
+            </RadzenStack>
+
+            <RadzenStack Gap="0" Style="height: contain; width: 100%; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                <RadzenStack Style="width: 50%;">
+                    <RadzenText Text="@($"Xuất NVL: ")" Style="font-weight: 600; font-size: 15px; font-style: italic;"></RadzenText>
+                </RadzenStack>
+                <RadzenStack Style="width: 50%; height: 100%; padding-left: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                    <RadzenNumeric Visible=@(iscreatenew) ShowUpDown="false" TValue="int" Value="@int.Parse(TargetTienDoGC.XuatNVL.Value?.ToString()?? "0")" Min="0" Max="999999"
+                                   ValueChanged="@((args) => { TargetTienDoGC.XuatNVL.Value = args; })"
+                                   Style="font-size: 15px; height: 35px; border-width: 1px; width: 100%" />
+                    <RadzenText Visible=@(!iscreatenew) Text="@(TargetTienDoGC.XuatNVL.Value?.ToString())" Style="font-weight: 600; font-size: 15px; font-style: italic;"></RadzenText>
+
+                </RadzenStack>
+            </RadzenStack>
+
+            <RadzenStack Gap="0" Style="height: contain; width: 100%; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                <RadzenStack Style="width: 50%;">
+                    <RadzenText Text="@($"Lot NVL: ")" Style="font-weight: 600; font-size: 15px; font-style: italic;"></RadzenText>
+                </RadzenStack>
+                <RadzenStack Style="width: 50%; height: 100%; padding-left: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                    <RadzenText Text="Xem file đính kèm" Style="font-weight: 600; font-size: 15px; font-style: italic; color: Highlight; cursor: pointer"></RadzenText>
+                </RadzenStack>
+            </RadzenStack>
+
+        </RadzenStack>
+        <RadzenStack Gap="5px" Style="height: 100%; width: 235px; padding: 0px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+            <RadzenStack Gap="0" Style="height: contain; width: 100%; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                <RadzenStack Style="width: 50%;">
+                    <RadzenText Text="@($"Năng lực máy: ")" Style="font-weight: 600; font-size: 15px; font-style: italic;"></RadzenText>
+                </RadzenStack>
+                <RadzenStack Style="width: 50%; height: 100%; padding-left: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                    <RadzenNumeric Visible=@(iscreatenew) ShowUpDown="false" TValue="int" Value="@int.Parse(TargetTienDoGC.NangLucMay.Value?.ToString()?? "0")" Min="0" Max="999999"
+                                   ValueChanged="@((args) => { TargetTienDoGC.NangLucMay.Value = args; })"
+                                   Style="font-size: 15px; height: 35px; border-width: 1px; width: 100%" />
+                    <RadzenText Visible=@(!iscreatenew) Text="@(TargetTienDoGC.NangLucMay.Value?.ToString())" Style="font-weight: 600; font-size: 15px; font-style: italic;"></RadzenText>
+
+                </RadzenStack>
+            </RadzenStack>
+
+            <RadzenStack Gap="0" Style="height: contain; width: 100%; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                <RadzenStack Style="width: 50%;">
+                    <RadzenText Text="@($"Nhân công: ")" Style="font-weight: 600; font-size: 15px; font-style: italic;"></RadzenText>
+                </RadzenStack>
+                <RadzenStack Style="width: 50%; height: 100%; padding-left: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                    <RadzenNumeric Visible=@(iscreatenew) ShowUpDown="false" TValue="int" Value="@int.Parse(TargetTienDoGC.NhanCong.Value?.ToString()?? "0")" Min="0" Max="999999"
+                                   ValueChanged="@((args) => { TargetTienDoGC.NhanCong.Value = args; })"
+                                   Style="font-size: 15px; height: 35px; border-width: 1px; width: 100%" />
+                    <RadzenText Visible=@(!iscreatenew) Text="@(TargetTienDoGC.NhanCong.Value?.ToString())" Style="font-weight: 600; font-size: 15px; font-style: italic;"></RadzenText>
+
+                </RadzenStack>
+            </RadzenStack>
+
+            <RadzenStack Gap="0" Style="height: contain; width: 100%; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                <RadzenStack Style="width: 50%;">
+                    <RadzenText Text="@($"Thời gian hành chính: ")" Style="font-weight: 600; font-size: 15px; font-style: italic;"></RadzenText>
+                </RadzenStack>
+                <RadzenStack Style="width: 50%; height: 100%; padding-left: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                    <RadzenNumeric Visible=@(iscreatenew) ShowUpDown="false" TValue="double" Value="@double.Parse(TargetTienDoGC.ThoiGianHanhChinh.Value?.ToString()?? "0")" Min="0" Max="999999"
+                                   ValueChanged="@((args) => { TargetTienDoGC.ThoiGianHanhChinh.Value = args; })"
+                                   Style="font-size: 15px; height: 35px; border-width: 1px; width: 100%" />
+                    <RadzenText Visible=@(!iscreatenew) Text="@(TargetTienDoGC.ThoiGianHanhChinh.Value?.ToString())" Style="font-weight: 600; font-size: 15px; font-style: italic;"></RadzenText>
+
+                </RadzenStack>
+            </RadzenStack>
+
+            <RadzenStack Gap="0" Style="height: contain; width: 100%; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                <RadzenStack Style="width: 50%;">
+                    <RadzenText Text="@($"Thời gian tăng ca:")" Style="font-weight: 600; font-size: 15px; font-style: italic;"></RadzenText>
+                </RadzenStack>
+                <RadzenStack Style="width: 50%; height: 100%; padding-left: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                    <RadzenNumeric Visible=@(iscreatenew) ShowUpDown="false" TValue="double" Value="@double.Parse(TargetTienDoGC.ThoiGianTangCa.Value?.ToString()?? "0")" Min="0" Max="999999"
+                                   ValueChanged="@((args) => { TargetTienDoGC.ThoiGianTangCa.Value = args; })"
+                                   Style="font-size: 15px; height: 35px; border-width: 1px; width: 100%" />
+                    <RadzenText Visible=@(!iscreatenew) Text="@(TargetTienDoGC.ThoiGianTangCa.Value?.ToString())" Style="font-weight: 600; font-size: 15px; font-style: italic;"></RadzenText>
+
+                </RadzenStack>
+            </RadzenStack>
+        </RadzenStack>
+        <RadzenStack Gap="5px" Style="height: 100%; width: 270px; padding: 0px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start">
+            <RadzenStack Gap="0" Style="height: contain; width: 100%; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                <RadzenStack Style="width: 50%;">
+                    <RadzenText Text="@($"Ngày lập: ")" Style="font-weight: 600; font-size: 15px; font-style: italic;"></RadzenText>
+                </RadzenStack>
+                <RadzenStack Style="width: 50%; height: 100%; padding-left: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                    <RadzenDatePicker Visible=@(iscreatenew) class="custom-datepicker" ShowTime="false" HourFormat="12" DateFormat="@Common.FormatNoTime_yyyddMM" ParseInput="@Common.ParseDate_MMddyyyy" AllowInput="true"
+                                      TValue="DateTime" AllowClear="true" Style="width: 100%; height: 35px; font-size: 16px"
+                                      Change="@((args) => { if (args != null)
+                                                                {
+                                                                    DateTime value = args.Value.Date.Add(DateTime.Now.TimeOfDay);
+                                                                    TargetTienDoGC.NgayLap.Value = value;
+                                                                } else{TargetTienDoGC.NgayLap.Value = string.Empty;}})">
+                        <FooterTemplate>
+                            <RadzenButton Click=@(args => TargetTienDoGC.NgayLap.Value = DateTime.Now) Text="Today" Style="width: 100%;" class="rz-my-4" />
+                        </FooterTemplate>
+                    </RadzenDatePicker>
+                    <RadzenText Visible=@(!iscreatenew) Text="@(TargetTienDoGC.NgayLap.Value?.ToString())" Style="font-weight: 600; font-size: 15px; font-style: italic;"></RadzenText>
+
+                </RadzenStack>
+            </RadzenStack>
+
+            <RadzenStack Gap="0" Style="height: contain; width: 100%; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                <RadzenStack Style="width: 50%;">
+                    <RadzenText Text="@($"Ngày xuất hàng:")" Style="font-weight: 600; font-size: 15px; font-style: italic;"></RadzenText>
+                </RadzenStack>
+                <RadzenStack Style="width: 50%; height: 100%; padding-left: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                    <RadzenDatePicker Visible=@(iscreatenew) class="custom-datepicker" ShowTime="false" HourFormat="12" DateFormat="@Common.FormatNoTime_yyyddMM" ParseInput="@Common.ParseDate_MMddyyyy" AllowInput="true"
+                                      TValue="DateTime" AllowClear="true" Style="width: 100%; height: 35px; font-size: 16px"
+                                      Change="@((args) => { if (args != null)
+                                                                {
+                                                                    DateTime value = args.Value.Date.Add(DateTime.Now.TimeOfDay);
+                                                                    TargetTienDoGC.NgayXuatHang.Value = value;
+                                                                } else{TargetTienDoGC.NgayXuatHang.Value = string.Empty;}})">
+                        <FooterTemplate>
+                            <RadzenButton Click=@(args => TargetTienDoGC.NgayXuatHang.Value = DateTime.Now) Text="Today" Style="width: 100%;" class="rz-my-4" />
+                        </FooterTemplate>
+                    </RadzenDatePicker>
+                    <RadzenText Visible=@(!iscreatenew) Text="@(TargetTienDoGC.NgayXuatHang.Value?.ToString())" Style="font-weight: 600; font-size: 15px; font-style: italic;"></RadzenText>
+
+                </RadzenStack>
+            </RadzenStack>
+
+            <RadzenStack Gap="0" Style="height: contain; width: 100%; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                <RadzenStack Style="width: 50%;">
+                    <RadzenText Text="@($"Ngày bắt đầu:")" Style="font-weight: 600; font-size: 15px; font-style: italic;"></RadzenText>
+                </RadzenStack>
+                <RadzenStack Style="width: 50%; height: 100%; padding-left: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                    <RadzenDatePicker Visible=@(iscreatenew) class="custom-datepicker" ShowTime="false" HourFormat="12" DateFormat="@Common.FormatNoTime_yyyddMM" ParseInput="@Common.ParseDate_MMddyyyy" AllowInput="true"
+                                      TValue="DateTime" AllowClear="true" Style="width: 100%; height: 35px; font-size: 16px"
+                                      Max="@daylimitUp"
+                                      Change="@((args) => { if (args != null)
+                                                                {
+                                                                    DateTime value = args.Value.Date.Add(DateTime.Now.TimeOfDay);
+                                                                    daylimitLow = value.AddDays(-1);
+                                                                    TargetTienDoGC.NgayBatDau.Value = value;
+                                                                } else{TargetTienDoGC.NgayBatDau.Value = string.Empty; daylimitLow = DateTime.MinValue;}})">
+                        <FooterTemplate>
+                            <RadzenButton Click=@(args => TargetTienDoGC.NgayBatDau.Value = DateTime.Now) Text="Today" Style="width: 100%;" class="rz-my-4" />
+                        </FooterTemplate>
+                    </RadzenDatePicker>
+                    <RadzenText Visible=@(!iscreatenew) Text="@(TargetTienDoGC.NgayBatDau.Value?.ToString())" Style="font-weight: 600; font-size: 15px; font-style: italic;"></RadzenText>
+
+                </RadzenStack>
+            </RadzenStack>
+
+            <RadzenStack Gap="0" Style="height: contain; width: 100%; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                <RadzenStack Style="width: 50%;">
+                    <RadzenText Text="@($"Ngày kết thúc:")" Style="font-weight: 600; font-size: 15px; font-style: italic;"></RadzenText>
+                </RadzenStack>
+                <RadzenStack Style="width: 50%; height: 100%; padding-left: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                    <RadzenDatePicker Visible=@(iscreatenew) class="custom-datepicker" ShowTime="false" HourFormat="12" DateFormat="@Common.FormatNoTime_yyyddMM" ParseInput="@Common.ParseDate_MMddyyyy" AllowInput="true"
+                                      TValue="DateTime" AllowClear="true" Style="width: 100%; height: 35px; font-size: 16px"
+                                      Min="@daylimitLow"
+                                      Change="@((args) => { if (args != null)
+                                                                {
+                                                                    DateTime value = args.Value.Date.Add(DateTime.Now.TimeOfDay);
+                                                                    daylimitUp = value;
+                                                                    TargetTienDoGC.NgayKetThuc.Value = value;
+                                                                } else{TargetTienDoGC.NgayKetThuc.Value = string.Empty; daylimitUp = DateTime.MaxValue;}})">
+                        <FooterTemplate>
+                            <RadzenButton Click=@(args => TargetTienDoGC.NgayKetThuc.Value = DateTime.Now) Text="Today" Style="width: 100%;" class="rz-my-4" />
+                        </FooterTemplate>
+                    </RadzenDatePicker>
+                    <RadzenText Visible=@(!iscreatenew) Text="@(TargetTienDoGC.NgayKetThuc.Value?.ToString())" Style="font-weight: 600; font-size: 15px; font-style: italic;"></RadzenText>
+
+                </RadzenStack>
+            </RadzenStack>
+        </RadzenStack>
+    </RadzenStack>
+
+    <!--Body-->
+    <RadzenRow Gap="10px" Style=" width: 100%; border-top: var(--rz-grid-cell-border); padding: 10px;">
+        <!--Theo doi tien do gia cong-->
+        <RadzenColumn Size="12" SizeMD="12" Style="height: contain; width: 100%;">
+            <RadzenStack Gap="0px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start" Style="height: 100%; width: 100%;">
+                <!--Datagrid-->
+                <RadzenStack Style="height: contain; width: 100%; padding-top: 10px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start">
+                    <RadzenDataGrid class="rz-grid-table-fixed-2" Data="@(TargetTienDoGC.DSachTienDoRows)" TItem="TienDoGCRow" IsLoading="@isLoading"
+                                    EmptyText="Danh sách theo dõi tiến độ gia công trống." Style="overflow: scroll; width: 100%; height: 100%"
+                                    ShowColumnTitleAsTooltip="true" ShowCellDataAsTooltip="true" AllowVirtualization="true"
+                                    AllowFiltering="false" FilterMode="FilterMode.Simple" AllowColumnResize="true"
+                                    AllowPaging="false" AllowSorting="false" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                    ShowPagingSummary="true" PagingSummaryFormat="@pagingSummaryFormat" PagerPosition="PagerPosition.Bottom"
+                                    GridLines="DataGridGridLines.Both" Density="Density.Default"
+                                    HeaderCellRender="@(args => {args.Attributes.Add("style", $"background-color: rgba(58, 71, 77);"); args.Attributes.Add("colspan", 1);})"
+                                    CellRender="@OnCellRender" FooterCellRender="@HeaderFooterCellRender" Value="@DatagridSeleted" ValueChanged="@((args) => OnDatagridSelectChanged(args))">
+
+                        <HeaderTemplate>
+                            <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                <!--Button them tiendogcrow-->
+                                <RadzenButton Click="OnThemMoiTienDoGCRow" Icon="add" Text="Thêm" Size="ButtonSize.Small"
+                                              ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat"
+                                              Style="min-width: 100px; font-size: 14px; border-radius: 20px;" />
+
+                                <!--Button them tiendogcrow-->
+                                <RadzenButton Visible="@(iscreatenew)" Disabled="@(!((TargetTienDoGC.DSachTienDoRows.Count != 0) && iscreatenew))" Click="OnSaveNewTienDoGC" Icon="add" Text="Lưu tiến độ" Size="ButtonSize.Small"
+                                              ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat"
+                                              Style="min-width: 100px; font-size: 14px; border-radius: 20px;" />
+
+                                <!--Button Reload-->
+                                <RadzenButton Text="Reload" Style="border-radius: 20px; min-width: 100px;"
+                                              Click="@(async() => { await ReLoadTienDoGCPage(null, NCID, KHSXID, delaytime: 300); })"
+                                              IsBusy="@isLoading" BusyText=" Loading..." Icon="autorenew" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />
+                            </RadzenStack>
+                        </HeaderTemplate>
+                        <Columns>
+                            @if (TargetTienDoGC.DSachTienDoRows?.Count > 0)
+                            {
+                                List<Propertyy> columns = TienDoGCRow.GetClassProperties() ?? new();
+
+                                <!--STT-->
+                                <RadzenDataGridColumn Width="50px" Frozen="true" FrozenPosition="FrozenColumnPosition.Left" Filterable="false"
+                                                      TItem="TienDoGCRow" Title="#"
+                                                      Property="STT" TextAlign="TextAlign.Center">
+                                    <HeaderTemplate>
+                                        <span style="font-weight: 600; font-size: 15px; color: white">STT</span>
+                                    </HeaderTemplate>
+                                    <Template Context="tdgcrow">
+                                        <span style="font-weight: bold;">@(TargetTienDoGC.DSachTienDoRows.IndexOf(tdgcrow) + 1)</span>
+                                    </Template>
+                                </RadzenDataGridColumn>
+
+                                foreach (var column in columns.Where(cl => cl.DispDatagrid == true).ToList())
+                                {
+                                    string colName = column.DBName ?? string.Empty;
+                                    string displayName = column.DisplayName ?? string.Empty;
+                                    Type? columnType = column.Type;
+
+                                    <RadzenDataGridColumn TItem="TienDoGCRow" Title="@displayName" MinWidth="100px"
+                                                          Property="@colName" TextAlign="TextAlign.Center">
+                                        <HeaderTemplate>
+                                            <span style="font-weight: 600; font-size: 15px; color: white;">@displayName</span>
+                                        </HeaderTemplate>
+                                        <Template Context="tdgcrow">
+                                            @{
+                                                if (columnType != null && columnType == typeof(DateTime))
+                                                {
+                                                    bool ishaveValueOfday = DateTime.TryParse(tdgcrow.GetPropertyValue(colName)?.ToString(), out DateTime vldate);
+
+                                                    <RadzenText Visible="@ishaveValueOfday" Text="@vldate.ToString(Common.FormatNoTime_yyyddMM)" Style="font-size: 16px; height: contain; color: black; font-weight: 500"></RadzenText>
+                                                    <RadzenText Visible="@(!ishaveValueOfday)" Text="@string.Empty" Style="font-size: 16px; height: contain; color: black; font-weight: 500"></RadzenText>
+                                                }
+                                                else
+                                                {
+                                                    string colValue = tdgcrow.GetPropertyValue(colName)?.ToString() ?? "_";
+
+                                                    if (colName == TienDoGCRow.DBName.TienDo)
+                                                    {
+                                                        int.TryParse(colValue?.ToString(), out int tiendo);
+
+                                                        <RadzenText Visible="@(tiendo < 0)" Text="@($"({Math.Abs(tiendo)})")" Style="color: red; font-size: 15px; height: contain; font-weight: 600"></RadzenText>
+                                                        <RadzenText Visible="@(tiendo >= 0)" Text="@($"{tiendo}")" Style="color: darkgreen; font-size: 15px; height: contain; font-weight: 600"></RadzenText>
+                                                    }
+                                                    else if (colName == TienDoGCRow.DBName.SLNG)
+                                                    {
+                                                        <RadzenText Text="@($"{colValue}")" Style="color: red; font-size: 15px; height: contain; font-weight: 600"></RadzenText>
+                                                    }
+                                                    else if (colName == TienDoGCRow.DBName.ThoiGianGiaCong)
+                                                    {
+                                                        <RadzenText Text="@($"{colValue} s")" Style="font-size: 15px; height: contain; font-weight: 600"></RadzenText>
+                                                    }
+                                                    else if (colName == TienDoGCRow.DBName.KeHoach || colName == TienDoGCRow.DBName.ThucTe)
+                                                    {
+                                                        <RadzenText Text="@($"{colValue}")" Style="font-size: 15px; height: contain; font-weight: 600"></RadzenText>
+                                                    }
+                                                    else
+                                                    {
+                                                        <RadzenText Text="@($"{colValue}")" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
+                                                    }
+                                                }
+                                            }
+                                        </Template>
+                                        <FooterTemplate>
+                                            <RadzenText Visible="@(colName == TienDoGCRow.DBName.NgayGC)" Text="TỔNG CỘNG" Style="color: black; font-size: 16px; height: contain; font-weight: 600;"></RadzenText>
+                                            <RadzenText Visible="@(colName == TienDoGCRow.DBName.KeHoach)" Text="@($"{TargetTienDoGC.FooterSumKeHoach}")" Style="color: black; font-size: 16px; height: contain; font-weight: 600;"></RadzenText>
+                                            <RadzenText Visible="@(colName == TienDoGCRow.DBName.ThucTe)" Text="@($"{TargetTienDoGC.FooterSumThucTe}")" Style="color: black; font-size: 16px; height: contain; font-weight: 600"></RadzenText>
+                                            <RadzenText Visible="@(colName == TienDoGCRow.DBName.SLNG)" Text="@($"{TargetTienDoGC.FooterSumNG}")" Style="color: darkred; font-size: 16px; height: contain; font-weight: 600"></RadzenText>
+                                            <RadzenText Visible="@(colName == TienDoGCRow.DBName.TienDo && TargetTienDoGC.FooterSumTienDo >= 0)" Text="@($"{TargetTienDoGC.FooterSumTienDo}")" Style="color: darkgreen; font-size: 16px; height: contain; font-weight: 600"></RadzenText>
+                                            <RadzenText Visible="@(colName == TienDoGCRow.DBName.TienDo && TargetTienDoGC.FooterSumTienDo < 0)" Text="@($"({Math.Abs(TargetTienDoGC.FooterSumTienDo)})")" Style="color: darkred; font-size: 16px; height: contain; font-weight: 600"></RadzenText>
+                                            <RadzenText Visible="@(colName == TienDoGCRow.DBName.TiLeNG_CD)" Text="@($"{TargetTienDoGC.TiLeNGCD} %")" Style="color: darkred; font-size: 16px; height: contain; font-weight: 600"></RadzenText>
+                                            <RadzenText Visible="@(colName == TienDoGCRow.DBName.TiLeNG_TT)" Text="@($"{TargetTienDoGC.TiLeNGTT} %")" Style="color: darkred; font-size: 16px; height: contain; font-weight: 600;"></RadzenText>
+                                        </FooterTemplate>
+                                    </RadzenDataGridColumn>
+                                }
+                            }
+                        </Columns>
+                    </RadzenDataGrid>
+                </RadzenStack>
+
+            </RadzenStack>
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenStack>
+
+
+@code {
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "spid")]
+    public object? SPID { get; set; }
+
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "ncid")]
+    public object? NCID { get; set; }
+
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "khsxid")]
+    public object? KHSXID { get; set; }
+
+    //private object? _khsxid;
+
+    private bool iscreatenew;
+
+    private TienDoGC TargetTienDoGC = new();
+    private IList<TienDoGCRow>? DatagridSeleted;
+    private TienDoGCRow SelectedTDGCRow = new();
+    private bool isLoading = false;
+    private string pagingSummaryFormat = "Displaying page {0} of {1} <b>(total {2} records)</b>";
+
+    private DateTime daylimitLow = DateTime.MinValue; // for minday of NgayKetThuc
+
+    private DateTime daylimitUp = DateTime.MaxValue;  // for maxday of NgayBatDau
+
+    protected async override Task OnInitializedAsync()
+    {
+        // Load tien do gia cong by khsxid/ncid/spid
+        await ReLoadTienDoGCPage(ncid: NCID, khsxid: KHSXID);
+
+        await base.OnInitializedAsync();
+    }
+
+    // protected override async Task OnParametersSetAsync()
+    // {
+    //     if (_khsxid != KHSXID)
+    //     {
+    //         _khsxid = KHSXID;
+
+    //         // Load tien do gia cong by khsxid/ncid/spid
+    //         await ReLoadTienDoGCPage(ncid: NCID, khsxid: _khsxid);
+
+    //         await ParameterChanged();
+    //     }
+
+    //     await base.OnParametersSetAsync();
+    // }
+
+
+    private async Task ParameterChanged()
+    {
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task OnThemMoiTienDoGCRow()
+    {
+        _ = int.TryParse(TargetTienDoGC.TDGCID.Value?.ToString(), out int tdgcid);
+        _ = int.TryParse(TargetTienDoGC.NCID.Value?.ToString(), out int ncid);
+        _ = int.TryParse(TargetTienDoGC.SPID.Value?.ToString(), out int spid);
+
+        bool startdayok = DateTime.TryParse(TargetTienDoGC.NgayBatDau.Value?.ToString(), out DateTime ngaybatdau);
+        bool enddayok = DateTime.TryParse(TargetTienDoGC.NgayKetThuc.Value?.ToString(), out DateTime ngayketthuc);
+
+        if (startdayok == true && enddayok == true && ncid > 0 && spid > 0)
+        {
+            TienDoGCRow newTDGCRow = await DialogService.OpenAsync<DialogAddNewTienDoGCRow>(null, new Dictionary<string, object>() { { "TDGCID", tdgcid }, { "SPID", spid }, { "NCID", ncid }, { "DayStart", ngaybatdau }, { "DayEnd", ngayketthuc } },
+            new DialogOptions() { ShowTitle = true, Width = "50%", Height = "95%", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 0px; padding: 0px" });
+
+            if (newTDGCRow != null)
+            {
+                if (iscreatenew)
+                {
+                    // Add newTDGCRow into TargetTienDoGC
+                    TargetTienDoGC.DSachTienDoRows.Add(newTDGCRow);
+                }
+                else
+                {
+                    // Insert newTDGCRow for TargetTienDoGC into DB
+                    (int newtdgcrowID, string error) = SQLServerServices.InsertSingleTienDoGCRow(tdgcid, newTDGCRow);
+
+                    if (newtdgcrowID > 0)
+                    {
+                        await ReLoadTienDoGCPage(tdgcid, ncid, KHSXID);
+                    }
+                    else
+                    {
+                        ShowNotification("Erorr add new!", NotificationSeverity.Error, 3000);
+                    }
+                }
+            }
+        }
+    }
+
+    private async Task OnSaveNewTienDoGC()
+    {
+        bool? confirm = await DialogService.Confirm("Lưu kế hoạch theo dõi tiến độ?", "Xác nhận", new ConfirmOptions() { OkButtonText = "OK", CancelButtonText = "Hủy", ShowClose = false });
+
+        if (confirm.Value)
+        {
+            // Check required fields of TienDoGC
+
+            // Insert into DB
+            (int tdgcid, string error) = SQLServerServices.InsertTienDoGC(TargetTienDoGC);
+
+            if (tdgcid > 0)
+            {   
+                ShowNotification("Save success!", NotificationSeverity.Success, 2000);
+                await ReLoadTienDoGCPage(tdgcid, NCID, KHSXID);
+                // Navigate to reload page
+                // NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
+            }
+            else
+            {
+                await DialogService.Alert($"{error}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+            }
+        }
+    }
+
+    private async Task ReLoadTienDoGCPage(object? tdgcID = null, object? ncid = null, object? khsxid = null, int delaytime = 10)
+    {
+        isLoading = true;
+
+        await Task.Delay(delaytime);
+
+        await Task.Run(() =>
+        {
+            List<TienDoGC> tienDoGCs = new();
+
+            (tienDoGCs, string error) = SQLServerServices.GetListTienDoGC(tdgcID, ncid, khsxid);
+
+            if (tienDoGCs.Any())
+            {
+                iscreatenew = false;
+
+                var firtResult = tienDoGCs.FirstOrDefault();
+                if (firtResult != null)
+                {
+                    TargetTienDoGC = firtResult;
+
+                    if (TargetTienDoGC.DSachTienDoRows.Any())
+                    {
+                        foreach (var tiendorow in TargetTienDoGC.DSachTienDoRows)
+                        {
+                            Dictionary<string, object?> parameters = new();
+
+                            parameters.Add($"{KetQuaGC.KQGCDBName.KHSXID}", TargetTienDoGC.KHSXID.Value);
+
+                            parameters.Add($"{KetQuaGC.KQGCDBName.MMID}", tiendorow.MMID.Value);
+
+                            parameters.Add($"{KetQuaGC.KQGCDBName.CaLamViec}", tiendorow.CaLamViec.Value);
+
+                            parameters.Add($"{KetQuaGC.KQGCDBName.NVIDs}", tiendorow.NVIDs.Value?.ToString()?.Trim());
+
+                            (List<KetQuaGC> ketquaGCs, string getError) = SQLServerServices.GetListKetQuaGC(parameters);
+
+                            List<KetQuaGC> temptlistketquagcs = new();
+
+                            if (DateTime.TryParse(tiendorow.NgayGC.Value?.ToString(), out DateTime rowNgayGC))
+                            {
+                                foreach (var kqgc in ketquaGCs)
+                                {
+                                    if (DateTime.TryParse(kqgc.SubMitDay.Value?.ToString(), out DateTime submitday))
+                                    {
+                                        if (!DateTime.Equals(submitday.Date, rowNgayGC.Date))
+                                        {
+                                            temptlistketquagcs.Add(kqgc);
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (temptlistketquagcs.Any())
+                            {
+                                foreach (var item in temptlistketquagcs)
+                                {
+                                    if (ketquaGCs.Contains(item))
+                                    {
+                                        ketquaGCs.Remove(item);
+                                    }
+                                }
+                            }
+
+                            // Calculate tong so luong OK thuc te
+                            int sumthucte = ketquaGCs.Sum(kqgc =>
+                            {
+                                if (int.TryParse(kqgc.SLOK.Value?.ToString(), out int slok))
+                                {
+                                    return slok;
+                                }
+                                else return 0;
+                            });
+                            tiendorow.ThucTe.Value = sumthucte;
+
+                            // Calculate tong so luong NG
+                            int sumNG = ketquaGCs.Sum(kqgc =>
+                            {
+                                if (int.TryParse(kqgc.SLNG.Value?.ToString(), out int slng))
+                                {
+                                    return slng;
+                                }
+                                else return 0;
+                            });
+                            tiendorow.SLNG.Value = sumNG;
+
+                            // Calculate tong tien do
+                            int sumtiendo = sumthucte - (int.TryParse(tiendorow.KeHoach.Value?.ToString(), out int slkehoach) ? slkehoach : 0);
+                            tiendorow.TienDo.Value = sumtiendo;
+
+                            // Calculate all results
+                            TargetTienDoGC.FooterSumKeHoach += slkehoach;
+                            TargetTienDoGC.FooterSumThucTe += sumthucte;
+                            TargetTienDoGC.FooterSumNG += sumNG;
+                            TargetTienDoGC.FooterSumTienDo += sumtiendo;
+                        }
+
+                        // Calculate tile NG
+                        if (TargetTienDoGC.FooterSumKeHoach > 0)
+                        {
+                            TargetTienDoGC.TiLeNGTT = (double)TargetTienDoGC.FooterSumNG / TargetTienDoGC.FooterSumKeHoach * 100;
+
+                            TargetTienDoGC.TiLeNGTT = Math.Ceiling(TargetTienDoGC.TiLeNGTT * 100) / 100;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                TargetTienDoGC = new() { KHSXID = { Value = KHSXID }, NCID = { Value = NCID }, SPID = { Value = SPID } };
+
+                iscreatenew = true;
+                // Check allow load when in CreateNew mode
+                // await DialogService.Alert($"{(string.IsNullOrEmpty(error) ? "Danh sách trống!" : error)}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+            }
+
+            if (TargetTienDoGC.TDGCID.Value == null)
+            {
+                // Load ma san pham
+                TargetTienDoGC.MaSanPham = SQLServerServices.GetMaSanphamByID(SPID);
+                // Load cong doan
+                TargetTienDoGC.TenCongDoan = SQLServerServices.GetNguyenCongByID(NCID);
+            }
+        });
+
+        isLoading = false;
+    }
+
+    // Notification
+    void ShowNotification(string message, NotificationSeverity notifytype, double time)
+    {
+        NotificationMessage notify = new NotificationMessage
+            {
+                Style = "position: fixed; top: 0; right: 0;",
+                Severity = notifytype,
+                Summary = message,
+                Duration = time
+            };
+
+        NotificationService.Notify(notify);
+    }
+
+    // Datagrid selected changed event
+    private void OnDatagridSelectChanged(IList<TienDoGCRow> selected)
+    {
+        DatagridSeleted = selected;
+
+        var fistItemSelected = DatagridSeleted.FirstOrDefault();
+
+        if (fistItemSelected != null)
+        {
+            SelectedTDGCRow = fistItemSelected;
+        }
+    }
+
+    // Datagrid cellrender
+    private void OnCellRender(DataGridCellRenderEventArgs<TienDoGCRow> args)
+    {
+        if (args.Column.Property.Contains("ID"))
+        {
+            args.Attributes.Add("style", $"font-weight: bold;");
+        }
+    }
+
+    void HeaderFooterCellRender(DataGridCellRenderEventArgs<TienDoGCRow> args)
+    {
+        if (args.Column.Property == TienDoGCRow.DBName.NgayGC)
+        {
+            args.Attributes.Add("colspan", 8);
+        }
+    }
+}

@@ -311,7 +311,7 @@
                                             haveCDupdated = true;
                                         }
                                         // set true neu lotnvl dang la cua nguyen cong cuoi cung
-                                        if (cd.CDID.Value?.ToString() == SelectedKHSX.DSachCongDoans.LastOrDefault()?.CDID.Value?.ToString())
+                                        if (cd.NCIDofKHSX.Value?.ToString() == SelectedKHSX.DSachCongDoans.LastOrDefault()?.NCIDofKHSX.Value?.ToString())
                                         {
                                             islastCDupdated = true;
                                         }
@@ -446,14 +446,14 @@
 
     private async void UpdateUI_IMEX_Mode(object? sender, object args)
     {
-        ReloadCurrentKHSX(SelectedKHSX.KHSXID.Value, SelectedNVLmcd.NVLMCDID.Value, SelectedNguyenCong.CDID.Value);
+        ReloadCurrentKHSX(SelectedKHSX.KHSXID.Value, SelectedNVLmcd.NVLMCDID.Value, SelectedNguyenCong.NCIDofKHSX.Value);
 
         await InvokeAsync(new Action(() => StateHasChanged()));
     }
 
     private async void CongDoanUpdatedEvent(object? sender, object? nvlmcdid)
     {
-        ReloadCurrentKHSX(SelectedKHSX.KHSXID.Value, SelectedNVLmcd.NVLMCDID.Value, SelectedNguyenCong.CDID.Value);
+        ReloadCurrentKHSX(SelectedKHSX.KHSXID.Value, SelectedNVLmcd.NVLMCDID.Value, SelectedNguyenCong.NCIDofKHSX.Value);
 
         await this.InvokeAsync(() => this.StateHasChanged());
     }
@@ -470,7 +470,7 @@
 
             Common.CurrentKHSXid = selectKHSX.KHSXID.Value;
 
-            ReloadCurrentKHSX(selectKHSX.KHSXID.Value, SelectedNVLmcd.NVLMCDID.Value, SelectedNguyenCong?.CDID.Value);
+            ReloadCurrentKHSX(selectKHSX.KHSXID.Value, SelectedNVLmcd.NVLMCDID.Value, SelectedNguyenCong?.NCIDofKHSX.Value);
         }
     }
 
@@ -486,7 +486,7 @@
 
             Common.CurrentKHSXid = newKHSX.KHSXID.Value;
 
-            ReloadCurrentKHSX(newKHSX.KHSXID.Value, SelectedNVLmcd.NVLMCDID.Value, SelectedNguyenCong?.CDID.Value);
+            ReloadCurrentKHSX(newKHSX.KHSXID.Value, SelectedNVLmcd.NVLMCDID.Value, SelectedNguyenCong?.NCIDofKHSX.Value);
         }
     }
 
@@ -513,7 +513,7 @@
 
             SelectedNVLmcd = temDSMaQuanly?.FirstOrDefault(nvlmcd => nvlmcd.NVLMCDID.Value?.ToString() == selectedNVLMCDid?.ToString()) ?? new();
 
-            SelectedNguyenCong = SelectedKHSX.DSachCongDoans?.FirstOrDefault(cd => cd.CDID.Value?.ToString() == selectedCDid?.ToString()) ?? new();
+            SelectedNguyenCong = SelectedKHSX.DSachCongDoans?.FirstOrDefault(cd => cd.NCIDofKHSX.Value?.ToString() == selectedCDid?.ToString()) ?? new();
 
             SelectNVLcuaCongdoan = SelectedNguyenCong.DSachNVLCongDoans.FirstOrDefault(nvlmcd => nvlmcd.MaQuanLy.Value?.ToString() == SelectedNVLmcd.MaQuanLy.Value?.ToString());
 
@@ -533,7 +533,7 @@
             SelectedNVLmcd = selectednvlmcd;
         }
 
-        if (selectedCD.CDID.Value == SelectedNguyenCong.CDID.Value && IsDisplayDetails == true && selectednvlmcd.NVLMCDID.Value == SelectedNVLmcd.NVLMCDID.Value)
+        if (selectedCD.NCIDofKHSX.Value == SelectedNguyenCong.NCIDofKHSX.Value && IsDisplayDetails == true && selectednvlmcd.NVLMCDID.Value == SelectedNVLmcd.NVLMCDID.Value)
         {
             IsDisplayDetails = false;
         }
@@ -544,7 +544,7 @@
 
     private string IsNVLmCDSelected(NVLmoiNguyenCong selectednvlmcd, NguyenCongofKHSX selectedCongDoan)
     {
-        if (selectednvlmcd.NVLMCDID.Value == SelectedNVLmcd.NVLMCDID.Value && selectedCongDoan.CDID.Value == SelectedNguyenCong.CDID.Value)
+        if (selectednvlmcd.NVLMCDID.Value == SelectedNVLmcd.NVLMCDID.Value && selectedCongDoan.NCIDofKHSX.Value == SelectedNguyenCong.NCIDofKHSX.Value)
             return "nvlmcdSelected";
         else
             return "nvlmcdUnSelected";

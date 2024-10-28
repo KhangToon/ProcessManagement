@@ -54,8 +54,8 @@
                                     </RadzenStack>
                                     <RadzenStack Style="width: 50%; height: contain;" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
                                         <RadzenDropDown Placeholder="* chọn sản phẩm" Value="@generLot.NewKHSX.SanPham?.SP_TenSanPham.Value?.ToString()" TValue="string"
-                                                        ValueChanged="@((args) => 
-                                                        { generLot.isGenerateListLotOK = false; generLot.isCheckSLNVLisOK = false; generLot.SetCurrentKHSXsanPham(args); generLot.ResetDefault(); })" 
+                                                        ValueChanged="@((args) =>
+                                                        { generLot.isGenerateListLotOK = false; generLot.isCheckSLNVLisOK = false; generLot.SetCurrentKHSXsanPham(args); generLot.ResetDefault(); })"
                                                         Data=@(generLot.GetDSMaSPs()) Style="width: 100%; border-radius: 5px; border-width: 1px; font-size: 16px; ">
                                         </RadzenDropDown>
                                     </RadzenStack>
@@ -134,7 +134,7 @@
                                             </RadzenStack>
                                         </RadzenStack>
                                     </RadzenStack>
-                                    
+
                                     <!--Range ma quan ly-->
                                     <RadzenStack Visible="@(generLot.ListNVLs?.Count > 0)" Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                         <RadzenStack Style="width: 100%; height: contain; padding-right: 10px" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
@@ -242,7 +242,7 @@
                                                                 </TargetHeader>
                                                                 <Template>
                                                                     <RadzenStack Style="height: contain; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                                                                        <RadzenText Text="@($"{context}")" Style="color: black; font-weight: 600; color: black; font-size: 16px"></RadzenText>
+                                                                        <RadzenText Text="@($"{context.TenNguyenCong.Value?.ToString()}")" Style="color: black; font-weight: 600; color: black; font-size: 16px"></RadzenText>
                                                                         @{
                                                                             int index = generLot.SelectListCDnames?.ToList().IndexOf(context) ?? -1;
                                                                         }
@@ -357,7 +357,7 @@
     private string currentSelectCDname = string.Empty;
     private bool isAddingLSXtodatabase = false;
     private int selectNCongTab = 1;
-    
+
 
     // Tao danh sach LOT
     private async Task CreateListLot()
@@ -408,7 +408,7 @@
         {
             // Reload list nguyen cong
             //List<NguyenCong> NguyenCongs = SQLServerServices.GetListNguyenCongs();
-            generLot.AddNewNguyenCongtoList(newNC.TenNguyenCong.Value?.ToString() ?? string.Empty);
+            generLot.AddNewNguyenCongtoList(newNC);
 
             StateHasChanged();
         }
@@ -522,9 +522,9 @@
                     congdoan.CreateDSachNVLCongDoans(generLot.ListNVLs);
 
                     // Insert Congdoan vao KHSX
-                    (int cdID, string addcdError) = SQLServerServices.InsertCongdoantoKehoachSanxuat(congdoan);
+                    (int ncofkhsxid, string addcdError) = SQLServerServices.InsertCongdoantoKehoachSanxuat(congdoan);
 
-                    if (cdID <= 0)
+                    if (ncofkhsxid <= 0)
                     {
                         // Remove KHSX if error
                         await DeleteKehoachSanxuat();
@@ -538,7 +538,7 @@
                         // add nvl moi cong doan
                         foreach (var nvlmoicd in congdoan.DSachNVLCongDoans)
                         {
-                            nvlmoicd.CDID.Value = cdID;
+                            nvlmoicd.NCIDofKHSX.Value = ncofkhsxid;
 
                             nvlmoicd.NgayXuat.Value = DateTime.Now;
 

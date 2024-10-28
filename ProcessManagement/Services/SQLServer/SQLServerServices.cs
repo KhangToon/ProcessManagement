@@ -773,7 +773,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 string parameterNames = string.Join(",", newcdItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
 
-                command.CommandText = $"INSERT INTO [{Common.TableCongDoan}] ({columnNames}) OUTPUT INSERTED.{Common.CDID} VALUES ({parameterNames})";
+                command.CommandText = $"INSERT INTO [{Common.TableCongDoan}] ({columnNames}) OUTPUT INSERTED.{Common.NCIDofKHSX} VALUES ({parameterNames})";
 
                 foreach (var item in newcdItems)
                 {
@@ -870,7 +870,7 @@ namespace ProcessManagement.Services.SQLServer
             {
                 congdoan.IsUsing = true;
 
-                congdoan.DSachNVLCongDoans = GetlistNVLmoiCongdoans(congdoan.CDID.Value ?? 0, khsxID);
+                congdoan.DSachNVLCongDoans = GetlistNVLmoiCongdoans(congdoan.NCIDofKHSX.Value ?? 0, khsxID);
             });
 
             return listCongdoans;
@@ -1016,7 +1016,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"SELECT * FROM [{Common.TableNVLmoiCongDoan}] WHERE [{Common.KHSXID}] = '{khsxID}' AND [{Common.CDID}] = '{congdoanID}'";
+                command.CommandText = $"SELECT * FROM [{Common.TableNVLmoiCongDoan}] WHERE [{Common.KHSXID}] = '{khsxID}' AND [{Common.NCIDofKHSX}] = '{congdoanID}'";
 
                 using var reader = command.ExecuteReader();
 
@@ -1106,7 +1106,7 @@ namespace ProcessManagement.Services.SQLServer
                     connection.Open();
 
                     string sqlQuery = $"UPDATE {Common.TableNVLmoiCongDoan} SET [{Common.TongOK}] = '{slOK}', [{Common.TongNG}] = '{slNG}', [{Common.IsUpdated}] = '{1}' " +
-                                    $"WHERE [{Common.KHSXID}] = '{khsxID}' AND [{Common.CDID}] = '{cdID}' AND [{Common.MaQuanLy}] = '{maquanly}'";
+                                    $"WHERE [{Common.KHSXID}] = '{khsxID}' AND [{Common.NCIDofKHSX}] = '{cdID}' AND [{Common.MaQuanLy}] = '{maquanly}'";
 
                     var command = new SqlCommand(sqlQuery, connection);
 
@@ -1204,7 +1204,7 @@ namespace ProcessManagement.Services.SQLServer
                 {
                     connection.Open();
 
-                    string sqlQuery = $"UPDATE {Common.TableNVLmoiCongDoan} SET [{Common.SLTruocGiaCong}] = '{sltruocgiacong}' WHERE [{Common.CDID}] = '{cdid}' AND [{Common.MaQuanLy}] = '{maquanly}'";
+                    string sqlQuery = $"UPDATE {Common.TableNVLmoiCongDoan} SET [{Common.SLTruocGiaCong}] = '{sltruocgiacong}' WHERE [{Common.NCIDofKHSX}] = '{cdid}' AND [{Common.MaQuanLy}] = '{maquanly}'";
 
                     var command = new SqlCommand(sqlQuery, connection);
 

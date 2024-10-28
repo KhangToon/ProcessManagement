@@ -73,7 +73,7 @@ namespace ProcessManagement.Commons
         // Table KHSX Nguyen cong //
         public const string TableCongDoan = "Table_NguyenCongofKHSX";
         //public const string KHSXID = "KHSXID";
-        public const string CDID = "CDID";
+        public const string NCIDofKHSX = "NCIDofKHSX";
         public const string TOTAL = "TOTAL"; // tong cua so luong nvl trong moi cong doan
 
 

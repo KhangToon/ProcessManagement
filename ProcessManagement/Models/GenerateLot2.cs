@@ -33,8 +33,8 @@ namespace ProcessManagement.Models
         public bool isGenerateListLotOK = false;
         public bool isCheckSLNVLisOK = false;
 
-        IEnumerable<string>? _defaultListCDnames = new List<string>();
-        public IEnumerable<string>? DefaultListCDnames
+        IEnumerable<NguyenCong>? _defaultListCDnames = new List<NguyenCong>();
+        public IEnumerable<NguyenCong>? DefaultListCDnames
         {
             get
             {
@@ -49,8 +49,8 @@ namespace ProcessManagement.Models
             }
         }
 
-        IEnumerable<string>? _selectListCDnames = new List<string>();
-        public IEnumerable<string>? SelectListCDnames
+        IEnumerable<NguyenCong>? _selectListCDnames = new List<NguyenCong>();
+        public IEnumerable<NguyenCong>? SelectListCDnames
         {
             get
             {
@@ -74,7 +74,8 @@ namespace ProcessManagement.Models
                     foreach (var nguyencong in _selectListCDnames)
                     {
                         NguyenCongofKHSX congDoan = new();
-                        congDoan.TenCongDoan.Value = nguyencong;
+                        congDoan.TenCongDoan.Value = nguyencong.TenNguyenCong.Value;
+                        congDoan.NCID.Value = nguyencong.NCID.Value;
                         congDoan.IsUsing = true;
                         NewKHSX.DSachCongDoans.Add(congDoan);
                     }
@@ -120,9 +121,9 @@ namespace ProcessManagement.Models
             else { isErrorSLloiChophep = false; return true; }
         }
 
-        public void AddNewNguyenCongtoList(string newnguyencong)
+        public void AddNewNguyenCongtoList(NguyenCong newnguyencong)
         {
-            if (newnguyencong == string.Empty) { return; }
+            if (newnguyencong.NCID.Value == null) { return; }
 
             if (_defaultListCDnames != null)
             {
@@ -134,7 +135,7 @@ namespace ProcessManagement.Models
             }
             else
             {
-                var convertlist = new List<string>
+                var convertlist = new List<NguyenCong>
                 {
                     newnguyencong
                 };
@@ -146,19 +147,20 @@ namespace ProcessManagement.Models
         {
             List<NguyenCong> nguyenCongs = SQLServerServices.GetListNguyenCongs();
 
-            List<string> tenNClist = new();
+            //List<string> tenNClist = new();
 
-            foreach (var nguyencong in nguyenCongs)
-            {
-                var tenNC = nguyencong.TenNguyenCong.Value?.ToString();
+            //foreach (var nguyencong in nguyenCongs)
+            //{
+            //    var tenNC = nguyencong.TenNguyenCong.Value?.ToString();
 
-                if (tenNC != null)
-                {
-                    tenNClist.Add(tenNC);
-                }
-            }
+            //    if (tenNC != null)
+            //    {
+            //        tenNClist.Add(tenNC);
+            //    }
+            //}
 
-            _defaultListCDnames = tenNClist;
+            //_defaultListCDnames = tenNClist;
+            _defaultListCDnames = nguyenCongs;
         }
 
         public void SetCurrentKHSXsanPham(string tenSP)
@@ -170,7 +172,7 @@ namespace ProcessManagement.Models
         {
             NewKHSX.MaLSX.Value = MaLSX;
             NewKHSX.LOAINVLID.Value = NewKHSX.LoaiNVL?.LOAINVLID.Value;
-            NewKHSX.SLSanPhamSX.Value = SLSanPhamSX;    
+            NewKHSX.SLSanPhamSX.Value = SLSanPhamSX;
             NewKHSX.SLNVLSanXuat.Value = SLNgVatLieuSX;
             NewKHSX.DinhMuc.Value = DinhMuc;
             NewKHSX.TileLoi.Value = TiLeLoi;

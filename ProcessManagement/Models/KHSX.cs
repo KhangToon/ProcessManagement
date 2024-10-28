@@ -30,6 +30,8 @@ namespace ProcessManagement.Models
 
         public List<NVLofKHSX> DSachNVLofKHSXs { get; set; } = new(); // Danh sach NVL cua KHSX (so luong, loai nvl, sp, ngay tao)
 
+        public bool IsDoneKHSX { get; set; } = false;
+
         public KHSX()
         {
 

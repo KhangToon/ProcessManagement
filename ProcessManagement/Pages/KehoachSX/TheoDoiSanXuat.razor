@@ -1,0 +1,89 @@
+﻿@using ProcessManagement.Commons
+@using ProcessManagement.Models
+@using ProcessManagement.Models.KHSXs
+@using ProcessManagement.Models.SANPHAM
+@using ProcessManagement.Models.TienDoGCs
+@using ProcessManagement.Pages.KehoachSX.KQGCs
+@using ProcessManagement.Pages.KehoachSX.TienDos
+@using ProcessManagement.Services.SQLServer
+@using Radzen.Blazor
+@using Radzen
+@using Microsoft.AspNetCore.Components
+
+@inject NotificationService NotificationService
+@inject DialogService DialogService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject SQLServerServices SQLServerServices
+@inject NavigationManager NavigationManager
+
+<RadzenSelectBar @bind-Value=selectBarIndex TValue="int" Style="margin-bottom: 15px">
+    <Items>
+        <RadzenSelectBarItem Text="PHIẾU THEO DÕI GIA CÔNG" Style="font-weight: 600; font-size: 16px;" Value="-1"></RadzenSelectBarItem>
+
+        @foreach (var item in SelectBarItems)
+        {
+            <RadzenSelectBarItem Text="@item.Value.TenCongDoan.Value?.ToString()" Style="font-weight: 600; font-size: 16px" Value="@item.Key"></RadzenSelectBarItem>
+        }
+    </Items>
+</RadzenSelectBar>
+
+<RadzenStack Visible="@(selectBarIndex == -1)">
+    <KetQuaGiaCong TargetKHSX="@TargetKHSX"></KetQuaGiaCong>
+</RadzenStack>
+
+@foreach (var item in SelectBarItems)
+{
+    <RadzenStack Visible="@(selectBarIndex == item.Key)">
+        <TienDoGiaCong KHSXID="@TargetKHSX.KHSXID.Value" NCID="@SelectBarItems[selectBarIndex].NCID.Value" SPID="@TargetKHSX.SPID.Value"></TienDoGiaCong>
+    </RadzenStack>
+}
+
+@code {
+    RadzenTabs tabs = new();
+
+    [Parameter]
+    public KHSX TargetKHSX { get; set; } = new();
+
+    private Dictionary<int, NguyenCongofKHSX> SelectBarItems = new();
+    private int selectBarIndex = -1;
+
+    protected override async Task OnInitializedAsync()
+    {
+        LoadKHSXDatas();
+
+        await base.OnInitializedAsync();
+    }
+
+    // protected override async Task OnParametersSetAsync()
+    // {
+    //     if (_targetKHSX != TargetKHSX)
+    //     {
+    //         _targetKHSX = TargetKHSX;
+
+    //         LoadKHSXDatas();
+
+    //         await ParameterChanged();
+    //     }
+
+    //     await base.OnParametersSetAsync();
+
+    // }
+
+
+    private async Task ParameterChanged()
+    {
+        await InvokeAsync(StateHasChanged);
+    }
+
+
+    private void LoadKHSXDatas()
+    {
+        SelectBarItems = new();
+
+        foreach (var nguyencong in TargetKHSX.DSachCongDoans)
+        {
+            int index = TargetKHSX.DSachCongDoans.IndexOf(nguyencong);
+            SelectBarItems.Add(index, nguyencong);
+        }
+    }
+}

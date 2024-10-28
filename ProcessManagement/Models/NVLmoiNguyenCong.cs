@@ -7,7 +7,7 @@ namespace ProcessManagement.Models
     {
         public Propertyy NVLMCDID { get; set; } = new() { DBName = Common.NVLMCDID, Type = typeof(int), AlowDatabase = true };
         public Propertyy KHSXID { get; set; } = new() { DBName = Common.KHSXID, Type = typeof(int), AlowDatabase = true };
-        public Propertyy CDID { get; set; } = new() { DBName = Common.CDID, Type = typeof(int), AlowDatabase = true };
+        public Propertyy NCIDofKHSX { get; set; } = new() { DBName = Common.NCIDofKHSX, Type = typeof(int), AlowDatabase = true };
         public Propertyy TenCongDoan { get; set; } = new() { DBName = Common.NguyenCong, Type = typeof(string), AlowDatabase = true };
 
         public Propertyy LoaiNVL = new() { DBName = Common.LoaiNL, Type = typeof(string), AlowDatabase = true };

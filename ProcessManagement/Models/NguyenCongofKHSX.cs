@@ -5,8 +5,9 @@ namespace ProcessManagement.Models
 {
     public class NguyenCongofKHSX
     {
+        public Propertyy NCIDofKHSX { get; set; } = new() { DBName = Common.NCIDofKHSX, Type = typeof(int) };
         public Propertyy KHSXID { get; set; } = new() { DBName = Common.KHSXID, Type = typeof(int), AlowDatabase = true };
-        public Propertyy CDID { get; set; } = new() { DBName = Common.CDID, Type = typeof(int) };
+        public Propertyy NCID { get; set; } = new() { DBName = Common.NCID, Type = typeof(int), AlowDatabase = true };
         public Propertyy TenCongDoan { get; set; } = new() { DBName = Common.NguyenCong, Type = typeof(string), AlowDatabase = true };
         public Propertyy TileNG { get; set; } = new() { DBName = Common.TileLoi, Type = typeof(double), AlowDatabase = true, Value = 0 };
         public Propertyy SoluongNG { get; set; } = new() { DBName = Common.SoluongNG, Type = typeof(int), AlowDatabase = true, Value = 0 };
@@ -22,7 +23,7 @@ namespace ProcessManagement.Models
 
                 nVLmoiCongDoan.MaSP.Value = nvl.MaSP.Value;
 
-                nVLmoiCongDoan.CDID.Value = CDID.Value;
+                nVLmoiCongDoan.NCIDofKHSX.Value = NCIDofKHSX.Value;
 
                 nVLmoiCongDoan.KHSXID.Value = KHSXID.Value;
 

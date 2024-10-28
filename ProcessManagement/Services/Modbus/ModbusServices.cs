@@ -398,7 +398,7 @@ namespace ProcessManagement.Services.Modbus
 
             string maquanly = currentNVLMCD?.MaQuanLy.Value?.ToString() ?? string.Empty;
 
-            int currentCDid = int.TryParse(currentNVLMCD?.CDID.Value?.ToString(), out int cdid) ? cdid : 0;
+            int currentCDid = int.TryParse(currentNVLMCD?.NCIDofKHSX.Value?.ToString(), out int cdid) ? cdid : 0;
 
             int nextCDid = (currentCDid > 0) ? (currentCDid + 1) : 0;
 
