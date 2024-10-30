@@ -7941,7 +7941,7 @@ namespace ProcessManagement.Services.SQLServer
             return (listKetQuaGC, errorMessage);
         }
 
-        public (List<KetQuaGC>, string) GetListKetQuaGC(Dictionary<string, object?> parameters)
+        public (List<KetQuaGC>, string) GetListKetQuaGC(Dictionary<string, object?> parameters, bool isgetAll = false)
         {
             List<KetQuaGC> listKetQuaGC = new();
 
@@ -7959,20 +7959,20 @@ namespace ProcessManagement.Services.SQLServer
 
                     command.CommandText = $"SELECT * FROM [{KQGCDBName.Table_KetQuaGC}]";
 
-                    // Process each parameter in the dictionary
-                    foreach (var param in parameters)
+                    if (!isgetAll)
                     {
-                        if (param.Value != null)
+                        // Process each parameter in the dictionary
+                        foreach (var param in parameters)
                         {
                             conditions.Add($"[{param.Key}] = @{param.Key}");
 
                             command.Parameters.AddWithValue($"@{param.Key}", param.Value);
                         }
-                    }
 
-                    if (conditions.Any())
-                    {
-                        command.CommandText += " WHERE " + string.Join(" AND ", conditions);
+                        if (conditions.Any())
+                        {
+                            command.CommandText += " WHERE " + string.Join(" AND ", conditions);
+                        }
                     }
 
                     using var reader = command.ExecuteReader();
@@ -8484,7 +8484,7 @@ namespace ProcessManagement.Services.SQLServer
             return (listTienDoGC, errorMessage);
         }
 
-        public (List<TienDoGC>, string) GetListTienDoGC(Dictionary<string, object?> parameters)
+        public (List<TienDoGC>, string) GetListTienDoGC(Dictionary<string, object?> parameters, bool isgetAll = false)
         {
             List<TienDoGC> listTienDoGC = new();
 
@@ -8500,20 +8500,20 @@ namespace ProcessManagement.Services.SQLServer
                     var command = connection.CreateCommand();
                     command.CommandText = $"SELECT * FROM [{TienDoGC.DBName.Table_TienDoGC}]";
 
-                    // Process each parameter in the dictionary
-                    foreach (var param in parameters)
+                    if (!isgetAll)
                     {
-                        if (param.Value != null)
+                        // Process each parameter in the dictionary
+                        foreach (var param in parameters)
                         {
                             conditions.Add($"[{param.Key}] = @{param.Key}");
 
                             command.Parameters.AddWithValue($"@{param.Key}", param.Value);
                         }
-                    }
 
-                    if (conditions.Any())
-                    {
-                        command.CommandText += " WHERE " + string.Join(" AND ", conditions);
+                        if (conditions.Any())
+                        {
+                            command.CommandText += " WHERE " + string.Join(" AND ", conditions);
+                        }
                     }
 
                     using var reader = command.ExecuteReader();

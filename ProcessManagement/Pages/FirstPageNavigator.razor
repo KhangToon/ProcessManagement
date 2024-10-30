@@ -1,0 +1,45 @@
+﻿@page "/"
+@attribute [Authorize(Roles = "Admin, User")]
+
+@using ParamountBed_Warehouse.Services.SocketService
+@using ProcessManagement.Commons
+@using ProcessManagement.Models
+@using ProcessManagement.Models.KHO_NVL.XuatKho
+@using ProcessManagement.Pages.KehoachSX.Dialogs
+@using ProcessManagement.Services.SQLServer
+@using Radzen.Blazor
+@using Radzen
+@using Microsoft.AspNetCore.Components
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+
+
+
+@code {
+    private List<string>? UserRoles;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+        var user = authState?.User;
+
+        if (user != null && user.Identity?.IsAuthenticated == true)
+        {
+            UserRoles = user.Claims.Where(c => c.Type == "role").Select(c => c.Value).ToList();
+        }
+
+        // Checking if is User login not Admin
+        if (UserRoles != null && UserRoles.Any())
+        {
+            if (UserRoles.FirstOrDefault() == "User")
+            {
+                // Navigate to Mobile device
+                NavigationManager.NavigateTo("/mobilesubmitkqgc");
+            }
+        }
+
+        await base.OnInitializedAsync();
+    }
+}

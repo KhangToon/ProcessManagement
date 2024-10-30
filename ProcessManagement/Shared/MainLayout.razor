@@ -1,7 +1,11 @@
-﻿@inherits LayoutComponentBase
+﻿@attribute [Authorize(Roles = "Admin, User")]
+
+@inherits LayoutComponentBase
 
 @using Radzen;
 @using Radzen.Blazor;
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <RadzenLayout Style="height: contain; width: 100%;">
     <RadzenHeader Style="height: 5%; align-items: center;">
@@ -17,7 +21,7 @@
             </RadzenStack>
         </RadzenStack>
     </RadzenHeader>
-    <NavigatorMenu sidebarExpanded="sidebarExpanded" />
+    <NavigatorMenu visibleSideBar="visibleSideBar" sidebarExpanded="sidebarExpanded" />
     <RadzenBody Style="height: 100%; width: 100%; overflow: scroll; padding-bottom: 0; padding-right: 0px">
         @Body
     </RadzenBody>
@@ -30,10 +34,38 @@
 
 @code
 {
+    private bool visibleSideBar = true;
     private bool sidebarExpanded = false;
+
+    private List<string>? UserRoles;
 
     void SidebarToggleClick()
     {
         sidebarExpanded = !sidebarExpanded;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+        var user = authState?.User;
+
+        if (user != null && user.Identity?.IsAuthenticated == true)
+        {
+            UserRoles = user.Claims.Where(c => c.Type == "role").Select(c => c.Value).ToList();
+        }
+
+        // Checking if is User login not Admin
+        if (UserRoles != null && UserRoles.Any())
+        {
+            if (UserRoles.FirstOrDefault() == "User")
+            {
+                visibleSideBar = false; // hide sidemenubar
+            }
+        }
+
+        // --> auto direction to "/" page
+
+        await base.OnInitializedAsync();
     }
 }
