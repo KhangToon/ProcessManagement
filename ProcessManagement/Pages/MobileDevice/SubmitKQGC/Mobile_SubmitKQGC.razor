@@ -1,8 +1,31 @@
 ﻿@page "/mobilesubmitkqgc"
 @attribute [Authorize(Roles = "User")]
 
-<h3>Mobile_SubmitKQGC</h3>
+@using ProcessManagement.Commons
+@using ProcessManagement.Models
+@using ProcessManagement.Models.MAYMOC
+@using ProcessManagement.Models.NHANVIEN
+@using ProcessManagement.Models.SANPHAM
+@using ProcessManagement.Services.SQLServer
+@using Radzen.Blazor
+@using Radzen
+@using ProcessManagement.Models.KHSXs
+
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject SQLServerServices SQLServerServices
+
+<RadzenButton Click="OnThemMoiKetQuaGC" Icon="add" Text="Thêm kết quả gia công" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Success" Variant="Variant.Filled" Shade="Shade.Darker"
+              Style="font-size: 16px; height: contain; width: contain; border-radius: 5px; --rz-icon-size: 18px;" />
+
 
 @code {
+
+    // Them ket qua gia cong
+    private async Task OnThemMoiKetQuaGC()
+    {
+        object newKetQuaGCid = await DialogService.OpenAsync<DialogAddNewKQGC_Mobile>(null, null,
+        new DialogOptions() { ShowTitle = true, Width = "100%", Height = "95%", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 0px; padding: 0px" });
+    }
 
 }

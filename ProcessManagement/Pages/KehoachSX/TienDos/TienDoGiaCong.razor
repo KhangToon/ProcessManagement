@@ -317,6 +317,10 @@
                                                     {
                                                         <RadzenText Text="@($"{colValue}")" Style="font-size: 15px; height: contain; font-weight: 600"></RadzenText>
                                                     }
+                                                    else if (colName == TienDoGCRow.DBName.SPID || colName == TienDoGCRow.DBName.MMID || colName == TienDoGCRow.DBName.NCID || colName == TienDoGCRow.DBName.NVIDs)
+                                                    {
+                                                        <RadzenText Text="@(GetColumnValueByID(colValue, colName))" Style="font-size: 15px; height: contain; font-weight: 500;"></RadzenText>
+                                                    }
                                                     else
                                                     {
                                                         <RadzenText Text="@($"{colValue}")" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
@@ -403,6 +407,42 @@
         await InvokeAsync(StateHasChanged);
     }
 
+    // Convert ID to stringValue
+    private string GetColumnValueByID(object? id, string colName)
+    {
+        string value = string.Empty;
+
+        if (colName == TienDoGCRow.DBName.SPID)
+        {
+            value = SQLServerServices.GetMaSanphamByID(id);
+        }
+        else if (colName == TienDoGCRow.DBName.NCID)
+        {
+            value = SQLServerServices.GetNguyenCongByID(id);
+        }
+        else if (colName == TienDoGCRow.DBName.MMID)
+        {
+            value = SQLServerServices.GetMaMayMocbyID(id);
+        }
+        else if (colName == TienDoGCRow.DBName.NVIDs)
+        {
+            string ids = id?.ToString()?.Trim() ?? string.Empty;
+
+            if (!string.IsNullOrEmpty(ids))
+            {
+                List<string> nvids = ids.Split(",").ToList();
+
+                value = string.Join(", ", nvids
+                        .Select(nvid => (SQLServerServices.GetNhanVienbyID(nvid).GetThongTinNhanVienByName("Tên nhân viên")).GiaTri.Value?.ToString() ?? string.Empty)
+                        .Where(name => !string.IsNullOrEmpty(name)))
+                        .Trim(',');
+            }
+        }
+
+        return value;
+    }
+
+
     private async Task OnThemMoiTienDoGCRow()
     {
         _ = int.TryParse(TargetTienDoGC.TDGCID.Value?.ToString(), out int tdgcid);
@@ -454,7 +494,7 @@
             (int tdgcid, string error) = SQLServerServices.InsertTienDoGC(TargetTienDoGC);
 
             if (tdgcid > 0)
-            {   
+            {
                 ShowNotification("Save success!", NotificationSeverity.Success, 2000);
                 await ReLoadTienDoGCPage(tdgcid, NCID, KHSXID);
                 // Navigate to reload page

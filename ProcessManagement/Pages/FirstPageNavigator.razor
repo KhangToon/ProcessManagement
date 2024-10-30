@@ -14,8 +14,6 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
 
-
-
 @code {
     private List<string>? UserRoles;
 
@@ -33,10 +31,17 @@
         // Checking if is User login not Admin
         if (UserRoles != null && UserRoles.Any())
         {
-            if (UserRoles.FirstOrDefault() == "User")
+            string userrole = UserRoles.FirstOrDefault()?.Trim() ?? string.Empty;
+
+            if (userrole == "User")
             {
                 // Navigate to Mobile device
-                NavigationManager.NavigateTo("/mobilesubmitkqgc");
+                NavigationManager.NavigateTo("/mobilemainpage");
+            }
+            else if (userrole == "Admin")
+            {
+                // Navigate to admin firstpage
+                NavigationManager.NavigateTo("/pagedskhsanxuats");
             }
         }
 
