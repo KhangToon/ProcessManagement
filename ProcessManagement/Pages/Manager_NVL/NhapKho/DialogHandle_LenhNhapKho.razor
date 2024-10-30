@@ -29,7 +29,7 @@
                 <RadzenText Text="@($"Số lượng nhập:")" Style="font-weight: 600; font-size: 16px; color: black; font-style: italic"></RadzenText>
                 <RadzenText Text="@($"{LNK?.LNKSoLuong.Value?.ToString()} ({LNK?.TargetNgLieu.DonViTinh.Value?.ToString()})")" Style="font-weight: bold; font-size: 16px; color: black; font-style: italic"></RadzenText>
             </RadzenStack>
-            <RadzenStack Gap="20px" Style="height: contain; width: contain; border-radius: 5px; background-color: var(--rz-primary-lighter); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+            <RadzenStack Visible="false" Gap="20px" Style="height: contain; width: contain; border-radius: 5px; background-color: var(--rz-primary-lighter); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                 <RadzenRadioButtonList Value=@usingScanner TValue="bool" ValueChanged=@(args => usingScanner = args)>
                     <Items>
                         <RadzenRadioButtonListItem Text="Sử dụng USB Scanner" Value="true" />
@@ -146,11 +146,11 @@
             <RadzenStack Gap="10px" Style="height: 100%; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                 @if (LNK.LNKIsDone.Value?.ToString() == "1")
                 {
-                    <RadzenButton Style="width: contain; cursor: default" Icon="check" Text="Đã nhập kho thành công" ButtonStyle="ButtonStyle.Success" Shade="Shade.Dark" Size="ButtonSize.Small" Variant="Variant.Flat" />
+                    <RadzenButton Text="Đã nhập kho thành công" Style="width: contain; cursor: default" Icon="check" ButtonStyle="ButtonStyle.Success" Shade="Shade.Dark" Size="ButtonSize.Small" Variant="Variant.Flat" />
                 }
                 else
                 {
-                    <RadzenButton Click="@(async () => { await OnConfirmExcuteLenhNhapKho(scanMaPNK, scanMaViTri, scanMaNVL);})" Style="width: contain;" Icon="arrow_outward" Text="Tiến hành nhập kho" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Size="ButtonSize.Small" Variant="Variant.Flat" />
+                    <RadzenButton Text="Tiến hành nhập kho" Click="@(async () => { await OnConfirmExcuteLenhNhapKho_withLotVitri(scanMaPNK, scanMaViTri, scanMaNVL);})" Style="width: contain;" Icon="arrow_outward" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Size="ButtonSize.Small" Variant="Variant.Flat" />
                 }
             </RadzenStack>
             <RadzenStack Gap="10px" Style="height: 100%; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
@@ -209,7 +209,7 @@
         if (soluongnhapfromClient == 0) { return; }
 
         if (savedLNK.LenhNKID.Value == null)
-        {   
+        {
             await DialogService.Alert($"Không tồn tại lệnh nhập kho!", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
         }
         else
@@ -219,7 +219,7 @@
             // Check trang thai lenh (da hoan thanh hay chua)
             _ = int.TryParse(savedLNK.LNKIsDone.Value?.ToString(), out int scanlnkIsdone) ? scanlnkIsdone : -1;
             if (scanlnkIsdone != 0)
-            {   
+            {
                 await DialogService.Alert($"Không thể nhập (lệnh đã hoàn thành trước đó)!", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
 
                 return;
@@ -228,7 +228,7 @@
             // Kiem tra so luong them vao
             int soluongThemvao = int.TryParse(savedLNK.LNKSoLuong.Value?.ToString(), out int slthem) ? slthem : 0;
             if (soluongThemvao == 0)
-            {   
+            {
                 await DialogService.Alert($"Số lượng không hợp lệ!", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
 
                 return;
@@ -240,7 +240,7 @@
             // Kiem tra qua so luong con trong cua vi tri
             int soluongcontrongvitri = savedLNK.TargertVitri.SLConTrong;
             if (soluongThemvao > soluongcontrongvitri)
-            {   
+            {
                 await DialogService.Alert($"Qúa số lượng trống của vị trí ({soluongcontrongvitri})", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
 
                 return;
@@ -258,7 +258,7 @@
                 (int updateVTofNVLresult, string updateVTofNVLerror) = SQLServerServices.UpdateSoluongNgVatLieuById(viTriofNVL?.VTofNVLID.Value, newtonkhotaivitri);
 
                 if (updateVTofNVLresult == -1)
-                {   
+                {
                     await DialogService.Alert($"LNK Lỗi: (HELNK0001)!", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
 
                     return;
@@ -268,7 +268,7 @@
                 (int updatelnkResult, string updatelnkError) = SQLServerServices.UpdateLenhNhapKhoStatus(savedLNK.LenhNKID.Value, 1);
 
                 if (updatelnkResult == -1)
-                {   
+                {
                     await DialogService.Alert($"LNK Lỗi: (HELNK0002)!", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
 
                     return;
@@ -288,7 +288,7 @@
                 (int InsertVTofNVLstatus, string InsertVTofNVLerror) = SQLServerServices.InsertNewViTriOfNgVatLieu(newviTriofNVL);
 
                 if (InsertVTofNVLstatus == -1)
-                {   
+                {
                     await DialogService.Alert($"LNK Lỗi: (HELNK0003)!", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
 
                     return;
@@ -298,7 +298,7 @@
                 (int updatelnkResult, string updatelnkError) = SQLServerServices.UpdateLenhNhapKhoStatus(savedLNK.LenhNKID.Value, 1);
 
                 if (updatelnkResult == -1)
-                {   
+                {
                     await DialogService.Alert($"LNK Lỗi: (HELNK0004)!", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
 
                     return;
@@ -337,6 +337,159 @@
 
             // Feedback nhap kho thanh cong
             await DialogService.Alert($"Đã nhập kho nguyên liệu: \n {maNVL} \n Số lượng : {soluongnhapfromClient} (pcs)", "<strong><span style='color: darkgreen'>Success!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+
+        }
+    }
+
+    private async Task OnConfirmExcuteLenhNhapKho_withLotVitri(string maPNK, string maVitri, string maNVL)
+    {
+        int soluongnhapfromClient = int.TryParse(LNK.LNKSoLuong.Value?.ToString(), out int lnksl) ? lnksl : 0;
+        object? lnkid = LNK.LenhNKID.Value?.ToString();
+
+        // Load lenh nhap kho by ID
+        LenhNhapKho savedLNK = SQLServerServices.GetLenhNhapKhoByID(lnkid);
+
+        if (string.IsNullOrWhiteSpace(maPNK) || !string.Equals(maPNK, PNK.MaPhieuNK.Value?.ToString())) { return; }
+        if (string.IsNullOrWhiteSpace(maVitri) || !string.Equals(maVitri, savedLNK.TargertVitri.MaViTri.Value?.ToString())) { return; }
+        if (string.IsNullOrWhiteSpace(maNVL) || !string.Equals(maNVL, savedLNK.TargetNgLieu.TenNVL.Value?.ToString())) { return; }
+        if (soluongnhapfromClient == 0) { return; }
+
+        if (savedLNK.LenhNKID.Value == null)
+        {
+            await DialogService.Alert($"Không tồn tại lệnh nhập kho!", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+        }
+        else
+        {
+            // Handle lenh nhap kho
+
+            // Check trang thai lenh (da hoan thanh hay chua)
+            _ = int.TryParse(savedLNK.LNKIsDone.Value?.ToString(), out int scanlnkIsdone) ? scanlnkIsdone : -1;
+            if (scanlnkIsdone != 0)
+            {
+                await DialogService.Alert($"Không thể nhập (lệnh đã hoàn thành trước đó)!", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+
+                return;
+            }
+
+            // Kiem tra so luong them vao
+            int soluongThemvao = int.TryParse(savedLNK.LNKSoLuong.Value?.ToString(), out int slthem) ? slthem : 0;
+            if (soluongThemvao == 0)
+            {
+                await DialogService.Alert($"Số lượng không hợp lệ!", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+
+                return;
+            }
+
+            // Kiem tra vitri of NVL con trong hay khong / hoac cung ngay nhap kho
+            var viTriofNVL = SQLServerServices.GetViTriOfNgVatLieuBy_VTid_LotVitri(vtid: savedLNK.VTID.Value, lotvitri: savedLNK.LotVitri.Value);
+
+            // Handle lenh nhap kho voi LOT Vitri
+            if (viTriofNVL.VTofNVLID.Value != null) // vtofnvl co chua NVL
+            {
+                int slhienco = int.TryParse(viTriofNVL?.VTNVLSoLuong.Value?.ToString(), out int slhc) ? slhc : 0;
+
+                // so luong sau khi nhap cho vi tri da luu
+                int newtonkhotaivitri = slhienco + soluongThemvao;
+
+                // Tao moi vitriofNVL
+                ViTriofNVL newviTriofNVL = new()
+                    {
+                        VTofNVLID = { Value = viTriofNVL?.VTofNVLID.Value },
+                        VTID = { Value = viTriofNVL?.VTID.Value },
+                        NVLID = { Value = savedLNK.NVLID.Value },
+                        VTNVLSoLuong = { Value = newtonkhotaivitri },
+                        NgayNhapKho = { Value = DateTime.Now.Date.ToShortDateString() },
+                        LotVitri = { Value = viTriofNVL?.LotVitri.Value }
+                    };
+
+                int updateVTofNVLresult = -1; string updateVTofNVLerror;
+
+                if (slhienco > 0)
+                {
+                    bool isnvlsame = object.Equals(viTriofNVL?.NVLID.Value, savedLNK.NVLID.Value);
+                    bool isngaynksame = viTriofNVL?.NgayNhapKho.Value?.ToString()?.Trim() == DateTime.Now.Date.ToShortDateString();
+
+                    if (isnvlsame && isngaynksame)
+                    {
+                        // Trung ngay va trung NVL --> ++ so luong ton kho tai LOT
+                        (updateVTofNVLresult, updateVTofNVLerror) = SQLServerServices.UpdateViTriOfNgVatLieu(newviTriofNVL);
+
+                        if (updateVTofNVLresult == -1)
+                        {
+                            await DialogService.Alert($"LNK Lỗi: {updateVTofNVLerror}!", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        // Khong cho nhap kho vao LOT // chi duoc nhap vao lot khac cung vitri
+                        await DialogService.Alert($"LOT đã chứa NVL, không thể nhập kho!", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+
+                        return;
+                    }
+                }
+                else
+                {
+                    // Update so luong ton kho tai LOT va NVLID
+                    (updateVTofNVLresult, updateVTofNVLerror) = SQLServerServices.UpdateViTriOfNgVatLieu(newviTriofNVL);
+
+                    if (updateVTofNVLresult == -1)
+                    {
+                        await DialogService.Alert($"LNK Lỗi: {updateVTofNVLerror}!", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                        return;
+                    }
+                }
+
+                // Update success
+                if (updateVTofNVLresult > 0)
+                {
+                    // Update lenh nhap kho status
+                    savedLNK.LNKIsDone.Value = 1;
+                    savedLNK.NgayNhapKho.Value = DateTime.Now.Date.ToShortDateString();
+                    (int updatelnkResult, string updatelnkError) = SQLServerServices.UpdateLenhNhapKho(savedLNK);
+
+                    if (updatelnkResult == -1)
+                    {
+                        await DialogService.Alert($"LNK Lỗi: {updatelnkError}!", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+
+                        return;
+                    }
+
+                    // update status to UI
+                    LNK.LNKIsDone.Value = 1;
+
+                    // Get nguoi nhap kho
+                    string nguoiNhapkho = SQLServerServices.GetNguoiTaoPhieuNhapKhoByID(savedLNK.PNKID.Value);
+
+                    // Logging nhap kho
+                    HistoryXNKho logNhapKho = new HistoryXNKho()
+                        {
+                            LogLoaiPhieu = { Value = Common.LogTypePNK },
+                            LogMaPhieu = { Value = maPNK },
+                            LogMaViTri = { Value = maVitri },
+                            LogNgThucHien = { Value = nguoiNhapkho },
+                            LogSoLuong = { Value = savedLNK.LNKSoLuong.Value },
+                            LogTonKhoTruoc = { Value = savedLNK.TargetNgLieu.TonKho },
+                            LogTonKhoSau = { Value = savedLNK.TargetNgLieu.TonKho + soluongThemvao },
+                            LogTenNVL = { Value = savedLNK.TargetNgLieu.TenNVL.Value },
+                            LogThoiDiem = { Value = DateTime.Now },
+                            LotVitri = { Value = savedLNK.LotVitri.Value },
+                            NVLID = { Value = savedLNK.NVLID.Value },
+                            VTID = { Value = savedLNK.VTID.Value }
+                        };
+                    // Insert logging to Database
+                    (int logId, string logErr) = SQLServerServices.InsertLogingXNKho(logNhapKho);
+
+                    if (logId == -1)
+                    {
+
+                    }
+
+                    // Feedback nhap kho thanh cong
+                    await DialogService.Alert($"Đã nhập kho nguyên liệu: \n {maNVL} \n Số lượng : {soluongnhapfromClient} (pcs)", "<strong><span style='color: darkgreen'>Success!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+
+                }
+            }
 
         }
     }

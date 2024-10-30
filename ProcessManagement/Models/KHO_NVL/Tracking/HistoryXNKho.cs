@@ -11,6 +11,7 @@ namespace ProcessManagement.Models.KHO_NVL.Tracking
         public Propertyy LogMaPhieu { get; set; } = new() { DBName = Common.LogMaPhieu, DisplayName = Common.LogMaPhieu, Type = typeof(string), AlowDatabase = true };
         public Propertyy LogTenNVL { get; set; } = new() { DBName = Common.LogTenNVL, DisplayName = Common.LogTenNVL, Type = typeof(string), AlowDatabase = true };
         public Propertyy LogMaViTri { get; set; } = new() { DBName = Common.LogMaViTri, DisplayName = Common.LogMaViTri, Type = typeof(string), AlowDatabase = true };
+        public Propertyy LotVitri { get; set; } = new() { DBName = Common.LotViTri, DisplayName = Common.LotViTri, Type = typeof(string), AlowDatabase = true };
         public Propertyy LogSoLuong { get; set; } = new() { DBName = Common.LogSoLuong, DisplayName = Common.LogSoLuong, Type = typeof(int), AlowDatabase = true };
         public Propertyy LogTonKhoTruoc { get; set; } = new() { DBName = Common.LogTonKhoTruoc, DisplayName = Common.LogTonKhoTruoc, Type = typeof(int), AlowDatabase = true };
         public Propertyy LogTonKhoSau { get; set; } = new() { DBName = Common.LogTonKhoSau, DisplayName = Common.LogTonKhoSau, Type = typeof(int), AlowDatabase = true };
@@ -27,6 +28,7 @@ namespace ProcessManagement.Models.KHO_NVL.Tracking
                 LogMaPhieu = inputHistoryXNKho.LogMaPhieu.Value?.ToString() ?? string.Empty,
                 LogTenNVL = inputHistoryXNKho.LogTenNVL.Value?.ToString() ?? string.Empty,
                 LogMaViTri = inputHistoryXNKho.LogMaViTri.Value?.ToString() ?? string.Empty,
+                LotVitri = inputHistoryXNKho.LotVitri.Value?.ToString() ?? string.Empty,
                 LogSoLuong = Convert.ToInt32(inputHistoryXNKho.LogSoLuong.Value),
                 LogTonKhoTruoc = Convert.ToInt32(inputHistoryXNKho.LogTonKhoTruoc.Value),
                 LogTonKhoSau = Convert.ToInt32(inputHistoryXNKho.LogTonKhoSau.Value),
@@ -50,6 +52,9 @@ namespace ProcessManagement.Models.KHO_NVL.Tracking
 
             [DisplayName("Mã Vị Trí")]
             public string LogMaViTri { get; set; } = string.Empty;
+
+            [DisplayName("LOT Vị Trí")]
+            public string LotVitri { get; set; } = string.Empty;
 
             [DisplayName("Số Lượng")]
             public int LogSoLuong { get; set; }

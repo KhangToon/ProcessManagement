@@ -174,7 +174,7 @@ namespace ProcessManagement.Commons
         public const string VTNVLSoLuong = "Số lượng";
         public const string LotViTri = "Lot";
         public const string NgayNhapKho = "Ngày nhập kho";
-
+        public const string NgayXuatKho = "Ngày xuất kho";
 
         // Table KHO_LoaiThongTinNVL
         public const string Table_LoaiThongTinNVL = "KHO_LoaiThongTinNVL";

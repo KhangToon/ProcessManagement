@@ -29,7 +29,7 @@
                 <RadzenText Text="@($"Số lượng xuất:")" Style="font-weight: 600; font-size: 16px; color: black; font-style: italic"></RadzenText>
                 <RadzenText Text="@($"{LXK?.LXKSoLuong.Value?.ToString()} ({LXK?.ViTriofNVL.NgLieuInfor.DonViTinh.Value?.ToString()})")" Style="font-weight: bold; font-size: 16px; color: black; font-style: italic"></RadzenText>
             </RadzenStack>
-            <RadzenStack Gap="20px" Style="height: contain; width: contain; border-radius: 5px; background-color: var(--rz-primary-lighter); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+            <RadzenStack Visible="false" Gap="20px" Style="height: contain; width: contain; border-radius: 5px; background-color: var(--rz-primary-lighter); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                 <RadzenRadioButtonList Value=@usingScanner TValue="bool" ValueChanged=@(args => usingScanner = args)>
                     <Items>
                         <RadzenRadioButtonListItem Text="Sử dụng USB Scanner" Value="true" />
@@ -144,13 +144,13 @@
         </RadzenRow>
         <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding-top: 10px; border-top: var(--rz-grid-cell-border) " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
             <RadzenStack Gap="10px" Style="height: 100%; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                @if (scanLXK.LXKIsDone.Value?.ToString() == "1")
+                @if (LXK.LXKIsDone.Value?.ToString() == "1")
                 {
                     <RadzenButton Style="width: contain; cursor: default" Icon="check" Text="Xuất kho thành công" ButtonStyle="ButtonStyle.Success" Shade="Shade.Dark" Size="ButtonSize.Small" Variant="Variant.Flat" />
                 }
                 else
                 {
-                    <RadzenButton Click="@(async () => { await OnConfirmExcuteLenhXuatKho(scanMaPXK, scanMaViTri, scanMaNVL);})" Style="width: contain;" Icon="arrow_outward" Text="Tiến hành xuất kho" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Size="ButtonSize.Small" Variant="Variant.Flat" />
+                    <RadzenButton Click="@(async () => { await OnConfirmExcuteLenhXuatKho_withLotVitri(scanMaPXK, scanMaViTri, scanMaNVL);})" Style="width: contain;" Icon="arrow_outward" Text="Tiến hành xuất kho" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Size="ButtonSize.Small" Variant="Variant.Flat" />
                 }
             </RadzenStack>
             <RadzenStack Gap="10px" Style="height: 100%; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
@@ -208,26 +208,26 @@
         await this.InvokeAsync(() => this.StateHasChanged());
     }
 
-    private async Task OnConfirmExcuteLenhXuatKho(string maphieu, string mavitri, string tennvl)
+    private async Task OnConfirmExcuteLenhXuatKho(string maPXK, string maViTri, string maNVL)
     {
-        if (String.IsNullOrEmpty(maphieu) || String.IsNullOrEmpty(mavitri) || String.IsNullOrEmpty(tennvl))
+        if (String.IsNullOrEmpty(maPXK) || String.IsNullOrEmpty(maViTri) || String.IsNullOrEmpty(maNVL))
         {
             await DialogService.Alert($"Hãy quét đầy đủ thông tin!", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
             return;
         }
 
         // Load phieu xuat kho id
-        List<int> pxkIds = SQLServerServices.GetListPXKIds(maphieu.Trim());
+        List<int> pxkIds = SQLServerServices.GetListPXKIds(maPXK.Trim());
         if (pxkIds.Count == 0) { return; }
         int scanpxkID = pxkIds[0];
 
         // Load nvl id
-        List<int> nvlIds = SQLServerServices.GetListNVLIds(tennvl.Trim());
+        List<int> nvlIds = SQLServerServices.GetListNVLIds(maNVL.Trim());
         if (nvlIds.Count == 0) { return; }
         int scannvlID = nvlIds[0];
 
         // Load vitri ID
-        List<int> vitriIds = SQLServerServices.GetListVTriIds(mavitri.Trim());
+        List<int> vitriIds = SQLServerServices.GetListVTriIds(maViTri.Trim());
         if (vitriIds.Count == 0) { return; }
         int scanvitriID = vitriIds[0];
 
@@ -312,6 +312,125 @@
             }
         }
     }
+
+    private async Task OnConfirmExcuteLenhXuatKho_withLotVitri(string maPXK, string maViTri, string maNVL)
+    {
+        int soluongxuatfromClient = int.TryParse(LXK.LXKSoLuong.Value?.ToString(), out int lxksl) ? lxksl : 0;
+        object? lxkid = LXK.LenhXKID.Value;
+
+        if (string.IsNullOrWhiteSpace(maPXK)) { return; }
+        if (string.IsNullOrWhiteSpace(maViTri)) { return; }
+        if (string.IsNullOrWhiteSpace(maNVL)) { return; }
+        if (soluongxuatfromClient == 0) { return; }
+
+        // Load lenh xuat kho by ID
+        LenhXuatKho savedLXK = SQLServerServices.GetLenhXuatKhoByID(lxkid);
+
+        if (savedLXK.LenhXKID.Value == null)
+        {
+            return;
+        }
+        else
+        {
+            // Handle lenh xuat kho
+
+            // Check trang thai lenh (da hoan thanh hay chua)
+            _ = int.TryParse(savedLXK.LXKIsDone.Value?.ToString(), out int scanlxkIsdone) ? scanlxkIsdone : -1;
+            if (scanlxkIsdone != 0)
+            {
+                return;
+            }
+
+            // Kiem tra so luong xuat ra
+            int soluongXuatra = int.TryParse(savedLXK.LXKSoLuong.Value?.ToString(), out int slxuat) ? slxuat : 0;
+            if (soluongXuatra == 0)
+            {
+                return;
+            }
+
+            // Kiem tra trang thai vi tri
+            ViTriofNVL viTriofNVL = SQLServerServices.GetViTriOfNgVatLieuBy_VTid_LotVitri(vtid: savedLXK.VTID.Value, lotvitri: savedLXK.LotVitri.Value);
+
+            if (viTriofNVL == null || viTriofNVL.VTofNVLID.Value == null)
+            {
+                return;
+            }
+
+            int soluongHiencotaivitri = int.TryParse(viTriofNVL?.VTNVLSoLuong.Value?.ToString(), out int slhc) ? slhc : 0;
+
+            // Kiem tra so luong xuat co vuot qua so luong hien tai khong
+            if (soluongXuatra > soluongHiencotaivitri)
+            {
+                return;
+            }
+
+            // Tinh so luong con lai sau khi xuat
+            int newtonkhotaivitri = soluongHiencotaivitri - soluongXuatra;
+
+            // Tao moi vitriofNVL
+            ViTriofNVL viTriofNVLupdate = new()
+                {
+                    VTofNVLID = { Value = viTriofNVL?.VTofNVLID.Value },
+                    VTID = { Value = viTriofNVL?.VTID.Value },
+                    NVLID = { Value = (newtonkhotaivitri > 0) ? savedLXK.NVLID.Value : 0 },
+                    VTNVLSoLuong = { Value = newtonkhotaivitri },
+                    NgayNhapKho = { Value = (newtonkhotaivitri > 0) ? viTriofNVL?.NgayNhapKho.Value : string.Empty },
+                    LotVitri = { Value = viTriofNVL?.LotVitri.Value }
+                };
+
+            // Update so luong vi tri cua nvl
+            (int updateVTofNVLresult, string updateVTofNVLerror) = SQLServerServices.UpdateViTriOfNgVatLieu(viTriofNVLupdate);
+
+            if (updateVTofNVLresult == -1)
+            {
+                return;
+            }
+
+            // Update lenh xuat kho status
+            savedLXK.LXKIsDone.Value = 1;
+            savedLXK.NgayXuatKho.Value = DateTime.Now.Date.ToShortDateString();
+            (int updatelxkResult, string updatelxkError) = SQLServerServices.UpdateLenhXuatKho(savedLXK);
+
+            if (updatelxkResult == -1)
+            {
+                return;
+            }
+
+            // update status to UI
+            LXK.LXKIsDone.Value = 1;
+
+            // Get nguoi xuat kho
+            string nguoiXuatkho = SQLServerServices.GetNguoiTaoPhieuXuatKhoByID(savedLXK.PXKID.Value);
+
+            // Logging xuat kho
+            HistoryXNKho logXuatKho = new HistoryXNKho()
+                {
+                    LogLoaiPhieu = { Value = Common.LogTypePXK },
+                    LogMaPhieu = { Value = maPXK },
+                    LogMaViTri = { Value = maViTri },
+                    LogNgThucHien = { Value = nguoiXuatkho },
+                    LogSoLuong = { Value = savedLXK.LXKSoLuong.Value },
+                    LogTonKhoTruoc = { Value = savedLXK.ViTriofNVL.NgLieuInfor.TonKho },
+                    LogTonKhoSau = { Value = savedLXK.ViTriofNVL.NgLieuInfor.TonKho - soluongXuatra },
+                    LogTenNVL = { Value = savedLXK.ViTriofNVL.NgLieuInfor.TenNVL.Value },
+                    LogThoiDiem = { Value = DateTime.Now },
+                    LotVitri = { Value = savedLXK.LotVitri.Value },
+                    NVLID = { Value = savedLXK.NVLID.Value },
+                    VTID = { Value = savedLXK.VTID.Value }
+                };
+            // Insert logging to Database
+            (int logId, string logErr) = SQLServerServices.InsertLogingXNKho(logXuatKho);
+
+            if (logId == -1)
+            {
+                return;
+            }
+
+            // Feedback xuat kho thanh cong
+            await DialogService.Alert($"Đã xuất kho nguyên liệu: \n {maNVL} \n Số lượng : {soluongxuatfromClient} (pcs)", "<strong><span style='color: darkgreen'>Success!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+        }
+    }
+
 
     private async Task CopyToClipboard(string content)
     {

@@ -299,7 +299,11 @@ namespace ParamountBed_Warehouse.Services.SocketService
         /// </summary>
         /// <param name="incomingMessage"></param>
         private void HandleClientRequired(ConnectedObject client)
-        {
+        {   
+            /////////////////////
+            /////////////// Modify with new method like DialogHandleNhap/XuatKho
+
+
             string clientMESS = client.IncomingMessage.Replace(Common.socketEndKey, "").ToString();
 
             SocketMessage? ClientMesage = JsonConvert.DeserializeObject<SocketMessage>(clientMESS);

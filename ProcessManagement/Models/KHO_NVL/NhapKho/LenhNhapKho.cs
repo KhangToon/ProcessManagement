@@ -12,6 +12,7 @@ namespace ProcessManagement.Models.KHO_NVL.NhapKho
         public Propertyy LotVitri { get; set; } = new() { DBName = Common.LotViTri, Type = typeof(string), AlowDatabase = true };
         public Propertyy NVLID { get; set; } = new() { DBName = Common.NVLID, Type = typeof(int), AlowDatabase = true };
         public Propertyy LNKSoLuong { get; set; } = new() { DBName = Common.LNKSoLuong, Type = typeof(int), AlowDatabase = true };
+        public Propertyy NgayNhapKho { get; set; } = new() { DBName = Common.NgayNhapKho, Type = typeof(string), AlowDatabase = true };
         public Propertyy LNKIsDone { get; set; } = new() { DBName = Common.LNKIsDone, Type = typeof(int), AlowDatabase = true };
 
         public NguyenVatLieu TargetNgLieu { get; set; } = new(); // thong tin nvl cua lenh

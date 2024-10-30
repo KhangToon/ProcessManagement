@@ -3227,6 +3227,70 @@ namespace ProcessManagement.Services.SQLServer
             return vitriofnvl;
         }
 
+        public ViTriofNVL GetViTriOfNgVatLieuBy_VTid_LotVitri(object? vtid = null, object? nvlid = null, object? lotvitri = null)
+        {
+            ViTriofNVL vitriofnvl = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var conditions = new List<string>();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_VitriOfNVL}]";
+
+                // Helper function to add condition if value is not null
+                void AddCondition(object? value, string fieldName, string paramName)
+                {
+                    if (value != null)
+                    {
+                        conditions.Add($"[{fieldName}] = @{paramName}");
+
+                        command.Parameters.AddWithValue($"@{paramName}", value);
+                    }
+                }
+
+                // Add all potential conditions
+                AddCondition(vtid, Common.VTID, "VTID");
+                AddCondition(nvlid, Common.NVLID, "NVLID");
+                AddCondition(lotvitri, Common.LotViTri, "LOTVITRI");
+                // Add more conditions as needed...
+
+                // Combine all conditions with AND
+                if (conditions.Any())
+                {
+                    command.CommandText += " WHERE " + string.Join(" AND ", conditions);
+                }
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    List<Propertyy> rowitems = vitriofnvl.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue == DBNull.Value ? null : columnValue;
+                    }
+                }
+            }
+
+            if (vitriofnvl.VTofNVLID.Value != null)
+            {
+                // Get vitriluutru infor
+                vitriofnvl.VitriInfor = GetViTriLuuTruByID(vitriofnvl.VTID.Value);
+                vitriofnvl.NgLieuInfor = GetNguyenVatLieuByID(vitriofnvl.NVLID.Value);
+            }
+
+            return vitriofnvl;
+        }
+
         // Lấy danh sách vị trí của nguyên vật liệu by ID
         public List<ViTriofNVL> GetListViTriOfNgVatLieuByNVLid(object? nvlID)
         {
@@ -3383,6 +3447,11 @@ namespace ProcessManagement.Services.SQLServer
                 }
 
                 result = command.ExecuteNonQuery();
+
+                if (result <= 0)
+                {
+                    return (-1, errorMess);
+                }
             }
             catch (Exception ex)
             {
@@ -4574,6 +4643,7 @@ namespace ProcessManagement.Services.SQLServer
                 return (-1, err);
             }
         }
+
         #endregion
 
         // ------------------------------------------------------------------------------------- //
@@ -5110,7 +5180,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"SELECT * FROM [{Common.Table_LenhXuatKho}] WHERE [{Common.PXKID}] = '{inputLXK.PXKID.Value}' AND [{Common.NVLID}] = '{inputLXK.NVLID.Value}' AND [{Common.VTID}] = '{inputLXK.VTID.Value}'";
+                command.CommandText = $"SELECT * FROM [{Common.Table_LenhXuatKho}] WHERE [{Common.PXKID}] = '{inputLXK.PXKID.Value}' AND [{Common.NVLID}] = '{inputLXK.NVLID.Value}' AND [{Common.VTID}] = '{inputLXK.VTID.Value}' AND [{Common.LotViTri}] = '{inputLXK.LotVitri.Value}'";
 
                 using var reader = command.ExecuteReader();
 
@@ -5206,7 +5276,7 @@ namespace ProcessManagement.Services.SQLServer
                     //lenhxk.TagertVitri = GetViTriLuuTruByID(lenhxk.VTID.Value);
 
                     // Get vitriofNVL infor
-                    lenhxk.ViTriofNVL = GetViTriOfNgVatLieuByNVLid_VTid(lenhxk.NVLID.Value, lenhxk.VTID.Value);
+                    lenhxk.ViTriofNVL = GetViTriOfNgVatLieuBy_VTid_LotVitri(vtid: lenhxk.VTID.Value, lotvitri: lenhxk.LotVitri.Value);
 
                     lenhXKhos.Add(lenhxk);
                 }
