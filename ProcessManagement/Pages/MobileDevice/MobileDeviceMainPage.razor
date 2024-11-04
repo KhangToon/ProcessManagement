@@ -1,6 +1,7 @@
 ﻿@page "/mobilemainpage"
 @attribute [Authorize(Roles = "User")]
 
+@using ProcessManagement.Pages.MobileDevice.SubmitKQGC
 @using Radzen.Blazor
 @using Radzen
 @using Microsoft.AspNetCore.Components
@@ -16,7 +17,7 @@
         <RadzenButton Icon="upload" Text="Xuất kho" Click="NavigateTo_Mobile_XuatKhoPage"
                       ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Medium" Shade="Shade.Dark" Style="font-size: 16px; height: 50px; width: 200px; border-radius: 5px; --rz-icon-size: 22px;" />
         <RadzenButton Icon="add" Text="Kết quả gia công" Click="NavigateTo_Mobile_KQGCPage"
-                      ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Medium" Shade="Shade.Dark" Style="font-size: 16px; height: 50px; width: 200px; border-radius: 5px; --rz-icon-size: 22px;" />
+                      ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Medium" Shade="Shade.Dark" Style="font-size: 16px; height: 50px; width: 200px; border-radius: 5px; --rz-icon-size: 22px;" />
     </RadzenStack>
 </RadzenCard>
 
@@ -32,8 +33,9 @@
 
     }
 
-    private void NavigateTo_Mobile_KQGCPage()
+    private async Task NavigateTo_Mobile_KQGCPage()
     {
-        NavigationManager.NavigateTo("/mobilesubmitkqgc");
+        object newKetQuaGCid = await DialogService.OpenAsync<DialogAddNewKQGC_Mobile>(null, null,
+        new DialogOptions() { ShowTitle = false, Width = "100%", Height = "100%", Resizable = false, Draggable = false, ShowClose = false, Style = "background-color: while; border-radius: 0px; padding: 0px; margin: 0px" });
     }
 }

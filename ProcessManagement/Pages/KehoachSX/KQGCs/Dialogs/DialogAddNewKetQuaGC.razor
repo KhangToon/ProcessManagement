@@ -64,7 +64,7 @@
                                 {
                                     string displayName = property.DisplayName;
 
-                                    if (property.DBName == KetQuaGC.KQGCDBName.SPID || property.DBName == KetQuaGC.KQGCDBName.MMID || property.DBName == KetQuaGC.KQGCDBName.NCID)
+                                    if (property.DBName == KetQuaGC.KQGCDBName.SPID || property.DBName == KetQuaGC.KQGCDBName.MMID || property.DBName == KetQuaGC.KQGCDBName.NCID || property.DBName == KetQuaGC.KQGCDBName.MaQuanLyLot)
                                     {
                                         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 5px; border-bottom: var(--rz-grid-cell-border);">
                                             <RadzenStack Style="width: 20%;">
@@ -83,6 +83,8 @@
                                                                         AllowSelectAll="true"
                                                                         TValue="KeyValuePair<string, string>"
                                                                         Data="@(ComboboxDSachKeys(property.DBName))"
+                                                                        SelectedItem="@(ITemSelecteds[property.DBName])"
+                                                                        Value="@(ITemSelecteds[property.DBName])" SearchTextChanged="@((args) => OnComboboxInputTextChange(property.DBName, args))"
                                                                         ValueChanged="@((KeyValuePair<string, string> args) => OnComboboxDSachKeysSelectedChanged(new List<KeyValuePair<string, string>>{args}, property))">
                                                             <!--Custom style off dropdownbox items-->
                                                             <Template>
@@ -215,9 +217,17 @@
                                                         }
                                                         else if (property.Type == typeof(int)) // Kieu int
                                                         {
+                                                            int max = 999999;
+
+                                                            if (property.DBName == KetQuaGC.KQGCDBName.SLOK)
+                                                            {
+                                                                max = (int.TryParse(newKetQuaGC.SLperLOT.Value?.ToString(), out int num) ? num : 999999);
+                                                            }
+
                                                             <RadzenStack Style="width: 50%;">
                                                                 <RadzenNumeric class="custom-numeric" TValue="int" Placeholder="0" Step="1"
-                                                                               Min="0" Max="999999"
+                                                                               Min="0" Max="max"
+                                                                               Value="@((int.TryParse(property.Value?.ToString(), out int num)? num : 0))"
                                                                                ValueChanged="@(async (args) =>
                                                                                {
                                                                                     property.Value = args;
@@ -285,48 +295,38 @@
     [Parameter]
     public int KHSXID { get; set; } // KHSXID
     [Parameter]
-    public int SPID { get; set; } // ID San pham
-                                  // [Parameter]
-                                  // public int CDID { get; set; } // ID Cong doan
-                                  // [Parameter]
-                                  // public int MMID { get; set; } // ID May moc
+    public int SPID { get; set; }// ID San pham
+                                 // [Parameter]
+                                 // public int CDID { get; set; } // ID Cong doan
+                                 // [Parameter]
+                                 // public int MMID { get; set; } // ID May moc
 
     private KetQuaGC newKetQuaGC = new();
-
     private List<SanPham> dsachSanPhams = new();
     private List<NguyenCong> dsachNguyenCongs = new();
     private List<MayMoc> dsachMayMocs = new();
     private List<NhanVien> dsachNhanViens = new();
     private List<NGType> dsachNGTypes = new();
+    private List<LOT_khsx> dsachMaQLyLots = new();
+
+    // Selected item changed
+    private IEnumerable<KeyValuePair<string, string>>? NhanviensSelected;
+    private IEnumerable<KeyValuePair<string, string>>? NGTypesSelected;
+    private Dictionary<string, KeyValuePair<string, string>?> ITemSelecteds = new Dictionary<string, KeyValuePair<string, string>?>()
+    {{KetQuaGC.KQGCDBName.SPID, null}, {KetQuaGC.KQGCDBName.MMID, null}, {KetQuaGC.KQGCDBName.NCID, null}, {KetQuaGC.KQGCDBName.MaQuanLyLot, null } };
 
     protected override async Task OnInitializedAsync()
     {
-        // Check KHSXID
-        if (KHSXID > 0)
-        {
-            newKetQuaGC.KHSXID.Value = KHSXID;
-            newKetQuaGC.SubMitDay.Value = DateTime.Now;
-            newKetQuaGC.SLNG.Value = 0;
-        }
+        newKetQuaGC.KHSXID.Value = KHSXID;
+        newKetQuaGC.SubMitDay.Value = DateTime.Now;
+        newKetQuaGC.SLNG.Value = 0;
+        newKetQuaGC.SPID.Value = SPID;
+        newKetQuaGC.NGIDs.IsDisable = true;
+        NGTypesSelected = null;
 
-        if (SPID > 0)
-        {
-            newKetQuaGC.SPID.Value = SPID;
-        }
-
-        // Check re-asign value
-        foreach (var property in newKetQuaGC.GetPropertiesValues().Where(pro => pro.Value != null && pro.AlowDisplay == true))
-        {
-            if (property.DBName == KetQuaGC.KQGCDBName.SLNG)
-            {
-                if (property.Value != null)
-                {
-                    newKetQuaGC.NGIDs.IsDisable = property.Value.Equals(0);
-                    NGTypesSelected = null;
-                }
-            }
-            await DefaultThongTinKetQuaGC_ValueIsOK(property);
-        }
+        await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.SubMitDay);
+        await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.SLNG);
+        await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.SPID);
 
         await base.OnInitializedAsync();
     }
@@ -366,6 +366,18 @@
                     ))
                     .Where(x => !string.IsNullOrEmpty(x.Value) && !string.IsNullOrEmpty(x.Key))
                     .Distinct();
+
+            if (newKetQuaGC.SPID.Value != null)
+            {
+                // Gan target SPID cho selected SPID
+                KeyValuePair<string, string> targetrs = results.FirstOrDefault(rs => rs.Key == newKetQuaGC.SPID.Value.ToString());
+
+                if (!string.IsNullOrEmpty(targetrs.Value))
+                {
+                    ITemSelecteds[colName] = targetrs;
+                }
+                else newKetQuaGC.SPID.Value = null;
+            }
         }
         else if (colName == KetQuaGC.KQGCDBName.NCID)
         {
@@ -390,6 +402,20 @@
                     ))
                     .Where(x => !string.IsNullOrEmpty(x.Value) && !string.IsNullOrEmpty(x.Key))
                     .Distinct();
+        }
+        else if (colName == KetQuaGC.KQGCDBName.MaQuanLyLot)
+        {
+            Dictionary<string, object?> par = new Dictionary<string, object?>() { { LOT_khsx.DBName.KHSXID, KHSXID } };
+            (dsachMaQLyLots, string errorLot) = SQLServerServices.GetListLOT_khsx(par, false);
+
+            results = dsachMaQLyLots
+                    .Where(item => item.KHSXLOTID.Value != null)
+                    .Select(item => new KeyValuePair<string, string>(
+                        item.KHSXLOTID.Value?.ToString() ?? string.Empty,
+                        $"{item.MaQuanLyLot.Value?.ToString()?.Trim()} (số lượng: {item.SLLOT.Value?.ToString()?.Trim()})"
+                    ))
+                    .Where(x => !string.IsNullOrEmpty(x.Value) && !string.IsNullOrEmpty(x.Key))
+                    .DistinctBy(x => x.Value);
         }
         else if (colName == KetQuaGC.KQGCDBName.NVIDs)
         {
@@ -416,9 +442,36 @@
         return results;
     }
 
-    // Selected item changed
-    private IEnumerable<KeyValuePair<string, string>>? NhanviensSelected;
-    private IEnumerable<KeyValuePair<string, string>>? NGTypesSelected;
+    private async Task OnComboboxInputTextChange(string proName, object? args) // using for scan QR Maquanly autobinding
+    {
+        if (proName == KetQuaGC.KQGCDBName.MaQuanLyLot && args != null)
+        {
+            var targetItem = dsachMaQLyLots.FirstOrDefault(lot => lot.MaQuanLyLot.Value?.ToString()?.Trim() == args.ToString()?.Trim());
+
+            if (targetItem != null)
+            {
+                ITemSelecteds[proName] = new KeyValuePair<string, string>(targetItem.KHSXLOTID.Value?.ToString() ?? string.Empty, $"{targetItem.MaQuanLyLot.Value?.ToString()?.Trim()} (số lượng: {targetItem.SLLOT.Value?.ToString()?.Trim()})");
+
+                // Asign slperlot
+                newKetQuaGC.SLperLOT.Value = targetItem.SLLOT.Value;
+                newKetQuaGC.MaQuanLyLot.Value = targetItem.MaQuanLyLot.Value;
+            }
+            else
+            {
+                ITemSelecteds[proName] = null; // reset selected value
+
+                newKetQuaGC.MaQuanLyLot.Value = null; // reset MaQuanLyLot
+                newKetQuaGC.SLperLOT.Value = null; // reset SLperLOT
+                newKetQuaGC.SLOK.Value = null; // reset SLOK
+                newKetQuaGC.SLNG.Value = 0; // reset SLNG
+            }
+
+            await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.SLOK);
+            await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.SLNG);
+            await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.SLperLOT);
+            await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.MaQuanLyLot);
+        }
+    }
 
     private async Task OnComboboxDSachKeysSelectedChanged(IEnumerable<KeyValuePair<string, string>> selectedValues, Propertyy propertyy)
     {
@@ -428,6 +481,8 @@
 
             if (targetItem != null)
             {
+                ITemSelecteds[propertyy.DBName] = selectedValues.FirstOrDefault();
+
                 newKetQuaGC.SPID.Value = targetItem.SP_SPID.Value;
             }
             else newKetQuaGC.SPID.Value = null;
@@ -438,6 +493,8 @@
 
             if (targetItem != null)
             {
+                ITemSelecteds[propertyy.DBName] = selectedValues.FirstOrDefault();
+
                 newKetQuaGC.NCID.Value = targetItem.NCID.Value;
             }
             else newKetQuaGC.NCID.Value = null;
@@ -448,9 +505,36 @@
 
             if (targetItem != null)
             {
+                ITemSelecteds[propertyy.DBName] = selectedValues.FirstOrDefault();
+
                 newKetQuaGC.MMID.Value = targetItem.MMID.Value;
             }
             else newKetQuaGC.MMID.Value = null;
+        }
+        else if (propertyy.DBName == KetQuaGC.KQGCDBName.MaQuanLyLot)
+        {
+            var targetItem = dsachMaQLyLots.FirstOrDefault(lot => lot.KHSXLOTID.Value?.ToString()?.Trim() == selectedValues.FirstOrDefault().Key);
+
+            if (targetItem != null)
+            {
+                // Asign selected value
+                ITemSelecteds[propertyy.DBName] = selectedValues.FirstOrDefault();
+                // Asign slperlot
+                newKetQuaGC.SLperLOT.Value = targetItem.SLLOT.Value;
+                newKetQuaGC.MaQuanLyLot.Value = targetItem.MaQuanLyLot.Value;
+            }
+            else
+            {
+                newKetQuaGC.MaQuanLyLot.Value = null;
+                newKetQuaGC.SLperLOT.Value = null;
+                newKetQuaGC.SLOK.Value = null;
+                newKetQuaGC.SLNG.Value = 0;
+            }
+
+            await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.SLOK);
+            await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.SLNG);
+            await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.SLperLOT);
+            await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.MaQuanLyLot);
         }
         else if (propertyy.DBName == KetQuaGC.KQGCDBName.NVIDs)
         {
@@ -522,8 +606,6 @@
 
     #endregion
 
-
-
     // Kiem tra thong tin mac dinh
     private async Task DefaultThongTinKetQuaGC_ValueIsOK(Propertyy propertyy)
     {
@@ -573,6 +655,7 @@
         });
     }
 
+
     // Insert new KetQuaGC to database
     private async Task OnAddNewKetQuaGC()
     {
@@ -582,53 +665,83 @@
         {
             // Kiem tra new KetQuaGC is existing
 
-            Dictionary<string, object?> parameters = new();
+            // Get target LOTKHSX
+            Dictionary<string, object?> pars = new();
 
-            parameters.Add($"{KetQuaGC.KQGCDBName.KHSXID}", newKetQuaGC.KHSXID.Value);
+            pars.Add($"{LOT_khsx.DBName.KHSXID}", newKetQuaGC.KHSXID.Value);
 
-            parameters.Add($"{KetQuaGC.KQGCDBName.MMID}", newKetQuaGC.MMID.Value);
+            pars.Add($"{LOT_khsx.DBName.NCID}", newKetQuaGC.NCID.Value);
 
-            parameters.Add($"{KetQuaGC.KQGCDBName.NCID}", newKetQuaGC.NCID.Value);
+            pars.Add($"{LOT_khsx.DBName.MaQuanLyLot}", newKetQuaGC.MaQuanLyLot.Value);
 
-            parameters.Add($"{KetQuaGC.KQGCDBName.CaLamViec}", newKetQuaGC.CaLamViec.Value);
+            (List<LOT_khsx> lotKHSXs, string error) = SQLServerServices.GetListLOT_khsx(pars, false);
 
-            parameters.Add($"{KetQuaGC.KQGCDBName.MaQuanLyLOT}", newKetQuaGC.MaQuanLyLOT.Value);
+            var targetlotKHSX = lotKHSXs.FirstOrDefault();
 
-            parameters.Add($"{KetQuaGC.KQGCDBName.NVIDs}", newKetQuaGC.NVIDs.Value?.ToString()?.Trim());
 
-            (List<KetQuaGC> ketquaGCs, string getError) = SQLServerServices.GetListKetQuaGC(parameters, false);
-
-            if (ketquaGCs.Any())
+            if (targetlotKHSX != null)
             {
-                await DialogService.Alert($"Kết quả gia công đã tồn tại!", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
-            }
-            else
-            {
-                // Insert new KetQuaGC
-                (int newkqgcID, string errorMess) = SQLServerServices.InsertKetQuaGC(newKetQuaGC);
+                _ = int.TryParse(newKetQuaGC.SLOK.Value?.ToString(), out int slOKsubmit);
+                _ = int.TryParse(newKetQuaGC.SLNG.Value?.ToString(), out int slNGsubmit);
 
-                if (newkqgcID > 0)
+                _ = int.TryParse(targetlotKHSX.SLOKsubmited.Value?.ToString(), out int sumOKsubmited);
+                _ = int.TryParse(targetlotKHSX.SLNGsubmited.Value?.ToString(), out int sumNGsubmited);
+                _ = int.TryParse(targetlotKHSX.SLLOT.Value?.ToString(), out int lotTotal);
+
+                bool isallowsubmit = false;
+
+                if ((sumOKsubmited + sumNGsubmited) + (slOKsubmit + slNGsubmit) <= lotTotal)
                 {
-                    if (newkqgcID < 0)
+                    isallowsubmit = true;
+                }
+
+                if (isallowsubmit)
+                {
+                    // Insert new KetQuaGC
+                    (int newkqgcID, string errorMess) = SQLServerServices.InsertKetQuaGC(newKetQuaGC);
+
+                    if (newkqgcID > 0)
                     {
-                        await DialogService.Alert($"{errorMess}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                        if (newkqgcID < 0)
+                        {
+                            await DialogService.Alert($"{errorMess}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                        }
+                        else
+                        {
+                            targetlotKHSX.IsDone.Value = ((sumOKsubmited + slOKsubmit + sumNGsubmited + slNGsubmit) == lotTotal) ? 1 : 0;
+                            targetlotKHSX.SLOKsubmited.Value = sumOKsubmited + slOKsubmit;
+                            targetlotKHSX.SLNGsubmited.Value = sumNGsubmited + slNGsubmit;
+
+                            // Update sluong
+                            (int updatereturn, string updateerror) = SQLServerServices.UpdateLOT_khsx(targetlotKHSX);
+
+                            if (updatereturn > 0)
+                            {
+                                ShowNotification("Success!", NotificationSeverity.Success, 3000);
+
+                                bool? success = await DialogService.Alert($"Đã thêm kết quả gia công!", "<strong><span style='color: green'>Success!</span></strong>", new AlertOptions() { OkButtonText = "Thoát", ShowClose = true });
+
+                                if (success.Value)
+                                {
+                                    //DialogService.Close(newkqgcID);
+                                }
+                            }
+                            else await DialogService.Alert($"{updateerror}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                        }
                     }
                     else
                     {
-                        ShowNotification("Success!", NotificationSeverity.Success, 3000);
-
-                        bool? success = await DialogService.Alert($"Đã thêm kết quả gia công!", "<strong><span style='color: green'>Success!</span></strong>", new AlertOptions() { OkButtonText = "Thoát", ShowClose = true });
-
-                        if (success.Value)
-                        {
-                            DialogService.Close(newkqgcID);
-                        }
+                        await DialogService.Alert($"{errorMess}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
                     }
                 }
                 else
                 {
-                    await DialogService.Alert($"{errorMess}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                    await DialogService.Alert($"Không thể nộp kết quả gia công!", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
                 }
+            }
+            else
+            {
+                await DialogService.Alert($"Mã quản lý lot không tồn tại!", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
             }
         }
     }

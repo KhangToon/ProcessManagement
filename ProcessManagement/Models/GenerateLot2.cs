@@ -369,7 +369,7 @@ namespace ProcessManagement.Models
                 NVL lotnvlle = new();
                 lotnvlle.LoaiNVL.Value = NewKHSX.LoaiNVL?.TenLoaiNVL.Value;
                 lotnvlle.MaSP.Value = NewKHSX.SanPham?.SP_MaSP.Value;
-                lotnvlle.MaQuanLy.Value = MaLSX + NewKHSX.SanPham?.SP_MaSP.Value + "-" + (SLLotChan + 1).ToString(NumberDigit);
+                lotnvlle.MaQuanLy.Value = MaLSX + "-" + NewKHSX.SanPham?.SP_MaSP.Value + "-" + (SLLotChan + 1).ToString(NumberDigit);
                 lotnvlle.SoLuong.Value = SLperLotLe;
                 lotnvlle.NgayXuat.Value = DateTime.Now;
                 ListNVLs?.Add(lotnvlle);

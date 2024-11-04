@@ -1,4 +1,5 @@
 ﻿@using ProcessManagement.Commons
+@using ProcessManagement.Models.KHSXs
 @using ProcessManagement.Pages.Manager_NguyenCong.Dialogs
 @using ProcessManagement.Services.SQLServer
 @using Radzen.Blazor
@@ -572,6 +573,9 @@
 
                     if (errorFlag) { break; }
                 }
+
+                // Insert danh sach LOTKHSX
+                await CreateDSLOT_KHSX(khsxID);
             }
             else
             {
@@ -582,6 +586,46 @@
         isAddingLSXtodatabase = false;
 
         DialogService.Close(generLot.NewKHSX);
+    }
+
+    private async Task CreateDSLOT_KHSX(object? khsxid)
+    {
+        if (generLot.ListNVLs != null && generLot.ListNVLs.Any() && generLot.NewKHSX.DSachCongDoans.Any())
+        {
+            List<LOT_khsx> dsahLOTkhsx = new();
+
+            foreach (var lotnvl in generLot.ListNVLs)
+            {
+                foreach (var congdoan in generLot.NewKHSX.DSachCongDoans.Where(cd => cd.IsUsing == true).ToList())
+                {
+                    LOT_khsx lot_Khsx = new()
+                        {
+                            KHSXID = { Value = khsxid },
+                            MaQuanLyLot = { Value = lotnvl.MaQuanLy.Value },
+                            NCID = { Value = congdoan.NCID.Value },
+                            SLLOT = {Value = lotnvl.SoLuong.Value}
+                        };
+
+                    dsahLOTkhsx.Add(lot_Khsx);
+                }
+
+            }
+
+            if (dsahLOTkhsx.Any())
+            {
+                // Insert dslotkhsx to DB
+                foreach (var lotkhsx in dsahLOTkhsx)
+                {
+                    (int result, string error) = SQLServerServices.InsertLOT_khsx(lotkhsx);
+
+                    if (result == -1)
+                    {
+                        await DeleteKehoachSanxuat();
+                        break;
+                    }
+                }
+            }
+        }
     }
 
 }

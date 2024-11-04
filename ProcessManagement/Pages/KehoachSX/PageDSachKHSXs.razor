@@ -53,7 +53,7 @@
                                       Style="font-size: 14px; border-radius: 0px;" />
                     </RadzenStack>
                     <RadzenStack Gap="10px" Style="height: contain; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                        <RadzenDataList Style="height: contain; width: 100%;" PagerPosition="PagerPosition.Top" PageSize="3" WrapItems="true" AllowPaging="true" Data="@DSKHSXs" TItem="KHSX">
+                        <RadzenDataList Style="height: contain; width: 100%;" PagerPosition="PagerPosition.Top" PageSize="10" WrapItems="true" AllowPaging="true" Data="@DSKHSXs" TItem="KHSX">
                             <Template Context="khsx">
                                 <RadzenCard onclick="@(async() => await OnKHSXClick(khsx))" Style="width: 100%; height: contain; padding: 0; cursor: pointer" Variant="Variant.Flat">
                                     <RadzenCard class="@(IsKHSXSelected(khsx))" Style="width: 100%; height: contain; padding: 10px" Variant="Variant.Filled">
@@ -177,12 +177,24 @@
     private List<KHSX> DSKHSXs = new();
     private KHSX SelectedKHSX = new();
     private bool isSearching = false;
-    private int selectedTabIndex = 0;
-    private bool isExpandListKHSX = false;
+    private static int selectedTabIndex = 0;
+    private static bool isExpandListKHSX = false;
+
+    private static object? selectKHSXID;
 
     protected override async Task OnInitializedAsync()
     {
         await OnGetListKHSXs();
+
+        if (DSKHSXs.Any())
+        {
+            if (selectKHSXID != null)
+            {
+                SelectedKHSX = DSKHSXs.FirstOrDefault(x => object.Equals(x.KHSXID.Value, selectKHSXID)) ?? new();
+            }
+            else SelectedKHSX = DSKHSXs.FirstOrDefault() ?? new();
+
+        }
 
         await base.OnInitializedAsync();
     }
@@ -192,7 +204,13 @@
     {
         DSKHSXs = await Task.Run(() =>
         {
-            return SQLServerServices.GetListKHSXs();
+            var results = SQLServerServices.GetListKHSXs();
+
+            if (results.Any())
+            {
+                results.Reverse();
+            }
+            return results;
         });
     }
 
@@ -210,7 +228,10 @@
     {
         SelectedKHSX = selectKHSX;
 
-        Common.CurrentKHSXid = SelectedKHSX.KHSXID.Value;
+        selectKHSXID = selectKHSX.KHSXID.Value;
+
+        //Common.CurrentKHSXid = SelectedKHSX.KHSXID.Value;
+
 
         khsxwaitloading = true;
         StateHasChanged();

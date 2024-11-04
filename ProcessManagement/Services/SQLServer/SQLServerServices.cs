@@ -723,6 +723,59 @@ namespace ProcessManagement.Services.SQLServer
             return listKHSXs;
         }
 
+        // Get KHSXID by maKHSX
+        public int GetKHSXIDbyMaKHSX(object? maKHSX)
+        {
+            int khsxid = -1;
+
+            if (maKHSX == null) { return khsxid; }
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT [{Common.KHSXID}] FROM [{Common.TableKHSX}] WHERE [{Common.MaLSX}] = '{maKHSX}'";
+
+                object result = command.ExecuteScalar();
+
+                if (result != null)
+                {
+                    khsxid = int.Parse(result.ToString() ?? "-1");
+                }
+                else khsxid = -1;
+            }
+
+            return khsxid;
+        }
+
+        public int GetSPIDbyMaKHSX(object? maKHSX)
+        {
+            int spid = -1;
+
+            if (maKHSX == null) { return spid; }
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT [{Common.SP_SPID}] FROM [{Common.TableKHSX}] WHERE [{Common.MaLSX}] = '{maKHSX}'";
+
+                object result = command.ExecuteScalar();
+
+                if (result != null)
+                {
+                    spid = int.Parse(result.ToString() ?? "-1");
+                }
+                else spid = -1;
+            }
+
+            return spid;
+        }
+
         // Delete Ke hoach san xuat
         public (int, string) DeleteKehoachSanxuat(KHSX? removeKHSX)
         {
@@ -8912,6 +8965,207 @@ namespace ProcessManagement.Services.SQLServer
                 }
             }
             return result;
+        }
+        #endregion
+
+        #region Table_KHSX_LOT
+        // Insert
+        public (int, string) InsertLOT_khsx(LOT_khsx lotkhsx)
+        {
+            int result = -1;
+            string errorMess = string.Empty;
+
+            if (lotkhsx == null) return (result, "Error: LOT_khsx is null");
+
+            List<Propertyy> properties = lotkhsx.GetPropertiesValues()
+                .Where(po => po.AlowDatabase == true && po.Value != null)
+                .ToList();
+
+            if (properties.Count == 0)
+            {
+                return (result, "Error: No valid properties to insert.");
+            }
+
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+            using var transaction = connection.BeginTransaction();
+
+            try
+            {
+                var command = connection.CreateCommand();
+                command.Transaction = transaction;
+
+                string columns = string.Join(", ", properties.Select(p => $"[{p.DBName}]"));
+                string parameters = string.Join(", ", properties.Select(p => $"@{Regex.Replace(p.DBName ?? string.Empty, @"[^\w]+", "")}"));
+                command.CommandText = $@"INSERT INTO [{LOT_khsx.DBName.Table_KHSXLOT}] ({columns}) OUTPUT INSERTED.{LOT_khsx.DBName.KHSXLOTID} VALUES ({parameters})";
+
+                foreach (var prop in properties)
+                {
+                    string parameterName = $"@{Regex.Replace(prop.DBName ?? string.Empty, @"[^\w]+", "")}";
+                    object? parameterValue = prop.Value ?? DBNull.Value;
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                object? rs = command.ExecuteScalar();
+                if (rs != null && int.TryParse(rs.ToString(), out result) && result > 0)
+                {
+                    transaction.Commit();
+                }
+                else
+                {
+                    result = -1;
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMess = $"Error: {ex.Message}";
+                try
+                {
+                    transaction.Rollback();
+                }
+                catch (Exception rollbackEx)
+                {
+                    errorMess += $" | Rollback Error: {rollbackEx.Message}";
+                }
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+        // Get
+        public (List<LOT_khsx>, string) GetListLOT_khsx(Dictionary<string, object?> parameters, bool isgetAll = false)
+        {
+            List<LOT_khsx> listLOT_khsx = new();
+
+            string errorMessage = string.Empty;
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                try
+                {
+                    connection.Open();
+
+                    var conditions = new List<string>();
+                    var command = connection.CreateCommand();
+                    command.CommandText = $"SELECT * FROM [{LOT_khsx.DBName.Table_KHSXLOT}]";
+
+                    if (!isgetAll)
+                    {
+                        // Process each parameter in the dictionary
+                        foreach (var param in parameters)
+                        {
+                            conditions.Add($"[{param.Key}] = @{param.Key}");
+
+                            command.Parameters.AddWithValue($"@{param.Key}", param.Value);
+                        }
+
+                        if (conditions.Any())
+                        {
+                            command.CommandText += " WHERE " + string.Join(" AND ", conditions);
+                        }
+                    }
+
+                    using var reader = command.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        LOT_khsx lotkhsx = new();
+
+                        List<Propertyy> rowItems = lotkhsx.GetPropertiesValues();
+
+                        foreach (var item in rowItems)
+                        {
+                            string? columnName = item.DBName;
+
+                            if (!string.IsNullOrEmpty(columnName) && reader.GetOrdinal(columnName) != -1)
+                            {
+                                object columnValue = reader[columnName];
+
+                                item.Value = columnValue == DBNull.Value ? null : columnValue;
+                            }
+                        }
+
+                        listLOT_khsx.Add(lotkhsx);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    errorMessage = $"Error: {ex.Message}";
+                    listLOT_khsx.Clear(); // Clear the list in case of error
+                }
+            }
+            return (listLOT_khsx, errorMessage);
+        }
+        // Update
+        public (int, string) UpdateLOT_khsx(LOT_khsx lotkhsx)
+        {
+            int result = -1;
+            string errorMess = string.Empty;
+
+            if (lotkhsx == null) return (result, "Error: LOT_khsx is null");
+
+            List<Propertyy> properties = lotkhsx.GetPropertiesValues()
+                .Where(po => po.AlowDatabase == true && po.Value != null)
+                .ToList();
+
+            if (properties.Count == 0)
+            {
+                return (result, "Error: No valid properties to update.");
+            }
+
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+            using var transaction = connection.BeginTransaction();
+
+            try
+            {
+                var command = connection.CreateCommand();
+                command.Transaction = transaction;
+
+                // Update main LOT_khsx record
+                string updateSet = string.Join(", ", properties.Select(p =>
+                    $"[{p.DBName}] = @{Regex.Replace(p.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $@"UPDATE [{LOT_khsx.DBName.Table_KHSXLOT}] 
+                                        SET {updateSet} 
+                                        WHERE [{LOT_khsx.DBName.KHSXLOTID}] = @KHSXLOTID";
+
+                foreach (var prop in properties)
+                {
+                    string parameterName = $"@{Regex.Replace(prop.DBName ?? string.Empty, @"[^\w]+", "")}";
+                    object? parameterValue = prop.Value ?? DBNull.Value;
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                command.Parameters.AddWithValue("@KHSXLOTID", lotkhsx.KHSXLOTID.Value);
+
+                result = command.ExecuteNonQuery();
+                if (result > 0)
+                {
+                    transaction.Commit();
+                }
+                else
+                {
+                    result = -1;
+                    errorMess = "No rows were updated. The specified LOT_khsx may not exist.";
+                    transaction.Rollback();
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMess = $"Error: {ex.Message}";
+                try
+                {
+                    transaction.Rollback();
+                }
+                catch (Exception rollbackEx)
+                {
+                    errorMess += $" | Rollback Error: {rollbackEx.Message}";
+                }
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
         }
         #endregion
     }
