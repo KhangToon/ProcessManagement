@@ -1938,6 +1938,54 @@ namespace ProcessManagement.Services.SQLServer
             return nvl;
         }
 
+        public NguyenVatLieu GetNguyenVatLieuByTenNVL(object? tenNVL, bool isloadsubitems = true)
+        {
+            NguyenVatLieu nvl = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_NguyenVatLieu}] WHERE [{Common.TenNVL}] = '{tenNVL}'";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    List<Propertyy> rowitems = nvl.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue.ToString()?.Trim();
+                    }
+
+                }
+            }
+
+            if (isloadsubitems)
+            {
+                // Load Details NVL 
+                nvl.DSThongTin = GetNguyenVatLieuDetails(nvl.NVLID.Value);
+                // Load Danh muc
+                nvl.DanhMuc = GetDanhMucbyID(nvl.DMID.Value);
+                // Load Loai NVL
+                nvl.LoaiNVL = GetLoaiNVLbyID(nvl.LOAINVLID.Value);
+                // Load list vi tri 
+                nvl.DSViTri = GetListViTriOfNgVatLieuByNVLid(nvl.NVLID.Value);
+                // Tinh so luong ton kho
+                nvl.TonKho = nvl.DSViTri.Sum(vitri => int.TryParse(vitri.VTNVLSoLuong.Value?.ToString(), out int slvt) ? slvt : 0);
+            }
+
+            return nvl;
+        }
+
+
         // Get list NguyenVatLieu by loai nvl ID
         public List<NguyenVatLieu> GetListNguyenVatLieuByLoaiNvlID(object? loainvlID)
         {
