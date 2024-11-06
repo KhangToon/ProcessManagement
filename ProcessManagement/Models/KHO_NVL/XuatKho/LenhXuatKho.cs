@@ -19,6 +19,9 @@ namespace ProcessManagement.Models.KHO_NVL.XuatKho
 
         public bool isEditingLXK = false; // chi dung khi xuat kho
 
+        public bool isAllowselect = false; // dung khi chi dinh lot voi ngay nhap kho uu tien
+
+        public bool isPicked = false; // dung khi chi dinh lot voi ngay nhap kho uu tien
 
         //public NguyenVatLieu NVLDetails { get; set; } = new();
         //public VitriLuuTru ViTriDetails { get; set; } = new();
