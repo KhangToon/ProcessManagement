@@ -2,10 +2,12 @@
 
 @inherits LayoutComponentBase
 
+@using ParamountBed_Warehouse.Services.SocketService
 @using Radzen;
 @using Radzen.Blazor;
 
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject ServerSocketAsync ServerSocketAsync
 
 <RadzenLayout Style="height: contain; width: 100%;">
     <RadzenHeader Style="height: 5%; align-items: center;">
@@ -61,6 +63,16 @@
             if (UserRoles.FirstOrDefault() == "User")
             {
                 visibleSideBar = false; // hide sidemenubar
+            }
+            else if (UserRoles.FirstOrDefault() == "Admin")
+            {
+                if (!ServerSocketAsync.serverrunning) { ServerSocketAsync.StartListening(); }
+
+                if (!ServerSocketAsync.IsIm_Ex_EventRegistered())
+                {
+                    // not use
+                    //ServerSocketAsync.Im_Ex_Event += UpdateUI_IMEX_Mode;
+                }
             }
         }
 

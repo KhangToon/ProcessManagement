@@ -5,11 +5,14 @@
 @using Radzen
 @using ProcessManagement.Models;
 @using ProcessManagement.Models.KHO_NVL.XuatKho
+@using ProcessManagement.Services.QRCodes
 
 @inject DialogService DialogService
 @inject NotificationService NotificationService
 @inject TooltipService TooltipService
 @inject SQLServerServices SQLServerServices
+@inject QRCodeServices QRCodeServices
+@inject IJSRuntime JSRuntime
 
 <RadzenCard Variant="Variant.Filled" Style="height: 100%; width: 100%; padding: 10px;">
     <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style=" height: 100%; width: 100%; padding: 0px; padding-bottom: 10px " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
@@ -158,6 +161,25 @@
                             <RadzenText Text="@PXK.GhiChuPXK.Value?.ToString()" Style="font-size: 16px; font-weight: 600; color: black; height: contain; width: 100% "></RadzenText>
                         </RadzenStack>
                     </RadzenStack>
+
+                    <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding: 5px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                        <RadzenStack Gap="20px" Style="height: contain; width: 100%; border-radius: 5px; background-color: var(--rz-secondary-lighter); padding: 5px; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                            <RadzenText Text="@($"Scan mã phiếu: ")" Style="font-weight: 600; font-size: 16px; color: black;"></RadzenText>
+                            <RadzenStack Gap="10" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenText Text="@($"{PXK.MaPhieuXK.Value?.ToString()}")" Style="font-weight: 600; font-size: 18px; color: darkblue;"></RadzenText>
+                                <RadzenButton Click="@(() => CopyToClipboard(PXK.MaPhieuXK.Value?.ToString()?? string.Empty))" Icon="content_copy" Style="--rz-icon-size: 18px;" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Light" />
+                            </RadzenStack>
+                        </RadzenStack>
+                        <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: contain; padding: 5px; border-radius: 0">
+                            <RadzenStack Style="height: contain; width: contain" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                @{
+                                    string qrBase64string = QRCodeServices.GenerateQRCode(PXK.MaPhieuXK.Value?.ToString() ?? string.Empty, 120);
+                                    <img style="border-radius: 10px;" src="@($"data:image/png;base64,{qrBase64string}")" alt="QR Code">
+                                }
+                            </RadzenStack>
+                        </RadzenCard>
+                    </RadzenStack>
+
                 </RadzenStack>
             </RadzenColumn>
             <!--Chi dinh so luong xuat kho moi NVL-->
@@ -368,5 +390,17 @@
         DatagridSelectedNVLofPXK = selectedNgvatlieu;
 
         SelectedNVLofPXK = DatagridSelectedNVLofPXK.FirstOrDefault() ?? new();
+    }
+
+    private async Task CopyToClipboard(string content)
+    {
+        await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", content);
+        NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Success,
+                Summary = "Copied!",
+                Detail = $"{content}",
+                Duration = 4000
+            });
     }
 }
