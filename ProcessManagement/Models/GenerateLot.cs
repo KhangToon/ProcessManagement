@@ -4,7 +4,7 @@ using ProcessManagement.Services.SQLServer;
 
 namespace ProcessManagement.Models
 {
-    public class GenerateLot2
+    public class GenerateLot
     {
         private static readonly SQLServerServices SQLServerServices = new();
         private static readonly int LimitRange = 999;
@@ -86,7 +86,7 @@ namespace ProcessManagement.Models
         }
 
         // First step for initial KHSX 
-        public GenerateLot2()
+        public GenerateLot()
         {
             // Tao LSX unique id
             MaLSX = AutoGenerateLSXCode();
