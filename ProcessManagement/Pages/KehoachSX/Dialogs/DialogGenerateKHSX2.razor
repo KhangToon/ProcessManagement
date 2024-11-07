@@ -148,12 +148,12 @@
                                     </RadzenStack>
 
                                     <!--Range ma quan ly-->
-                                    <RadzenStack Visible="@(generLot.ListNVLs?.Count > 0)" Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                    <RadzenStack Visible="@(generLot.ListTempLOT_NVLs?.Count > 0)" Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                         <RadzenStack Style="width: 100%; height: contain; padding-right: 10px" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
                                             <RadzenText Text="Mã quản lý" Style="font-size: 16px; font-weight: 600; color: black"></RadzenText>
                                         </RadzenStack>
                                         <RadzenStack Style="width: 100%; height: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                            <RadzenText Text="@($"{generLot.ListNVLs?.FirstOrDefault()?.MaQuanLy.Value?.ToString()} --- {generLot.ListNVLs?.LastOrDefault()?.MaQuanLy.Value?.ToString()}")"
+                                            <RadzenText Text="@($"{generLot.ListTempLOT_NVLs?.FirstOrDefault()?.MaQuanLy.Value?.ToString()} --- {generLot.ListTempLOT_NVLs?.LastOrDefault()?.MaQuanLy.Value?.ToString()}")"
                                                         Style="color: red; font-weight: 600; font-size: 18px"></RadzenText>
                                         </RadzenStack>
                                     </RadzenStack>
@@ -207,14 +207,14 @@
                                                 </RadzenStack>
 
                                                 <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style=" height: 92%; width: 100%; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                                    @if (generLot.ListNVLs != null)
+                                                    @if (generLot.ListTempLOT_NVLs != null)
                                                     {
-                                                        @foreach (var lot in generLot.ListNVLs)
+                                                        @foreach (var lot in generLot.ListTempLOT_NVLs)
                                                         {
                                                             <RadzenCard Variant="Variant.Outlined" Style="width: 100%; height: 100%; padding: 5px; background-color: white">
                                                                 <RadzenStack Style="width: 100%; height: contain" Gap="10px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                                     <RadzenStack Style="width: 10%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                        <RadzenText Text="@((generLot.ListNVLs?.IndexOf(lot) + 1).ToString())" Style="color: black; font-weight: 600; font-size: 16px"></RadzenText>
+                                                                        <RadzenText Text="@((generLot.ListTempLOT_NVLs?.IndexOf(lot) + 1).ToString())" Style="color: black; font-weight: 600; font-size: 16px"></RadzenText>
                                                                     </RadzenStack>
                                                                     <RadzenStack Style="width: 60%; height: contain; background-color: beige" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                                         <RadzenText Text="@lot.MaQuanLy.Value?.ToString()" Style="color: black; font-weight: 600; font-size: 16px"></RadzenText>
@@ -343,7 +343,7 @@
                             <!--Submit LSX to database-->
                             <RadzenStack Style="width: 100%; height: 7%; padding: 5px; background-color: white" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                                 <RadzenButton Disabled="@((!generLot.isGenerateListLotOK) || (!generLot.isCheckSLNVLisOK)|| generLot.NewKHSX.DSachCongDoans?.Count() == 0
-                                                        || generLot.ListNVLs == null || generLot.ListNVLs?.Count() == 0 || !generLot.isComfirmSLLoiNguyenCong || generLot.isErrorSLloiChophep)"
+                                                        || generLot.ListTempLOT_NVLs == null || generLot.ListTempLOT_NVLs?.Count() == 0 || !generLot.isComfirmSLLoiNguyenCong || generLot.isErrorSLloiChophep)"
                                               Icon="upload" Text="Lưu kế hoạch sản xuất"
                                               Click="@(() => SubmitKHSXtoDatabase())" Style="font-size: 16px; border-radius: 5px; width: 50%;"
                                               IsBusy=@isAddingLSXtodatabase BusyText="Waiting..."
@@ -477,7 +477,7 @@
     // Luu ke hoach san xuat to Database
     private async Task SubmitKHSXtoDatabase()
     {
-        if (generLot.ListNVLs == null || generLot.NewKHSX == null || generLot.NewKHSX.DSachCongDoans.Count == 0) { return; }
+        if (generLot.ListTempLOT_NVLs == null || generLot.NewKHSX == null || generLot.NewKHSX.DSachCongDoans.Count == 0) { return; }
 
         isAddingLSXtodatabase = true;
 
@@ -531,7 +531,7 @@
 
                     congdoan.KHSXID.Value = khsxID;
 
-                    congdoan.CreateDSachNVLCongDoans(generLot.ListNVLs);
+                    congdoan.CreateDSachNVLCongDoans(generLot.ListTempLOT_NVLs);
 
                     // Insert Congdoan vao KHSX
                     (int ncofkhsxid, string addcdError) = SQLServerServices.InsertCongdoantoKehoachSanxuat(congdoan);
@@ -601,11 +601,11 @@
 
     private async Task CreateDSLOT_KHSX(object? khsxid)
     {
-        if (generLot.ListNVLs != null && generLot.ListNVLs.Any() && generLot.NewKHSX.DSachCongDoans.Any())
+        if (generLot.ListTempLOT_NVLs != null && generLot.ListTempLOT_NVLs.Any() && generLot.NewKHSX.DSachCongDoans.Any())
         {
             List<LOT_khsx> dsahLOTkhsx = new();
 
-            foreach (var lotnvl in generLot.ListNVLs)
+            foreach (var lotnvl in generLot.ListTempLOT_NVLs)
             {
                 foreach (var congdoan in generLot.NewKHSX.DSachCongDoans.Where(cd => cd.IsUsing == true).ToList())
                 {

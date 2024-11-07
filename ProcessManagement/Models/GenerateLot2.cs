@@ -24,7 +24,7 @@ namespace ProcessManagement.Models
         public DateTime NgayTao { get; set; } = DateTime.Now;
         public KHSX NewKHSX { get; set; } = new KHSX();
 
-        public List<NVL>? ListNVLs { get; set; }
+        public List<TemLotNVL>? ListTempLOT_NVLs { get; set; }
         private List<SanPham> DSachSanPhams { get; set; } = new List<SanPham>();
         private List<LoaiNVL> DSachLoaiNVLs { get; set; } = new List<LoaiNVL>();
 
@@ -197,13 +197,13 @@ namespace ProcessManagement.Models
             SLLotChan = 0;
             SLLotLe = 0;
             SLperLotLe = 0;
-            ListNVLs = new();
+            ListTempLOT_NVLs = new();
             NewKHSX.DSachNVLofKHSXs = new();
         }
 
         public List<string> GetDSMaSPs()
         {
-            DSachSanPhams = SQLServerServices.GetlistSanphams();
+            DSachSanPhams = SQLServerServices.GetDanhSachSanPham();
 
             List<string> result = DSachSanPhams.Select(sp => sp.SP_TenSanPham.Value?.ToString() ?? string.Empty).ToList();
 
@@ -293,7 +293,7 @@ namespace ProcessManagement.Models
         {
             // Reset so luong cua moi nvl cua lsx khi bat ki thong so nao thay doi (loai nvl, ti le loi, slsx, ...)
             isGenerateListLotOK = false; // false bit generate LOT
-            ListNVLs = new(); // reset danh sach LOT NVL
+            ListTempLOT_NVLs = new(); // reset danh sach LOT NVL
 
             int result = -1; string error = string.Empty;
 
@@ -338,7 +338,7 @@ namespace ProcessManagement.Models
 
             Thread.Sleep(500);
 
-            ListNVLs = new();
+            ListTempLOT_NVLs = new();
 
             // Tinh dinh muc
             //DinhMuc = (int)(SLNgVatLieuSX + SLNgVatLieuSX * (TiLeLoi / 100));
@@ -349,13 +349,13 @@ namespace ProcessManagement.Models
             // Calculate and generate list lot nvl
             for (int index = 1; index <= SLLotChan; index++)
             {
-                NVL nVL = new();
+                TemLotNVL nVL = new();
                 nVL.LoaiNVL.Value = NewKHSX.LoaiNVL?.TenLoaiNVL.Value;
                 nVL.MaSP.Value = NewKHSX.SanPham?.SP_MaSP.Value;
                 nVL.MaQuanLy.Value = MaLSX + "-" + NewKHSX.SanPham?.SP_MaSP.Value + "-" + index.ToString(NumberDigit);
                 nVL.SoLuong.Value = SLperLotChan;
                 nVL.NgayXuat.Value = DateTime.Now;
-                ListNVLs?.Add(nVL);
+                ListTempLOT_NVLs?.Add(nVL);
             }
 
             if (DinhMuc % SLperLotChan > 0)
@@ -366,18 +366,18 @@ namespace ProcessManagement.Models
                 SLperLotLe = DinhMuc - SLperLotChan * SLLotChan;
 
                 // Add lot le
-                NVL lotnvlle = new();
+                TemLotNVL lotnvlle = new();
                 lotnvlle.LoaiNVL.Value = NewKHSX.LoaiNVL?.TenLoaiNVL.Value;
                 lotnvlle.MaSP.Value = NewKHSX.SanPham?.SP_MaSP.Value;
                 lotnvlle.MaQuanLy.Value = MaLSX + "-" + NewKHSX.SanPham?.SP_MaSP.Value + "-" + (SLLotChan + 1).ToString(NumberDigit);
                 lotnvlle.SoLuong.Value = SLperLotLe;
                 lotnvlle.NgayXuat.Value = DateTime.Now;
-                ListNVLs?.Add(lotnvlle);
+                ListTempLOT_NVLs?.Add(lotnvlle);
             }
             else { SLLotLe = 0; SLperLotLe = 0; }
 
 
-            SLLot = ListNVLs?.Count ?? 0;
+            SLLot = ListTempLOT_NVLs?.Count ?? 0;
 
             return (1, error);
         }

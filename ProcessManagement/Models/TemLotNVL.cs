@@ -1,23 +1,37 @@
-﻿using ProcessManagement.Commons;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using ProcessManagement.Commons;
+using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 
 namespace ProcessManagement.Models
 {
-    public class Lot
+    public class TemLotNVL
     {
-        public Propertyy LotID = new() { DBName = Common.LotID, Type = typeof(int), DispDatagrid = false, AlowDatabase = true };
+        public Propertyy NVLID = new() { DBName = Common.NVLID, Type = typeof(int), DispDatagrid = false, AlowDatabase = false };
+
+        public Propertyy LoaiNVL = new() { DBName = Common.LoaiNL, Type = typeof(string), AlowDatabase = true };
+
+        public Propertyy MaSP = new() { DBName = Common.SP_MaSP, Type = typeof(string), AlowDatabase = true };
+
+        public Propertyy MaQuanLy = new() { DBName = Common.MaQuanLy, Type = typeof(string), AlowDatabase = true };
 
         public Propertyy LotNVL = new() { DBName = Common.LotNVL, Type = typeof(string), AlowDatabase = true };
 
-        public Propertyy NgayTao = new() { DBName = Common.NgayTao, Type = typeof(DateTime), AlowDatabase = true };
+        public Propertyy SoLuong = new() { DBName = Common.SoLuong, Type = typeof(int), AlowDatabase = true };
 
-        public Propertyy SoLuongNL = new() { DBName = Common.SoLuongNVL, Type = typeof(int), AlowDatabase = true };
+        public Propertyy NgayNhap = new() { DBName = Common.NgayNhap, Type = typeof(DateTime), AlowDatabase = true };
+
+        public Propertyy NgayXuat = new() { DBName = Common.NgayXuat, Type = typeof(DateTime), AlowDatabase = true };
+
+        public Propertyy SoLuongXuat = new() { DBName = Common.SoLuongXuat, Type = typeof(int), AlowDatabase = true };
 
         public Propertyy GhiChu = new() { DBName = Common.GhiChu, Type = typeof(string), AlowDatabase = true };
 
+        // Dung lam temp de auto tao list LOT khi tao KHSX
+
         public List<Propertyy> GetPropertiesValues()
         {
-            Type propertyType = typeof(Lot);
+            Type propertyType = typeof(TemLotNVL);
 
             FieldInfo[] fields = propertyType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
@@ -37,6 +51,7 @@ namespace ProcessManagement.Models
 
             return propertiesValue;
         }
+
 
         public void SetPropertyValue(string propertyName, object newValue)
         {

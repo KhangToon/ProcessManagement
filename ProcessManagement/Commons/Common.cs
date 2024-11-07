@@ -47,11 +47,8 @@ namespace ProcessManagement.Commons
         public const string PropertyValue = "PropertyValue";
         public const string PropertyType = "PropertyType";
 
-        // Table NVL //
-        public const string TableNVL = "Table_NVL";
-        //public const string NVLID = "NVLID";
+
         public const string LoaiNL = "Loại NL";
-        //public const string TenSanPham = "Tên sản phẩm";
         public const string MaQuanLy = "Mã quản lý";
         public const string LotNVL = "Lot NVL";
         public const string SoLuong = "Số lượng";
@@ -59,15 +56,6 @@ namespace ProcessManagement.Commons
         public const string NgayXuat = "Ngày xuất";
         public const string SoLuongXuat = "Số lượng xuất";
         public const string GhiChu = "Ghi chú";
-
-        // Table Lot //
-        public const string TableLot = "Table_Lot";
-        public const string LotID = "LotID";
-        //public const string LotNVL = "Lot NVL";
-        //public const string NgayTao = "Ngày tạo";
-        public const string SoLuongNVL = "Số lượng NVL";
-        //public const string GhiChu = "Ghi chú";
-
         public const string NgayTao = "Ngày tạo";
 
         // Table KHSX Nguyen cong //

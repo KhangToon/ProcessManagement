@@ -36,449 +36,6 @@ namespace ProcessManagement.Services.SQLServer
             // kieu du lieu de khong bi loi font tieng Viet la nvarchar hoac nchar
         }
 
-        // Lay toan bo danh sach nguyen vat lieu
-        public List<NVL> GetlistNVL()
-        {
-            List<NVL> listNVL = new();
-
-            using (var connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-
-                var command = connection.CreateCommand();
-
-                command.CommandText = $"SELECT * FROM [{Common.TableNVL}]";
-
-                using var reader = command.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    NVL rowNVL = new();
-
-                    List<Propertyy> rowNVLitems = rowNVL.GetPropertiesValues();
-
-                    foreach (var item in rowNVLitems)
-                    {
-                        string? columnName = item.DBName;
-
-                        object columnValue = reader[columnName];
-
-                        item.Value = columnValue;
-                    }
-
-                    listNVL.Add(rowNVL);
-                }
-            }
-
-            return listNVL;
-        }
-
-        // Lay danh sach nguyen vat lieu theo Lot
-        public List<NVL> GetlistNVLperLot(Lot? lot)
-        {
-            List<NVL> listNVL = new();
-
-            if (lot == null) { return listNVL; }
-
-            using (var connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-
-                var command = connection.CreateCommand();
-
-                command.CommandText = $"SELECT * FROM [{Common.TableNVL}] WHERE [{Common.LotNVL}] = '{lot.LotNVL.Value}'";
-
-                using var reader = command.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    NVL rowNVL = new();
-
-                    List<Propertyy> rowNVLitems = rowNVL.GetPropertiesValues();
-
-                    foreach (var item in rowNVLitems)
-                    {
-                        string? columnName = item.DBName;
-
-                        object columnValue = reader[columnName];
-
-                        item.Value = columnValue;
-                    }
-
-                    listNVL.Add(rowNVL);
-                }
-            }
-
-            return listNVL;
-        }
-
-        // Lay danh sach NVL theo ma san pham
-        public List<NVL> GetlistNVLperSanPham(SanPham? sanpham)
-        {
-            List<NVL> listNVL = new();
-
-            if (sanpham == null || sanpham.SP_MaSP.Value == null) { return listNVL; }
-
-            using (var connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-
-                var command = connection.CreateCommand();
-
-                command.CommandText = $"SELECT * FROM [{Common.TableNVL}] WHERE [{Common.SP_MaSP}] = '{sanpham.SP_MaSP.Value}'";
-
-                using var reader = command.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    NVL rowNVL = new();
-
-                    List<Propertyy> rowNVLitems = rowNVL.GetPropertiesValues();
-
-                    foreach (var item in rowNVLitems)
-                    {
-                        string? columnName = item.DBName;
-
-                        object columnValue = reader[columnName];
-
-                        item.Value = columnValue;
-                    }
-
-                    listNVL.Add(rowNVL);
-                }
-            }
-
-            return listNVL;
-        }
-
-        // Lay danh sach nguyen vat lieu
-        public List<NVL> GetlistNVLperLot(string lotNVL)
-        {
-            List<NVL> listNVL = new();
-
-            if (lotNVL == string.Empty) { return listNVL; }
-
-            using (var connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-
-                var command = connection.CreateCommand();
-
-                command.CommandText = $"SELECT * FROM [{Common.TableNVL}] WHERE [{Common.LotNVL}] = '{lotNVL}'";
-
-                using var reader = command.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    NVL rowNVL = new();
-
-                    List<Propertyy> rowNVLitems = rowNVL.GetPropertiesValues();
-
-                    foreach (var item in rowNVLitems)
-                    {
-                        string? columnName = item.DBName;
-
-                        object columnValue = reader[columnName];
-
-                        item.Value = columnValue;
-                    }
-
-                    listNVL.Add(rowNVL);
-                }
-            }
-
-            return listNVL;
-        }
-
-        // Load danh sach NVL by loai nl
-        public List<NVL> GetlistNVLbyLoaiNL(string loaiNL)
-        {
-            List<NVL> listNVL = new();
-
-            using (var connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-
-                var command = connection.CreateCommand();
-
-                command.CommandText = $"SELECT * FROM [{Common.TableNVL}] WHERE [{Common.LoaiNL}] = '{loaiNL}'";
-
-                using var reader = command.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    NVL rowNVL = new();
-
-                    List<Propertyy> rowNVLitems = rowNVL.GetPropertiesValues();
-
-                    foreach (var item in rowNVLitems)
-                    {
-                        string? columnName = item.DBName;
-
-                        object columnValue = reader[columnName];
-
-                        item.Value = columnValue;
-                    }
-
-                    listNVL.Add(rowNVL);
-                }
-            }
-
-            return listNVL;
-        }
-
-        // Them moi nguyen vat lieu
-        public (int, string) InsertNewNguyenvatlieu(NVL newNVL)
-        {
-            List<Propertyy> newNVLItems = newNVL.GetPropertiesValues().Where(po => po.AlowDatabase == true && po.Value != null).ToList();
-
-            int result = -1;
-            string errorMess = string.Empty;
-
-            try
-            {
-                using var connection = new SqlConnection(connectionString);
-
-                connection.Open();
-
-                var command = connection.CreateCommand();
-
-                string columnNames = string.Join(",", newNVLItems.Select(key => $"[{key.DBName}]"));
-
-                string parameterNames = string.Join(",", newNVLItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
-
-                command.CommandText = $"INSERT INTO [{Common.TableNVL}] ({columnNames}) OUTPUT INSERTED.{Common.NVLID} VALUES ({parameterNames})";
-
-                foreach (var item in newNVLItems)
-                {
-                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
-
-                    object? parameterValue = item.Value;
-
-                    command.Parameters.AddWithValue(parameterName, parameterValue);
-                }
-
-                object? rs = command.ExecuteScalar();
-
-                result = Convert.ToInt32(rs);
-
-                if (result == 0) result = -1;
-            }
-            catch (Exception ex)
-            {
-                errorMess = ex.Message;
-
-                return (-1, errorMess);
-            }
-
-            return (result, errorMess);
-        }
-
-        // Lay danh sach Lot
-        public List<Lot> GetlistLot()
-        {
-            List<Lot> listLot = new();
-
-            using (var connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-
-                var command = connection.CreateCommand();
-
-                command.CommandText = $"SELECT * FROM [{Common.TableLot}]";
-
-                using var reader = command.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    Lot rowLot = new();
-
-                    List<Propertyy> rowLotitems = rowLot.GetPropertiesValues();
-
-                    foreach (var item in rowLotitems)
-                    {
-                        string? columnName = item.DBName;
-
-                        object columnValue = reader[columnName];
-
-                        item.Value = columnValue;
-                    }
-
-                    listLot.Add(rowLot);
-                }
-            }
-
-            Parallel.ForEach(listLot, lot =>
-            {
-                int lotNLcount = GetTotalNVLperLot(lot.LotNVL.Value?.ToString() ?? string.Empty).Item1;
-
-                if (lotNLcount >= 0)
-                {
-                    lot.SoLuongNL.Value = lotNLcount;
-                }
-            });
-
-            return listLot;
-        }
-
-        // Them moi Lot
-        public (int, string) InsertNewLot(Lot newLot)
-        {
-            List<Propertyy> newLotItems = newLot.GetPropertiesValues().Where(po => po.AlowDatabase == true && po.Value != null).ToList();
-
-            int result = -1;
-            string errorMess = string.Empty;
-
-            try
-            {
-                using var connection = new SqlConnection(connectionString);
-
-                connection.Open();
-
-                var command = connection.CreateCommand();
-
-                string columnNames = string.Join(",", newLotItems.Select(key => $"[{key.DBName}]"));
-
-                string parameterNames = string.Join(",", newLotItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
-
-                command.CommandText = $"INSERT INTO [{Common.TableLot}] ({columnNames}) OUTPUT INSERTED.{Common.LotID} VALUES ({parameterNames})";
-
-                foreach (var item in newLotItems)
-                {
-                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
-
-                    object? parameterValue = item.Value;
-
-                    command.Parameters.AddWithValue(parameterName, parameterValue);
-                }
-
-                object? rs = command.ExecuteScalar();
-
-                result = Convert.ToInt32(rs);
-
-                if (result == 0) result = -1;
-            }
-            catch (Exception ex)
-            {
-                errorMess = ex.Message;
-
-                return (-1, errorMess);
-            }
-
-            return (result, errorMess);
-        }
-
-        // Load so luong NVL moi lot
-        public (int, string) GetTotalNVLperLot(string lotNL)
-        {
-            if (lotNL == string.Empty) { return (-1, "Lot NL is empty"); }
-
-            string errorMess = string.Empty;
-
-            try
-            {
-                using var connection = new SqlConnection(connectionString);
-
-                connection.Open();
-
-                var command = connection.CreateCommand();
-
-                command.CommandText = $"SELECT COUNT(*) FROM [{Common.TableNVL}] WHERE [{Common.LotNVL}] = '{lotNL}'";
-
-                int count = Convert.ToInt32(command.ExecuteScalar());
-
-                return (count, errorMess);
-            }
-            catch (Exception ex)
-            {
-                errorMess = ex.Message;
-
-                return (-1, errorMess);
-            }
-        }
-
-        // ------------------------------------------------------------------------------------- //
-        #region Table_SanPham_ not Use
-        // Lay danh sach san pham
-        public List<SanPham> GetlistSanphams()
-        {
-            List<SanPham> listSanphams = new();
-
-            using (var connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-
-                var command = connection.CreateCommand();
-
-                command.CommandText = $"SELECT * FROM [{Common.Table_SanPham}]";
-
-                using var reader = command.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    SanPham rowSP = new();
-
-                    List<Propertyy> rowSPitems = rowSP.GetPropertiesValues();
-
-                    foreach (var item in rowSPitems)
-                    {
-                        string? columnName = item.DBName;
-
-                        object columnValue = reader[columnName];
-
-                        item.Value = columnValue;
-                    }
-
-                    listSanphams.Add(rowSP);
-                }
-            }
-
-            Parallel.ForEach(listSanphams, sp =>
-            {
-                sp.DanhSachNVLs = GetDSachNVLofSanPham(sp.SP_SPID.Value);
-            });
-
-            return listSanphams;
-        }
-
-        // Lay san pham by sp id
-        public SanPham GetSanpham(int spid) // Lay danh sach san pham
-        {
-            SanPham sanpham = new();
-
-            using (var connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-
-                var command = connection.CreateCommand();
-
-                command.CommandText = $"SELECT * FROM [{Common.Table_SanPham}] WHERE [{Common.SP_SPID}] = '{spid}'";
-
-                using var reader = command.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    List<Propertyy> rowSPitems = sanpham.GetPropertiesValues();
-
-                    foreach (var item in rowSPitems)
-                    {
-                        string? columnName = item.DBName;
-
-                        object columnValue = reader[columnName];
-
-                        item.Value = columnValue;
-                    }
-
-                }
-            }
-
-            sanpham.DanhSachNVLs = GetDSachNVLofSanPham(sanpham.SP_SPID.Value);
-
-            return sanpham;
-        }
-
-        #endregion Table_SanPham
-
         // ------------------------------------------------------------------------------------- //
         #region Table_KHSX
         // Get last ke hoach san xuat
@@ -5628,7 +5185,6 @@ namespace ProcessManagement.Services.SQLServer
 
         #endregion
 
-
         // ------------------------------------------------------------------------------------- //
         #region Table_MAY_MayMoc
         // Get may moc by mmid
@@ -5957,6 +5513,7 @@ namespace ProcessManagement.Services.SQLServer
             return (result, errorMess);
         }
         #endregion
+       
         // ------------------------------------------------------------------------------------- //
         #region Table_MAY_ThongTinMayMoc
 
@@ -6166,6 +5723,7 @@ namespace ProcessManagement.Services.SQLServer
         }
 
         #endregion
+        
         // ------------------------------------------------------------------------------------- //
         #region Table_MAY_LoaiThongTinMayMoc
         // Get loai thong tin may moc by loadittmmid
@@ -6703,6 +6261,7 @@ namespace ProcessManagement.Services.SQLServer
             return (result, errorMess);
         }
         #endregion
+        
         // ------------------------------------------------------------------------------------- //
         #region Table_LoaiThongTinNhanVien
 
@@ -6947,6 +6506,7 @@ namespace ProcessManagement.Services.SQLServer
             }
         }
         #endregion
+        
         // ------------------------------------------------------------------------------------- //
         #region Table_ThongTinNhanVien
 
@@ -7119,7 +6679,7 @@ namespace ProcessManagement.Services.SQLServer
 
         #endregion
 
-
+        // ------------------------------------------------------------------------------------- //
         #region Table_SanPham
         // Check gia tri truong thong tin san pham 
         public bool DefaultThongTinSanPham_ValueIsExisting(string? proValue, string proName)
@@ -7307,6 +6867,42 @@ namespace ProcessManagement.Services.SQLServer
             return danhSachSanPham;
         }
 
+        // Lay san pham by sp id
+        public SanPham GetSanpham(int spid) // Lay danh sach san pham
+        {
+            SanPham sanpham = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_SanPham}] WHERE [{Common.SP_SPID}] = '{spid}'";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    List<Propertyy> rowSPitems = sanpham.GetPropertiesValues();
+
+                    foreach (var item in rowSPitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue;
+                    }
+
+                }
+            }
+
+            sanpham.DanhSachNVLs = GetDSachNVLofSanPham(sanpham.SP_SPID.Value);
+
+            return sanpham;
+        }
+
         // Get ma sanpham by ID
         public string GetMaSanphamByID(object? id)
         {
@@ -7371,6 +6967,7 @@ namespace ProcessManagement.Services.SQLServer
         }
 
         #endregion
+        
         // ------------------------------------------------------------------------------------- //
         #region Table_LoaiThongTinSanPham
 
@@ -9016,6 +8613,7 @@ namespace ProcessManagement.Services.SQLServer
         }
         #endregion
 
+        // ------------------------------------------------------------------------------------- //
         #region Table_KHSX_LOT
         // Insert
         public (int, string) InsertLOT_khsx(LOT_khsx lotkhsx)

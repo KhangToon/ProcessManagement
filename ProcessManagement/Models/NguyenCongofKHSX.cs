@@ -15,7 +15,7 @@ namespace ProcessManagement.Models
 
         public bool IsUsing { get; set; } = false;
 
-        public void CreateDSachNVLCongDoans(List<NVL> nVLs)
+        public void CreateDSachNVLCongDoans(List<TemLotNVL> nVLs)
         {
             foreach (var nvl in nVLs)
             {
