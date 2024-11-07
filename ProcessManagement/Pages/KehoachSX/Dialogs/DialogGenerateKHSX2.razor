@@ -10,6 +10,19 @@
 @inject NotificationService NotificationService
 @inject SQLServerServices SQLServerServices
 
+<style>
+    .custom-placeholder::placeholder {
+        color: #888888;
+        font-size: 14px;
+        font-style: italic;
+    }
+
+    .rz-numeric.custom-numeric input {
+        font-size: 18px !important;
+        font-weight: 600 !important;
+    }
+</style>
+
 <RadzenStack Gap="0" Style="width: 100%; height: contain; background-color: white" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
     <RadzenStack Style="height: contain; width: 100%; border-radius: 10px; background-color: var(--rz-primary-darker); padding: 10px; padding-bottom: 0" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
         <RadzenText Text="TẠO KẾ HOẠCH SẢN XUẤT" Style="color: white; font-weight: 600; font-size: 18px"></RadzenText>
@@ -78,10 +91,10 @@
                                 <!--Số lượng SX-->
                                 <RadzenStack Gap="0" Style="width: 100%; height: contain; padding-top: 10px; border-top: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                     <RadzenStack Style="width: 50%; height: contain; padding-right: 10px" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
-                                        <RadzenText Text="Số lượng NVL sản xuất" Style="font-size: 16px; font-weight: 600; color: black"></RadzenText>
+                                        <RadzenText Text="Số lượng PO" Style="font-size: 16px; font-weight: 600; color: black"></RadzenText>
                                     </RadzenStack>
                                     <RadzenStack Style="width: 50%; height: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                        <RadzenText Text="@($"{generLot.SLNgVatLieuSX.ToString()} (PCS)")" Style="font-size: 16px; font-weight: 600; width: 100%; height: contain; color: darkblue"></RadzenText>
+                                        <RadzenText Text="@($"{generLot.SLNgVatLieuSX.ToString()} (PCS)")" Style="font-size: 18px; font-weight: 600; width: 100%; height: contain; color: darkblue"></RadzenText>
                                     </RadzenStack>
                                 </RadzenStack>
 
@@ -90,22 +103,20 @@
                                     <RadzenStack Style="width: 50%; height: contain; padding-right: 10px" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
                                         <RadzenText Text="Tỉ lệ lỗi (%)" Style="font-size: 16px; font-weight: 600; color: black"></RadzenText>
                                     </RadzenStack>
-                                    <RadzenStack Style="width: 50%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                        <RadzenText Text="@($"{generLot.TiLeLoi.ToString()} (%)")" Style="font-size: 16px; font-weight: 600; width: 50%; height: contain; color: darkblue"></RadzenText>
+                                    <RadzenStack Gap="15px" Style="width: 50%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                        <RadzenText Text="@($"{generLot.TiLeLoi.ToString()} (%)")" Style="font-size: 18px; font-weight: 600; width: contain; height: contain; color: darkblue"></RadzenText>
 
-                                        <RadzenStack Visible="(generLot.TiLeLoi != 0)" Style="width: 50%; height: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                            <RadzenText Text="@($"{generLot.DinhMuc - generLot.SLNgVatLieuSX} (PCS)")" Style="font-size: 16px; font-weight: 600; color: black"></RadzenText>
-                                        </RadzenStack>
+                                        <RadzenText Visible="(generLot.TiLeLoi != 0)" Text="@($"~ {generLot.DinhMuc - generLot.SLNgVatLieuSX} (PCS)")" Style="font-size: 18px; font-weight: 600; color: black"></RadzenText>
                                     </RadzenStack>
                                 </RadzenStack>
 
                                 <!--Định mức-->
                                 <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                     <RadzenStack Style="width: 50%; height: contain; padding-right: 10px" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
-                                        <RadzenText Text="Định mức sản xuất" Style="font-size: 16px; font-weight: 600; color: black"></RadzenText>
+                                        <RadzenText Text="Số lượng NVL sản xuất" Style="font-size: 16px; font-weight: 600; color: black"></RadzenText>
                                     </RadzenStack>
                                     <RadzenStack Style="width: 50%; height: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                        <RadzenText Text="@($"{generLot.DinhMuc.ToString()} (PCS)")" Style="font-size: 16px; font-weight: 600; width: 100%; height: contain; color: darkblue"></RadzenText>
+                                        <RadzenText Text="@($"{generLot.DinhMuc.ToString()} (PCS)")" Style="font-size: 18px; font-weight: 600; width: 100%; height: contain; color: darkgreen"></RadzenText>
                                     </RadzenStack>
                                 </RadzenStack>
 
@@ -116,9 +127,9 @@
                                             <RadzenText Text="Số lượng NVL mỗi lot (PCS)" Style="font-size: 16px; font-weight: 600; color: black"></RadzenText>
                                         </RadzenStack>
                                         <RadzenStack Style="width: 50%; height: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                            <RadzenNumeric Placeholder="*Nhập số lượng mỗi lot" TValue="int" Min="0" Max="100000"
+                                            <RadzenNumeric class="custom-numeric" Placeholder="*nhập số lượng mỗi lot" TValue="int" Min="0" Max="100000"
                                                            Value="@generLot.SLperLotChan" ValueChanged="@((args) => { generLot.SLperLotChan = args ; generLot.ReCalculate();})"
-                                                           Style="font-size: 16px; height: contain; border-radius: 0; border-width: 1px; width: 100%" />
+                                                           Style="font-size: 18px; height: contain; border-radius: 0; border-width: 1px; width: 100%" />
                                         </RadzenStack>
                                     </RadzenStack>
                                     <!--Số Lot-->
@@ -128,10 +139,10 @@
                                         </RadzenStack>
                                         <RadzenStack Style="width: 100%; height: contain;" Gap="30px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                             <RadzenStack Style="width: contain; height: contain;" Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                <RadzenText Text="@($"{generLot.SLLot.ToString()} (LOT)")" Style="font-size: 16px; font-weight: 600; width: 100%; height: contain; color: darkblue"></RadzenText>
+                                                <RadzenText Text="@($"{generLot.SLLot.ToString()} (LOT)")" Style="font-size: 18px; font-weight: 600; width: 100%; height: contain; color: darkblue"></RadzenText>
                                             </RadzenStack>
                                             <RadzenStack Visible="@(generLot.SLperLotLe > 0)" Style="width: contain; height: contain;" Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                <RadzenText Text="@($"{generLot.SLLotChan} ({generLot.SLperLotChan} PCS) + {generLot.SLLotLe} ({generLot.SLperLotLe} PCS)")" Style="font-size: 16px; font-weight: 600; width: 100%; height: contain; color: black"></RadzenText>
+                                                <RadzenText Text="@($"{generLot.SLLotChan} ({generLot.SLperLotChan} PCS) + {generLot.SLLotLe} ({generLot.SLperLotLe} PCS)")" Style="font-size: 18px; font-weight: 600; width: 100%; height: contain; color: black"></RadzenText>
                                             </RadzenStack>
                                         </RadzenStack>
                                     </RadzenStack>
@@ -143,7 +154,7 @@
                                         </RadzenStack>
                                         <RadzenStack Style="width: 100%; height: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                             <RadzenText Text="@($"{generLot.ListNVLs?.FirstOrDefault()?.MaQuanLy.Value?.ToString()} --- {generLot.ListNVLs?.LastOrDefault()?.MaQuanLy.Value?.ToString()}")"
-                                                        Style="color: red; font-weight: 600; font-size: 16px"></RadzenText>
+                                                        Style="color: red; font-weight: 600; font-size: 18px"></RadzenText>
                                         </RadzenStack>
                                     </RadzenStack>
                                 </RadzenStack>
@@ -603,7 +614,7 @@
                             KHSXID = { Value = khsxid },
                             MaQuanLyLot = { Value = lotnvl.MaQuanLy.Value },
                             NCID = { Value = congdoan.NCID.Value },
-                            SLLOT = {Value = lotnvl.SoLuong.Value}
+                            SLLOT = { Value = lotnvl.SoLuong.Value }
                         };
 
                     dsahLOTkhsx.Add(lot_Khsx);
