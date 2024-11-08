@@ -388,13 +388,44 @@
 
     private async Task CopyToClipboard(string content)
     {
-        await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", content);
-        NotificationService.Notify(new NotificationMessage
+        try
+        {
+            // Try modern Clipboard API first
+            await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", content);
+
+            NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = "Copied!",
+                    Detail = $"{content}",
+                    Duration = 4000
+                });
+        }
+        catch (JSException)
+        {
+            try
             {
-                Severity = NotificationSeverity.Success,
-                Summary = "Copied!",
-                Detail = $"{content}",
-                Duration = 4000
-            });
+                // Fallback method
+                await JSRuntime.InvokeVoidAsync("fallbackCopyToClipboard", content);
+
+                NotificationService.Notify(new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Success,
+                        Summary = "Fallback Copied!",
+                        Detail = $"{content}",
+                        Duration = 4000
+                    });
+            }
+            catch (Exception)
+            {
+                NotificationService.Notify(new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Error,
+                        Summary = "Error",
+                        Detail = "Failed to copy text",
+                        Duration = 3000
+                    });
+            }
+        }
     }
 }

@@ -8,11 +8,13 @@ namespace ProcessManagement.Models.KHSXs
         public Propertyy KHSXLOTID { get; set; } = new() { DBName = DBName.KHSXLOTID, DisplayName = DispName.KHSXLOTID, Type = typeof(int), AlowDatabase = false, AlowDisplay = false, DispDatagrid = false };
         public Propertyy KHSXID { get; set; } = new() { DBName = DBName.KHSXID, DisplayName = DispName.KHSXID, Type = typeof(int), AlowDatabase = true, AlowDisplay = false, DispDatagrid = false };
         public Propertyy NCID { get; set; } = new() { DBName = DBName.NCID, DisplayName = DispName.NCID, Type = typeof(int), AlowDatabase = true, AlowDisplay = false, DispDatagrid = false };
-        public Propertyy SLLOT { get; set; } = new() { DBName = DBName.SLLOT, DisplayName = DispName.SLLOT, Type = typeof(int), AlowDatabase = true, };
         public Propertyy MaQuanLyLot { get; set; } = new() { DBName = DBName.MaQuanLyLot, DisplayName = DispName.MaQuanLyLot, Type = typeof(string), AlowDatabase = true };
-        public Propertyy IsDone { get; set; } = new() { DBName = DBName.IsDone, DisplayName = DispName.IsDone, Type = typeof(int), AlowDatabase = true, };
-        public Propertyy SLOKsubmited { get; set; } = new() { DBName = DBName.SLOKsubmited, DisplayName = DispName.SLOKsubmited, Type = typeof(int), AlowDatabase = true, };
-        public Propertyy SLNGsubmited { get; set; } = new() { DBName = DBName.SLNGsubmited, DisplayName = DispName.SLNGsubmited, Type = typeof(int), AlowDatabase = true, };
+        public Propertyy SLLOT { get; set; } = new() { DBName = DBName.SLLOT, DisplayName = DispName.SLLOT, Type = typeof(int), AlowDatabase = true, };
+        public Propertyy NgayNhapKho { get; set; } = new() { DBName = DBName.NgayNhapKho, DisplayName = DispName.NgayNhapKho, Type = typeof(string), AlowDatabase = true };
+        public Propertyy NgayXuatKho { get; set; } = new() { DBName = DBName.NgayXuatKho, DisplayName = DispName.NgayXuatKho, Type = typeof(string), AlowDatabase = true };
+        public Propertyy IsDone { get; set; } = new() { DBName = DBName.IsDone, DisplayName = DispName.IsDone, Type = typeof(int), AlowDatabase = true, DispDatagrid = false };
+        public Propertyy SLOKsubmited { get; set; } = new() { DBName = DBName.SLOKsubmited, DisplayName = DispName.SLOKsubmited, Type = typeof(int), AlowDatabase = true, DispDatagrid = false };
+        public Propertyy SLNGsubmited { get; set; } = new() { DBName = DBName.SLNGsubmited, DisplayName = DispName.SLNGsubmited, Type = typeof(int), AlowDatabase = true, DispDatagrid = false };
 
 
         public static class DBName
@@ -26,6 +28,8 @@ namespace ProcessManagement.Models.KHSXs
             public const string IsDone = "isdone";
             public const string SLOKsubmited = "sloksubmited";
             public const string SLNGsubmited = "slngsubmited";
+            public const string NgayNhapKho = "ngaynhapkho";
+            public const string NgayXuatKho = "ngayxuatkho";
         }
 
         public static class DispName
@@ -38,6 +42,8 @@ namespace ProcessManagement.Models.KHSXs
             public const string IsDone = "isdone";
             public const string SLOKsubmited = "Đã hoàn thành";
             public const string SLNGsubmited = "Số lượng lỗi";
+            public const string NgayNhapKho = "Ngày nhập kho";
+            public const string NgayXuatKho = "Ngày xuất kho";
         }
 
         public static List<Propertyy> GetClassProperties()

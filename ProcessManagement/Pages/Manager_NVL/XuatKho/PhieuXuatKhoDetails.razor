@@ -320,6 +320,9 @@
     [Parameter]
     public PhieuXuatKho PXK { get; set; } = new();
 
+    [Parameter]
+    public int TargetKHSXID { get; set; } = 0;
+
     private IList<NVLofPhieuXuatKho> DatagridSelectedNVLofPXK = new List<NVLofPhieuXuatKho>();
 
     private NVLofPhieuXuatKho SelectedNVLofPXK = new();
@@ -368,6 +371,8 @@
     {
         lxk.ViTriofNVL.NgLieuInfor = SelectedNVLofPXK.TargetNgLieu;
 
+        PXK.KHSXID.Value = (TargetKHSXID > 0) ? TargetKHSXID : null;
+
         await DialogService.OpenAsync<DialogHandle_LenhXuatKho>(null, new Dictionary<string, object>() { { "LXK", lxk }, { "PXK", PXK } },
         new DialogOptions() { ShowTitle = false, Width = "70%", Height = "contain", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
 
@@ -394,13 +399,45 @@
 
     private async Task CopyToClipboard(string content)
     {
-        await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", content);
-        NotificationService.Notify(new NotificationMessage
+        try
+        {
+            // Try modern Clipboard API first
+            await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", content);
+
+            NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = "Copied!",
+                    Detail = $"{content}",
+                    Duration = 4000
+                });
+        }
+        catch (JSException)
+        {
+            try
             {
-                Severity = NotificationSeverity.Success,
-                Summary = "Copied!",
-                Detail = $"{content}",
-                Duration = 4000
-            });
+                // Fallback method
+                await JSRuntime.InvokeVoidAsync("fallbackCopyToClipboard", content);
+
+                NotificationService.Notify(new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Success,
+                        Summary = "Fallback Copied!",
+                        Detail = $"{content}",
+                        Duration = 4000
+                    });
+            }
+            catch (Exception)
+            {
+                NotificationService.Notify(new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Error,
+                        Summary = "Error",
+                        Detail = "Failed to copy text",
+                        Duration = 3000
+                    });
+            }
+        }
     }
+
 }

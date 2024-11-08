@@ -594,7 +594,9 @@
     {
         Common.SelectedPXKID = PXKofKHSX.PXKID.Value;
 
-        NavigationManager.NavigateTo($"khomanagement?tabindxex={3}");
+        _ = int.TryParse(SelectedKHSX.KHSXID.Value?.ToString(), out int khsxid) ? khsxid : 0;
+
+        NavigationManager.NavigateTo($"khomanagement?tabindxex={3}&khsxid={khsxid}");
     }
 
     private bool isLoadingKHSX = false;
@@ -627,7 +629,7 @@
                 MaQuanLyLOT = SelectNVLcuaCongdoan?.MaQuanLy.Value?.ToString() ?? string.Empty,
             };
 
-        
+
 
         NavigationManager.NavigateTo($"phieu-xac-dinh-cong-doan");
     }

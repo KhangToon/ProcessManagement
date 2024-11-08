@@ -41,7 +41,7 @@
 
         <!--Scan ma phieu xuat kho-->
         <RadzenRow class="rowbackground-style" Gap="10px" Style="height: contain; width: 100%; padding-top: 10px; border-radius: 0; overflow-y: auto; border-top: var(--rz-grid-cell-border);">
-            <RadzenColumn Size="12" SizeMD="4" Style="height: 100%; width: 100%; border-right: var(--rz-grid-cell-border); padding-right: 10px">
+            <RadzenColumn Visible="false" Size="12" SizeMD="4" Style="height: 100%; width: 100%; border-right: var(--rz-grid-cell-border); padding-right: 10px">
                 <RadzenCard Variant="Variant.Flat" Style="height: 100%; width: 100%; padding: 10px;">
                     <RadzenStack Gap="10px" Style="height: contain; width: 100%;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                         <RadzenStack Gap="20px" Style="height: contain; width: 100%; border-radius: 5px; background-color: var(--rz-secondary-lighter); padding: 5px; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
@@ -150,7 +150,7 @@
                 }
                 else
                 {
-                    <RadzenButton Click="@(async () => { await OnConfirmExcuteLenhXuatKho_withLotVitri(scanMaPXK, scanMaViTri, scanMaNVL);})" Style="width: contain;" Icon="arrow_outward" Text="Tiến hành xuất kho" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Size="ButtonSize.Small" Variant="Variant.Flat" />
+                    <RadzenButton Click="@(async () => { await OnConfirmExcuteLenhXuatKho_withLotVitri(PXK.MaPhieuXK.Value?.ToString()?? string.Empty, scanMaViTri, scanMaNVL);})" Style="width: contain;" Icon="arrow_outward" Text="Tiến hành xuất kho" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Size="ButtonSize.Small" Variant="Variant.Flat" />
                 }
             </RadzenStack>
             <RadzenStack Gap="10px" Style="height: 100%; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
@@ -189,7 +189,7 @@
     {
         if (focusIndex == 1)
         {
-            await reftxtMaPXK.FocusAsync();
+            //await reftxtMaPXK.FocusAsync();
         }
         else if (focusIndex == 2)
         {
@@ -313,18 +313,53 @@
         }
     }
 
+    // Update ngaynhapkho/ngayxuatkho cua dsLOTofKHSX
+    private (int, string) UpdateNgayNhapXuatKho_dsLOTofKHSX(object? khsxid, LenhXuatKho targetLXK)
+    {
+        Dictionary<string, object?> parameters = new Dictionary<string, object?>() { { Models.KHSXs.LOT_khsx.DBName.KHSXID, khsxid } };
+        (var resultdslots, string getError) = SQLServerServices.GetListLOT_khsx(parameters);
+
+        if (resultdslots != null && resultdslots.Any())
+        {
+            if (targetLXK != null)
+            {
+                foreach (var lot in resultdslots)
+                {
+                    lot.NgayNhapKho.Value = targetLXK.ViTriofNVL.NgayNhapKho.Value;
+                    lot.NgayXuatKho.Value = targetLXK.NgayXuatKho.Value;
+
+                    (int updatelot, string updateloterr) = SQLServerServices.UpdateLOT_khsx(lot);
+
+                    if (updatelot == -1)
+                    {
+
+                    }
+                }
+
+                return (1, string.Empty);
+            }
+
+            return (-1, "Error");
+
+        }
+        else return (-1, "Danh sách LOT của KHSX không tồn tại!");
+    }
+
+
     private async Task OnConfirmExcuteLenhXuatKho_withLotVitri(string maPXK, string maViTri, string maNVL)
     {
         int soluongxuatfromClient = int.TryParse(LXK.LXKSoLuong.Value?.ToString(), out int lxksl) ? lxksl : 0;
         object? lxkid = LXK.LenhXKID.Value;
 
-        if (string.IsNullOrWhiteSpace(maPXK)) { return; }
-        if (string.IsNullOrWhiteSpace(maViTri)) { return; }
-        if (string.IsNullOrWhiteSpace(maNVL)) { return; }
-        if (soluongxuatfromClient == 0) { return; }
-
         // Load lenh xuat kho by ID
         LenhXuatKho savedLXK = SQLServerServices.GetLenhXuatKhoByID(lxkid);
+
+
+        if (string.IsNullOrWhiteSpace(maPXK) || !string.Equals(maPXK, PXK.MaPhieuXK.Value?.ToString())) { return; }
+        if (string.IsNullOrWhiteSpace(maViTri) || !string.Equals(maViTri, savedLXK.ViTriofNVL.VitriInfor.MaViTri.Value?.ToString())) { return; }
+        if (string.IsNullOrWhiteSpace(maNVL) || !string.Equals(maNVL, savedLXK.ViTriofNVL.NgLieuInfor.TenNVL.Value?.ToString())) { return; }
+        if (soluongxuatfromClient == 0) { return; }
+
 
         if (savedLXK.LenhXKID.Value == null)
         {
@@ -396,6 +431,16 @@
                 return;
             }
 
+            // Update ngaynhap/xuatkho of KHSX
+            _ = int.TryParse(PXK.KHSXID.Value?.ToString(), out int khsxid) ? khsxid : 0;
+
+            if (khsxid > 0)
+            {
+                SQLServerServices.UpdatePhieuXuatKhoInfor(PXK);
+
+                (int updatelotstatus, string errorlot) = UpdateNgayNhapXuatKho_dsLOTofKHSX(khsxid, savedLXK);
+            }
+
             // update status to UI
             LXK.LXKIsDone.Value = 1;
 
@@ -434,15 +479,47 @@
 
     private async Task CopyToClipboard(string content)
     {
-        await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", content);
-        NotificationService.Notify(new NotificationMessage
+        try
+        {
+            // Try modern Clipboard API first
+            await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", content);
+
+            NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = "Copied!",
+                    Detail = $"{content}",
+                    Duration = 4000
+                });
+        }
+        catch (JSException)
+        {
+            try
             {
-                Severity = NotificationSeverity.Success,
-                Summary = "Copied!",
-                Detail = $"{content}",
-                Duration = 4000
-            });
+                // Fallback method
+                await JSRuntime.InvokeVoidAsync("fallbackCopyToClipboard", content);
+
+                NotificationService.Notify(new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Success,
+                        Summary = "Fallback Copied!",
+                        Detail = $"{content}",
+                        Duration = 4000
+                    });
+            }
+            catch (Exception)
+            {
+                NotificationService.Notify(new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Error,
+                        Summary = "Error",
+                        Detail = "Failed to copy text",
+                        Duration = 3000
+                    });
+            }
+        }
     }
+
 
     // Notification
     private void ShowNotification(string message, NotificationSeverity notifytype, double time)

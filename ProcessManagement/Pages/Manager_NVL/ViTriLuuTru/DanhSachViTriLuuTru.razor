@@ -140,7 +140,7 @@
                                         <RadzenText Text="@($"Mã vị trí: ")" Style="font-weight: 600; font-size: 16px; color: black;"></RadzenText>
                                         <RadzenStack Gap="10" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                             <RadzenText Text="@($"{SelectedViTri.MaViTri.Value?.ToString()}")" Style="font-weight: 600; font-size: 18px; color: darkblue;"></RadzenText>
-                                            <RadzenButton Click="@(() => CopyToClipboard(SelectedViTri.MaViTri.Value?.ToString()?? string.Empty))" Icon="content_copy" Style="--rz-icon-size: 18px;" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Light" />
+                                            <RadzenButton Click="@(async() => await CopyToClipboard(SelectedViTri.MaViTri.Value?.ToString()?? string.Empty))" Icon="content_copy" Style="--rz-icon-size: 18px;" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Light" />
                                         </RadzenStack>
                                     </RadzenStack>
                                     <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: contain; padding: 5px; border-radius: 0">
@@ -243,7 +243,7 @@
                                                                 <RadzenStack Visible="@(slhientai > 0)" Style="height: 30px; width: 100%; border-radius: 5px; background-color: var(--rz-success-lighter); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                                     <RadzenText Text="@($"{vitriofNVL.VTNVLSoLuong.Value?.ToString()} ({vitriofNVL.NgLieuInfor.DonViTinh.Value?.ToString()})")" Style="color: darkgreen; font-weight: 600; font-size: 15px"></RadzenText>
                                                                 </RadzenStack>
-                                                                <RadzenStack Visible="@(slhientai <= 0)"Style="height: 30px; width: 100%; border-radius: 5px; padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                <RadzenStack Visible="@(slhientai <= 0)" Style="height: 30px; width: 100%; border-radius: 5px; padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                                     <RadzenText Text="@($"{0}")" Style="color: darkgreen; font-weight: 600; font-size: 15px"></RadzenText>
                                                                 </RadzenStack>
                                                             </RadzenStack>
@@ -314,7 +314,12 @@
                 // Load nguyen lieu infor
                 foreach (var vitriofnvl in vitri.DSachViTriofNVL)
                 {
-                    vitriofnvl.NgLieuInfor = SQLServerServices.GetNguyenVatLieuByID(vitriofnvl.NVLID.Value);
+                    _ = int.TryParse(vitriofnvl.NVLID.Value?.ToString(), out int nvlid) ? nvlid : 0;
+
+                    if ((nvlid) > 0)
+                    {
+                        vitriofnvl.NgLieuInfor = SQLServerServices.GetNguyenVatLieuByID(vitriofnvl.NVLID.Value);
+                    }
                 }
             }
         });
@@ -385,13 +390,56 @@
 
     private async Task CopyToClipboard(string content)
     {
-        await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", content);
-        NotificationService.Notify(new NotificationMessage
+        // await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", content);
+
+        // NotificationService.Notify(new NotificationMessage
+        //     {
+        //         Severity = NotificationSeverity.Success,
+        //         Summary = "Copied!",
+        //         Detail = $"{content}",
+        //         Duration = 4000
+        //     });
+
+        try
+        {
+            // Try modern Clipboard API first
+            await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", content);
+
+            NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = "Copied!",
+                    Detail = $"{content}",
+                    Duration = 4000
+                });
+        }
+        catch (JSException)
+        {
+            try
             {
-                Severity = NotificationSeverity.Success,
-                Summary = "Copied!",
-                Detail = $"{content}",
-                Duration = 4000
-            });
+                // Fallback method
+                await JSRuntime.InvokeVoidAsync("fallbackCopyToClipboard", content);
+
+                NotificationService.Notify(new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Success,
+                        Summary = "Fallback Copied!",
+                        Detail = $"{content}",
+                        Duration = 4000
+                    });
+            }
+            catch (Exception)
+            {
+                NotificationService.Notify(new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Error,
+                        Summary = "Error",
+                        Detail = "Failed to copy text",
+                        Duration = 3000
+                    });
+            }
+        }
     }
+
+    
 }

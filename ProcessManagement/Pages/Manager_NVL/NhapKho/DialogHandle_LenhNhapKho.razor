@@ -41,7 +41,7 @@
 
         <!--Scan ma phieu nhap kho-->
         <RadzenRow class="rowbackground-style" Gap="10px" Style="height: contain; width: 100%; padding-top: 10px; border-radius: 0; overflow-y: auto; border-top: var(--rz-grid-cell-border);">
-            <RadzenColumn Size="12" SizeMD="4" Style="height: 100%; width: 100%; border-right: var(--rz-grid-cell-border); padding-right: 10px">
+            <RadzenColumn Visible="false" Size="12" SizeMD="4" Style="height: 100%; width: 100%; border-right: var(--rz-grid-cell-border); padding-right: 10px">
                 <RadzenCard Variant="Variant.Flat" Style="height: 100%; width: 100%; padding: 10px;">
                     <RadzenStack Gap="10px" Style="height: contain; width: 100%;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                         <RadzenStack Gap="20px" Style="height: contain; width: 100%; border-radius: 5px; background-color: var(--rz-secondary-lighter); padding: 5px; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
@@ -150,7 +150,7 @@
                 }
                 else
                 {
-                    <RadzenButton Text="Tiến hành nhập kho" Click="@(async () => { await OnConfirmExcuteLenhNhapKho_withLotVitri(scanMaPNK, scanMaViTri, scanMaNVL);})" Style="width: contain;" Icon="arrow_outward" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Size="ButtonSize.Small" Variant="Variant.Flat" />
+                    <RadzenButton Text="Tiến hành nhập kho" Click="@(async () => { await OnConfirmExcuteLenhNhapKho_withLotVitri(PNK.MaPhieuNK.Value?.ToString()?? string.Empty, scanMaViTri, scanMaNVL);})" Style="width: contain;" Icon="arrow_outward" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Size="ButtonSize.Small" Variant="Variant.Flat" />
                 }
             </RadzenStack>
             <RadzenStack Gap="10px" Style="height: 100%; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
@@ -183,7 +183,7 @@
     {
         if (focusIndex == 1)
         {
-            await reftxtMaPNK.FocusAsync();
+            //await reftxtMaPNK.FocusAsync();
         }
         else if (focusIndex == 2)
         {
@@ -496,14 +496,45 @@
 
     private async Task CopyToClipboard(string content)
     {
-        await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", content);
-        NotificationService.Notify(new NotificationMessage
+        try
+        {
+            // Try modern Clipboard API first
+            await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", content);
+
+            NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = "Copied!",
+                    Detail = $"{content}",
+                    Duration = 4000
+                });
+        }
+        catch (JSException)
+        {
+            try
             {
-                Severity = NotificationSeverity.Success,
-                Summary = "Copied!",
-                Detail = $"{content}",
-                Duration = 4000
-            });
+                // Fallback method
+                await JSRuntime.InvokeVoidAsync("fallbackCopyToClipboard", content);
+
+                NotificationService.Notify(new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Success,
+                        Summary = "Fallback Copied!",
+                        Detail = $"{content}",
+                        Duration = 4000
+                    });
+            }
+            catch (Exception)
+            {
+                NotificationService.Notify(new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Error,
+                        Summary = "Error",
+                        Detail = "Failed to copy text",
+                        Duration = 3000
+                    });
+            }
+        }
     }
 
     // Notification

@@ -1,5 +1,6 @@
 ﻿@using ProcessManagement.Commons
 @using ProcessManagement.Models.KHO_NVL
+@using ProcessManagement.Models.KHSXs
 @using ProcessManagement.Services.SQLServer
 @using Radzen.Blazor
 @using Radzen
@@ -195,10 +196,10 @@
                                                    Style="--rz-input-font-size: 18px; height: contain; border-width: 1px; width: 100%" />
                                 </RadzenStack>
                                 <RadzenStack Style="width: 15%; height: 35px; padding: 0" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                    <RadzenButton Disabled="@isPXKSaved" Visible="@(!SelectedNVLofPXK.IsEditingSLXKhoALL)" Icon="edit" Click="(() => SelectedNVLofPXK.IsEditingSLXKhoALL = !(SelectedNVLofPXK.IsEditingSLXKhoALL))"
+                                    <RadzenButton Disabled="@(isPXKSaved || CreatedWithKHSX)" Visible="@(!SelectedNVLofPXK.IsEditingSLXKhoALL)" Icon="edit" Click="(() => SelectedNVLofPXK.IsEditingSLXKhoALL = !(SelectedNVLofPXK.IsEditingSLXKhoALL))"
                                                   MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Thay đổi số lượng"))"
                                                   ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 20px; height: 35px; width: 35px" />
-                                    <RadzenButton Disabled="@isPXKSaved" Visible="@(SelectedNVLofPXK.IsEditingSLXKhoALL)" Icon="check" Click="(async () => { await OnSaveSoluongXuatKhoAll(SelectedNVLofPXK);})"
+                                    <RadzenButton Disabled="@(isPXKSaved || CreatedWithKHSX)" Visible="@(SelectedNVLofPXK.IsEditingSLXKhoALL)" Icon="check" Click="(async () => { await OnSaveSoluongXuatKhoAll(SelectedNVLofPXK);})"
                                                   ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 20px; height: 35px; width: 35px" />
 
                                 </RadzenStack>

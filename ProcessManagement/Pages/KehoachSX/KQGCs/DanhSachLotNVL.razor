@@ -33,7 +33,7 @@
 
                 <!--Datagrid-->
                 <RadzenStack Style="height: contain; width: 100%; padding-top: 10px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start">
-                    <RadzenDataGrid class="rz-grid-table-fixed-2" Data="@(DSItems)" TItem="NVLmoiNguyenCong" IsLoading="@isLoading"
+                    <RadzenDataGrid class="rz-grid-table-fixed-2" Data="@(DSItems)" TItem="LOT_khsx" IsLoading="@isLoading"
                                     EmptyText="Danh sách LOT NVL trống." Style="overflow: scroll; width: 100%; height: 100%"
                                     ShowColumnTitleAsTooltip="true" ShowCellDataAsTooltip="true" AllowVirtualization="true"
                                     AllowFiltering="false" FilterMode="FilterMode.Simple" AllowColumnResize="true"
@@ -58,44 +58,73 @@
 
                                 <!--STT-->
                                 <RadzenDataGridColumn Width="50px" Frozen="true" FrozenPosition="FrozenColumnPosition.Left" Filterable="false"
-                                                      TItem="NVLmoiNguyenCong" Title="#"
+                                                      TItem="LOT_khsx" Title="#"
                                                       Property="STT" TextAlign="TextAlign.Center">
                                     <HeaderTemplate>
                                         <span style="font-weight: 600; font-size: 15px; color: white">STT</span>
                                     </HeaderTemplate>
-                                    <Template Context="tdgcrow">
-                                        <span style="font-weight: bold;">@(DSItems.IndexOf(tdgcrow) + 1)</span>
+                                    <Template Context="lotrow">
+                                        <span style="font-weight: bold;">@(DSItems.IndexOf(lotrow) + 1)</span>
+                                    </Template>
+                                    <FooterTemplate>
+                                        <RadzenText Text="TỔNG" Style="color: black; font-size: 18px; height: contain; font-weight: 600;"></RadzenText>
+                                    </FooterTemplate>
+                                </RadzenDataGridColumn>
+
+                                <!--LoaiNVL-->
+                                <RadzenDataGridColumn TItem="LOT_khsx" Title="Loại NVL" MinWidth="100px"
+                                                      Property="loainvl" TextAlign="TextAlign.Center">
+                                    <HeaderTemplate>
+                                        <span style="font-weight: 600; font-size: 15px; color: white;">Loại NVL</span>
+                                    </HeaderTemplate>
+                                    <Template Context="lotrow">
+                                        <RadzenText Text="@($"{TargetKHSX.SanPham?.DanhSachNVLs.FirstOrDefault()?.TargetNgLieu.TenNVL?.Value?.ToString()?? "_"}")" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
+                                    </Template>
+                                </RadzenDataGridColumn>
+
+                                <!--TenSanPham-->
+                                <RadzenDataGridColumn TItem="LOT_khsx" Title="Tên sản phẩm" MinWidth="100px"
+                                                      Property="tensp" TextAlign="TextAlign.Center">
+                                    <HeaderTemplate>
+                                        <span style="font-weight: 600; font-size: 15px; color: white;">Tên sản phẩm</span>
+                                    </HeaderTemplate>
+                                    <Template Context="lotrow">
+                                        <RadzenText Text="@($"{TargetKHSX.SanPham?.SP_TenSanPham.Value?.ToString()?? "_"}")" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
                                     </Template>
                                 </RadzenDataGridColumn>
 
                                 foreach (var column in columns.Where(cl => cl.DispDatagrid == true).ToList())
                                 {
                                     string colName = column.DBName ?? string.Empty;
-                                    string displayName = column.DBName ?? string.Empty;
+                                    string displayName = column.DisplayName ?? string.Empty;
                                     Type? columnType = column.Type;
 
-                                    <RadzenDataGridColumn TItem="NVLmoiNguyenCong" Title="@displayName" MinWidth="100px"
+                                    <RadzenDataGridColumn TItem="LOT_khsx" Title="@displayName" MinWidth="100px"
                                                           Property="@colName" TextAlign="TextAlign.Center">
                                         <HeaderTemplate>
                                             <span style="font-weight: 600; font-size: 15px; color: white;">@displayName</span>
                                         </HeaderTemplate>
-                                        <Template Context="tdgcrow">
+                                        <Template Context="lotrow">
                                             @{
                                                 if (columnType != null && columnType == typeof(DateTime))
                                                 {
-                                                    bool ishaveValueOfday = DateTime.TryParse(tdgcrow.GetPropertyValue(colName)?.ToString(), out DateTime vldate);
+                                                    bool ishaveValueOfday = DateTime.TryParse(lotrow.GetPropertyValue(colName)?.ToString(), out DateTime vldate);
 
                                                     <RadzenText Visible="@ishaveValueOfday" Text="@vldate.ToString(Common.FormatNoTime_yyyddMM)" Style="font-size: 16px; height: contain; color: black; font-weight: 500"></RadzenText>
                                                     <RadzenText Visible="@(!ishaveValueOfday)" Text="@string.Empty" Style="font-size: 16px; height: contain; color: black; font-weight: 500"></RadzenText>
                                                 }
                                                 else
                                                 {
-                                                    string colValue = tdgcrow.GetPropertyValue(colName)?.ToString() ?? "_";
+                                                    string colValue = lotrow.GetPropertyValue(colName)?.ToString() ?? "_";
 
                                                     <RadzenText Text="@($"{colValue}")" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
                                                 }
                                             }
                                         </Template>
+                                        <FooterTemplate>
+                                            <RadzenText Visible="@(colName == LOT_khsx.DBName.SLLOT)" Text="@(DSItems.Sum(item => int.TryParse(item.SLLOT.Value?.ToString(), out int sllot)? sllot : 0).ToString())"
+                                                        Style="color: black; font-size: 18px; height: contain; font-weight: 600;"></RadzenText>
+                                        </FooterTemplate>
                                     </RadzenDataGridColumn>
                                 }
                             }
@@ -112,18 +141,35 @@
     [Parameter]
     public KHSX TargetKHSX { get; set; } = new();
 
-    private IList<NVLmoiNguyenCong>? DatagridSeleted;
-    private NVLmoiNguyenCong SelectedRow = new();
+    private IList<LOT_khsx>? DatagridSeleted;
+    private LOT_khsx SelectedRow = new();
     private bool isLoading = false;
     private string pagingSummaryFormat = "Displaying page {0} of {1} <b>(total {2} records)</b>";
 
-    private List<NVLmoiNguyenCong> DSItems = new();
+    private List<LOT_khsx> DSItems = new();
 
     protected override async Task OnInitializedAsync()
     {
-        DSItems = TargetKHSX.DSachCongDoans.FirstOrDefault()?.DSachNVLCongDoans ?? new();
+        DSItems = LoadDSachLOTofKHSX(TargetKHSX.KHSXID.Value);
 
         await base.OnInitializedAsync();
+    }
+
+    private List<LOT_khsx> LoadDSachLOTofKHSX(object? khsxid)
+    {
+        List<LOT_khsx> dsLots = new();
+
+        Dictionary<string, object?> parameters = new Dictionary<string, object?>() { { LOT_khsx.DBName.KHSXID, khsxid } };
+        (var resultdslots, string getError) = SQLServerServices.GetListLOT_khsx(parameters);
+
+        if (resultdslots != null && resultdslots.Any())
+        {
+            var resultDistinct = resultdslots.DistinctBy(lot => lot.MaQuanLyLot.Value?.ToString()?.Trim()).ToList();
+
+            return resultDistinct;
+        }
+
+        return dsLots;
     }
 
     // protected override async Task OnParametersSetAsync()
@@ -134,7 +180,7 @@
     // }
 
     // Datagrid selected changed event
-    private void OnDatagridSelectChanged(IList<NVLmoiNguyenCong> selected)
+    private void OnDatagridSelectChanged(IList<LOT_khsx> selected)
     {
         DatagridSeleted = selected;
 
@@ -147,7 +193,7 @@
     }
 
     // Datagrid cellrender
-    private void OnCellRender(DataGridCellRenderEventArgs<NVLmoiNguyenCong> args)
+    private void OnCellRender(DataGridCellRenderEventArgs<LOT_khsx> args)
     {
         if (args.Column.Property.Contains("ID"))
         {
@@ -155,8 +201,11 @@
         }
     }
 
-    void HeaderFooterCellRender(DataGridCellRenderEventArgs<NVLmoiNguyenCong> args)
+    void HeaderFooterCellRender(DataGridCellRenderEventArgs<LOT_khsx> args)
     {
-
+        if (args.Column.Property == "STT")
+        {
+            args.Attributes.Add("colspan", 4);
+        }
     }
 }

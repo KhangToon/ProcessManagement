@@ -57,9 +57,6 @@
     };
 }
 
-
-
-
 //@media print {
 //            .table {
 //        border - collapse: collapse;

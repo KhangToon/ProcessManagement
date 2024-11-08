@@ -44,8 +44,8 @@
         <RadzenTabs Style="width: 100%; height: 100%; padding-right: 0" SelectedIndex="@SeletedTabIndex">
             <Tabs>
                 <RadzenTabsItem Text="Kho nguyên liệu">
-                    <RadzenCard Variant="Variant.Flat" Style="height: contain; width: 100%; padding-top: 10px">
-                        <RadzenStack Gap="5" Style="height: contain; width: 100%;">
+                    <RadzenCard Variant="Variant.Flat" Style="height: 100%; width: 100%; padding-top: 10px">
+                        <RadzenStack Gap="5" Style="height: 100%; width: 100%;">
                             <!--Search by maquanly-->
                             <RadzenStack Style="height: contain; width: 100%; padding-bottom: 5px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                 <RadzenStack Style="height: 100%; width: 20%; border-radius: 10px; background-color: var(--rz-success-lighter); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
@@ -126,9 +126,9 @@
                             </RadzenStack>
 
                             <!--Danh sach nguyen lieu trong kho-->
-                            <RadzenRow Gap="10px" Style="height: contain; width: 100%; border-top: var(--rz-grid-cell-border); padding: 0;">
+                            <RadzenRow Gap="10px" Style="height: 100%; width: 100%; border-top: var(--rz-grid-cell-border); padding: 0;">
                                 <!--Column bang danh sach NVL-->
-                                <RadzenColumn Size="12" SizeMD="7" Style="height: contain; width: 100%; padding-top: 5px;">
+                                <RadzenColumn Size="12" SizeMD="7" Style="height: auto; width: 100%; padding-top: 5px;">
                                     <RadzenStack Gap="20px" Style="height: contain; width: 100%; padding-bottom: 5px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                                         <RadzenStack Visible="@(DSNguyenVatLieus != null && DSNguyenVatLieus.Count > 0)" Gap="10px" Style="height: contain; width: contain; padding: 10px; padding-left: 0" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                                             <RadzenText Text="Danh sách nguyên liệu" Style="font-weight: 600; height: contain; width: contain; font-style: italic; color: darkred"></RadzenText>
@@ -153,14 +153,14 @@
                                         <RadzenText Text="Hãy chọn loại nguyên vật liệu" Style="color: red; font-weight: 500; font-size: 16px"></RadzenText>
                                     </RadzenStack>
                                     <!--Table listNVL-->
-                                    <RadzenStack Visible="@(DSNguyenVatLieus != null && DSNguyenVatLieus.Count > 0)" Style="height: 450px; width: 100%; padding-top: 10px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                    <RadzenStack Visible="@(DSNguyenVatLieus != null && DSNguyenVatLieus.Count > 0)" Style="min-height: 450px; height: contain; width: 100%; padding-top: 10px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                         <RadzenDataGrid class="rz-grid-table-fixed-2" Data="@(DSNguyenVatLieus)" TItem="NguyenVatLieu"
-                                                        EmptyText="Danh sách nguyên liệu trống." Style="overflow-x: scroll; width: 100%; height: 100%"
+                                                        EmptyText="Danh sách nguyên liệu trống." Style="overflow-x: scroll; width: 100%; height: contain"
                                                         ShowColumnTitleAsTooltip="true" ShowCellDataAsTooltip="true"
-                                                        AllowFiltering="false" FilterMode="FilterMode.Simple"
+                                                        AllowFiltering="false" FilterMode="FilterMode.Simple" AllowVirtualization="true"
                                                         AllowPaging="true" AllowSorting="false" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
                                                         ShowPagingSummary="true" PagingSummaryFormat="@pagingSummaryFormat" PagerPosition="PagerPosition.Bottom"
-                                                        GridLines="DataGridGridLines.Both" PageSize="10" Density="Density.Default" CellContextMenu="@OnDatagridCellContextMenu"
+                                                        GridLines="DataGridGridLines.Both" Density="Density.Default" CellContextMenu="@OnDatagridCellContextMenu"
                                                         HeaderCellRender="@(args => args.Attributes.Add("style", $"background-color: rgba(58, 71, 77)"))"
                                                         CellRender="@OnCellRender" Value="@DatagridSelected" ValueChanged="@((args) => OnDatagridSelectChanged(args))">
 
@@ -314,15 +314,15 @@
                                     </RadzenStack>
                                 </RadzenColumn>
                                 <!--Column bang thong tin NVL-->
-                                <RadzenColumn Size="12" SizeMD="5" Style="height: contain; width: 100%; padding-top: 10px; padding-left: 10px; border-left: var(--rz-grid-cell-border);">
-                                    <RadzenCard Variant="Variant.Filled" Style="border-radius: 10px; height: 100%; width: 100%; padding-bottom: 5px;">
+                                <RadzenColumn Size="12" SizeMD="5" Style="height: auto; width: 100%; padding-top: 10px; padding-left: 10px; border-left: var(--rz-grid-cell-border);">
+                                    <RadzenCard Variant="Variant.Filled" Style="border-radius: 10px; height: 100%; width: 100%;">
                                         <RadzenStack Orientation="Orientation.Vertical" Gap="5px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: 100%; width: 100%;">
                                             <RadzenStack Orientation="Orientation.Horizontal" Gap="10px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: contain; width: contain; padding: 0px">
                                                 <RadzenText Visible="@(!isEditNVLDetail)" Text="@("Thông tin chi tiết nguyên liệu")" Style="color: black; font-size: 18px; font-weight: 500; height: contain; width: contain"></RadzenText>
                                                 <RadzenText Visible="@isEditNVLDetail" Text="@("Sửa thông tin nguyên liệu")" Style="color: red; font-size: 18px; font-weight: 500; height: contain; width: contain"></RadzenText>
                                                 <RadzenText Text="@($"{SelectedNgVatLieu?.TenNVL.Value?.ToString()}")" Style="color: darkred; font-size: 18px; font-weight: 600; height: contain; width: contain"></RadzenText>
                                             </RadzenStack>
-                                            <RadzenCard Variant="@((isEditNVLDetail)? Variant.Flat : Variant.Outlined)" Style="height: 370px; width: 100%; padding: 5px; padding-right:0; border-radius: 10px; margin-top: 5px;">
+                                            <RadzenCard Variant="@((isEditNVLDetail)? Variant.Flat : Variant.Outlined)" Style="min-height: 370px; height: contain; width: 100%; padding: 5px; padding-right:0; border-radius: 10px; margin-top: 5px;">
                                                 <RadzenStack Style="height: 100%; width: 100%; padding: 10px; padding-right: 0; overflow-y: scroll" Gap="0" Orientation="Orientation.Vertical">
                                                     @if (SelectedNgVatLieu.NVLID.Value != null)
                                                     {
@@ -629,7 +629,7 @@
                 <RadzenTabsItem Text="Kế hoạch xuất kho">
                     <RadzenCard Variant="Variant.Flat" Style="height: 100%; width: 100%; padding: 10px;">
                         <RadzenStack Gap="5" Style="height: 100%; width: 100%;">
-                            <DanhSachPhieuXuatKho></DanhSachPhieuXuatKho>
+                            <DanhSachPhieuXuatKho TargetKHSXID="@TargetKHSXID"></DanhSachPhieuXuatKho>
                         </RadzenStack>
                     </RadzenCard>
                 </RadzenTabsItem>
@@ -649,6 +649,11 @@
     [Parameter]
     [SupplyParameterFromQuery(Name = "tabindxex")]
     public int SeletedTabIndex { get; set; } = 0;
+
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "khsxid")]
+    public int TargetKHSXID { get; set; } = 0;
+
 
     private List<string>? UserRoles;
     private DateTime startSearchDay = DateTime.Today;

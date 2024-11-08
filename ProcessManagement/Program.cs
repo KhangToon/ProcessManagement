@@ -51,7 +51,7 @@ int FindAvailablePort(int startingPort = 5000)
 
 var localIP = GetLocalIPAddress();
 var port = FindAvailablePort();
-var url = $"http://{localIP}:{port}"; 
+var url = $"http://{localIP}:{port}";
 // enable khi deploy - disable khi use local 
 
 

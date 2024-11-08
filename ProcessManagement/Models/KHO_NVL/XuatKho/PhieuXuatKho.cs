@@ -7,6 +7,7 @@ namespace ProcessManagement.Models.KHO_NVL.XuatKho
     {
         public Propertyy PXKID { get; set; } = new() { DBName = Common.PXKID, Type = typeof(int), AlowDatabase = false, AlowDisplay = false, DispDatagrid = false }; // ID
         public Propertyy MaPhieuXK { get; set; } = new() { DBName = Common.MaPhieuXuatKho, Type = typeof(string), AlowDatabase = true };
+        public Propertyy KHSXID { get; set; } = new() { DBName = Common.KHSXID, Type = typeof(int), AlowDatabase = true, AlowDisplay = false, DispDatagrid = false };
         public Propertyy NguoiLapPXK { get; set; } = new() { DBName = Common.NguoiLapPXK, Type = typeof(string), AlowDatabase = true };
         public Propertyy NgayLapPXK { get; set; } = new() { DBName = Common.NgayLapPXK, Type = typeof(DateTime), AlowDatabase = true };
         public Propertyy GhiChuPXK { get; set; } = new() { DBName = Common.GhiChuPXK, Type = typeof(string), AlowDatabase = true };

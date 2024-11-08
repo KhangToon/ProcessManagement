@@ -102,7 +102,7 @@
     <RadzenColumn Size="12" SizeMD="9" Style="height: contain; width: 100%; padding: 10px; border-left: var(--rz-grid-cell-border)">
         <RadzenStack Gap="10px" Style="height: 100%; width: 100%; padding: 0px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
             <RadzenStack Gap="10px" Style="height: 95%; width: 100%; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                <PhieuXuatKhoDetails PXK="SelectedPXK"></PhieuXuatKhoDetails>
+                <PhieuXuatKhoDetails TargetKHSXID="@TargetKHSXID" PXK="SelectedPXK"></PhieuXuatKhoDetails>
             </RadzenStack>
             <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                 <RadzenButton Visible="@(SelectedPXK.PXKID.Value != null)" Style="width: contain; min-width: 120px; height: contain;" Click="@(() => OnDeleteSelectedPhieuXuatKho())" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Xóa phiếu xuất kho"))"
@@ -117,8 +117,11 @@
     private PhieuXuatKho SelectedPXK = new();
     private bool isSearching = false;
 
+    [Parameter]
+    public int TargetKHSXID { get; set; } = 0;
+
     protected override async Task OnInitializedAsync()
-    {   
+    {
         // Registed reload pnk
         if (Common.IsReloadPXK_EventRegistered())
         {
