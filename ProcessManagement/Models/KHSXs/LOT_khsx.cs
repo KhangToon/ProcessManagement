@@ -38,7 +38,7 @@ namespace ProcessManagement.Models.KHSXs
             public const string KHSXID = "Mã KHSX";
             public const string NCID = "Công đoạn";
             public const string MaQuanLyLot = "Mã quản lý LOT";
-            public const string SLLOT = "Tổng";
+            public const string SLLOT = "Số lượng";
             public const string IsDone = "isdone";
             public const string SLOKsubmited = "Đã hoàn thành";
             public const string SLNGsubmited = "Số lượng lỗi";

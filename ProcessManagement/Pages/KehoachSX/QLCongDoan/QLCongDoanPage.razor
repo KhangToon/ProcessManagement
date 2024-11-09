@@ -1,0 +1,325 @@
+﻿@using ProcessManagement.Commons
+@using ProcessManagement.Models
+@using ProcessManagement.Models.KHSXs
+@using ProcessManagement.Services.SQLServer
+@using Radzen.Blazor
+@using Radzen
+
+@inject NotificationService NotificationService
+@inject DialogService DialogService
+@inject SQLServerServices SQLServerServices
+
+<style>
+    .rz-grid-table {
+        width: unset;
+    }
+</style>
+
+<RadzenStack Gap="5" Style="height: 100%; width: 100%;">
+    <!--Header-->
+    <RadzenStack Style="width: 100%; padding-bottom: 5px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+        <RadzenStack Style="height: contain; width: 100%; background-color: var(--rz-success-lighter); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+            <RadzenText Text="QUẢN LÝ CÔNG ĐOẠN" Style="color: green; font-weight: 600; font-size: 20px"></RadzenText>
+        </RadzenStack>
+    </RadzenStack>
+
+    <!--Body-->
+    <!--Datagrid-->
+    <RadzenDataGrid class="rz-grid-table" Data="@(DSItems)" TItem="LOT_khsx" IsLoading="@isLoading"
+                    EmptyText="Danh sách LOT NVL trống." Style="overflow: scroll; max-width: 100%; max-height: 700px"
+                    ShowColumnTitleAsTooltip="true" ShowCellDataAsTooltip="true"
+                    AllowFiltering="false" FilterMode="FilterMode.Simple" AllowColumnResize=true AllowVirtualization=true
+                    AllowPaging="false" AllowSorting="false" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                    ShowPagingSummary="true" PagingSummaryFormat="@pagingSummaryFormat" PagerPosition="PagerPosition.Bottom"
+                    GridLines="DataGridGridLines.Both" Density="Density.Default"
+                    HeaderCellRender="@(args => {args.Attributes.Add("style", $"background-color: rgba(58, 71, 77); padding-left: 10px; padding-right: 10px");})"
+                    CellRender="@OnCellRender" FooterCellRender="@HeaderFooterCellRender" Value="@DatagridSeleted" ValueChanged="@((args) => OnDatagridSelectChanged(args))">
+
+        <HeaderTemplate>
+            <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                <!--Button Reload-->
+                <RadzenButton Text="Reload" Style="border-radius: 20px; min-width: 100px;" Click="@(async() => { await LoadDSachLOTofKHSX(TargetKHSX.KHSXID.Value, 300); })"
+                              IsBusy="@isLoading" BusyText=" Loading..." Icon="autorenew" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />
+            </RadzenStack>
+        </HeaderTemplate>
+        <Columns>
+            @if (DSItems.Count > 0)
+            {
+                List<Propertyy> columns = DSItems.FirstOrDefault()?.GetPropertiesValues().Where(pro => pro.AlowDisplay == true).ToList() ?? new();
+
+                <!--STT-->
+                <RadzenDataGridColumn Width="40px" Frozen="true"
+                                      TItem="LOT_khsx" Title="STT"
+                                      Property="STT" TextAlign="TextAlign.Center">
+                    <HeaderTemplate>
+                        <span style="font-weight: 600; font-size: 15px; color: white">STT</span>
+                    </HeaderTemplate>
+                    <Template Context="lotrow">
+                        <span style="font-weight: bold;">@(DSItems.IndexOf(lotrow) + 1)</span>
+                    </Template>
+                    <FooterTemplate>
+                        <RadzenText Text="TOTAL" Style="color: black; font-size: 18px; height: contain; font-weight: 600;"></RadzenText>
+                    </FooterTemplate>
+                </RadzenDataGridColumn>
+
+                <!--MaSP-->
+                <RadzenDataGridColumn Width="90px" Frozen="true" TItem="LOT_khsx" Title="Mã SP"
+                                      Property="masp" TextAlign="TextAlign.Center">
+                    <HeaderTemplate>
+                        <span style="font-weight: 600; font-size: 15px; color: white;">Mã SP</span>
+                    </HeaderTemplate>
+                    <Template Context="lotrow">
+                        <RadzenText Text="@($"{TargetKHSX.SanPham?.SP_MaSP?.Value?.ToString()?? "_"}")" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
+                    </Template>
+                </RadzenDataGridColumn>
+
+                <!--MaQuanLy-->
+                <RadzenDataGridColumn Width="150px" TItem="LOT_khsx" Title="Mã quản lý" Frozen="true"
+                                      Property="maquanly" TextAlign="TextAlign.Center">
+                    <HeaderTemplate>
+                        <span style="font-weight: 600; font-size: 15px; color: white;">Mã quản lý</span>
+                    </HeaderTemplate>
+                    <Template Context="lotrow">
+                        <RadzenText Text="@($"{lotrow.MaQuanLyLot.Value?.ToString()?? "_"}")" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
+                    </Template>
+                </RadzenDataGridColumn>
+
+                <!--SoLuong-->
+                <RadzenDataGridColumn Width="60px" Frozen="true" TItem="LOT_khsx" Title="Số lượng"
+                                      Property="soluong" TextAlign="TextAlign.Center">
+                    <HeaderTemplate>
+                        <span style="font-weight: 600; font-size: 15px; color: white;">Số lượng</span>
+                    </HeaderTemplate>
+                    <Template Context="lotrow">
+                        <RadzenText Text="@($"{lotrow.SLLOT.Value?.ToString()?? "_"}")" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
+                    </Template>
+                    <FooterTemplate>
+                        <RadzenText Text="@((DSItems.Sum(lot => int.TryParse(lot.SLLOT.Value?.ToString(), out int numperlot)? numperlot : 0).ToString()))" Style="color: black; font-size: 18px; height: contain; font-weight: 600;"></RadzenText>
+                    </FooterTemplate>
+                </RadzenDataGridColumn>
+
+
+
+                <RadzenDataGridColumn Resizable=true TItem="LOT_khsx" Title="Tiện phi"
+                                      Property="tienphi" TextAlign="TextAlign.Center">
+                    <HeaderTemplate>
+                        <span style="font-weight: 600; font-size: 15px; color: white;">Tiện phi</span>
+                    </HeaderTemplate>
+                    <Columns>
+                        <RadzenDataGridColumn Resizable=true TItem="LOT_khsx" Title="Công đoạn"
+                                              TextAlign="TextAlign.Center">
+                            <HeaderTemplate>
+                                <span style="font-weight: 600; font-size: 15px; color: white;">Công đoạn</span>
+                            </HeaderTemplate>
+                            <Template Context="lotrow">
+                                <RadzenText Text="_" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
+                            </Template>
+                        </RadzenDataGridColumn>
+
+                        <RadzenDataGridColumn Resizable=true TItem="LOT_khsx" Title="Ca"
+                                              TextAlign="TextAlign.Center">
+                            <HeaderTemplate>
+                                <span style="font-weight: 600; font-size: 15px; color: white;">Ca</span>
+                            </HeaderTemplate>
+                            <Template Context="lotrow">
+                                <RadzenText Text="_" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
+                            </Template>
+                        </RadzenDataGridColumn>
+
+                        <RadzenDataGridColumn Resizable=true TItem="LOT_khsx" Title="Ngày gia công"
+                                              TextAlign="TextAlign.Center">
+                            <HeaderTemplate>
+                                <span style="font-weight: 600; font-size: 15px; color: white;">Ngày gia công</span>
+                            </HeaderTemplate>
+                            <Template Context="lotrow">
+                                <RadzenText Text="_" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
+                            </Template>
+                        </RadzenDataGridColumn>
+
+                        <RadzenDataGridColumn Resizable=true TItem="LOT_khsx" Title="Nhân viên"
+                                              TextAlign="TextAlign.Center">
+                            <HeaderTemplate>
+                                <span style="font-weight: 600; font-size: 15px; color: white;">Nhân viên</span>
+                            </HeaderTemplate>
+                            <Template Context="lotrow">
+                                <RadzenText Text="_" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
+                            </Template>
+                        </RadzenDataGridColumn>
+
+                        <RadzenDataGridColumn Resizable=true TItem="LOT_khsx" Title="OK"
+                                              TextAlign="TextAlign.Center">
+                            <HeaderTemplate>
+                                <span style="font-weight: 600; font-size: 15px; color: white;">OK</span>
+                            </HeaderTemplate>
+                            <Template Context="lotrow">
+                                <RadzenText Text="_" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
+                            </Template>
+                        </RadzenDataGridColumn>
+
+                        <RadzenDataGridColumn Resizable=true TItem="LOT_khsx" Title="NG"
+                                              TextAlign="TextAlign.Center">
+                            <HeaderTemplate>
+                                <span style="font-weight: 600; font-size: 15px; color: white;">NG</span>
+                            </HeaderTemplate>
+                            <Template Context="lotrow">
+                                <RadzenText Text="_" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
+                            </Template>
+                        </RadzenDataGridColumn>
+
+                    </Columns>
+                </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn Resizable=true TItem="LOT_khsx" Title="Khoan lỗ"
+                                      Property="khoanlo" TextAlign="TextAlign.Center">
+                    <HeaderTemplate>
+                        <span style="font-weight: 600; font-size: 15px; color: white;">Khoan lỗ</span>
+                    </HeaderTemplate>
+                    <Columns>
+                        <RadzenDataGridColumn Resizable=true TItem="LOT_khsx" Title="Công đoạn"
+                                              TextAlign="TextAlign.Center">
+                            <HeaderTemplate>
+                                <span style="font-weight: 600; font-size: 15px; color: white;">Công đoạn</span>
+                            </HeaderTemplate>
+                            <Template Context="lotrow">
+                                <RadzenText Text="_" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
+                            </Template>
+                        </RadzenDataGridColumn>
+
+                        <RadzenDataGridColumn Resizable=true TItem="LOT_khsx" Title="Ca"
+                                              TextAlign="TextAlign.Center">
+                            <HeaderTemplate>
+                                <span style="font-weight: 600; font-size: 15px; color: white;">Ca</span>
+                            </HeaderTemplate>
+                            <Template Context="lotrow">
+                                <RadzenText Text="_" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
+                            </Template>
+                        </RadzenDataGridColumn>
+
+                        <RadzenDataGridColumn Resizable=true TItem="LOT_khsx" Title="Ngày gia công"
+                                              TextAlign="TextAlign.Center">
+                            <HeaderTemplate>
+                                <span style="font-weight: 600; font-size: 15px; color: white;">Ngày gia công</span>
+                            </HeaderTemplate>
+                            <Template Context="lotrow">
+                                <RadzenText Text="_" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
+                            </Template>
+                        </RadzenDataGridColumn>
+
+                        <RadzenDataGridColumn Resizable=true TItem="LOT_khsx" Title="Nhân viên"
+                                              TextAlign="TextAlign.Center">
+                            <HeaderTemplate>
+                                <span style="font-weight: 600; font-size: 15px; color: white;">Nhân viên</span>
+                            </HeaderTemplate>
+                            <Template Context="lotrow">
+                                <RadzenText Text="_" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
+                            </Template>
+                        </RadzenDataGridColumn>
+
+                        <RadzenDataGridColumn Resizable=true TItem="LOT_khsx" Title="OK"
+                                              TextAlign="TextAlign.Center">
+                            <HeaderTemplate>
+                                <span style="font-weight: 600; font-size: 15px; color: white;">OK</span>
+                            </HeaderTemplate>
+                            <Template Context="lotrow">
+                                <RadzenText Text="_" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
+                            </Template>
+                        </RadzenDataGridColumn>
+
+                        <RadzenDataGridColumn Resizable=true TItem="LOT_khsx" Title="NG"
+                                              TextAlign="TextAlign.Center">
+                            <HeaderTemplate>
+                                <span style="font-weight: 600; font-size: 15px; color: white;">NG</span>
+                            </HeaderTemplate>
+                            <Template Context="lotrow">
+                                <RadzenText Text="_" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
+                            </Template>
+                        </RadzenDataGridColumn>
+
+                    </Columns>
+                </RadzenDataGridColumn>
+
+
+            }
+        </Columns>
+    </RadzenDataGrid>
+
+
+</RadzenStack>
+
+@code {
+    [Parameter]
+    public KHSX TargetKHSX { get; set; } = new();
+
+    private IList<LOT_khsx>? DatagridSeleted;
+    private LOT_khsx SelectedRow = new();
+    private bool isLoading = false;
+    private string pagingSummaryFormat = "Displaying page {0} of {1} <b>(total {2} records)</b>";
+
+    private List<LOT_khsx> DSItems = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDSachLOTofKHSX(TargetKHSX.KHSXID.Value, 0);
+
+        await base.OnInitializedAsync();
+    }
+
+    private async Task LoadDSachLOTofKHSX(object? khsxid, int delay)
+    {
+        await Task.Run(async () =>
+        {
+            if (isLoading == false)
+            {
+                isLoading = true;
+
+                List<LOT_khsx> dsLots = new();
+
+                Dictionary<string, object?> parameters = new Dictionary<string, object?>() { { LOT_khsx.DBName.KHSXID, khsxid } };
+                (var resultdslots, string getError) = SQLServerServices.GetListLOT_khsx(parameters);
+
+                if (resultdslots != null && resultdslots.Any())
+                {
+                    var resultDistinct = resultdslots.DistinctBy(lot => lot.MaQuanLyLot.Value?.ToString()?.Trim()).ToList();
+
+                    dsLots = resultDistinct;
+                }
+
+                await Task.Delay(delay);
+
+                DSItems = dsLots;
+
+                isLoading = false;
+            }
+        });
+    }
+
+    // Datagrid selected changed event
+    private void OnDatagridSelectChanged(IList<LOT_khsx> selected)
+    {
+        DatagridSeleted = selected;
+
+        var fistItemSelected = DatagridSeleted.FirstOrDefault();
+
+        if (fistItemSelected != null)
+        {
+            SelectedRow = fistItemSelected;
+        }
+    }
+
+    // Datagrid cellrender
+    private void OnCellRender(DataGridCellRenderEventArgs<LOT_khsx> args)
+    {
+        if (args.Column.Title.Contains("ID"))
+        {
+            args.Attributes.Add("style", $"font-weight: bold;");
+        }
+    }
+
+    void HeaderFooterCellRender(DataGridCellRenderEventArgs<LOT_khsx> args)
+    {
+        if (args.Column.Title == "STT")
+        {
+            args.Attributes.Add("colspan", 3);
+        }
+    }
+}
