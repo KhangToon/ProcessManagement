@@ -40,6 +40,14 @@
                 <RadzenButton Icon="search" ButtonStyle="ButtonStyle.Primary" Style="border-radius: 20px;" />
                 <RadzenButton Style="border-radius: 20px;" Icon="autorenew" ButtonStyle="ButtonStyle.Primary" />
             </RadzenStack>
+            <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" Style="height: contain; width: contain; padding-right: 20px;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                <!--Tai danh sach KHSX-->
+                <RadzenButton Click="@(() => LoadDanhSachKHSX())" Icon="list" Text="Danh sách KHSX" Size="ButtonSize.Small" Variant="Variant.Filled"
+                              Style="height: 100%; width: contain; font-size: 14px; background-color: Highlight " />
+                <!--Tao moi ke hoach san xuat-->
+                <RadzenButton Click="@(() => AddNewKehoachSX())" Icon="add" Text="Thêm KHSX" Size="ButtonSize.Small" Variant="Variant.Filled"
+                              Style="height: 100%; width: contain; font-size: 14px; background-color: Highlight " />
+            </RadzenStack>
         </RadzenStack>
 
         <RadzenStack Orientation="Orientation.Vertical" Gap="20px" Style="height: contain; width: 100%; padding: 0px;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
@@ -237,5 +245,34 @@
     {
         await DialogService.OpenAsync<DialogDetailKHSX>(null, new Dictionary<string, object>() { { "SelectKHSX", seletedkhsx } },
         new DialogOptions() { Width = "80%", Height = "contain", Resizable = false, Draggable = true, ShowTitle = false, ShowClose = false, Style = "background-color: while; border-radius: 0px; padding: 0px" });
+    }
+
+    // Load danh sach ke hoach san xuat
+    private async Task LoadDanhSachKHSX()
+    {
+        KHSX selectKHSX = await DialogService.OpenAsync<DialogDSachKHSX>(null, null,
+        new DialogOptions() { Width = "70%", Height = "90%", Resizable = false, Draggable = true, ShowTitle = false, ShowClose = false, Style = "background-color: while; border-radius: 0px; padding: 0px" });
+    }
+
+    // Them ke hoach san xuat
+    private async Task AddNewKehoachSX()
+    {
+        KHSX newKHSX = await DialogService.OpenAsync<DialogGenerateKHSX>(null, null,
+        new DialogOptions() { Width = "90%", Height = "contain", Resizable = false, Draggable = true, ShowTitle = false, ShowClose = false, Style = "background-color: while; border-radius: 0px; padding: 0px" });
+
+        if (newKHSX != null)
+        {
+            await OnGetListKHSXs();
+
+            if (DSKHSXs.Any())
+            {
+                if (selectKHSXID != null)
+                {
+                    SelectedKHSX = DSKHSXs.FirstOrDefault(x => object.Equals(x.KHSXID.Value, selectKHSXID)) ?? new();
+                }
+                else SelectedKHSX = DSKHSXs.FirstOrDefault() ?? new();
+
+            }
+        }
     }
 }

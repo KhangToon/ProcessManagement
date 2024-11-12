@@ -1,5 +1,6 @@
 ﻿@using ProcessManagement.Commons
 @using ProcessManagement.Models.KHO_NVL
+@using ProcessManagement.Models.KHO_NVL.XuatKho
 @using ProcessManagement.Pages.Manager_NVL.Dialogs
 @using ProcessManagement.Pages.Manager_NguyenCong.Dialogs
 @using ProcessManagement.Pages.Manager_SanPham.Dialogs
@@ -11,6 +12,7 @@
 @inject DialogService DialogService
 @inject NotificationService NotificationService
 @inject SQLServerServices SQLServerServices
+@inject NavigationManager NavigationManager
 
 <RadzenStack Gap="0" Style="width: 100%; height: contain; background-color: white" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
     <RadzenRow Style="width: 100%;">
@@ -111,6 +113,33 @@
                                                     Style="color: darkred; font-weight: 600; font-size: 16px"></RadzenText>
                                     </RadzenStack>
                                 </RadzenStack>
+                            </RadzenStack>
+                            <RadzenStack Orientation="Orientation.Horizontal" Style="height: contain; width: 100%; padding: 10px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                @{
+                                    <!--Chua tao phieu xuat kho-->
+                                    <RadzenStack Style="height: contain; width: contain; padding: 0px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                        <RadzenAlert Visible="@(PXKofKHSX.PXKID.Value == null)" Text="Chưa tạo phiếu xuất kho NVL cho KHSX" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; padding-right: 10px; margin: 0" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                                    </RadzenStack>
+                                    <!--Chua tao phieu xuat kho-->
+                                    <RadzenButton Visible="@(PXKofKHSX.PXKID.Value == null)" Click="OnOpenDialogCreatePhieuXuatKho" Icon="upload" Text="Tạo phiếu xuất kho NVL" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
+                                                  Style="height: contain; width: contain; font-size: 14px;" />
+
+                                    <!--Da tao phieu xuat kho/ Da chi dinh vi tri NVL/ Chua hoan thanh xuat kho-->
+                                    <RadzenStack Style="height: contain; width: contain; padding: 0px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                        <RadzenAlert Visible="@(PXKofKHSX.PXKID.Value != null && PXKofKHSX.IsChiDinhDuSLXuatKho && !PXKofKHSX.IsPXKDoneXuatKho)" Text="Chưa hoàn thành xuất kho NVL cho KHSX" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; padding-right: 10px; margin: 0" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                                    </RadzenStack>
+                                    <!--Da tao phieu xuat kho/ Da chi dinh vi tri NVL/ Chua hoan thanh xuat kho-->
+                                    <RadzenButton Visible="@(PXKofKHSX.PXKID.Value != null && PXKofKHSX.IsChiDinhDuSLXuatKho && !PXKofKHSX.IsPXKDoneXuatKho)" Click="NavigateToHandlePhieuXuatKho" Text="@($"Tiến hành xuất kho NVL ({PXKofKHSX.MaPhieuXK.Value?.ToString()})")" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
+                                                  Style="height: contain; width: contain; font-size: 14px;" />
+
+                                    <!--Da tao phieu xuat kho/ Da chi dinh vi tri NVL/ Da hoan thanh xuat kho-->
+                                    <RadzenStack Style="height: contain; width: contain; padding: 0px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                        <RadzenAlert Visible="@(PXKofKHSX.PXKID.Value != null && PXKofKHSX.IsChiDinhDuSLXuatKho && PXKofKHSX.IsPXKDoneXuatKho)" Text="Đã xuất kho NVL cho kế hoạch sản xuất" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; padding-right: 10px; margin: 0" AlertStyle="AlertStyle.Success" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                                    </RadzenStack>
+                                    <!--Da tao phieu xuat kho/ Da tao phieu xuat kho/ Da hoan thanh xuat kho -->
+                                    <RadzenButton Visible="@(PXKofKHSX.PXKID.Value != null && PXKofKHSX.IsChiDinhDuSLXuatKho && PXKofKHSX.IsPXKDoneXuatKho)" Click="@(() => OnOpenDialogXemPhieuXuatKho("Xem phiếu xuất kho NVL"))" Text="Xem phiếu xuất kho NVL" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
+                                                  Style="height: contain; width: contain; font-size: 14px;" />
+                                }
                             </RadzenStack>
                             <!--Danh sach nguyen lieu da chon-->
                             <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style=" height: contain; width: 100%; padding: 0px;" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start">
@@ -315,6 +344,31 @@
     [Parameter]
     public bool IsNotDialog { get; set; } = false;
 
+    private PhieuXuatKho PXKofKHSX = new();
+
+    protected async override Task OnParametersSetAsync()
+    {
+        if (PXKofKHSX.PXKID.Value == null)
+        {
+            PXKofKHSX = SQLServerServices.GetPhieuXuatKhoByID(SelectKHSX?.PXKID.Value);
+        }
+
+        await base.OnParametersSetAsync();
+    }
+
+    private void ReloadCurrentKHSX(object? currentKHSXid)
+    {
+        SelectKHSX = SQLServerServices.GetKHSXbyID(currentKHSXid);
+
+        if (SelectKHSX?.KHSXID.Value != null)
+        {
+            // Kiem tra trang thai lay NVL cua KHSX
+            // Load thong tin phieu xuat kho cua KHSX
+            PXKofKHSX = SQLServerServices.GetPhieuXuatKhoByID(SelectKHSX.PXKID.Value);
+        }
+        else SelectKHSX = new();
+    }
+
     private async Task OnOpenDialogXemChitietNVL(NguyenVatLieu nguyenVatLieu)
     {
         await DialogService.OpenAsync<DialogDetailsNguyenVatLieu>(null, new Dictionary<string, object>() { { "NgVLieu", nguyenVatLieu } },
@@ -328,5 +382,37 @@
         var nguyenvatlieu = SQLServerServices.GetNguyenVatLieuByID(nvlid);
 
         return nguyenvatlieu;
+    }
+
+    // Tao phieu xuat kho dialog
+    private async Task OnOpenDialogCreatePhieuXuatKho()
+    {
+        if (SelectKHSX?.DSachNVLofKHSXs.Count > 0)
+        {
+            await DialogService.OpenAsync<Manager_NVL.XuatKho.DialogCreate_PhieuXuatKho>(null, new Dictionary<string, object>() { { "DSNVLofKHSX", SelectKHSX.DSachNVLofKHSXs }, { "CreatedWithKHSX", true }, { "KHSX", SelectKHSX } },
+            new DialogOptions() { ShowTitle = false, Width = "85%", Height = "100%", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
+
+            ReloadCurrentKHSX(SelectKHSX.KHSXID.Value);
+        }
+    }
+
+    // Xem phieu xuat kho dialog
+    private async Task OnOpenDialogXemPhieuXuatKho(string tilte)
+    {
+        if (SelectKHSX?.DSachNVLofKHSXs.Count > 0)
+        {
+            await DialogService.OpenAsync<Manager_NVL.XuatKho.PhieuXuatKhoDetails>(tilte, new Dictionary<string, object>() { { "PXK", PXKofKHSX } },
+            new DialogOptions() { ShowTitle = true, Width = "70%", Height = "contain", Resizable = true, Draggable = true, ShowClose = true, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
+        }
+    }
+
+    // Navigate to handlephieuxuatkho page
+    private void NavigateToHandlePhieuXuatKho()
+    {
+        _ = int.TryParse(SelectKHSX?.KHSXID.Value?.ToString(), out int khsxid) ? khsxid : 0;
+
+        Common.SelectedPXKID = SelectKHSX?.PXKID.Value;
+
+        NavigationManager.NavigateTo($"khomanagement?tabindxex={3}&khsxid={khsxid}");
     }
 }

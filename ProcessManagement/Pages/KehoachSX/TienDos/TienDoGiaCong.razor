@@ -21,6 +21,12 @@
 @inject SQLServerServices SQLServerServices
 @inject NavigationManager NavigationManager
 
+<style>
+    .rz-grid-table {
+        width: unset;
+    }
+</style>
+
 <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style=" height: 100%; width: 100%; padding: 0px; padding-bottom: 10px " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
     <!--Header-->
     <RadzenStack Gap="30px" Style="height: contain; width: 100%; background-color: var(--rz-success-lighter); padding: 10px; padding-top: 15px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
@@ -229,14 +235,14 @@
             <RadzenStack Gap="0px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start" Style="height: 100%; width: 100%;">
                 <!--Datagrid-->
                 <RadzenStack Style="height: contain; width: 100%; padding-top: 10px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start">
-                    <RadzenDataGrid class="rz-grid-table-fixed-2" Data="@(TargetTienDoGC.DSachTienDoRows)" TItem="TienDoGCRow" IsLoading="@isLoading"
-                                    EmptyText="Danh sách theo dõi tiến độ gia công trống." Style="overflow: scroll; width: 100%; height: 100%"
+                    <RadzenDataGrid class="rz-grid-table" Data="@(TargetTienDoGC.DSachTienDoRows)" TItem="TienDoGCRow" IsLoading="@isLoading"
+                                    EmptyText="Danh sách theo dõi tiến độ gia công trống." Style="overflow: scroll; min-width: 100%; height: 100%"
                                     ShowColumnTitleAsTooltip="true" ShowCellDataAsTooltip="true" AllowVirtualization="true"
                                     AllowFiltering="false" FilterMode="FilterMode.Simple" AllowColumnResize="true"
                                     AllowPaging="false" AllowSorting="false" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
                                     ShowPagingSummary="true" PagingSummaryFormat="@pagingSummaryFormat" PagerPosition="PagerPosition.Bottom"
-                                    GridLines="DataGridGridLines.Both" Density="Density.Default"
-                                    HeaderCellRender="@(args => {args.Attributes.Add("style", $"background-color: rgba(58, 71, 77);"); args.Attributes.Add("colspan", 1);})"
+                                    GridLines="DataGridGridLines.Both" Density="Density.Default" ColumnWidth="150px"
+                                    HeaderCellRender="@(args => {args.Attributes.Add("style", $"background-color: rgba(58, 71, 77); padding-left: 10px; padding-right: 10px"); args.Attributes.Add("colspan", 1);})"
                                     CellRender="@OnCellRender" FooterCellRender="@HeaderFooterCellRender" Value="@DatagridSeleted" ValueChanged="@((args) => OnDatagridSelectChanged(args))">
 
                         <HeaderTemplate>
@@ -280,7 +286,7 @@
                                     string displayName = column.DisplayName ?? string.Empty;
                                     Type? columnType = column.Type;
 
-                                    <RadzenDataGridColumn TItem="TienDoGCRow" Title="@displayName" MinWidth="100px"
+                                    <RadzenDataGridColumn TItem="TienDoGCRow" Title="@displayName"
                                                           Property="@colName" TextAlign="TextAlign.Center">
                                         <HeaderTemplate>
                                             <span style="font-weight: 600; font-size: 15px; color: white;">@displayName</span>
