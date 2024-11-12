@@ -33,6 +33,7 @@ namespace ProcessManagement.Models
         public bool IsDoneKHSX { get; set; } = false;
 
         public bool IsCollapsed { get; set; } = true; // Dung cho PageDSachKHSX
+
         public KHSX()
         {
 

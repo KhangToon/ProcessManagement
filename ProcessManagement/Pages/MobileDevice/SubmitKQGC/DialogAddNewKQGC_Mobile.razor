@@ -219,16 +219,34 @@
                                                     }
 
                                                     <RadzenStack Style="width: 85%;">
-                                                        <RadzenNumeric class="custom-numeric" TValue="int" Placeholder="0" Step="1"
+                                                        <RadzenNumeric Disabled="@(property.DBName == KetQuaGC.KQGCDBName.SLNG)" class="custom-numeric" TValue="int" Placeholder="0" Step="1"
                                                                        Min="0" Max="max"
                                                                        Value="@((int.TryParse(property.Value?.ToString(), out int num)? num : 0))"
                                                                        ValueChanged="@(async (args) =>
                                                                                {
                                                                                     property.Value = args;
 
-                                                                                    if (property.DBName == KetQuaGC.KQGCDBName.SLNG)
+                                                                                    if (property.DBName == KetQuaGC.KQGCDBName.SLOK)
+                                                                                    {
+                                                                                        _ = int.TryParse(newKetQuaGC.SLperLOT.Value?.ToString(), out int total) ? total : 0;
+                                                                                        _ = int.TryParse(newKetQuaGC.SLOK.Value?.ToString(), out int slok) ? slok : 0;
+                                                                                        int slng = total - slok;
+
+                                                                                        int maxng = (slng > 0 && slok > 0) ? slng : 0;
+
+                                                                                        newKetQuaGC.SLNG.Value = maxng;
+
+                                                                                        newKetQuaGC.NGIDs.IsDisable = (maxng == 0);
+                                                                                        newKetQuaGC.NGIDs.Value = null;
+                                                                                        NGTypesSelected = null;
+
+                                                                                        await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.SLNG);
+                                                                                        await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.NGIDs);
+                                                                                    }
+                                                                                    else if (property.DBName == KetQuaGC.KQGCDBName.SLNG)
                                                                                     {
                                                                                         newKetQuaGC.NGIDs.IsDisable = property.Value.Equals(0);
+                                                                                        newKetQuaGC.NGIDs.Value = null;
                                                                                         NGTypesSelected = null;
                                                                                     }
 
@@ -299,7 +317,7 @@
     private List<MayMoc> dsachMayMocs = new();
     private List<NhanVien> dsachNhanViens = new();
     private List<NGType> dsachNGTypes = new();
-    private List<LOT_khsx> dsachMaQLyLots = new();
+    private List<KHSX_LOT> dsachMaQLyLots = new();
 
     // Selected item changed
     private IEnumerable<KeyValuePair<string, string>>? NhanviensSelected;
@@ -394,7 +412,7 @@
         }
         else if (colName == KetQuaGC.KQGCDBName.MaQuanLyLot)
         {
-            Dictionary<string, object?> par = new Dictionary<string, object?>() { { LOT_khsx.DBName.KHSXID, KHSXID } };
+            Dictionary<string, object?> par = new Dictionary<string, object?>() { { KHSX_LOT.DBName.KHSXID, KHSXID } };
             (dsachMaQLyLots, string errorLot) = SQLServerServices.GetListLOT_khsx(par, false);
 
             results = dsachMaQLyLots
@@ -721,13 +739,13 @@
             // Get target LOTKHSX
             Dictionary<string, object?> pars = new();
 
-            pars.Add($"{LOT_khsx.DBName.KHSXID}", newKetQuaGC.KHSXID.Value);
+            pars.Add($"{KHSX_LOT.DBName.KHSXID}", newKetQuaGC.KHSXID.Value);
 
-            pars.Add($"{LOT_khsx.DBName.NCID}", newKetQuaGC.NCID.Value);
+            pars.Add($"{KHSX_LOT.DBName.NCID}", newKetQuaGC.NCID.Value);
 
-            pars.Add($"{LOT_khsx.DBName.MaQuanLyLot}", newKetQuaGC.MaQuanLyLot.Value);
+            pars.Add($"{KHSX_LOT.DBName.MaQuanLyLot}", newKetQuaGC.MaQuanLyLot.Value);
 
-            (List<LOT_khsx> lotKHSXs, string error) = SQLServerServices.GetListLOT_khsx(pars, false);
+            (List<KHSX_LOT> lotKHSXs, string error) = SQLServerServices.GetListLOT_khsx(pars, false);
 
             var targetlotKHSX = lotKHSXs.FirstOrDefault();
 

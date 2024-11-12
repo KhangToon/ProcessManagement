@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace ProcessManagement.Models.KHSXs
 {
-    public class LOT_khsx
+    public class KHSX_LOT
     {
         public Propertyy KHSXLOTID { get; set; } = new() { DBName = DBName.KHSXLOTID, DisplayName = DispName.KHSXLOTID, Type = typeof(int), AlowDatabase = false, AlowDisplay = false, DispDatagrid = false };
         public Propertyy KHSXID { get; set; } = new() { DBName = DBName.KHSXID, DisplayName = DispName.KHSXID, Type = typeof(int), AlowDatabase = true, AlowDisplay = false, DispDatagrid = false };
@@ -48,9 +48,9 @@ namespace ProcessManagement.Models.KHSXs
 
         public static List<Propertyy> GetClassProperties()
         {
-            Type propertyType = typeof(LOT_khsx);
+            Type propertyType = typeof(KHSX_LOT);
 
-            LOT_khsx instance = new();
+            KHSX_LOT instance = new();
 
             FieldInfo[] fields = propertyType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
@@ -76,7 +76,7 @@ namespace ProcessManagement.Models.KHSXs
 
         public List<Propertyy> GetPropertiesValues()
         {
-            Type propertyType = typeof(LOT_khsx);
+            Type propertyType = typeof(KHSX_LOT);
 
             FieldInfo[] fields = propertyType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 

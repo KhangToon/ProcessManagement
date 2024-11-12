@@ -8616,7 +8616,7 @@ namespace ProcessManagement.Services.SQLServer
         // ------------------------------------------------------------------------------------- //
         #region Table_KHSX_LOT
         // Insert
-        public (int, string) InsertLOT_khsx(LOT_khsx lotkhsx)
+        public (int, string) InsertLOT_khsx(KHSX_LOT lotkhsx)
         {
             int result = -1;
             string errorMess = string.Empty;
@@ -8643,7 +8643,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 string columns = string.Join(", ", properties.Select(p => $"[{p.DBName}]"));
                 string parameters = string.Join(", ", properties.Select(p => $"@{Regex.Replace(p.DBName ?? string.Empty, @"[^\w]+", "")}"));
-                command.CommandText = $@"INSERT INTO [{LOT_khsx.DBName.Table_KHSXLOT}] ({columns}) OUTPUT INSERTED.{LOT_khsx.DBName.KHSXLOTID} VALUES ({parameters})";
+                command.CommandText = $@"INSERT INTO [{KHSX_LOT.DBName.Table_KHSXLOT}] ({columns}) OUTPUT INSERTED.{KHSX_LOT.DBName.KHSXLOTID} VALUES ({parameters})";
 
                 foreach (var prop in properties)
                 {
@@ -8679,9 +8679,9 @@ namespace ProcessManagement.Services.SQLServer
             return (result, errorMess);
         }
         // Get
-        public (List<LOT_khsx>, string) GetListLOT_khsx(Dictionary<string, object?> parameters, bool isgetAll = false)
+        public (List<KHSX_LOT>, string) GetListLOT_khsx(Dictionary<string, object?> parameters, bool isgetAll = false)
         {
-            List<LOT_khsx> listLOT_khsx = new();
+            List<KHSX_LOT> listLOT_khsx = new();
 
             string errorMessage = string.Empty;
 
@@ -8693,7 +8693,7 @@ namespace ProcessManagement.Services.SQLServer
 
                     var conditions = new List<string>();
                     var command = connection.CreateCommand();
-                    command.CommandText = $"SELECT * FROM [{LOT_khsx.DBName.Table_KHSXLOT}]";
+                    command.CommandText = $"SELECT * FROM [{KHSX_LOT.DBName.Table_KHSXLOT}]";
 
                     if (!isgetAll)
                     {
@@ -8715,7 +8715,7 @@ namespace ProcessManagement.Services.SQLServer
 
                     while (reader.Read())
                     {
-                        LOT_khsx lotkhsx = new();
+                        KHSX_LOT lotkhsx = new();
 
                         List<Propertyy> rowItems = lotkhsx.GetPropertiesValues();
 
@@ -8743,7 +8743,7 @@ namespace ProcessManagement.Services.SQLServer
             return (listLOT_khsx, errorMessage);
         }
         // Update
-        public (int, string) UpdateLOT_khsx(LOT_khsx lotkhsx)
+        public (int, string) UpdateLOT_khsx(KHSX_LOT lotkhsx)
         {
             int result = -1;
             string errorMess = string.Empty;
@@ -8772,9 +8772,9 @@ namespace ProcessManagement.Services.SQLServer
                 string updateSet = string.Join(", ", properties.Select(p =>
                     $"[{p.DBName}] = @{Regex.Replace(p.DBName ?? string.Empty, @"[^\w]+", "")}"));
 
-                command.CommandText = $@"UPDATE [{LOT_khsx.DBName.Table_KHSXLOT}] 
+                command.CommandText = $@"UPDATE [{KHSX_LOT.DBName.Table_KHSXLOT}] 
                                         SET {updateSet} 
-                                        WHERE [{LOT_khsx.DBName.KHSXLOTID}] = @KHSXLOTID";
+                                        WHERE [{KHSX_LOT.DBName.KHSXLOTID}] = @KHSXLOTID";
 
                 foreach (var prop in properties)
                 {
