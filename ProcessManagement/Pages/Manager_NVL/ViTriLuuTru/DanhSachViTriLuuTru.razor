@@ -306,13 +306,13 @@
         {
             DSVitris = SQLServerServices.GetAllViTriLuuTru();
 
-            foreach (var vitri in DSVitris)
+            Parallel.ForEach(DSVitris, vitri =>
             {
                 // Load ds nguyen lieu trong vi tri
                 vitri.DSachViTriofNVL = SQLServerServices.GetListViTriOfNgVatLieuByVTid(vitri.VTID.Value);
 
                 // Load nguyen lieu infor
-                foreach (var vitriofnvl in vitri.DSachViTriofNVL)
+                Parallel.ForEach(vitri.DSachViTriofNVL, vitriofnvl =>
                 {
                     _ = int.TryParse(vitriofnvl.NVLID.Value?.ToString(), out int nvlid) ? nvlid : 0;
 
@@ -320,8 +320,8 @@
                     {
                         vitriofnvl.NgLieuInfor = SQLServerServices.GetNguyenVatLieuByID(vitriofnvl.NVLID.Value);
                     }
-                }
-            }
+                });
+            });
         });
     }
 
@@ -441,5 +441,5 @@
         }
     }
 
-    
+
 }

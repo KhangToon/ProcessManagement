@@ -11,7 +11,6 @@ using ProcessManagement.Models.NHANVIEN;
 using ProcessManagement.Models.SANPHAM;
 using ProcessManagement.Models.TienDoGCs;
 using System.Data;
-using System.Reflection;
 using System.Text.RegularExpressions;
 using static ProcessManagement.Models.KHSXs.DongThung;
 using static ProcessManagement.Models.KHSXs.KetQuaGC;
@@ -5513,7 +5512,7 @@ namespace ProcessManagement.Services.SQLServer
             return (result, errorMess);
         }
         #endregion
-       
+
         // ------------------------------------------------------------------------------------- //
         #region Table_MAY_ThongTinMayMoc
 
@@ -5723,7 +5722,7 @@ namespace ProcessManagement.Services.SQLServer
         }
 
         #endregion
-        
+
         // ------------------------------------------------------------------------------------- //
         #region Table_MAY_LoaiThongTinMayMoc
         // Get loai thong tin may moc by loadittmmid
@@ -6261,7 +6260,7 @@ namespace ProcessManagement.Services.SQLServer
             return (result, errorMess);
         }
         #endregion
-        
+
         // ------------------------------------------------------------------------------------- //
         #region Table_LoaiThongTinNhanVien
 
@@ -6506,7 +6505,7 @@ namespace ProcessManagement.Services.SQLServer
             }
         }
         #endregion
-        
+
         // ------------------------------------------------------------------------------------- //
         #region Table_ThongTinNhanVien
 
@@ -6967,7 +6966,7 @@ namespace ProcessManagement.Services.SQLServer
         }
 
         #endregion
-        
+
         // ------------------------------------------------------------------------------------- //
         #region Table_LoaiThongTinSanPham
 
