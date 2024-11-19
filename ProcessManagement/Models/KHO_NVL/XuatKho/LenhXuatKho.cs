@@ -17,7 +17,7 @@ namespace ProcessManagement.Models.KHO_NVL.XuatKho
         public Propertyy NgayXuatKho { get; set; } = new() { DBName = Common.NgayXuatKho, Type = typeof(string), AlowDatabase = true };
         public ViTriofNVL ViTriofNVL { get; set; } = new(); // Chi dung cho phieu xuat kho
 
-        public bool isEditingLXK = false; // chi dung khi xuat kho
+        public int id = 0; // dung khi chi dinh lot voi ngay nhap kho uu tien
 
         public bool isAllowselect = false; // dung khi chi dinh lot voi ngay nhap kho uu tien
 
@@ -25,8 +25,6 @@ namespace ProcessManagement.Models.KHO_NVL.XuatKho
 
         //public NguyenVatLieu NVLDetails { get; set; } = new();
         //public VitriLuuTru ViTriDetails { get; set; } = new();
-
-
 
         //public void LoadNVLDetails(SQLServerServices sQLServer)
         //{

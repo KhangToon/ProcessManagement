@@ -17,7 +17,6 @@ using System.Net.NetworkInformation;
 using System.Diagnostics;
 using System.Drawing;
 
-
 // enable khi deploy - disable khi use local 
 // Get local IP address
 string GetLocalIPAddress()
@@ -129,7 +128,7 @@ app.MapFallbackToPage("/_Host");
 //{
 //    var psi = new ProcessStartInfo
 //    {
-//        FileName = url,
+//        FileName = url, 
 //        UseShellExecute = true
 //    };
 //    Process.Start(psi);

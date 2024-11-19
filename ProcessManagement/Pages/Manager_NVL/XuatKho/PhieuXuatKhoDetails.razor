@@ -14,6 +14,12 @@
 @inject QRCodeServices QRCodeServices
 @inject IJSRuntime JSRuntime
 
+<style>
+    .rz-grid-table {
+        width: unset;
+    }
+</style>
+
 <RadzenCard Variant="Variant.Filled" Style="height: 100%; width: 100%; padding: 10px;">
     <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style=" height: 100%; width: 100%; padding: 0px; padding-bottom: 10px " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
         <!--Header Phieu Xuat Kho-->
@@ -51,14 +57,14 @@
                         <RadzenText Text="@($"Tổng NVL cần xuất kho: {PXK.DSNVLofPXKs?.Sum(nvl => (int.TryParse(nvl.NVLXKSoLuongAll.Value?.ToString(), out int dm) ? dm : 0)) ?? 0} ({SelectedNVLofPXK.TargetNgLieu.DonViTinh.Value?.ToString()})")" Style="font-size: 16px; font-weight: 600; color: darkgreen; height: contain; width: contain"></RadzenText>
                     </RadzenStack>
                     <!--Table listNVL-->
-                    <RadzenDataGrid class="rz-grid-table-fixed-2" Data="@(PXK.DSNVLofPXKs)" TItem="NVLofPhieuXuatKho"
+                    <RadzenDataGrid class="rz-grid-table" Data="@(PXK.DSNVLofPXKs)" TItem="NVLofPhieuXuatKho"
                                     EmptyText="Danh sách nguyên liệu trống."
                                     ShowColumnTitleAsTooltip="true" ShowCellDataAsTooltip="true"
                                     AllowFiltering="false" FilterMode="FilterMode.Simple"
                                     AllowPaging="true" AllowSorting="false" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
-                                    ShowPagingSummary="true" PagerPosition="PagerPosition.Bottom" Style="padding-right: 5px"
-                                    GridLines="DataGridGridLines.Both" PageSize="10" Density="Density.Compact"
-                                    HeaderCellRender="@(args => args.Attributes.Add("style", $"background-color: rgba(58, 71, 77)"))"
+                                    ShowPagingSummary="true" PagerPosition="PagerPosition.Bottom" Style="padding-right: 5px; width: 100%"
+                                    GridLines="DataGridGridLines.Both" PageSize="10" Density="Density.Compact" ColumnWidth="120px"
+                                    HeaderCellRender="@(args => args.Attributes.Add("style", $"background-color: rgba(58, 71, 77); padding-left: 10px; padding-right: 10px"))"
                                     CellRender="@OnCellRender" Value="@DatagridSelectedNVLofPXK" ValueChanged="@((args) => OnDatagridSelectChanged(args))">
                         <Columns>
                             @{
@@ -77,7 +83,7 @@
                                 </RadzenDataGridColumn>
 
                                 <!--Column TenNVL-->
-                                <RadzenDataGridColumn Width="contain" TItem="NVLofPhieuXuatKho" Title="Tên nguyên vật liệu"
+                                <RadzenDataGridColumn TItem="NVLofPhieuXuatKho" Title="Tên nguyên vật liệu"
                                                       Property="tennvl" TextAlign="TextAlign.Center">
                                     <HeaderTemplate>
                                         <span style="font-weight: 600; font-size: 15px; color: white">Tên NVL</span>
@@ -85,10 +91,13 @@
                                     <Template Context="nvl">
                                         <span style="color: black; font-weight: bold;">@($"{nvl?.TargetNgLieu.TenNVL.Value?.ToString()}")</span>
                                     </Template>
+                                    <FooterTemplate>
+                                        <span style="color: black; font-weight: bold; font-size: 16px;">Tổng</span>
+                                    </FooterTemplate>
                                 </RadzenDataGridColumn>
 
                                 <!--Column SL can xuat-->
-                                <RadzenDataGridColumn Width="contain" TItem="NVLofPhieuXuatKho" Title="Số lượng xuất kho"
+                                <RadzenDataGridColumn TItem="NVLofPhieuXuatKho" Title="Số lượng xuất kho"
                                                       Property="slxuatkho" TextAlign="TextAlign.Center">
                                     <HeaderTemplate>
                                         <span style="font-weight: 600; font-size: 15px; color: white">SL xuất</span>
@@ -96,10 +105,13 @@
                                     <Template Context="nvl">
                                         <span style="color: black; font-weight: bold;">@($"{nvl?.NVLXKSoLuongAll.Value?.ToString()} ({nvl?.TargetNgLieu.DonViTinh.Value?.ToString()})")</span>
                                     </Template>
+                                    <FooterTemplate>
+                                        <span style="color: black; font-weight: bold; font-size: 16px;">@($"{PXK.DSNVLofPXKs?.Sum(nvl => (int.TryParse(nvl.NVLXKSoLuongAll.Value?.ToString(), out int dm) ? dm : 0))}")</span>
+                                    </FooterTemplate>
                                 </RadzenDataGridColumn>
 
                                 <!--Column TonKhoNVL-->
-                                <RadzenDataGridColumn Width="contain" TItem="NVLofPhieuXuatKho" Title="Tồn kho"
+                                <RadzenDataGridColumn TItem="NVLofPhieuXuatKho" Title="Tồn kho"
                                                       Property="tonkho" TextAlign="TextAlign.Center">
                                     <HeaderTemplate>
                                         <span style="font-weight: 600; font-size: 15px; color: white">Tồn kho</span>
@@ -110,7 +122,7 @@
                                 </RadzenDataGridColumn>
 
                                 <!--Column trang thai xuat kho-->
-                                <RadzenDataGridColumn Width="contain" TItem="NVLofPhieuXuatKho" Title="Trạng thái" Frozen="false"
+                                <RadzenDataGridColumn TItem="NVLofPhieuXuatKho" Title="Trạng thái" Frozen="false"
                                                       Property="trangthai" TextAlign="TextAlign.Center">
                                     <HeaderTemplate>
                                         <span style="font-weight: 600; font-size: 15px; color: white">Trạng thái</span>
@@ -214,7 +226,7 @@
                                             <RadzenStack Gap="20px" Style="height: contain; width: 100%; padding: 5px; padding-right: 10px; padding-left: 10px; background-color: var(--rz-primary-lighter);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                                                 <RadzenText Text="Vị trí xuất kho" Style="color: black; font-weight: 500; font-size: 16px"></RadzenText>
                                             </RadzenStack>
-                                            <RadzenStack Gap="5px" Orientation="Orientation.Vertical" Style=" height: contain; width: 100%; max-height: 350px; padding-right: 0;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                            <RadzenStack Gap="5px" Orientation="Orientation.Vertical" Style=" height: contain; width: 100%; padding-right: 0;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                                 <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: contain; padding: 5px; padding-right: 0px; background-color: rgb(58, 71, 77)">
                                                     <RadzenStack Style="width: 100%; height: contain; " Gap="10px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                                         <RadzenStack Style="width: 3%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
@@ -295,6 +307,27 @@
                                                             </RadzenStack>
                                                         </RadzenCard>
                                                     }
+                                                    <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: contain; padding: 0px; padding-right: 0px;">
+                                                        <RadzenStack Style="width: 100%; height: contain" Gap="10px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                            <RadzenStack Style="width: 3%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                            </RadzenStack>
+
+                                                            <RadzenStack Style="width: 20%; height: contain; border-left: var(--rz-grid-cell-border); border-right: var(--rz-grid-cell-border); padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                            </RadzenStack>
+
+                                                            <RadzenStack Style="width: 15%; height: contain; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                <RadzenStack Style="height: contain; min-height: 35px; width: 100%; border-radius: 5px; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                    <RadzenText Text="Tổng" Style="color: black; font-weight: 600; font-size: 16px"></RadzenText>
+                                                                </RadzenStack>
+                                                            </RadzenStack>
+
+                                                            <RadzenStack Style="width: 40%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                <RadzenStack Style="height: contain; min-height: contain; min-height: 35px; width: 100%; border-radius: 5px; padding: 10px; padding-left: 0" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                                    <RadzenText Text="@($"{(SelectedNVLofPXK.DSLenhXKs.Sum(lxk => int.TryParse(lxk.LXKSoLuong.Value?.ToString(), out int lxksl)? lxksl : 0))} ({SelectedNVLofPXK.TargetNgLieu.DonViTinh.Value?.ToString()})")" Style="color: darkred; font-weight: 600; font-size: 16px"></RadzenText>
+                                                                </RadzenStack>
+                                                            </RadzenStack>
+                                                        </RadzenStack>
+                                                    </RadzenCard>
                                                 }
                                                 else
                                                 {

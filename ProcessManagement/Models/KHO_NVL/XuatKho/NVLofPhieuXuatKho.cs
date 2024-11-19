@@ -18,6 +18,19 @@ namespace ProcessManagement.Models.KHO_NVL.XuatKho
 
         public bool IsEditingSLXKhoALL = false;
 
+        public object TemSLXKhoAll = 0;
+
+        public List<object> DsachPickedLXKs = new();
+
+        public List<LXKExtendItems> DSachFILOLXKs = new();
+        public class LXKExtendItems
+        {
+            public LenhXuatKho LXK { get; set; } = new();
+            public int ID { get; set; }
+            public bool IsSelected { get; set; } = false;
+            public bool IsAllowSelect { get; set; } = true;
+            public bool IsLastElement { get; set; } = false;
+        }
         public List<Propertyy> GetPropertiesValues()
         {
             Type propertyType = typeof(NVLofPhieuXuatKho);
