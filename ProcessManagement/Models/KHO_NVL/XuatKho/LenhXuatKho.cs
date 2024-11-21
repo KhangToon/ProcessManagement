@@ -15,6 +15,7 @@ namespace ProcessManagement.Models.KHO_NVL.XuatKho
         public Propertyy LXKSoLuong { get; set; } = new() { DBName = Common.LXKSoLuong, Type = typeof(int), AlowDatabase = true };
         public Propertyy LXKIsDone { get; set; } = new() { DBName = Common.LXKIsDone, Type = typeof(int), AlowDatabase = true };
         public Propertyy NgayXuatKho { get; set; } = new() { DBName = Common.NgayXuatKho, Type = typeof(string), AlowDatabase = true };
+        public Propertyy QRIDLOT { get; set; } = new() { DBName = Common.QRIDLOT, Type = typeof(string), AlowDatabase = true };
         public ViTriofNVL ViTriofNVL { get; set; } = new(); // Chi dung cho phieu xuat kho
 
         public int id = 0; // dung khi chi dinh lot voi ngay nhap kho uu tien

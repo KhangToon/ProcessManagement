@@ -64,13 +64,13 @@
 
     <RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 5px; border-bottom: var(--rz-grid-cell-border);">
         <RadzenStack Style="width: 100%;">
-            <RadzenText Text="Mã NVL" Style="color: var(--rz-primary-darker); font-size: 12px; font-weight: 600; height: contain; width: 100% "></RadzenText>
+            <RadzenText Text="Mã quản lý NVL" Style="color: var(--rz-primary-darker); font-size: 12px; font-weight: 600; height: contain; width: 100% "></RadzenText>
         </RadzenStack>
         <RadzenStack Style="width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
             <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
                 @{
                     <RadzenStack Style="width: 85%;">
-                        <RadzenTextBox class="custom-placeholder" Placeholder="@($" * quét mã nguyên liệu")" Value="@maNVL?.ToString()" Style="font-size: 12px; height: contain; border-width: 1px; color: black; font-weight: 500"
+                        <RadzenTextBox class="custom-placeholder" Placeholder="@($" * quét mã")" Value="@maNVL?.ToString()" Style="font-size: 12px; height: contain; border-width: 1px; color: black; font-weight: 500"
                                        @oninput="@((args) => { IsScanMaNVL_isExisting(args.Value?.ToString()?.Trim()?? string.Empty); })">
                         </RadzenTextBox>
                     </RadzenStack>
@@ -99,9 +99,11 @@
 
     private string maVitri = string.Empty;
     private string maNVL = string.Empty;
+    private string qrIDLOT = string.Empty;
 
     private bool isScanmavitriok = false;
     private bool isScanmanvlok = false;
+    private bool isScanqridlotlok = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -135,7 +137,7 @@
             NguyenVatLieu targetNVL = SQLServerServices.GetNguyenVatLieuByTenNVL(manvl);
 
             if (targetNVL.NVLID.Value != null && object.Equals(targetNVL.NVLID.Value, LNK.NVLID.Value))
-            {   
+            {
                 if (string.Equals(manvl.Trim(), LNK.TargetNgLieu.TenNVL.Value?.ToString()?.Trim()))
                 {
                     isScanmanvlok = true;
@@ -147,6 +149,17 @@
         isScanmanvlok = false;
     }
 
+    private void IsScanQRIDLOT_isExisting(string qridlot)
+    {
+        qrIDLOT = qridlot.Trim();
+
+        if (!string.IsNullOrEmpty(qridlot))
+        {
+            
+        }
+
+        isScanqridlotlok = false;
+    }
 
 
     private async Task OnConfirmExcuteLenhNhapKho_withLotVitri(string mavitri, string manvl)

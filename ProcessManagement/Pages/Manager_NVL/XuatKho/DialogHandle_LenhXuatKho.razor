@@ -99,7 +99,7 @@
                                 <RadzenText Text="Quét mã vị trí" Style="font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
                             </RadzenStack>
                             <RadzenStack Style="height: contain; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                <RadzenTextBox Placeholder="*Kết quả quét mã" @ref="reftxtMaViTri"
+                                <RadzenTextBox Placeholder="*Kết quả quét mã" @ref="reftxtQRIDLOT"
                                                Value="@scanMaViTri" ValueChanged="@((args) => { scanMaViTri = args; } )"
                                                Style="font-size: 16px; height: contain; border-width: 1px; width: 100%;"></RadzenTextBox>
                             </RadzenStack>
@@ -113,16 +113,16 @@
                 <RadzenCard Variant="Variant.Flat" Style="height: 100%; width: 100%; padding: 10px;">
                     <RadzenStack Gap="10px" Style="height: contain; width: 100%;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                         <RadzenStack Gap="20px" Style="height: contain; width: 100%; border-radius: 5px; background-color: var(--rz-secondary-lighter); padding: 5px; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                            <RadzenText Text="@($"Mã nguyên liệu: ")" Style="font-weight: 600; font-size: 16px; color: black;"></RadzenText>
+                            <RadzenText Text="@($"QR quản lý NVL: ")" Style="font-weight: 600; font-size: 16px; color: black;"></RadzenText>
                             <RadzenStack Gap="10" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                <RadzenText Text="@($"{LXK.ViTriofNVL.NgLieuInfor.TenNVL.Value?.ToString()}")" Style="font-weight: 600; font-size: 18px; color: darkred;"></RadzenText>
-                                <RadzenButton Click="@(() => CopyToClipboard(LXK.ViTriofNVL.NgLieuInfor.TenNVL.Value?.ToString()?? string.Empty))" Icon="content_copy" Style="--rz-icon-size: 18px;" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Light" />
+                                <RadzenText Text="@($"{LXK.QRIDLOT.Value?.ToString()}")" Style="font-weight: 600; font-size: 18px; color: darkred;"></RadzenText>
+                                <RadzenButton Click="@(() => CopyToClipboard(LXK.QRIDLOT.Value?.ToString()?? string.Empty))" Icon="content_copy" Style="--rz-icon-size: 18px;" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Light" />
                             </RadzenStack>
                         </RadzenStack>
                         <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: contain; padding: 10px; margin-top: 10px; border-radius: 0">
                             <RadzenStack Style="height: 100%; width: contain" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                 @{
-                                    string qrBase64string = QRCodeServices.GenerateQRCode(LXK.ViTriofNVL.NgLieuInfor.TenNVL.Value?.ToString() ?? string.Empty, 150);
+                                    string qrBase64string = QRCodeServices.GenerateQRCode(LXK.QRIDLOT.Value?.ToString() ?? string.Empty, 150);
                                     <img style="border-radius: 10px;" src="@($"data:image/png;base64,{qrBase64string}")" alt="QR Code">
                                 }
                             </RadzenStack>
@@ -130,11 +130,11 @@
 
                         <RadzenStack Gap="5" Style="height: contain; width: 100%; padding-bottom: 5px; padding-top: 5px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                             <RadzenStack Style="height: contain; width: 100%">
-                                <RadzenText Text="Quét mã nguyên liệu" Style="font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
+                                <RadzenText Text="Quét mã quản lý" Style="font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
                             </RadzenStack>
                             <RadzenStack Style="height: contain; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                <RadzenTextBox Placeholder="*Kết quả quét mã" @ref="reftxtMaViTri"
-                                               Value="@scanMaNVL" ValueChanged="@((args) => { scanMaNVL = args; } )"
+                                <RadzenTextBox Placeholder="*Kết quả quét mã" @ref="reftxtQRIDLOT"
+                                               Value="@scanQRIDLOT" ValueChanged="@((args) => { scanQRIDLOT = args; } )"
                                                Style="font-size: 16px; height: contain; border-width: 1px; width: 100%;"></RadzenTextBox>
                             </RadzenStack>
                         </RadzenStack>
@@ -150,7 +150,7 @@
                 }
                 else
                 {
-                    <RadzenButton Click="@(async () => { await OnConfirmExcuteLenhXuatKho_withLotVitri(PXK.MaPhieuXK.Value?.ToString()?? string.Empty, scanMaViTri, scanMaNVL);})" Style="width: contain;" Icon="arrow_outward" Text="Tiến hành xuất kho" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Size="ButtonSize.Small" Variant="Variant.Flat" />
+                    <RadzenButton Click="@(async () => { await OnConfirmExcuteLenhXuatKho_byQRIDLOT(PXK.MaPhieuXK.Value?.ToString()?? string.Empty, scanMaViTri, scanQRIDLOT);})" Style="width: contain;" Icon="arrow_outward" Text="Tiến hành xuất kho" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Size="ButtonSize.Small" Variant="Variant.Flat" />
                 }
             </RadzenStack>
             <RadzenStack Gap="10px" Style="height: 100%; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
@@ -172,12 +172,12 @@
 
     private RadzenTextBox reftxtMaPXK = new();
     private RadzenTextBox reftxtMaNVL = new();
-    private RadzenTextBox reftxtMaViTri = new();
+    private RadzenTextBox reftxtQRIDLOT = new();
     private int focusIndex = 1;
 
     private LenhXuatKho scanLXK = new();
     private string scanMaPXK = string.Empty;
-    private string scanMaNVL = string.Empty;
+    private string scanQRIDLOT = string.Empty;
     private string scanMaViTri = string.Empty;
 
     protected override async Task OnInitializedAsync()
@@ -197,7 +197,7 @@
         }
         else if (focusIndex == 3)
         {
-            await reftxtMaViTri.FocusAsync();
+            await reftxtQRIDLOT.FocusAsync();
         }
     }
 
@@ -345,6 +345,137 @@
         else return (-1, "Danh sách LOT của KHSX không tồn tại!");
     }
 
+    private async Task OnConfirmExcuteLenhXuatKho_byQRIDLOT(string maPXK, string maViTri, string qridlot)
+    {
+        int soluongxuatfromClient = int.TryParse(LXK.LXKSoLuong.Value?.ToString(), out int lxksl) ? lxksl : 0;
+        object? lxkid = LXK.LenhXKID.Value;
+
+        // Load lenh xuat kho by ID
+        LenhXuatKho savedLXK = SQLServerServices.GetLenhXuatKhoByID(lxkid);
+
+
+        if (string.IsNullOrWhiteSpace(maPXK) || !string.Equals(maPXK, PXK.MaPhieuXK.Value?.ToString()?.Trim())) { return; }
+        if (string.IsNullOrWhiteSpace(maViTri) || !string.Equals(maViTri, savedLXK.ViTriofNVL.VitriInfor.MaViTri.Value?.ToString()?.Trim())) { return; }
+        if (string.IsNullOrWhiteSpace(qridlot) || !string.Equals(qridlot, savedLXK.QRIDLOT.Value?.ToString()?.Trim())) { return; }
+        if (soluongxuatfromClient == 0) { return; }
+
+
+        if (savedLXK.LenhXKID.Value == null)
+        {
+            return;
+        }
+        else
+        {
+            // Handle lenh xuat kho
+
+            // Check trang thai lenh (da hoan thanh hay chua)
+            _ = int.TryParse(savedLXK.LXKIsDone.Value?.ToString(), out int scanlxkIsdone) ? scanlxkIsdone : -1;
+            if (scanlxkIsdone != 0)
+            {
+                return;
+            }
+
+            // Kiem tra so luong xuat ra
+            int soluongXuatra = int.TryParse(savedLXK.LXKSoLuong.Value?.ToString(), out int slxuat) ? slxuat : 0;
+            if (soluongXuatra == 0)
+            {
+                return;
+            }
+
+            // Kiem tra trang thai vi tri
+            ViTriofNVL viTriofNVL = SQLServerServices.GetViTriOfNgVatLieuBy_VTid_LotVitri(vtid: savedLXK.VTID.Value, lotvitri: savedLXK.LotVitri.Value);
+
+            if (viTriofNVL == null || viTriofNVL.VTofNVLID.Value == null)
+            {
+                return;
+            }
+
+            int soluongHiencotaivitri = int.TryParse(viTriofNVL?.VTNVLSoLuong.Value?.ToString(), out int slhc) ? slhc : 0;
+
+            // Kiem tra so luong xuat co vuot qua so luong hien tai khong
+            if (soluongXuatra > soluongHiencotaivitri)
+            {
+                return;
+            }
+
+            // Tinh so luong con lai sau khi xuat
+            int newtonkhotaivitri = soluongHiencotaivitri - soluongXuatra;
+
+            // Tao moi vitriofNVL
+            ViTriofNVL viTriofNVLupdate = new()
+                {
+                    VTofNVLID = { Value = viTriofNVL?.VTofNVLID.Value },
+                    VTID = { Value = viTriofNVL?.VTID.Value },
+                    NVLID = { Value = (newtonkhotaivitri > 0) ? savedLXK.NVLID.Value : 0 },
+                    VTNVLSoLuong = { Value = newtonkhotaivitri },
+                    NgayNhapKho = { Value = (newtonkhotaivitri > 0) ? viTriofNVL?.NgayNhapKho.Value : string.Empty },
+                    LotVitri = { Value = viTriofNVL?.LotVitri.Value },
+                    QRIDLOT = { Value = viTriofNVL?.QRIDLOT.Value }
+                };
+
+            // Update so luong vi tri cua nvl
+            (int updateVTofNVLresult, string updateVTofNVLerror) = SQLServerServices.UpdateViTriOfNgVatLieu(viTriofNVLupdate);
+
+            if (updateVTofNVLresult == -1)
+            {
+                return;
+            }
+
+            // Update lenh xuat kho status
+            savedLXK.LXKIsDone.Value = 1;
+            savedLXK.NgayXuatKho.Value = DateTime.Now.Date.ToShortDateString();
+            (int updatelxkResult, string updatelxkError) = SQLServerServices.UpdateLenhXuatKho(savedLXK);
+
+            if (updatelxkResult == -1)
+            {
+                return;
+            }
+
+            // Update ngaynhap/xuatkho of KHSX
+            _ = int.TryParse(PXK.KHSXID.Value?.ToString(), out int khsxid) ? khsxid : 0;
+
+            if (khsxid > 0)
+            {
+                SQLServerServices.UpdatePhieuXuatKhoInfor(PXK);
+
+                (int updatelotstatus, string errorlot) = UpdateNgayNhapXuatKho_dsLOTofKHSX(khsxid, savedLXK);
+            }
+
+            // update status to UI
+            LXK.LXKIsDone.Value = 1;
+
+            // Get nguoi xuat kho
+            string nguoiXuatkho = SQLServerServices.GetNguoiTaoPhieuXuatKhoByID(savedLXK.PXKID.Value);
+
+            // Logging xuat kho
+            HistoryXNKho logXuatKho = new HistoryXNKho()
+                {
+                    LogLoaiPhieu = { Value = Common.LogTypePXK },
+                    LogMaPhieu = { Value = maPXK },
+                    LogMaViTri = { Value = maViTri },
+                    LogNgThucHien = { Value = nguoiXuatkho },
+                    LogSoLuong = { Value = savedLXK.LXKSoLuong.Value },
+                    LogTonKhoTruoc = { Value = savedLXK.ViTriofNVL.NgLieuInfor.TonKho },
+                    LogTonKhoSau = { Value = savedLXK.ViTriofNVL.NgLieuInfor.TonKho - soluongXuatra },
+                    LogTenNVL = { Value = savedLXK.ViTriofNVL.NgLieuInfor.TenNVL.Value },
+                    LogThoiDiem = { Value = DateTime.Now },
+                    LotVitri = { Value = savedLXK.LotVitri.Value },
+                    NVLID = { Value = savedLXK.NVLID.Value },
+                    VTID = { Value = savedLXK.VTID.Value },
+                    QRIDLOT = { Value = savedLXK.QRIDLOT.Value }
+                };
+            // Insert logging to Database
+            (int logId, string logErr) = SQLServerServices.InsertLogingXNKho(logXuatKho);
+
+            if (logId == -1)
+            {
+                return;
+            }
+
+            // Feedback xuat kho thanh cong
+            await DialogService.Alert($"Đã xuất kho nguyên liệu: \n {savedLXK.ViTriofNVL.NgLieuInfor.TenNVL.Value?.ToString()} \n Số lượng : {soluongxuatfromClient} (pcs)", "<strong><span style='color: darkgreen'>Success!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+        }
+    }
 
     private async Task OnConfirmExcuteLenhXuatKho_withLotVitri(string maPXK, string maViTri, string maNVL)
     {

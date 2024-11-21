@@ -34,7 +34,8 @@ namespace ProcessManagement.Models.KHO_NVL.Tracking
                 LogTonKhoTruoc = Convert.ToInt32(inputHistoryXNKho.LogTonKhoTruoc.Value),
                 LogTonKhoSau = Convert.ToInt32(inputHistoryXNKho.LogTonKhoSau.Value),
                 LogNgThucHien = inputHistoryXNKho.LogNgThucHien.Value?.ToString() ?? string.Empty,
-                LogThoiDiem = Convert.ToDateTime(inputHistoryXNKho.LogThoiDiem.Value)
+                LogThoiDiem = Convert.ToDateTime(inputHistoryXNKho.LogThoiDiem.Value),
+                QRIDLOT = inputHistoryXNKho.QRIDLOT.Value?.ToString() ?? string.Empty
             };
         }
 
@@ -56,6 +57,9 @@ namespace ProcessManagement.Models.KHO_NVL.Tracking
 
             [DisplayName("LOT Vị Trí")]
             public string LotVitri { get; set; } = string.Empty;
+
+            [DisplayName("QR quản lý NVL")]
+            public string QRIDLOT { get; set; } = string.Empty;
 
             [DisplayName("Số Lượng")]
             public int LogSoLuong { get; set; }
