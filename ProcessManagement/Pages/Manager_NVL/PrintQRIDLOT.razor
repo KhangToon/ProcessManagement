@@ -1,0 +1,90 @@
+﻿@page "/print-qridlot"
+
+@using ProcessManagement.Models
+@using ProcessManagement.Models.KHO_NVL.NhapKho
+@using ProcessManagement.Models.SANPHAM
+@using ProcessManagement.Services.QRCodes
+@using ProcessManagement.Services.SQLServer
+@using Radzen.Blazor
+@using Radzen
+
+@inject QRCodeServices QRCodeServices
+@inject SQLServerServices SQLServerServices
+@inject IJSRuntime JSRuntime
+
+<RadzenStack Gap="10px" Style="height: 100%; width: 100%;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+    <RadzenCard Variant="Variant.Outlined" Style="width: 800px; height: 500px; background-color: white">
+        <RadzenStack id="qridlotprint-component" Style="width: 100%; height: 100%" Gap="0px" Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center">
+            <RadzenStack Gap="0px" Style="height: 100%; width: 40%" JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center">
+                <RadzenStack class="rz-h-25 rz-border" Style="width: 100%; border-bottom: none; border-width: 2px; border-color: black;" JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center">
+                    <RadzenText TextStyle="TextStyle.H2" Text="VỊ TRÍ"></RadzenText>
+                </RadzenStack>
+                <RadzenStack class="rz-h-75 rz-border" Style="width: 100%; border-width: 2px; border-color: black;">
+
+                </RadzenStack>
+            </RadzenStack>
+            <RadzenStack Style="height: 100%; width: 60%; border-width: 2px; border-color: black" JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center">
+                <RadzenStack class="rz-h-50 rz-border" Style="width: 100%; border-left: none; border-bottom: none; border-width: 2px; border-color: black;" JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center">
+                    <RadzenStack Style="height: contain; width: contain" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                        @{
+                            string qrBase64string = QRCodeServices.GenerateQRCode(TargetLNK.QRIDLOT.Value?.ToString() ?? string.Empty, 180);
+
+                            if (!string.IsNullOrEmpty(qrBase64string))
+                            {
+                                <img style="border-radius: 10px; padding: 5px" src="@($"data:image/png;base64,{qrBase64string}")" alt="QR Code">
+                                <RadzenText TextStyle="TextStyle.H5" Text="@(TargetLNK.QRIDLOT.Value?.ToString())"></RadzenText>
+                            }
+                        }
+                    </RadzenStack>
+                </RadzenStack>
+                <RadzenStack Gap="20px" class="rz-h-50 rz-border" Style="padding: 20px; width: 100%; border-left: none; border-width: 2px; border-color: black;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                    <RadzenStack Style="height: contain; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                        <RadzenText TextStyle="TextStyle.H5" Text="Ngày nhập kho"></RadzenText>
+                        <RadzenText TextStyle="TextStyle.DisplayH5" Text="@(((TargetLNK.NgayNhapKho.Value == null)? TargetLNK.NgayNhapKho.Value?.ToString() : DateTime.Today.ToString("MM/dd/yyyy")))"></RadzenText>
+                    </RadzenStack>
+                    <RadzenStack Style="height: contain; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                        <RadzenText TextStyle="TextStyle.H5" Text="Mã NVL"></RadzenText>
+                        <RadzenText TextStyle="TextStyle.DisplayH5" Text="@(TargetLNK.TargetNgLieu.TenNVL.Value?.ToString())"></RadzenText>
+                    </RadzenStack>
+                    <RadzenStack Style="height: contain; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                        <RadzenText TextStyle="TextStyle.H5" Text="Số lượng"></RadzenText>
+                        <RadzenText TextStyle="TextStyle.DisplayH5" Text="@(TargetLNK.LNKSoLuong.Value?.ToString())"></RadzenText>
+                    </RadzenStack>
+                </RadzenStack>
+            </RadzenStack>
+        </RadzenStack>
+    </RadzenCard>
+
+    <RadzenStack Style="width: 800px; height: contain" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+        <RadzenButton Click="@(() => PrintComponent())" Icon="print" Text="Print" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Size="ButtonSize.Small" Variant="Variant.Filled"
+                      Style="height: contain; width: contain; font-size: 14px;" />
+    </RadzenStack>
+</RadzenStack>
+
+@code {
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "lnkid")]
+    public int LNKID { get; set; } = 0;
+
+    private LenhNhapKho TargetLNK = new();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("import", "/js/printBlazorComponent.js");
+        }
+    }
+
+    protected override Task OnParametersSetAsync()
+    {
+        TargetLNK = SQLServerServices.GetLenhNhapKhoByID(LNKID);
+
+        return base.OnParametersSetAsync();
+    }
+
+    private async Task PrintComponent()
+    {
+        await JSRuntime.InvokeVoidAsync("printBlazorComponent", "qridlotprint-component");
+    }
+}

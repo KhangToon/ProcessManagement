@@ -12,6 +12,7 @@
 @inject TooltipService TooltipService
 @inject SQLServerServices SQLServerServices
 @inject QRCodeServices QRCodeServices
+@inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
 
 <style>
@@ -306,7 +307,7 @@
                                                                 <RadzenStack Style="width: 100%; height: contain; padding-right: 10px; padding-top: 10px; border-top: var(--rz-grid-cell-border);" Gap="10px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                                                     <RadzenButton Text="@lnk?.QRIDLOT.Value?.ToString()" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Lighter" Variant="Variant.Flat"
                                                                                   Style="font-size: 18px; height: contain; min-height: contain; width: contain;" />
-                                                                    <RadzenButton Text="In" Icon="print" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Darker" Variant="Variant.Flat"
+                                                                    <RadzenButton Click="@(() => NavigateToPrintQRIDLOTpage(lnk))" Text="In" Icon="print" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Darker" Variant="Variant.Flat"
                                                                                   Style="font-size: 18px; height: contain; min-height: contain; width: contain;" />
                                                                 </RadzenStack>
                                                             </RadzenStack>
@@ -409,6 +410,18 @@
 
         // Raise event reload ds phieu nhap kho
         Common.RaiseReloadPNK_Event();
+    }
+
+    // Navigate to print QRIDLOT page
+    private void NavigateToPrintQRIDLOTpage(LenhNhapKho? lnk)
+    {
+        if (lnk != null)
+        {
+            //NavigationManager.NavigateTo($"khomanagement?tabindxex={3}&khsxid={khsxid}");
+            int.TryParse(lnk.LenhNKID.Value?.ToString(), out int lnkid);
+
+            NavigationManager.NavigateTo($"print-qridlot?lnkid={lnkid}");
+        }
     }
 
     // Datagrid cell render
