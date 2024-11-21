@@ -479,14 +479,6 @@
         // tong so luong can chi dinh cua NVL
         slallcanchidinh = int.TryParse(TarGetNVLofPNK.NVLNKSoLuongAll.Value?.ToString(), out int sl) ? sl : 0;
 
-        // if (DSVitriDaluu.Count > 0)
-        // {
-        //     foreach (var vitri in DSVitriDaluu)
-        //     {
-        //         AddNVlIntoVitriSelect(vitri);
-        //     }
-        // }
-
         // Load dsvitri
         await GetFilterDSachVitriLuuTru(string.Empty);
 
@@ -561,57 +553,6 @@
 
         StateHasChanged();
     }
-
-    // Button add nvl vao vitri da co truoc do
-
-    private void AddNVlIntoVitriSelect(ViTriofNVL selectVT)
-    {
-        // Kiem tra vi tri da ton tai
-        bool iscontain = dsViTriNhapKho.Select(lenh => lenh.TargertVitri.VTID.Value).ToList().Contains(selectVT.VTID.Value);
-
-        // Kiem tra xem vi tri NVL dang duoc luu co trung voi vi tri khac khong
-        if (DSLenhNKofAnotherNVL.Any(lenh => lenh.VTID.Value?.ToString() == selectVT.VTID.Value?.ToString()))
-        {
-            return;
-        }
-
-        if (iscontain) return;
-
-        // tong so luong da chi dinh
-        int tongsldachidinh = dsViTriNhapKho.Sum(lenh => int.TryParse(lenh.LNKSoLuong.Value?.ToString(), out int sll) ? sll : 0);
-
-        // soluong can chi dinh con lai
-        int allslchidinhconlai = slallcanchidinh - tongsldachidinh;
-
-        if (allslchidinhconlai == 0)
-        {
-            return; // return neu da chi dinh du so luong
-        }
-
-        int slchidinh = 0;
-
-        if (allslchidinhconlai <= selectVT.VitriInfor.SLConTrong)
-        {
-            slchidinh = allslchidinhconlai;
-        }
-        else slchidinh = (selectVT.VitriInfor.SLConTrong);
-
-        // Gan thong tin cua lenh nhap kho
-        LenhNhapKho newLenhNhapKho = new()
-            {
-                LNKSoLuong = { Value = slchidinh },    // soluong
-                NVLID = { Value = TarGetNVLofPNK.NVLID.Value },             // nvl id
-                VTID = { Value = selectVT.VTID.Value },    // vitri id
-                NVLPNKID = { Value = TarGetNVLofPNK.NVLPNKID.Value }, // nvlpnkid
-                PNKID = { Value = TarGetNVLofPNK.PNKID.Value }, // pnkid
-                LNKIsDone = { Value = 0 }   // status
-            };
-        newLenhNhapKho.TargertVitri = selectVT.VitriInfor;
-        newLenhNhapKho.TargetNgLieu = TarGetNVLofPNK.TargetNgLieu;
-
-        dsViTriNhapKho.Add(newLenhNhapKho);
-    }
-
 
     private bool isSearching = false;
     private async Task GetFilterDSachVitriLuuTru(string keyWord)

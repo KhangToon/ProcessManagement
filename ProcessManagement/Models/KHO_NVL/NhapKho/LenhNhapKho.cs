@@ -14,7 +14,7 @@ namespace ProcessManagement.Models.KHO_NVL.NhapKho
         public Propertyy LNKSoLuong { get; set; } = new() { DBName = Common.LNKSoLuong, Type = typeof(int), AlowDatabase = true };
         public Propertyy NgayNhapKho { get; set; } = new() { DBName = Common.NgayNhapKho, Type = typeof(string), AlowDatabase = true };
         public Propertyy LNKIsDone { get; set; } = new() { DBName = Common.LNKIsDone, Type = typeof(int), AlowDatabase = true };
-
+        public Propertyy QRIDLOT { get; set; } = new() { DBName = Common.QRIDLOT, Type = typeof(string), AlowDatabase = true };
         public NguyenVatLieu TargetNgLieu { get; set; } = new(); // thong tin nvl cua lenh
         public VitriLuuTru TargertVitri { get; set; } = new(); // vi tri khi chi dinh noi nhap kho
 

@@ -2883,6 +2883,41 @@ namespace ProcessManagement.Services.SQLServer
 
             return vitriofnvl;
         }
+        public ViTriofNVL GetViTriOfNgVatLieuByQRIDLOT(object? qridlot)
+        {
+            ViTriofNVL vitriofnvl = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_VitriOfNVL}] WHERE [{Common.QRIDLOT}] = '{qridlot}'";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    List<Propertyy> rowitems = vitriofnvl.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue.ToString()?.Trim();
+                    }
+                }
+            }
+
+            // Get vitriluutru infor
+            vitriofnvl.VitriInfor = GetViTriLuuTruByID(vitriofnvl.VTID.Value);
+            vitriofnvl.NgLieuInfor = GetNguyenVatLieuByID(vitriofnvl.NVLID.Value);
+
+            return vitriofnvl;
+        }
 
         public ViTriofNVL GetViTriOfNgVatLieuBy_VTid_LotVitri(object? vtid = null, object? nvlid = null, object? lotvitri = null)
         {

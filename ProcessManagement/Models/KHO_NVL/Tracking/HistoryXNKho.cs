@@ -12,6 +12,7 @@ namespace ProcessManagement.Models.KHO_NVL.Tracking
         public Propertyy LogTenNVL { get; set; } = new() { DBName = Common.LogTenNVL, DisplayName = Common.LogTenNVL, Type = typeof(string), AlowDatabase = true };
         public Propertyy LogMaViTri { get; set; } = new() { DBName = Common.LogMaViTri, DisplayName = Common.LogMaViTri, Type = typeof(string), AlowDatabase = true };
         public Propertyy LotVitri { get; set; } = new() { DBName = Common.LotViTri, DisplayName = Common.LotViTri, Type = typeof(string), AlowDatabase = true };
+        public Propertyy QRIDLOT { get; set; } = new() { DBName = Common.QRIDLOT, Type = typeof(string), AlowDatabase = true };
         public Propertyy LogSoLuong { get; set; } = new() { DBName = Common.LogSoLuong, DisplayName = Common.LogSoLuong, Type = typeof(int), AlowDatabase = true };
         public Propertyy LogTonKhoTruoc { get; set; } = new() { DBName = Common.LogTonKhoTruoc, DisplayName = Common.LogTonKhoTruoc, Type = typeof(int), AlowDatabase = true };
         public Propertyy LogTonKhoSau { get; set; } = new() { DBName = Common.LogTonKhoSau, DisplayName = Common.LogTonKhoSau, Type = typeof(int), AlowDatabase = true };

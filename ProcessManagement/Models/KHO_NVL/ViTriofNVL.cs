@@ -11,6 +11,7 @@ namespace ProcessManagement.Models.KHO_NVL
         public Propertyy VTNVLSoLuong { get; set; } = new() { DBName = Common.VTNVLSoLuong, Type = typeof(int), AlowDatabase = true };
         public Propertyy NgayNhapKho { get; set; } = new() { DBName = Common.NgayNhapKho, Type = typeof(string), AlowDatabase = true };
         public Propertyy LotVitri { get; set; } = new() { DBName = Common.LotViTri, Type = typeof(string), AlowDatabase = true };
+        public Propertyy QRIDLOT { get; set; } = new() { DBName = Common.QRIDLOT, Type = typeof(string), AlowDatabase = true };
 
         public VitriLuuTru VitriInfor = new();
 
@@ -58,6 +59,13 @@ namespace ProcessManagement.Models.KHO_NVL
             Propertyy? tagetProperty = propertiesValue.FirstOrDefault(f => f.DBName == propertyName);
 
             return tagetProperty?.Value;
+        }
+
+        public static string GenerateQRIDLOT(string? args = null)
+        {
+            string qridlot = string.Empty;
+
+            return qridlot;
         }
     }
 }

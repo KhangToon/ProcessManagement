@@ -161,6 +161,7 @@ namespace ProcessManagement.Commons
         public const string VTofNVLID = "VTofNVLID";
         public const string VTNVLSoLuong = "Số lượng";
         public const string LotViTri = "Lot";
+        public const string QRIDLOT = "QRIDLOT";
         public const string NgayNhapKho = "Ngày nhập kho";
         public const string NgayXuatKho = "Ngày xuất kho";
 
@@ -460,6 +461,13 @@ namespace ProcessManagement.Commons
         {
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
             return new string(Enumerable.Repeat(chars, 5)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
+        }
+
+        public static string GenerateUppercaseChars(int lenght)
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            return new string(Enumerable.Repeat(chars, lenght)
                 .Select(s => s[random.Next(s.Length)]).ToArray());
         }
 

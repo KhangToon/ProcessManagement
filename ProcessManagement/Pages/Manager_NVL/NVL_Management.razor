@@ -173,60 +173,60 @@
                                                         List<Propertyy> columns = DSNguyenVatLieus.FirstOrDefault()?.GetPropertiesValues() ?? new();
                                                         List<ThongTinNVL>? extracolumns = DSNguyenVatLieus.FirstOrDefault()?.DSThongTin.Where(tt => tt.LoaiThongTin.IsDisplayDatagrid.Value?.ToString() == "1")?.ToList();
 
-                                                            <RadzenDataGridColumn Width="40px" Frozen="true" FrozenPosition="FrozenColumnPosition.Left" Filterable="false"
-                                                                                  TItem="NguyenVatLieu" Title="#"
-                                                                                  Property="STT" TextAlign="TextAlign.Center">
-                                                                <HeaderTemplate>
-                                                                    <span style="font-weight: 600; font-size: 15px; color: white">STT</span>
-                                                                </HeaderTemplate>
-                                                                <Template Context="nvl">
-                                                                    <span style="font-weight: bold;">@(DSNguyenVatLieus.IndexOf(nvl) + 1)</span>
-                                                                </Template>
-                                                            </RadzenDataGridColumn>
+                                                        <RadzenDataGridColumn Width="40px" Frozen="true" FrozenPosition="FrozenColumnPosition.Left" Filterable="false"
+                                                                              TItem="NguyenVatLieu" Title="#"
+                                                                              Property="STT" TextAlign="TextAlign.Center">
+                                                            <HeaderTemplate>
+                                                                <span style="font-weight: 600; font-size: 15px; color: white">STT</span>
+                                                            </HeaderTemplate>
+                                                            <Template Context="nvl">
+                                                                <span style="font-weight: bold;">@(DSNguyenVatLieus.IndexOf(nvl) + 1)</span>
+                                                            </Template>
+                                                        </RadzenDataGridColumn>
 
-                                                            <!--Ten NVL-->
-                                                            <RadzenDataGridColumn Width="110px" TItem="NguyenVatLieu" Title="Tên NVL"
-                                                                                  Property="tennvl" TextAlign="TextAlign.Center">
-                                                                <HeaderTemplate>
-                                                                    <span style="font-weight: 600; font-size: 15px; color: white">Tên NVL</span>
-                                                                </HeaderTemplate>
-                                                                <Template Context="nvl">
-                                                                    <span style="color: darkblue; font-weight: bold;">@($"{nvl?.TenNVL.Value?.ToString()}")</span>
-                                                                </Template>
-                                                            </RadzenDataGridColumn>
+                                                        <!--Ten NVL-->
+                                                        <RadzenDataGridColumn Width="110px" TItem="NguyenVatLieu" Title="Tên NVL"
+                                                                              Property="tennvl" TextAlign="TextAlign.Center">
+                                                            <HeaderTemplate>
+                                                                <span style="font-weight: 600; font-size: 15px; color: white">Tên NVL</span>
+                                                            </HeaderTemplate>
+                                                            <Template Context="nvl">
+                                                                <span style="color: darkblue; font-weight: bold;">@($"{nvl?.TenNVL.Value?.ToString()}")</span>
+                                                            </Template>
+                                                        </RadzenDataGridColumn>
 
-                                                            <!--Loai NVL-->
-                                                            <RadzenDataGridColumn Width="110px" TItem="NguyenVatLieu" Title="Loại NVL"
-                                                                                  Property="loainglieu" TextAlign="TextAlign.Center">
-                                                                <HeaderTemplate>
-                                                                    <span style="font-weight: 600; font-size: 15px; color: white">Loại NVL</span>
-                                                                </HeaderTemplate>
-                                                                <Template Context="nvl">
-                                                                    <span style="color: black; font-weight: 500;">@($"{nvl.LoaiNVL?.TenLoaiNVL.Value?.ToString()}")</span>
-                                                                </Template>
-                                                            </RadzenDataGridColumn>
+                                                        <!--Loai NVL-->
+                                                        <RadzenDataGridColumn Width="110px" TItem="NguyenVatLieu" Title="Loại NVL"
+                                                                              Property="loainglieu" TextAlign="TextAlign.Center">
+                                                            <HeaderTemplate>
+                                                                <span style="font-weight: 600; font-size: 15px; color: white">Loại NVL</span>
+                                                            </HeaderTemplate>
+                                                            <Template Context="nvl">
+                                                                <span style="color: black; font-weight: 500;">@($"{nvl.LoaiNVL?.TenLoaiNVL.Value?.ToString()}")</span>
+                                                            </Template>
+                                                        </RadzenDataGridColumn>
 
-                                                            <!--Ton Kho-->
-                                                            <RadzenDataGridColumn Width="110px" TItem="NguyenVatLieu" Title="Tồn kho"
-                                                                                  Property="tongtonkho" TextAlign="TextAlign.Center">
-                                                                <HeaderTemplate>
-                                                                    <span style="font-weight: 600; font-size: 15px; color: white">Tồn kho</span>
-                                                                </HeaderTemplate>
-                                                                <Template Context="nvl">
+                                                        <!--Ton Kho-->
+                                                        <RadzenDataGridColumn Width="110px" TItem="NguyenVatLieu" Title="Tồn kho"
+                                                                              Property="tongtonkho" TextAlign="TextAlign.Center">
+                                                            <HeaderTemplate>
+                                                                <span style="font-weight: 600; font-size: 15px; color: white">Tồn kho</span>
+                                                            </HeaderTemplate>
+                                                            <Template Context="nvl">
                                                                 @{
                                                                     string donvitinh = nvl.DonViTinh.Value?.ToString() ?? string.Empty;
 
                                                                     if (!String.IsNullOrEmpty(donvitinh) && nvl.TonKho > 0)
                                                                     {
-                                                                                    <span style="color: darkred; font-weight: bold;">@(nvl.TonKho + $" ({donvitinh})")</span>
+                                                                        <span style="color: darkred; font-weight: bold;">@(nvl.TonKho + $" ({donvitinh})")</span>
                                                                     }
                                                                     else
                                                                     {
-                                                                                    <span style="color: darkred; font-weight: bold;">@(nvl.TonKho)</span>
+                                                                        <span style="color: darkred; font-weight: bold;">@(nvl.TonKho)</span>
                                                                     }
                                                                 }
-                                                                </Template>
-                                                            </RadzenDataGridColumn>
+                                                            </Template>
+                                                        </RadzenDataGridColumn>
 
                                                         if (extracolumns != null)
                                                         {
@@ -234,12 +234,12 @@
                                                             {
                                                                 string colName = column.LoaiThongTin.TenLoaiThongTin.Value?.ToString() ?? string.Empty;
 
-                                                                            <RadzenDataGridColumn Width="110px" TItem="NguyenVatLieu" Title="@colName"
-                                                                                                  Property="@colName" TextAlign="TextAlign.Center">
-                                                                                <HeaderTemplate>
-                                                                                    <span style="font-weight: 600; font-size: 15px; color: white">@colName</span>
-                                                                                </HeaderTemplate>
-                                                                                <Template Context="nvl">
+                                                                <RadzenDataGridColumn Width="110px" TItem="NguyenVatLieu" Title="@colName"
+                                                                                      Property="@colName" TextAlign="TextAlign.Center">
+                                                                    <HeaderTemplate>
+                                                                        <span style="font-weight: 600; font-size: 15px; color: white">@colName</span>
+                                                                    </HeaderTemplate>
+                                                                    <Template Context="nvl">
                                                                         @{
                                                                             ThongTinNVL? ttNVl = nvl.DSThongTin.FirstOrDefault(tt => tt.LoaiThongTin.TenLoaiThongTin.Value?.ToString() == colName);
                                                                             if (ttNVl != null)
@@ -250,21 +250,21 @@
                                                                                 {
                                                                                     bool ishaveValueOfday = DateTime.TryParse(colValue, out DateTime vldate);
 
-                                                                                                            <RadzenText Visible="@ishaveValueOfday" Text="@vldate.ToString("dd/MM/yyyy")" Style="font-size: 15px; height: contain; color: black; font-weight: 500"></RadzenText>
-                                                                                                            <RadzenText Visible="@(!ishaveValueOfday)" Text="@string.Empty" Style="font-size: 15px; height: contain; color: black; font-weight: 500"></RadzenText>
+                                                                                    <RadzenText Visible="@ishaveValueOfday" Text="@vldate.ToString("dd/MM/yyyy")" Style="font-size: 15px; height: contain; color: black; font-weight: 500"></RadzenText>
+                                                                                    <RadzenText Visible="@(!ishaveValueOfday)" Text="@string.Empty" Style="font-size: 15px; height: contain; color: black; font-weight: 500"></RadzenText>
                                                                                 }
                                                                                 else
                                                                                 {
-                                                                                                            <span style="color: black; font-weight: 500;">@colValue</span>
+                                                                                    <span style="color: black; font-weight: 500;">@colValue</span>
                                                                                 }
                                                                             }
                                                                             else
                                                                             {
-                                                                                                    <RadzenText Text="@string.Empty" Style="font-size: 15px; height: contain; color: black; font-weight: 500"></RadzenText>
+                                                                                <RadzenText Text="@string.Empty" Style="font-size: 15px; height: contain; color: black; font-weight: 500"></RadzenText>
                                                                             }
                                                                         }
-                                                                                </Template>
-                                                                            </RadzenDataGridColumn>
+                                                                    </Template>
+                                                                </RadzenDataGridColumn>
                                                             }
                                                         }
 
@@ -275,41 +275,41 @@
 
                                                             if (colName != Common.TenNVL)
                                                             {
-                                                                            <RadzenDataGridColumn Width="110px" TItem="NguyenVatLieu" Title="@displayName"
-                                                                                                  Property="@colName" TextAlign="TextAlign.Center">
-                                                                                <HeaderTemplate>
-                                                                                    <span style="font-weight: 600; font-size: 15px; color: white">@displayName</span>
-                                                                                </HeaderTemplate>
-                                                                                <Template Context="nvl">
+                                                                <RadzenDataGridColumn Width="110px" TItem="NguyenVatLieu" Title="@displayName"
+                                                                                      Property="@colName" TextAlign="TextAlign.Center">
+                                                                    <HeaderTemplate>
+                                                                        <span style="font-weight: 600; font-size: 15px; color: white">@displayName</span>
+                                                                    </HeaderTemplate>
+                                                                    <Template Context="nvl">
 
                                                                         @if (column.Type == typeof(DateTime))
                                                                         {
                                                                             string valuensd = nvl.GetPropertyValue(colName)?.ToString() ?? string.Empty;
                                                                             bool ishaveValueOfday = DateTime.TryParse(valuensd, out DateTime vldate);
 
-                                                                                            <RadzenText Visible="@ishaveValueOfday" Text="@vldate.ToString("dd/MM/yyyy")" Style="font-size: 15px; height: contain; color: black; font-weight: 500"></RadzenText>
-                                                                                            <RadzenText Visible="@(!ishaveValueOfday)" Text="@string.Empty" Style="font-size: 15px; height: contain; color: black; font-weight: 500"></RadzenText>
+                                                                            <RadzenText Visible="@ishaveValueOfday" Text="@vldate.ToString("dd/MM/yyyy")" Style="font-size: 15px; height: contain; color: black; font-weight: 500"></RadzenText>
+                                                                            <RadzenText Visible="@(!ishaveValueOfday)" Text="@string.Empty" Style="font-size: 15px; height: contain; color: black; font-weight: 500"></RadzenText>
 
                                                                         }
                                                                         else
                                                                         {
-                                                                                            <span style="color: black; font-weight: 500;">@(nvl.GetPropertyValue(colName))</span>
+                                                                            <span style="color: black; font-weight: 500;">@(nvl.GetPropertyValue(colName))</span>
                                                                         }
-                                                                                </Template>
-                                                                            </RadzenDataGridColumn>
+                                                                    </Template>
+                                                                </RadzenDataGridColumn>
                                                             }
                                                         }
 
-                                                            <!--ID-->
-                                                            <RadzenDataGridColumn Width="40px" TItem="NguyenVatLieu" Title="#ID" Frozen="true"
-                                                                                  Property="#ID" TextAlign="TextAlign.Center">
-                                                                <HeaderTemplate>
-                                                                    <span style="font-weight: 600; font-size: 15px; color: white">#ID</span>
-                                                                </HeaderTemplate>
-                                                                <Template Context="nvl">
-                                                                    <span style="color: black; font-weight: 500;">@($"#{nvl.GetPropertyValue(Common.NVLID)}")</span>
-                                                                </Template>
-                                                            </RadzenDataGridColumn>
+                                                        <!--ID-->
+                                                        <RadzenDataGridColumn Width="40px" TItem="NguyenVatLieu" Title="#ID" Frozen="true"
+                                                                              Property="#ID" TextAlign="TextAlign.Center">
+                                                            <HeaderTemplate>
+                                                                <span style="font-weight: 600; font-size: 15px; color: white">#ID</span>
+                                                            </HeaderTemplate>
+                                                            <Template Context="nvl">
+                                                                <span style="color: black; font-weight: 500;">@($"#{nvl.GetPropertyValue(Common.NVLID)}")</span>
+                                                            </Template>
+                                                        </RadzenDataGridColumn>
                                                     }
                                                 </Columns>
                                             </RadzenDataGrid>
@@ -329,144 +329,148 @@
                                                         @if (SelectedNgVatLieu.NVLID.Value != null)
                                                         {
 
-                                                                <!--Display list VitriLuutri-->
-                                                                <RadzenStack Gap="20px" Style="height: contain; width: 100%; background-color: var(--rz-primary-darker); padding: 5px; padding-left: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                                                                    <RadzenText Text="Vị trí nguyên liệu trong kho" Style="color: white; font-weight: 500; font-size: 16px"></RadzenText>
-                                                                </RadzenStack>
-                                                                <RadzenStack Gap="0" Style="width: 100%; height: contain; padding: 0; " Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                                                    <RadzenCard Variant="Variant.Filled" Style="height: contain; width: 30%; padding: 5px; border-radius: 10px">
-                                                                        <RadzenStack Style="width: 100%; height: contain; padding: 0; padding-top: 10px;" Gap="0" Orientation=Orientation.Vertical AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                            <!--Display list VitriLuutri-->
+                                                            <RadzenStack Gap="20px" Style="height: contain; width: 100%; background-color: var(--rz-primary-darker); padding: 5px; padding-left: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                                                <RadzenText Text="Vị trí nguyên liệu trong kho" Style="color: white; font-weight: 500; font-size: 16px"></RadzenText>
+                                                            </RadzenStack>
+                                                            <RadzenStack Gap="0" Style="width: 100%; height: contain; padding: 0; " Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                                <RadzenCard Variant="Variant.Filled" Style="height: contain; width: 25%; padding: 5px; border-radius: 10px">
+                                                                    <RadzenStack Style="width: 100%; height: contain; padding: 0; padding-top: 10px;" Gap="0" Orientation=Orientation.Vertical AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
 
                                                                         @{
                                                                             string qrBase64string = QRCodeServices.GenerateQRCode(SelectedNgVatLieu?.TenNVL.Value?.ToString() ?? string.Empty, 150);
                                                                             @if (!string.IsNullOrEmpty(qrBase64string))
                                                                             {
-                                                                                            <RadzenStack Gap="10" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                                                <RadzenText Text="@($"{SelectedNgVatLieu?.TenNVL.Value?.ToString()}")" Style="font-weight: 600; font-size: 16px; color: darkblue;"></RadzenText>
-                                                                                            </RadzenStack>
-                                                                                            <RadzenImage Style="max-width: 100px; max-height: 100px; padding: 0px; margin: 0" Path="@($"data:image/png;base64,{qrBase64string}")"></RadzenImage>
+                                                                                <RadzenStack Gap="10" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                                    <RadzenText Text="@($"{SelectedNgVatLieu?.TenNVL.Value?.ToString()}")" Style="font-weight: 600; font-size: 16px; color: darkblue;"></RadzenText>
+                                                                                </RadzenStack>
+                                                                                <RadzenImage Style="max-width: 100px; max-height: 100px; padding: 0px; margin: 0" Path="@($"data:image/png;base64,{qrBase64string}")"></RadzenImage>
                                                                             }
                                                                             else
                                                                             {
-                                                                                            <RadzenIcon Icon="image_not_supported" Style="font-size: 100px; color: #ccc;"></RadzenIcon>
+                                                                                <RadzenIcon Icon="image_not_supported" Style="font-size: 100px; color: #ccc;"></RadzenIcon>
                                                                             }
                                                                         }
-                                                                        </RadzenStack>
-                                                                    </RadzenCard>
-                                                                    <RadzenStack Style="width: 70%; height: contain; padding: 0" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                                                        <RadzenCard Variant="Variant.Flat" Style="height: contain; width: 100%; padding: 10px; border-radius: 0; margin-bottom: 10px">
-                                                                            <RadzenStack Gap="5px" Orientation="Orientation.Vertical" Style=" height: contain; width: 100%; padding: 0px; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                                                                <RadzenStack Gap="20px" Style="height: contain; width: 100%; padding: 0px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                                                                                    <RadzenText Text="Danh sách vị trí" Style="font-weight: 500; font-size: 16px; color: black"></RadzenText>
-                                                                                </RadzenStack>
-                                                                                <RadzenRow Gap="10px" Style="width: 100%; height: contain;">
-                                                                                    <RadzenColumn Size="12" SizeMD="12" Style="width: 100%; height: 100%;">
-                                                                                        <RadzenStack Gap="5px" Orientation="Orientation.Vertical" Style="height: 100%; width: 100%;" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start">
-                                                                                            <RadzenStack Gap="5px" Orientation="Orientation.Vertical" Style=" height: contain; width: 100%; max-height: 350px; padding-right: 0;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                                    </RadzenStack>
+                                                                </RadzenCard>
+                                                                <RadzenStack Style="width: 75%; height: contain; padding: 0;" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                                    <RadzenCard Variant="Variant.Flat" Style="height: contain; width: 100%; padding: 10px; border-radius: 0; margin-bottom: 10px">
+                                                                        <RadzenStack Gap="5px" Orientation="Orientation.Vertical" Style=" height: contain; width: 100%; padding: 0px; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                                            <RadzenStack Gap="20px" Style="height: contain; width: 100%; padding: 0px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                                                                <RadzenText Text="Danh sách vị trí" Style="font-weight: 500; font-size: 16px; color: black"></RadzenText>
+                                                                            </RadzenStack>
+                                                                            <RadzenRow Gap="10px" Style="width: 100%; height: contain; overflow-x: scroll">
+                                                                                <RadzenColumn Size="12" SizeMD="12" Style="width: 100%; height: 100%; min-width: 350px;">
+                                                                                    <RadzenStack Gap="5px" Orientation="Orientation.Vertical" Style=" height: contain; width: 100%; padding-right: 0;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
 
-                                                                                            @if (SelectedNgVatLieu.NVLID.Value != null)
+                                                                                        @if (SelectedNgVatLieu.NVLID.Value != null)
+                                                                                        {
+                                                                                            var dsvitri = SelectedNgVatLieu?.DSViTri.Where(vt => (int.TryParse(vt.VTNVLSoLuong.Value?.ToString(), out int slvt) ? slvt : 0) > 0).ToList();
+
+                                                                                            if (dsvitri != null && dsvitri.Count > 0)
                                                                                             {
-                                                                                                var dsvitri = SelectedNgVatLieu?.DSViTri.Where(vt => (int.TryParse(vt.VTNVLSoLuong.Value?.ToString(), out int slvt) ? slvt : 0) > 0).ToList();
-
-                                                                                                if (dsvitri != null && dsvitri.Count > 0)
+                                                                                                @foreach (var vitri in dsvitri)
                                                                                                 {
-                                                                                                    @foreach (var vitri in dsvitri)
-                                                                                                    {
-                                                                                                                        <RadzenCard class="rz-shadow-4" Variant="Variant.Outlined" Style="width: 100%; height: contain; padding: 5px; padding-right: 0px; background-color: white">
-                                                                                                                            <RadzenStack Style="width: 100%; height: 100%" Gap="10px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                                                                                <RadzenStack Style="width: 3%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                                                                                    <RadzenText Text="@($"{(dsvitri.IndexOf(vitri) + 1).ToString()}")" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
-                                                                                                                                </RadzenStack>
-                                                                                                                                <RadzenStack Style="width: 25%; height: contain; border-left: var(--rz-grid-cell-border); border-right: var(--rz-grid-cell-border); padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                                                                                    <RadzenText Text="@($"{vitri.VitriInfor.MaViTri.Value?.ToString()}")" Style="color: darkblue; font-weight: 600; font-size: 16px"></RadzenText>
-                                                                                                                                </RadzenStack>
-                                                                                                                                <RadzenStack Style="width: 15%; height: contain; border-right: var(--rz-grid-cell-border); padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                                                                                    <RadzenText Text="@($"{vitri.LotVitri.Value?.ToString()}")" Style="color: darkblue; font-weight: 600; font-size: 16px"></RadzenText>
-                                                                                                                                </RadzenStack>
-                                                                                                                                <RadzenStack Gap=15px Style="width: 20%; height: contain; border-right: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                                                                                                                    <RadzenText Text="@($"{(int.TryParse(vitri.VTNVLSoLuong?.Value?.ToString(), out int slvt)? slvt : 0)} (pcs)")" Style="font-size: 16px; font-weight: 600; height: contain; color: rgba(58,71,77)"></RadzenText>
-                                                                                                                                </RadzenStack>
-                                                                                                                                <RadzenStack Style="width: 20%; height: contain; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                                                                                    <RadzenText Text="@($"{vitri.NgayNhapKho.Value?.ToString()}")" Style="color: darkblue; font-weight: 600; font-size: 16px"></RadzenText>
-                                                                                                                                </RadzenStack>
-                                                                                                                            </RadzenStack>
-                                                                                                                        </RadzenCard>
-                                                                                                    }
-                                                                                                }
-                                                                                                else
-                                                                                                {
-                                                                                                                <RadzenStack Style="width: 100%; height: contain; " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                                                                    <RadzenText Text="Nguyên liệu chưa có trong kho lưu trữ" Style="font-size: 16px; font-weight: 500; height: contain; color: red"></RadzenText>
+                                                                                                    <RadzenCard class="rz-shadow-4" Variant="Variant.Outlined" Style="width: 100%; height: contain; padding: 5px; padding-right: 0px; background-color: white">
+                                                                                                        <RadzenStack Style="width: 100%; height: contain" Gap="0" Orientation=Orientation.Vertical AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                                                            <RadzenStack Style="width: 100%; height: contain" Gap="10px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                                                                <RadzenStack Style="width: 3%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                                                                    <RadzenText Text="@($"{(dsvitri.IndexOf(vitri) + 1).ToString()}")" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
                                                                                                                 </RadzenStack>
+                                                                                                                <RadzenStack Style="width: 25%; height: contain; border-left: var(--rz-grid-cell-border); border-right: var(--rz-grid-cell-border); padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                                                                    <RadzenText Text="@($"{vitri.VitriInfor.MaViTri.Value?.ToString()}")" Style="color: darkblue; font-weight: 600; font-size: 16px"></RadzenText>
+                                                                                                                </RadzenStack>
+                                                                                                                <RadzenStack Style="width: 15%; height: contain; border-right: var(--rz-grid-cell-border); padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                                                                    <RadzenText Text="@($"{vitri.LotVitri.Value?.ToString()}")" Style="color: darkblue; font-weight: 600; font-size: 16px"></RadzenText>
+                                                                                                                </RadzenStack>
+                                                                                                                <RadzenStack Gap=15px Style="width: 30%; height: contain; padding-right: 10px; border-right: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                                                                    <RadzenText Text="@($"{(int.TryParse(vitri.VTNVLSoLuong?.Value?.ToString(), out int slvt)? slvt : 0)} (pcs)")" Style="font-size: 16px; font-weight: 600; height: contain; color: rgba(58,71,77)"></RadzenText>
+                                                                                                                </RadzenStack>
+                                                                                                                <RadzenStack Style="width: 25%; height: contain; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                                                                    <RadzenText Text="@($"{vitri.NgayNhapKho.Value?.ToString()}")" Style="color: darkblue; font-weight: 600; font-size: 16px"></RadzenText>
+                                                                                                                </RadzenStack>
+                                                                                                            </RadzenStack>
+                                                                                                            <RadzenStack Visible="@(!string.IsNullOrEmpty(vitri.QRIDLOT.Value?.ToString()))" Style="width: 100%; height: contain; padding-right: 10px; padding-top: 5px" Gap="10px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                                                                                <RadzenButton Text="@vitri.QRIDLOT.Value?.ToString()" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Lighter" Variant="Variant.Flat"
+                                                                                                                              Style="font-size: 18px; height: contain; min-height: contain; width: contain;" />
+                                                                                                            </RadzenStack>
+                                                                                                        </RadzenStack>
+                                                                                                    </RadzenCard>
                                                                                                 }
                                                                                             }
-                                                                                            </RadzenStack>
-                                                                                        </RadzenStack>
-                                                                                    </RadzenColumn>
-                                                                                </RadzenRow>
-                                                                            </RadzenStack>
-                                                                        </RadzenCard>
-                                                                    </RadzenStack>
+                                                                                            else
+                                                                                            {
+                                                                                                <RadzenStack Style="width: 100%; height: contain; " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                                                    <RadzenText Text="Nguyên liệu chưa có trong kho lưu trữ" Style="font-size: 16px; font-weight: 500; height: contain; color: red"></RadzenText>
+                                                                                                </RadzenStack>
+                                                                                            }
+                                                                                        }
+                                                                                    </RadzenStack>
+                                                                                </RadzenColumn>
+                                                                            </RadzenRow>
+                                                                        </RadzenStack>
+                                                                    </RadzenCard>
                                                                 </RadzenStack>
-                                                                <!--Display list VitriLuutri-->
+                                                            </RadzenStack>
+                                                            <!--Display list VitriLuutri-->
 
-                                                                <RadzenStack Gap="20px" Style="height: contain; width: 100%; background-color: var(--rz-primary-darker); padding: 5px; padding-left: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                                                                    <RadzenText Text="Thông tin chi tiết nguyên liệu" Style="color: white; font-weight: 500; font-size: 16px"></RadzenText>
-                                                                </RadzenStack>
-                                                                <!--Danh sach thong tin cua nguyen lieu - default-->
+                                                            <RadzenStack Gap="20px" Style="height: contain; width: 100%; background-color: var(--rz-primary-darker); padding: 5px; padding-left: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                                                <RadzenText Text="Thông tin chi tiết nguyên liệu" Style="color: white; font-weight: 500; font-size: 16px"></RadzenText>
+                                                            </RadzenStack>
+                                                            <!--Danh sach thong tin cua nguyen lieu - default-->
                                                             var nvlDetailsItems = SelectedNgVatLieu?.GetPropertiesValues().Where(nvl => nvl.AlowDisplay == true).ToList();
 
                                                             if (nvlDetailsItems != null)
                                                             {
                                                                 // Danh muc
-                                                                        <RadzenStack Visible="false" Gap="0" Style="height: contain; width: 100%; padding-bottom: 5px; padding-top: 5px; padding-left: 20px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                                                            <RadzenStack Style="width: 30%;">
-                                                                                <RadzenText Text="Danh mục" Style="font-size: 16px; font-weight: 600; color: black; height: contain; width: 100% "></RadzenText>
-                                                                            </RadzenStack>
-                                                                            <RadzenStack Style="width: 55%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="@((isEditNVLDetail)? JustifyContent.Start : JustifyContent.Center)">
-                                                                                <RadzenText Text="@SelectedNgVatLieu?.DanhMuc?.TenDanhMuc.Value?.ToString()" Style="font-size: 16px; height: contain;"></RadzenText>
-                                                                            </RadzenStack>
-                                                                        </RadzenStack>
+                                                                <RadzenStack Visible="false" Gap="0" Style="height: contain; width: 100%; padding-bottom: 5px; padding-top: 5px; padding-left: 20px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                                    <RadzenStack Style="width: 30%;">
+                                                                        <RadzenText Text="Danh mục" Style="font-size: 16px; font-weight: 600; color: black; height: contain; width: 100% "></RadzenText>
+                                                                    </RadzenStack>
+                                                                    <RadzenStack Style="width: 55%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="@((isEditNVLDetail)? JustifyContent.Start : JustifyContent.Center)">
+                                                                        <RadzenText Text="@SelectedNgVatLieu?.DanhMuc?.TenDanhMuc.Value?.ToString()" Style="font-size: 16px; height: contain;"></RadzenText>
+                                                                    </RadzenStack>
+                                                                </RadzenStack>
 
                                                                 // Ton kho
-                                                                        <RadzenStack Gap="0" Style="height: contain; width: 100%; padding-bottom: 5px; padding-top: 5px; padding-left: 20px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                                                            <RadzenStack Style="width: 30%;">
-                                                                                <RadzenText Text="Tồn kho" Style="font-size: 16px; font-weight: 600; color: black; height: contain; width: 100% "></RadzenText>
-                                                                            </RadzenStack>
-                                                                            <RadzenStack Style="width: 55%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="@((isEditNVLDetail)? JustifyContent.Start : JustifyContent.Center)">
-                                                                                <RadzenText Text="@($"{SelectedNgVatLieu?.TonKho} ({SelectedNgVatLieu?.DonViTinh.Value?.ToString()})")" Style="color: darkred; font-size: 16px; height: contain;"></RadzenText>
-                                                                            </RadzenStack>
-                                                                        </RadzenStack>
+                                                                <RadzenStack Gap="0" Style="height: contain; width: 100%; padding-bottom: 5px; padding-top: 5px; padding-left: 20px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                                    <RadzenStack Style="width: 30%;">
+                                                                        <RadzenText Text="Tồn kho" Style="font-size: 16px; font-weight: 600; color: black; height: contain; width: 100% "></RadzenText>
+                                                                    </RadzenStack>
+                                                                    <RadzenStack Style="width: 55%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="@((isEditNVLDetail)? JustifyContent.Start : JustifyContent.Center)">
+                                                                        <RadzenText Text="@($"{SelectedNgVatLieu?.TonKho} ({SelectedNgVatLieu?.DonViTinh.Value?.ToString()})")" Style="color: darkred; font-size: 16px; height: contain;"></RadzenText>
+                                                                    </RadzenStack>
+                                                                </RadzenStack>
 
                                                                 foreach (var ngVatlieu in nvlDetailsItems)
                                                                 {
-                                                                                <RadzenStack Gap="0" Style="height: contain; width: 100%; padding-bottom: 5px; padding-top: 5px; padding-left: 20px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                                                                    <RadzenStack Style="width: 30%;">
-                                                                                        <RadzenText Text="@ngVatlieu.DisplayName" Style="font-size: 16px; font-weight: 600; color: black; height: contain; width: 100% "></RadzenText>
-                                                                                    </RadzenStack>
-                                                                                    <RadzenStack Style="width: 55%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="@((isEditNVLDetail)? JustifyContent.Start : JustifyContent.Center)">
+                                                                    <RadzenStack Gap="0" Style="height: contain; width: 100%; padding-bottom: 5px; padding-top: 5px; padding-left: 20px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                                        <RadzenStack Style="width: 30%;">
+                                                                            <RadzenText Text="@ngVatlieu.DisplayName" Style="font-size: 16px; font-weight: 600; color: black; height: contain; width: 100% "></RadzenText>
+                                                                        </RadzenStack>
+                                                                        <RadzenStack Style="width: 55%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="@((isEditNVLDetail)? JustifyContent.Start : JustifyContent.Center)">
 
-                                                                                        <!--Edit mode-->
+                                                                            <!--Edit mode-->
                                                                             @if (isEditNVLDetail)
                                                                             {
                                                                                 if (ngVatlieu.Type == typeof(string))
                                                                                 {
-                                                                                                        <RadzenTextBox Placeholder="@($"*Nhập {ngVatlieu.DisplayName}")" Value="@ngVatlieu.Value?.ToString()" ValueChanged="@((args) => { ngVatlieu.Value = args; } )"
-                                                                                                                       Style="font-size: 16px; height: contain; border-width: 1px; width: 100% "></RadzenTextBox>
+                                                                                    <RadzenTextBox Placeholder="@($"*Nhập {ngVatlieu.DisplayName}")" Value="@ngVatlieu.Value?.ToString()" ValueChanged="@((args) => { ngVatlieu.Value = args; } )"
+                                                                                                   Style="font-size: 16px; height: contain; border-width: 1px; width: 100% "></RadzenTextBox>
                                                                                 }
                                                                                 else if (ngVatlieu.Type == typeof(int))
                                                                                 {
-                                                                                                        <RadzenNumeric Placeholder="@($"*Nhập {ngVatlieu.DisplayName}")" TValue="int" Value="@int.Parse(ngVatlieu.Value?.ToString()?? "0")" Min="0" Max="999999" ValueChanged="@((args) => { ngVatlieu.Value = args; })"
-                                                                                                                       Style="font-size: 16px; height: contain; border-width: 1px; width: 100%" />
+                                                                                    <RadzenNumeric Placeholder="@($"*Nhập {ngVatlieu.DisplayName}")" TValue="int" Value="@int.Parse(ngVatlieu.Value?.ToString()?? "0")" Min="0" Max="999999" ValueChanged="@((args) => { ngVatlieu.Value = args; })"
+                                                                                                   Style="font-size: 16px; height: contain; border-width: 1px; width: 100%" />
                                                                                 }
                                                                                 else if (ngVatlieu.Type == typeof(DateTime))
                                                                                 {
                                                                                     bool ishaveValueOfday = DateTime.TryParse(ngVatlieu.Value?.ToString(), out DateTime selectday);
                                                                                     if (ishaveValueOfday) selectday = selectday.Date.Add(DateTime.Now.TimeOfDay);
 
-                                                                                                        <RadzenDatePicker class="custom-datepicker" Placeholder="@($"* nhập {ngVatlieu.DisplayName}")"
-                                                                                                                          TValue="DateTime" Value="selectday" AllowClear="true"
-                                                                                                                          Change="@((args) =>
+                                                                                    <RadzenDatePicker class="custom-datepicker" Placeholder="@($"* nhập {ngVatlieu.DisplayName}")"
+                                                                                                      TValue="DateTime" Value="selectday" AllowClear="true"
+                                                                                                      Change="@((args) =>
                                                                                                         {
                                                                                                             if (args != null)
                                                                                                             {
@@ -478,31 +482,31 @@
                                                                                                                 ngVatlieu.Value = string.Empty;
                                                                                                             }
                                                                                                         })"
-                                                                                                                          ShowTime="false" HourFormat="12" DateFormat="@Common.FormatNoTime_yyyMMdd" ParseInput="@Common.ParseDate_ddMMyyyy" AllowInput="true"
-                                                                                                                          Style="width: 100%;  font-size: 16px"></RadzenDatePicker>
+                                                                                                      ShowTime="false" HourFormat="12" DateFormat="@Common.FormatNoTime_yyyMMdd" ParseInput="@Common.ParseDate_ddMMyyyy" AllowInput="true"
+                                                                                                      Style="width: 100%;  font-size: 16px"></RadzenDatePicker>
                                                                                 }
                                                                             }
                                                                             else
                                                                             {
-                                                                                                <!--Normal mode-->
+                                                                                <!--Normal mode-->
                                                                                 if (ngVatlieu.Type == typeof(DateTime))
                                                                                 {
                                                                                     bool ishaveValueOfday = DateTime.TryParse(ngVatlieu.Value?.ToString(), out DateTime vldate);
 
-                                                                                                        <RadzenText Visible="@ishaveValueOfday" Text="@vldate.ToString("dd/MM/yyyy")" Style="font-size: 16px; height: contain; color: black; font-weight: 500"></RadzenText>
-                                                                                                        <RadzenText Visible="@(!ishaveValueOfday)" Text="@string.Empty" Style="font-size: 16px; height: contain; color: black; font-weight: 500"></RadzenText>
+                                                                                    <RadzenText Visible="@ishaveValueOfday" Text="@vldate.ToString("dd/MM/yyyy")" Style="font-size: 16px; height: contain; color: black; font-weight: 500"></RadzenText>
+                                                                                    <RadzenText Visible="@(!ishaveValueOfday)" Text="@string.Empty" Style="font-size: 16px; height: contain; color: black; font-weight: 500"></RadzenText>
                                                                                 }
                                                                                 else
                                                                                 {
-                                                                                                        <RadzenText Text="@ngVatlieu.Value?.ToString()" Style="font-size: 16px; height: contain; color: black; font-weight: 500"></RadzenText>
+                                                                                    <RadzenText Text="@ngVatlieu.Value?.ToString()" Style="font-size: 16px; height: contain; color: black; font-weight: 500"></RadzenText>
                                                                                 }
                                                                             }
-                                                                                    </RadzenStack>
-                                                                                </RadzenStack>
+                                                                        </RadzenStack>
+                                                                    </RadzenStack>
                                                                 }
                                                             }
 
-                                                                <!--Display extra details-->
+                                                            <!--Display extra details-->
                                                             @if (SelectedNgVatLieu?.DSThongTin.Count > 0)
                                                             {
                                                                 var dsngvldetails = SelectedNgVatLieu?.DSThongTin;
@@ -511,12 +515,12 @@
                                                                 {
                                                                     foreach (var nvldetail in dsngvldetails)
                                                                     {
-                                                                                        <RadzenStack Gap="0" Style="height: contain; width: 100%; padding-bottom: 5px; padding-top: 5px; padding-left: 20px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                                                                            <RadzenStack Style="width: 30%;">
-                                                                                                <RadzenText Text="@(nvldetail.LoaiThongTin?.TenLoaiThongTin.Value?.ToString())" Style="font-size: 16px; font-weight: 600; color: black; height: contain; width: 100% "></RadzenText>
-                                                                                            </RadzenStack>
-                                                                                            <RadzenStack Style="width: 55%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="@((isEditNVLDetail)? JustifyContent.Start : JustifyContent.Center)">
-                                                                                                <!--Edit mode-->
+                                                                        <RadzenStack Gap="0" Style="height: contain; width: 100%; padding-bottom: 5px; padding-top: 5px; padding-left: 20px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                                            <RadzenStack Style="width: 30%;">
+                                                                                <RadzenText Text="@(nvldetail.LoaiThongTin?.TenLoaiThongTin.Value?.ToString())" Style="font-size: 16px; font-weight: 600; color: black; height: contain; width: 100% "></RadzenText>
+                                                                            </RadzenStack>
+                                                                            <RadzenStack Style="width: 55%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="@((isEditNVLDetail)? JustifyContent.Start : JustifyContent.Center)">
+                                                                                <!--Edit mode-->
                                                                                 @{
                                                                                     int kieudulieu = int.TryParse(nvldetail.LoaiThongTin?.KieuDuLieu.Value?.ToString(), out int kdl) ? kdl : 0;
 
@@ -524,25 +528,25 @@
                                                                                     {
                                                                                         if (kieudulieu == 1) // kieu ki tu
                                                                                         {
-                                                                                                                        <RadzenTextBox Placeholder="@($"* nhập {nvldetail.LoaiThongTin?.TenLoaiThongTin.Value?.ToString()}")"
-                                                                                                                                       Value="@nvldetail.GiaTri.Value?.ToString()" ValueChanged="@((args) => { nvldetail.GiaTri.Value = args; } )"
-                                                                                                                                       Style="font-size: 16px; height: contain; border-width: 1px; width: 100% "></RadzenTextBox>
+                                                                                            <RadzenTextBox Placeholder="@($"* nhập {nvldetail.LoaiThongTin?.TenLoaiThongTin.Value?.ToString()}")"
+                                                                                                           Value="@nvldetail.GiaTri.Value?.ToString()" ValueChanged="@((args) => { nvldetail.GiaTri.Value = args; } )"
+                                                                                                           Style="font-size: 16px; height: contain; border-width: 1px; width: 100% "></RadzenTextBox>
                                                                                         }
                                                                                         else if (kieudulieu == 2) // kieu so
                                                                                         {
-                                                                                                                        <RadzenNumeric Placeholder="@($"* nhập {nvldetail.LoaiThongTin?.TenLoaiThongTin.Value?.ToString()}")" TValue="int"
-                                                                                                                                       Value="@int.Parse(nvldetail.GiaTri.Value?.ToString()?? "0")" Min="0" Max="999999"
-                                                                                                                                       ValueChanged="@((args) => { nvldetail.GiaTri.Value = args; })"
-                                                                                                                                       Style="font-size: 16px; height: contain; border-width: 1px; width: 100%" />
+                                                                                            <RadzenNumeric Placeholder="@($"* nhập {nvldetail.LoaiThongTin?.TenLoaiThongTin.Value?.ToString()}")" TValue="int"
+                                                                                                           Value="@int.Parse(nvldetail.GiaTri.Value?.ToString()?? "0")" Min="0" Max="999999"
+                                                                                                           ValueChanged="@((args) => { nvldetail.GiaTri.Value = args; })"
+                                                                                                           Style="font-size: 16px; height: contain; border-width: 1px; width: 100%" />
                                                                                         }
                                                                                         else if (kieudulieu == 3) // datetime
                                                                                         {
                                                                                             bool ishaveValueOfday = DateTime.TryParse(nvldetail.GiaTri.Value?.ToString(), out DateTime selectday);
                                                                                             if (ishaveValueOfday) selectday = selectday.Date.Add(DateTime.Now.TimeOfDay);
 
-                                                                                                                        <RadzenDatePicker class="custom-datepicker" Placeholder="@($"* nhập {nvldetail.LoaiThongTin?.TenLoaiThongTin.Value?.ToString()}")"
-                                                                                                                                          TValue="DateTime" Value="selectday" AllowClear="true"
-                                                                                                                                          Change="@((args) =>
+                                                                                            <RadzenDatePicker class="custom-datepicker" Placeholder="@($"* nhập {nvldetail.LoaiThongTin?.TenLoaiThongTin.Value?.ToString()}")"
+                                                                                                              TValue="DateTime" Value="selectday" AllowClear="true"
+                                                                                                              Change="@((args) =>
                                                                                                         {
                                                                                                             if (args != null)
                                                                                                             {
@@ -554,34 +558,34 @@
                                                                                                                 nvldetail.GiaTri.Value = string.Empty;
                                                                                                             }
                                                                                                         })"
-                                                                                                                                          ShowTime="false" HourFormat="12" DateFormat="@Common.FormatNoTime_yyyMMdd" ParseInput="@Common.ParseDate_ddMMyyyy" AllowInput="true"
-                                                                                                                                          Style="width: 100%;  font-size: 16px"></RadzenDatePicker>
+                                                                                                              ShowTime="false" HourFormat="12" DateFormat="@Common.FormatNoTime_yyyMMdd" ParseInput="@Common.ParseDate_ddMMyyyy" AllowInput="true"
+                                                                                                              Style="width: 100%;  font-size: 16px"></RadzenDatePicker>
                                                                                         }
                                                                                     }
                                                                                     else
                                                                                     {
-                                                                                                                <!--Normal mode-->
+                                                                                        <!--Normal mode-->
                                                                                         if (kieudulieu == 3)
                                                                                         {
                                                                                             bool ishaveValueOfday = DateTime.TryParse(nvldetail.GiaTri.Value?.ToString(), out DateTime vldate);
 
-                                                                                                                        <RadzenText Visible="@ishaveValueOfday" Text="@vldate.ToString("dd/MM/yyyy")" Style="font-size: 16px; height: contain; color: black; font-weight: 500"></RadzenText>
-                                                                                                                        <RadzenText Visible="@(!ishaveValueOfday)" Text="@string.Empty" Style="font-size: 16px; height: contain; color: black; font-weight: 500"></RadzenText>
+                                                                                            <RadzenText Visible="@ishaveValueOfday" Text="@vldate.ToString("dd/MM/yyyy")" Style="font-size: 16px; height: contain; color: black; font-weight: 500"></RadzenText>
+                                                                                            <RadzenText Visible="@(!ishaveValueOfday)" Text="@string.Empty" Style="font-size: 16px; height: contain; color: black; font-weight: 500"></RadzenText>
                                                                                         }
                                                                                         else
                                                                                         {
-                                                                                                                        <RadzenText Text="@nvldetail.GiaTri.Value?.ToString()" Style="font-size: 16px; height: contain; color: black; font-weight: 500"></RadzenText>
+                                                                                            <RadzenText Text="@nvldetail.GiaTri.Value?.ToString()" Style="font-size: 16px; height: contain; color: black; font-weight: 500"></RadzenText>
                                                                                         }
                                                                                     }
                                                                                 }
-                                                                                            </RadzenStack>
-                                                                                            <RadzenStack Visible="@isEditNVLDetail" Gap="5" Style="width: 15%; height: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                                                <RadzenButton Click="@(() => OpendialogRenameThongTinNVL(nvldetail))" Icon="edit" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Đổi tên trường thông tin"))"
-                                                                                                              ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 18px;" />
-                                                                                                <RadzenButton Click="@(() => OpendialogDeleteThongTinNVL(nvldetail))" Icon="delete" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Xóa trường thông tin"))"
-                                                                                                              ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 18px;" />
-                                                                                            </RadzenStack>
-                                                                                        </RadzenStack>
+                                                                            </RadzenStack>
+                                                                            <RadzenStack Visible="@isEditNVLDetail" Gap="5" Style="width: 15%; height: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                                <RadzenButton Click="@(() => OpendialogRenameThongTinNVL(nvldetail))" Icon="edit" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Đổi tên trường thông tin"))"
+                                                                                              ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 18px;" />
+                                                                                <RadzenButton Click="@(() => OpendialogDeleteThongTinNVL(nvldetail))" Icon="delete" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Xóa trường thông tin"))"
+                                                                                              ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 18px;" />
+                                                                            </RadzenStack>
+                                                                        </RadzenStack>
                                                                     }
                                                                 }
                                                             }
