@@ -183,6 +183,15 @@ namespace ProcessManagement.Services.SQLServer
 
                 khsx.DSachNVLofKHSXs = GetListNVLofKHSXbyID(khsx.KHSXID.Value);
 
+                var resultdslots = GetListLOT_khsx(new() { { KHSX_LOT.DBName.KHSXID, khsx.KHSXID.Value } }).Item1;
+
+                if (resultdslots != null && resultdslots.Any())
+                {
+                    var resultDistinct = resultdslots.DistinctBy(lot => lot.MaQuanLyLot.Value?.ToString()?.Trim()).ToList();
+
+                    khsx.DSLOT_KHSXs = resultDistinct;
+                }
+
                 khsx.DSachCongDoans = GetlistCongdoans(khsx.KHSXID.Value);
             }
 
@@ -224,6 +233,15 @@ namespace ProcessManagement.Services.SQLServer
                     khsx.LoaiNVL = GetLoaiNVLbyID(int.TryParse(khsx.LOAINVLID.Value?.ToString(), out int loainvlid) ? loainvlid : 0);
 
                     khsx.DSachNVLofKHSXs = GetListNVLofKHSXbyID(khsx.KHSXID.Value);
+
+                    var resultdslots = GetListLOT_khsx(new() { { KHSX_LOT.DBName.KHSXID, khsx.KHSXID.Value } }).Item1;
+
+                    if (resultdslots != null && resultdslots.Any())
+                    {
+                        var resultDistinct = resultdslots.DistinctBy(lot => lot.MaQuanLyLot.Value?.ToString()?.Trim()).ToList();
+
+                        khsx.DSLOT_KHSXs = resultDistinct;
+                    }
 
                     khsx.DSachCongDoans = GetlistCongdoans(khsx.KHSXID.Value);
 
@@ -269,6 +287,15 @@ namespace ProcessManagement.Services.SQLServer
                     khsx.LoaiNVL = GetLoaiNVLbyID(int.TryParse(khsx.LOAINVLID.Value?.ToString(), out int loainvlid) ? loainvlid : 0);
 
                     khsx.DSachNVLofKHSXs = GetListNVLofKHSXbyID(khsx.KHSXID.Value);
+
+                    var resultdslots = GetListLOT_khsx(new() { { KHSX_LOT.DBName.KHSXID, khsx.KHSXID.Value } }).Item1;
+
+                    if (resultdslots != null && resultdslots.Any())
+                    {
+                        var resultDistinct = resultdslots.DistinctBy(lot => lot.MaQuanLyLot.Value?.ToString()?.Trim()).ToList();
+
+                        khsx.DSLOT_KHSXs = resultDistinct;
+                    }
 
                     khsx.DSachCongDoans = GetlistCongdoans(khsx.KHSXID.Value);
 

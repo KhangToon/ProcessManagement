@@ -48,7 +48,7 @@
                 <RadzenColumn SizeMD="3" Size="12">
                     <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" Style="height: 100%; width: 100%; padding-right: 20px;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                         <!--Tai danh sach KHSX-->
-                        <RadzenButton Click="@(() => LoadDanhSachKHSX())" Icon="list" Text="Danh sách KHSX" Size="ButtonSize.Small" Variant="Variant.Filled"
+                        <RadzenButton Click="@(async () => await LoadDanhSachKHSX())" Icon="list" Text="Danh sách KHSX" Size="ButtonSize.Small" Variant="Variant.Filled"
                                       Style="height: contain; width: 50%; font-size: 14px; background-color: Highlight " />
                         <!--Tao moi ke hoach san xuat-->
                         <RadzenButton Click="@(() => AddNewKehoachSX())" Icon="add" Text="Thêm KHSX" Size="ButtonSize.Small" Variant="Variant.Filled"
@@ -58,7 +58,7 @@
             </RadzenRow>
         </RadzenStack>
 
-        <RadzenStack Orientation="Orientation.Vertical" Gap="20px" Style="height: contain; width: 100%; padding: 0px;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+        <RadzenStack Visible="@(reloadpage == false)" Orientation="Orientation.Vertical" Gap="20px" Style="height: contain; width: 100%; padding: 0px;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
             @foreach (var khsx in DSKHSXs)
             {
                 <RadzenPanel AllowCollapse="true" Style="width: 100%;" Collapsed="@khsx.IsCollapsed" Collapse="@(() => {khsx.IsCollapsed = true;})">
@@ -187,8 +187,8 @@
     private List<KHSX> DSKHSXs = new();
     private KHSX SelectedKHSX = new();
     private static int selectedTabIndex = 0;
-
     private static object? selectKHSXID;
+    private bool reloadpage = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -260,6 +260,12 @@
     {
         KHSX selectKHSX = await DialogService.OpenAsync<DialogDSachKHSX>(null, null,
         new DialogOptions() { Width = "70%", Height = "90%", Resizable = false, Draggable = true, ShowTitle = false, ShowClose = false, Style = "background-color: while; border-radius: 0px; padding: 0px" });
+
+        reloadpage = true;
+        StateHasChanged();
+        await Task.Delay(10);
+        reloadpage = false;
+        StateHasChanged();
     }
 
     // Them ke hoach san xuat
@@ -279,8 +285,13 @@
                     SelectedKHSX = DSKHSXs.FirstOrDefault(x => object.Equals(x.KHSXID.Value, selectKHSXID)) ?? new();
                 }
                 else SelectedKHSX = DSKHSXs.FirstOrDefault() ?? new();
-
             }
         }
+
+        reloadpage = true;
+        StateHasChanged();
+        await Task.Delay(10);
+        reloadpage = false;
+        StateHasChanged();
     }
 }

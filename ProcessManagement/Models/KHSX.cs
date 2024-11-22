@@ -1,5 +1,6 @@
 ﻿using ProcessManagement.Commons;
 using ProcessManagement.Models.KHO_NVL;
+using ProcessManagement.Models.KHSXs;
 using ProcessManagement.Models.NHANVIEN;
 using ProcessManagement.Models.SANPHAM;
 using System.Reflection;
@@ -25,9 +26,9 @@ namespace ProcessManagement.Models
         public Propertyy NgayTao = new() { DBName = Common.NgayTao, Type = typeof(DateTime), AlowDatabase = true };
         public Propertyy PXKID { get; set; } = new() { DBName = Common.PXKID, DisplayName = "PXKID", Type = typeof(int), AlowDatabase = true };
         public SanPham? SanPham { get; set; }
-        public LoaiNVL? LoaiNVL { get; set; }   
+        public LoaiNVL? LoaiNVL { get; set; }
         public List<NguyenCongofKHSX> DSachCongDoans { get; set; } = new();
-
+        public List<KHSX_LOT> DSLOT_KHSXs { get; set; } = new();
         public List<NVLofKHSX> DSachNVLofKHSXs { get; set; } = new(); // Danh sach NVL cua KHSX (so luong, loai nvl, sp, ngay tao)
 
         public bool IsDoneKHSX { get; set; } = false;
