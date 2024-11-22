@@ -3,6 +3,7 @@
 @using ProcessManagement.Models.KHO_NVL.NhapKho
 @using ProcessManagement.Models.KHO_NVL.Tracking
 @using ProcessManagement.Pages.Manager_NVL.NhapKho
+@using ProcessManagement.Services
 @using ProcessManagement.Services.SQLServer
 @using Radzen.Blazor
 @using Radzen
@@ -30,14 +31,26 @@
         </RadzenStack>
     </RadzenStack>
     <RadzenStack Style="height: contain; width: 100%; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-        <RadzenStack Gap="10px" Style="height: contain; width: contain; border-radius: 5px; padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-            <RadzenText Text="@($"Vị trí nhập:")" Style="font-weight: 600; font-size: 16px; color: black; font-style: italic"></RadzenText>
-            <RadzenText Text="@($"{LNK?.TargertVitri.MaViTri.Value?.ToString()}")" Style="font-weight: bold; font-size: 16px; color: darkred; font-style: italic"></RadzenText>
-        </RadzenStack>
-        <RadzenStack Gap="10px" Style="height: contain; width: contain; border-radius: 5px; padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-            <RadzenText Text="@($"Lot vị trí:")" Style="font-weight: 600; font-size: 16px; color: black; font-style: italic"></RadzenText>
-            <RadzenText Text="@($"{LNK?.LotVitri.Value?.ToString()}")" Style="font-weight: bold; font-size: 16px; color: black; font-style: italic"></RadzenText>
-        </RadzenStack>
+        <RadzenRow Gap="2px" Style="height: 100%; width: 100%;">
+            <RadzenColumn SizeMD="3" Size="12">
+                <RadzenStack Gap="10px" Style="height: contain; width: contain; border-radius: 5px; padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                    <RadzenText Text="@($"Vị trí nhập:")" Style="font-weight: 600; font-size: 16px; color: black; font-style: italic"></RadzenText>
+                    <RadzenText Text="@($"{LNK?.TargertVitri.MaViTri.Value?.ToString()}")" Style="font-weight: bold; font-size: 16px; color: darkred; font-style: italic"></RadzenText>
+                </RadzenStack>
+            </RadzenColumn>
+            <RadzenColumn SizeMD="6" Size="12">
+                <RadzenStack Gap="10px" Style="height: contain; width: contain; border-radius: 5px; padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                    <RadzenText Text="@($"QR quản lý:")" Style="font-weight: 600; font-size: 16px; color: black; font-style: italic"></RadzenText>
+                    <RadzenText Text="@($"{LNK?.QRIDLOT.Value?.ToString()}")" Style="font-weight: bold; font-size: 16px; color: black; font-style: italic"></RadzenText>
+                </RadzenStack>
+            </RadzenColumn>
+            <RadzenColumn SizeMD="3" Size="12">
+                <RadzenStack Gap="10px" Style="height: contain; width: contain; border-radius: 5px; padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                    <RadzenText Text="@($"Lot vị trí:")" Style="font-weight: 600; font-size: 16px; color: black; font-style: italic"></RadzenText>
+                    <RadzenText Text="@($"{LNK?.LotVitri.Value?.ToString()}")" Style="font-weight: bold; font-size: 16px; color: black; font-style: italic"></RadzenText>
+                </RadzenStack>
+            </RadzenColumn>
+        </RadzenRow>
     </RadzenStack>
 
     <RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 5px; border-bottom: var(--rz-grid-cell-border);">
@@ -70,14 +83,14 @@
             <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
                 @{
                     <RadzenStack Style="width: 85%;">
-                        <RadzenTextBox class="custom-placeholder" Placeholder="@($" * quét mã")" Value="@maNVL?.ToString()" Style="font-size: 12px; height: contain; border-width: 1px; color: black; font-weight: 500"
-                                       @oninput="@((args) => { IsScanMaNVL_isExisting(args.Value?.ToString()?.Trim()?? string.Empty); })">
+                        <RadzenTextBox class="custom-placeholder" Placeholder="@($" * quét mã")" Value="@qrIDLOT?.ToString()" Style="font-size: 12px; height: contain; border-width: 1px; color: black; font-weight: 500"
+                                       @oninput="@((args) => { IsScanQRIDLOT_isExisting(args.Value?.ToString()?.Trim()?? string.Empty); })">
                         </RadzenTextBox>
                     </RadzenStack>
 
                     <RadzenStack Style="width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
-                        <RadzenAlert Visible="@(!isScanmanvlok)" Style="width: contain; height: 100%; font-size: 12px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
-                        <RadzenAlert Visible="@(isScanmanvlok)" Style="width: contain; height: 100%; font-size: 12px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Success" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                        <RadzenAlert Visible="@(!isScanqridlotlok)" Style="width: contain; height: 100%; font-size: 12px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                        <RadzenAlert Visible="@(isScanqridlotlok)" Style="width: contain; height: 100%; font-size: 12px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Success" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
                     </RadzenStack>
                 }
             </RadzenStack>
@@ -85,7 +98,7 @@
     </RadzenStack>
 
     <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding-right: 15px; padding-top: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
-        <RadzenButton Disabled="@(string.IsNullOrWhiteSpace(MaPNK) || !isScanmanvlok || !isScanmavitriok)" Click="@(() => OnConfirmExcuteLenhNhapKho_withLotVitri(maVitri, maNVL))" Style="padding: 5px; width: contain; height: contain; font-size: 12px" Icon="check" Text="Xác nhận thêm" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Default" Size="ButtonSize.ExtraSmall" Variant="Variant.Filled" />
+        <RadzenButton Disabled="@(string.IsNullOrWhiteSpace(MaPNK) || !isScanqridlotlok || !isScanmavitriok)" Click="@(() => OnHandleLenhNhapKhousingKhoServices(LNK, MaPNK, maVitri, qrIDLOT))" Style="padding: 5px; width: contain; height: contain; font-size: 12px" Icon="check" Text="Xác nhận thêm" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Default" Size="ButtonSize.ExtraSmall" Variant="Variant.Filled" />
         <RadzenButton Style="width: contain; height: contain; font-size: 12px; padding: 5px" Icon="close" Text="Thoát" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.ExtraSmall" Variant="Variant.Flat" Click="@(() => DialogService.Close(null))" />
     </RadzenStack>
 </RadzenStack>
@@ -98,11 +111,11 @@
     public string MaPNK { get; set; } = string.Empty;
 
     private string maVitri = string.Empty;
-    private string maNVL = string.Empty;
+    //private string maNVL = string.Empty;
     private string qrIDLOT = string.Empty;
 
     private bool isScanmavitriok = false;
-    private bool isScanmanvlok = false;
+    //private bool isScanmanvlok = false;
     private bool isScanqridlotlok = false;
 
     protected override async Task OnInitializedAsync()
@@ -128,39 +141,53 @@
         isScanmavitriok = false;
     }
 
-    private void IsScanMaNVL_isExisting(string manvl)
-    {
-        maNVL = manvl.Trim();
+    // private void IsScanMaNVL_isExisting(string manvl)
+    // {
+    //     maNVL = manvl.Trim();
 
-        if (!string.IsNullOrEmpty(manvl))
-        {
-            NguyenVatLieu targetNVL = SQLServerServices.GetNguyenVatLieuByTenNVL(manvl);
+    //     if (!string.IsNullOrEmpty(manvl))
+    //     {
+    //         NguyenVatLieu targetNVL = SQLServerServices.GetNguyenVatLieuByTenNVL(manvl);
 
-            if (targetNVL.NVLID.Value != null && object.Equals(targetNVL.NVLID.Value, LNK.NVLID.Value))
-            {
-                if (string.Equals(manvl.Trim(), LNK.TargetNgLieu.TenNVL.Value?.ToString()?.Trim()))
-                {
-                    isScanmanvlok = true;
-                    return;
-                }
-            }
-        }
+    //         if (targetNVL.NVLID.Value != null && object.Equals(targetNVL.NVLID.Value, LNK.NVLID.Value))
+    //         {
+    //             if (string.Equals(manvl.Trim(), LNK.TargetNgLieu.TenNVL.Value?.ToString()?.Trim()))
+    //             {
+    //                 isScanmanvlok = true;
+    //                 return;
+    //             }
+    //         }
+    //     }
 
-        isScanmanvlok = false;
-    }
+    //     isScanmanvlok = false;
+    // }
 
     private void IsScanQRIDLOT_isExisting(string qridlot)
     {
         qrIDLOT = qridlot.Trim();
 
-        if (!string.IsNullOrEmpty(qridlot))
+        if (!string.IsNullOrEmpty(qridlot) && string.Equals(qridlot, LNK.QRIDLOT.Value?.ToString()?.Trim()))
         {
-            
+            isScanqridlotlok = true;
+            return;
         }
 
         isScanqridlotlok = false;
     }
 
+    private async Task OnHandleLenhNhapKhousingKhoServices(LenhNhapKho lenhNhapKho, string maPNK, string maVitri, string qridlot)
+    {
+        (int status, string mess) = await KHOServices.HandleLenhNhapKho(lenhNhapKho, maPNK, maVitri, qridlot);
+
+        if (status == -1)
+        {
+            await DialogService.Alert(mess, "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+        }
+        else if (status == 1)
+        {
+            await DialogService.Alert(mess, "<strong><span style='color: darkgreen'>Success!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+        }
+    }
 
     private async Task OnConfirmExcuteLenhNhapKho_withLotVitri(string mavitri, string manvl)
     {
