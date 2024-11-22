@@ -1,6 +1,7 @@
 ﻿@using ProcessManagement.Commons
 @using ProcessManagement.Models.KHO_NVL
 @using ProcessManagement.Models.KHO_NVL.Tracking
+@using ProcessManagement.Services
 @using ProcessManagement.Services.SQLServer
 @using ProcessManagement.Services.QRCodes
 @using Radzen.Blazor
@@ -150,7 +151,7 @@
                 }
                 else
                 {
-                    <RadzenButton Click="@(async () => { await OnConfirmExcuteLenhXuatKho_byQRIDLOT(PXK.MaPhieuXK.Value?.ToString()?? string.Empty, scanMaViTri, scanQRIDLOT);})" Style="width: contain;" Icon="arrow_outward" Text="Tiến hành xuất kho" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Size="ButtonSize.Small" Variant="Variant.Flat" />
+                    <RadzenButton Click="@(async () => { await OnHandleLenhXuatKhousingKhoServices(PXK, LXK, scanMaViTri, scanQRIDLOT);})" Style="width: contain;" Icon="arrow_outward" Text="Tiến hành xuất kho" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Size="ButtonSize.Small" Variant="Variant.Flat" />
                 }
             </RadzenStack>
             <RadzenStack Gap="10px" Style="height: 100%; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
@@ -345,6 +346,20 @@
         else return (-1, "Danh sách LOT của KHSX không tồn tại!");
     }
 
+    private async Task OnHandleLenhXuatKhousingKhoServices(PhieuXuatKho phieuXuatKho, LenhXuatKho lenhXuatKho, string maVitri, string qridlot)
+    {
+        (int status, string mess) = await KHOServices.HandleLenhXuatKho(phieuXuatKho, lenhXuatKho, maVitri, qridlot);
+
+        if (status == -1)
+        {
+            await DialogService.Alert(mess, "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+        }
+        else if (status == 1)
+        {
+            await DialogService.Alert(mess, "<strong><span style='color: darkgreen'>Success!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+        }
+    }
+
     private async Task OnConfirmExcuteLenhXuatKho_byQRIDLOT(string maPXK, string maViTri, string qridlot)
     {
         int soluongxuatfromClient = int.TryParse(LXK.LXKSoLuong.Value?.ToString(), out int lxksl) ? lxksl : 0;
@@ -382,8 +397,8 @@
                 return;
             }
 
-            // Kiem tra trang thai vi tri
-            ViTriofNVL viTriofNVL = SQLServerServices.GetViTriOfNgVatLieuBy_VTid_LotVitri(vtid: savedLXK.VTID.Value, lotvitri: savedLXK.LotVitri.Value);
+            // Kiem tra trang thai vi tri (vi tri co QRIDLOT trung voi lenh xuat kho)
+            ViTriofNVL viTriofNVL = SQLServerServices.GetViTriOfNgVatLieuBy_QRIDLOT(vtid: savedLXK.VTID.Value, qridlot: savedLXK.QRIDLOT.Value);
 
             if (viTriofNVL == null || viTriofNVL.VTofNVLID.Value == null)
             {

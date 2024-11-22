@@ -2883,7 +2883,7 @@ namespace ProcessManagement.Services.SQLServer
 
             return vitriofnvl;
         }
-        public ViTriofNVL GetViTriOfNgVatLieuByQRIDLOT(object? qridlot)
+        public ViTriofNVL GetViTriOfNgVatLieuBy_QRIDLOT(object? vtid = null, object? nvlid = null, object? qridlot = null)
         {
             ViTriofNVL vitriofnvl = new();
 
@@ -2891,9 +2891,34 @@ namespace ProcessManagement.Services.SQLServer
             {
                 connection.Open();
 
+                var conditions = new List<string>();
+
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"SELECT * FROM [{Common.Table_VitriOfNVL}] WHERE [{Common.QRIDLOT}] = '{qridlot}'";
+                command.CommandText = $"SELECT * FROM [{Common.Table_VitriOfNVL}]";
+
+                // Helper function to add condition if value is not null
+                void AddCondition(object? value, string fieldName, string paramName)
+                {
+                    if (value != null)
+                    {
+                        conditions.Add($"[{fieldName}] = @{paramName}");
+
+                        command.Parameters.AddWithValue($"@{paramName}", value);
+                    }
+                }
+
+                // Add all potential conditions
+                AddCondition(vtid, Common.VTID, "VTID");
+                AddCondition(nvlid, Common.NVLID, "NVLID");
+                AddCondition(qridlot, Common.QRIDLOT, "QRIDLOT");
+                // Add more conditions as needed...
+
+                // Combine all conditions with AND
+                if (conditions.Any())
+                {
+                    command.CommandText += " WHERE " + string.Join(" AND ", conditions);
+                }
 
                 using var reader = command.ExecuteReader();
 
@@ -2907,18 +2932,20 @@ namespace ProcessManagement.Services.SQLServer
 
                         object columnValue = reader[columnName];
 
-                        item.Value = columnValue.ToString()?.Trim();
+                        item.Value = columnValue == DBNull.Value ? null : columnValue;
                     }
                 }
             }
 
-            // Get vitriluutru infor
-            vitriofnvl.VitriInfor = GetViTriLuuTruByID(vitriofnvl.VTID.Value);
-            vitriofnvl.NgLieuInfor = GetNguyenVatLieuByID(vitriofnvl.NVLID.Value);
+            if (vitriofnvl.VTofNVLID.Value != null)
+            {
+                // Get vitriluutru infor
+                vitriofnvl.VitriInfor = GetViTriLuuTruByID(vitriofnvl.VTID.Value);
+                vitriofnvl.NgLieuInfor = GetNguyenVatLieuByID(vitriofnvl.NVLID.Value);
+            }
 
             return vitriofnvl;
         }
-
         public ViTriofNVL GetViTriOfNgVatLieuBy_VTid_LotVitri(object? vtid = null, object? nvlid = null, object? lotvitri = null)
         {
             ViTriofNVL vitriofnvl = new();

@@ -1,6 +1,7 @@
 ﻿@using ProcessManagement.Commons
 @using ProcessManagement.Models.KHO_NVL
 @using ProcessManagement.Models.KHO_NVL.Tracking
+@using ProcessManagement.Services
 @using ProcessManagement.Services.SQLServer
 @using ProcessManagement.Services.QRCodes
 @using Radzen.Blazor
@@ -150,7 +151,7 @@
                 }
                 else
                 {
-                    <RadzenButton Text="Tiến hành nhập kho" Click="@(async () => { await OnConfirmExcuteLenhNhapKho_byQRIDLOT(PNK.MaPhieuNK.Value?.ToString()?? string.Empty, scanMaViTri, scanQRIDLOT);})" Style="width: contain;" Icon="arrow_outward" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Size="ButtonSize.Small" Variant="Variant.Flat" />
+                    <RadzenButton Text="Tiến hành nhập kho" Click="@(async () => { await OnHandleLenhNhapKhousingKhoServices(LNK, PNK.MaPhieuNK.Value?.ToString()?? string.Empty, scanMaViTri, scanQRIDLOT);})" Style="width: contain;" Icon="arrow_outward" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Size="ButtonSize.Small" Variant="Variant.Flat" />
                 }
             </RadzenStack>
             <RadzenStack Gap="10px" Style="height: 100%; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
@@ -193,6 +194,20 @@
         else if (focusIndex == 3)
         {
             await reftxtMaViTri.FocusAsync();
+        }
+    }
+
+    private async Task OnHandleLenhNhapKhousingKhoServices(LenhNhapKho lenhNhapKho, string maPNK, string maVitri, string qridlot)
+    {
+        (int status, string mess) = await KHOServices.HandleLenhNhapKho(lenhNhapKho, maPNK, maVitri, qridlot);
+
+        if (status == -1)
+        {
+            await DialogService.Alert(mess, "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+        }
+        else if (status == 1)
+        {
+            await DialogService.Alert(mess, "<strong><span style='color: darkgreen'>Success!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
         }
     }
 
