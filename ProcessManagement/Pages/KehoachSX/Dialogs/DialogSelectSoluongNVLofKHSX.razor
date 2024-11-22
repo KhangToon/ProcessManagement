@@ -171,7 +171,14 @@
                                                 <!--Dinh muc-->
                                                 <RadzenStack Style="width: 15%; height: contain; border-right: var(--rz-grid-cell-border); padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                     <RadzenStack Style="height: contain; min-height: 35px; width: 100%; border-radius: 5px; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                        <RadzenText Text="@($"{nvlofsp.dinhmuc} ({nvlofsp.TargetNgLieu.DonViTinh.Value?.ToString()})")" Style="color: darkgreen; font-weight: 600; font-size: 18px"></RadzenText>
+                                                        @if (nvlofsp.TargetNgLieu.TonKho == 0 || nvlofsp.allsoLuongcanLay > nvlofsp.TargetNgLieu.TonKho || nvlofsp.dinhmuc > nvlofsp.TargetNgLieu.TonKho || nvlofsp.allsoLuongcanLay == 0)
+                                                        {
+                                                            <RadzenText Text="@($"{nvlofsp.dinhmuc} ({nvlofsp.TargetNgLieu.DonViTinh.Value?.ToString()})")" Style="color: red; font-weight: 600; font-size: 18px"></RadzenText>
+                                                        }
+                                                        else
+                                                        {
+                                                            <RadzenText Text="@($"{nvlofsp.dinhmuc} ({nvlofsp.TargetNgLieu.DonViTinh.Value?.ToString()})")" Style="color: darkgreen; font-weight: 600; font-size: 18px"></RadzenText>
+                                                        }
                                                     </RadzenStack>
                                                 </RadzenStack>
 
@@ -262,7 +269,7 @@
 
         foreach (var nvlofsp in TargetSP.DanhSachNVLs)
         {
-            if (nvlofsp.TargetNgLieu.TonKho == 0 || nvlofsp.allsoLuongcanLay > nvlofsp.TargetNgLieu.TonKho || nvlofsp.allsoLuongcanLay == 0)
+            if (nvlofsp.TargetNgLieu.TonKho == 0 || nvlofsp.allsoLuongcanLay > nvlofsp.TargetNgLieu.TonKho || nvlofsp.dinhmuc > nvlofsp.TargetNgLieu.TonKho  || nvlofsp.allsoLuongcanLay == 0)
             {
                 isallow = false; break;
             }

@@ -51,18 +51,34 @@
                             <RadzenStack Gap="5" Style="height: 100%; width: 100%;">
                                 <!--Search by maquanly-->
                                 <RadzenStack Style="height: contain; width: 100%; padding-bottom: 5px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                    <RadzenStack Style="height: 100%; width: 20%; border-radius: 10px; background-color: var(--rz-success-lighter); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                        <RadzenText Text="KHO NGUYÊN LIỆU" Style="color: green; font-weight: 600; font-size: 18px"></RadzenText>
-                                    </RadzenStack>
-                                    <RadzenStack Gap="15px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: 100%; width: 60%;">
-                                        <RadzenTextBox @oninput="@((args) => FilterNVL(args?.Value))" Placeholder="Tìm theo tên nguyên liệu" Style="border-radius: 20px; padding-left: 20px; border-width: 2px; border-color: var(--rz-primary-light); width: 50% "></RadzenTextBox>
-                                        <RadzenButton Icon="search" ButtonStyle="ButtonStyle.Primary" Style="border-radius: 20px;" />
-                                        <RadzenButton Click="@(() => { LoadList_LoaiNVL(); LoadList_NguyenVatLieu(); ReSelectCurrentNguyenVatLieu(Common.SelectedNVLid); })" Style="border-radius: 20px;" Icon="autorenew" ButtonStyle="ButtonStyle.Primary" />
-                                    </RadzenStack>
+                                    <RadzenRow Style="height: 100%; width: 100%;">
+                                        <RadzenColumn SizeMD="3" Size="12">
+                                            <RadzenStack Style="height: 100%; width: 100%; border-radius: 10px; background-color: var(--rz-success-lighter); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                <RadzenText Text="KHO NGUYÊN LIỆU" Style="color: green; font-weight: 600; font-size: 18px"></RadzenText>
+                                            </RadzenStack>
+                                        </RadzenColumn>
+                                        <RadzenColumn SizeMD="6" Size="12">
+                                            <RadzenStack Gap="15px" Style="height: 100%; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                <RadzenTextBox @oninput="@((args) => FilterNVL(args?.Value))" Placeholder="Tìm theo tên nguyên liệu" Style="border-radius: 20px; padding-left: 20px; border-width: 2px; border-color: var(--rz-primary-light); width: 50% "></RadzenTextBox>
+                                                <RadzenButton Icon="search" ButtonStyle="ButtonStyle.Primary" Style="border-radius: 20px;" />
+                                                <RadzenButton Click="@(() => { LoadList_LoaiNVL(); LoadList_NguyenVatLieu(); ReSelectCurrentNguyenVatLieu(Common.SelectedNVLid); })" Style="border-radius: 20px;" Icon="autorenew" ButtonStyle="ButtonStyle.Primary" />
+                                            </RadzenStack>
+                                        </RadzenColumn>
+                                        <RadzenColumn SizeMD="3" Size="12">
+                                            <RadzenStack Gap="10px" Style="height: 100%; width: 100%; padding-left: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                <!--Nhap kho button-->
+                                                <RadzenButton Click="OnOpenDialogNhapKho" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Tạo phiếu nhập kho"))" Icon="download" Text="@($"Nhập kho {((DSNvlNhapKho.Count > 0)? $"({DSNvlNhapKho.Count})" : string.Empty)}")" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Light"
+                                                              Style="height: contain; width: 50%; font-size: 14px;" />
+                                                <!--Xuat kho button-->
+                                                <RadzenButton Click="OnOpenDialogXuatKho" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Tạo phiếu xuất kho"))" Icon="upload" Text="@($"Xuất kho {((DSNvlXuatKho.Count > 0)? $"({DSNvlXuatKho.Count})" : string.Empty)}")" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Light"
+                                                              Style="height: contain; width: 50%; font-size: 14px;" />
+                                            </RadzenStack>
+                                        </RadzenColumn>
+                                    </RadzenRow>
                                 </RadzenStack>
 
                                 <!--Filter-->
-                                <RadzenStack Gap="0px" Orientation="Orientation.Horizontal" Style="height: contain; width: 100%; padding-top: 5px; padding-bottom: 0px; border-top: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                <RadzenStack Visible="false" Gap="0px" Orientation="Orientation.Horizontal" Style="height: contain; width: 100%; padding-top: 5px; padding-bottom: 0px; border-top: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                                     <!--Search by ngaynhap-->
                                     <RadzenStack Visible="false" Gap="10px" Orientation="Orientation.Horizontal" Style="height: contain; width: contain; padding: 0; padding-right: 10px; border-right: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                         <RadzenStack Gap="10px" Style="height: 100%; width: contain; background-color: white; padding: 5px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
@@ -108,22 +124,6 @@
                                                             Data=@(DanhMucNVLs?.Select(dm => dm.TenDanhMuc.Value?.ToString()).Prepend(allLoainvlFormat).ToList()) Style="border-radius: 5px; border-width: 1px; font-size: 14px; width: contain ">
                                             </RadzenDropDown>
                                         </RadzenStack>
-                                        <!--Search by Loai NVL-->
-                                        <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: 100%; width: contain; padding-left: 10px; padding-right: 10px; border-right: var(--rz-grid-cell-border);">
-                                            <RadzenLabel Text="Loại nguyên liệu" Style="font-size: 14px; color: darkred; font-weight: 600; width: contain" />
-                                            <RadzenDropDown Placeholder="*Chọn loại nguyên liệu" Value="@((SelectedLoaiNVL != null)? SelectedLoaiNVL?.TenLoaiNVL.Value?.ToString() : allLoainvlFormat)"
-                                                            ValueChanged="@((args) => { OnSelectLoaiNVLValueChanged(args);})" TValue="string"
-                                                            Data=@(DSLoaiNVLs?.Select(loai => loai.TenLoaiNVL.Value?.ToString()).Prepend(allLoainvlFormat).ToList()) Style="border-radius: 5px; border-width: 1px; font-size: 14px; width: contain">
-                                            </RadzenDropDown>
-                                        </RadzenStack>
-                                    </RadzenStack>
-                                    <RadzenStack Gap="10px" Style="height: 100%; width: contain; padding-left: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                        <!--Nhap kho button-->
-                                        <RadzenButton Click="OnOpenDialogNhapKho" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Tạo phiếu nhập kho"))" Icon="download" Text="@($"Nhập kho {((DSNvlNhapKho.Count > 0)? $"({DSNvlNhapKho.Count})" : string.Empty)}")" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
-                                                      Style="height: contain; width: contain; font-size: 14px;" />
-                                        <!--Xuat kho button-->
-                                        <RadzenButton Click="OnOpenDialogXuatKho" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Tạo phiếu xuất kho"))" Icon="upload" Text="@($"Xuất kho {((DSNvlXuatKho.Count > 0)? $"({DSNvlXuatKho.Count})" : string.Empty)}")" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
-                                                      Style="height: contain; width: contain; font-size: 14px;" />
                                     </RadzenStack>
                                 </RadzenStack>
 
@@ -131,26 +131,39 @@
                                 <RadzenRow Gap="10px" Style="height: 100%; width: 100%; border-top: var(--rz-grid-cell-border); padding: 0;">
                                     <!--Column bang danh sach NVL-->
                                     <RadzenColumn Size="12" SizeMD="7" Style="height: auto; width: 100%; padding-top: 5px;">
-                                        <RadzenStack Gap="20px" Style="height: contain; width: 100%; padding-bottom: 5px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                                            <RadzenStack Visible="@(DSNguyenVatLieus != null && DSNguyenVatLieus.Count > 0)" Gap="10px" Style="height: contain; width: contain; padding: 10px; padding-left: 0" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                                                <RadzenText Text="Danh sách nguyên liệu" Style="font-weight: 600; height: contain; width: contain; font-style: italic; color: darkred"></RadzenText>
-                                            </RadzenStack>
-                                            <RadzenStack Gap="10px" Style="height: 100%; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                <RadzenStack Gap="10px" Style="height: 100%; width: contain; padding-right: 10px; border-right: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                                    <RadzenText Text="@($"Loại nguyên liệu:")" Style="color: black; height: contain; width: contain; font-size: 15px"></RadzenText>
-                                                    <RadzenText Text="@($"{((isSelectAllNguyenVatLieu)? allLoainvlFormat : $"{SelectedLoaiNVL?.TenLoaiNVL.Value?.ToString()}")}")" Style="color: darkblue; font-weight: 600; font-size: 15px; height: contain; width: contain"></RadzenText>
-                                                </RadzenStack>
-                                                <RadzenStack Gap="10px" Style="height: 100%; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                                    <RadzenText Text="@($"Tổng số nguyên liệu: ")" Style="color: black;  height: contain; width: contain; font-size: 15px"></RadzenText>
-                                                    <RadzenText Text="@($"{DSNguyenVatLieus?.Count?? 0}")" Style="color: black; font-weight: 600; font-size: 15px; height: contain; width: contain"></RadzenText>
-                                                </RadzenStack>
-                                            </RadzenStack>
-                                            <!--Them NVL moi-->
-                                            <RadzenStack Style="height: 100%; width: contain; padding-left: 10px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                <RadzenButton Click="OnThemMoiNguyenVatLieu" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Thêm nguyên liệu mới"))" Icon="add" Text="Thêm nguyên liệu mới" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
-                                                              Style="height: contain; width: contain; font-size: 14px;" />
-                                            </RadzenStack>
+                                        <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding-bottom: 5px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                            <RadzenRow Style="height: 100%; width: 100%;">
+                                                <RadzenColumn SizeMD="3" Size="12">
+                                                    <RadzenStack Gap="10px" Style="height: 100%; width: 100%; padding: 10px; padding-left: 0; padding-right: 10px; border-right: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                                        <RadzenText Text="Danh sách nguyên liệu" Style="font-weight: 600; height: contain; width: contain; font-style: italic; color: darkred"></RadzenText>
+                                                    </RadzenStack>
+                                                </RadzenColumn>
+                                                <RadzenColumn SizeMD="6" Size="12">
+                                                    <RadzenStack Gap="10px" Style="height: 100%; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                        <!--Search by Loai NVL-->
+                                                        <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: 100%; width: contain; padding-left: 10px; padding-right: 10px;">
+                                                            <RadzenLabel Text="Loại nguyên liệu" Style="font-size: 16px; color: black; font-weight: 600; width: contain" />
+                                                            <RadzenDropDown Placeholder="*Chọn loại nguyên liệu" Value="@((SelectedLoaiNVL != null)? SelectedLoaiNVL?.TenLoaiNVL.Value?.ToString() : allLoainvlFormat)"
+                                                                            ValueChanged="@((args) => { OnSelectLoaiNVLValueChanged(args);})" TValue="string"
+                                                                            Data=@(DSLoaiNVLs?.Select(loai => loai.TenLoaiNVL.Value?.ToString()).Prepend(allLoainvlFormat).ToList()) Style="border-radius: 5px; border-width: 1px; font-size: 14px; width: contain">
+                                                            </RadzenDropDown>
+                                                        </RadzenStack>
+                                                        <RadzenStack Gap="10px" Style="height: 100%; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                            <RadzenText Text="@($"Tổng: ")" Style="color: black;  height: contain; width: contain; font-size: 15px"></RadzenText>
+                                                            <RadzenText Text="@($"{DSNguyenVatLieus?.Count?? 0}")" Style="color: black; font-weight: 600; font-size: 15px; height: contain; width: contain"></RadzenText>
+                                                        </RadzenStack>
+                                                    </RadzenStack>
+                                                </RadzenColumn>
+                                                <RadzenColumn SizeMD="3" Size="12">
+                                                    <!--Them NVL moi-->
+                                                    <RadzenStack Style="height: 100%; width: 100%; padding-left: 10px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                        <RadzenButton Click="OnThemMoiNguyenVatLieu" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Thêm nguyên liệu mới"))" Icon="add" Text="Thêm nguyên liệu mới" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
+                                                                      Style="height: contain; width: 100%; font-size: 14px;" />
+                                                    </RadzenStack>
+                                                </RadzenColumn>
+                                            </RadzenRow>
                                         </RadzenStack>
+
                                         <RadzenStack Visible="@(DSNguyenVatLieus?.Count == 0)" Gap="20px" Style="height: contain; width: 100%; background-color: var(--rz-primary-lighter); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                             <RadzenText Text="Hãy chọn loại nguyên vật liệu" Style="color: red; font-weight: 500; font-size: 16px"></RadzenText>
                                         </RadzenStack>

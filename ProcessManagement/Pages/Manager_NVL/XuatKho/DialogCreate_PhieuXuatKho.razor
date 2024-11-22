@@ -155,10 +155,10 @@
                     <!--Nguoi xuat kho-->
                     <RadzenStack Gap="0" Style="height: contain; width: 100%; padding-left: 10px; padding-bottom: 5px; padding-top: 5px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                         <RadzenStack Style="width: 35%;">
-                            <RadzenText Text="Người xuất kho" Style="font-size: 16px; font-weight: 600; color: black; height: contain; width: 100% "></RadzenText>
+                            <RadzenText Text="Người lập phiếu" Style="font-size: 16px; font-weight: 600; color: black; height: contain; width: 100% "></RadzenText>
                         </RadzenStack>
                         <RadzenStack Style="width: 65%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                            <RadzenTextBox Placeholder="*Nhập tên người xuất kho" Disabled="@isPXKSaved"
+                            <RadzenTextBox Placeholder="*Nhập tên người lập phiếu" Disabled="@isPXKSaved"
                                            Value="@PXK.NguoiLapPXK.Value?.ToString()" ValueChanged="@((args) => { PXKNguoiLapPhieu = args; PXK.NguoiLapPXK.Value = args; } )"
                                            Style="font-size: 16px; height: contain; border-width: 1px; width: 100% "></RadzenTextBox>
                         </RadzenStack>
@@ -399,7 +399,7 @@
     private NVLofPhieuXuatKho SelectedNVLofPXK = new();
     private bool isPXKSaved = false;
     private bool isAllowCreatePXK = true;
-    private List<VitriLuuTru> DSVitris = new();
+    //private List<VitriLuuTru> DSVitris = new();
     private string PXKGhichu = string.Empty;
     private string PXKNguoiLapPhieu = string.Empty;
 
@@ -436,12 +436,14 @@
         if (DSachNVL_XuatKho.Count > 0)
         {
             // Load dsvitri
-            DSVitris = SQLServerServices.GetAllViTriLuuTru();
+            //DSVitris = SQLServerServices.GetAllViTriLuuTru();
 
             // Tao ma phieu random
             string maphieu = Common.Generate5UppercaseChars();
             PXK.MaPhieuXK.Value = $"#PXK{maphieu}";
             PXK.NgayLapPXK.Value = DateTime.Now;
+            PXKNguoiLapPhieu = "Admin";
+            PXK.NguoiLapPXK.Value = PXKNguoiLapPhieu;
             PXK.IsConfirmedPXK.Value = 0;
 
             // Insert in to DB new PXK
@@ -543,7 +545,7 @@
         {
             foreach (var nvlofpxk in PXK.DSNVLofPXKs)
             {
-                nvlofpxk.NVLXKSoLuongAll.Value = DSNVLofKHSX.FirstOrDefault(nvlofkhsx => nvlofkhsx.NVLID.Value?.ToString() == nvlofpxk.NVLID.Value?.ToString())?.DinhMuc.Value ?? 0;
+                nvlofpxk.NVLXKSoLuongAll.Value = DSNVLofKHSX.FirstOrDefault(nvlofkhsx => nvlofkhsx.NVLID.Value?.ToString()?.Trim() == nvlofpxk.NVLID.Value?.ToString()?.Trim())?.DinhMuc.Value ?? 0;
                 await OnSaveSoluongXuatKhoAll(nvlofpxk);
             }
 
@@ -604,6 +606,11 @@
 
     private List<LenhXuatKho> ReDefineDSLenhXK(List<LenhXuatKho> dslenhxks)
     {
+        if (dslenhxks.Count == 0)
+        {
+            return new();
+        }
+
         // Sap xep ngay tang dan
         dslenhxks.Sort((a, b) =>
         {
@@ -836,11 +843,16 @@
     // Luu so luong tong can xuat kho
     private async Task OnSaveSoluongXuatKhoAll(NVLofPhieuXuatKho nvlofPXk)
     {
-        nvlofPXk.NVLXKSoLuongAll.Value = nvlofPXk.TemSLXKhoAll;
 
-        nvlofPXk.TemSLXKhoAll = 0;
+        //////////// Dung khi tao PXK voi KHSX
+        if (!CreatedWithKHSX)
+        {
+            nvlofPXk.NVLXKSoLuongAll.Value = nvlofPXk.TemSLXKhoAll;
 
-        nvlofPXk.IsEditingSLXKhoALL = false;
+            nvlofPXk.TemSLXKhoAll = 0;
+
+            nvlofPXk.IsEditingSLXKhoALL = false;
+        }
 
         // Check so luong
         bool isSLok = true;
