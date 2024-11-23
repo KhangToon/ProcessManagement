@@ -1,6 +1,7 @@
 ﻿@page "/print-qridlot"
 
 @using ProcessManagement.Models
+@using ProcessManagement.Models.KHO_NVL
 @using ProcessManagement.Models.KHO_NVL.NhapKho
 @using ProcessManagement.Models.SANPHAM
 @using ProcessManagement.Services.QRCodes
@@ -27,12 +28,12 @@
                 <RadzenStack class="rz-h-50 rz-border" Style="width: 100%; border-left: none; border-bottom: none; border-width: 2px; border-color: black;" JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center">
                     <RadzenStack Style="height: contain; width: contain" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                         @{
-                            string qrBase64string = QRCodeServices.GenerateQRCode(TargetLNK.QRIDLOT.Value?.ToString() ?? string.Empty, 180);
+                            string qrBase64string = QRCodeServices.GenerateQRCode(QRItems.QRIDLOT, 180);
 
                             if (!string.IsNullOrEmpty(qrBase64string))
                             {
                                 <img style="border-radius: 10px; padding: 5px" src="@($"data:image/png;base64,{qrBase64string}")" alt="QR Code">
-                                <RadzenText TextStyle="TextStyle.H5" Text="@(TargetLNK.QRIDLOT.Value?.ToString())"></RadzenText>
+                                <RadzenText TextStyle="TextStyle.H5" Text="@(QRItems.QRIDLOT)"></RadzenText>
                             }
                         }
                     </RadzenStack>
@@ -40,15 +41,15 @@
                 <RadzenStack Gap="20px" class="rz-h-50 rz-border" Style="padding: 20px; width: 100%; border-left: none; border-width: 2px; border-color: black;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                     <RadzenStack Style="height: contain; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                         <RadzenText TextStyle="TextStyle.H5" Text="Ngày nhập kho"></RadzenText>
-                        <RadzenText TextStyle="TextStyle.DisplayH5" Text="@(((TargetLNK.NgayNhapKho.Value == null)? TargetLNK.NgayNhapKho.Value?.ToString()?.Trim() : DateTime.Today.ToString("MM/dd/yyyy")))"></RadzenText>
+                        <RadzenText TextStyle="TextStyle.DisplayH5" Text="@(QRItems.NgayNhapKho)"></RadzenText>
                     </RadzenStack>
                     <RadzenStack Style="height: contain; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                         <RadzenText TextStyle="TextStyle.H5" Text="Mã NVL"></RadzenText>
-                        <RadzenText TextStyle="TextStyle.DisplayH5" Text="@(TargetLNK.TargetNgLieu.TenNVL.Value?.ToString())"></RadzenText>
+                        <RadzenText TextStyle="TextStyle.DisplayH5" Text="@(QRItems.TenNVL)"></RadzenText>
                     </RadzenStack>
                     <RadzenStack Style="height: contain; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                         <RadzenText TextStyle="TextStyle.H5" Text="Số lượng"></RadzenText>
-                        <RadzenText TextStyle="TextStyle.DisplayH5" Text="@(TargetLNK.LNKSoLuong.Value?.ToString())"></RadzenText>
+                        <RadzenText TextStyle="TextStyle.DisplayH5" Text="@(QRItems.SoLuong.ToString())"></RadzenText>
                     </RadzenStack>
                 </RadzenStack>
             </RadzenStack>
@@ -66,7 +67,19 @@
     [SupplyParameterFromQuery(Name = "lnkid")]
     public int LNKID { get; set; } = 0;
 
-    private LenhNhapKho TargetLNK = new();
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "vtofnvlid")]
+    public int VTofNVLID { get; set; } = 0;
+
+    private class Items
+    {
+        public string NgayNhapKho = string.Empty;
+        public string TenNVL = string.Empty;
+        public string QRIDLOT = string.Empty;
+        public int SoLuong = 0;
+    }
+
+    private Items QRItems = new();
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -78,8 +91,24 @@
 
     protected override Task OnParametersSetAsync()
     {
-        TargetLNK = SQLServerServices.GetLenhNhapKhoByID(LNKID);
+        if (LNKID != 0)
+        {
+            LenhNhapKho TargetLNK = SQLServerServices.GetLenhNhapKhoByID(LNKID);
 
+            QRItems.NgayNhapKho = (string.IsNullOrEmpty(TargetLNK.NgayNhapKho.Value?.ToString()?.Trim())) ? DateTime.Now.ToString("MM/dd/yyyy") : TargetLNK.NgayNhapKho.Value?.ToString()?.Trim() ?? DateTime.Now.ToString("MM/dd/yyyy");
+            QRItems.QRIDLOT = TargetLNK.QRIDLOT.Value?.ToString() ?? string.Empty;
+            QRItems.TenNVL = TargetLNK.TargetNgLieu.TenNVL.Value?.ToString() ?? string.Empty;
+            QRItems.SoLuong = int.TryParse(TargetLNK.LNKSoLuong.Value?.ToString(), out int sl) ? sl : 0;
+        }
+        else if (VTofNVLID != 0)
+        {
+            ViTriofNVL TargetVTofNVL = SQLServerServices.GetViTriOfNgVatLieuByAnyParameters(vtofnvlid: VTofNVLID);
+
+            QRItems.NgayNhapKho = TargetVTofNVL.NgayNhapKho.Value?.ToString() ?? string.Empty;
+            QRItems.QRIDLOT = TargetVTofNVL.QRIDLOT.Value?.ToString() ?? string.Empty;
+            QRItems.TenNVL = TargetVTofNVL.NgLieuInfor.TenNVL.Value?.ToString() ?? string.Empty;
+            QRItems.SoLuong = int.TryParse(TargetVTofNVL.VTNVLSoLuong.Value?.ToString(), out int sl) ? sl : 0;
+        }
         return base.OnParametersSetAsync();
     }
 

@@ -23,6 +23,7 @@
 @inject SQLServerServices SQLServerServices
 @inject QRCodeServices QRCodeServices
 @inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
 
 <style>
     .rowbackground-style {
@@ -67,10 +68,10 @@
                                         <RadzenColumn SizeMD="3" Size="12">
                                             <RadzenStack Gap="10px" Style="height: 100%; width: 100%; padding-left: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                 <!--Nhap kho button-->
-                                                <RadzenButton Click="OnOpenDialogNhapKho" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Tạo phiếu nhập kho"))" Icon="download" Text="@($"Nhập kho {((DSNvlNhapKho.Count > 0)? $"({DSNvlNhapKho.Count})" : string.Empty)}")" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Light"
+                                                <RadzenButton Click="OnOpenDialogNhapKho" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Tạo phiếu nhập kho", 100))" Icon="download" Text="@($"Nhập kho {((DSNvlNhapKho.Count > 0)? $"({DSNvlNhapKho.Count})" : string.Empty)}")" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Light"
                                                               Style="height: contain; width: 50%; font-size: 14px;" />
                                                 <!--Xuat kho button-->
-                                                <RadzenButton Click="OnOpenDialogXuatKho" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Tạo phiếu xuất kho"))" Icon="upload" Text="@($"Xuất kho {((DSNvlXuatKho.Count > 0)? $"({DSNvlXuatKho.Count})" : string.Empty)}")" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Light"
+                                                <RadzenButton Click="OnOpenDialogXuatKho" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Tạo phiếu xuất kho", 100))" Icon="upload" Text="@($"Xuất kho {((DSNvlXuatKho.Count > 0)? $"({DSNvlXuatKho.Count})" : string.Empty)}")" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Light"
                                                               Style="height: contain; width: 50%; font-size: 14px;" />
                                             </RadzenStack>
                                         </RadzenColumn>
@@ -157,7 +158,7 @@
                                                 <RadzenColumn SizeMD="3" Size="12">
                                                     <!--Them NVL moi-->
                                                     <RadzenStack Style="height: 100%; width: 100%; padding-left: 10px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                        <RadzenButton Click="OnThemMoiNguyenVatLieu" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Thêm nguyên liệu mới"))" Icon="add" Text="Thêm nguyên liệu mới" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
+                                                        <RadzenButton Click="OnThemMoiNguyenVatLieu" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Thêm nguyên liệu mới", 100))" Icon="add" Text="Thêm nguyên liệu mới" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
                                                                       Style="height: contain; width: 100%; font-size: 14px;" />
                                                     </RadzenStack>
                                                 </RadzenColumn>
@@ -391,21 +392,27 @@
                                                                                                                     <RadzenText Text="@($"{(dsvitri.IndexOf(vitri) + 1).ToString()}")" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
                                                                                                                 </RadzenStack>
                                                                                                                 <RadzenStack Style="width: 25%; height: contain; border-left: var(--rz-grid-cell-border); border-right: var(--rz-grid-cell-border); padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                                                                    <RadzenText Text="@($"{vitri.VitriInfor.MaViTri.Value?.ToString()}")" Style="color: darkblue; font-weight: 600; font-size: 16px"></RadzenText>
+                                                                                                                    <RadzenText Text="@($"{vitri.VitriInfor.MaViTri.Value?.ToString()}")" Style="color: darkblue; font-weight: 600; font-size: 16px" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Vị trí", 0, duration: 500))"></RadzenText>
                                                                                                                 </RadzenStack>
                                                                                                                 <RadzenStack Style="width: 15%; height: contain; border-right: var(--rz-grid-cell-border); padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                                                                    <RadzenText Text="@($"{vitri.LotVitri.Value?.ToString()}")" Style="color: darkblue; font-weight: 600; font-size: 16px"></RadzenText>
+                                                                                                                    <RadzenText Text="@($"{vitri.LotVitri.Value?.ToString()}")" Style="color: darkblue; font-weight: 600; font-size: 16px" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Lot vị trí", 0, duration: 500))"></RadzenText>
                                                                                                                 </RadzenStack>
                                                                                                                 <RadzenStack Gap=15px Style="width: 30%; height: contain; padding-right: 10px; border-right: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                                                                    <RadzenText Text="@($"{(int.TryParse(vitri.VTNVLSoLuong?.Value?.ToString(), out int slvt)? slvt : 0)} (pcs)")" Style="font-size: 16px; font-weight: 600; height: contain; color: rgba(58,71,77)"></RadzenText>
+                                                                                                                    <RadzenText Text="@($"{(int.TryParse(vitri.VTNVLSoLuong?.Value?.ToString(), out int slvt)? slvt : 0)} (pcs)")" Style="font-size: 16px; font-weight: 600; height: contain; color: rgba(58,71,77)" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Số lượng tại vị trí", 0, duration: 500))"></RadzenText>
                                                                                                                 </RadzenStack>
                                                                                                                 <RadzenStack Style="width: 25%; height: contain; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                                                                    <RadzenText Text="@($"{vitri.NgayNhapKho.Value?.ToString()}")" Style="color: darkblue; font-weight: 600; font-size: 16px"></RadzenText>
+                                                                                                                    <RadzenText Text="@($"{vitri.NgayNhapKho.Value?.ToString()}")" Style="color: darkblue; font-weight: 600; font-size: 16px" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Ngày nhập kho", 0, duration: 500))"></RadzenText>
                                                                                                                 </RadzenStack>
                                                                                                             </RadzenStack>
                                                                                                             <RadzenStack Visible="@(!string.IsNullOrEmpty(vitri.QRIDLOT.Value?.ToString()))" Style="width: 100%; height: contain; padding-right: 10px; padding-top: 5px" Gap="10px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                                                                                                 <RadzenButton Text="@vitri.QRIDLOT.Value?.ToString()" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Lighter" Variant="Variant.Flat"
+                                                                                                                              Style="font-size: 17px; font-weight: 600; height: contain; min-height: contain; width: contain;" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Mã quản lý", 0, duration: 500))" />
+
+                                                                                                                <RadzenButton Click="@(() => CopyToClipboard(vitri.QRIDLOT.Value?.ToString()?? string.Empty))" Icon="content_copy" Style="--rz-icon-size: 18px;" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Light" />
+
+                                                                                                                <RadzenButton Click="@(() => NavigateToPrintQRIDLOTpage(vitri))" Icon="print" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Darker" Variant="Variant.Flat"
                                                                                                                               Style="font-size: 18px; height: contain; min-height: contain; width: contain;" />
+
                                                                                                             </RadzenStack>
                                                                                                         </RadzenStack>
                                                                                                     </RadzenCard>
@@ -593,9 +600,9 @@
                                                                                 }
                                                                             </RadzenStack>
                                                                             <RadzenStack Visible="@isEditNVLDetail" Gap="5" Style="width: 15%; height: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                                <RadzenButton Click="@(() => OpendialogRenameThongTinNVL(nvldetail))" Icon="edit" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Đổi tên trường thông tin"))"
+                                                                                <RadzenButton Click="@(() => OpendialogRenameThongTinNVL(nvldetail))" Icon="edit" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Đổi tên trường thông tin", 100))"
                                                                                               ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 18px;" />
-                                                                                <RadzenButton Click="@(() => OpendialogDeleteThongTinNVL(nvldetail))" Icon="delete" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Xóa trường thông tin"))"
+                                                                                <RadzenButton Click="@(() => OpendialogDeleteThongTinNVL(nvldetail))" Icon="delete" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Xóa trường thông tin", 100))"
                                                                                               ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 18px;" />
                                                                             </RadzenStack>
                                                                         </RadzenStack>
@@ -608,14 +615,14 @@
 
                                                 <RadzenStack Visible="(SelectedNgVatLieu.NVLID.Value != null)" Gap="10px" Style="height: contain; width: 100%; padding-top: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                                                     <RadzenStack Gap="10px" Style="height: contain; width: contain; padding: 0px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                        <RadzenButton Visible="@(!isEditNVLDetail)" Style="width: contain; height: contain;" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Thêm thông tin khác cho nguyên liệu"))"
+                                                        <RadzenButton Visible="@(!isEditNVLDetail)" Style="width: contain; height: contain;" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Thêm thông tin khác cho nguyên liệu", 100))"
                                                                       Icon="add" Text="Thêm trường thông tin" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat"
                                                                       Click="@(() => OnOpenDialogAddNewNVLDetail())" />
                                                         <RadzenButton Visible="@(isEditNVLDetail)" Style="width: contain; height: contain;"
                                                                       Icon="check" Text="Lưu thay đổi" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Size="ButtonSize.Small" Variant="Variant.Flat"
                                                                       Click=@(() => OnUpdateThongTinNguyenVatLieu(SelectedNgVatLieu))
                                                                       BusyText="Saving ..." IsBusy=@isSavingNVLdetails />
-                                                        <RadzenButton Style="width: contain; min-width: 120px; height: contain;" Click="@(() => EnableEditNVLDetail())" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Thêm/xóa/sửa thông tin"))"
+                                                        <RadzenButton Style="width: contain; min-width: 120px; height: contain;" Click="@(() => EnableEditNVLDetail())" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Thêm/xóa/sửa thông tin", 100))"
                                                                       Icon="@((isEditNVLDetail)? "clear" : "edit")" Text="@((isEditNVLDetail)? "Hủy" : "Chỉnh sửa")" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" />
                                                     </RadzenStack>
                                                     <RadzenStack Gap="10px" Style="height: contain; width: contain; padding: 0px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
@@ -1151,17 +1158,61 @@
         }
     }
 
+    // Navigate to print QRIDLOT page
+    private void NavigateToPrintQRIDLOTpage(ViTriofNVL? viTriofNVL)
+    {
+        if (viTriofNVL != null)
+        {
+            //NavigationManager.NavigateTo($"khomanagement?tabindxex={3}&khsxid={khsxid}");
+            int.TryParse(viTriofNVL.VTofNVLID.Value?.ToString(), out int vtofnvlid);
+
+            NavigationManager.NavigateTo($"print-qridlot?vtofnvlid={vtofnvlid}");
+        }
+    }
+
     private async Task CopyToClipboard(string content)
     {
-        await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", content);
-        NotificationService.Notify(new NotificationMessage
+        try
+        {
+            // Try modern Clipboard API first
+            await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", content);
+
+            NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = "Copied!",
+                    Detail = $"{content}",
+                    Duration = 4000
+                });
+        }
+        catch (JSException)
+        {
+            try
             {
-                Severity = NotificationSeverity.Success,
-                Summary = "Copied!",
-                Detail = $"{content}",
-                Duration = 4000
-            });
+                // Fallback method
+                await JSRuntime.InvokeVoidAsync("fallbackCopyToClipboard", content);
+
+                NotificationService.Notify(new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Success,
+                        Summary = "Fallback Copied!",
+                        Detail = $"{content}",
+                        Duration = 4000
+                    });
+            }
+            catch (Exception)
+            {
+                NotificationService.Notify(new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Error,
+                        Summary = "Error",
+                        Detail = "Failed to copy text",
+                        Duration = 3000
+                    });
+            }
+        }
     }
+
 
     // ContextMenu
     void OnDatagridCellContextMenu(DataGridCellMouseEventArgs<NguyenVatLieu> args)
@@ -1202,9 +1253,9 @@
     }
 
     // Tooltip
-    void ShowToolTip(ElementReference elementReference, TooltipPosition position, string content)
+    void ShowToolTip(ElementReference elementReference, TooltipPosition position, string content, int delay, int duration = 500)
     {
-        TooltipOptions options = new TooltipOptions() { Position = position, Delay = 500, Style = "background-color: black" };
+        TooltipOptions options = new TooltipOptions() { Position = position, Delay = delay, Duration = duration, Style = "background-color: black" };
 
         TooltipService.Open(elementReference, content, options);
     }

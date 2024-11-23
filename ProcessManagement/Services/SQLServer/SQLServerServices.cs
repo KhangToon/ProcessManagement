@@ -2910,7 +2910,7 @@ namespace ProcessManagement.Services.SQLServer
 
             return vitriofnvl;
         }
-        public ViTriofNVL GetViTriOfNgVatLieuBy_QRIDLOT(object? vtid = null, object? nvlid = null, object? qridlot = null)
+        public ViTriofNVL GetViTriOfNgVatLieuByAnyParameters(object? vtid = null, object? nvlid = null, object? qridlot = null, object? vtofnvlid = null)
         {
             ViTriofNVL vitriofnvl = new();
 
@@ -2937,6 +2937,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 // Add all potential conditions
                 AddCondition(vtid, Common.VTID, "VTID");
+                AddCondition(vtofnvlid, Common.VTofNVLID, "VTofNVLID");
                 AddCondition(nvlid, Common.NVLID, "NVLID");
                 AddCondition(qridlot, Common.QRIDLOT, "QRIDLOT");
                 // Add more conditions as needed...

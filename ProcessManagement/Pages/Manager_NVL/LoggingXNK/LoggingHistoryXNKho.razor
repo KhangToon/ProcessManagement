@@ -26,24 +26,30 @@
 </style>
 
 <RadzenStack Style="height: contain; width: 100%; padding-bottom: 5px; padding-left: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-    <RadzenStack Style="height: 100%; width: 20%; border-radius: 10px; background-color: var(--rz-success-lighter); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-        <RadzenText Text="LỊCH SỬ XUẤT/NHẬP KHO" Style="color: green; font-weight: 600; font-size: 18px"></RadzenText>
-    </RadzenStack>
-    <RadzenStack Gap="15px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: 100%; width: 60%;">
-        <RadzenMenu Visible="false" Style="height: 100%; padding: 0; margin: 0; border-radius: 10px; background-color: var(--rz-primary-lighter)">
-            <RadzenMenuItem Text="@($"Bộ lọc ( {dsachModeSearch[modeSearch]} )")" Icon="search">
-                <RadzenMenuItem Text="@dsachModeSearch[0]" Click="@( async() => {modeSearch = 0; await LoadLoggingList(); } )" Icon="filter_alt"></RadzenMenuItem>
-                <RadzenMenuItem Text="@dsachModeSearch[1]" Click="@( async() => {modeSearch = 1; await GetFilterDSachVitriLuuTru(Common.LogTypePNK);})" Icon="filter_alt"></RadzenMenuItem>
-                <RadzenMenuItem Text="@dsachModeSearch[2]" Click="@( async() => {modeSearch = 2; await GetFilterDSachVitriLuuTru(Common.LogTypePXK);})" Icon="filter_alt"></RadzenMenuItem>
-                <RadzenMenuItem Text="@dsachModeSearch[3]" Click="@( () => {modeSearch = 3;})" Icon="filter_alt"></RadzenMenuItem>
-                <RadzenMenuItem Text="@dsachModeSearch[4]" Click="@( () => {modeSearch = 4;})" Icon="filter_alt"></RadzenMenuItem>
-                <RadzenMenuItem Text="@dsachModeSearch[5]" Click="@( () => {modeSearch = 5;})" Icon="filter_alt"></RadzenMenuItem>
-            </RadzenMenuItem>
-        </RadzenMenu>
-        <RadzenTextBox @oninput="@((args) => GetFilterDSachVitriLuuTru(args?.Value?.ToString()?? string.Empty))" Placeholder="@($"Nhập {((modeSearch != 0 && modeSearch != 1 && modeSearch != 2)? $"{dsachModeSearch[modeSearch]}" : "thông tin")} để tìm kiếm")" Style="border-radius: 20px; padding-left: 20px; border-width: 2px; border-color: var(--rz-primary-light); width: 50% "></RadzenTextBox>
-        <RadzenButton Icon="search" ButtonStyle="ButtonStyle.Primary" Style="border-radius: 20px;" />
-        <RadzenButton Style="border-radius: 20px;" Icon="autorenew" Click="@(async () => await LoadLoggingList())" IsBusy="@isloading" BusyText="Loading..." ButtonStyle="ButtonStyle.Primary" />
-    </RadzenStack>
+    <RadzenRow Style="height: 100%; width: 100%;">
+        <RadzenColumn SizeMD="3" Size="12">
+            <RadzenStack Style="height: 100%; width: 100%; border-radius: 10px; background-color: var(--rz-success-lighter); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                <RadzenText Text="LỊCH SỬ XUẤT/NHẬP KHO" Style="color: green; font-weight: 600; font-size: 18px"></RadzenText>
+            </RadzenStack>
+        </RadzenColumn>
+        <RadzenColumn SizeMD="6" Size="12">
+            <RadzenStack Gap="15px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: 100%; width: 100%;">
+                <RadzenMenu Visible="false" Style="height: 100%; padding: 0; margin: 0; border-radius: 10px; background-color: var(--rz-primary-lighter)">
+                    <RadzenMenuItem Text="@($"Bộ lọc ( {dsachModeSearch[modeSearch]} )")" Icon="search">
+                        <RadzenMenuItem Text="@dsachModeSearch[0]" Click="@( async() => {modeSearch = 0; await LoadLoggingList(); } )" Icon="filter_alt"></RadzenMenuItem>
+                        <RadzenMenuItem Text="@dsachModeSearch[1]" Click="@( async() => {modeSearch = 1; await GetFilterDSachVitriLuuTru(Common.LogTypePNK);})" Icon="filter_alt"></RadzenMenuItem>
+                        <RadzenMenuItem Text="@dsachModeSearch[2]" Click="@( async() => {modeSearch = 2; await GetFilterDSachVitriLuuTru(Common.LogTypePXK);})" Icon="filter_alt"></RadzenMenuItem>
+                        <RadzenMenuItem Text="@dsachModeSearch[3]" Click="@( () => {modeSearch = 3;})" Icon="filter_alt"></RadzenMenuItem>
+                        <RadzenMenuItem Text="@dsachModeSearch[4]" Click="@( () => {modeSearch = 4;})" Icon="filter_alt"></RadzenMenuItem>
+                        <RadzenMenuItem Text="@dsachModeSearch[5]" Click="@( () => {modeSearch = 5;})" Icon="filter_alt"></RadzenMenuItem>
+                    </RadzenMenuItem>
+                </RadzenMenu>
+                <RadzenTextBox @oninput="@((args) => GetFilterDSachVitriLuuTru(args?.Value?.ToString()?? string.Empty))" Placeholder="@($"Nhập {((modeSearch != 0 && modeSearch != 1 && modeSearch != 2)? $"{dsachModeSearch[modeSearch]}" : "thông tin")} để tìm kiếm")" Style="border-radius: 20px; padding-left: 20px; border-width: 2px; border-color: var(--rz-primary-light); width: 50% "></RadzenTextBox>
+                <RadzenButton Icon="search" ButtonStyle="ButtonStyle.Primary" Style="border-radius: 20px;" />
+                <RadzenButton Style="border-radius: 20px;" Icon="autorenew" Click="@(async () => await LoadLoggingList())" IsBusy="@isloading" BusyText="Loading..." ButtonStyle="ButtonStyle.Primary" />
+            </RadzenStack>
+        </RadzenColumn>
+    </RadzenRow>
 </RadzenStack>
 <RadzenRow Gap="10px" Style="height: 100%; width: 100%; border-top: var(--rz-grid-cell-border); padding: 0;">
     <RadzenColumn Size="12" SizeMD="12" Style="height: contain; width: 100%;">
@@ -165,7 +171,7 @@
                                 {
                                     <RadzenDataGridColumn FilterMode="FilterMode.SimpleWithMenu" Width="100px" TItem="HistoryXNKho.HistoryXNKhoConvert"
                                                           Title="@item.Name" Property="@item.Name"
-                                                          TextAlign="TextAlign.Center" Filterable="true" >
+                                                          TextAlign="TextAlign.Center" Filterable="true">
                                         <HeaderTemplate>
                                             <span style="font-weight: 600; font-size: 15px; color: white">@HistoryXNKho.GetDisplayName(item.Name)</span>
                                         </HeaderTemplate>

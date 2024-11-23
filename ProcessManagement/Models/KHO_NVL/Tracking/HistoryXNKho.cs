@@ -13,8 +13,8 @@ namespace ProcessManagement.Models.KHO_NVL.Tracking
         public Propertyy LogMaViTri { get; set; } = new() { DBName = Common.LogMaViTri, DisplayName = Common.LogMaViTri, Type = typeof(string), AlowDatabase = true };
         public Propertyy LotVitri { get; set; } = new() { DBName = Common.LotViTri, DisplayName = Common.LotViTri, Type = typeof(string), AlowDatabase = true };
         public Propertyy QRIDLOT { get; set; } = new() { DBName = Common.QRIDLOT, Type = typeof(string), AlowDatabase = true };
-        public Propertyy LogSoLuong { get; set; } = new() { DBName = Common.LogSoLuong, DisplayName = Common.LogSoLuong, Type = typeof(int), AlowDatabase = true };
         public Propertyy LogTonKhoTruoc { get; set; } = new() { DBName = Common.LogTonKhoTruoc, DisplayName = Common.LogTonKhoTruoc, Type = typeof(int), AlowDatabase = true };
+        public Propertyy LogSoLuong { get; set; } = new() { DBName = Common.LogSoLuong, DisplayName = Common.LogSoLuong, Type = typeof(int), AlowDatabase = true };
         public Propertyy LogTonKhoSau { get; set; } = new() { DBName = Common.LogTonKhoSau, DisplayName = Common.LogTonKhoSau, Type = typeof(int), AlowDatabase = true };
         public Propertyy LogNgThucHien { get; set; } = new() { DBName = Common.LogNgThucHien, DisplayName = Common.LogNgThucHien, Type = typeof(int), AlowDatabase = true };
         public Propertyy LogThoiDiem { get; set; } = new() { DBName = Common.LogThoiDiem, DisplayName = Common.LogThoiDiem, Type = typeof(DateTime), AlowDatabase = true };
@@ -30,8 +30,8 @@ namespace ProcessManagement.Models.KHO_NVL.Tracking
                 LogTenNVL = inputHistoryXNKho.LogTenNVL.Value?.ToString() ?? string.Empty,
                 LogMaViTri = inputHistoryXNKho.LogMaViTri.Value?.ToString() ?? string.Empty,
                 LotVitri = inputHistoryXNKho.LotVitri.Value?.ToString() ?? string.Empty,
-                LogSoLuong = Convert.ToInt32(inputHistoryXNKho.LogSoLuong.Value),
                 LogTonKhoTruoc = Convert.ToInt32(inputHistoryXNKho.LogTonKhoTruoc.Value),
+                LogSoLuong = Convert.ToInt32(inputHistoryXNKho.LogSoLuong.Value),
                 LogTonKhoSau = Convert.ToInt32(inputHistoryXNKho.LogTonKhoSau.Value),
                 LogNgThucHien = inputHistoryXNKho.LogNgThucHien.Value?.ToString() ?? string.Empty,
                 LogThoiDiem = Convert.ToDateTime(inputHistoryXNKho.LogThoiDiem.Value),
@@ -61,11 +61,11 @@ namespace ProcessManagement.Models.KHO_NVL.Tracking
             [DisplayName("QR quản lý NVL")]
             public string QRIDLOT { get; set; } = string.Empty;
 
-            [DisplayName("Số Lượng")]
-            public int LogSoLuong { get; set; }
-
             [DisplayName("Tồn Kho Trước")]
             public int LogTonKhoTruoc { get; set; }
+
+            [DisplayName("Số Lượng")]
+            public int LogSoLuong { get; set; }
 
             [DisplayName("Tồn Kho Sau")]
             public int LogTonKhoSau { get; set; }
