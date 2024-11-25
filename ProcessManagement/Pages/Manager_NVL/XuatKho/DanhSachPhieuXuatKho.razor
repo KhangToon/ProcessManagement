@@ -153,6 +153,30 @@
         await Task.Run(() =>
         {
             DSPhieuXKs = SQLServerServices.GetListPhieuXuatKho();
+
+            // Remove PXK if KHSXID != 0 && TargetKHSX not exsiting
+            var listkhsxids = SQLServerServices.GetlistKHSXid();
+            if (listkhsxids.Count > 0)
+            {
+                foreach (var pxk in DSPhieuXKs)
+                {
+                    _ = int.TryParse(pxk.KHSXID.Value?.ToString()?.Trim(), out int khsxid) ? khsxid : 0;
+
+                    if (khsxid > 0)
+                    {
+                        if (!listkhsxids.Contains(khsxid))
+                        {
+                            (int removeStatus, string removeEr) = SQLServerServices.DeletePhieuXuatKho(pxk.PXKID.Value);
+
+                            if (removeStatus > 0)
+                            {
+                                DSPhieuXKs.Remove(pxk);
+                            }
+                        }
+                    }
+                }
+            }
+
             DSPhieuXKs.Reverse();
         });
     }
