@@ -15,41 +15,9 @@ using ProcessManagement.Services.Modbus;
 using System.Net.Sockets;
 using System.Net.NetworkInformation;
 using System.Diagnostics;
-using System.Drawing;
 
-// enable khi deploy - disable khi use local 
-// Get local IP address
-string GetLocalIPAddress()
-{
-    var host = Dns.GetHostEntry(Dns.GetHostName());
-    foreach (var ip in host.AddressList)
-    {
-        if (ip.AddressFamily == AddressFamily.InterNetwork)
-        {
-            return ip.ToString();
-        }
-    }
-    throw new Exception("No network adapters with an IPv4 address in the system!");
-}
-// Find an available port
-int FindAvailablePort(int startingPort = 5000)
-{
-    var properties = IPGlobalProperties.GetIPGlobalProperties();
-    var usedPorts = properties.GetActiveTcpListeners().Select(l => l.Port).ToList();
-
-    for (int port = startingPort; port < 65535; port++)
-    {
-        if (!usedPorts.Contains(port))
-        {
-            return port;
-        }
-    }
-
-    throw new Exception("No available ports found.");
-}
-
-var localIP = GetLocalIPAddress();
-var port = FindAvailablePort();
+var localIP = PortFinder.GetLocalIPAddress();
+var port = PortFinder.FindAvailablePort_notcheckUsed();
 var url = $"http://{localIP}:{port}";
 // enable khi deploy - disable khi use local 
 
@@ -121,17 +89,90 @@ app.MapControllers();
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 
-//app.Urls.Add(url); // enable khi deploy - disable khi use local 
-
-//// Open browser after application starts 
+// Open browser after application starts
+//app.Urls.Add(url); // enable khi deploy - disable khi use local  
 //app.Lifetime.ApplicationStarted.Register(() =>  // enable khi deploy - disable khi use local 
 //{
 //    var psi = new ProcessStartInfo
 //    {
-//        FileName = url, 
+//        FileName = url,
 //        UseShellExecute = true
 //    };
 //    Process.Start(psi);
 //});
 
+
+
+
+
 app.Run();
+
+
+public static class PortFinder
+{
+    // Find an available port
+    public static int FindAvailablePort_notcheckUsed(int startingPort = 5000)
+    {
+        var properties = IPGlobalProperties.GetIPGlobalProperties();
+        var usedPorts = properties.GetActiveTcpListeners().Select(l => l.Port).ToList();
+
+        for (int port = startingPort; port < 65535; port++)
+        {
+            if (!usedPorts.Contains(port))
+            {
+                return port;
+            }
+        }
+
+        throw new Exception("No available ports found.");
+    }
+
+
+    public static int FindAvailablePort_CheckUsed(int startingPort = 5000)
+    {
+        if (startingPort < 1 || startingPort > 65535)
+            throw new ArgumentOutOfRangeException(nameof(startingPort), "Port must be between 1 and 65535");
+
+        for (int port = startingPort; port <= 65535; port++)
+        {
+            if (IsPortAvailable(port))
+                return port;
+        }
+
+        throw new InvalidOperationException("No available ports found in range.");
+    }
+
+    private static bool IsPortAvailable(int port)
+    {
+        var tcpListener = new TcpListener(IPAddress.Any, port);
+
+        try
+        {
+            tcpListener.Start();
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+        finally
+        {
+            tcpListener.Stop();
+        }
+    }
+
+    // enable khi deploy - disable khi use local 
+    // Get local IP address
+    public static string GetLocalIPAddress()
+    {
+        var host = Dns.GetHostEntry(Dns.GetHostName());
+        foreach (var ip in host.AddressList)
+        {
+            if (ip.AddressFamily == AddressFamily.InterNetwork)
+            {
+                return ip.ToString();
+            }
+        }
+        throw new Exception("No network adapters with an IPv4 address in the system!");
+    }
+}

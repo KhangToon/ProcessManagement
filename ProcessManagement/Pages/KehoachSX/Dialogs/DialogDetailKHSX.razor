@@ -78,7 +78,7 @@
                                 <!--Định mức-->
                                 <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                     <RadzenStack Style="width: 45%; height: contain; padding-right: 10px" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
-                                        <RadzenText Text="Số lượng NVL sản xuất" Style="font-size: 14px; font-weight: 700;"></RadzenText>
+                                        <RadzenText Text="Số lượng sản xuất" Style="font-size: 14px; font-weight: 700;"></RadzenText>
                                     </RadzenStack>
                                     <RadzenStack Style="width: 55%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
                                         <RadzenText Text="@($"{SelectKHSX?.DinhMuc.Value?.ToString()} (PCS)")" Style="font-size: 16px; font-weight: 600; height: contain; color: rgba(58,71,77)"></RadzenText>
@@ -121,7 +121,7 @@
                                         <RadzenAlert Text="Chưa tạo phiếu xuất kho NVL cho KHSX" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; padding-right: 10px; margin: 0" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Dark"></RadzenAlert>
                                     </RadzenStack>
                                     <!--Chua tao phieu xuat kho-->
-                                    <RadzenButton Visible="@(PXKofKHSX.PXKID.Value == null)" Click="OnOpenDialogCreatePhieuXuatKho" Icon="upload" Text="Tạo phiếu xuất kho NVL" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Dark"
+                                    <RadzenButton Visible="@(PXKofKHSX.PXKID.Value == null)" Click="OnOpenDialogCreatePhieuXuatKho" Icon="add_circle" Text="Tạo phiếu xuất kho NVL" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Dark"
                                                   Style="height: contain; width: 100%; font-size: 14px;" />
 
                                     <!--Da tao phieu xuat kho/ Da chi dinh vi tri NVL/ Chua hoan thanh xuat kho-->
@@ -411,9 +411,8 @@
     private void NavigateToHandlePhieuXuatKho()
     {
         _ = int.TryParse(SelectKHSX?.KHSXID.Value?.ToString(), out int khsxid) ? khsxid : 0;
-
         Common.SelectedPXKID = SelectKHSX?.PXKID.Value;
-
-        NavigationManager.NavigateTo($"khomanagement?tabindxex={3}&khsxid={khsxid}");
+        var url = $"khomanagement?khsxid={khsxid}&tabindxex={4}";
+        NavigationManager.NavigateTo(url);
     }
 }

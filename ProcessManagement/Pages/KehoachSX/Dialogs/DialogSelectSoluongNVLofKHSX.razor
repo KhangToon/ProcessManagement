@@ -19,13 +19,27 @@
         </RadzenStack>
 
         <!--Chi dinh so luong san pham-->
-        <RadzenStack Gap="10px" Style="height: contain; width: 100%; background-color: var(--rz-success-lighter); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-            <RadzenText Text="Nhập số lượng sản phẩm cần sản xuất" Style="color: black; font-weight: 600; font-size: 16px"></RadzenText>
-            <RadzenNumeric TValue="int" TextAlign=TextAlign.Center
-                           Min="0" Max="999999"
-                           Value="@(generate.SLSanPhamSX)"
-                           ValueChanged="@((args) => { OnNumOfSanPhamChanged(args); })"
-                           Style="--rz-input-font-size: 18px; font-weight: 600; height: 35px; border-width: 1px; width: 15%" />
+        <RadzenStack Gap="20px" Style="height: contain; width: 100%; background-color: var(--rz-success-lighter); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+            <RadzenStack Gap="10px" Style="width: contain; height: contain;" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
+                <RadzenText Text="Sản phẩm" Style="color: black; font-weight: 600; font-size: 16px"></RadzenText>
+                <RadzenDropDown Placeholder="* chọn sản phẩm" Value="@generLot.NewKHSX.SanPham?.SP_TenSanPham.Value?.ToString()" TValue="string"
+                                ValueChanged="@((args) =>
+                                            { generLot.isGenerateListLotOK = false;
+                                            generLot.isCheckSLNVLisOK = false;
+                                            generLot.SetCurrentKHSXsanPham(args);
+                                            TargetSP = generLot.NewKHSX.SanPham ?? new();
+                                            generLot.ResetDefault(); })"
+                                Data=@(generLot.GetDSMaSPs()) Style="width: contain; border-radius: 5px; border-width: 1px; font-size: 16px; ">
+                </RadzenDropDown>
+            </RadzenStack>
+            <RadzenStack Gap="10px" Style="width: contain; height: contain;" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
+                <RadzenText Text="Số lượng cần sản xuất" Style="color: black; font-weight: 600; font-size: 16px"></RadzenText>
+                <RadzenNumeric TValue="int" TextAlign=TextAlign.Center
+                               Min="0" Max="999999"
+                               Value="@(generLot.SLSanPhamSX)"
+                               ValueChanged="@((args) => { OnNumOfSanPhamChanged(args); })"
+                               Style="--rz-input-font-size: 18px; font-weight: 600; height: 35px; border-width: 1px; width: contain" />
+            </RadzenStack>
         </RadzenStack>
 
         <RadzenRow Gap="10px" Style="width: 100%; height: 100%;">
@@ -196,21 +210,21 @@
             </RadzenColumn>
         </RadzenRow>
     </RadzenStack>
-    <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding-top: 10px; border-top: var(--rz-grid-cell-border) " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+    <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding-top: 10px; border-top: var(--rz-grid-cell-border) " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
         <RadzenButton Disabled="@(!IsAllowXacNhan())" Style="width: 120px;" Icon="check" Text="Xác nhận" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Dark" Variant="Variant.Flat" Click="@(() => OnXacNhan())" />
-        <RadzenButton Style="width: 120px;" Icon="close" Text="Thoát" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" Click="@(() => DialogService.Close(null))" />
+        <RadzenButton Style="width: 120px;" Icon="close" Text="Thoát" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Dark" Size="ButtonSize.Small" Variant="Variant.Flat" Click="@(() => DialogService.Close(null))" />
     </RadzenStack>
 </RadzenCard>
 
 @code {
     [Parameter]
-    public GenerateLot generate { get; set; } = new();
+    public GenerateLot generLot { get; set; } = new();
 
     private SanPham TargetSP = new();
 
     protected override Task OnInitializedAsync()
     {
-        TargetSP = generate.NewKHSX.SanPham ?? new();
+        TargetSP = generLot.NewKHSX.SanPham ?? new();
 
         return base.OnInitializedAsync();
     }
@@ -219,7 +233,7 @@
     private void OnNumOfSanPhamChanged(int args)
     {
         // Update SL Sanpham can SX
-        generate.SLSanPhamSX = args;
+        generLot.SLSanPhamSX = args;
 
         foreach (var nvlofsp in TargetSP.DanhSachNVLs)
         {
@@ -228,7 +242,7 @@
             if (iscanconvert)
             {
                 // Update so luong can lay cua moi NVL
-                nvlofsp.allsoLuongcanLay = generate.SLSanPhamSX * slforsp;
+                nvlofsp.allsoLuongcanLay = generLot.SLSanPhamSX * slforsp;
                 // Tinh dinh muc/ti le loi
                 GetDinhMucSX(nvlofsp);
             }
@@ -269,13 +283,13 @@
 
         foreach (var nvlofsp in TargetSP.DanhSachNVLs)
         {
-            if (nvlofsp.TargetNgLieu.TonKho == 0 || nvlofsp.allsoLuongcanLay > nvlofsp.TargetNgLieu.TonKho || nvlofsp.dinhmuc > nvlofsp.TargetNgLieu.TonKho  || nvlofsp.allsoLuongcanLay == 0)
+            if (nvlofsp.TargetNgLieu.TonKho == 0 || nvlofsp.allsoLuongcanLay > nvlofsp.TargetNgLieu.TonKho || nvlofsp.dinhmuc > nvlofsp.TargetNgLieu.TonKho || nvlofsp.allsoLuongcanLay == 0)
             {
                 isallow = false; break;
             }
         }
 
-        if (generate.SLSanPhamSX == 0)
+        if (generLot.SLSanPhamSX == 0)
         {
             isallow = false;
         }
@@ -288,7 +302,7 @@
     {
         if (TargetSP.DanhSachNVLs != null)
         {
-            generate.NewKHSX.DSachNVLofKHSXs = new();
+            generLot.NewKHSX.DSachNVLofKHSXs = new();
 
             foreach (var nvl in TargetSP.DanhSachNVLs)
             {
@@ -303,18 +317,18 @@
                         DinhMuc = { Value = nvl.dinhmuc }
                     };
 
-                generate.NewKHSX.DSachNVLofKHSXs?.Add(nVLofKHSX);
+                generLot.NewKHSX.DSachNVLofKHSXs?.Add(nVLofKHSX);
             }
 
             // Update so luong NVL da lay
-            generate.SLNgVatLieuSX = generate.NewKHSX.DSachNVLofKHSXs?.Sum(item => int.Parse(item.SoLuong.Value?.ToString() ?? "0")) ?? 0;
+            generLot.SLNgVatLieuSX = generLot.NewKHSX.DSachNVLofKHSXs?.Sum(item => int.Parse(item.SoLuong.Value?.ToString() ?? "0")) ?? 0;
 
-            generate.DinhMuc = generate.NewKHSX.DSachNVLofKHSXs?.Sum(item => int.Parse(item.DinhMuc.Value?.ToString() ?? "0")) ?? 0;
+            generLot.DinhMuc = generLot.NewKHSX.DSachNVLofKHSXs?.Sum(item => int.Parse(item.DinhMuc.Value?.ToString() ?? "0")) ?? 0;
 
-            generate.TiLeLoi = Math.Round(generate.NewKHSX.DSachNVLofKHSXs?.Sum(item => double.Parse(item.TiLeLoi.Value?.ToString() ?? "0")) ?? 0, 4);
+            generLot.TiLeLoi = Math.Round(generLot.NewKHSX.DSachNVLofKHSXs?.Sum(item => double.Parse(item.TiLeLoi.Value?.ToString() ?? "0")) ?? 0, 4);
             //generate.TiLeLoi = Math.Round((((double)generate.DinhMuc - generate.SLNgVatLieuSX) / generate.SLNgVatLieuSX) * 100, 2);
 
-            DialogService.Close(generate.NewKHSX.DSachNVLofKHSXs);
+            DialogService.Close(generLot.NewKHSX.DSachNVLofKHSXs);
         }
     }
 }

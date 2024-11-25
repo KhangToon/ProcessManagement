@@ -549,8 +549,8 @@
                 await OnSaveSoluongXuatKhoAll(nvlofpxk);
             }
 
-            PXKGhichu = $"Xuất nguyên vật liệu KHSX: {KHSX.MaLSX.Value?.ToString()}";
-            PXK.GhiChuPXK.Value = PXKGhichu;
+            PXKGhichu = $"Xuất nguyên vật liệu KHSX: {KHSX.MaLSX.Value?.ToString()} ID: {KHSX.KHSXID.Value}";
+            ReAsignPreviousValueOfPXK(CreatedWithKHSX);
         }
         //////////
 
@@ -559,14 +559,20 @@
         await base.OnInitializedAsync();
     }
 
+    private void ReAsignPreviousValueOfPXK(bool createdwithkhsx)
+    {
+        PXK.GhiChuPXK.Value = PXKGhichu;
+        PXK.NguoiLapPXK.Value = PXKNguoiLapPhieu;
+        PXK.KHSXID.Value = (CreatedWithKHSX) ? KHSX.KHSXID.Value : 0;
+    }
+
     private async Task ReloadPhieuXuatKho(object? pxkid, object? seletedNVlpxkId)
     {
         await Task.Run(() =>
         {
             PXK = SQLServerServices.GetPhieuXuatKhoByID(pxkid);
 
-            PXK.GhiChuPXK.Value = PXKGhichu;
-            PXK.NguoiLapPXK.Value = PXKNguoiLapPhieu;
+            ReAsignPreviousValueOfPXK(CreatedWithKHSX);
 
             // Kiem tra tong so luong chi dinh bang tong so luong can lay
             foreach (var nvlofpxk in PXK.DSNVLofPXKs)

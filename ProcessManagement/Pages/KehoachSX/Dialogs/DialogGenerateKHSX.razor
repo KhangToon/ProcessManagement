@@ -61,30 +61,26 @@
                                     </RadzenStack>
                                 </RadzenStack>
 
-                                <!--Ma SP-->
+                                <!--Select NVL-->
                                 <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                     <RadzenStack Style="width: 50%; height: contain; padding-right: 10px" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
-                                        <RadzenText Text="Loại sản phẩm" Style="font-size: 16px; font-weight: 600; color: black"></RadzenText>
-                                    </RadzenStack>
-                                    <RadzenStack Style="width: 50%; height: contain;" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
-                                        <RadzenDropDown Placeholder="* chọn sản phẩm" Value="@generLot.NewKHSX.SanPham?.SP_TenSanPham.Value?.ToString()" TValue="string"
-                                                        ValueChanged="@((args) =>
-                                                        { generLot.isGenerateListLotOK = false; generLot.isCheckSLNVLisOK = false; generLot.SetCurrentKHSXsanPham(args); generLot.ResetDefault(); })"
-                                                        Data=@(generLot.GetDSMaSPs()) Style="width: 100%; border-radius: 5px; border-width: 1px; font-size: 16px; ">
-                                        </RadzenDropDown>
-                                    </RadzenStack>
-                                </RadzenStack>
-
-                                <!--Select so luong NVL-->
-                                <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                    <RadzenStack Style="width: 50%; height: contain; padding-right: 10px" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
-                                        <RadzenText Text="" Style="font-size: 16px; font-weight: 600; color: black"></RadzenText>
+                                        <RadzenText Text="Chọn nguyên liệu" Style="font-size: 16px; font-weight: 600; color: black"></RadzenText>
                                     </RadzenStack>
                                     <RadzenStack Gap="10px" Style="width: 50%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                         <!--Chua chi dinh so luong NVL-->
-                                        <RadzenButton Visible="@(!generLot.isCheckSLNVLisOK)" Disabled="@((generLot.NewKHSX.SanPham?.SP_SPID.Value == null))" Click="@(() => OpenDialogSelectNVLofKHSX())" Style="width: 100%;" Icon="add" Text="Lấy nguyên vật liệu" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Variant="Variant.Flat" />
+                                        <RadzenButton Visible="@(!generLot.isCheckSLNVLisOK)" Click="@(() => OpenDialogSelectNVLofKHSX())" Style="width: 100%;" Icon="add" Text="Lấy nguyên vật liệu" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Variant="Variant.Flat" />
                                         <!--Da chi dinh so luong NVL-->
                                         <RadzenButton Visible="@generLot.isCheckSLNVLisOK" Click="@(() => OpenDialogSelectNVLofKHSX())" Style="width: 100%; font-size: 16px" Icon="check" Text="Đã chọn NVL" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Success" Shade="Shade.Lighter" Variant="Variant.Flat" />
+                                    </RadzenStack>
+                                </RadzenStack>
+
+                                <!--Sản phẩm-->
+                                <RadzenStack Gap="0" Style="width: 100%; height: contain; padding-top: 10px; border-top: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                    <RadzenStack Style="width: 50%; height: contain; padding-right: 10px" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
+                                        <RadzenText Text="Sản phẩm" Style="font-size: 16px; font-weight: 600; color: black"></RadzenText>
+                                    </RadzenStack>
+                                    <RadzenStack Style="width: 50%; height: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                        <RadzenText Text="@($"{generLot.NewKHSX.SanPham?.SP_TenSanPham.Value?.ToString()}")" Style="font-size: 18px; font-weight: 600; width: 100%; height: contain; color: darkblue"></RadzenText>
                                     </RadzenStack>
                                 </RadzenStack>
 
@@ -113,7 +109,7 @@
                                 <!--Định mức-->
                                 <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                     <RadzenStack Style="width: 50%; height: contain; padding-right: 10px" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
-                                        <RadzenText Text="Số lượng NVL sản xuất" Style="font-size: 16px; font-weight: 600; color: black"></RadzenText>
+                                        <RadzenText Text="Số lượng sản xuất" Style="font-size: 16px; font-weight: 600; color: black"></RadzenText>
                                     </RadzenStack>
                                     <RadzenStack Style="width: 50%; height: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                         <RadzenText Text="@($"{generLot.DinhMuc.ToString()} (PCS)")" Style="font-size: 18px; font-weight: 600; width: 100%; height: contain; color: darkgreen"></RadzenText>
@@ -429,7 +425,7 @@
     // Chon nguyen vat lieu san xuat
     private async Task OpenDialogSelectNVLofKHSX()
     {
-        List<NVLofKHSX> nVLofKHSXs = await DialogService.OpenAsync<DialogSelectSoluongNVLofKHSX>(null, new Dictionary<string, object>() { { "generate", generLot } },
+        List<NVLofKHSX> nVLofKHSXs = await DialogService.OpenAsync<DialogSelectSoluongNVLofKHSX>(null, new Dictionary<string, object>() { { "generLot", generLot } },
         new DialogOptions() { Width = "80%", Height = "contain", Resizable = false, Draggable = true, ShowTitle = false, ShowClose = false, Style = "background-color: while; border-radius: 0px; padding: 0px" });
 
         // Recalculate variable

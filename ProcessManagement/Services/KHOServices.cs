@@ -248,7 +248,7 @@ namespace ProcessManagement.Services
 
                     // Update ngaynhap/xuatkho of KHSX
                     _ = int.TryParse(PXK.KHSXID.Value?.ToString(), out int khsxid) ? khsxid : 0;
-
+                    //  // Update ngaynhap/xuatkho of KHSX (use with create KHSX)
                     if (khsxid > 0)
                     {
                         SQLServerServices.UpdatePhieuXuatKhoInfor(PXK);

@@ -41,11 +41,11 @@
 
 <RadzenRow class="rowbackground-style" Gap="0" Style="height: 100%; width: 100%; overflow-y: auto;">
     <RadzenColumn Size="12" SizeMD="12" Style="height: 100%; width: 100%; padding-right: 0">
-        <RadzenTabs Style="width: 100%; height: 100%; padding-right: 0" SelectedIndex="@SelectedTabIndex">
+        <RadzenTabs Style="width: 100%; height: 100%; padding-right: 0" SelectedIndex="@((SelectedTabIndex - 1))">
             <Tabs>
-                <RadzenTabsItem @onclick="@(() => SelectedTabIndex = 0)">
+                <RadzenTabsItem @onclick="@(() => SelectedTabIndex = 1)">
                     <Template>
-                        <RadzenText Text="Kho nguyên liệu" Style=@($"{((SelectedTabIndex == 0)? "color: black; font-weight: 600; font-size: 16px" : "color: var(--rz-primary-dark); font-weight: 600; font-size: 16px")}")></RadzenText>
+                        <RadzenText Text="Kho nguyên liệu" Style=@($"{((SelectedTabIndex == 1)? "color: black; font-weight: 600; font-size: 16px" : "color: var(--rz-primary-dark); font-weight: 600; font-size: 16px")}")></RadzenText>
                     </Template>
                     <ChildContent>
                         <RadzenCard Variant="Variant.Flat" Style="height: 100%; width: 100%; padding-top: 10px">
@@ -639,9 +639,9 @@
                         </RadzenCard>
                     </ChildContent>
                 </RadzenTabsItem>
-                <RadzenTabsItem @onclick="@(() => SelectedTabIndex = 1)">
+                <RadzenTabsItem @onclick="@(() => SelectedTabIndex = 2)">
                     <Template>
-                        <RadzenText Text="Vị trí lưu trữ" Style=@($"{((SelectedTabIndex == 1)? "color: black; font-weight: 600; font-size: 16px" : "color: var(--rz-primary-dark); font-weight: 600; font-size: 16px")}")></RadzenText>
+                        <RadzenText Text="Vị trí lưu trữ" Style=@($"{((SelectedTabIndex == 2)? "color: black; font-weight: 600; font-size: 16px" : "color: var(--rz-primary-dark); font-weight: 600; font-size: 16px")}")></RadzenText>
                     </Template>
                     <ChildContent>
                         <RadzenCard Variant="Variant.Flat" Style="height: 100%; width: 100%; padding: 10px;">
@@ -651,9 +651,9 @@
                         </RadzenCard>
                     </ChildContent>
                 </RadzenTabsItem>
-                <RadzenTabsItem @onclick="@(() => SelectedTabIndex = 2)">
+                <RadzenTabsItem @onclick="@(() => SelectedTabIndex = 3)">
                     <Template>
-                        <RadzenText Text="Kế hoạch nhập kho" Style=@($"{((SelectedTabIndex == 2)? "color: black; font-weight: 600; font-size: 16px" : "color: var(--rz-primary-dark); font-weight: 600; font-size: 16px")}")></RadzenText>
+                        <RadzenText Text="Kế hoạch nhập kho" Style=@($"{((SelectedTabIndex == 3)? "color: black; font-weight: 600; font-size: 16px" : "color: var(--rz-primary-dark); font-weight: 600; font-size: 16px")}")></RadzenText>
                     </Template>
                     <ChildContent>
                         <RadzenCard Variant="Variant.Flat" Style="height: 100%; width: 100%; padding: 10px;">
@@ -663,21 +663,21 @@
                         </RadzenCard>
                     </ChildContent>
                 </RadzenTabsItem>
-                <RadzenTabsItem @onclick="@(() => SelectedTabIndex = 3)">
+                <RadzenTabsItem @onclick="@(() => SelectedTabIndex = 4)">
                     <Template>
-                        <RadzenText Text="Kế hoạch xuất kho" Style=@($"{((SelectedTabIndex == 3)? "color: black; font-weight: 600; font-size: 16px" : "color: var(--rz-primary-dark); font-weight: 600; font-size: 16px")}")></RadzenText>
+                        <RadzenText Text="Kế hoạch xuất kho" Style=@($"{((SelectedTabIndex == 4)? "color: black; font-weight: 600; font-size: 16px" : "color: var(--rz-primary-dark); font-weight: 600; font-size: 16px")}")></RadzenText>
                     </Template>
                     <ChildContent>
                         <RadzenCard Variant="Variant.Flat" Style="height: 100%; width: 100%; padding: 10px;">
                             <RadzenStack Gap="5" Style="height: 100%; width: 100%;">
-                                <DanhSachPhieuXuatKho TargetKHSXID="@TargetKHSXID"></DanhSachPhieuXuatKho>
+                                <DanhSachPhieuXuatKho></DanhSachPhieuXuatKho>
                             </RadzenStack>
                         </RadzenCard>
                     </ChildContent>
                 </RadzenTabsItem>
-                <RadzenTabsItem @onclick="@(() => SelectedTabIndex = 4)">
+                <RadzenTabsItem @onclick="@(() => SelectedTabIndex = 5)">
                     <Template>
-                        <RadzenText Text="Lịch sử xuất/nhập kho" Style=@($"{((SelectedTabIndex == 4)? "color: black; font-weight: 600; font-size: 16px" : "color: var(--rz-primary-dark); font-weight: 600; font-size: 16px")}")></RadzenText>
+                        <RadzenText Text="Lịch sử xuất/nhập kho" Style=@($"{((SelectedTabIndex == 5)? "color: black; font-weight: 600; font-size: 16px" : "color: var(--rz-primary-dark); font-weight: 600; font-size: 16px")}")></RadzenText>
                     </Template>
                     <ChildContent>
                         <RadzenCard Variant="Variant.Flat" Style="height: 100%; width: 100%; padding: 10px;">
@@ -693,14 +693,16 @@
 </RadzenRow>
 
 @code {
+
     [Parameter]
     [SupplyParameterFromQuery(Name = "tabindxex")]
-    public static int SelectedTabIndex { get; set; } = 0;
+    public int AsignCurrentTabIndex { get; set; } = 1;
+
+    public static int SelectedTabIndex { get; set; } = 1;
 
     [Parameter]
     [SupplyParameterFromQuery(Name = "khsxid")]
-    public int TargetKHSXID { get; set; } = 0;
-
+    public int TargetKHSXID { get; set; } = 0; // notuse
 
     private List<string>? UserRoles;
     private DateTime startSearchDay = DateTime.Today;
@@ -730,6 +732,16 @@
     private List<NguyenVatLieu> DSNvlXuatKho = new();
 
     private bool isEditNVLDetail = false;
+
+    protected override Task OnParametersSetAsync()
+    {
+        if (AsignCurrentTabIndex > 0)
+        {
+            SelectedTabIndex = AsignCurrentTabIndex;
+        }
+
+        return base.OnParametersSetAsync();
+    }
 
     protected override async Task OnInitializedAsync()
     {

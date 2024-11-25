@@ -48,7 +48,7 @@
                 <RadzenColumn SizeMD="3" Size="12">
                     <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" Style="height: 100%; width: 100%; padding-right: 20px;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                         <!--Tai danh sach KHSX-->
-                        <RadzenButton Click="@(async () => await LoadDanhSachKHSX())" Icon="list" Text="Danh sách KHSX" Size="ButtonSize.Small" Variant="Variant.Filled"
+                        <RadzenButton Click="@(async () => await LoadDanhSachKHSX())" Icon="list" Text="Quản lý KHSX" Size="ButtonSize.Small" Variant="Variant.Filled"
                                       Style="height: contain; width: 50%; font-size: 14px; background-color: Highlight " />
                         <!--Tao moi ke hoach san xuat-->
                         <RadzenButton Click="@(() => AddNewKehoachSX())" Icon="add" Text="Thêm KHSX" Size="ButtonSize.Small" Variant="Variant.Filled"
@@ -194,19 +194,8 @@
     {
         await OnGetListKHSXs();
 
-        if (DSKHSXs.Any())
-        {
-            if (selectKHSXID != null)
-            {
-                SelectedKHSX = DSKHSXs.FirstOrDefault(x => object.Equals(x.KHSXID.Value, selectKHSXID)) ?? new();
-            }
-            else SelectedKHSX = DSKHSXs.FirstOrDefault() ?? new();
-
-        }
-
         await base.OnInitializedAsync();
     }
-
 
     private async Task OnGetListKHSXs()
     {
@@ -220,6 +209,15 @@
             }
             return results;
         });
+
+        if (DSKHSXs.Any())
+        {
+            if (selectKHSXID != null)
+            {
+                SelectedKHSX = DSKHSXs.FirstOrDefault(x => object.Equals(x.KHSXID.Value, selectKHSXID)) ?? new();
+            }
+            else SelectedKHSX = DSKHSXs.FirstOrDefault() ?? new();
+        }
     }
 
     private string IsKHSXSelected(KHSX selectKHSX)
@@ -260,6 +258,8 @@
     {
         KHSX selectKHSX = await DialogService.OpenAsync<DialogDSachKHSX>(null, null,
         new DialogOptions() { Width = "70%", Height = "90%", Resizable = false, Draggable = true, ShowTitle = false, ShowClose = false, Style = "background-color: while; border-radius: 0px; padding: 0px" });
+
+        await OnGetListKHSXs();
 
         reloadpage = true;
         StateHasChanged();
