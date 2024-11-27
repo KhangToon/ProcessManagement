@@ -73,7 +73,7 @@ namespace ProcessManagement.Services
 
                         int updateVTofNVLresult = -1; string updateVTofNVLerror;
 
-                        if (slhienco > 0)
+                        if (slhienco > 0) // cung NVL cung NgayNhapKho
                         {
                             bool isnvlsame = object.Equals(viTriofNVL?.NVLID.Value, savedLNK.NVLID.Value);
                             bool isngaynksame = viTriofNVL?.NgayNhapKho.Value?.ToString()?.Trim() == DateTime.Now.Date.ToShortDateString();
@@ -103,53 +103,53 @@ namespace ProcessManagement.Services
                             {
                                 return (-1, $"LNK Lỗi: {updateVTofNVLerror}!");
                             }
+                        }
 
-                            // Update success
-                            if (updateVTofNVLresult > 0)
+                        // Update success
+                        if (updateVTofNVLresult > 0)
+                        {
+                            // Update lenh nhap kho status
+                            savedLNK.LNKIsDone.Value = 1;
+                            savedLNK.NgayNhapKho.Value = DateTime.Now.Date.ToShortDateString();
+                            (int updatelnkResult, string updatelnkError) = SQLServerServices.UpdateLenhNhapKho(savedLNK);
+
+                            if (updatelnkResult == -1)
                             {
-                                // Update lenh nhap kho status
-                                savedLNK.LNKIsDone.Value = 1;
-                                savedLNK.NgayNhapKho.Value = DateTime.Now.Date.ToShortDateString();
-                                (int updatelnkResult, string updatelnkError) = SQLServerServices.UpdateLenhNhapKho(savedLNK);
-
-                                if (updatelnkResult == -1)
-                                {
-                                    return (-1, $"LNK Lỗi: {updatelnkError}!");
-                                }
-
-                                // update status to UI
-                                LNK.LNKIsDone.Value = 1;
-
-                                // Get nguoi nhap kho
-                                string nguoiNhapkho = SQLServerServices.GetNguoiTaoPhieuNhapKhoByID(savedLNK.PNKID.Value);
-
-                                // Logging nhap kho
-                                HistoryXNKho logNhapKho = new HistoryXNKho()
-                                {
-                                    LogLoaiPhieu = { Value = Common.LogTypePNK },
-                                    LogMaPhieu = { Value = maPNK },
-                                    LogMaViTri = { Value = maVitri },
-                                    LogNgThucHien = { Value = nguoiNhapkho },
-                                    LogSoLuong = { Value = savedLNK.LNKSoLuong.Value },
-                                    LogTonKhoTruoc = { Value = savedLNK.TargetNgLieu.TonKho },
-                                    LogTonKhoSau = { Value = savedLNK.TargetNgLieu.TonKho + soluongThemvao },
-                                    LogTenNVL = { Value = savedLNK.TargetNgLieu.TenNVL.Value },
-                                    LogThoiDiem = { Value = DateTime.Now },
-                                    LotVitri = { Value = savedLNK.LotVitri.Value },
-                                    NVLID = { Value = savedLNK.NVLID.Value },
-                                    VTID = { Value = savedLNK.VTID.Value },
-                                    QRIDLOT = { Value = savedLNK.QRIDLOT.Value }
-                                };
-                                // Insert logging to Database
-                                (int logId, string logErr) = SQLServerServices.InsertLogingXNKho(logNhapKho);
-
-                                if (logId == -1)
-                                {
-
-                                }
-
-                                return (1, $"Đã nhập kho nguyên liệu: \n {savedLNK.TargetNgLieu.TenNVL.Value?.ToString()} \n Số lượng : {soluongnhapfromClient} (pcs)");
+                                return (-1, $"LNK Lỗi: {updatelnkError}!");
                             }
+
+                            // update status to UI
+                            LNK.LNKIsDone.Value = 1;
+
+                            // Get nguoi nhap kho
+                            string nguoiNhapkho = SQLServerServices.GetNguoiTaoPhieuNhapKhoByID(savedLNK.PNKID.Value);
+
+                            // Logging nhap kho
+                            HistoryXNKho logNhapKho = new HistoryXNKho()
+                            {
+                                LogLoaiPhieu = { Value = Common.LogTypePNK },
+                                LogMaPhieu = { Value = maPNK },
+                                LogMaViTri = { Value = maVitri },
+                                LogNgThucHien = { Value = nguoiNhapkho },
+                                LogSoLuong = { Value = savedLNK.LNKSoLuong.Value },
+                                LogTonKhoTruoc = { Value = savedLNK.TargetNgLieu.TonKho },
+                                LogTonKhoSau = { Value = savedLNK.TargetNgLieu.TonKho + soluongThemvao },
+                                LogTenNVL = { Value = savedLNK.TargetNgLieu.TenNVL.Value },
+                                LogThoiDiem = { Value = DateTime.Now },
+                                LotVitri = { Value = savedLNK.LotVitri.Value },
+                                NVLID = { Value = savedLNK.NVLID.Value },
+                                VTID = { Value = savedLNK.VTID.Value },
+                                QRIDLOT = { Value = savedLNK.QRIDLOT.Value }
+                            };
+                            // Insert logging to Database
+                            (int logId, string logErr) = SQLServerServices.InsertLogingXNKho(logNhapKho);
+
+                            if (logId == -1)
+                            {
+
+                            }
+
+                            return (1, $"Đã nhập kho nguyên liệu: \n {savedLNK.TargetNgLieu.TenNVL.Value?.ToString()} \n Số lượng : {soluongnhapfromClient} (pcs)");
                         }
                     }
                 }
@@ -198,7 +198,7 @@ namespace ProcessManagement.Services
                     }
 
                     // Kiem tra trang thai vi tri (vi tri co QRIDLOT trung voi lenh xuat kho)
-                    ViTriofNVL viTriofNVL = SQLServerServices.GetViTriOfNgVatLieuByAnyParameters(vtid: savedLXK.VTID.Value, qridlot: savedLXK.QRIDLOT.Value);
+                    ViTriofNVL viTriofNVL = SQLServerServices.GetViTriOfNgVatLieuByAnyParameters(vtid: savedLXK.VTID.Value, qridlot: savedLXK.QRIDLOT.Value).FirstOrDefault() ?? new();
 
                     if (viTriofNVL == null || viTriofNVL.VTofNVLID.Value == null)
                     {
@@ -296,7 +296,7 @@ namespace ProcessManagement.Services
         // Update ngaynhapkho/ngayxuatkho cua dsLOTofKHSX
         private static (int, string) UpdateNgayNhapXuatKho_dsLOTofKHSX(object? khsxid, LenhXuatKho targetLXK)
         {
-            Dictionary<string, object?> parameters = new Dictionary<string, object?>() { { Models.KHSXs.KHSX_LOT.DBName.KHSXID, khsxid } };
+            Dictionary<string, object?> parameters = new() { { Models.KHSXs.KHSX_LOT.DBName.KHSXID, khsxid } };
             (var resultdslots, string getError) = SQLServerServices.GetListLOT_khsx(parameters);
 
             if (resultdslots != null && resultdslots.Any())
@@ -324,6 +324,5 @@ namespace ProcessManagement.Services
             }
             else return (-1, "Danh sách LOT của KHSX không tồn tại!");
         }
-
     }
 }

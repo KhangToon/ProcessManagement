@@ -245,6 +245,7 @@ namespace ProcessManagement.Commons
         public const string LogNgThucHien = "Người thực hiện";
         public const string LogThoiDiem = "Thời điểm";
         public const string LogTypePNK = "Nhập kho";
+        public const string LogTypeKiemKe = "Kiểm kê";
         public const string LogTypePNK_Manual = "Nhập tay";
         public const string LogTypePXK_Manual = "Xuất tay";
         public const string LogTypePXK = "Xuất kho";

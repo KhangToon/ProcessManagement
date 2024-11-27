@@ -2,6 +2,7 @@
 using ProcessManagement.Commons;
 using ProcessManagement.Models;
 using ProcessManagement.Models.KHO_NVL;
+using ProcessManagement.Models.KHO_NVL.KiemKe;
 using ProcessManagement.Models.KHO_NVL.NhapKho;
 using ProcessManagement.Models.KHO_NVL.Tracking;
 using ProcessManagement.Models.KHO_NVL.XuatKho;
@@ -2910,9 +2911,9 @@ namespace ProcessManagement.Services.SQLServer
 
             return vitriofnvl;
         }
-        public ViTriofNVL GetViTriOfNgVatLieuByAnyParameters(object? vtid = null, object? nvlid = null, object? qridlot = null, object? vtofnvlid = null)
+        public List<ViTriofNVL> GetViTriOfNgVatLieuByAnyParameters(object? vtid = null, object? nvlid = null, object? qridlot = null, object? vtofnvlid = null)
         {
-            ViTriofNVL vitriofnvl = new();
+            List<ViTriofNVL> vitriofnvls = new();
 
             using (var connection = new SqlConnection(connectionString))
             {
@@ -2952,6 +2953,8 @@ namespace ProcessManagement.Services.SQLServer
 
                 while (reader.Read())
                 {
+                    ViTriofNVL vitriofnvl = new();
+
                     List<Propertyy> rowitems = vitriofnvl.GetPropertiesValues();
 
                     foreach (var item in rowitems)
@@ -2962,17 +2965,19 @@ namespace ProcessManagement.Services.SQLServer
 
                         item.Value = columnValue == DBNull.Value ? null : columnValue;
                     }
+
+                    if (vitriofnvl.VTofNVLID.Value != null)
+                    {
+                        // Get vitriluutru infor
+                        vitriofnvl.VitriInfor = GetViTriLuuTruByID(vitriofnvl.VTID.Value);
+                        vitriofnvl.NgLieuInfor = GetNguyenVatLieuByID(vitriofnvl.NVLID.Value);
+                    }
+
+                    vitriofnvls.Add(vitriofnvl);
                 }
             }
 
-            if (vitriofnvl.VTofNVLID.Value != null)
-            {
-                // Get vitriluutru infor
-                vitriofnvl.VitriInfor = GetViTriLuuTruByID(vitriofnvl.VTID.Value);
-                vitriofnvl.NgLieuInfor = GetNguyenVatLieuByID(vitriofnvl.NVLID.Value);
-            }
-
-            return vitriofnvl;
+            return vitriofnvls;
         }
         public ViTriofNVL GetViTriOfNgVatLieuBy_VTid_LotVitri(object? vtid = null, object? nvlid = null, object? lotvitri = null)
         {
@@ -8902,6 +8907,138 @@ namespace ProcessManagement.Services.SQLServer
 
             return (result, errorMess);
         }
+        #endregion
+
+        #region Table_KHO_LogKiemKe
+        // Insert
+        public (int, string) InsertLogKiemKe(LogKiemKe logkiemke)
+        {
+            int result = -1;
+            string errorMess = string.Empty;
+
+            if (logkiemke == null) return (result, "Error: log is null");
+
+            List<Propertyy> properties = logkiemke.GetPropertiesValues()
+                .Where(po => po.AlowDatabase == true && po.Value != null)
+                .ToList();
+
+            if (properties.Count == 0)
+            {
+                return (result, "Error: No valid properties to insert.");
+            }
+
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+            using var transaction = connection.BeginTransaction();
+
+            try
+            {
+                var command = connection.CreateCommand();
+                command.Transaction = transaction;
+
+                string columns = string.Join(", ", properties.Select(p => $"[{p.DBName}]"));
+                string parameters = string.Join(", ", properties.Select(p => $"@{Regex.Replace(p.DBName ?? string.Empty, @"[^\w]+", "")}"));
+                command.CommandText = $@"INSERT INTO [{LogKiemKe.DBName.Table_LogKiemKe}] ({columns}) OUTPUT INSERTED.{LogKiemKe.DBName.LOGKKEID} VALUES ({parameters})";
+
+                foreach (var prop in properties)
+                {
+                    string parameterName = $"@{Regex.Replace(prop.DBName ?? string.Empty, @"[^\w]+", "")}";
+                    object? parameterValue = prop.Value ?? DBNull.Value;
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                object? rs = command.ExecuteScalar();
+                if (rs != null && int.TryParse(rs.ToString(), out result) && result > 0)
+                {
+                    transaction.Commit();
+                }
+                else
+                {
+                    result = -1;
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMess = $"Error: {ex.Message}";
+                try
+                {
+                    transaction.Rollback();
+                }
+                catch (Exception rollbackEx)
+                {
+                    errorMess += $" | Rollback Error: {rollbackEx.Message}";
+                }
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
+        // Get list
+        public (List<LogKiemKe>, string) GetListLogKiemKes(Dictionary<string, object?> parameters, bool isgetAll = false)
+        {
+            List<LogKiemKe> listLogkiemkes = new();
+
+            string errorMessage = string.Empty;
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                try
+                {
+                    connection.Open();
+
+                    var conditions = new List<string>();
+                    var command = connection.CreateCommand();
+                    command.CommandText = $"SELECT * FROM [{LogKiemKe.DBName.Table_LogKiemKe}]";
+
+                    if (!isgetAll)
+                    {
+                        // Process each parameter in the dictionary
+                        foreach (var param in parameters)
+                        {
+                            conditions.Add($"[{param.Key}] = @{param.Key}");
+
+                            command.Parameters.AddWithValue($"@{param.Key}", param.Value);
+                        }
+
+                        if (conditions.Any())
+                        {
+                            command.CommandText += " WHERE " + string.Join(" AND ", conditions);
+                        }
+                    }
+
+                    using var reader = command.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        LogKiemKe lotkhsx = new();
+
+                        List<Propertyy> rowItems = lotkhsx.GetPropertiesValues();
+
+                        foreach (var item in rowItems)
+                        {
+                            string? columnName = item.DBName;
+
+                            if (!string.IsNullOrEmpty(columnName) && reader.GetOrdinal(columnName) != -1)
+                            {
+                                object columnValue = reader[columnName];
+
+                                item.Value = columnValue == DBNull.Value ? null : columnValue;
+                            }
+                        }
+
+                        listLogkiemkes.Add(lotkhsx);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    errorMessage = $"Error: {ex.Message}";
+                    listLogkiemkes.Clear(); // Clear the list in case of error
+                }
+            }
+            return (listLogkiemkes, errorMessage);
+        }
+
         #endregion
     }
 }

@@ -348,40 +348,43 @@
                                                                 <RadzenText Text="Vị trí nguyên liệu trong kho" Style="color: white; font-weight: 500; font-size: 16px"></RadzenText>
                                                             </RadzenStack>
                                                             <RadzenStack Gap="0" Style="width: 100%; height: contain; padding: 0; " Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                                                <RadzenCard Variant="Variant.Filled" Style="height: contain; width: 25%; padding: 5px; border-radius: 10px">
-                                                                    <RadzenStack Style="width: 100%; height: contain; padding: 0; padding-top: 10px;" Gap="0" Orientation=Orientation.Vertical AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-
-                                                                        @{
-                                                                            string qrBase64string = QRCodeServices.GenerateQRCode(SelectedNgVatLieu?.TenNVL.Value?.ToString() ?? string.Empty, 150);
-                                                                            @if (!string.IsNullOrEmpty(qrBase64string))
-                                                                            {
-                                                                                <RadzenStack Gap="10" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                                    <RadzenText Text="@($"{SelectedNgVatLieu?.TenNVL.Value?.ToString()}")" Style="font-weight: 600; font-size: 16px; color: darkblue;"></RadzenText>
-                                                                                </RadzenStack>
-                                                                                <RadzenImage Style="max-width: 100px; max-height: 100px; padding: 0px; margin: 0" Path="@($"data:image/png;base64,{qrBase64string}")"></RadzenImage>
-                                                                            }
-                                                                            else
-                                                                            {
-                                                                                <RadzenIcon Icon="image_not_supported" Style="font-size: 100px; color: #ccc;"></RadzenIcon>
-                                                                            }
+                                                                <RadzenStack Style="width: 25%; height: 100%; padding: 0; padding-top: 10px;" Gap="0" Orientation=Orientation.Vertical AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                                    @{
+                                                                        string qrBase64string = QRCodeServices.GenerateQRCode(SelectedNgVatLieu?.TenNVL.Value?.ToString() ?? string.Empty, 150);
+                                                                        @if (!string.IsNullOrEmpty(qrBase64string))
+                                                                        {
+                                                                            <RadzenStack Gap="10" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                                <RadzenText Text="@($"{SelectedNgVatLieu?.TenNVL.Value?.ToString()}")" Style="font-weight: 600; font-size: 16px; color: darkblue;"></RadzenText>
+                                                                            </RadzenStack>
+                                                                            <RadzenImage Style="max-width: 100px; max-height: 100px; padding: 0px; margin: 0" Path="@($"data:image/png;base64,{qrBase64string}")"></RadzenImage>
                                                                         }
-                                                                    </RadzenStack>
-                                                                </RadzenCard>
+                                                                        else
+                                                                        {
+                                                                            <RadzenIcon Icon="image_not_supported" Style="font-size: 100px; color: #ccc;"></RadzenIcon>
+                                                                        }
+                                                                    }
+                                                                </RadzenStack>
                                                                 <RadzenStack Style="width: 75%; height: contain; padding: 0;" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                                                     <RadzenCard Variant="Variant.Flat" Style="height: contain; width: 100%; padding: 10px; border-radius: 0; margin-bottom: 10px">
-                                                                        <RadzenStack Gap="5px" Orientation="Orientation.Vertical" Style=" height: contain; width: 100%; padding: 0px; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                                                            <RadzenStack Gap="20px" Style="height: contain; width: 100%; padding: 0px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                                                                                <RadzenText Text="Danh sách vị trí" Style="font-weight: 500; font-size: 16px; color: black"></RadzenText>
-                                                                            </RadzenStack>
-                                                                            <RadzenRow Gap="10px" Style="width: 100%; height: contain; overflow-x: scroll">
-                                                                                <RadzenColumn Size="12" SizeMD="12" Style="width: 100%; height: 100%; min-width: 350px;">
-                                                                                    <RadzenStack Gap="5px" Orientation="Orientation.Vertical" Style=" height: contain; width: 100%; padding-right: 0;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                                        @if (SelectedNgVatLieu.NVLID.Value != null)
+                                                                        {
+                                                                            var dsvitri = SelectedNgVatLieu?.DSViTri.Where(vt => (int.TryParse(vt.VTNVLSoLuong.Value?.ToString(), out int slvt) ? slvt : 0) > 0).ToList();
 
-                                                                                        @if (SelectedNgVatLieu.NVLID.Value != null)
-                                                                                        {
-                                                                                            var dsvitri = SelectedNgVatLieu?.DSViTri.Where(vt => (int.TryParse(vt.VTNVLSoLuong.Value?.ToString(), out int slvt) ? slvt : 0) > 0).ToList();
+                                                                            <RadzenStack Gap="5px" Orientation="Orientation.Vertical" Style=" height: contain; width: 100%; padding: 0px; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                                                <RadzenStack Gap="20px" Style="height: contain; width: 100%; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                                                                    <RadzenText Text="Danh sách vị trí" Style="font-weight: 500; font-size: 16px; color: black"></RadzenText>
+                                                                                    <RadzenStack Gap="20px" Style="height: 100%; width: contain; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                                                                        <RadzenButton Disabled="true" Click="@(() => NavigateToKiemKepage(SelectedNgVatLieu))" Visible="@(dsvitri != null && dsvitri.Count > 0)" Icon="timeline" Text="Lịch sử" ButtonStyle="ButtonStyle.Secondary" Size="ButtonSize.Small" Shade="Shade.Darker" Variant="Variant.Flat"
+                                                                                                      Style="font-size: 16px; height: contain; min-height: contain; width: contain;" />
+                                                                                        <RadzenButton Click="@(() => NavigateToKiemKepage(SelectedNgVatLieu))" Visible="@(dsvitri != null && dsvitri.Count > 0)" Icon="contract_edit" Text="Kiểm kê" ButtonStyle="ButtonStyle.Secondary" Size="ButtonSize.Small" Shade="Shade.Darker" Variant="Variant.Flat"
+                                                                                                      Style="font-size: 16px; height: contain; min-height: contain; width: contain;" />
+                                                                                    </RadzenStack>
+                                                                                </RadzenStack>
+                                                                                <RadzenRow Gap="10px" Style="width: 100%; height: contain; overflow-x: scroll">
+                                                                                    <RadzenColumn Size="12" SizeMD="12" Style="width: 100%; height: 100%; min-width: 350px;">
+                                                                                        <RadzenStack Gap="5px" Orientation="Orientation.Vertical" Style=" height: contain; width: 100%; padding-right: 0;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
 
-                                                                                            if (dsvitri != null && dsvitri.Count > 0)
+                                                                                            @if (dsvitri != null && dsvitri.Count > 0)
                                                                                             {
                                                                                                 @foreach (var vitri in dsvitri)
                                                                                                 {
@@ -404,15 +407,15 @@
                                                                                                                     <RadzenText Text="@($"{vitri.NgayNhapKho.Value?.ToString()}")" Style="color: darkblue; font-weight: 600; font-size: 16px" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Ngày nhập kho", 0, duration: 500))"></RadzenText>
                                                                                                                 </RadzenStack>
                                                                                                             </RadzenStack>
-                                                                                                            <RadzenStack Visible="@(!string.IsNullOrEmpty(vitri.QRIDLOT.Value?.ToString()))" Style="width: 100%; height: contain; padding-right: 10px; padding-top: 5px" Gap="10px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                                                                            <RadzenStack Visible="@(!string.IsNullOrEmpty(vitri.QRIDLOT.Value?.ToString()))" Style="width: 100%; height: contain; padding-right: 10px; padding-top: 5px" Gap="10px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                                                                                                                 <RadzenButton Text="@vitri.QRIDLOT.Value?.ToString()" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Lighter" Variant="Variant.Flat"
                                                                                                                               Style="font-size: 17px; font-weight: 600; height: contain; min-height: contain; width: contain;" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Mã quản lý", 0, duration: 500))" />
 
-                                                                                                                <RadzenButton Click="@(() => CopyToClipboard(vitri.QRIDLOT.Value?.ToString()?? string.Empty))" Icon="content_copy" Style="--rz-icon-size: 18px;" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Light" />
-
-                                                                                                                <RadzenButton Click="@(() => NavigateToPrintQRIDLOTpage(vitri))" Icon="print" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Darker" Variant="Variant.Flat"
-                                                                                                                              Style="font-size: 18px; height: contain; min-height: contain; width: contain;" />
-
+                                                                                                                <RadzenStack Style="width: contain; height: contain;" Gap="10px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                                                                    <RadzenButton Click="@(() => CopyToClipboard(vitri.QRIDLOT.Value?.ToString()?? string.Empty))" Icon="content_copy" Style="--rz-icon-size: 18px;" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Light" />
+                                                                                                                    <RadzenButton Click="@(() => NavigateToPrintQRIDLOTpage(vitri))" Icon="print" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Darker" Variant="Variant.Flat"
+                                                                                                                                  Style="font-size: 18px; height: contain; min-height: contain; width: contain;" />
+                                                                                                                </RadzenStack>
                                                                                                             </RadzenStack>
                                                                                                         </RadzenStack>
                                                                                                     </RadzenCard>
@@ -424,11 +427,12 @@
                                                                                                     <RadzenText Text="Nguyên liệu chưa có trong kho lưu trữ" Style="font-size: 16px; font-weight: 500; height: contain; color: red"></RadzenText>
                                                                                                 </RadzenStack>
                                                                                             }
-                                                                                        }
-                                                                                    </RadzenStack>
-                                                                                </RadzenColumn>
-                                                                            </RadzenRow>
-                                                                        </RadzenStack>
+
+                                                                                        </RadzenStack>
+                                                                                    </RadzenColumn>
+                                                                                </RadzenRow>
+                                                                            </RadzenStack>
+                                                                        }
                                                                     </RadzenCard>
                                                                 </RadzenStack>
                                                             </RadzenStack>
@@ -1179,6 +1183,17 @@
             int.TryParse(viTriofNVL.VTofNVLID.Value?.ToString(), out int vtofnvlid);
 
             NavigationManager.NavigateTo($"print-qridlot?vtofnvlid={vtofnvlid}");
+        }
+    }
+
+    // Navigate to print KiemKe page
+    private void NavigateToKiemKepage(NguyenVatLieu? selectednvl)
+    {
+        if (selectednvl != null)
+        {
+            int.TryParse(selectednvl.NVLID.Value?.ToString(), out int nvlid);
+
+            NavigationManager.NavigateTo($"kiem-ke-nvl?nvlid={nvlid}");
         }
     }
 

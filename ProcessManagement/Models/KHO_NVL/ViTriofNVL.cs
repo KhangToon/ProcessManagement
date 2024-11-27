@@ -17,6 +17,9 @@ namespace ProcessManagement.Models.KHO_NVL
 
         public NguyenVatLieu NgLieuInfor = new(); // chi load khi can (khong load luc load ViTriofNVL)
 
+        public bool isEditVTNVLSoLuong = false; // Dung trong modul kiemke
+        public object tempVTNVLSoLuong = 0; // Dung trong modul kiemke
+
         public List<Propertyy> GetPropertiesValues()
         {
             Type propertyType = typeof(ViTriofNVL);

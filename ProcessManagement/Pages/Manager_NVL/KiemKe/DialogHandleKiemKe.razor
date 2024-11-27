@@ -1,0 +1,48 @@
+﻿@using ProcessManagement.Commons
+@using ProcessManagement.Models.KHO_NVL
+@using ProcessManagement.Services
+@using ProcessManagement.Services.SQLServer
+@using Radzen.Blazor
+@using Radzen
+@using ProcessManagement.Models;
+
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject SQLServerServices SQLServerServices
+
+<RadzenCard Variant="Variant.Filled" Style="height: contain; width: 100%; padding: 10px;">
+    <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style=" height: contain; width: 100%; padding: 0px; padding-bottom: 10px; padding-top: 10px " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+        <RadzenStack Style="height: contain; width: 100%; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+            <RadzenStack Gap="20px" Style="height: contain; width: 220px; border-radius: 5px; background-color: var(--rz-success-lighter); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                <RadzenText Text="@($"KIỂM KHO")" Style="font-weight: 600; font-size: 16px; color: darkgreen;"></RadzenText>
+            </RadzenStack>
+            <RadzenStack Gap="10px" Style="height: contain; width: contain; border-radius: 5px; padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                <RadzenText Text="@($"Tên nguyên liệu:")" Style="font-weight: 600; font-size: 16px; color: black; font-style: italic"></RadzenText>
+                <RadzenText Text="@($"{TargetViTriofNVL?.NgLieuInfor.TenNVL.Value?.ToString()}")" Style="font-weight: bold; font-size: 16px; color: black; font-style: italic"></RadzenText>
+            </RadzenStack>
+        </RadzenStack>
+    </RadzenStack>
+
+    <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding-top: 10px; border-top: var(--rz-grid-cell-border) " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+        <RadzenStack Gap="10px" Style="height: 100%; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+            <RadzenButton Visible="@isChecked" Text="Hoàn thành kiểm kê" Style="width: contain; cursor: default" Icon="check" ButtonStyle="ButtonStyle.Success" Shade="Shade.Dark" Size="ButtonSize.Small" Variant="Variant.Flat" />
+            <RadzenButton Visible="@isCheckedOK" Text="Số lượng không chênh lệnh" Style="width: contain; cursor: default" Icon="check" ButtonStyle="ButtonStyle.Success" Shade="Shade.Dark" Size="ButtonSize.Small" Variant="Variant.Flat" />
+            <RadzenButton Visible="@(!isCheckedOK)" Text="Số lượng chênh lệnh" Style="width: contain; cursor: default" Icon="error" ButtonStyle="ButtonStyle.Danger" Shade="Shade.Darker" Size="ButtonSize.Small" Variant="Variant.Flat" />
+        </RadzenStack>
+        <RadzenStack Gap="10px" Style="height: 100%; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+            <RadzenButton Click="@(() => { DialogService.Close();})" Style="width: 120px;" Icon="close" Text="Đóng" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" />
+        </RadzenStack>
+    </RadzenStack>
+
+</RadzenCard>
+
+
+@code {
+    [Parameter]
+    public ViTriofNVL TargetViTriofNVL { get; set; } = new();
+    
+    private bool isChecked = false;
+    private bool isCheckedOK = false;
+
+    // Scan QRIDLOT ==> HandleKiemKe
+}
