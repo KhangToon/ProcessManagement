@@ -7,6 +7,7 @@
 @using ProcessManagement.Models.KHO_NVL.NhapKho
 @using ProcessManagement.Models.KHO_NVL.Tracking
 @using ProcessManagement.Models.SANPHAM
+@using ProcessManagement.Services
 @using ProcessManagement.Services.QRCodes
 @using ProcessManagement.Services.SQLServer
 @using Radzen.Blazor
@@ -171,64 +172,19 @@
 
     private async Task OnSaveChangedVTNVLSoLuong(ViTriofNVL viTriofNVL)
     {
-        int slhientai = int.Parse(viTriofNVL.VTNVLSoLuong.Value?.ToString() ?? "0");
-        int slafteruUpdated = int.Parse(viTriofNVL.tempVTNVLSoLuong.ToString() ?? "0");
+        bool? confirm = await DialogService.Confirm($"Cập nhật số lượng (<strong>{(viTriofNVL.VTNVLSoLuong.Value?.ToString())}</strong> --> <strong>{viTriofNVL.tempVTNVLSoLuong}</strong>)?", "Xác nhận", new ConfirmOptions() { OkButtonText = "OK", CancelButtonText = "Hủy", ShowClose = false });
 
-        if (slhientai != slafteruUpdated)
+        if (confirm.Value)
         {
-            bool? confirm = await DialogService.Confirm($"Cập nhật số lượng mới (<strong>{(viTriofNVL.VTNVLSoLuong.Value?.ToString())}</strong> --> <strong>{viTriofNVL.tempVTNVLSoLuong}</strong>)?", "Xác nhận", new ConfirmOptions() { OkButtonText = "OK", CancelButtonText = "Hủy", ShowClose = false });
+            (int status, string mess) = await KHOServices.OnHandleLenhKiemKe(viTriofNVL);
 
-            if (confirm.Value)
+            if (status == -1)
             {
-                viTriofNVL.VTNVLSoLuong.Value = viTriofNVL.tempVTNVLSoLuong;
-
-                // Update so luong vi tri cua nvl
-                (int updateVTofNVLresult, string updateVTofNVLerror) = SQLServerServices.UpdateViTriOfNgVatLieu(viTriofNVL);
-
-                if (updateVTofNVLresult == -1)
-                {
-                    await DialogService.Alert($"Không thể cập nhật số lượng", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
-                }
-                else
-                {
-                    // Logging update kho
-                    HistoryXNKho logUpdate = new HistoryXNKho()
-                        {
-                            LogLoaiPhieu = { Value = Common.LogTypeKiemKe },
-                            LogMaPhieu = { Value = string.Empty },
-                            LogMaViTri = { Value = viTriofNVL.VitriInfor.MaViTri.Value?.ToString() },
-                            LogNgThucHien = { Value = "Admin" },
-                            LogSoLuong = { Value = Math.Abs(slafteruUpdated - slhientai) },
-                            LogTonKhoTruoc = { Value = slhientai },
-                            LogTonKhoSau = { Value = slafteruUpdated },
-                            LogTenNVL = { Value = viTriofNVL.NgLieuInfor.TenNVL.Value?.ToString() },
-                            LogThoiDiem = { Value = DateTime.Now },
-                            LotVitri = { Value = viTriofNVL.LotVitri.Value?.ToString() },
-                            NVLID = { Value = viTriofNVL.NVLID.Value?.ToString() },
-                            VTID = { Value = viTriofNVL.VTID.Value?.ToString() },
-                            QRIDLOT = { Value = viTriofNVL.QRIDLOT.Value?.ToString() }
-                        };
-                    // Insert loggingupdate to Database
-                    (int logId, string logErr) = SQLServerServices.InsertLogingXNKho(logUpdate);
-                    if (logId == -1) { }
-
-
-                    // Log kiem ke
-                    LogKiemKe logKiemKe = new()
-                        {
-                            VTofNVLID = { Value = viTriofNVL.VTofNVLID.Value },
-                            SLTruoc = { Value = slhientai },
-                            SLSau = { Value = slafteruUpdated },
-                            NgayKiemKe = { Value = logUpdate.LogThoiDiem.Value }
-                        };
-                    // Insert loggingkiemke to Database
-                    (int logkkid, string logkkErr) = SQLServerServices.InsertLogKiemKe(logKiemKe);
-                    if (logkkid == -1) { }
-
-
-                    // Reload page
-                    ShowNotification("Cập nhật thành công!", NotificationSeverity.Success, 2000);
-                }
+                await DialogService.Alert(mess, "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+            }
+            else if (status == 1)
+            {
+                await DialogService.Alert(mess, "<strong><span style='color: darkgreen'>Success!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
             }
         }
 

@@ -5,12 +5,15 @@ using ProcessManagement.Models.KHO_NVL.XuatKho;
 using ProcessManagement.Models.KHO_NVL.Tracking;
 using Radzen;
 using ProcessManagement.Commons;
+using ProcessManagement.Models.KHO_NVL.KiemKe;
 
 namespace ProcessManagement.Services
 {
     public static class KHOServices
     {
         private static readonly SQLServerServices SQLServerServices = new();
+
+        // Handle lenh nhap kho
         public static async Task<(int, string)> HandleLenhNhapKho(LenhNhapKho LNK, string maPNK, string maVitri, string qridlot)
         {
             return await Task.Run(() =>
@@ -158,6 +161,7 @@ namespace ProcessManagement.Services
             });
         }
 
+        // Handle lenh xuat kho
         public static async Task<(int, string)> HandleLenhXuatKho(PhieuXuatKho PXK, LenhXuatKho LXK, string maViTri, string qridlot)
         {
             return await Task.Run(() =>
@@ -323,6 +327,64 @@ namespace ProcessManagement.Services
 
             }
             else return (-1, "Danh sách LOT của KHSX không tồn tại!");
+        }
+
+        // Handle kiem ke
+        public static async Task<(int, string)> OnHandleLenhKiemKe(ViTriofNVL viTriofNVL)
+        {
+            return await Task.Run(() =>
+            {
+                int slhientai = int.Parse(viTriofNVL.VTNVLSoLuong.Value?.ToString() ?? "0");
+                int slafteruUpdated = int.Parse(viTriofNVL.tempVTNVLSoLuong.ToString() ?? "0");
+
+                viTriofNVL.VTNVLSoLuong.Value = viTriofNVL.tempVTNVLSoLuong;
+
+                // Update so luong vi tri cua nvl
+                (int updateVTofNVLresult, string updateVTofNVLerror) = SQLServerServices.UpdateViTriOfNgVatLieu(viTriofNVL);
+
+                if (updateVTofNVLresult == -1)
+                {
+                    return (-1, "Không thể cập nhật số lượng");
+                }
+                else
+                {
+                    // Logging update kho
+                    HistoryXNKho logUpdate = new HistoryXNKho()
+                    {
+                        LogLoaiPhieu = { Value = Common.LogTypeKiemKe },
+                        LogMaPhieu = { Value = string.Empty },
+                        LogMaViTri = { Value = viTriofNVL.VitriInfor.MaViTri.Value?.ToString() },
+                        LogNgThucHien = { Value = "Admin" },
+                        LogSoLuong = { Value = Math.Abs(slafteruUpdated - slhientai) },
+                        LogTonKhoTruoc = { Value = slhientai },
+                        LogTonKhoSau = { Value = slafteruUpdated },
+                        LogTenNVL = { Value = viTriofNVL.NgLieuInfor.TenNVL.Value?.ToString() },
+                        LogThoiDiem = { Value = DateTime.Now },
+                        LotVitri = { Value = viTriofNVL.LotVitri.Value?.ToString() },
+                        NVLID = { Value = viTriofNVL.NVLID.Value?.ToString() },
+                        VTID = { Value = viTriofNVL.VTID.Value?.ToString() },
+                        QRIDLOT = { Value = viTriofNVL.QRIDLOT.Value?.ToString() }
+                    };
+                    // Insert loggingupdate to Database
+                    (int logId, string logErr) = SQLServerServices.InsertLogingXNKho(logUpdate);
+                    if (logId == -1) { }
+
+
+                    // Log kiem ke
+                    LogKiemKe logKiemKe = new()
+                    {
+                        VTofNVLID = { Value = viTriofNVL.VTofNVLID.Value },
+                        SLTruoc = { Value = slhientai },
+                        SLSau = { Value = slafteruUpdated },
+                        NgayKiemKe = { Value = logUpdate.LogThoiDiem.Value }
+                    };
+                    // Insert loggingkiemke to Database
+                    (int logkkid, string logkkErr) = SQLServerServices.InsertLogKiemKe(logKiemKe);
+                    if (logkkid == -1) { }
+
+                    return (1, "Cập nhật thành công!");
+                }
+            });
         }
     }
 }
