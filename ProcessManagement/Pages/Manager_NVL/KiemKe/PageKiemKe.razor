@@ -1,4 +1,5 @@
 ﻿@page "/kiem-ke-nvl"
+@attribute [Authorize(Roles = "Admin")]
 
 @using ProcessManagement.Commons
 @using ProcessManagement.Models
@@ -161,13 +162,6 @@
         }
 
         return base.OnParametersSetAsync();
-    }
-
-    // Nhap kho dialog
-    private async Task OnOpenDialogHandleKiemKe(ViTriofNVL viTriofNVL)
-    {
-        await DialogService.OpenAsync<DialogHandleKiemKe>(null, new Dictionary<string, object>() { { "TargetViTriofNVL", viTriofNVL } },
-        new DialogOptions() { ShowTitle = false, Width = "80%", Height = "80%", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
     }
 
     private async Task OnSaveChangedVTNVLSoLuong(ViTriofNVL viTriofNVL)

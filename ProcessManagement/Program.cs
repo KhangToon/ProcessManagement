@@ -89,8 +89,9 @@ app.MapControllers();
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 
-// Open browser after application starts
 
+
+////////// Open browser after application starts
 //app.Urls.Add(url); // enable khi deploy - disable khi use local  
 //app.Lifetime.ApplicationStarted.Register(() =>  // enable khi deploy - disable khi use local 
 //{
@@ -101,9 +102,7 @@ app.MapFallbackToPage("/_Host");
 //    };
 //    Process.Start(psi);
 //});
-
-
-
+///////////////////
 
 
 app.Run();

@@ -1,0 +1,45 @@
+﻿@using ProcessManagement.Commons
+@using ProcessManagement.Models.KHO_NVL
+@using ProcessManagement.Models.KHO_NVL.Tracking
+@using ProcessManagement.Services
+@using ProcessManagement.Services.SQLServer
+@using ProcessManagement.Services.QRCodes
+@using Radzen.Blazor
+@using Radzen
+@using ProcessManagement.Models;
+@using ProcessManagement.Models.KHO_NVL.XuatKho
+
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject TooltipService TooltipService
+@inject SQLServerServices SQLServerServices
+@inject QRCodeServices QRCodeServices
+@inject IJSRuntime JSRuntime
+
+<RadzenCard Variant="Variant.Flat" Style="height: contain; width: contain; padding: 10px;">
+    <RadzenStack Gap="10px" Style="height: contain; width: 100%;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+        <RadzenStack Gap="20px" Style="height: contain; width: 100%; border-radius: 5px; background-color: var(--rz-secondary-lighter); padding: 5px; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+            <RadzenText Text="@($"{HEADER}")" Style="font-weight: 600; font-size: 16px; color: black;"></RadzenText>
+            <RadzenStack Gap="10" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                <RadzenText Text="@($"{CONTENT?.ToString()}")" Style="font-weight: 600; font-size: 18px; color: darkgreen;"></RadzenText>
+            </RadzenStack>
+        </RadzenStack>
+        <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: contain; padding: 10px; margin-top: 10px; border-radius: 0">
+            <RadzenStack Style="height: 100%; width: contain" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                @{
+                    string qrBase64string = QRCodeServices.GenerateQRCode(CONTENT?.ToString() ?? string.Empty, 150);
+                    <img style="border-radius: 10px;" src="@($"data:image/png;base64,{qrBase64string}")" alt="QR Code">
+                }
+            </RadzenStack>
+        </RadzenCard>
+    </RadzenStack>
+</RadzenCard>
+
+
+@code {
+    [Parameter]
+    public object? CONTENT { get; set; } = string.Empty;
+
+    [Parameter]
+    public object? HEADER { get; set; } = string.Empty;
+}
