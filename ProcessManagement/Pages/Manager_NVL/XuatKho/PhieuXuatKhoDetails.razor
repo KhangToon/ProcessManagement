@@ -1,5 +1,7 @@
 ﻿@using ProcessManagement.Commons
 @using ProcessManagement.Models.KHO_NVL
+@using ProcessManagement.Models.KHO_NVL.NhapKho
+@using ProcessManagement.Pages.Manager_NVL.TraKho
 @using ProcessManagement.Services.SQLServer
 @using Radzen.Blazor
 @using Radzen
@@ -415,6 +417,14 @@
 
         // Raise event reload ds phieu xuat kho
         Common.RaiseReloadPXK_Event();
+    }
+
+    // Tooltip
+    void ShowToolTip(ElementReference elementReference, TooltipPosition position, string content, int delay, int duration = 500)
+    {
+        TooltipOptions options = new TooltipOptions() { Position = position, Delay = delay, Duration = duration, Style = "background-color: black" };
+
+        TooltipService.Open(elementReference, content, options);
     }
 
     // Datagrid cell render

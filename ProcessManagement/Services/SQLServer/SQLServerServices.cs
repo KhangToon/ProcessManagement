@@ -4167,6 +4167,47 @@ namespace ProcessManagement.Services.SQLServer
             return lnkho;
         }
 
+        public LenhNhapKho GetLenhNhapKhoByQRIDLOT(object? qridlot)
+        {
+            LenhNhapKho lnkho = new();
+
+            if (qridlot == null) return lnkho;
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_LenhNhapKho}] WHERE [{Common.QRIDLOT}] = '{qridlot}'";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    List<Propertyy> rowitems = lnkho.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue;
+                    }
+                }
+            }
+
+            // Get vi tri luu tru
+            lnkho.TargertVitri = GetViTriLuuTruByID(lnkho.VTID.Value);
+
+            // Get ng vat lieu nhap kho
+            lnkho.TargetNgLieu = GetNguyenVatLieuByID(lnkho.NVLID.Value);
+
+            return lnkho;
+        }
+
+
         public LenhNhapKho GetLenhNhapKho(LenhNhapKho inputLNK)
         {
             LenhNhapKho lnkho = new();

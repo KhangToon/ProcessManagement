@@ -7,13 +7,13 @@ namespace ProcessManagement.Models.KHO_NVL.Tracking
     public class HistoryXNKho
     {
         public Propertyy LogXNKID { get; set; } = new() { DBName = Common.LogXNKID, DisplayName = Common.LogXNKID, Type = typeof(int), AlowDatabase = false, AlowDisplay = false, DispDatagrid = false }; // ID
-        public Propertyy LogLoaiPhieu { get; set; } = new() { DBName = Common.LogLoaiPhieu, DisplayName = Common.LogLoaiPhieu, Type = typeof(string), AlowDatabase = true };
         public Propertyy LogMaPhieu { get; set; } = new() { DBName = Common.LogMaPhieu, DisplayName = Common.LogMaPhieu, Type = typeof(string), AlowDatabase = true };
         public Propertyy LogTenNVL { get; set; } = new() { DBName = Common.LogTenNVL, DisplayName = Common.LogTenNVL, Type = typeof(string), AlowDatabase = true };
         public Propertyy LogMaViTri { get; set; } = new() { DBName = Common.LogMaViTri, DisplayName = Common.LogMaViTri, Type = typeof(string), AlowDatabase = true };
         public Propertyy LotVitri { get; set; } = new() { DBName = Common.LotViTri, DisplayName = Common.LotViTri, Type = typeof(string), AlowDatabase = true };
         public Propertyy QRIDLOT { get; set; } = new() { DBName = Common.QRIDLOT, Type = typeof(string), AlowDatabase = true };
         public Propertyy LogTonKhoTruoc { get; set; } = new() { DBName = Common.LogTonKhoTruoc, DisplayName = Common.LogTonKhoTruoc, Type = typeof(int), AlowDatabase = true };
+        public Propertyy LogLoaiPhieu { get; set; } = new() { DBName = Common.LogLoaiPhieu, DisplayName = Common.LogLoaiPhieu, Type = typeof(string), AlowDatabase = true };
         public Propertyy LogSoLuong { get; set; } = new() { DBName = Common.LogSoLuong, DisplayName = Common.LogSoLuong, Type = typeof(int), AlowDatabase = true };
         public Propertyy LogTonKhoSau { get; set; } = new() { DBName = Common.LogTonKhoSau, DisplayName = Common.LogTonKhoSau, Type = typeof(int), AlowDatabase = true };
         public Propertyy LogNgThucHien { get; set; } = new() { DBName = Common.LogNgThucHien, DisplayName = Common.LogNgThucHien, Type = typeof(int), AlowDatabase = true };
@@ -25,12 +25,12 @@ namespace ProcessManagement.Models.KHO_NVL.Tracking
         {
             return new HistoryXNKhoConvert
             {
-                LogLoaiPhieu = inputHistoryXNKho.LogLoaiPhieu.Value?.ToString() ?? string.Empty,
                 LogMaPhieu = inputHistoryXNKho.LogMaPhieu.Value?.ToString() ?? string.Empty,
                 LogTenNVL = inputHistoryXNKho.LogTenNVL.Value?.ToString() ?? string.Empty,
                 LogMaViTri = inputHistoryXNKho.LogMaViTri.Value?.ToString() ?? string.Empty,
                 LotVitri = inputHistoryXNKho.LotVitri.Value?.ToString() ?? string.Empty,
                 LogTonKhoTruoc = Convert.ToInt32(inputHistoryXNKho.LogTonKhoTruoc.Value),
+                LogLoaiPhieu = inputHistoryXNKho.LogLoaiPhieu.Value?.ToString() ?? string.Empty,
                 LogSoLuong = Convert.ToInt32(inputHistoryXNKho.LogSoLuong.Value),
                 LogTonKhoSau = Convert.ToInt32(inputHistoryXNKho.LogTonKhoSau.Value),
                 LogNgThucHien = inputHistoryXNKho.LogNgThucHien.Value?.ToString() ?? string.Empty,
@@ -43,9 +43,6 @@ namespace ProcessManagement.Models.KHO_NVL.Tracking
 
         public class HistoryXNKhoConvert
         {
-            [DisplayName("Loại Phiếu")]
-            public string LogLoaiPhieu { get; set; } = string.Empty;
-
             [DisplayName("Mã Phiếu")]
             public string LogMaPhieu { get; set; } = string.Empty;
 
@@ -63,6 +60,9 @@ namespace ProcessManagement.Models.KHO_NVL.Tracking
 
             [DisplayName("Tồn Kho Trước")]
             public int LogTonKhoTruoc { get; set; }
+
+            [DisplayName("Loại Phiếu")]
+            public string LogLoaiPhieu { get; set; } = string.Empty;
 
             [DisplayName("Số Lượng")]
             public int LogSoLuong { get; set; }

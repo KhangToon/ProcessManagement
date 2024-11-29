@@ -135,9 +135,9 @@ namespace ProcessManagement.Services
                             string nguoiNhapkho = SQLServerServices.GetNguoiTaoPhieuNhapKhoByID(savedLNK.PNKID.Value);
 
                             // Logging nhap kho
-                            HistoryXNKho logNhapKho = new HistoryXNKho()
+                            HistoryXNKho logNhapKho = new()
                             {
-                                LogLoaiPhieu = { Value = (modeTraKho)? Common.LogTypeTraKho : Common.LogTypePNK },
+                                LogLoaiPhieu = { Value = (modeTraKho) ? Common.LogTypeTraKho : Common.LogTypePNK },
                                 LogMaPhieu = { Value = maPNK },
                                 LogMaViTri = { Value = maVitri },
                                 LogNgThucHien = { Value = nguoiNhapkho },
@@ -362,9 +362,9 @@ namespace ProcessManagement.Services
                         LogMaPhieu = { Value = string.Empty },
                         LogMaViTri = { Value = viTriofNVL.VitriInfor.MaViTri.Value?.ToString() },
                         LogNgThucHien = { Value = "Admin" },
+                        LogTonKhoTruoc = { Value = viTriofNVL.NgLieuInfor.TonKho },
                         LogSoLuong = { Value = Math.Abs(slafteruUpdated - slhientai) },
-                        LogTonKhoTruoc = { Value = slhientai },
-                        LogTonKhoSau = { Value = slafteruUpdated },
+                        LogTonKhoSau = { Value = viTriofNVL.NgLieuInfor.TonKho + (slafteruUpdated - slhientai) },
                         LogTenNVL = { Value = viTriofNVL.NgLieuInfor.TenNVL.Value?.ToString() },
                         LogThoiDiem = { Value = DateTime.Now },
                         LotVitri = { Value = viTriofNVL.LotVitri.Value?.ToString() },
