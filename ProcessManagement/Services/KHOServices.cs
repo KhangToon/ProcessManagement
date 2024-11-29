@@ -14,7 +14,7 @@ namespace ProcessManagement.Services
         private static readonly SQLServerServices SQLServerServices = new();
 
         // Handle lenh nhap kho
-        public static async Task<(int, string)> HandleLenhNhapKho(LenhNhapKho LNK, string maPNK, string maVitri, string qridlot)
+        public static async Task<(int, string)> HandleLenhNhapKho(LenhNhapKho LNK, string maPNK, string maVitri, string qridlot, bool modeTraKho = false)
         {
             return await Task.Run(() =>
             {
@@ -24,14 +24,17 @@ namespace ProcessManagement.Services
                 // Load lenh nhap kho by ID
                 LenhNhapKho savedLNK = SQLServerServices.GetLenhNhapKhoByID(lnkid);
 
-                if (string.IsNullOrWhiteSpace(maPNK)) { return (-1, "Mã phiếu nhập không tồn tại"); }
+                // Checking LNK is "Trakho"
+                modeTraKho = (savedLNK.NgayNhapKho.Value != null);
+
+                if (string.IsNullOrWhiteSpace(maPNK)) { return (-1, $"Mã phiếu {((modeTraKho) ? "trả" : "nhập")} không tồn tại"); }
                 if (string.IsNullOrWhiteSpace(maVitri) || !string.Equals(maVitri, savedLNK.TargertVitri.MaViTri.Value?.ToString()?.Trim())) { return (-1, "Mã vị trí không tồn tại"); }
                 if (string.IsNullOrWhiteSpace(qridlot) || !string.Equals(qridlot, savedLNK.QRIDLOT.Value?.ToString()?.Trim())) { return (-1, "Mã quản lý LOT NVL không tồn tại"); }
-                if (soluongnhapfromClient == 0) { return (-1, "Số lượng nhập kho phải lớn hơn 0"); }
+                if (soluongnhapfromClient == 0) { return (-1, $"Số lượng {((modeTraKho) ? "trả" : "nhập")} kho phải lớn hơn 0"); }
 
                 if (savedLNK.LenhNKID.Value == null)
                 {
-                    return (-1, "Không tồn tại lệnh nhập kho!");
+                    return (-1, $"Không tồn tại lệnh {((modeTraKho) ? "trả" : "nhập")} kho!");
                 }
                 else
                 {
@@ -41,7 +44,7 @@ namespace ProcessManagement.Services
                     _ = int.TryParse(savedLNK.LNKIsDone.Value?.ToString(), out int scanlnkIsdone) ? scanlnkIsdone : -1;
                     if (scanlnkIsdone != 0)
                     {
-                        return (-1, "Không thể nhập (lệnh đã hoàn thành trước đó)!");
+                        return (-1, $"Không thể {((modeTraKho) ? "trả" : "nhập")} (lệnh đã hoàn thành trước đó)!");
                     }
 
                     // Kiem tra so luong them vao
@@ -69,7 +72,8 @@ namespace ProcessManagement.Services
                             VTID = { Value = viTriofNVL?.VTID.Value },
                             NVLID = { Value = savedLNK.NVLID.Value },
                             VTNVLSoLuong = { Value = newtonkhotaivitri },
-                            NgayNhapKho = { Value = DateTime.Now.Date.ToShortDateString() },
+                            //NgayNhapKho = { Value = DateTime.Now.Date.ToShortDateString() },
+                            NgayNhapKho = { Value = (modeTraKho) ? savedLNK.NgayNhapKho.Value : DateTime.Now.Date.ToShortDateString() },
                             LotVitri = { Value = viTriofNVL?.LotVitri.Value },
                             QRIDLOT = { Value = savedLNK.QRIDLOT.Value }
                         };
@@ -79,7 +83,8 @@ namespace ProcessManagement.Services
                         if (slhienco > 0) // cung NVL cung NgayNhapKho
                         {
                             bool isnvlsame = object.Equals(viTriofNVL?.NVLID.Value, savedLNK.NVLID.Value);
-                            bool isngaynksame = viTriofNVL?.NgayNhapKho.Value?.ToString()?.Trim() == DateTime.Now.Date.ToShortDateString();
+                            //bool isngaynksame = viTriofNVL?.NgayNhapKho.Value?.ToString()?.Trim() == DateTime.Now.Date.ToShortDateString();
+                            bool isngaynksame = viTriofNVL?.NgayNhapKho.Value?.ToString()?.Trim() == ((modeTraKho) ? savedLNK.NgayNhapKho.Value?.ToString()?.Trim() : DateTime.Now.Date.ToShortDateString());
 
                             if (isnvlsame && isngaynksame)
                             {
@@ -94,7 +99,7 @@ namespace ProcessManagement.Services
                             else
                             {
                                 // Khong cho nhap kho vao LOT // chi duoc nhap vao lot khac cung vitri
-                                return (-1, "LOT đã chứa NVL, không thể nhập kho!");
+                                return (-1, $"LOT đã chứa NVL, không thể {((modeTraKho) ? "trả" : "nhập")} kho!");
                             }
                         }
                         else
@@ -113,7 +118,9 @@ namespace ProcessManagement.Services
                         {
                             // Update lenh nhap kho status
                             savedLNK.LNKIsDone.Value = 1;
-                            savedLNK.NgayNhapKho.Value = DateTime.Now.Date.ToShortDateString();
+                            savedLNK.NgayNhapKho.Value = (modeTraKho) ? savedLNK.NgayNhapKho.Value : DateTime.Now.Date.ToShortDateString();
+                            //savedLNK.NgayNhapKho.Value = DateTime.Now.Date.ToShortDateString();
+
                             (int updatelnkResult, string updatelnkError) = SQLServerServices.UpdateLenhNhapKho(savedLNK);
 
                             if (updatelnkResult == -1)
@@ -130,7 +137,7 @@ namespace ProcessManagement.Services
                             // Logging nhap kho
                             HistoryXNKho logNhapKho = new HistoryXNKho()
                             {
-                                LogLoaiPhieu = { Value = Common.LogTypePNK },
+                                LogLoaiPhieu = { Value = (modeTraKho)? Common.LogTypeTraKho : Common.LogTypePNK },
                                 LogMaPhieu = { Value = maPNK },
                                 LogMaViTri = { Value = maVitri },
                                 LogNgThucHien = { Value = nguoiNhapkho },
@@ -152,12 +159,12 @@ namespace ProcessManagement.Services
 
                             }
 
-                            return (1, $"Đã nhập kho nguyên liệu: \n {savedLNK.TargetNgLieu.TenNVL.Value?.ToString()} \n Số lượng : {soluongnhapfromClient} (pcs)");
+                            return (1, $"Đã {((modeTraKho) ? "trả" : "nhập")} kho nguyên liệu: \n {savedLNK.TargetNgLieu.TenNVL.Value?.ToString()} \n Số lượng : {soluongnhapfromClient} (pcs)");
                         }
                     }
                 }
 
-                return (-1, $"Không thể nhập kho!");
+                return (-1, $"Không thể {((modeTraKho) ? "trả" : "nhập")} kho!");
             });
         }
 
