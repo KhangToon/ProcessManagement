@@ -12,11 +12,15 @@ namespace ProcessManagement.Models.KHO_NVL.XuatKho
         public Propertyy NgayLapPXK { get; set; } = new() { DBName = Common.NgayLapPXK, Type = typeof(DateTime), AlowDatabase = true };
         public Propertyy GhiChuPXK { get; set; } = new() { DBName = Common.GhiChuPXK, Type = typeof(string), AlowDatabase = true };
         public Propertyy IsConfirmedPXK { get; set; } = new() { DBName = Common.IsConfirmedPXK, Type = typeof(int), AlowDatabase = true };
+        public Propertyy PNKID { get; set; } = new() { DBName = Common.PNKID, Type = typeof(int), AlowDatabase = true }; // using for detect PXK is created return phieu tra kho
         //public Propertyy IsDonePXK { get; set; } = new() { DBName = Common.IsDonePXK, Type = typeof(int), AlowDatabase = true };
 
         public bool IsPXKDoneXuatKho = false; // Da load o SQLServices
 
         public bool IsChiDinhDuSLXuatKho = false; // Da load o SQLServices
+
+        public bool IsReturnedNVL = false; // using for detect PXK is returned phieu tra kho
+        public string MaPNKreturnNVL = string.Empty; // using for detect PXK is returned phieu tra kho
 
         public List<NVLofPhieuXuatKho> DSNVLofPXKs { get; set; } = new();
 

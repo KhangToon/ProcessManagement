@@ -14,6 +14,7 @@
 @inject TooltipService TooltipService
 @inject SQLServerServices SQLServerServices
 @inject QRCodeServices QRCodeServices
+@inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
 
 <style>
@@ -37,7 +38,7 @@
                 </RadzenStack>
             </RadzenStack>
             <RadzenStack Gap="20px" Style="height: contain; width: contain; padding: 10px; padding-left: 20px; padding-right: 20px; border-radius: 5px; border-bottom: var(--rz-series-1); " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                <RadzenText Text="CHI TIẾT PHIẾU XUẤT KHO" Style="color: black; font-weight: bold; font-size: 20px"></RadzenText>
+                <RadzenText Text="CHI TIẾT PHIẾU XUẤT KHO" Style="color: black; font-weight: bold; font-size: 22px"></RadzenText>
             </RadzenStack>
             <RadzenStack Gap="5px" Style="height: contain; width: contain; padding: 0px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
                 <RadzenStack Gap="5px" Style="height: contain; width: contain; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
@@ -194,16 +195,38 @@
                         </RadzenCard>
                     </RadzenStack>
 
+                    @{
+                        int.TryParse(PXK.PNKID.Value?.ToString(), out int iscreatedreturnnvl);
+
+                        if (!PXK.IsReturnedNVL)
+                        {
+                            <!--Tra kho button-->
+                            <RadzenButton Visible="@(((int.TryParse(PXK.KHSXID.Value?.ToString(), out int khsxid)? khsxid : 0) > 0) && PXK.IsPXKDoneXuatKho && iscreatedreturnnvl == 0)" Click="OnOpenDialogTraKho" Icon="undo" Text="@($"Tạo phiếu trả kho")" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Darker"
+                                          Style="height: contain; width: 100%; font-size: 14px; margin-top: 20px" />
+
+                            <!--Handle tra kho-->
+                            <RadzenButton Visible="@(iscreatedreturnnvl > 0)" Icon="undo" Click="NavigateToHandleTraKho" Text="@($"Tiến hành trả kho NVL")" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Dark"
+                                          Style="height: contain; width: 100%; font-size: 14px;" />
+                        }
+                        else
+                        {
+                            <!--Handle tra kho-->
+                            <RadzenButton Click="@(() => CopyToClipboard(PXK.MaPNKreturnNVL))" Icon="warning" Text="@($"NVL đã được trả lại vào kho - Mã phiếu: {PXK.MaPNKreturnNVL}")" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Danger" Variant="Variant.Filled" Shade="Shade.Darker"
+                                          Style="height: contain; width: 100%; font-size: 14px; " />
+                        }
+                    }
+
                 </RadzenStack>
             </RadzenColumn>
             <!--Chi dinh so luong xuat kho moi NVL-->
             <RadzenColumn Size="12" SizeMD="7" Style="height: 100%; width: 100%;">
                 <RadzenRow Visible="@(SelectedNVLofPXK.NVLID.Value != null && PXK.DSNVLofPXKs.Count > 0)" class="rowbackground-style" Gap="10px" Style="height: 100%; width: 100%; border-radius: 0; overflow: scroll">
                     <RadzenColumn Size="12" SizeMD="12" Style="height: contain; width: 100%;">
-                        <RadzenStack Gap="0" Style="height: 100%; width: 100%; padding: 0px; padding-top: 30px; border-radius: 10px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                            <RadzenStack Visible="@(PXK.DSNVLofPXKs.Count > 0)" Gap="10px" Style="height: contain; width: 100%; padding: 0px; padding-left: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                        <RadzenStack Gap="0" Style="height: 100%; width: 100%; padding: 0px; padding-top: 20px; border-radius: 10px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                            <RadzenStack Visible="@(PXK.DSNVLofPXKs.Count > 0)" Gap="10px" Style="height: contain; width: 100%; padding: 0px; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                                 <RadzenText Text="Danh sách lệnh xuất kho của nguyên liệu" Style="color: darkred; font-weight: 600; font-size: 16px; height: contain; width: contain; font-style: italic;"></RadzenText>
-                                <RadzenText Text="@($"(nguyên liệu {SelectedNVLofPXK.TargetNgLieu.TenNVL.Value?.ToString()})")" Style="color: black; font-weight: 600; font-size: 16px; height: contain; width: contain; font-style: italic;"></RadzenText>
+                                <RadzenButton Text="@SelectedNVLofPXK.TargetNgLieu.TenNVL.Value?.ToString()" ButtonStyle="ButtonStyle.Secondary" Size="ButtonSize.Small" Shade="Shade.Lighter" Variant="Variant.Flat"
+                                              Style="font-size: 18px; height: contain; font-weight: 600; min-height: contain; width: contain; color: darkblue" />
                             </RadzenStack>
                             <!--Tong so luong xuat kho-->
                             <RadzenStack Gap="20px" Style="height: contain; width: 100%; padding: 10px; padding-bottom: 5px; margin-top: 10px; border-top: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
@@ -212,14 +235,14 @@
                                     <RadzenText Text="@($"(nguyên liệu {SelectedNVLofPXK.TargetNgLieu.TenNVL.Value?.ToString()})")" Style="color: black; font-weight: 600; font-size: 16px; height: contain; width: contain; font-style: italic;"></RadzenText>
                                 </RadzenStack>
                                 <RadzenStack Style="width: 30%; height: 100%; padding-left: 10px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                    <RadzenText Text="@($"{SelectedNVLofPXK.NVLXKSoLuongAll.Value?.ToString()} ({SelectedNVLofPXK.TargetNgLieu.DonViTinh.Value?.ToString()})")" Style="font-size: 18px; font-weight: 600; color: darkgreen; height: contain; width: 100% "></RadzenText>
+                                    <RadzenText Text="@($"{SelectedNVLofPXK.NVLXKSoLuongAll.Value?.ToString()} ({SelectedNVLofPXK.TargetNgLieu.DonViTinh.Value?.ToString()})")" Style="font-size: 18px; font-weight: 700; color: darkred; height: contain; width: 100% "></RadzenText>
                                 </RadzenStack>
                             </RadzenStack>
                             <RadzenStack Visible="@(int.Parse(SelectedNVLofPXK.NVLXKSoLuongAll.Value?.ToString()?? "0") > 0)" Gap="10px" Style="height: contain; width: 100%; padding: 10px; padding-bottom: 0" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                 <RadzenButton Visible=@(!SelectedNVLofPXK.IsXuatKhoDone) Text="Chưa xuất đủ số lượng cần xuất kho của nguyên liệu" ButtonStyle="ButtonStyle.Warning" Size="ButtonSize.Small" Shade="Shade.Darker" Variant="Variant.Outlined"
                                               Style="border-radius: 5px; --rz-icon-size: 18px; height: 20px; width: 100%; cursor: default; background-color: rgb(254,243,220);" />
-                                <RadzenButton Visible=@(SelectedNVLofPXK.IsXuatKhoDone) Icon="check" Text="Đã xuất đủ số lượng cần xuất kho của nguyên liệu" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Darker" Variant="Variant.Outlined"
-                                              Style="border-radius: 5px; --rz-icon-size: 18px; height: 20px; width: 100%; cursor: default; background-color: rgb(229,245,233);" />
+                                <RadzenButton Visible=@(SelectedNVLofPXK.IsXuatKhoDone) Icon="check" Text="Đã xuất đủ số lượng cần xuất kho của nguyên liệu" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Lighter" Variant="Variant.Flat"
+                                              Style="border-radius: 5px; --rz-icon-size: 18px; font-size: 16px; height: 20px; width: 100%; cursor: default;" />
                             </RadzenStack>
                             <RadzenStack Style="height: 100%; width: 100%; padding: 5px; padding-left: 10px; padding-right: 10px; margin-top: 5px" Gap="5px" Orientation="Orientation.Vertical">
                                 <RadzenStack Style="width: 100%; height: contain; padding: 0" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
@@ -262,18 +285,18 @@
                                                         <RadzenCard Variant="Variant.Outlined" Style="width: 100%; height: contain; padding: 7px; padding-right: 0px; background-color: white">
                                                             <RadzenStack Style="width: 100%; height: contain" Gap="10px" Orientation=Orientation.Vertical AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                                 <RadzenStack Style="width: 100%; height: contain" Gap="10px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                                                    <RadzenStack Style="width: 3%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                    <RadzenStack Style="width: 3%; height: contain; background-color: var(--rz-secondary-lighter); " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                                         <RadzenText Text="@($"{(SelectedNVLofPXK.DSLenhXKs.IndexOf(lxk) + 1).ToString()}")" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
                                                                     </RadzenStack>
 
                                                                     <RadzenStack Style="width: 20%; height: contain; border-left: var(--rz-grid-cell-border); border-right: var(--rz-grid-cell-border); padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                        <RadzenStack Style="height: contain; min-height: 35px; width: 100%; border-radius: 5px; background-color: var(--rz-secondary-lighter); padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                        <RadzenStack Style="height: contain; min-height: 35px; width: 100%; border-radius: 5px; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                                             <RadzenText Text="@($"{lxk.ViTriofNVL.VitriInfor.MaViTri.Value?.ToString()}")" Style="color: black; font-weight: 600; font-size: 15px"></RadzenText>
                                                                         </RadzenStack>
                                                                     </RadzenStack>
 
                                                                     <RadzenStack Style="width: 15%; height: contain; border-right: var(--rz-grid-cell-border); padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                        <RadzenStack Style="height: contain; min-height: 35px; width: 100%; border-radius: 5px; background-color: var(--rz-secondary-lighter); padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                        <RadzenStack Style="height: contain; min-height: 35px; width: 100%; border-radius: 5px; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                                             <RadzenText Text="@($"{lxk.LotVitri.Value?.ToString()}")" Style="color: black; font-weight: 600; font-size: 15px"></RadzenText>
                                                                         </RadzenStack>
                                                                     </RadzenStack>
@@ -296,8 +319,8 @@
 
                                                                             if (islxkDone == 1)
                                                                             {
-                                                                                <RadzenButton Icon="check" Text="Done" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Darker" Variant="Variant.Outlined"
-                                                                                              Style="border-radius: 5px; --rz-icon-size: 18px; font-size: 16px; height: contain; min-height: 35px; width: 100%; cursor: default; background-color: rgb(229,245,233);" />
+                                                                                <RadzenButton Icon="check" Text="Done" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Lighter" Variant="Variant.Flat"
+                                                                                              Style="border-radius: 5px; --rz-icon-size: 18px; font-size: 18px; height: contain; min-height: 35px; width: 100%; cursor: default;" />
                                                                             }
                                                                             else
                                                                             {
@@ -310,8 +333,8 @@
                                                                 </RadzenStack>
                                                                 <RadzenStack Visible="@((!string.IsNullOrEmpty(lxk.QRIDLOT.Value?.ToString())))" Style="width: 100%; height: contain; padding-right: 10px; padding-top: 10px; border-top: var(--rz-grid-cell-border);" Gap="10px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                                                     <RadzenText Text="Mã quản lý:" Style="color: black; font-weight: 600; font-size: 16px"></RadzenText>
-                                                                    <RadzenButton Click="@(() => CopyToClipboard(lxk.QRIDLOT.Value?.ToString()?? string.Empty))" Text="@lxk.QRIDLOT.Value?.ToString()" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Lighter" Variant="Variant.Flat"
-                                                                                  Style="font-size: 18px; height: contain; min-height: contain; width: contain;" />
+                                                                    <RadzenButton Click="@(() => CopyToClipboard(lxk.QRIDLOT.Value?.ToString()?? string.Empty))" Text="@lxk.QRIDLOT.Value?.ToString()" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Variant="Variant.Flat"
+                                                                                  Style="font-size: 18px; height: contain; min-height: contain; width: contain; color: darkgreen" />
                                                                 </RadzenStack>
                                                             </RadzenStack>
                                                         </RadzenCard>
@@ -378,6 +401,19 @@
             nvlofpxk.IsChidinhDuSoluongXuatKho = IsChidinhDuSoLuongXuatKho(nvlofpxk);
         }
 
+        // Kiem tra trang thai tra NVL neu phieu tra kho da duoc tao
+        int.TryParse(PXK.PNKID.Value?.ToString(), out int pnkid_trakho);
+        int.TryParse(PXK.KHSXID.Value?.ToString(), out int khsxid_trakho);
+
+        if (pnkid_trakho > 0 && khsxid_trakho > 0)
+        {
+            PhieuNhapKho phieuNhapKho = SQLServerServices.GetPhieuNhapKhoByID(PXK.PNKID.Value);
+
+            PXK.MaPNKreturnNVL = phieuNhapKho.MaPhieuNK.Value?.ToString() ?? string.Empty;
+
+            PXK.IsReturnedNVL = !phieuNhapKho.DSNVLofPNKs.Any(nvlpnk => nvlpnk.IsNhapKhoDone == false);
+        }
+
         base.OnParametersSet();
     }
 
@@ -419,10 +455,30 @@
         Common.RaiseReloadPXK_Event();
     }
 
-    // Tooltip
-    void ShowToolTip(ElementReference elementReference, TooltipPosition position, string content, int delay, int duration = 500)
+
+    // Tra kho dialog
+    private async Task OnOpenDialogTraKho()
     {
-        TooltipOptions options = new TooltipOptions() { Position = position, Delay = delay, Duration = duration, Style = "background-color: black" };
+        if (SelectedNVLofPXK.DSLenhXKs.Count > 0)
+        {
+            await DialogService.OpenAsync<DialogCreate_PhieuTraKhofromKHSX>(null, new Dictionary<string, object>() { { "PXK", PXK } },
+            new DialogOptions() { ShowTitle = false, Width = "100%", Height = "100%", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
+        }
+    }
+
+    // Navigate to handlephieuxuatkho page
+    private void NavigateToHandleTraKho()
+    {
+        _ = int.TryParse(PXK.PNKID?.Value?.ToString(), out int pnkid) ? pnkid : 0;
+        Common.SelectedPNKID = pnkid;
+        var url = $"khomanagement?pnkid={pnkid}&tabindxex={3}"; // not need use pnkid
+        NavigationManager.NavigateTo(url);
+    }
+
+    // Tooltip
+    void ShowToolTip(ElementReference elementReference, TooltipPosition position, string content, int delay, int duration = 2000)
+    {
+        TooltipOptions options = new TooltipOptions() { Position = position, Delay = delay, Duration = duration, CloseTooltipOnDocumentClick = true, Style = "background-color: black" };
 
         TooltipService.Open(elementReference, content, options);
     }
