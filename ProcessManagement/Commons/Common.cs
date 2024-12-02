@@ -215,6 +215,7 @@ namespace ProcessManagement.Commons
         public const string NgayLapPXK = "Ngày lập phiếu";
         public const string GhiChuPXK = "Ghi chú";
         public const string IsDonePXK = "IsDonePXK";
+        public const string IsReturnedNVL = "IsReturnedNVL";
 
         // Table KHO_NVLofPhieuXuatKho
         public const string Table_NVLofPhieuXuatKho = "KHO_NVLofPhieuXuatKho";

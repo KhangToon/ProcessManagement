@@ -31,6 +31,9 @@ namespace ProcessManagement.Models
         public List<KHSX_LOT> DSLOT_KHSXs { get; set; } = new();
         public List<NVLofKHSX> DSachNVLofKHSXs { get; set; } = new(); // Danh sach NVL cua KHSX (so luong, loai nvl, sp, ngay tao)
 
+        public bool isDonePXK = false; // trang thai xuat kho NVL cua PXK of KHSX
+        public bool isReturnedNVL = false; // trang thai return NVL cua PXK of KHSX
+
         public bool IsDoneKHSX { get; set; } = false;
 
         public bool IsCollapsed { get; set; } = true; // Dung cho PageDSachKHSX

@@ -248,7 +248,7 @@
                         <HeaderTemplate>
                             <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                 <!--Button them tiendogcrow-->
-                                <RadzenButton Click="OnThemMoiTienDoGCRow" Icon="add" Text="Thêm" Size="ButtonSize.Small"
+                                <RadzenButton Disabled="@(TargetKHSX.isDonePXK == false || TargetKHSX.isReturnedNVL)" Click="OnThemMoiTienDoGCRow" Icon="add" Text="Thêm" Size="ButtonSize.Small"
                                               ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat"
                                               Style="min-width: 100px; font-size: 14px; border-radius: 20px;" />
 
@@ -259,7 +259,7 @@
 
                                 <!--Button Reload-->
                                 <RadzenButton Text="Reload" Style="border-radius: 20px; min-width: 100px;"
-                                              Click="@(async() => { await ReLoadTienDoGCPage(null, NCID, KHSXID, delaytime: 300); })"
+                                              Click="@(async() => { await ReLoadTienDoGCPage(null, NCID, TargetKHSX.KHSXID.Value, delaytime: 300); })"
                                               IsBusy="@isLoading" BusyText=" Loading..." Icon="autorenew" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />
                             </RadzenStack>
                         </HeaderTemplate>
@@ -366,11 +366,12 @@
     [SupplyParameterFromQuery(Name = "ncid")]
     public object? NCID { get; set; }
 
-    [Parameter]
-    [SupplyParameterFromQuery(Name = "khsxid")]
-    public object? KHSXID { get; set; }
+    // [Parameter]
+    // [SupplyParameterFromQuery(Name = "khsxid")]
+    // public object? KHSXID { get; set; }
 
-    //private object? _khsxid;
+    [Parameter]
+    public KHSX TargetKHSX { get; set; } = new();
 
     private bool iscreatenew;
 
@@ -387,25 +388,10 @@
     protected async override Task OnInitializedAsync()
     {
         // Load tien do gia cong by khsxid/ncid/spid
-        await ReLoadTienDoGCPage(ncid: NCID, khsxid: KHSXID);
+        await ReLoadTienDoGCPage(ncid: NCID, khsxid: TargetKHSX.KHSXID.Value);
 
         await base.OnInitializedAsync();
     }
-
-    // protected override async Task OnParametersSetAsync()
-    // {
-    //     if (_khsxid != KHSXID)
-    //     {
-    //         _khsxid = KHSXID;
-
-    //         // Load tien do gia cong by khsxid/ncid/spid
-    //         await ReLoadTienDoGCPage(ncid: NCID, khsxid: _khsxid);
-
-    //         await ParameterChanged();
-    //     }
-
-    //     await base.OnParametersSetAsync();
-    // }
 
 
     private async Task ParameterChanged()
@@ -477,7 +463,7 @@
 
                     if (newtdgcrowID > 0)
                     {
-                        await ReLoadTienDoGCPage(tdgcid, ncid, KHSXID);
+                        await ReLoadTienDoGCPage(tdgcid, ncid, TargetKHSX.KHSXID.Value);
                     }
                     else
                     {
@@ -502,7 +488,7 @@
             if (tdgcid > 0)
             {
                 ShowNotification("Save success!", NotificationSeverity.Success, 2000);
-                await ReLoadTienDoGCPage(tdgcid, NCID, KHSXID);
+                await ReLoadTienDoGCPage(tdgcid, NCID, TargetKHSX.KHSXID.Value);
                 // Navigate to reload page
                 // NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
             }
@@ -622,7 +608,7 @@
             }
             else
             {
-                TargetTienDoGC = new() { KHSXID = { Value = KHSXID }, NCID = { Value = NCID }, SPID = { Value = SPID } };
+                TargetTienDoGC = new() { KHSXID = { Value = TargetKHSX.KHSXID.Value }, NCID = { Value = NCID }, SPID = { Value = SPID } };
 
                 iscreatenew = true;
                 // Check allow load when in CreateNew mode

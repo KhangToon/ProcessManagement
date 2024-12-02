@@ -61,7 +61,7 @@
                             <!--Button enable advance filter-->
                             <RadzenStack Gap="10px" Style="height: contain; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                 <!--Button them ket qua gia cong-->
-                                <RadzenButton Click="OnThemMoiKetQuaGC" Icon="add" Text="Thêm kết quả gia công" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Success" Variant="Variant.Filled" Shade="Shade.Darker"
+                                <RadzenButton Disabled="@(TargetKHSX.isDonePXK == false || TargetKHSX.isReturnedNVL)" Click="OnThemMoiKetQuaGC" Icon="add" Text="Thêm kết quả gia công" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Success" Variant="Variant.Filled" Shade="Shade.Darker"
                                               Style="height: contain; width: contain; font-size: 14px;" />
 
                                 <!--Button xem tien do gia cong-->
@@ -113,7 +113,7 @@
                                     string displayName = column.DisplayName ?? string.Empty;
                                     Type? columnType = column.Type;
 
-                                    <RadzenDataGridColumn TItem="KetQuaGC" Title="@displayName" 
+                                    <RadzenDataGridColumn TItem="KetQuaGC" Title="@displayName"
                                                           Property="@colName" TextAlign="TextAlign.Center">
                                         <HeaderTemplate>
                                             <span style="font-weight: 600; font-size: 15px; color: white;">@displayName</span>
@@ -171,8 +171,6 @@
     [Parameter]
     public EventCallback<Dictionary<string, object?>> NavigateEvent { get; set; }
 
-    //private KHSX _targetKHSX = new();
-
     [Parameter]
     public KHSX TargetKHSX { get; set; } = new();
 
@@ -201,24 +199,6 @@
 
         await base.OnInitializedAsync();
     }
-
-    // protected override async Task OnParametersSetAsync()
-    // {
-    //     if (_targetKHSX != TargetKHSX)
-    //     {
-    //         _targetKHSX = TargetKHSX;
-
-    //         // Load ds KetQuaGC base/ hien thi
-    //         await LoadAllDanhsachKQGCBase(0);
-
-    //         // Khoi tao bien luu danh sach key search
-    //         await CreateCurrentSelectedKeyVariable();
-
-    //         await ParameterChanged();
-    //     }
-
-    //     await base.OnParametersSetAsync();
-    // }
 
     private async Task ParameterChanged()
     {

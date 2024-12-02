@@ -39,39 +39,6 @@ namespace ProcessManagement.Services.SQLServer
 
         // ------------------------------------------------------------------------------------- //
         #region Table_KHSX
-        // Get last ke hoach san xuat
-        public KHSX GetLastKHSX()
-        {
-            KHSX lastkhsx = new();
-
-            using (var connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-
-                var command = connection.CreateCommand();
-
-                command.CommandText = $"SELECT TOP 1 * FROM [{Common.TableKHSX}] ORDER BY [{Common.KHSXID}] DESC";
-
-                using var reader = command.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    List<Propertyy> rowSPitems = lastkhsx.GetPropertiesValues();
-
-                    foreach (var item in rowSPitems)
-                    {
-                        string? columnName = item.DBName;
-
-                        object columnValue = reader[columnName];
-
-                        item.Value = columnValue;
-                    }
-
-                }
-            }
-
-            return lastkhsx;
-        }
 
         // Them ke hoach san xuat moi
         public (int, string) InsertNewKHSX(KHSX newKHSX)
@@ -148,6 +115,53 @@ namespace ProcessManagement.Services.SQLServer
             return listKHSXid;
         }
 
+        // Get last ke hoach san xuat
+        public KHSX GetLastKHSX()
+        {
+            KHSX khsx = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT TOP 1 * FROM [{Common.TableKHSX}] ORDER BY [{Common.KHSXID}] DESC";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    List<Propertyy> rowSPitems = khsx.GetPropertiesValues();
+
+                    foreach (var item in rowSPitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue;
+                    }
+
+                }
+            }
+
+            // Get trang thai xuat kho NVL
+            var colIsDonePXK = GetPXK_AnyColValuebyAnyParameters(new Dictionary<string, object?>() { { Common.KHSXID, khsx.KHSXID.Value } }, Common.IsDonePXK).columnValues.FirstOrDefault();
+            if (int.TryParse(colIsDonePXK?.ToString(), out int ispxkdone))
+            {
+                khsx.isDonePXK = ispxkdone == 1;
+            }
+            // Get trang thai tra NVL
+            var colIsReturnedNVL = GetPXK_AnyColValuebyAnyParameters(new Dictionary<string, object?>() { { Common.KHSXID, khsx.KHSXID.Value } }, Common.IsReturnedNVL).columnValues.FirstOrDefault();
+            if (int.TryParse(colIsReturnedNVL?.ToString(), out int isreturnednvl))
+            {
+                khsx.isReturnedNVL = isreturnednvl == 1;
+            }
+
+            return khsx;
+        }
+
         // Load ke hoach san xuat by ID
         public KHSX GetKHSXbyID(object? khsxID)
         {
@@ -195,6 +209,19 @@ namespace ProcessManagement.Services.SQLServer
                 }
 
                 khsx.DSachCongDoans = GetlistCongdoans(khsx.KHSXID.Value);
+
+                // Get trang thai xuat kho NVL
+                var colIsDonePXK = GetPXK_AnyColValuebyAnyParameters(new Dictionary<string, object?>() { { Common.KHSXID, khsx.KHSXID.Value } }, Common.IsDonePXK).columnValues.FirstOrDefault();
+                if (int.TryParse(colIsDonePXK?.ToString(), out int ispxkdone))
+                {
+                    khsx.isDonePXK = ispxkdone == 1;
+                }
+                // Get trang thai tra NVL
+                var colIsReturnedNVL = GetPXK_AnyColValuebyAnyParameters(new Dictionary<string, object?>() { { Common.KHSXID, khsx.KHSXID.Value } }, Common.IsReturnedNVL).columnValues.FirstOrDefault();
+                if (int.TryParse(colIsReturnedNVL?.ToString(), out int isreturnednvl))
+                {
+                    khsx.isReturnedNVL = isreturnednvl == 1;
+                }
             }
 
             return khsx;
@@ -246,6 +273,19 @@ namespace ProcessManagement.Services.SQLServer
                     }
 
                     khsx.DSachCongDoans = GetlistCongdoans(khsx.KHSXID.Value);
+
+                    // Get trang thai xuat kho NVL
+                    var colIsDonePXK = GetPXK_AnyColValuebyAnyParameters(new Dictionary<string, object?>() { { Common.KHSXID, khsx.KHSXID.Value } }, Common.IsDonePXK).columnValues.FirstOrDefault();
+                    if (int.TryParse(colIsDonePXK?.ToString(), out int ispxkdone))
+                    {
+                        khsx.isDonePXK = ispxkdone == 1;
+                    }
+                    // Get trang thai tra NVL
+                    var colIsReturnedNVL = GetPXK_AnyColValuebyAnyParameters(new Dictionary<string, object?>() { { Common.KHSXID, khsx.KHSXID.Value } }, Common.IsReturnedNVL).columnValues.FirstOrDefault();
+                    if (int.TryParse(colIsReturnedNVL?.ToString(), out int isreturnednvl))
+                    {
+                        khsx.isReturnedNVL = isreturnednvl == 1;
+                    }
 
                     listKHSXs.Add(khsx);
                 }
@@ -300,6 +340,19 @@ namespace ProcessManagement.Services.SQLServer
                     }
 
                     khsx.DSachCongDoans = GetlistCongdoans(khsx.KHSXID.Value);
+
+                    // Get trang thai xuat kho NVL
+                    var colIsDonePXK = GetPXK_AnyColValuebyAnyParameters(new Dictionary<string, object?>() { { Common.KHSXID, khsx.KHSXID.Value } }, Common.IsDonePXK).columnValues.FirstOrDefault();
+                    if (int.TryParse(colIsDonePXK?.ToString(), out int ispxkdone))
+                    {
+                        khsx.isDonePXK = ispxkdone == 1;
+                    }
+                    // Get trang thai tra NVL
+                    var colIsReturnedNVL = GetPXK_AnyColValuebyAnyParameters(new Dictionary<string, object?>() { { Common.KHSXID, khsx.KHSXID.Value } }, Common.IsReturnedNVL).columnValues.FirstOrDefault();
+                    if (int.TryParse(colIsReturnedNVL?.ToString(), out int isreturnednvl))
+                    {
+                        khsx.isReturnedNVL = isreturnednvl == 1;
+                    }
 
                     listKHSXs.Add(khsx);
                 }
@@ -4788,6 +4841,78 @@ namespace ProcessManagement.Services.SQLServer
             return listPXKids;
         }
 
+        // Get any columns of PXK by any paramaters
+        public (List<object?> columnValues, string errorMessage) GetPXK_AnyColValuebyAnyParameters(Dictionary<string, object?> parameters, string? returnColumnName = null, bool isGetAll = false)
+        {
+            List<object?> columnValues = new();
+            string errorMessage = string.Empty;
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                try
+                {
+                    connection.Open();
+                    var conditions = new List<string>();
+                    var command = connection.CreateCommand();
+
+                    // If a specific column is requested, select only that column
+                    string selectClause = returnColumnName != null
+                        ? $"SELECT [{returnColumnName}]"
+                        : "SELECT *";
+
+                    command.CommandText = $"{selectClause} FROM [{Common.Table_PhieuXuatKho}]";
+
+                    if (!isGetAll)
+                    {
+                        // Process each parameter in the dictionary
+                        foreach (var param in parameters)
+                        {
+                            conditions.Add($"[{param.Key}] = @{param.Key}");
+                            command.Parameters.AddWithValue($"@{param.Key}", param.Value);
+                        }
+                        if (conditions.Any())
+                        {
+                            command.CommandText += " WHERE " + string.Join(" AND ", conditions);
+                        }
+                    }
+
+                    using var reader = command.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        // If no specific column is requested, read entire object
+                        if (returnColumnName == null)
+                        {
+                            PhieuXuatKho phieuxuatkho = new();
+                            List<Propertyy> rowItems = phieuxuatkho.GetPropertiesValues();
+                            foreach (var item in rowItems)
+                            {
+                                string? columnName = item.DBName;
+                                if (!string.IsNullOrEmpty(columnName) && reader.GetOrdinal(columnName) != -1)
+                                {
+                                    object columnValue = reader[columnName];
+                                    item.Value = columnValue == DBNull.Value ? null : columnValue;
+                                }
+                                columnValues.Add(phieuxuatkho);
+                            }
+                        }
+                        else
+                        {
+                            // If a specific column is requested, read only that column
+                            object columnValue = reader[returnColumnName];
+                            columnValues.Add(columnValue == DBNull.Value ? null : columnValue);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    errorMessage = $"Error: {ex.Message}";
+                    columnValues.Clear(); // Clear the list in case of error
+                }
+            }
+            return (columnValues, errorMessage);
+        }
+
+
         // Update thong tin Phieu xuat kho
         public (int, string) UpdatePhieuXuatKhoInfor(PhieuXuatKho phieuXK)
         {
@@ -8928,6 +9053,77 @@ namespace ProcessManagement.Services.SQLServer
             }
             return (listLOT_khsx, errorMessage);
         }
+
+        public (List<object?> columnValues, string errorMessage) GetListLOT_khsxColumnValues(Dictionary<string, object?> parameters, string? returnColumnName = null, bool isGetAll = false)
+        {
+            List<object?> columnValues = new();
+            string errorMessage = string.Empty;
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                try
+                {
+                    connection.Open();
+                    var conditions = new List<string>();
+                    var command = connection.CreateCommand();
+
+                    // If a specific column is requested, select only that column
+                    string selectClause = returnColumnName != null
+                        ? $"SELECT [{returnColumnName}]"
+                        : "SELECT *";
+
+                    command.CommandText = $"{selectClause} FROM [{KHSX_LOT.DBName.Table_KHSXLOT}]";
+
+                    if (!isGetAll)
+                    {
+                        // Process each parameter in the dictionary
+                        foreach (var param in parameters)
+                        {
+                            conditions.Add($"[{param.Key}] = @{param.Key}");
+                            command.Parameters.AddWithValue($"@{param.Key}", param.Value);
+                        }
+                        if (conditions.Any())
+                        {
+                            command.CommandText += " WHERE " + string.Join(" AND ", conditions);
+                        }
+                    }
+
+                    using var reader = command.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        // If no specific column is requested, read entire object
+                        if (returnColumnName == null)
+                        {
+                            KHSX_LOT lotkhsx = new();
+                            List<Propertyy> rowItems = lotkhsx.GetPropertiesValues();
+                            foreach (var item in rowItems)
+                            {
+                                string? columnName = item.DBName;
+                                if (!string.IsNullOrEmpty(columnName) && reader.GetOrdinal(columnName) != -1)
+                                {
+                                    object columnValue = reader[columnName];
+                                    item.Value = columnValue == DBNull.Value ? null : columnValue;
+                                }
+                                columnValues.Add(lotkhsx);
+                            }
+                        }
+                        else
+                        {
+                            // If a specific column is requested, read only that column
+                            object columnValue = reader[returnColumnName];
+                            columnValues.Add(columnValue == DBNull.Value ? null : columnValue);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    errorMessage = $"Error: {ex.Message}";
+                    columnValues.Clear(); // Clear the list in case of error
+                }
+            }
+            return (columnValues, errorMessage);
+        }
+
         // Update
         public (int, string) UpdateLOT_khsx(KHSX_LOT lotkhsx)
         {
@@ -9130,7 +9326,6 @@ namespace ProcessManagement.Services.SQLServer
             }
             return (listLogkiemkes, errorMessage);
         }
-
         #endregion
     }
 }
