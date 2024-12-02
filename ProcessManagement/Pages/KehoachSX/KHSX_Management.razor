@@ -127,18 +127,18 @@
 
                                 <!--Da tao phieu xuat kho/ Da chi dinh vi tri NVL/ Chua hoan thanh xuat kho-->
                                 <RadzenStack Style="height: contain; width: contain; padding: 0px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                    <RadzenAlert Visible="@(PXKofKHSX.PXKID.Value != null && PXKofKHSX.IsChiDinhDuSLXuatKho && !PXKofKHSX.IsPXKDoneXuatKho)" Text="Chưa hoàn thành xuất kho NVL cho KHSX" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; padding-right: 10px; margin: 0" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                                    <RadzenAlert Visible="@(PXKofKHSX.PXKID.Value != null && PXKofKHSX.IsChiDinhDuSLXuatKho && !PXKofKHSX.isPXKDoneXuatKho)" Text="Chưa hoàn thành xuất kho NVL cho KHSX" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; padding-right: 10px; margin: 0" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
                                 </RadzenStack>
                                 <!--Da tao phieu xuat kho/ Da chi dinh vi tri NVL/ Chua hoan thanh xuat kho-->
-                                <RadzenButton Visible="@(PXKofKHSX.PXKID.Value != null && PXKofKHSX.IsChiDinhDuSLXuatKho && !PXKofKHSX.IsPXKDoneXuatKho)" Click="NavigateToHandlePhieuXuatKho" Text="@($"Tiến hành xuất kho NVL ({PXKofKHSX.MaPhieuXK.Value?.ToString()})")" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
+                                <RadzenButton Visible="@(PXKofKHSX.PXKID.Value != null && PXKofKHSX.IsChiDinhDuSLXuatKho && !PXKofKHSX.isPXKDoneXuatKho)" Click="NavigateToHandlePhieuXuatKho" Text="@($"Tiến hành xuất kho NVL ({PXKofKHSX.MaPhieuXK.Value?.ToString()})")" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
                                               Style="height: contain; width: contain; font-size: 14px;" />
 
                                 <!--Da tao phieu xuat kho/ Da chi dinh vi tri NVL/ Da hoan thanh xuat kho-->
                                 <RadzenStack Style="height: contain; width: contain; padding: 0px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                    <RadzenAlert Visible="@(PXKofKHSX.PXKID.Value != null && PXKofKHSX.IsChiDinhDuSLXuatKho && PXKofKHSX.IsPXKDoneXuatKho)" Text="Đã xuất kho NVL cho kế hoạch sản xuất" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; padding-right: 10px; margin: 0" AlertStyle="AlertStyle.Success" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                                    <RadzenAlert Visible="@(PXKofKHSX.PXKID.Value != null && PXKofKHSX.IsChiDinhDuSLXuatKho && PXKofKHSX.isPXKDoneXuatKho)" Text="Đã xuất kho NVL cho kế hoạch sản xuất" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; padding-right: 10px; margin: 0" AlertStyle="AlertStyle.Success" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
                                 </RadzenStack>
                                 <!--Da tao phieu xuat kho/ Da tao phieu xuat kho/ Da hoan thanh xuat kho -->
-                                <RadzenButton Visible="@(PXKofKHSX.PXKID.Value != null && PXKofKHSX.IsChiDinhDuSLXuatKho && PXKofKHSX.IsPXKDoneXuatKho)" Click="@(() => OnOpenDialogXemPhieuXuatKho("Xem phiếu xuất kho NVL"))" Text="Xem phiếu xuất kho NVL" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
+                                <RadzenButton Visible="@(PXKofKHSX.PXKID.Value != null && PXKofKHSX.IsChiDinhDuSLXuatKho && PXKofKHSX.isPXKDoneXuatKho)" Click="@(() => OnOpenDialogXemPhieuXuatKho("Xem phiếu xuất kho NVL"))" Text="Xem phiếu xuất kho NVL" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
                                               Style="height: contain; width: contain; font-size: 14px;" />
 
                                 <RadzenText Text="Xem chi tiết KHSX" @onclick="@(() => OnOpenChitietKHSX())" TextAlign="TextAlign.Center" Style="font-size: 14px; font-weight: 500; color: Highlight; cursor: pointer "></RadzenText>
@@ -367,7 +367,7 @@
                                 </RadzenStack>
                             </RadzenStack>
                             <RadzenStack Visible=@(nvlmcd.NVLMCDID.Value == SelectedNVLmcd.NVLMCDID.Value && IsDisplayDetails) Style="height: contain; width: 100%; padding: 5px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                <DetailsNVLmoiCongDoan IsAllowUpdate="@(PXKofKHSX.PXKID.Value != null && PXKofKHSX.IsChiDinhDuSLXuatKho && PXKofKHSX.IsPXKDoneXuatKho)" _selectNVLmoiCD="SelectNVLcuaCongdoan" _selectedNguyenCong="SelectedNguyenCong" IsEditCaNgay=false IsEditCaDem=false></DetailsNVLmoiCongDoan>
+                                <DetailsNVLmoiCongDoan IsAllowUpdate="@(PXKofKHSX.PXKID.Value != null && PXKofKHSX.IsChiDinhDuSLXuatKho && PXKofKHSX.isPXKDoneXuatKho)" _selectNVLmoiCD="SelectNVLcuaCongdoan" _selectedNguyenCong="SelectedNguyenCong" IsEditCaNgay=false IsEditCaDem=false></DetailsNVLmoiCongDoan>
                             </RadzenStack>
                         </RadzenStack>
                     }

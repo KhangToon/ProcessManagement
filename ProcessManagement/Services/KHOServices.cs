@@ -257,12 +257,28 @@ namespace ProcessManagement.Services
                         return (-1, "Không thể thực hiện lệnh xuất kho!");
                     }
 
+
+                    // Update isDonePXK status
+                    // Get if this LXK is last LXK
+                    int totalLXK = PXK.DSNVLofPXKs.Sum(nvlpxk => nvlpxk.DSLenhXKs.Count);
+                    int totalLXKdone = PXK.DSNVLofPXKs.Sum(nvlpxk => nvlpxk.DSLenhXKs.Sum(lxk => (((int.TryParse(lxk.LXKIsDone.Value?.ToString(), out int isdonelxk) ? isdonelxk : 0) == 1) ? 1 : 0)));
+                    bool islastLXK = (totalLXK - totalLXKdone) == 1;
+                    //
+                    // Set bit done PXK is 1 if isLastLXK
+                    if (islastLXK)
+                    {
+                        PXK.IsDonePXK.Value = 1;
+                        // Update isDonePXK
+                        SQLServerServices.UpdatePhieuXuatKhoInfor(PXK);
+                    }
+
                     // Update ngaynhap/xuatkho of KHSX
                     _ = int.TryParse(PXK.KHSXID.Value?.ToString(), out int khsxid) ? khsxid : 0;
                     //  // Update ngaynhap/xuatkho of KHSX (use with create KHSX)
                     if (khsxid > 0)
                     {
-                        SQLServerServices.UpdatePhieuXuatKhoInfor(PXK);
+                        // update IsDonePXKofKHSX is done (da xuat kho cho KHSX)
+                        SQLServerServices.UpdateKHSXProperty(khsxid, Common.IsDonePXKofKHSX, PXK.IsDonePXK.Value);
 
                         (int updatelotstatus, string errorlot) = UpdateNgayNhapXuatKho_dsLOTofKHSX(khsxid, savedLXK);
                     }
@@ -274,7 +290,7 @@ namespace ProcessManagement.Services
                     string nguoiXuatkho = SQLServerServices.GetNguoiTaoPhieuXuatKhoByID(savedLXK.PXKID.Value);
 
                     // Logging xuat kho
-                    HistoryXNKho logXuatKho = new HistoryXNKho()
+                    HistoryXNKho logXuatKho = new()
                     {
                         LogLoaiPhieu = { Value = Common.LogTypePXK },
                         LogMaPhieu = { Value = PXK.MaPhieuXK.Value?.ToString() },

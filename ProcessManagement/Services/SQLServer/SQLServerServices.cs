@@ -1,4 +1,5 @@
 ﻿using Microsoft.Data.SqlClient;
+using Microsoft.IdentityModel.Tokens;
 using ProcessManagement.Commons;
 using ProcessManagement.Models;
 using ProcessManagement.Models.KHO_NVL;
@@ -4556,10 +4557,12 @@ namespace ProcessManagement.Services.SQLServer
             phieuxuatkho.IsChiDinhDuSLXuatKho = !(phieuxuatkho.DSNVLofPXKs.Any(nvlofpxk => IsChidinhDuSoLuongXuatKho(nvlofpxk) == false));
 
             // Check PXK isdone
-            phieuxuatkho.IsPXKDoneXuatKho = !(phieuxuatkho.DSNVLofPXKs.Any(nvlofpxk => nvlofpxk.IsXuatKhoDone == false));
+            //phieuxuatkho.isPXKDoneXuatKho = !(phieuxuatkho.DSNVLofPXKs.Any(nvlofpxk => nvlofpxk.IsXuatKhoDone == false));
+            phieuxuatkho.isPXKDoneXuatKho = (int.TryParse(phieuxuatkho.IsDonePXK.Value?.ToString(), out int isdone) ? isdone : 0) == 1;
 
             return phieuxuatkho;
         }
+
         // Kiem tra tong so luong chi dinh bang tong so luong can lay
         private bool IsChidinhDuSoLuongXuatKho(NVLofPhieuXuatKho nvlofpxk)
         {
@@ -4576,6 +4579,7 @@ namespace ProcessManagement.Services.SQLServer
 
             return isSlgAsigned;
         }
+
         // Get ma phieu xuat kho by ID
         public string GetMaPhieuXuatKhoByID(object? pxkid)
         {
@@ -4597,7 +4601,6 @@ namespace ProcessManagement.Services.SQLServer
             return maPhieuXuatKho;
         }
 
-
         // Get nguoi xuat kho by pxkid ID
         public string GetNguoiTaoPhieuXuatKhoByID(object? pxkid)
         {
@@ -4618,7 +4621,6 @@ namespace ProcessManagement.Services.SQLServer
             }
             return nguoilapphieu;
         }
-
 
         // Get phiếu xuất kho by Mã phiếu 
         public PhieuXuatKho GetPhieuXuatKhoByMaPhieu(object? maPXK)
@@ -4656,7 +4658,10 @@ namespace ProcessManagement.Services.SQLServer
             phieuxuatkho.IsChiDinhDuSLXuatKho = !(phieuxuatkho.DSNVLofPXKs.Any(nvlofpxk => IsChidinhDuSoLuongXuatKho(nvlofpxk) == false));
 
             // Check PXK isdone
-            phieuxuatkho.IsPXKDoneXuatKho = !(phieuxuatkho.DSNVLofPXKs.Any(nvlofpxk => nvlofpxk.IsXuatKhoDone == false));
+            //phieuxuatkho.isPXKDoneXuatKho = !(phieuxuatkho.DSNVLofPXKs.Any(nvlofpxk => nvlofpxk.IsXuatKhoDone == false));
+
+            phieuxuatkho.isPXKDoneXuatKho = (int.TryParse(phieuxuatkho.IsDonePXK.Value?.ToString(), out int isdone) ? isdone : 0) == 1;
+
 
             return phieuxuatkho;
         }
@@ -4698,7 +4703,9 @@ namespace ProcessManagement.Services.SQLServer
                     phieuxuatkho.IsChiDinhDuSLXuatKho = !(phieuxuatkho.DSNVLofPXKs.Any(nvlofpxk => IsChidinhDuSoLuongXuatKho(nvlofpxk) == false));
 
                     // Check PXK isdone
-                    phieuxuatkho.IsPXKDoneXuatKho = !(phieuxuatkho.DSNVLofPXKs.Any(nvlofpxk => nvlofpxk.IsXuatKhoDone == false));
+                    //phieuxuatkho.isPXKDoneXuatKho = !(phieuxuatkho.DSNVLofPXKs.Any(nvlofpxk => nvlofpxk.IsXuatKhoDone == false));
+
+                    phieuxuatkho.isPXKDoneXuatKho = (int.TryParse(phieuxuatkho.IsDonePXK.Value?.ToString(), out int isdone) ? isdone : 0) == 1;
 
                     dsPXKho.Add(phieuxuatkho);
                 }

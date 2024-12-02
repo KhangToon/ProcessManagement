@@ -17,7 +17,7 @@ using System.Net.NetworkInformation;
 using System.Diagnostics;
 
 var localIP = PortFinder.GetLocalIPAddress();
-var port = PortFinder.FindAvailablePort_notcheckUsed();
+var port = PortFinder.FindAvailablePort_CheckUsed();
 var url = $"http://{localIP}:{port}";
 // enable khi deploy - disable khi use local 
 
