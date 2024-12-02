@@ -13,6 +13,8 @@ namespace ProcessManagement.Models
         public Propertyy SoluongNG { get; set; } = new() { DBName = Common.SoluongNG, Type = typeof(int), AlowDatabase = true, Value = 0 };
         public List<NVLmoiNguyenCong> DSachNVLCongDoans { get; set; } = new();
 
+        public bool isExpandColumn = false; // Using in QLCongDoanPage
+
         public bool IsUsing { get; set; } = false;
 
         public void CreateDSachNVLCongDoans(List<TemLotNVL> nVLs)
