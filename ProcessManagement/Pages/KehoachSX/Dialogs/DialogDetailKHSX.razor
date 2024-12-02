@@ -13,6 +13,7 @@
 @inject NotificationService NotificationService
 @inject SQLServerServices SQLServerServices
 @inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
 
 <RadzenStack Gap="0" Style="width: 100%; height: contain; background-color: white" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
     <RadzenRow Style="width: 100%;">
@@ -116,29 +117,38 @@
                             </RadzenStack>
                             <RadzenStack Orientation="Orientation.Vertical" Style="height: contain; width: 100%; padding: 10px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                 @{
-                                    <!--Chua tao phieu xuat kho-->
-                                    <RadzenStack Visible="@(PXKofKHSX.PXKID.Value == null)" Style="height: contain; width: 100%; padding: 0px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                        <RadzenAlert Text="Chưa tạo phiếu xuất kho NVL cho KHSX" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; padding-right: 10px; margin: 0" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Dark"></RadzenAlert>
-                                    </RadzenStack>
-                                    <!--Chua tao phieu xuat kho-->
-                                    <RadzenButton Visible="@(PXKofKHSX.PXKID.Value == null)" Click="OnOpenDialogCreatePhieuXuatKho" Icon="add_circle" Text="Tạo phiếu xuất kho NVL" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Dark"
-                                                  Style="height: contain; width: 100%; font-size: 14px;" />
+                                    if (PXKofKHSX.isReturnedNVL)
+                                    {
+                                        <RadzenButton Click="@(() => CopyToClipboard(PXKofKHSX.maPNKreturnNVL))" Icon="warning" Text="@($"NVL đã được trả lại vào kho - Mã phiếu: {PXKofKHSX.maPNKreturnNVL}")" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Danger" Variant="Variant.Filled" Shade="Shade.Darker"
+                                                      Style="height: contain; width: 100%; font-size: 14px; " />
+                                    }
+                                    else
+                                    {
+                                        <!--Chua tao phieu xuat kho-->
+                                        <RadzenStack Visible="@(PXKofKHSX.PXKID.Value == null)" Style="height: contain; width: 100%; padding: 0px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                            <RadzenAlert Text="Chưa tạo phiếu xuất kho NVL cho KHSX" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; padding-right: 10px; margin: 0" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Dark"></RadzenAlert>
+                                        </RadzenStack>
+                                        <!--Chua tao phieu xuat kho-->
+                                        <RadzenButton Visible="@(PXKofKHSX.PXKID.Value == null)" Click="OnOpenDialogCreatePhieuXuatKho" Icon="add_circle" Text="Tạo phiếu xuất kho NVL" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Dark"
+                                                      Style="height: contain; width: 100%; font-size: 14px;" />
 
-                                    <!--Da tao phieu xuat kho/ Da chi dinh vi tri NVL/ Chua hoan thanh xuat kho-->
-                                    <RadzenStack Visible="@(PXKofKHSX.PXKID.Value != null && PXKofKHSX.IsChiDinhDuSLXuatKho && !PXKofKHSX.isPXKDoneXuatKho)" Style="height: contain; width: 100%; padding: 0px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                        <RadzenAlert Text="Chưa hoàn thành xuất kho NVL cho KHSX" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; padding-right: 10px; margin: 0" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Dark"></RadzenAlert>
-                                    </RadzenStack>
-                                    <!--Da tao phieu xuat kho/ Da chi dinh vi tri NVL/ Chua hoan thanh xuat kho-->
-                                    <RadzenButton Visible="@(PXKofKHSX.PXKID.Value != null && PXKofKHSX.IsChiDinhDuSLXuatKho && !PXKofKHSX.isPXKDoneXuatKho)" Icon="upload" Click="NavigateToHandlePhieuXuatKho" Text="@($"Tiến hành xuất kho NVL ({PXKofKHSX.MaPhieuXK.Value?.ToString()})")" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Dark"
-                                                  Style="height: contain; width: 100%; font-size: 14px;" />
+                                        <!--Da tao phieu xuat kho/ Da chi dinh vi tri NVL/ Chua hoan thanh xuat kho-->
+                                        <RadzenStack Visible="@(PXKofKHSX.PXKID.Value != null && PXKofKHSX.isChiDinhDuSLXuatKho && !PXKofKHSX.isPXKDoneXuatKho)" Style="height: contain; width: 100%; padding: 0px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                            <RadzenAlert Text="Chưa hoàn thành xuất kho NVL cho KHSX" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; padding-right: 10px; margin: 0" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Dark"></RadzenAlert>
+                                        </RadzenStack>
+                                        <!--Da tao phieu xuat kho/ Da chi dinh vi tri NVL/ Chua hoan thanh xuat kho-->
+                                        <RadzenButton Visible="@(PXKofKHSX.PXKID.Value != null && PXKofKHSX.isChiDinhDuSLXuatKho && !PXKofKHSX.isPXKDoneXuatKho)" Icon="upload" Click="NavigateToHandlePhieuXuatKho" Text="@($"Tiến hành xuất kho NVL ({PXKofKHSX.MaPhieuXK.Value?.ToString()})")" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Dark"
+                                                      Style="height: contain; width: 100%; font-size: 14px;" />
 
-                                    <!--Da tao phieu xuat kho/ Da chi dinh vi tri NVL/ Da hoan thanh xuat kho-->
-                                    <RadzenStack Visible="@(PXKofKHSX.PXKID.Value != null && PXKofKHSX.IsChiDinhDuSLXuatKho && PXKofKHSX.isPXKDoneXuatKho)" Style="height: contain; width: 100%; padding: 0px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                        <RadzenAlert Text="Đã xuất kho NVL cho kế hoạch sản xuất" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; padding-right: 10px; margin: 0" AlertStyle="AlertStyle.Success" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Light"></RadzenAlert>
-                                    </RadzenStack>
-                                    <!--Da tao phieu xuat kho/ Da tao phieu xuat kho/ Da hoan thanh xuat kho -->
-                                    <RadzenButton Visible="@(PXKofKHSX.PXKID.Value != null && PXKofKHSX.IsChiDinhDuSLXuatKho && PXKofKHSX.isPXKDoneXuatKho)" Icon="visibility" Click="@(() => OnOpenDialogXemPhieuXuatKho("Xem phiếu xuất kho NVL"))" Text="Xem phiếu xuất kho NVL" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Dark"
-                                                  Style="height: contain; width: 100%; font-size: 14px;" />
+                                        <!--Da tao phieu xuat kho/ Da chi dinh vi tri NVL/ Da hoan thanh xuat kho-->
+                                        <RadzenStack Visible="@(PXKofKHSX.PXKID.Value != null && PXKofKHSX.isChiDinhDuSLXuatKho && PXKofKHSX.isPXKDoneXuatKho)" Style="height: contain; width: 100%; padding: 0px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                            <RadzenAlert Text="Đã xuất kho NVL cho kế hoạch sản xuất" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; padding-right: 10px; margin: 0" AlertStyle="AlertStyle.Success" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Light"></RadzenAlert>
+                                        </RadzenStack>
+                                        <!--Da tao phieu xuat kho/ Da tao phieu xuat kho/ Da hoan thanh xuat kho -->
+                                        <RadzenButton Visible="@(PXKofKHSX.PXKID.Value != null && PXKofKHSX.isChiDinhDuSLXuatKho && PXKofKHSX.isPXKDoneXuatKho)" Icon="visibility" Click="@(() => OnOpenDialogXemPhieuXuatKho("Xem phiếu xuất kho NVL"))" Text="Xem phiếu xuất kho NVL" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Dark"
+                                                      Style="height: contain; width: 100%; font-size: 14px;" />
+                                    }
+
                                 }
                             </RadzenStack>
                             <!--Danh sach nguyen lieu da chon-->
@@ -415,4 +425,48 @@
         var url = $"khomanagement?khsxid={khsxid}&tabindxex={4}";
         NavigationManager.NavigateTo(url);
     }
+
+    private async Task CopyToClipboard(string content)
+    {
+        try
+        {
+            // Try modern Clipboard API first
+            await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", content);
+
+            NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = "Copied!",
+                    Detail = $"{content}",
+                    Duration = 4000
+                });
+        }
+        catch (JSException)
+        {
+            try
+            {
+                // Fallback method
+                await JSRuntime.InvokeVoidAsync("fallbackCopyToClipboard", content);
+
+                NotificationService.Notify(new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Success,
+                        Summary = "Fallback Copied!",
+                        Detail = $"{content}",
+                        Duration = 4000
+                    });
+            }
+            catch (Exception)
+            {
+                NotificationService.Notify(new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Error,
+                        Summary = "Error",
+                        Detail = "Failed to copy text",
+                        Duration = 3000
+                    });
+            }
+        }
+    }
+
 }

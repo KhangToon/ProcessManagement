@@ -14,7 +14,7 @@ namespace ProcessManagement.Models.KHO_NVL.NhapKho
 
         public List<NVLofPhieuNhapKho> DSNVLofPNKs { get; set; } = new();
 
-        public bool isPXKDoneNhapKho = false;
+        public bool isPNKDoneNhapKho = false;
         public List<Propertyy> GetPropertiesValues()
         {
             Type propertyType = typeof(PhieuNhapKho);

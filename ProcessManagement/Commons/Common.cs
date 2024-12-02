@@ -107,7 +107,6 @@ namespace ProcessManagement.Commons
         public const string SLLotLe = "SL lot lẻ";
         public const string SLperLotLe = "SL mỗi lot lẻ";
         //public const string PXKID = "PXKID";
-        public const string IsDonePXKofKHSX = "IsDonePXKofKHSX";
 
         // Table KHSXpickNVL //
         public const string TableNVLofKHSX = "Table_NVLofKHSX";
@@ -215,7 +214,6 @@ namespace ProcessManagement.Commons
         public const string NguoiLapPXK = "Người lập phiếu";
         public const string NgayLapPXK = "Ngày lập phiếu";
         public const string GhiChuPXK = "Ghi chú";
-        public const string IsConfirmedPXK = "IsConfirmedPXK";
         public const string IsDonePXK = "IsDonePXK";
 
         // Table KHO_NVLofPhieuXuatKho

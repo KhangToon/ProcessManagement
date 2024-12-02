@@ -3737,7 +3737,7 @@ namespace ProcessManagement.Services.SQLServer
             // Load danh sach nguyen vat lieu pnk
             phieunhapkho.DSNVLofPNKs = GetListNVLofPNKs(pnkid);
 
-            phieunhapkho.isPXKDoneNhapKho = (int.TryParse(phieunhapkho.IsDonePNK.Value?.ToString(), out int isdone) ? isdone : 0) == 1;
+            phieunhapkho.isPNKDoneNhapKho = (int.TryParse(phieunhapkho.IsDonePNK.Value?.ToString(), out int isdone) ? isdone : 0) == 1;
 
             return phieunhapkho;
         }
@@ -3818,7 +3818,7 @@ namespace ProcessManagement.Services.SQLServer
             // Load danh sach nguyen vat lieu pnk
             phieunhapkho.DSNVLofPNKs = GetListNVLofPNKs(phieunhapkho.PNKID.Value);
 
-            phieunhapkho.isPXKDoneNhapKho = (int.TryParse(phieunhapkho.IsDonePNK.Value?.ToString(), out int isdone) ? isdone : 0) == 1;
+            phieunhapkho.isPNKDoneNhapKho = (int.TryParse(phieunhapkho.IsDonePNK.Value?.ToString(), out int isdone) ? isdone : 0) == 1;
 
             return phieunhapkho;
         }
@@ -3856,7 +3856,7 @@ namespace ProcessManagement.Services.SQLServer
                     // Load danh sach nguyen vat lieu pnk
                     phieunhapkho.DSNVLofPNKs = GetListNVLofPNKs(phieunhapkho.PNKID.Value);
 
-                    phieunhapkho.isPXKDoneNhapKho = (int.TryParse(phieunhapkho.IsDonePNK.Value?.ToString(), out int isdone) ? isdone : 0) == 1;
+                    phieunhapkho.isPNKDoneNhapKho = (int.TryParse(phieunhapkho.IsDonePNK.Value?.ToString(), out int isdone) ? isdone : 0) == 1;
 
                     // Check PNK isdone
                     //foreach (var nvlofpnk in phieunhapkho.DSNVLofPNKs)
@@ -4560,13 +4560,143 @@ namespace ProcessManagement.Services.SQLServer
             phieuxuatkho.DSNVLofPXKs = GetListNVLofPXKs(pxkid);
 
             // Kiem tra phieu xuat kho da chi dinh du NVL chua
-            phieuxuatkho.IsChiDinhDuSLXuatKho = !(phieuxuatkho.DSNVLofPXKs.Any(nvlofpxk => IsChidinhDuSoLuongXuatKho(nvlofpxk) == false));
+            phieuxuatkho.isChiDinhDuSLXuatKho = !(phieuxuatkho.DSNVLofPXKs.Any(nvlofpxk => IsChidinhDuSoLuongXuatKho(nvlofpxk) == false));
 
             // Check PXK isdone
             //phieuxuatkho.isPXKDoneXuatKho = !(phieuxuatkho.DSNVLofPXKs.Any(nvlofpxk => nvlofpxk.IsXuatKhoDone == false));
             phieuxuatkho.isPXKDoneXuatKho = (int.TryParse(phieuxuatkho.IsDonePXK.Value?.ToString(), out int isdone) ? isdone : 0) == 1;
 
+            // Kiem tra trang thai tra NVL neu phieu tra kho da duoc tao
+            _ = int.TryParse(phieuxuatkho.PNKID.Value?.ToString(), out int pnkid_trakho);
+            _ = int.TryParse(phieuxuatkho.KHSXID.Value?.ToString(), out int khsxid_trakho);
+
+            if (pnkid_trakho > 0 && khsxid_trakho > 0)
+            {
+                PhieuNhapKho phieuNhapKho = GetPhieuNhapKhoByID(phieuxuatkho.PNKID.Value);
+
+                phieuxuatkho.maPNKreturnNVL = phieuNhapKho.MaPhieuNK.Value?.ToString() ?? string.Empty;
+
+                phieuxuatkho.isReturnedNVL = phieuNhapKho.isPNKDoneNhapKho;
+            }
+
             return phieuxuatkho;
+        }
+
+        // Get phiếu xuất kho by Mã phiếu 
+        public PhieuXuatKho GetPhieuXuatKhoByMaPhieu(object? maPXK)
+        {
+            PhieuXuatKho phieuxuatkho = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_PhieuXuatKho}] WHERE [{Common.MaPhieuXuatKho}] = '{maPXK}'";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    List<Propertyy> rowitems = phieuxuatkho.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue.ToString()?.Trim();
+                    }
+                }
+            }
+            // Load danh sach nguyen vat lieu pxk
+            phieuxuatkho.DSNVLofPXKs = GetListNVLofPXKs(phieuxuatkho.PXKID.Value);
+
+            // Kiem tra phieu xuat kho da chi dinh du NVL chua
+            phieuxuatkho.isChiDinhDuSLXuatKho = !(phieuxuatkho.DSNVLofPXKs.Any(nvlofpxk => IsChidinhDuSoLuongXuatKho(nvlofpxk) == false));
+
+            // Check PXK isdone
+            //phieuxuatkho.isPXKDoneXuatKho = !(phieuxuatkho.DSNVLofPXKs.Any(nvlofpxk => nvlofpxk.IsXuatKhoDone == false));
+
+            phieuxuatkho.isPXKDoneXuatKho = (int.TryParse(phieuxuatkho.IsDonePXK.Value?.ToString(), out int isdone) ? isdone : 0) == 1;
+
+            // Kiem tra trang thai tra NVL neu phieu tra kho da duoc tao
+            _ = int.TryParse(phieuxuatkho.PNKID.Value?.ToString(), out int pnkid_trakho);
+            _ = int.TryParse(phieuxuatkho.KHSXID.Value?.ToString(), out int khsxid_trakho);
+
+            if (pnkid_trakho > 0 && khsxid_trakho > 0)
+            {
+                PhieuNhapKho phieuNhapKho = GetPhieuNhapKhoByID(phieuxuatkho.PNKID.Value);
+
+                phieuxuatkho.maPNKreturnNVL = phieuNhapKho.MaPhieuNK.Value?.ToString() ?? string.Empty;
+
+                phieuxuatkho.isReturnedNVL = phieuNhapKho.isPNKDoneNhapKho;
+            }
+
+            return phieuxuatkho;
+        }
+
+        // Load danh sach phieu xuat kho
+        public List<PhieuXuatKho> GetListPhieuXuatKho()
+        {
+            List<PhieuXuatKho> dsPXKho = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_PhieuXuatKho}]";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    PhieuXuatKho phieuxuatkho = new();
+
+                    List<Propertyy> rowitems = phieuxuatkho.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue.ToString()?.Trim();
+                    }
+
+                    // Load danh sach nguyen vat lieu pxk
+                    phieuxuatkho.DSNVLofPXKs = GetListNVLofPXKs(phieuxuatkho.PXKID.Value);
+
+                    // Kiem tra phieu xuat kho da chi dinh du NVL chua
+                    phieuxuatkho.isChiDinhDuSLXuatKho = !(phieuxuatkho.DSNVLofPXKs.Any(nvlofpxk => IsChidinhDuSoLuongXuatKho(nvlofpxk) == false));
+
+                    // Check PXK isdone
+                    //phieuxuatkho.isPXKDoneXuatKho = !(phieuxuatkho.DSNVLofPXKs.Any(nvlofpxk => nvlofpxk.IsXuatKhoDone == false));
+
+                    phieuxuatkho.isPXKDoneXuatKho = (int.TryParse(phieuxuatkho.IsDonePXK.Value?.ToString(), out int isdone) ? isdone : 0) == 1;
+
+                    // Kiem tra trang thai tra NVL neu phieu tra kho da duoc tao
+                    _ = int.TryParse(phieuxuatkho.PNKID.Value?.ToString(), out int pnkid_trakho);
+                    _ = int.TryParse(phieuxuatkho.KHSXID.Value?.ToString(), out int khsxid_trakho);
+
+                    if (pnkid_trakho > 0 && khsxid_trakho > 0)
+                    {
+                        PhieuNhapKho phieuNhapKho = GetPhieuNhapKhoByID(phieuxuatkho.PNKID.Value);
+
+                        phieuxuatkho.maPNKreturnNVL = phieuNhapKho.MaPhieuNK.Value?.ToString() ?? string.Empty;
+
+                        phieuxuatkho.isReturnedNVL = phieuNhapKho.isPNKDoneNhapKho;
+                    }
+
+                    dsPXKho.Add(phieuxuatkho);
+                }
+            }
+
+            return dsPXKho;
         }
 
         // Kiem tra tong so luong chi dinh bang tong so luong can lay
@@ -4626,98 +4756,6 @@ namespace ProcessManagement.Services.SQLServer
                 }
             }
             return nguoilapphieu;
-        }
-
-        // Get phiếu xuất kho by Mã phiếu 
-        public PhieuXuatKho GetPhieuXuatKhoByMaPhieu(object? maPXK)
-        {
-            PhieuXuatKho phieuxuatkho = new();
-
-            using (var connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-
-                var command = connection.CreateCommand();
-
-                command.CommandText = $"SELECT * FROM [{Common.Table_PhieuXuatKho}] WHERE [{Common.MaPhieuXuatKho}] = '{maPXK}'";
-
-                using var reader = command.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    List<Propertyy> rowitems = phieuxuatkho.GetPropertiesValues();
-
-                    foreach (var item in rowitems)
-                    {
-                        string? columnName = item.DBName;
-
-                        object columnValue = reader[columnName];
-
-                        item.Value = columnValue.ToString()?.Trim();
-                    }
-                }
-            }
-            // Load danh sach nguyen vat lieu pxk
-            phieuxuatkho.DSNVLofPXKs = GetListNVLofPXKs(phieuxuatkho.PXKID.Value);
-
-            // Kiem tra phieu xuat kho da chi dinh du NVL chua
-            phieuxuatkho.IsChiDinhDuSLXuatKho = !(phieuxuatkho.DSNVLofPXKs.Any(nvlofpxk => IsChidinhDuSoLuongXuatKho(nvlofpxk) == false));
-
-            // Check PXK isdone
-            //phieuxuatkho.isPXKDoneXuatKho = !(phieuxuatkho.DSNVLofPXKs.Any(nvlofpxk => nvlofpxk.IsXuatKhoDone == false));
-
-            phieuxuatkho.isPXKDoneXuatKho = (int.TryParse(phieuxuatkho.IsDonePXK.Value?.ToString(), out int isdone) ? isdone : 0) == 1;
-
-
-            return phieuxuatkho;
-        }
-
-        // Load danh sach phieu xuat kho
-        public List<PhieuXuatKho> GetListPhieuXuatKho()
-        {
-            List<PhieuXuatKho> dsPXKho = new();
-
-            using (var connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-
-                var command = connection.CreateCommand();
-
-                command.CommandText = $"SELECT * FROM [{Common.Table_PhieuXuatKho}]";
-
-                using var reader = command.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    PhieuXuatKho phieuxuatkho = new();
-
-                    List<Propertyy> rowitems = phieuxuatkho.GetPropertiesValues();
-
-                    foreach (var item in rowitems)
-                    {
-                        string? columnName = item.DBName;
-
-                        object columnValue = reader[columnName];
-
-                        item.Value = columnValue.ToString()?.Trim();
-                    }
-
-                    // Load danh sach nguyen vat lieu pxk
-                    phieuxuatkho.DSNVLofPXKs = GetListNVLofPXKs(phieuxuatkho.PXKID.Value);
-
-                    // Kiem tra phieu xuat kho da chi dinh du NVL chua
-                    phieuxuatkho.IsChiDinhDuSLXuatKho = !(phieuxuatkho.DSNVLofPXKs.Any(nvlofpxk => IsChidinhDuSoLuongXuatKho(nvlofpxk) == false));
-
-                    // Check PXK isdone
-                    //phieuxuatkho.isPXKDoneXuatKho = !(phieuxuatkho.DSNVLofPXKs.Any(nvlofpxk => nvlofpxk.IsXuatKhoDone == false));
-
-                    phieuxuatkho.isPXKDoneXuatKho = (int.TryParse(phieuxuatkho.IsDonePXK.Value?.ToString(), out int isdone) ? isdone : 0) == 1;
-
-                    dsPXKho.Add(phieuxuatkho);
-                }
-            }
-
-            return dsPXKho;
         }
 
         // Get phieu xuat kho ID by maPXK

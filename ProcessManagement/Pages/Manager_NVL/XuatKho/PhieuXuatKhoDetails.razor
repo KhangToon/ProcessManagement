@@ -198,7 +198,7 @@
                     @{
                         int.TryParse(PXK.PNKID.Value?.ToString(), out int iscreatedreturnnvl);
 
-                        if (!PXK.IsReturnedNVL)
+                        if (!PXK.isReturnedNVL)
                         {
                             <!--Tra kho button-->
                             <RadzenButton Visible="@(((int.TryParse(PXK.KHSXID.Value?.ToString(), out int khsxid)? khsxid : 0) > 0) && PXK.isPXKDoneXuatKho && iscreatedreturnnvl == 0)" Click="OnOpenDialogTraKho" Icon="undo" Text="@($"Tạo phiếu trả kho")" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Darker"
@@ -211,7 +211,7 @@
                         else
                         {
                             <!--Handle tra kho-->
-                            <RadzenButton Click="@(() => CopyToClipboard(PXK.MaPNKreturnNVL))" Icon="warning" Text="@($"NVL đã được trả lại vào kho - Mã phiếu: {PXK.MaPNKreturnNVL}")" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Danger" Variant="Variant.Filled" Shade="Shade.Darker"
+                            <RadzenButton Click="@(() => CopyToClipboard(PXK.maPNKreturnNVL))" Icon="warning" Text="@($"NVL đã được trả lại vào kho - Mã phiếu: {PXK.maPNKreturnNVL}")" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Danger" Variant="Variant.Filled" Shade="Shade.Darker"
                                           Style="height: contain; width: 100%; font-size: 14px; " />
                         }
                     }
@@ -399,19 +399,6 @@
         foreach (var nvlofpxk in PXK.DSNVLofPXKs)
         {
             nvlofpxk.IsChidinhDuSoluongXuatKho = IsChidinhDuSoLuongXuatKho(nvlofpxk);
-        }
-
-        // Kiem tra trang thai tra NVL neu phieu tra kho da duoc tao
-        int.TryParse(PXK.PNKID.Value?.ToString(), out int pnkid_trakho);
-        int.TryParse(PXK.KHSXID.Value?.ToString(), out int khsxid_trakho);
-
-        if (pnkid_trakho > 0 && khsxid_trakho > 0)
-        {
-            PhieuNhapKho phieuNhapKho = SQLServerServices.GetPhieuNhapKhoByID(PXK.PNKID.Value);
-
-            PXK.MaPNKreturnNVL = phieuNhapKho.MaPhieuNK.Value?.ToString() ?? string.Empty;
-
-            PXK.IsReturnedNVL = !phieuNhapKho.DSNVLofPNKs.Any(nvlpnk => nvlpnk.IsNhapKhoDone == false);
         }
 
         base.OnParametersSet();

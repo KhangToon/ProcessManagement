@@ -294,8 +294,8 @@ namespace ProcessManagement.Services
                     //  // Update ngaynhap/xuatkho of KHSX (use with create KHSX)
                     if (khsxid > 0)
                     {
-                        // update IsDonePXKofKHSX is done (da xuat kho cho KHSX)
-                        SQLServerServices.UpdateKHSXProperty(khsxid, Common.IsDonePXKofKHSX, PXK.IsDonePXK.Value);
+                        //// update IsDonePXKofKHSX is done (da xuat kho cho KHSX)
+                        //SQLServerServices.UpdateKHSXProperty(khsxid, Common.IsDonePXK, PXK.IsDonePXK.Value);
 
                         (int updatelotstatus, string errorlot) = UpdateNgayNhapXuatKho_dsLOTofKHSX(khsxid, savedLXK);
                     }
