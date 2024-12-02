@@ -14,7 +14,6 @@ namespace ProcessManagement.Models.KHO_NVL.XuatKho
         public Propertyy IsConfirmedPXK { get; set; } = new() { DBName = Common.IsConfirmedPXK, Type = typeof(int), AlowDatabase = true };
         public Propertyy PNKID { get; set; } = new() { DBName = Common.PNKID, Type = typeof(int), AlowDatabase = true }; // using for detect PXK is created return phieu tra kho
         public Propertyy IsDonePXK { get; set; } = new() { DBName = Common.IsDonePXK, Type = typeof(int), AlowDatabase = true };
-        public Propertyy IndexofLXKdone { get; set; } = new() { DBName = Common.IndexofLXKdone, Type = typeof(int), AlowDatabase = true }; // stt LXK done
 
         public bool isPXKDoneXuatKho = false; // Da load o SQLServices
 

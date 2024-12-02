@@ -3737,6 +3737,8 @@ namespace ProcessManagement.Services.SQLServer
             // Load danh sach nguyen vat lieu pnk
             phieunhapkho.DSNVLofPNKs = GetListNVLofPNKs(pnkid);
 
+            phieunhapkho.isPXKDoneNhapKho = (int.TryParse(phieunhapkho.IsDonePNK.Value?.ToString(), out int isdone) ? isdone : 0) == 1;
+
             return phieunhapkho;
         }
 
@@ -3816,6 +3818,8 @@ namespace ProcessManagement.Services.SQLServer
             // Load danh sach nguyen vat lieu pnk
             phieunhapkho.DSNVLofPNKs = GetListNVLofPNKs(phieunhapkho.PNKID.Value);
 
+            phieunhapkho.isPXKDoneNhapKho = (int.TryParse(phieunhapkho.IsDonePNK.Value?.ToString(), out int isdone) ? isdone : 0) == 1;
+
             return phieunhapkho;
         }
 
@@ -3852,18 +3856,20 @@ namespace ProcessManagement.Services.SQLServer
                     // Load danh sach nguyen vat lieu pnk
                     phieunhapkho.DSNVLofPNKs = GetListNVLofPNKs(phieunhapkho.PNKID.Value);
 
+                    phieunhapkho.isPXKDoneNhapKho = (int.TryParse(phieunhapkho.IsDonePNK.Value?.ToString(), out int isdone) ? isdone : 0) == 1;
+
                     // Check PNK isdone
-                    foreach (var nvlofpnk in phieunhapkho.DSNVLofPNKs)
-                    {
-                        if (!nvlofpnk.IsNhapKhoDone)
-                        {
-                            phieunhapkho.IsPXKDoneNhapKho = false; break;
-                        }
-                        else if (nvlofpnk.IsNhapKhoDone)
-                        {
-                            phieunhapkho.IsPXKDoneNhapKho = true;
-                        }
-                    }
+                    //foreach (var nvlofpnk in phieunhapkho.DSNVLofPNKs)
+                    //{
+                    //    if (!nvlofpnk.IsNhapKhoDone)
+                    //    {
+                    //        phieunhapkho.IsPXKDoneNhapKho = false; break;
+                    //    }
+                    //    else if (nvlofpnk.IsNhapKhoDone)
+                    //    {
+                    //        phieunhapkho.IsPXKDoneNhapKho = true;
+                    //    }
+                    //}
 
                     dsPNKho.Add(phieunhapkho);
                 }

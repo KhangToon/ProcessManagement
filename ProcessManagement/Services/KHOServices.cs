@@ -6,6 +6,7 @@ using ProcessManagement.Models.KHO_NVL.Tracking;
 using Radzen;
 using ProcessManagement.Commons;
 using ProcessManagement.Models.KHO_NVL.KiemKe;
+using Microsoft.IdentityModel.Tokens;
 
 namespace ProcessManagement.Services
 {
@@ -14,7 +15,7 @@ namespace ProcessManagement.Services
         private static readonly SQLServerServices SQLServerServices = new();
 
         // Handle lenh nhap kho
-        public static async Task<(int, string)> HandleLenhNhapKho(LenhNhapKho LNK, string maPNK, string maVitri, string qridlot, bool modeTraKho = false)
+        public static async Task<(int, string)> HandleLenhNhapKho(PhieuNhapKho PNK, LenhNhapKho LNK, string maVitri, string qridlot, bool modeTraKho = false)
         {
             return await Task.Run(() =>
             {
@@ -25,7 +26,9 @@ namespace ProcessManagement.Services
                 LenhNhapKho savedLNK = SQLServerServices.GetLenhNhapKhoByID(lnkid);
 
                 // Checking LNK is "Trakho"
-                modeTraKho = (savedLNK.NgayNhapKho.Value != null);
+                modeTraKho = !string.IsNullOrEmpty(savedLNK.NgayNhapKho.Value?.ToString()?.Trim());
+
+                string maPNK = PNK.MaPhieuNK.Value?.ToString() ?? string.Empty;
 
                 if (string.IsNullOrWhiteSpace(maPNK)) { return (-1, $"Mã phiếu {((modeTraKho) ? "trả" : "nhập")} không tồn tại"); }
                 if (string.IsNullOrWhiteSpace(maVitri) || !string.Equals(maVitri, savedLNK.TargertVitri.MaViTri.Value?.ToString()?.Trim())) { return (-1, "Mã vị trí không tồn tại"); }
@@ -126,6 +129,20 @@ namespace ProcessManagement.Services
                             if (updatelnkResult == -1)
                             {
                                 return (-1, $"LNK Lỗi: {updatelnkError}!");
+                            }
+
+                            // Update isDonePNK status
+                            // Get if this LNK is last LNK
+                            int totalLNK = PNK.DSNVLofPNKs.Sum(nvlpNK => nvlpNK.DSLenhNKs.Count);
+                            int totalLNKdone = PNK.DSNVLofPNKs.Sum(nvlpNK => nvlpNK.DSLenhNKs.Sum(lNK => (((int.TryParse(lNK.LNKIsDone.Value?.ToString(), out int isdonelNK) ? isdonelNK : 0) == 1) ? 1 : 0)));
+                            bool islastLNK = (totalLNK - totalLNKdone) == 1;
+                            //
+                            // Set bit done PNK is 1 if isLastLNK
+                            if (islastLNK)
+                            {
+                                PNK.IsDonePNK.Value = 1;
+                                // Update isDonePNK
+                                SQLServerServices.UpdatePhieuNhapKhoInfor(PNK);
                             }
 
                             // update status to UI

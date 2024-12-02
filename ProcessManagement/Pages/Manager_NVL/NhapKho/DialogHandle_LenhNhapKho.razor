@@ -151,7 +151,7 @@
                 }
                 else
                 {
-                    <RadzenButton Text="Tiến hành nhập kho" Click="@(async () => { await OnHandleLenhNhapKhousingKhoServices(LNK, PNK.MaPhieuNK.Value?.ToString()?? string.Empty, scanMaViTri, scanQRIDLOT);})" Style="width: contain;" Icon="arrow_outward" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Size="ButtonSize.Small" Variant="Variant.Flat" />
+                    <RadzenButton Text="Tiến hành nhập kho" Click="@(async () => { await OnHandleLenhNhapKhousingKhoServices(PNK, LNK, scanMaViTri, scanQRIDLOT);})" Style="width: contain;" Icon="arrow_outward" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Size="ButtonSize.Small" Variant="Variant.Flat" />
                 }
             </RadzenStack>
             <RadzenStack Gap="10px" Style="height: 100%; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
@@ -197,9 +197,9 @@
         }
     }
 
-    private async Task OnHandleLenhNhapKhousingKhoServices(LenhNhapKho lenhNhapKho, string maPNK, string maVitri, string qridlot)
+    private async Task OnHandleLenhNhapKhousingKhoServices(PhieuNhapKho phieuNhapKho, LenhNhapKho lenhNhapKho, string maVitri, string qridlot)
     {
-        (int status, string mess) = await KHOServices.HandleLenhNhapKho(lenhNhapKho, maPNK, maVitri, qridlot);
+        (int status, string mess) = await KHOServices.HandleLenhNhapKho(phieuNhapKho, lenhNhapKho, maVitri, qridlot);
 
         if (status == -1)
         {

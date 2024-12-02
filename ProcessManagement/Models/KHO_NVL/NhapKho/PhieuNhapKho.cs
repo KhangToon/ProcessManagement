@@ -10,10 +10,11 @@ namespace ProcessManagement.Models.KHO_NVL.NhapKho
         public Propertyy NguoiLapPNK { get; set; } = new() { DBName = Common.NguoiLapPNK, Type = typeof(string), AlowDatabase = true };
         public Propertyy NgayLapPNK { get; set; } = new() { DBName = Common.NgayLapPNK, Type = typeof(DateTime), AlowDatabase = true };
         public Propertyy GhiChuPNK { get; set; } = new() { DBName = Common.GhiChuPNK, Type = typeof(string), AlowDatabase = true };
+        public Propertyy IsDonePNK { get; set; } = new() { DBName = Common.IsDonePNK, Type = typeof(int), AlowDatabase = true };
 
         public List<NVLofPhieuNhapKho> DSNVLofPNKs { get; set; } = new();
 
-        public bool IsPXKDoneNhapKho = false;
+        public bool isPXKDoneNhapKho = false;
         public List<Propertyy> GetPropertiesValues()
         {
             Type propertyType = typeof(PhieuNhapKho);

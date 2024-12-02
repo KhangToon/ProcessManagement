@@ -190,6 +190,7 @@ namespace ProcessManagement.Commons
         public const string NguoiLapPNK = "Người lập phiếu";
         public const string NgayLapPNK = "Ngày lập phiếu";
         public const string GhiChuPNK = "Ghi chú";
+        public const string IsDonePNK = "IsDonePNK";
 
         // Table KHO_NVLofPhieuNhapKho
         public const string Table_NVLofPhieuNhapKho = "KHO_NVLofPhieuNhapKho";
@@ -216,7 +217,6 @@ namespace ProcessManagement.Commons
         public const string GhiChuPXK = "Ghi chú";
         public const string IsConfirmedPXK = "IsConfirmedPXK";
         public const string IsDonePXK = "IsDonePXK";
-        public const string IndexofLXKdone = "IndexofLXKdone";
 
         // Table KHO_NVLofPhieuXuatKho
         public const string Table_NVLofPhieuXuatKho = "KHO_NVLofPhieuXuatKho";

@@ -98,7 +98,7 @@
     </RadzenStack>
 
     <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding-right: 15px; padding-top: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
-        <RadzenButton Disabled="@(string.IsNullOrWhiteSpace(MaPNK) || !isScanqridlotlok || !isScanmavitriok)" Click="@(() => OnHandleLenhNhapKhousingKhoServices(LNK, MaPNK, maVitri, qrIDLOT))" Style="padding: 5px; width: contain; height: contain; font-size: 12px" Icon="check" Text="Xác nhận thêm" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Default" Size="ButtonSize.ExtraSmall" Variant="Variant.Filled" />
+        <RadzenButton Disabled="@(string.IsNullOrWhiteSpace(TargetPNK.MaPhieuNK.Value?.ToString()) || !isScanqridlotlok || !isScanmavitriok)" Click="@(() => OnHandleLenhNhapKhousingKhoServices(TargetPNK, LNK, maVitri, qrIDLOT))" Style="padding: 5px; width: contain; height: contain; font-size: 12px" Icon="check" Text="Xác nhận thêm" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Default" Size="ButtonSize.ExtraSmall" Variant="Variant.Filled" />
         <RadzenButton Style="width: contain; height: contain; font-size: 12px; padding: 5px" Icon="close" Text="Thoát" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.ExtraSmall" Variant="Variant.Flat" Click="@(() => DialogService.Close(null))" />
     </RadzenStack>
 </RadzenStack>
@@ -108,7 +108,7 @@
     public LenhNhapKho LNK { get; set; } = new();
 
     [Parameter]
-    public string MaPNK { get; set; } = string.Empty;
+    public PhieuNhapKho TargetPNK { get; set; } = new();
 
     private string maVitri = string.Empty;
     //private string maNVL = string.Empty;
@@ -175,9 +175,9 @@
         isScanqridlotlok = false;
     }
 
-    private async Task OnHandleLenhNhapKhousingKhoServices(LenhNhapKho lenhNhapKho, string maPNK, string maVitri, string qridlot)
+    private async Task OnHandleLenhNhapKhousingKhoServices(PhieuNhapKho phieuNhapKho, LenhNhapKho lenhNhapKho, string maVitri, string qridlot)
     {
-        (int status, string mess) = await KHOServices.HandleLenhNhapKho(lenhNhapKho, maPNK, maVitri, qridlot);
+        (int status, string mess) = await KHOServices.HandleLenhNhapKho(phieuNhapKho, lenhNhapKho, maVitri, qridlot);
 
         if (status == -1)
         {
@@ -201,7 +201,7 @@
 
         if (confirm.Value)
         {
-            if (string.IsNullOrWhiteSpace(MaPNK)) { return; }
+            if (string.IsNullOrWhiteSpace(TargetPNK.MaPhieuNK.Value?.ToString())) { return; }
             if (string.IsNullOrWhiteSpace(mavitri) || !string.Equals(mavitri.Trim(), savedLNK.TargertVitri.MaViTri.Value?.ToString()?.Trim())) { return; }
             if (string.IsNullOrWhiteSpace(manvl) || !string.Equals(manvl.Trim(), savedLNK.TargetNgLieu.TenNVL.Value?.ToString()?.Trim())) { return; }
             if (soluongnhapfromClient == 0) { return; }
@@ -317,7 +317,7 @@
                         HistoryXNKho logNhapKho = new HistoryXNKho()
                             {
                                 LogLoaiPhieu = { Value = Common.LogTypePNK },
-                                LogMaPhieu = { Value = MaPNK },
+                                LogMaPhieu = { Value = TargetPNK.MaPhieuNK.Value?.ToString() },
                                 LogMaViTri = { Value = mavitri },
                                 LogNgThucHien = { Value = nguoiNhapkho },
                                 LogSoLuong = { Value = savedLNK.LNKSoLuong.Value },
