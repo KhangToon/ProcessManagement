@@ -4,14 +4,15 @@ using System.Reflection;
 
 namespace ProcessManagement.Models.SANPHAM
 {
-    public class NVLofSanPham
+    public class NVLwithSanPham
     {
-        public Propertyy SP_NVLSPID { get; set; } = new() { DBName = Common.SP_NVLSPID, Type = typeof(int), AlowDatabase = false, AlowDisplay = false }; // ID
-        public Propertyy SP_SPID { get; set; } = new() { DBName = Common.SP_SPID, Type = typeof(int), AlowDatabase = true, };
+        public Propertyy NVLSPID { get; set; } = new() { DBName = Common.SP_NVLSPID, Type = typeof(int), AlowDatabase = false, AlowDisplay = false }; // ID
+        public Propertyy SPID { get; set; } = new() { DBName = Common.SP_SPID, Type = typeof(int), AlowDatabase = true, };
         public Propertyy NVLID { get; set; } = new() { DBName = Common.NVLID, Type = typeof(int), AlowDatabase = true, };
-        public Propertyy SP_NgayThem { get; set; } = new() { DBName = Common.SP_NgayThem, DisplayName = "Ngày thêm", Type = typeof(DateTime), AlowDatabase = true };
-        public Propertyy SP_SLforSP { get; set; } = new() { DBName = Common.SP_SLforSP, DisplayName = "Số lượng/sản phẩm", Type = typeof(int), AlowDatabase = true, };
+        public Propertyy NgayThem { get; set; } = new() { DBName = Common.SP_NgayThem, DisplayName = "Ngày thêm", Type = typeof(DateTime), AlowDatabase = true };
+        public Propertyy QuyCach { get; set; } = new() { DBName = Common.QuyCach, DisplayName = "Quy cách", Type = typeof(int), AlowDatabase = true, };
         public NguyenVatLieu TargetNgLieu { get; set; } = new();
+        public SanPham TargetSP { get; set; } = new(); // Khong load trong DB (deadloop)
 
         public bool isEditingSoluong = false;
         public int allsoLuongcanLay = 0; // dung khi chi ding so luong sp trong KHSX
@@ -20,7 +21,7 @@ namespace ProcessManagement.Models.SANPHAM
         public int dinhmuc = 0; // dung khi chi ding so luong sp trong KHSX
         public List<Propertyy> GetPropertiesValues()
         {
-            Type propertyType = typeof(NVLofSanPham);
+            Type propertyType = typeof(NVLwithSanPham);
 
             FieldInfo[] fields = propertyType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 

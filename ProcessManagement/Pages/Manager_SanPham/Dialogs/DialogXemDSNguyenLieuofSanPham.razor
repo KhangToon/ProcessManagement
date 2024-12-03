@@ -58,7 +58,7 @@
                             </RadzenStack>
                             <RadzenStack Style="width: 20%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                 @{
-                                    bool isokslforsp = int.TryParse(nvlofSP.SP_SLforSP.Value?.ToString(), out int slforsp);
+                                    bool isokslforsp = int.TryParse(nvlofSP.QuyCach.Value?.ToString(), out int slforsp);
                                 }
                                 <RadzenText Text="@($"{((isokslforsp)? slforsp : 0)} ({nguyenvatlieu.DonViTinh.Value?.ToString()})")" Style="font-size: 16px; font-weight: 600; color: black"></RadzenText>
                             </RadzenStack>
@@ -100,13 +100,13 @@
         return base.OnInitializedAsync();
     }
 
-    private async Task OnDeleteNVLofSP(NVLofSanPham removeNVLofSP)
+    private async Task OnDeleteNVLofSP(NVLwithSanPham removeNVLofSP)
     {
         bool? comfirm = await DialogService.Confirm($"Xóa nguyên liệu khỏi sản phẩm này?", "Xác nhận", new ConfirmOptions() { OkButtonText = "Đồng ý", CancelButtonText = "Hủy" });
 
         if (comfirm.Value)
         {
-            (int result, string errormess) = SQLServerServices.DeleteNVLofSanpham(removeNVLofSP);
+            (int result, string errormess) = SQLServerServices.DeleteNVLwithSanpham(removeNVLofSP);
 
             if (result > 0)
             {
@@ -121,7 +121,7 @@
         }
     }
 
-    private string GetTonKhoNVL(NVLofSanPham nVLofSanP)
+    private string GetTonKhoNVL(NVLwithSanPham nVLofSanP)
     {
         int nvlid = int.TryParse(nVLofSanP.NVLID.Value?.ToString(), out int id) ? id : 0;
 

@@ -33,11 +33,11 @@ namespace ProcessManagement.Commons
         public const string SP_TTSPID = "TTSPID";
         public const string SP_GiaTriThongTin = "Giá trị";
 
-        // Table NVL of Sanpham
-        public const string Table_NVLofSanPham = "SP_NVLofSanPham";
+        // Table NVLwithSanPham
+        public const string Table_NVLwithSanPham = "SP_NVLwithSanPham";
         public const string SP_NVLSPID = "NVLSPID";
         public const string SP_NgayThem = "NgayThem";
-        public const string SP_SLforSP = "SLforSanPham";
+        public const string QuyCach = "QuyCach";
 
         // Table ChitietSanPham //
         public const string TableChitietSanPham = "SP_ChitietSanPham";

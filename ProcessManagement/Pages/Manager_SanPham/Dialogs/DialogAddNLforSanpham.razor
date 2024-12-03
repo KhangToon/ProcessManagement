@@ -145,12 +145,12 @@
                                                         <RadzenStack Visible="@(nvl.isEditingSoluong)" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                                             <RadzenNumeric Placeholder="@($"*Nhập số lượng")" TValue="int" TextAlign=TextAlign.Center Disabled="@(!nvl.isEditingSoluong)"
                                                                            Min="0" Max="999999"
-                                                                           Value="@(int.TryParse(nvl.SP_SLforSP.Value?.ToString(), out int slofSP)? slofSP : 0)"
-                                                                           ValueChanged="@((args) => { nvl.SP_SLforSP.Value = args; })"
+                                                                           Value="@(int.TryParse(nvl.QuyCach.Value?.ToString(), out int slofSP)? slofSP : 0)"
+                                                                           ValueChanged="@((args) => { nvl.QuyCach.Value = args; })"
                                                                            Style="--rz-input-font-size: 18px; font-weight: 600; height: 35px; border-width: 1px; width: 100%" />
                                                         </RadzenStack>
                                                         <RadzenStack Visible="@(!nvl.isEditingSoluong)" Style="height: 30px; width: 100%; border-radius: 5px; padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                            <RadzenText Text="@($"{nvl.SP_SLforSP.Value?.ToString()} ({nvl.TargetNgLieu.DonViTinh.Value?.ToString()})")" Style="color: darkgreen; font-weight: 600; font-size: 15px"></RadzenText>
+                                                            <RadzenText Text="@($"{nvl.QuyCach.Value?.ToString()} ({nvl.TargetNgLieu.DonViTinh.Value?.ToString()})")" Style="color: darkgreen; font-weight: 600; font-size: 15px"></RadzenText>
                                                         </RadzenStack>
                                                     </RadzenStack>
                                                     <RadzenStack Gap="5px" Style="width: 20%; height: 100%; padding-left: 10px " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
@@ -166,7 +166,7 @@
                                                     </RadzenStack>
                                                     <RadzenStack Style="width: 25%; height: contain; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                         @{
-                                                            bool isSoluongOK = (int.TryParse(nvl.SP_SLforSP.Value?.ToString(), out int sl) ? sl : 0) > 0;
+                                                            bool isSoluongOK = (int.TryParse(nvl.QuyCach.Value?.ToString(), out int sl) ? sl : 0) > 0;
                                                             if (isSoluongOK)
                                                             {
                                                                 <RadzenButton Icon="check" Text="OK" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Lighter" Variant="Variant.Flat"
@@ -280,13 +280,13 @@
 
             if (!isalreadyexisting)
             {
-                NVLofSanPham newNVLofSP = new()
+                NVLwithSanPham newNVLofSP = new()
                     {
                         NVLID = { Value = addingNVL.NVLID.Value },
-                        SP_SPID = { Value = Sanpham.SP_SPID.Value },
-                        SP_NgayThem = { Value = DateTime.Now },
+                        SPID = { Value = Sanpham.SP_SPID.Value },
+                        NgayThem = { Value = DateTime.Now },
                         TargetNgLieu = addingNVL,
-                        SP_SLforSP = { Value = 0 }
+                        QuyCach = { Value = 0 }
                     };
 
                 Sanpham.DanhSachNVLs.Add(newNVLofSP);
@@ -303,7 +303,7 @@
         {
             foreach (var nvl in Sanpham.DanhSachNVLs)
             {
-                bool isSoluongOK = (int.TryParse(nvl.SP_SLforSP.Value?.ToString(), out int sl) ? sl : 0) > 0;
+                bool isSoluongOK = (int.TryParse(nvl.QuyCach.Value?.ToString(), out int sl) ? sl : 0) > 0;
 
                 if (!isSoluongOK)
                 {
@@ -330,17 +330,17 @@
             foreach (var nvlofsp in Sanpham.DanhSachNVLs)
             {
                 // Check nvl da co trong dsnvl cua san pham
-                bool isExisting = SQLServerServices.IsNVLofSanPhamExisting(nvlofsp);
+                bool isExisting = SQLServerServices.IsNVLwithSanPhamExisting(nvlofsp);
 
                 if (isExisting)
                 {
                     // Update neu da ton tai
-                    (int result, string error) = SQLServerServices.UpdateNVLofSanPham(nvlofsp);
+                    (int result, string error) = SQLServerServices.UpdateNVLwithSanPham(nvlofsp);
                 }
                 else
                 {
                     // Insert moi neu chua ton tai
-                    (int result, string error) = SQLServerServices.InsertNewNguyenVatLieuchoSanPham(nvlofsp);
+                    (int result, string error) = SQLServerServices.InsertNewNVLwithSanPham(nvlofsp);
                 }
             }
 
@@ -356,25 +356,25 @@
         {
             if (selectNguyenVL != null)
             {
-                NVLofSanPham newNVLofSP = new()
+                NVLwithSanPham newNVLofSP = new()
                     {
                         NVLID = { Value = selectNguyenVL.NVLID.Value },
-                        SP_SPID = { Value = Sanpham?.SP_SPID.Value },
-                        SP_NgayThem = { Value = DateTime.Now }
+                        SPID = { Value = Sanpham?.SP_SPID.Value },
+                        NgayThem = { Value = DateTime.Now }
                     };
 
                 // Check nvl da co trong dsnvl cua san pham
-                bool isExisting = SQLServerServices.IsNVLofSanPhamExisting(newNVLofSP);
+                bool isExisting = SQLServerServices.IsNVLwithSanPhamExisting(newNVLofSP);
 
                 if (!isExisting) // Chua ton tai
                 {
-                    (int result, string error) = SQLServerServices.InsertNewNguyenVatLieuchoSanPham(newNVLofSP);
+                    (int result, string error) = SQLServerServices.InsertNewNVLwithSanPham(newNVLofSP);
 
                     if (result > 0)
                     {
                         ShowNotification("Thêm thành công!", NotificationSeverity.Success, 2000);
 
-                        newNVLofSP.SP_NVLSPID.Value = result;
+                        newNVLofSP.NVLSPID.Value = result;
 
                         Sanpham?.DanhSachNVLs?.Add(newNVLofSP);
 
@@ -399,9 +399,9 @@
     }
 
     // Remove NVL from DSNgVatLieu san pham
-    private async Task OnDeleteNVLofSP(NVLofSanPham removeNVLofSP)
+    private async Task OnDeleteNVLofSP(NVLwithSanPham removeNVLofSP)
     {
-        bool isexisting = SQLServerServices.IsNVLofSanPhamExisting(removeNVLofSP);
+        bool isexisting = SQLServerServices.IsNVLwithSanPhamExisting(removeNVLofSP);
 
         if (isexisting)
         {
@@ -409,7 +409,7 @@
 
             if (comfirm.Value)
             {
-                (int result, string errormess) = SQLServerServices.DeleteNVLofSanpham(removeNVLofSP);
+                (int result, string errormess) = SQLServerServices.DeleteNVLwithSanpham(removeNVLofSP);
 
                 if (result > 0)
                 {

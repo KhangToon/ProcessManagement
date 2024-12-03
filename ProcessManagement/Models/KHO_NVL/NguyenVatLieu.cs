@@ -1,4 +1,5 @@
 ﻿using ProcessManagement.Commons;
+using ProcessManagement.Models.SANPHAM;
 using System.Reflection;
 using System.Text.Json;
 
@@ -24,7 +25,8 @@ namespace ProcessManagement.Models.KHO_NVL
 
         public List<ViTriofNVL> DSViTri { get; set; } = new();
 
-        public List<SanPhamofNVL> DSachSPofNVLs { get; set; } = new();
+        // Danh sach thanh pham cua NVL
+        public List<NVLwithSanPham> DSachSPofNVLs { get; set; } = new(); // Load rieng/ tranh dead loop
 
         // Get nvl details infor by detail name
         public string GetValue(string proName)
