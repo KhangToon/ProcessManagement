@@ -1388,103 +1388,6 @@ namespace ProcessManagement.Services.SQLServer
 
         // ------------------------------------------------------------------------------------- //
         #region Table KHO_NguyenVatLieu
-        // Them loai NVL moi 
-        public (int, string) InsertNewLoaiNguyenVatLieu(NguyenVatLieu? newnvl)
-        {
-            int result = -1; string errorMess = string.Empty;
-
-            if (newnvl == null) return (result, "Error");
-
-            List<Propertyy> newNVLItems = newnvl.GetPropertiesValues().Where(po => po.AlowDatabase == true && po.Value != null).ToList();
-
-            try
-            {
-                using var connection = new SqlConnection(connectionString);
-
-                connection.Open();
-
-                var command = connection.CreateCommand();
-
-                string columnNames = string.Join(",", newNVLItems.Select(key => $"[{key.DBName}]"));
-
-                string parameterNames = string.Join(",", newNVLItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
-
-                command.CommandText = $"INSERT INTO [{Common.Table_NguyenVatLieu}] ({columnNames}) OUTPUT INSERTED.{Common.NVLID} VALUES ({parameterNames})";
-
-                foreach (var item in newNVLItems)
-                {
-                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
-
-                    object? parameterValue = item.Value;
-
-                    command.Parameters.AddWithValue(parameterName, parameterValue);
-                }
-
-                object? rs = command.ExecuteScalar();
-
-                result = Convert.ToInt32(rs);
-
-                if (result == 0) result = -1;
-            }
-            catch (Exception ex)
-            {
-                errorMess = ex.Message;
-
-                return (-1, errorMess);
-            }
-
-            return (result, errorMess);
-        }
-
-        // Update so luong ton kho NVL 
-        public (int, string) UpdateSLTonkhoNguyenVatLieu_XuatKho(object? nvlid, object? soluongLay)
-        {
-            int result = -1; string errorMess = string.Empty;
-
-            if (soluongLay == null || nvlid == null) { return (result, errorMess); }
-
-            try
-            {
-                using (var connection = new SqlConnection(connectionString))
-                {
-                    connection.Open();
-
-                    string sqlQuery = $"UPDATE {Common.Table_NguyenVatLieu} SET [{Common.NVLTonKho}] = [{Common.NVLTonKho}] - '{soluongLay}' WHERE [{Common.NVLID}] = '{nvlid}'";
-
-                    var command = new SqlCommand(sqlQuery, connection);
-
-                    result = command.ExecuteNonQuery();
-
-                    connection.Close();
-
-                    return (result, string.Empty);
-                }
-            }
-            catch (Exception ex)
-            {
-                string err = ex.Message;
-
-                return (-1, err);
-            }
-        }
-
-        // Check Ten NVL da ton tai 
-        public bool IsTenNVLExists(string? tenNVL)
-        {
-            using (var connection = new SqlConnection(connectionString))
-            {
-                string query = $"SELECT COUNT(*) FROM [{Common.Table_NguyenVatLieu}] WHERE [{Common.TenNVL}] = N'{tenNVL}'";
-
-                using (var command = new SqlCommand(query, connection))
-                {
-                    connection.Open();
-
-                    int count = (int)command.ExecuteScalar();
-
-                    return count > 0;
-                }
-            }
-        }
 
         // Get Nguyen Vat Lieu by ID 
         public NguyenVatLieu GetNguyenVatLieuByID(object? nvlID)
@@ -1575,54 +1478,6 @@ namespace ProcessManagement.Services.SQLServer
 
             return nvl;
         }
-
-        public NguyenVatLieu GetNguyenVatLieuByTenNVL(object? tenNVL, bool isloadsubitems = true)
-        {
-            NguyenVatLieu nvl = new();
-
-            using (var connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-
-                var command = connection.CreateCommand();
-
-                command.CommandText = $"SELECT * FROM [{Common.Table_NguyenVatLieu}] WHERE [{Common.TenNVL}] = '{tenNVL}'";
-
-                using var reader = command.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    List<Propertyy> rowitems = nvl.GetPropertiesValues();
-
-                    foreach (var item in rowitems)
-                    {
-                        string? columnName = item.DBName;
-
-                        object columnValue = reader[columnName];
-
-                        item.Value = columnValue.ToString()?.Trim();
-                    }
-
-                }
-            }
-
-            if (isloadsubitems)
-            {
-                // Load Details NVL 
-                nvl.DSThongTin = GetNguyenVatLieuDetails(nvl.NVLID.Value);
-                // Load Danh muc
-                nvl.DanhMuc = GetDanhMucbyID(nvl.DMID.Value);
-                // Load Loai NVL
-                nvl.LoaiNVL = GetLoaiNVLbyID(nvl.LOAINVLID.Value);
-                // Load list vi tri 
-                nvl.DSViTri = GetListViTriOfNgVatLieuByNVLid(nvl.NVLID.Value);
-                // Tinh so luong ton kho
-                nvl.TonKho = nvl.DSViTri.Sum(vitri => int.TryParse(vitri.VTNVLSoLuong.Value?.ToString(), out int slvt) ? slvt : 0);
-            }
-
-            return nvl;
-        }
-
 
         // Get list NguyenVatLieu by loai nvl ID
         public List<NguyenVatLieu> GetListNguyenVatLieuByLoaiNvlID(object? loainvlID)
@@ -1820,50 +1675,6 @@ namespace ProcessManagement.Services.SQLServer
             return (result, errorMess);
         }
 
-
-
-        // Get all ds nguyen vat lieu
-        public List<NguyenVatLieu> GetDanhSachNguyenVatLieu()
-        {
-            List<NguyenVatLieu> danhSachNguyenVatLieu = new();
-
-            using (var connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-
-                var command = connection.CreateCommand();
-
-                command.CommandText = $"SELECT * FROM [{Common.Table_NguyenVatLieu}]";
-
-                using var reader = command.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    NguyenVatLieu nguyenVatLieu = new();
-
-                    List<Propertyy> rowItems = nguyenVatLieu.GetPropertiesValues();
-
-                    foreach (var item in rowItems)
-                    {
-                        string? columnName = item.DBName;
-
-                        if (reader.GetOrdinal(columnName) != -1) // Check if the column exists
-                        {
-                            object columnValue = reader[columnName];
-
-                            item.Value = columnValue == DBNull.Value ? null : columnValue.ToString()?.Trim();
-                        }
-                    }
-
-                    // Load danh sach thong tin nguyen vat lieu
-                    nguyenVatLieu.DSThongTin = GetDanhSachThongTinNguyenVatLieu(nguyenVatLieu.NVLID.Value);
-
-                    danhSachNguyenVatLieu.Add(nguyenVatLieu);
-                }
-            }
-
-            return danhSachNguyenVatLieu;
-        }
         // Check gia tri truong thong tin mac dinh nvl is exsting? 
         public bool DefaultThongTinNguyenVatLieu_ValueIsExisting(string? proValue, string proName)
         {
@@ -1881,6 +1692,7 @@ namespace ProcessManagement.Services.SQLServer
                 }
             }
         }
+
         // Insert new nguyen vat lieu
         public (int, string) InsertNewNguyenVatLieu(NguyenVatLieu? newNguyenVatLieu)
         {
@@ -1925,6 +1737,7 @@ namespace ProcessManagement.Services.SQLServer
 
             return (result, errorMess);
         }
+
         // Delete nguyen vat lieu by nvlid
         public (int, string) DeleteNguyenVatLieu(object? nvlID)
         {
@@ -9326,6 +9139,260 @@ namespace ProcessManagement.Services.SQLServer
             }
             return (listLogkiemkes, errorMessage);
         }
+        #endregion
+
+        #region Table_KHO_SPofNVL
+        // Insert
+        public (int, string) InsertSPofNVL(SanPhamofNVL spofnvl)
+        {
+            int result = -1;
+            string errorMess = string.Empty;
+
+            if (spofnvl == null) return (result, "Error: spofnvl is null");
+
+            List<Propertyy> properties = spofnvl.GetPropertiesValues()
+                .Where(po => po.AlowDatabase == true && po.Value != null)
+                .ToList();
+
+            if (properties.Count == 0)
+            {
+                return (result, "Error: No valid properties to insert.");
+            }
+
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+            using var transaction = connection.BeginTransaction();
+
+            try
+            {
+                var command = connection.CreateCommand();
+                command.Transaction = transaction;
+
+                string columns = string.Join(", ", properties.Select(p => $"[{p.DBName}]"));
+                string parameters = string.Join(", ", properties.Select(p => $"@{Regex.Replace(p.DBName ?? string.Empty, @"[^\w]+", "")}"));
+                command.CommandText = $@"INSERT INTO [{SanPhamofNVL.DBName.Table_SPofNVL}] ({columns}) OUTPUT INSERTED.{SanPhamofNVL.DBName.SPofNVLID} VALUES ({parameters})";
+
+                foreach (var prop in properties)
+                {
+                    string parameterName = $"@{Regex.Replace(prop.DBName ?? string.Empty, @"[^\w]+", "")}";
+                    object? parameterValue = prop.Value ?? DBNull.Value;
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                object? rs = command.ExecuteScalar();
+                if (rs != null && int.TryParse(rs.ToString(), out result) && result > 0)
+                {
+                    transaction.Commit();
+                }
+                else
+                {
+                    result = -1;
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMess = $"Error: {ex.Message}";
+                try
+                {
+                    transaction.Rollback();
+                }
+                catch (Exception rollbackEx)
+                {
+                    errorMess += $" | Rollback Error: {rollbackEx.Message}";
+                }
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
+        // Get list
+        public (List<SanPhamofNVL>, string) GetListSPofNVLs(Dictionary<string, object?> parameters, bool isgetAll = false)
+        {
+            List<SanPhamofNVL> listSanPhamofNVLs = new();
+
+            string errorMessage = string.Empty;
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                try
+                {
+                    connection.Open();
+
+                    var conditions = new List<string>();
+                    var command = connection.CreateCommand();
+                    command.CommandText = $"SELECT * FROM [{SanPhamofNVL.DBName.Table_SPofNVL}]";
+
+                    if (!isgetAll)
+                    {
+                        // Process each parameter in the dictionary
+                        foreach (var param in parameters)
+                        {
+                            conditions.Add($"[{param.Key}] = @{param.Key}");
+
+                            command.Parameters.AddWithValue($"@{param.Key}", param.Value);
+                        }
+
+                        if (conditions.Any())
+                        {
+                            command.CommandText += " WHERE " + string.Join(" AND ", conditions);
+                        }
+                    }
+
+                    using var reader = command.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        SanPhamofNVL spofnvl = new();
+
+                        List<Propertyy> rowItems = spofnvl.GetPropertiesValues();
+
+                        foreach (var item in rowItems)
+                        {
+                            string? columnName = item.DBName;
+
+                            if (!string.IsNullOrEmpty(columnName) && reader.GetOrdinal(columnName) != -1)
+                            {
+                                object columnValue = reader[columnName];
+
+                                item.Value = columnValue == DBNull.Value ? null : columnValue;
+                            }
+                        }
+
+                        listSanPhamofNVLs.Add(spofnvl);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    errorMessage = $"Error: {ex.Message}";
+                    listSanPhamofNVLs.Clear(); // Clear the list in case of error
+                }
+            }
+            return (listSanPhamofNVLs, errorMessage);
+        }
+
+        // Is existing
+        public bool IsSPofNVLExisting(SanPhamofNVL spofnvl)
+        {
+            using (var connection = new SqlConnection(connectionString))
+            {
+                string query = $"SELECT COUNT(*) FROM [{SanPhamofNVL.DBName.Table_SPofNVL}] WHERE [{SanPhamofNVL.DBName.SPID}] = '{spofnvl.SPID.Value}' AND [{SanPhamofNVL.DBName.NVLID}] = '{spofnvl.NVLID.Value}'";
+
+                using (var command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+
+                    int count = (int)command.ExecuteScalar();
+
+                    return count > 0;
+                }
+            }
+        }
+
+        // Delete
+        public (int, string) DeleteSPofNVL(SanPhamofNVL? removeSPofNVL)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            if (removeSPofNVL == null) return (result, errorMess);
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"DELETE FROM {SanPhamofNVL.DBName.Table_SPofNVL} WHERE [{SanPhamofNVL.DBName.SPofNVLID}] = '{removeSPofNVL.SPofNVLID.Value}'";
+
+                object rs = command.ExecuteNonQuery();
+
+                result = Convert.ToInt32(rs);
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
+        // Update
+        public (int, string) UpdateLOT_khsx(SanPhamofNVL spofnvl)
+        {
+            int result = -1;
+            string errorMess = string.Empty;
+
+            if (spofnvl == null) return (result, "Error: SanPhamofNVL is null");
+
+            List<Propertyy> properties = spofnvl.GetPropertiesValues()
+                .Where(po => po.AlowDatabase == true && po.Value != null)
+                .ToList();
+
+            if (properties.Count == 0)
+            {
+                return (result, "Error: No valid properties to update.");
+            }
+
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+            using var transaction = connection.BeginTransaction();
+
+            try
+            {
+                var command = connection.CreateCommand();
+                command.Transaction = transaction;
+
+                // Update main SanPhamofNVL record
+                string updateSet = string.Join(", ", properties.Select(p =>
+                    $"[{p.DBName}] = @{Regex.Replace(p.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $@"UPDATE [{SanPhamofNVL.DBName.Table_SPofNVL}] 
+                                        SET {updateSet} 
+                                        WHERE [{SanPhamofNVL.DBName.SPofNVLID}] = @SPofNVLID";
+
+                foreach (var prop in properties)
+                {
+                    string parameterName = $"@{Regex.Replace(prop.DBName ?? string.Empty, @"[^\w]+", "")}";
+                    object? parameterValue = prop.Value ?? DBNull.Value;
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                command.Parameters.AddWithValue("@SPofNVLID", spofnvl.SPofNVLID.Value);
+
+                result = command.ExecuteNonQuery();
+                if (result > 0)
+                {
+                    transaction.Commit();
+                }
+                else
+                {
+                    result = -1;
+                    errorMess = "No rows were updated. The specified SanPhamofNVL may not exist.";
+                    transaction.Rollback();
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMess = $"Error: {ex.Message}";
+                try
+                {
+                    transaction.Rollback();
+                }
+                catch (Exception rollbackEx)
+                {
+                    errorMess += $" | Rollback Error: {rollbackEx.Message}";
+                }
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
+
         #endregion
     }
 }

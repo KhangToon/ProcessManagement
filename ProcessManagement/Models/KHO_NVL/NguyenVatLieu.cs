@@ -24,6 +24,8 @@ namespace ProcessManagement.Models.KHO_NVL
 
         public List<ViTriofNVL> DSViTri { get; set; } = new();
 
+        public List<SanPhamofNVL> DSachSPofNVLs { get; set; } = new();
+
         // Get nvl details infor by detail name
         public string GetValue(string proName)
         {
