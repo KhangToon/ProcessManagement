@@ -25,7 +25,8 @@ namespace ProcessManagement.Models
 
         public Propertyy NgayTao = new() { DBName = Common.NgayTao, Type = typeof(DateTime), AlowDatabase = true };
         public Propertyy PXKID { get; set; } = new() { DBName = Common.PXKID, DisplayName = "PXKID", Type = typeof(int), AlowDatabase = true };
-        public SanPham? SanPham { get; set; }
+        public SanPham? TargetSanPham { get; set; }
+        public NguyenVatLieu? TargetNVL { get; set; }
         public LoaiNVL? LoaiNVL { get; set; }
         public List<NguyenCongofKHSX> DSachCongDoans { get; set; } = new();
         public List<KHSX_LOT> DSLOT_KHSXs { get; set; } = new();

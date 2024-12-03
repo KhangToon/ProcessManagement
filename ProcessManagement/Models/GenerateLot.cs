@@ -163,11 +163,6 @@ namespace ProcessManagement.Models
             _defaultListCDnames = nguyenCongs;
         }
 
-        public void SetCurrentKHSXsanPham(string tenSP)
-        {
-            NewKHSX.SanPham = DSachSanPhams.FirstOrDefault(sp => sp.SP_TenSanPham.Value?.ToString() == tenSP) ?? new();
-        }
-
         public void AsignKHSXdata()
         {
             NewKHSX.MaLSX.Value = MaLSX;
@@ -181,7 +176,7 @@ namespace ProcessManagement.Models
             NewKHSX.SLperLotChan.Value = SLperLotChan;
             NewKHSX.SLLotLe.Value = SLLotLe;
             NewKHSX.SLperLotLe.Value = SLperLotLe;
-            NewKHSX.SPID.Value = NewKHSX.SanPham?.SP_SPID.Value;
+            NewKHSX.SPID.Value = NewKHSX.TargetSanPham?.SP_SPID.Value;
             NewKHSX.NgayTao.Value = NgayTao;
         }
 
@@ -199,6 +194,13 @@ namespace ProcessManagement.Models
             SLperLotLe = 0;
             ListTempLOT_NVLs = new();
             NewKHSX.DSachNVLofKHSXs = new();
+        }
+
+        public void SetCurrentKHSXsanPham(string? tenSP, List<SanPham>? sanPhams)
+        {
+            DSachSanPhams = sanPhams?.ToList()?? new();
+
+            NewKHSX.TargetSanPham = DSachSanPhams.FirstOrDefault(sp => sp.SP_TenSanPham.Value?.ToString()?.Trim() == tenSP?.ToString()) ?? new();
         }
 
         public List<string> GetDSMaSPs()
@@ -351,8 +353,8 @@ namespace ProcessManagement.Models
             {
                 TemLotNVL nVL = new();
                 nVL.LoaiNVL.Value = NewKHSX.LoaiNVL?.TenLoaiNVL.Value;
-                nVL.MaSP.Value = NewKHSX.SanPham?.SP_MaSP.Value;
-                nVL.MaQuanLy.Value = MaLSX + "-" + NewKHSX.SanPham?.SP_MaSP.Value + "-" + index.ToString(NumberDigit);
+                nVL.MaSP.Value = NewKHSX.TargetSanPham?.SP_MaSP.Value;
+                nVL.MaQuanLy.Value = MaLSX + "-" + NewKHSX.TargetSanPham?.SP_MaSP.Value + "-" + index.ToString(NumberDigit);
                 nVL.SoLuong.Value = SLperLotChan;
                 nVL.NgayXuat.Value = DateTime.Now;
                 ListTempLOT_NVLs?.Add(nVL);
@@ -368,8 +370,8 @@ namespace ProcessManagement.Models
                 // Add lot le
                 TemLotNVL lotnvlle = new();
                 lotnvlle.LoaiNVL.Value = NewKHSX.LoaiNVL?.TenLoaiNVL.Value;
-                lotnvlle.MaSP.Value = NewKHSX.SanPham?.SP_MaSP.Value;
-                lotnvlle.MaQuanLy.Value = MaLSX + "-" + NewKHSX.SanPham?.SP_MaSP.Value + "-" + (SLLotChan + 1).ToString(NumberDigit);
+                lotnvlle.MaSP.Value = NewKHSX.TargetSanPham?.SP_MaSP.Value;
+                lotnvlle.MaQuanLy.Value = MaLSX + "-" + NewKHSX.TargetSanPham?.SP_MaSP.Value + "-" + (SLLotChan + 1).ToString(NumberDigit);
                 lotnvlle.SoLuong.Value = SLperLotLe;
                 lotnvlle.NgayXuat.Value = DateTime.Now;
                 ListTempLOT_NVLs?.Add(lotnvlle);

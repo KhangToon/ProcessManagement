@@ -181,7 +181,7 @@ namespace ProcessManagement.Services.Modbus
                 WriteRegData(Regs.Server.LSXCode, Regs.RegTypes.RegWriteString, maLSX);
 
                 // Masanpham to device01 // 4x80
-                string maSP = Common.CurrentKHSX?.SanPham?.SP_MaSP.Value?.ToString() ?? string.Empty;
+                string maSP = Common.CurrentKHSX?.TargetSanPham?.SP_MaSP.Value?.ToString() ?? string.Empty;
                 WriteRegData(Regs.Server.MaSanPham, Regs.RegTypes.RegWriteString, maSP);
 
                 // LoaiNVL to device01 // 4x28

@@ -193,7 +193,7 @@ namespace ProcessManagement.Services.SQLServer
                     }
                 }
 
-                khsx.SanPham = GetSanpham(int.TryParse(khsx.SPID.Value?.ToString(), out int spid) ? spid : 0);
+                khsx.TargetSanPham = GetSanpham(int.TryParse(khsx.SPID.Value?.ToString(), out int spid) ? spid : 0);
 
                 khsx.LoaiNVL = GetLoaiNVLbyID(int.TryParse(khsx.LOAINVLID.Value?.ToString(), out int loainvlid) ? loainvlid : 0);
 
@@ -257,7 +257,7 @@ namespace ProcessManagement.Services.SQLServer
                         item.Value = columnValue;
                     }
 
-                    khsx.SanPham = GetSanpham(int.Parse(khsx.SPID.Value?.ToString() ?? "0"));
+                    khsx.TargetSanPham = GetSanpham(int.Parse(khsx.SPID.Value?.ToString() ?? "0"));
 
                     khsx.LoaiNVL = GetLoaiNVLbyID(int.TryParse(khsx.LOAINVLID.Value?.ToString(), out int loainvlid) ? loainvlid : 0);
 
@@ -324,7 +324,7 @@ namespace ProcessManagement.Services.SQLServer
                         item.Value = columnValue;
                     }
 
-                    khsx.SanPham = GetSanpham(int.Parse(khsx.SPID.Value?.ToString() ?? "0"));
+                    khsx.TargetSanPham = GetSanpham(int.Parse(khsx.SPID.Value?.ToString() ?? "0"));
 
                     khsx.LoaiNVL = GetLoaiNVLbyID(int.TryParse(khsx.LOAINVLID.Value?.ToString(), out int loainvlid) ? loainvlid : 0);
 
