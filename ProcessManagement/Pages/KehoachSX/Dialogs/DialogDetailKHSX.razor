@@ -357,6 +357,16 @@
 
     private PhieuXuatKho PXKofKHSX = new();
 
+    protected async override Task OnInitializedAsync()
+    {
+        await Task.Run(() =>
+        {
+            ReloadCurrentKHSX(SelectKHSX?.KHSXID.Value);
+        });
+
+        await base.OnInitializedAsync();
+    }
+
     protected async override Task OnParametersSetAsync()
     {
         if (PXKofKHSX.PXKID.Value == null)

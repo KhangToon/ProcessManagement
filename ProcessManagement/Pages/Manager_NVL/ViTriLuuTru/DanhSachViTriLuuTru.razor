@@ -1,5 +1,6 @@
 ﻿@using ProcessManagement.Commons
 @using ProcessManagement.Models.KHO_NVL
+@using ProcessManagement.Pages.Manager_NVL.Dialogs
 @using ProcessManagement.Services.QRCodes
 @using ProcessManagement.Services.SQLServer
 @using Radzen.Blazor
@@ -266,7 +267,7 @@
                                                             </RadzenStack>
                                                             <RadzenStack Visible="@((!string.IsNullOrEmpty(vitriofNVL.QRIDLOT.Value?.ToString())))" Style="width: 100%; height: contain; padding-right: 10px;" Gap="10px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                                                 <RadzenText Text="Mã quản lý:" Style="color: black; font-weight: 600; font-size: 16px"></RadzenText>
-                                                                <RadzenButton Text="@vitriofNVL.QRIDLOT.Value?.ToString()" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Lighter" Variant="Variant.Flat"
+                                                                <RadzenButton Click="@(() => OnOpenQRIDLOT_ImageDialog(vitriofNVL.QRIDLOT.Value ?? string.Empty, "QR quản lý NVL"))" Text="@vitriofNVL.QRIDLOT.Value?.ToString()" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Lighter" Variant="Variant.Flat"
                                                                               Style="font-size: 18px; color: darkgreen; height: contain; min-width: 300px; width: contain;" />
                                                                 <RadzenButton Click="@(() => CopyToClipboard(vitriofNVL.QRIDLOT.Value?.ToString()?? string.Empty))" Icon="content_copy" Style="--rz-icon-size: 18px;" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Light" />
                                                                 <RadzenButton Click="@(() => NavigateToPrintQRIDLOTpage(vitriofNVL))" Icon="print" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Darker" Variant="Variant.Flat"
@@ -421,6 +422,13 @@
 
             NavigationManager.NavigateTo($"print-qridlot?vtofnvlid={vtofnvlid}");
         }
+    }
+
+    // Open QRIDLOT Image dialog
+    private async Task OnOpenQRIDLOT_ImageDialog(object content, string header)
+    {
+        await DialogService.OpenAsync<DialogQR_Image>(null, new Dictionary<string, object>() { { "CONTENT", content }, { "HEADER", header } },
+        new DialogOptions() { CloseDialogOnEsc = true, CloseDialogOnOverlayClick = true, ShowTitle = true, Width = "contain", Height = "contain", Resizable = true, Draggable = true, ShowClose = true, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
     }
 
     private async Task CopyToClipboard(string content)
