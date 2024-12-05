@@ -152,11 +152,17 @@ namespace ProcessManagement.Services.SQLServer
             {
                 khsx.isDonePXK = ispxkdone == 1;
             }
-            // Get trang thai tra NVL
-            var colIsReturnedNVL = GetPXK_AnyColValuebyAnyParameters(new Dictionary<string, object?>() { { Common.KHSXID, khsx.KHSXID.Value } }, Common.IsReturnedNVL).columnValues.FirstOrDefault();
-            if (int.TryParse(colIsReturnedNVL?.ToString(), out int isreturnednvl))
+
+            // Get PNKID
+            var colpnkid = GetPXK_AnyColValuebyAnyParameters(new Dictionary<string, object?>() { { Common.PXKID, khsx.PXKID.Value } }, Common.PNKID).columnValues.FirstOrDefault();
+            if (int.TryParse(colpnkid?.ToString(), out int pnkid))
             {
-                khsx.isReturnedNVL = isreturnednvl == 1;
+                // Get trang thai tra NVL
+                var colIsReturnedNVL = GetPNK_AnyColValuebyAnyParameters(new Dictionary<string, object?>() { { Common.PNKID, pnkid } }, Common.IsDonePNK).columnValues.FirstOrDefault();
+                if (int.TryParse(colIsReturnedNVL?.ToString(), out int isPNKdone))
+                {
+                    khsx.isReturnedNVL = isPNKdone == 1;
+                }
             }
 
             return khsx;
@@ -216,11 +222,17 @@ namespace ProcessManagement.Services.SQLServer
                 {
                     khsx.isDonePXK = ispxkdone == 1;
                 }
-                // Get trang thai tra NVL
-                var colIsReturnedNVL = GetPXK_AnyColValuebyAnyParameters(new Dictionary<string, object?>() { { Common.KHSXID, khsx.KHSXID.Value } }, Common.IsReturnedNVL).columnValues.FirstOrDefault();
-                if (int.TryParse(colIsReturnedNVL?.ToString(), out int isreturnednvl))
+
+                // Get PNKID
+                var colpnkid = GetPXK_AnyColValuebyAnyParameters(new Dictionary<string, object?>() { { Common.PXKID, khsx.PXKID.Value } }, Common.PNKID).columnValues.FirstOrDefault();
+                if (int.TryParse(colpnkid?.ToString(), out int pnkid))
                 {
-                    khsx.isReturnedNVL = isreturnednvl == 1;
+                    // Get trang thai tra NVL
+                    var colIsReturnedNVL = GetPNK_AnyColValuebyAnyParameters(new Dictionary<string, object?>() { { Common.PNKID, pnkid } }, Common.IsDonePNK).columnValues.FirstOrDefault();
+                    if (int.TryParse(colIsReturnedNVL?.ToString(), out int isPNKdone))
+                    {
+                        khsx.isReturnedNVL = isPNKdone == 1;
+                    }
                 }
             }
 
@@ -280,11 +292,17 @@ namespace ProcessManagement.Services.SQLServer
                     {
                         khsx.isDonePXK = ispxkdone == 1;
                     }
-                    // Get trang thai tra NVL
-                    var colIsReturnedNVL = GetPXK_AnyColValuebyAnyParameters(new Dictionary<string, object?>() { { Common.KHSXID, khsx.KHSXID.Value } }, Common.IsReturnedNVL).columnValues.FirstOrDefault();
-                    if (int.TryParse(colIsReturnedNVL?.ToString(), out int isreturnednvl))
+
+                    // Get PNKID
+                    var colpnkid = GetPXK_AnyColValuebyAnyParameters(new Dictionary<string, object?>() { { Common.PXKID, khsx.PXKID.Value } }, Common.PNKID).columnValues.FirstOrDefault();
+                    if (int.TryParse(colpnkid?.ToString(), out int pnkid))
                     {
-                        khsx.isReturnedNVL = isreturnednvl == 1;
+                        // Get trang thai tra NVL
+                        var colIsReturnedNVL = GetPNK_AnyColValuebyAnyParameters(new Dictionary<string, object?>() { { Common.PNKID, pnkid } }, Common.IsDonePNK).columnValues.FirstOrDefault();
+                        if (int.TryParse(colIsReturnedNVL?.ToString(), out int isPNKdone))
+                        {
+                            khsx.isReturnedNVL = isPNKdone == 1;
+                        }
                     }
 
                     listKHSXs.Add(khsx);
@@ -347,11 +365,17 @@ namespace ProcessManagement.Services.SQLServer
                     {
                         khsx.isDonePXK = ispxkdone == 1;
                     }
-                    // Get trang thai tra NVL
-                    var colIsReturnedNVL = GetPXK_AnyColValuebyAnyParameters(new Dictionary<string, object?>() { { Common.KHSXID, khsx.KHSXID.Value } }, Common.IsReturnedNVL).columnValues.FirstOrDefault();
-                    if (int.TryParse(colIsReturnedNVL?.ToString(), out int isreturnednvl))
+
+                    // Get PNKID
+                    var colpnkid = GetPXK_AnyColValuebyAnyParameters(new Dictionary<string, object?>() { { Common.PXKID, khsx.PXKID.Value } }, Common.PNKID).columnValues.FirstOrDefault();
+                    if (int.TryParse(colpnkid?.ToString(), out int pnkid))
                     {
-                        khsx.isReturnedNVL = isreturnednvl == 1;
+                        // Get trang thai tra NVL
+                        var colIsReturnedNVL = GetPNK_AnyColValuebyAnyParameters(new Dictionary<string, object?>() { { Common.PNKID, pnkid } }, Common.IsDonePNK).columnValues.FirstOrDefault();
+                        if (int.TryParse(colIsReturnedNVL?.ToString(), out int isPNKdone))
+                        {
+                            khsx.isReturnedNVL = isPNKdone == 1;
+                        }
                     }
 
                     listKHSXs.Add(khsx);
@@ -3790,6 +3814,77 @@ namespace ProcessManagement.Services.SQLServer
             }
 
             return listPNKids;
+        }
+
+        // Get any columns of PNK by any paramaters
+        public (List<object?> columnValues, string errorMessage) GetPNK_AnyColValuebyAnyParameters(Dictionary<string, object?> parameters, string? returnColumnName = null, bool isGetAll = false)
+        {
+            List<object?> columnValues = new();
+            string errorMessage = string.Empty;
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                try
+                {
+                    connection.Open();
+                    var conditions = new List<string>();
+                    var command = connection.CreateCommand();
+
+                    // If a specific column is requested, select only that column
+                    string selectClause = returnColumnName != null
+                        ? $"SELECT [{returnColumnName}]"
+                        : "SELECT *";
+
+                    command.CommandText = $"{selectClause} FROM [{Common.Table_PhieuNhapKho}]";
+
+                    if (!isGetAll)
+                    {
+                        // Process each parameter in the dictionary
+                        foreach (var param in parameters)
+                        {
+                            conditions.Add($"[{param.Key}] = @{param.Key}");
+                            command.Parameters.AddWithValue($"@{param.Key}", param.Value);
+                        }
+                        if (conditions.Any())
+                        {
+                            command.CommandText += " WHERE " + string.Join(" AND ", conditions);
+                        }
+                    }
+
+                    using var reader = command.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        // If no specific column is requested, read entire object
+                        if (returnColumnName == null)
+                        {
+                            PhieuNhapKho phieunhapkho = new();
+                            List<Propertyy> rowItems = phieunhapkho.GetPropertiesValues();
+                            foreach (var item in rowItems)
+                            {
+                                string? columnName = item.DBName;
+                                if (!string.IsNullOrEmpty(columnName) && reader.GetOrdinal(columnName) != -1)
+                                {
+                                    object columnValue = reader[columnName];
+                                    item.Value = columnValue == DBNull.Value ? null : columnValue;
+                                }
+                                columnValues.Add(phieunhapkho);
+                            }
+                        }
+                        else
+                        {
+                            // If a specific column is requested, read only that column
+                            object columnValue = reader[returnColumnName];
+                            columnValues.Add(columnValue == DBNull.Value ? null : columnValue);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    errorMessage = $"Error: {ex.Message}";
+                    columnValues.Clear(); // Clear the list in case of error
+                }
+            }
+            return (columnValues, errorMessage);
         }
 
         // Update thong tin Phieu nhap kho
