@@ -117,7 +117,7 @@
                                     <RadzenText Text="Xem chi tiết" @onclick="@(() => OnOpenChitietKHSX())" TextAlign="TextAlign.Center" Style="font-size: 16px; font-weight: 500; color: Highlight; cursor: pointer "></RadzenText>
                                     <RadzenButton Click="@(() => DialogService.Close(khsx))" Icon="download" Text="Tải KHSX" Size="ButtonSize.Small" Variant="Variant.Filled"
                                                   Style="height: 100%; width: contain; font-size: 16px; background-color: darkgreen " />
-                                    <RadzenButton Click="@(() => OnDeleteKHSX(khsx))" Style="width: contain; color: white; background-color: darkred" Icon="delete" Text="Xóa" Size="ButtonSize.Small" Variant="Variant.Flat" />
+                                    <RadzenButton Disabled="@(khsx.isReturnedNVL == false)" Click="@(() => OnDeleteKHSX(khsx))" Style="width: contain; color: white; background-color: darkred" Icon="delete" Text="Xóa" Size="ButtonSize.Small" Variant="Variant.Flat" />
                                 </RadzenStack>
                             </RadzenCard>
                         </RadzenStack>
@@ -155,6 +155,8 @@
             ListKHSXs = SQLServerServices.GetListKHSXs(startSearchDay, offsetendDay);
         }
         else ListKHSXs = SQLServerServices.GetListKHSXs();
+
+        ListKHSXs.Reverse();
     }
 
     private string IsKHSXSelected(KHSX selectedkhsx)
