@@ -1,4 +1,5 @@
 ﻿using ProcessManagement.Commons;
+using ProcessManagement.Models.KHO_NVL.NhapKho;
 using System.Reflection;
 
 namespace ProcessManagement.Models.KHO_NVL.XuatKho
@@ -23,6 +24,8 @@ namespace ProcessManagement.Models.KHO_NVL.XuatKho
         public string maPNKreturnNVL = string.Empty; // using for detect PXK is returned phieu tra kho
 
         public List<NVLofPhieuXuatKho> DSNVLofPXKs { get; set; } = new();
+
+        public PhieuNhapKho PhieuTraKho { get; set; } = new(); // Dung cho tra kho
 
         public List<Propertyy> GetPropertiesValues()
         {

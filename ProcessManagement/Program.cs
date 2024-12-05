@@ -91,18 +91,18 @@ app.MapFallbackToPage("/_Host");
 
 
 
-//// Open browser after application starts
-app.Urls.Add(url); // enable khi deploy - disable khi use local  
-app.Lifetime.ApplicationStarted.Register(() =>  // enable khi deploy - disable khi use local 
-{
-    var psi = new ProcessStartInfo
-    {
-        FileName = url,
-        UseShellExecute = true
-    };
-    Process.Start(psi);
-});
-/////////////
+////// Open browser after application starts
+//app.Urls.Add(url); // enable khi deploy - disable khi use local  
+//app.Lifetime.ApplicationStarted.Register(() =>  // enable khi deploy - disable khi use local 
+//{
+//    var psi = new ProcessStartInfo
+//    {
+//        FileName = url,
+//        UseShellExecute = true
+//    };
+//    Process.Start(psi);
+//});
+///////////////
 
 
 app.Run();

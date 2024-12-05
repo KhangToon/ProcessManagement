@@ -176,6 +176,11 @@ namespace ProcessManagement.Services
 
                             }
 
+                            if (string.IsNullOrEmpty(savedLNK.NgayNhapKho.Value?.ToString()?.Trim()))
+                            {
+                                return (-1, $"Đã {((modeTraKho) ? "trả" : "nhập")} kho nguyên liệu: \n {savedLNK.TargetNgLieu.TenNVL.Value?.ToString()} \n Số lượng : {soluongnhapfromClient} (pcs), \n \n Lỗi trống ngày {((modeTraKho) ? "trả" : "nhập")} kho!");
+                            }
+
                             return (1, $"Đã {((modeTraKho) ? "trả" : "nhập")} kho nguyên liệu: \n {savedLNK.TargetNgLieu.TenNVL.Value?.ToString()} \n Số lượng : {soluongnhapfromClient} (pcs)");
                         }
                     }
