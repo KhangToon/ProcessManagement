@@ -4553,6 +4553,8 @@ namespace ProcessManagement.Services.SQLServer
             {
                 PhieuNhapKho phieuNhapKho = GetPhieuNhapKhoByID(phieuxuatkho.PNKID.Value);
 
+                phieuxuatkho.PhieuTraKho = phieuNhapKho;
+
                 phieuxuatkho.maPNKreturnNVL = phieuNhapKho.MaPhieuNK.Value?.ToString() ?? string.Empty;
 
                 phieuxuatkho.isReturnedNVL = phieuNhapKho.isPNKDoneNhapKho;
@@ -4609,10 +4611,14 @@ namespace ProcessManagement.Services.SQLServer
             {
                 PhieuNhapKho phieuNhapKho = GetPhieuNhapKhoByID(phieuxuatkho.PNKID.Value);
 
+                phieuxuatkho.PhieuTraKho = phieuNhapKho;
+
                 phieuxuatkho.maPNKreturnNVL = phieuNhapKho.MaPhieuNK.Value?.ToString() ?? string.Empty;
 
                 phieuxuatkho.isReturnedNVL = phieuNhapKho.isPNKDoneNhapKho;
             }
+
+
 
             return phieuxuatkho;
         }
@@ -4666,10 +4672,14 @@ namespace ProcessManagement.Services.SQLServer
                     {
                         PhieuNhapKho phieuNhapKho = GetPhieuNhapKhoByID(phieuxuatkho.PNKID.Value);
 
+                        phieuxuatkho.PhieuTraKho = phieuNhapKho;
+
                         phieuxuatkho.maPNKreturnNVL = phieuNhapKho.MaPhieuNK.Value?.ToString() ?? string.Empty;
 
                         phieuxuatkho.isReturnedNVL = phieuNhapKho.isPNKDoneNhapKho;
                     }
+
+
 
                     dsPXKho.Add(phieuxuatkho);
                 }
