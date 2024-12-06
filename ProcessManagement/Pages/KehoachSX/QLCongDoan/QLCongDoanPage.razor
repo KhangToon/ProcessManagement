@@ -113,6 +113,8 @@
 
                 @foreach (var cdoancolumn in TargetKHSX.DSachCongDoans)
                 {
+                    int maxindexColumn = GetMaxIndexColumnCDoan(cdoancolumn.NCID.Value);
+
                     string tencongdoan = cdoancolumn.TenCongDoan.Value?.ToString() ?? string.Empty;
                     <RadzenDataGridColumn Resizable=true TItem="ResultPerLOTKHSX" Title="@tencongdoan"
                                           TextAlign="TextAlign.Center">
@@ -139,123 +141,66 @@
                                         </Template>
                                     </RadzenDataGridColumn>
 
-                                    <!--CaNgay-->
-                                    <RadzenDataGridColumn Resizable=true TItem="ResultPerLOTKHSX" Title="Ca"
-                                                          TextAlign="TextAlign.Center">
-                                        <HeaderTemplate>
-                                            <span style="font-weight: 600; font-size: 15px; color: black; padding-left: 10px; padding-right: 10px">Ca</span>
-                                        </HeaderTemplate>
-                                        <Template Context="lotrow">
-                                            <RadzenText Text="@(lotrow.GetCaLamViec(cdoancolumn.NCID.Value, 0)?.ToString())" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
-                                        </Template>
-                                    </RadzenDataGridColumn>
+                                    foreach (var resultIndex in cdoancolumn.GenerateListColumnIndex(maxindexColumn))
+                                    {
+                                        <RadzenDataGridColumn Resizable=true TItem="ResultPerLOTKHSX" Title="Ca"
+                                                              TextAlign="TextAlign.Center">
+                                            <HeaderTemplate>
+                                                <span style="font-weight: 600; font-size: 15px; color: black; padding-left: 10px; padding-right: 10px">Ca</span>
+                                            </HeaderTemplate>
+                                            <Template Context="lotrow">
+                                                <RadzenText Text="@(lotrow.GetCaLamViec(cdoancolumn.NCID.Value, resultIndex)?.ToString())" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
+                                            </Template>
+                                        </RadzenDataGridColumn>
 
-                                    <RadzenDataGridColumn Resizable=true TItem="ResultPerLOTKHSX" Title="Ngày gia công"
-                                                          TextAlign="TextAlign.Center">
-                                        <HeaderTemplate>
-                                            <span style="font-weight: 600; font-size: 15px; color: black; padding-left: 10px; padding-right: 10px">Ngày gia công</span>
-                                        </HeaderTemplate>
-                                        <Template Context="lotrow">
-                                            <RadzenText Text="@(lotrow.GetNgayGC(cdoancolumn.NCID.Value, 0)?.ToString())" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
-                                        </Template>
-                                    </RadzenDataGridColumn>
+                                        <RadzenDataGridColumn Resizable=true TItem="ResultPerLOTKHSX" Title="Ngày gia công"
+                                                              TextAlign="TextAlign.Center">
+                                            <HeaderTemplate>
+                                                <span style="font-weight: 600; font-size: 15px; color: black; padding-left: 10px; padding-right: 10px">Ngày gia công</span>
+                                            </HeaderTemplate>
+                                            <Template Context="lotrow">
+                                                <RadzenText Text="@(lotrow.GetNgayGC(cdoancolumn.NCID.Value, resultIndex)?.ToString())" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
+                                            </Template>
+                                        </RadzenDataGridColumn>
 
-                                    <RadzenDataGridColumn Resizable=true TItem="ResultPerLOTKHSX" Title="Nhân viên"
-                                                          TextAlign="TextAlign.Center">
-                                        <HeaderTemplate>
-                                            <span style="font-weight: 600; font-size: 15px; color: black; padding-left: 10px; padding-right: 10px">Nhân viên</span>
-                                        </HeaderTemplate>
-                                        <Template Context="lotrow">
-                                            <RadzenText Text="@(GetColumnValueByID(lotrow.GetNhanVien(cdoancolumn.NCID.Value, 0)?.ToString(), KetQuaGC.KQGCDBName.NVIDs))" Style="font-size: 15px; height: contain; font-weight: 500;"></RadzenText>
-                                        </Template>
-                                    </RadzenDataGridColumn>
+                                        <RadzenDataGridColumn Resizable=true TItem="ResultPerLOTKHSX" Title="Nhân viên"
+                                                              TextAlign="TextAlign.Center">
+                                            <HeaderTemplate>
+                                                <span style="font-weight: 600; font-size: 15px; color: black; padding-left: 10px; padding-right: 10px">Nhân viên</span>
+                                            </HeaderTemplate>
+                                            <Template Context="lotrow">
+                                                <RadzenText Text="@(GetColumnValueByID(lotrow.GetNhanVien(cdoancolumn.NCID.Value, resultIndex)?.ToString(), KetQuaGC.KQGCDBName.NVIDs))" Style="font-size: 15px; height: contain; font-weight: 500;"></RadzenText>
+                                            </Template>
+                                        </RadzenDataGridColumn>
 
-                                    <RadzenDataGridColumn Resizable=true TItem="ResultPerLOTKHSX" Title="OK"
-                                                          TextAlign="TextAlign.Center">
-                                        <HeaderTemplate>
-                                            <span style="font-weight: 600; font-size: 15px; color: black; padding-left: 10px; padding-right: 10px">OK</span>
-                                        </HeaderTemplate>
-                                        <Template Context="lotrow">
-                                            <RadzenText Text="@(lotrow.GetSLOK(cdoancolumn.NCID.Value, 0)?.ToString())" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
-                                        </Template>
-                                        <FooterTemplate>
-                                            <RadzenText Text="@(((DSachResultPerLOTKHSX.Sum(lot => int.TryParse(lot.GetSLOK(cdoancolumn.NCID.Value, 0)?.ToString(), out int sumok)? sumok : 0)).ToString()))"
-                                                        Style="color: black; font-size: 18px; height: contain; min-width: 50px; font-weight: 600;"></RadzenText>
-                                        </FooterTemplate>
-                                    </RadzenDataGridColumn>
+                                        <RadzenDataGridColumn Resizable=true TItem="ResultPerLOTKHSX" Title="OK"
+                                                              TextAlign="TextAlign.Center">
+                                            <HeaderTemplate>
+                                                <span style="font-weight: 600; font-size: 15px; color: black; padding-left: 10px; padding-right: 10px">OK</span>
+                                            </HeaderTemplate>
+                                            <Template Context="lotrow">
+                                                <RadzenText Text="@(lotrow.GetSLOK(cdoancolumn.NCID.Value, resultIndex)?.ToString())" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
+                                            </Template>
+                                            <FooterTemplate>
+                                                <RadzenText Text="@(((DSachResultPerLOTKHSX.Sum(lot => int.TryParse(lot.GetSLOK(cdoancolumn.NCID.Value, resultIndex)?.ToString(), out int sumok)? sumok : 0)).ToString()))"
+                                                            Style="color: black; font-size: 18px; height: contain; min-width: 50px; font-weight: 600;"></RadzenText>
+                                            </FooterTemplate>
+                                        </RadzenDataGridColumn>
 
-                                    <RadzenDataGridColumn Resizable=true TItem="ResultPerLOTKHSX" Title="NG"
-                                                          TextAlign="TextAlign.Center">
-                                        <HeaderTemplate>
-                                            <span style="font-weight: 600; font-size: 15px; color: red; padding-left: 10px; padding-right: 10px">NG</span>
-                                        </HeaderTemplate>
-                                        <Template Context="lotrow">
-                                            <RadzenText Text="@(lotrow.GetSLNG(cdoancolumn.NCID.Value, 0)?.ToString())" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
-                                        </Template>
-                                        <FooterTemplate>
-                                            <RadzenText Text="@(((DSachResultPerLOTKHSX.Sum(lot => int.TryParse(lot.GetSLNG(cdoancolumn.NCID.Value, 0)?.ToString(), out int sumng)? sumng : 0)).ToString()))"
-                                                        Style="color: black; font-size: 18px; height: contain; min-width: 50px; font-weight: 600;"></RadzenText>
-                                        </FooterTemplate>
-                                    </RadzenDataGridColumn>
-
-                                    <!--CaDem-->
-                                    <RadzenDataGridColumn Resizable=true TItem="ResultPerLOTKHSX" Title="Ca"
-                                                          TextAlign="TextAlign.Center">
-                                        <HeaderTemplate>
-                                            <span style="font-weight: 600; font-size: 15px; color: black; padding-left: 10px; padding-right: 10px">Ca</span>
-                                        </HeaderTemplate>
-                                        <Template Context="lotrow">
-                                            <RadzenText Text="@(lotrow.GetCaLamViec(cdoancolumn.NCID.Value, 1)?.ToString())" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
-                                        </Template>
-                                    </RadzenDataGridColumn>
-
-                                    <RadzenDataGridColumn Resizable=true TItem="ResultPerLOTKHSX" Title="Ngày gia công"
-                                                          TextAlign="TextAlign.Center">
-                                        <HeaderTemplate>
-                                            <span style="font-weight: 600; font-size: 15px; color: black; padding-left: 10px; padding-right: 10px">Ngày gia công</span>
-                                        </HeaderTemplate>
-                                        <Template Context="lotrow">
-                                            <RadzenText Text="@(lotrow.GetNgayGC(cdoancolumn.NCID.Value, 1)?.ToString())" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
-                                        </Template>
-                                    </RadzenDataGridColumn>
-
-                                    <RadzenDataGridColumn Resizable=true TItem="ResultPerLOTKHSX" Title="Nhân viên"
-                                                          TextAlign="TextAlign.Center">
-                                        <HeaderTemplate>
-                                            <span style="font-weight: 600; font-size: 15px; color: black; padding-left: 10px; padding-right: 10px">Nhân viên</span>
-                                        </HeaderTemplate>
-                                        <Template Context="lotrow">
-                                            <RadzenText Text="@(GetColumnValueByID(lotrow.GetNhanVien(cdoancolumn.NCID.Value, 1)?.ToString(), KetQuaGC.KQGCDBName.NVIDs))" Style="font-size: 15px; height: contain; font-weight: 500;"></RadzenText>
-                                        </Template>
-                                    </RadzenDataGridColumn>
-
-                                    <RadzenDataGridColumn Resizable=true TItem="ResultPerLOTKHSX" Title="OK"
-                                                          TextAlign="TextAlign.Center">
-                                        <HeaderTemplate>
-                                            <span style="font-weight: 600; font-size: 15px; color: black; padding-left: 10px; padding-right: 10px">OK</span>
-                                        </HeaderTemplate>
-                                        <Template Context="lotrow">
-                                            <RadzenText Text="@(lotrow.GetSLOK(cdoancolumn.NCID.Value, 1)?.ToString())" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
-                                        </Template>
-                                        <FooterTemplate>
-                                            <RadzenText Text="@(((DSachResultPerLOTKHSX.Sum(lot => int.TryParse(lot.GetSLOK(cdoancolumn.NCID.Value, 1)?.ToString(), out int sumok)? sumok : 0)).ToString()))"
-                                                        Style="color: black; font-size: 18px; height: contain; min-width: 50px; font-weight: 600;"></RadzenText>
-                                        </FooterTemplate>
-                                    </RadzenDataGridColumn>
-
-                                    <RadzenDataGridColumn Resizable=true TItem="ResultPerLOTKHSX" Title="NG"
-                                                          TextAlign="TextAlign.Center">
-                                        <HeaderTemplate>
-                                            <span style="font-weight: 600; font-size: 15px; color: red; padding-left: 10px; padding-right: 10px">NG</span>
-                                        </HeaderTemplate>
-                                        <Template Context="lotrow">
-                                            <RadzenText Text="@(lotrow.GetSLNG(cdoancolumn.NCID.Value, 1)?.ToString())" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
-                                        </Template>
-                                        <FooterTemplate>
-                                            <RadzenText Text="@(((DSachResultPerLOTKHSX.Sum(lot => int.TryParse(lot.GetSLNG(cdoancolumn.NCID.Value, 1)?.ToString(), out int sumng)? sumng : 0)).ToString()))"
-                                                        Style="color: black; font-size: 18px; height: contain; min-width: 50px; font-weight: 600;"></RadzenText>
-                                        </FooterTemplate>
-                                    </RadzenDataGridColumn>
+                                        <RadzenDataGridColumn Resizable=true TItem="ResultPerLOTKHSX" Title="NG"
+                                                              TextAlign="TextAlign.Center">
+                                            <HeaderTemplate>
+                                                <span style="font-weight: 600; font-size: 15px; color: red; padding-left: 10px; padding-right: 10px">NG</span>
+                                            </HeaderTemplate>
+                                            <Template Context="lotrow">
+                                                <RadzenText Text="@(lotrow.GetSLNG(cdoancolumn.NCID.Value, resultIndex)?.ToString())" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
+                                            </Template>
+                                            <FooterTemplate>
+                                                <RadzenText Text="@(((DSachResultPerLOTKHSX.Sum(lot => int.TryParse(lot.GetSLNG(cdoancolumn.NCID.Value, resultIndex)?.ToString(), out int sumng)? sumng : 0)).ToString()))"
+                                                            Style="color: black; font-size: 18px; height: contain; min-width: 50px; font-weight: 600;"></RadzenText>
+                                            </FooterTemplate>
+                                        </RadzenDataGridColumn>
+                                    }
 
                                     <!--Tong-->
                                     <RadzenDataGridColumn Width="60px" Frozen="true" TItem="ResultPerLOTKHSX" Title="Tổng"
@@ -391,6 +336,15 @@
         await base.OnInitializedAsync();
     }
 
+    private int GetMaxIndexColumnCDoan(object? cdid)
+    {
+        int defaultmaxindex = 2;
+
+        var maxindex = DSachResultPerLOTKHSX.Max(rs => rs.TargetKQGC(cdid).ResultCalamviecs.Count());
+
+        return (maxindex > defaultmaxindex) ? maxindex : defaultmaxindex;
+    }
+
     private bool revisiblepage = false;
     private async Task ReVisiblePage()
     {
@@ -455,6 +409,13 @@
 
         public List<KQGCperCDOANofLOTKHSX> dsachKQGCperCDOAN { get; set; } = new();
 
+        public int GetMaxColumnIndex() // get max column of lot result in dsachKQGCperCDOAN
+        {
+            int maxindex = dsachKQGCperCDOAN.MaxBy(kqgc => kqgc.ResultCalamviecs.Count)?.ResultCalamviecs.Count ?? 2;
+
+            return maxindex;
+        }
+
         public KQGCperCDOANofLOTKHSX TargetKQGC(object? cdid)
         {
             KQGCperCDOANofLOTKHSX targetKQ = dsachKQGCperCDOAN.FirstOrDefault(rs => rs.TargetLOT.NCID.Value?.ToString()?.Trim() == cdid?.ToString()?.Trim()) ?? new();
@@ -467,14 +428,7 @@
 
             KQGCperCDOANofLOTKHSX targetKQ = dsachKQGCperCDOAN.FirstOrDefault(rs => rs.TargetLOT.NCID.Value?.ToString()?.Trim() == cdid?.ToString()?.Trim()) ?? new();
 
-            if (caindex == 0 && targetKQ.ResultCalamviecs.Count > 0)
-            {
-                calamviec = targetKQ.ResultCalamviecs[caindex]?.Ca ?? "__";
-            }
-            else if (caindex == 1 && targetKQ.ResultCalamviecs.Count > 1)
-            {
-                calamviec = targetKQ.ResultCalamviecs[caindex]?.Ca ?? "__";
-            }
+            calamviec = Common.GetElementOrNew(targetKQ.ResultCalamviecs, caindex).Ca ?? "__";
 
             return calamviec;
         }
@@ -485,14 +439,7 @@
 
             KQGCperCDOANofLOTKHSX targetKQ = dsachKQGCperCDOAN.FirstOrDefault(rs => rs.TargetLOT.NCID.Value?.ToString()?.Trim() == cdid?.ToString()?.Trim()) ?? new();
 
-            if (caindex == 0 && targetKQ.ResultCalamviecs.Count > 0)
-            {
-                nhanvien = targetKQ.ResultCalamviecs[caindex]?.NhanVien ?? null;
-            }
-            else if (caindex == 1 && targetKQ.ResultCalamviecs.Count > 1)
-            {
-                nhanvien = targetKQ.ResultCalamviecs[caindex]?.NhanVien ?? null;
-            }
+            nhanvien = Common.GetElementOrNew(targetKQ.ResultCalamviecs, caindex).NhanVien ?? null;
 
             return nhanvien;
         }
@@ -503,14 +450,7 @@
 
             KQGCperCDOANofLOTKHSX targetKQ = dsachKQGCperCDOAN.FirstOrDefault(rs => rs.TargetLOT.NCID.Value?.ToString()?.Trim() == cdid?.ToString()?.Trim()) ?? new();
 
-            if (caindex == 0 && targetKQ.ResultCalamviecs.Count > 0)
-            {
-                ngayGC = targetKQ.ResultCalamviecs[caindex]?.NgayGiaCong ?? "__";
-            }
-            else if (caindex == 1 && targetKQ.ResultCalamviecs.Count > 1)
-            {
-                ngayGC = targetKQ.ResultCalamviecs[caindex]?.NgayGiaCong ?? "__";
-            }
+            ngayGC = Common.GetElementOrNew(targetKQ.ResultCalamviecs, caindex).NgayGiaCong ?? "__";
 
             return ngayGC;
         }
@@ -521,14 +461,7 @@
 
             KQGCperCDOANofLOTKHSX targetKQ = dsachKQGCperCDOAN.FirstOrDefault(rs => rs.TargetLOT.NCID.Value?.ToString()?.Trim() == cdid?.ToString()?.Trim()) ?? new();
 
-            if (caindex == 0 && targetKQ.ResultCalamviecs.Count > 0)
-            {
-                slok = targetKQ.ResultCalamviecs[caindex]?.SLOK ?? "__";
-            }
-            else if (caindex == 1 && targetKQ.ResultCalamviecs.Count > 1)
-            {
-                slok = targetKQ.ResultCalamviecs[caindex]?.SLOK ?? "__";
-            }
+            slok = Common.GetElementOrNew(targetKQ.ResultCalamviecs, caindex).SLOK ?? "__";
 
             return slok;
         }
@@ -539,14 +472,7 @@
 
             KQGCperCDOANofLOTKHSX targetKQ = dsachKQGCperCDOAN.FirstOrDefault(rs => rs.TargetLOT.NCID.Value?.ToString()?.Trim() == cdid?.ToString()?.Trim()) ?? new();
 
-            if (caindex == 0 && targetKQ.ResultCalamviecs.Count > 0)
-            {
-                slng = targetKQ.ResultCalamviecs[caindex]?.SLNG ?? "__";
-            }
-            else if (caindex == 1 && targetKQ.ResultCalamviecs.Count > 1)
-            {
-                slng = targetKQ.ResultCalamviecs[caindex]?.SLNG ?? "__";
-            }
+            slng = Common.GetElementOrNew(targetKQ.ResultCalamviecs, caindex).SLNG ?? "__";
 
             return slng;
         }

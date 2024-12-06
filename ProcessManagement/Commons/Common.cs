@@ -503,5 +503,18 @@ namespace ProcessManagement.Commons
 
             return null;
         }
+
+        public static T GetElementOrNew<T>(List<T> list, int index) where T : new()
+        {
+            // Check if the index is within the list's bounds
+            if (list == null || index < 0 || index >= list.Count)
+            {
+                // Return a new instance of T
+                return new T();
+            }
+
+            // Return the element at the specified index
+            return list[index];
+        }
     }
 }

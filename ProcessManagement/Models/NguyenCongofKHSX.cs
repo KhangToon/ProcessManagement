@@ -17,6 +17,16 @@ namespace ProcessManagement.Models
 
         public bool IsUsing { get; set; } = false;
 
+        public List<int> GenerateListColumnIndex(int lenght)
+        {
+            var list = new List<int>();
+            for (int i = 0; i < lenght; i++)
+            {
+                list.Add(i);
+            }
+            return list;
+        }
+
         public void CreateDSachNVLCongDoans(List<TemLotNVL> nVLs)
         {
             foreach (var nvl in nVLs)
