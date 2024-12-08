@@ -43,9 +43,9 @@
                 <!--Button Reload-->
                 <RadzenButton Text="Reload" Style="border-radius: 20px; min-width: 100px;" Click="@(async() => { await LoadDSachLOTofKHSX(TargetKHSX.KHSXID.Value, 300); })"
                               IsBusy="@isLoading" BusyText=" Loading..." Icon="autorenew" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />
-                <RadzenButton Visible="@(isexpandingAll)" Text="Đóng tất cả" Style="border-radius: 20px; min-width: 100px;" Click="@(() => { isexpandingAll = false; })"
+                <RadzenButton Visible="@(isexpandingAll)" Text="Đóng tất cả" Style="border-radius: 20px; min-width: 100px;" Click="@(() => { isexpandingAll = false; SetExpandingAll(isexpandingAll);})"
                               Icon="chevron_left" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />
-                <RadzenButton Visible="@(!isexpandingAll)" Text="Mở tất cả" Style="border-radius: 20px; min-width: 100px;" Click="@(() => { isexpandingAll = true; })"
+                <RadzenButton Visible="@(!isexpandingAll)" Text="Mở tất cả" Style="border-radius: 20px; min-width: 100px;" Click="@(() => { isexpandingAll = true; SetExpandingAll(isexpandingAll);})"
                               Icon="chevron_right" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />
             </RadzenStack>
         </HeaderTemplate>
@@ -129,7 +129,7 @@
                         </HeaderTemplate>
                         <Columns>
                             @{
-                                @if (cdoancolumn.isExpandColumn || isexpandingAll)
+                                @if (cdoancolumn.isExpandColumn)
                                 {
                                     <RadzenDataGridColumn Resizable=true TItem="ResultPerLOTKHSX" Title="Công đoạn"
                                                           TextAlign="TextAlign.Center">
@@ -244,7 +244,7 @@
                                         </Columns>
                                     </RadzenDataGridColumn>
                                 }
-                                else if (cdoancolumn.isExpandColumn == false || isexpandingAll == false)
+                                else if (cdoancolumn.isExpandColumn == false)
                                 {
                                     <!--Tong-->
                                     <RadzenDataGridColumn Width="60px" Frozen="true" TItem="ResultPerLOTKHSX" Title="Tổng"
@@ -334,6 +334,14 @@
         await LoadDSachLOTofKHSX(TargetKHSX.KHSXID.Value, 0);
 
         await base.OnInitializedAsync();
+    }
+
+    private void SetExpandingAll(bool setExpanding)
+    {
+        foreach (var cd in TargetKHSX.DSachCongDoans)
+        {
+            cd.isExpandColumn = setExpanding;
+        }
     }
 
     private int GetMaxIndexColumnCDoan(object? cdid)
