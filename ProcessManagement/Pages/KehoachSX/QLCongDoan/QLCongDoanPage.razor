@@ -302,7 +302,7 @@
                             @{
                                 var targetkqgc = lotrow.TargetKQGC(cdoancolumn.NCID.Value);
                             }
-                            <RadzenText Text="@($"{((targetkqgc.DanhGia == 1)? "FALSE" : "TRUE")}")" Style="font-size: 15px; height: contain; font-weight: 600"></RadzenText>
+                            <RadzenText Text="@($"{((targetkqgc.DanhGia == 1)? "TRUE" : "FALSE")}")" Style="font-size: 15px; height: contain; font-weight: 600"></RadzenText>
                         </Template>
                         <FooterTemplate>
                             <RadzenText Text="@(((DSachResultPerLOTKHSX.Sum(lot => lot.TargetKQGC(cdoancolumn.NCID.Value).DanhGia) == 0)? "TRUE" : "FALSE"))"
@@ -353,11 +353,6 @@
         await Task.Delay(1);
         revisiblepage = false;
         StateHasChanged();
-    }
-
-    private bool IsCongDoanExpanded(NguyenCongofKHSX congdoanColumn)
-    {
-        return congdoanColumn.isExpandColumn;
     }
 
     private void SetCongDoanExpand(NguyenCongofKHSX congdoanColumn)
@@ -428,7 +423,7 @@
 
             KQGCperCDOANofLOTKHSX targetKQ = dsachKQGCperCDOAN.FirstOrDefault(rs => rs.TargetLOT.NCID.Value?.ToString()?.Trim() == cdid?.ToString()?.Trim()) ?? new();
 
-            calamviec = Common.GetElementOrNew(targetKQ.ResultCalamviecs, caindex).Ca ?? "__";
+            calamviec = Common.GetElementOrNew(targetKQ.ResultCalamviecs, caindex).Ca ?? "_";
 
             return calamviec;
         }
@@ -450,29 +445,29 @@
 
             KQGCperCDOANofLOTKHSX targetKQ = dsachKQGCperCDOAN.FirstOrDefault(rs => rs.TargetLOT.NCID.Value?.ToString()?.Trim() == cdid?.ToString()?.Trim()) ?? new();
 
-            ngayGC = Common.GetElementOrNew(targetKQ.ResultCalamviecs, caindex).NgayGiaCong ?? "__";
+            ngayGC = Common.GetElementOrNew(targetKQ.ResultCalamviecs, caindex).NgayGiaCong ?? "_";
 
             return ngayGC;
         }
 
         public object? GetSLOK(object? cdid, int caindex)
         {
-            object slok = "_";
+            object slok = 0;
 
             KQGCperCDOANofLOTKHSX targetKQ = dsachKQGCperCDOAN.FirstOrDefault(rs => rs.TargetLOT.NCID.Value?.ToString()?.Trim() == cdid?.ToString()?.Trim()) ?? new();
 
-            slok = Common.GetElementOrNew(targetKQ.ResultCalamviecs, caindex).SLOK ?? "__";
+            slok = Common.GetElementOrNew(targetKQ.ResultCalamviecs, caindex).SLOK ?? 0;
 
             return slok;
         }
 
         public object? GetSLNG(object? cdid, int caindex)
         {
-            object slng = "_";
+            object slng = 0;
 
             KQGCperCDOANofLOTKHSX targetKQ = dsachKQGCperCDOAN.FirstOrDefault(rs => rs.TargetLOT.NCID.Value?.ToString()?.Trim() == cdid?.ToString()?.Trim()) ?? new();
 
-            slng = Common.GetElementOrNew(targetKQ.ResultCalamviecs, caindex).SLNG ?? "__";
+            slng = Common.GetElementOrNew(targetKQ.ResultCalamviecs, caindex).SLNG ?? 0;
 
             return slng;
         }
@@ -535,13 +530,17 @@
 
             List<KQGCperCDOANofLOTKHSX> dsachKQGCperCDOAN = new();
 
-            foreach (var cdperlot in dsCDOANperLOTKHSX)
+            foreach (var (index, cdperlot) in dsCDOANperLOTKHSX.Select((item, idx) => (idx, item)))
             {
+                // Get lastest kqgc
+                var rekQGCperLOTofKHSX = dsachKQGCperCDOAN.LastOrDefault() ?? null;
+
                 // Get kqgc targetLOT with all CDoan
-                KQGCperCDOANofLOTKHSX kQGCperLOTofKHSX = new(cdperlot);
+                KQGCperCDOANofLOTKHSX kQGCperLOTofKHSX = new(cdperlot, rekQGCperLOTofKHSX);
 
                 dsachKQGCperCDOAN.Add(kQGCperLOTofKHSX);
             }
+
 
             // Asign dsachKQGCperCDOAN for resultPerLOTKHSX
             resultPerLOTKHSX.dsachKQGCperCDOAN = dsachKQGCperCDOAN;

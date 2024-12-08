@@ -15,21 +15,21 @@ namespace ProcessManagement.Models.QLCDOAN
         public int TotalOK { get; set; } = 0;
         public int TotalNG { get; set; } = 0;
         public int Total { get; set; } = 0;
-        public int DanhGia { get; set; } = 0; // OK is O, NG is 1
+        public int DanhGia { get; set; } = 0; // OK is 1, NG is 0
 
         private readonly SQLServerServices SQLServerServices = new();
 
-        public KQGCperCDOANofLOTKHSX(KHSX_LOT targetlot)
+        public KQGCperCDOANofLOTKHSX(KHSX_LOT targetlot, KQGCperCDOANofLOTKHSX? preKQGCperCDOANofLOTKHSX)
         {
             _targetlot = targetlot;
 
-            GetKQGCofKHSXLOTperCDoan();
+            GetKQGCofKHSXLOTperCDoan(preKQGCperCDOANofLOTKHSX);
         }
 
         public KQGCperCDOANofLOTKHSX() { }
 
         // Load dsach KQGC of LOT in target CongDoan with Calamviec (ca Ngay/Dem)
-        private void GetKQGCofKHSXLOTperCDoan()
+        private void GetKQGCofKHSXLOTperCDoan(KQGCperCDOANofLOTKHSX? preKQGCperCDOANofLOTKHSX = null)
         {
             // Load ds KQGC for targetlot
             List<KetQuaGC> ketQuaGCperlots = GetKQGCperLOTKHSX(_targetlot).Item1;
@@ -53,12 +53,22 @@ namespace ProcessManagement.Models.QLCDOAN
                 }
             }
 
-            // //
-            Total = int.TryParse(_targetlot.SLLOT.Value?.ToString(), out int total) ? total : 0;
-            TotalOK = ResultCalamviecs.Sum(rs => int.TryParse(rs.SLOK?.ToString(), out int totalok) ? totalok : 0);
-            TotalNG = ResultCalamviecs.Sum(rs => int.TryParse(rs.SLNG?.ToString(), out int totalng) ? totalng : 0);
+            // // current 
+            Total = int.TryParse(_targetlot.SLLOT.Value?.ToString(), out int cur_total) ? cur_total : 0;
+            TotalOK = ResultCalamviecs.Sum(rs => int.TryParse(rs.SLOK?.ToString(), out int cur_totalok) ? cur_totalok : 0);
+            TotalNG = ResultCalamviecs.Sum(rs => int.TryParse(rs.SLNG?.ToString(), out int cur_totalng) ? cur_totalng : 0);
 
-            DanhGia = ((TotalOK + TotalNG) == Total) ? 0 : 1;
+            if (preKQGCperCDOANofLOTKHSX != null)
+            {
+                // previous total done (OK + NG)
+                int predoneOK = preKQGCperCDOANofLOTKHSX.TotalOK;
+
+                DanhGia = ((TotalOK + TotalNG) == predoneOK && predoneOK > 0) ? 1 : 0;
+            }
+            else
+            {
+                DanhGia = ((TotalOK + TotalNG) == Total) ? 1 : 0;
+            }
         }
 
         // Load dsach KQGC per LOT with targetCDoan
