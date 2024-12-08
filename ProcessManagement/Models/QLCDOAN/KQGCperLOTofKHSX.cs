@@ -15,7 +15,7 @@ namespace ProcessManagement.Models.QLCDOAN
         public int TotalOK { get; set; } = 0;
         public int TotalNG { get; set; } = 0;
         public int Total { get; set; } = 0;
-        public int DanhGia { get; set; } = 0; // OK is 1, NG is 0
+        public int DanhGia { get; set; } = 2; // OK is 1, NG is 0, Not yet submit is 2
 
         private readonly SQLServerServices SQLServerServices = new();
 
@@ -58,16 +58,37 @@ namespace ProcessManagement.Models.QLCDOAN
             TotalOK = ResultCalamviecs.Sum(rs => int.TryParse(rs.SLOK?.ToString(), out int cur_totalok) ? cur_totalok : 0);
             TotalNG = ResultCalamviecs.Sum(rs => int.TryParse(rs.SLNG?.ToString(), out int cur_totalng) ? cur_totalng : 0);
 
-            if (preKQGCperCDOANofLOTKHSX != null)
+            if (preKQGCperCDOANofLOTKHSX != null) // Not first element
             {
                 // previous total done (OK + NG)
                 int predoneOK = preKQGCperCDOANofLOTKHSX.TotalOK;
+                int predoneNG = preKQGCperCDOANofLOTKHSX.TotalNG;
 
-                DanhGia = ((TotalOK + TotalNG) == predoneOK && predoneOK > 0) ? 1 : 0;
+                if (predoneOK > 0 || predoneNG > 0)
+                {
+                    DanhGia = ((TotalOK + TotalNG) == predoneOK) ? 1 : 0;
+                }
+                else if ((predoneOK + predoneNG) == 0)
+                {
+                    DanhGia = 2;
+                }
             }
-            else
+            else // for first element 
             {
-                DanhGia = ((TotalOK + TotalNG) == Total) ? 1 : 0;
+                if (TotalOK > 0 || TotalNG > 0)
+                {
+                    DanhGia = ((TotalOK + TotalNG) == Total) ? 1 : 0;
+                }
+                else if ((TotalOK + TotalNG) == 0)
+                {
+                    DanhGia = 2;
+                }
+            }
+
+            // Set null for current element if it not submited
+            if ((TotalOK + TotalNG) == 0)
+            {
+                DanhGia = 2;
             }
         }
 

@@ -246,14 +246,16 @@
                                                                                         newKetQuaGC.NGIDs.Value = null;
                                                                                         NGTypesSelected = null;
 
-                                                                                    await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.SLNG);
-                                                                                    await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.NGIDs);
+                                                                                        await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.SLNG);
+                                                                                        await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.NGIDs);
                                                                                     }
                                                                                     else if (property.DBName == KetQuaGC.KQGCDBName.SLNG)
                                                                                     {
                                                                                         newKetQuaGC.NGIDs.IsDisable = property.Value.Equals(0);
                                                                                         newKetQuaGC.NGIDs.Value = null;
                                                                                         NGTypesSelected = null;
+
+                                                                                        await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.NGIDs);
                                                                                     }
 
                                                                                     await DefaultThongTinKetQuaGC_ValueIsOK(property);
@@ -849,6 +851,15 @@
             {
                 isOK = false;
             }
+        }
+
+        // Check total of NG and OK is more than 0
+        _ = int.TryParse(newKetQuaGC.SLOK.Value?.ToString(), out int slok) ? slok : 0;
+        _ = int.TryParse(newKetQuaGC.SLNG.Value?.ToString(), out int slng) ? slng : 0;
+
+        if ((slok + slng == 0))
+        {
+            isOK = false;
         }
 
         return isOK;
