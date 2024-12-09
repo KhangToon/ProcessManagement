@@ -306,12 +306,12 @@
                             @{
                                 var targetkqgc = lotrow.TargetKQGC(cdoancolumn.NCID.Value);
                             }
-                            <RadzenText Visible="@(targetkqgc.DanhGia == 0)" Text="FALSE" Style="font-size: 15px; height: contain; font-weight: 600"></RadzenText>
-                            <RadzenText Visible="@(targetkqgc.DanhGia == 1)" Text="TRUE" Style="font-size: 15px; height: contain; font-weight: 700"></RadzenText>
+                            <RadzenButton Visible="@(targetkqgc.DanhGia == 0)" Text="FALSE" ButtonStyle="ButtonStyle.Danger" Shade="Shade.Dark" Size="ButtonSize.Small" Variant="Variant.Flat" Style="font-size: 15px; font-weight: 600; width: 100%; cursor: default"></RadzenButton>
+                            <RadzenButton Visible="@(targetkqgc.DanhGia == 1)" Text="TRUE" ButtonStyle="ButtonStyle.Success" Shade="Shade.Dark" Size="ButtonSize.Small" Variant="Variant.Flat" Style="font-size: 15px; width: 100%; font-weight: 600; cursor: default"></RadzenButton>
                             <RadzenText Visible="@(targetkqgc.DanhGia == 2)" Text="_" Style="font-size: 15px; height: contain; font-weight: 600"></RadzenText>
                         </Template>
                         <FooterTemplate>
-                            <RadzenText Text="@(((DSachResultPerLOTKHSX.Sum(lot => lot.TargetKQGC(cdoancolumn.NCID.Value).DanhGia) == 0)? "TRUE" : "FALSE"))"
+                            <RadzenText Text="@(((DSachResultPerLOTKHSX.Sum(lot => lot.TargetKQGC(cdoancolumn.NCID.Value).DanhGia) == 1)? "TRUE" : "FALSE"))"
                                         Style="color: black; font-size: 18px; height: contain; min-width: 50px; font-weight: 600;"></RadzenText>
                         </FooterTemplate>
                     </RadzenDataGridColumn>
@@ -418,12 +418,12 @@
 
         public List<KQGCperCDOANofLOTKHSX> dsachKQGCperCDOAN { get; set; } = new();
 
-        public int GetMaxColumnIndex() // get max column of lot result in dsachKQGCperCDOAN
-        {
-            int maxindex = dsachKQGCperCDOAN.MaxBy(kqgc => kqgc.ResultCalamviecs.Count)?.ResultCalamviecs.Count ?? 2;
+        // public int GetMaxColumnIndex() // get max column of lot result in dsachKQGCperCDOAN
+        // {
+        //     int maxindex = dsachKQGCperCDOAN.MaxBy(kqgc => kqgc.ResultCalamviecs.Count)?.ResultCalamviecs.Count ?? 2;
 
-            return maxindex;
-        }
+        //     return maxindex;
+        // }
 
         public KQGCperCDOANofLOTKHSX TargetKQGC(object? cdid)
         {

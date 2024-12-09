@@ -14,6 +14,8 @@ namespace ProcessManagement.Models
         public Propertyy DinhMuc { get; set; } = new() { DBName = Common.DinhMuc, Type = typeof(int), AlowDatabase = true };
         public Propertyy ThoiDiem { get; set; } = new() { DBName = Common.ThoiDiem, Type = typeof(DateTime), AlowDatabase = true };
 
+        public string TenNVL { get; set; } = string.Empty;
+
         public List<Propertyy> GetPropertiesValues()
         {
             Type propertyType = typeof(NVLofKHSX);

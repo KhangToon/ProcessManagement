@@ -112,12 +112,10 @@
                                     <RadzenText Text="----" Style="font-size: 14px; font-weight: bold; color: black "></RadzenText>
                                 }
                             </RadzenStack>
-                            <RadzenCard Visible=@(khsx.KHSXID.Value == SelectKHSX.KHSXID.Value) Variant=Variant.Flat Style="width: contain; height: 100%">
+                            <RadzenCard Variant=Variant.Flat Style="width: contain; height: 100%">
                                 <RadzenStack Gap="10px" Style="height: 100%; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                    <RadzenText Text="Xem chi tiết" @onclick="@(() => OnOpenChitietKHSX())" TextAlign="TextAlign.Center" Style="font-size: 16px; font-weight: 500; color: Highlight; cursor: pointer "></RadzenText>
-                                    <RadzenButton Click="@(() => DialogService.Close(khsx))" Icon="download" Text="Tải KHSX" Size="ButtonSize.Small" Variant="Variant.Filled"
-                                                  Style="height: 100%; width: contain; font-size: 16px; background-color: darkgreen " />
-                                    <RadzenButton Disabled="@(khsx.isReturnedNVL == false)" Click="@(() => OnDeleteKHSX(khsx))" Style="width: contain; color: white; background-color: darkred" Icon="delete" Text="Xóa" Size="ButtonSize.Small" Variant="Variant.Flat" />
+                                    <RadzenText Text="Xem chi tiết" @onclick="@( async() => await OnOpenChitietKHSX(khsx))" TextAlign="TextAlign.Center" Style="font-size: 16px; font-weight: 500; color: Highlight; cursor: pointer "></RadzenText>
+                                    <RadzenButton Disabled="@(khsx.isReturnedNVL == false && khsx.isDonePXK == true)" Click="@(() => OnDeleteKHSX(khsx))" Style="width: contain; color: white; background-color: darkred" Icon="delete" Text="Xóa" Size="ButtonSize.Small" Variant="Variant.Flat" />
                                 </RadzenStack>
                             </RadzenCard>
                         </RadzenStack>
@@ -135,7 +133,7 @@
 
     private DateTime endSearchDay = DateTime.Today;
     private DateTime startSearchDay = DateTime.Today;
-    private bool displaybyDay = true;
+    private bool displaybyDay = false;
     private List<KHSX> ListKHSXs = new();
     private KHSX SelectKHSX = new();
 
@@ -198,9 +196,9 @@
     }
 
     // Open dialog chi tiet KHSX
-    private async Task OnOpenChitietKHSX()
+    private async Task OnOpenChitietKHSX(KHSX selectedKHSX)
     {
-        await DialogService.OpenAsync<DialogDetailKHSX>(null, new Dictionary<string, object>() { { "SelectKHSX", SelectKHSX } },
+        await DialogService.OpenAsync<DialogDetailKHSX>(null, new Dictionary<string, object>() { { "SelectKHSX", selectedKHSX } },
         new DialogOptions() { Width = "80%", Height = "contain", Resizable = false, Draggable = true, ShowTitle = false, ShowClose = false, Style = "background-color: while; border-radius: 0px; padding: 0px" });
     }
 

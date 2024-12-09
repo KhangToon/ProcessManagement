@@ -15,6 +15,8 @@ namespace ProcessManagement.Models
 
         public bool isExpandColumn = false; // Using in QLCongDoanPage
 
+        public int SLlimit = 0;
+
         public bool IsUsing { get; set; } = false;
 
         public List<int> GenerateListColumnIndex(int lenght)

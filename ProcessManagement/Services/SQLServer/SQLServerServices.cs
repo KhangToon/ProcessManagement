@@ -1407,6 +1407,8 @@ namespace ProcessManagement.Services.SQLServer
                         item.Value = columnValue;
                     }
 
+                    nvl.TenNVL = GetTenNguyenVatLieu(nvl.NVLID.Value).TenNVL.Value?.ToString() ?? string.Empty;
+
                     listnvls.Add(nvl);
                 }
             }
@@ -1511,6 +1513,38 @@ namespace ProcessManagement.Services.SQLServer
 
             // Load danh sach SPofNVL
             nvl.DSachSPofNVLs = GetDSachNVLwithSanPham_byNVLID(nvl.NVLID.Value);
+
+            return nvl;
+        }
+
+        public NguyenVatLieu GetTenNguyenVatLieu(object? nvlid)
+        {
+            NguyenVatLieu nvl = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_NguyenVatLieu}] WHERE [{Common.NVLID}] = '{nvlid}'";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    List<Propertyy> rowitems = nvl.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue.ToString()?.Trim();
+                    }
+                }
+            }
 
             return nvl;
         }
