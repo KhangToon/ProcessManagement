@@ -73,7 +73,7 @@
                                             <RadzenStack Style="width: 80%; padding-left: 10px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                 <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
                                                     <RadzenStack Style="width: 50%;">
-                                                        <RadzenDropDown AllowClear="true" Disabled="@(property.DBName != KetQuaGC.KQGCDBName.NCID && string.IsNullOrEmpty(newKetQuaGC.NCID.Value?.ToString()))"
+                                                        <RadzenDropDown AllowClear="true" Disabled="@((property.DBName != KetQuaGC.KQGCDBName.NCID && string.IsNullOrEmpty(newKetQuaGC.NCID.Value?.ToString()) || property.DBName == KetQuaGC.KQGCDBName.SPID))"
                                                                         Style="width: 100%; height: contain; font-size: 14px; font-weight: 600; background-color: white"
                                                                         Placeholder="@($" * chọn {displayName}")"
                                                                         AllowVirtualization="true"
@@ -161,7 +161,7 @@
                                             <RadzenStack Style="width: 80%; padding-left: 10px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                 <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
                                                     <RadzenStack Style="width: 50%;">
-                                                        <RadzenDropDown AllowClear="true"
+                                                        <RadzenDropDown AllowClear="true" Disabled="@(string.IsNullOrEmpty(newKetQuaGC.NCID.Value?.ToString()))"
                                                                         Style="width: 100%; height: contain; font-size: 14px; font-weight: 600; color: black; background-color: white"
                                                                         Placeholder="@($" * chọn {displayName}")"
                                                                         TValue="string" Data="@(new List<string>(){"Ngày", "Đêm"})"
@@ -471,7 +471,6 @@
             //
             KHSX_LOT preRSultLotTargetCD = new();
             KHSX_LOT curRSultLotinTargetCD = new();
-            KHSX_LOT nextRSultLotTargetCD = new();
 
             List<KHSX_LOT> dsanhResultofLotAllCdoan = dsachMaQLyLots.Where(lot => lot.MaQuanLyLot.Value?.ToString()?.Trim() == args.ToString()?.Trim()).ToList();
 
@@ -488,9 +487,6 @@
             // SL ok + ng da submit cua preRSultLotTargetCD
             _ = int.TryParse(preRSultLotTargetCD.SLOKsubmited.Value?.ToString(), out int preSLOKsubmited) ? preSLOKsubmited : 0;
             _ = int.TryParse(preRSultLotTargetCD.SLNGsubmited.Value?.ToString(), out int preSLNGsubmited) ? preSLNGsubmited : 0;
-
-            //nextRSultLotTargetCD = Common.GetElementOrNew(dsanhResultofLotAllCdoan, indexcurrentCD + 1);
-
             _ = int.TryParse(targetItem?.SLLOT.Value?.ToString(), out int slperlotBase) ? slperlotBase : 0;
 
             if (!string.IsNullOrEmpty(preRSultLotTargetCD.KHSXLOTID.Value?.ToString()))
@@ -571,11 +567,10 @@
 
             var targetItem = dsachMaQLyLots.FirstOrDefault(lot => lot.KHSXLOTID.Value?.ToString()?.Trim() == selectedValues.FirstOrDefault().Key);
 
-            //
+            //Asign sluong OK/NG last Result
 
             KHSX_LOT preRSultLotTargetCD = new();
             KHSX_LOT curRSultLotinTargetCD = new();
-            //KHSX_LOT nextRSultLotTargetCD = new();
 
             List<KHSX_LOT> dsanhResultofLotAllCdoan = dsachMaQLyLots.Where(lot => lot.MaQuanLyLot.Value?.ToString()?.Trim() == targetItem?.MaQuanLyLot.Value?.ToString()?.Trim()).ToList();
 
@@ -592,9 +587,6 @@
             // SL ok + ng da submit cua preRSultLotTargetCD
             _ = int.TryParse(preRSultLotTargetCD.SLOKsubmited.Value?.ToString(), out int preSLOKsubmited) ? preSLOKsubmited : 0;
             _ = int.TryParse(preRSultLotTargetCD.SLNGsubmited.Value?.ToString(), out int preSLNGsubmited) ? preSLNGsubmited : 0;
-
-            //nextRSultLotTargetCD = Common.GetElementOrNew(dsanhResultofLotAllCdoan, indexcurrentCD + 1);
-
             _ = int.TryParse(targetItem?.SLLOT.Value?.ToString(), out int slperlotBase) ? slperlotBase : 0;
 
             if (!string.IsNullOrEmpty(preRSultLotTargetCD.KHSXLOTID.Value?.ToString()))
@@ -789,6 +781,8 @@
 
                 if (isallowsubmit)
                 {
+                    // Gan tong cua Lot hien tai truoc khi submit
+                    newKetQuaGC.SLperLOT.Value = slOKsubmit + slNGsubmit;
                     // Insert new KetQuaGC
                     (int newkqgcID, string errorMess) = SQLServerServices.InsertKetQuaGC(newKetQuaGC);
 
