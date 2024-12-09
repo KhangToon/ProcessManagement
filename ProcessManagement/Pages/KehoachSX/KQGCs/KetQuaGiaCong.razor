@@ -191,9 +191,9 @@
     private DateTime endSearchDay = DateTime.Today;
     private string pagingSummaryFormat = "Displaying page {0} of {1} <b>(total {2} records)</b>";
 
-    private Dictionary<string, List<string>> keyFilterMainColumns = new();
+    private static Dictionary<string, List<string>> keyFilterMainColumns = new();
     private Dictionary<string, List<string>> keyFilterExtraColumns = new();
-    private bool filterActive = false;
+    private static bool filterActive = false;
 
     private bool isLoadingKQGCs = false;
 
@@ -204,6 +204,9 @@
 
         // Khoi tao bien luu danh sach key search
         await CreateCurrentSelectedKeyVariable();
+
+        // Load preFiltering value
+        await FilterDSachKetQuaGCProcessing();
 
         await base.OnInitializedAsync();
     }
