@@ -8014,7 +8014,7 @@ namespace ProcessManagement.Services.SQLServer
                 return (result, "Error: No valid properties to insert.");
             }
 
-            using var transaction = connection.BeginTransaction(); // Start transaction for DongThung
+            using var transaction = connection.BeginTransaction(); // Start transaction 
 
             try
             {
@@ -8083,7 +8083,7 @@ namespace ProcessManagement.Services.SQLServer
                 return (result, "Error: No valid properties to update.");
             }
 
-            using var transaction = connection.BeginTransaction(); // Start transaction for ThungTPham
+            using var transaction = connection.BeginTransaction(); // Start transaction
 
             try
             {
@@ -8134,7 +8134,7 @@ namespace ProcessManagement.Services.SQLServer
         }
 
         // Get
-        public (List<ThungTPham>, string) GetListThungTPhams(Dictionary<string, object?> parameters, bool isgetAll = false)
+        public (List<ThungTPham> thungTPhams, string error) GetListThungTPhams(Dictionary<string, object?> parameters, bool isgetAll = false)
         {
             List<ThungTPham> listThungTPhams = new();
 

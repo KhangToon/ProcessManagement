@@ -2,6 +2,7 @@
 @using ProcessManagement.Models
 @using ProcessManagement.Models.KHSXs
 @using ProcessManagement.Models.QLCDOAN
+@using ProcessManagement.Pages.KehoachSX.DongThung.Dialogs
 @using ProcessManagement.Pages.Manager_NVL.Dialogs
 @using ProcessManagement.Services.SQLServer
 @using Radzen.Blazor
@@ -316,6 +317,90 @@
                         </FooterTemplate>
                     </RadzenDataGridColumn>
                 }
+
+                <!--DongThung-->
+                <RadzenDataGridColumn Resizable=true TItem="ResultPerLOTKHSX" Title="Thùng thành phẩm">
+                    <HeaderTemplate>
+                        <RadzenStack Gap="30px" Style="width: 100%; height: 100%" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Orientation="Orientation.Horizontal">
+                            <RadzenText Text="Thùng thành phẩm" Style="font-size: 17px; height: contain; font-weight: 600; padding: 5px; color: white; cursor: pointer"></RadzenText>
+                        </RadzenStack>
+                    </HeaderTemplate>
+                    <Columns>
+                        <!--ID thung-->
+                        <RadzenDataGridColumn Resizable=true TItem="ResultPerLOTKHSX" Title="ID thùng"
+                                              TextAlign="TextAlign.Center">
+                            <HeaderTemplate>
+                                <span style="font-weight: 700; font-size: 15px; color: black; padding-left: 10px; padding-right: 10px">ID thùng</span>
+                            </HeaderTemplate>
+                            <Template Context="lotrow">
+                                <RadzenText Text="@(lotrow.ThungTPhams.FirstOrDefault()?.IDThung.Value?.ToString())" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
+                            </Template>
+                            <FooterTemplate>
+
+                            </FooterTemplate>
+                        </RadzenDataGridColumn>
+                        <!--So luong-->
+                        <RadzenDataGridColumn Resizable=true TItem="ResultPerLOTKHSX" Title="Số lượng"
+                                              TextAlign="TextAlign.Center">
+                            <HeaderTemplate>
+                                <span style="font-weight: 700; font-size: 15px; color: black; padding-left: 10px; padding-right: 10px">Số lượng</span>
+                            </HeaderTemplate>
+                            <Template Context="lotrow">
+                                <RadzenText Text="@(lotrow.ThungTPhams.FirstOrDefault()?.SoLuong.Value?.ToString())" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
+                            </Template>
+                            <FooterTemplate>
+                            </FooterTemplate>
+                        </RadzenDataGridColumn>
+                    </Columns>
+                </RadzenDataGridColumn>
+
+                <!--Button DongThung-->
+                <RadzenDataGridColumn Resizable=true TItem="ResultPerLOTKHSX" Title="Đóng thùng">
+                    <HeaderTemplate>
+                        <RadzenStack Gap="30px" Style="width: 100%; height: 100%" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Orientation="Orientation.Horizontal">
+                            <RadzenText Text="Đóng thùng" Style="font-size: 15px; height: contain; font-weight: 600; color: white; padding: 5px;"></RadzenText>
+                        </RadzenStack>
+                    </HeaderTemplate>
+                    <Template Context="lotrow">
+                        <RadzenButton Text="Đóng thùng" Click="@(async () => await OpenDialogAsignSPforNVL(lotrow))" ButtonStyle="ButtonStyle.Secondary" Icon="add" Shade="Shade.Darker" Size="ButtonSize.Small" Variant="Variant.Flat" Style="font-size: 15px; width: 100%; font-weight: 500; background-color: Highlight"></RadzenButton>
+                    </Template>
+                </RadzenDataGridColumn>
+
+                <!--TONG OK-->
+                <RadzenDataGridColumn Resizable=true TItem="ResultPerLOTKHSX" Title="TỔNG OK">
+                    <HeaderTemplate>
+                        <RadzenStack Gap="30px" Style="width: 100%; height: 100%" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Orientation="Orientation.Horizontal">
+                            <RadzenText Text="TỔNG OK" Style="font-size: 17px; height: contain; font-weight: 600; color: white; padding: 5px;"></RadzenText>
+                        </RadzenStack>
+                    </HeaderTemplate>
+                    <Template Context="lotrow">
+                        <RadzenText Text="" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
+                    </Template>
+                </RadzenDataGridColumn>
+
+                <!--TONG NG-->
+                <RadzenDataGridColumn Resizable=true TItem="ResultPerLOTKHSX" Title="TỔNG NG">
+                    <HeaderTemplate>
+                        <RadzenStack Gap="30px" Style="width: 100%; height: 100%" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Orientation="Orientation.Horizontal">
+                            <RadzenText Text="TỔNG NG" Style="font-size: 17px; height: contain; font-weight: 600; color: white; padding: 5px;"></RadzenText>
+                        </RadzenStack>
+                    </HeaderTemplate>
+                    <Template Context="lotrow">
+                        <RadzenText Text="" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
+                    </Template>
+                </RadzenDataGridColumn>
+
+                <!--Ngay xuat hang-->
+                <RadzenDataGridColumn Resizable=true TItem="ResultPerLOTKHSX" Title="Ngày xuất hàng">
+                    <HeaderTemplate>
+                        <RadzenStack Gap="30px" Style="width: 100%; height: 100%" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Orientation="Orientation.Horizontal">
+                            <RadzenText Text="Ngày xuất hàng" Style="font-size: 15px; height: contain; font-weight: 600; color: white; padding: 5px;"></RadzenText>
+                        </RadzenStack>
+                    </HeaderTemplate>
+                    <Template Context="lotrow">
+                        <RadzenText Text="" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
+                    </Template>
+                </RadzenDataGridColumn>
             }
         </Columns>
     </RadzenDataGrid>
@@ -410,84 +495,89 @@
         });
     }
 
-    private class ResultPerLOTKHSX
-    {
-        public object? MaSP { get; set; }
-        public object? MaQuanLyLot { get; set; }
-        public object? SLperLOT { get; set; }
+    // private class ResultPerLOTKHSX
+    // {
+    //     public object? MaSP { get; set; }
+    //     public object? MaQuanLyLot { get; set; }
+    //     public object? SLperLOT { get; set; }
 
-        public List<KQGCperCDOANofLOTKHSX> dsachKQGCperCDOAN { get; set; } = new();
+    //     public bool isLastCDoanDone = true;
 
-        // public int GetMaxColumnIndex() // get max column of lot result in dsachKQGCperCDOAN
-        // {
-        //     int maxindex = dsachKQGCperCDOAN.MaxBy(kqgc => kqgc.ResultCalamviecs.Count)?.ResultCalamviecs.Count ?? 2;
+    //     public List<KQGCperCDOANofLOTKHSX> dsachKQGCperCDOAN { get; set; } = new();
 
-        //     return maxindex;
-        // }
+    //     public List<ThungTPham> thungTPhams { get; set; } = new(); // danh sach thung thanh pham cua moi LOT
 
-        public KQGCperCDOANofLOTKHSX TargetKQGC(object? cdid)
-        {
-            KQGCperCDOANofLOTKHSX targetKQ = dsachKQGCperCDOAN.FirstOrDefault(rs => rs.TargetLOT.NCID.Value?.ToString()?.Trim() == cdid?.ToString()?.Trim()) ?? new();
-            return targetKQ;
-        }
+    //     // public int GetMaxColumnIndex() // get max column of lot result in dsachKQGCperCDOAN
+    //     // {
+    //     //     int maxindex = dsachKQGCperCDOAN.MaxBy(kqgc => kqgc.ResultCalamviecs.Count)?.ResultCalamviecs.Count ?? 2;
 
-        public object? GetCaLamViec(object? cdid, int caindex)
-        {
-            object calamviec = "_";
+    //     //     return maxindex;
+    //     // }
 
-            KQGCperCDOANofLOTKHSX targetKQ = dsachKQGCperCDOAN.FirstOrDefault(rs => rs.TargetLOT.NCID.Value?.ToString()?.Trim() == cdid?.ToString()?.Trim()) ?? new();
+    //     public KQGCperCDOANofLOTKHSX TargetKQGC(object? cdid)
+    //     {
+    //         KQGCperCDOANofLOTKHSX targetKQ = dsachKQGCperCDOAN.FirstOrDefault(rs => rs.TargetLOT.NCID.Value?.ToString()?.Trim() == cdid?.ToString()?.Trim()) ?? new();
+    //         return targetKQ;
+    //     }
 
-            calamviec = Common.GetElementOrNew(targetKQ.ResultCalamviecs, caindex).Ca ?? "_";
+    //     public object? GetCaLamViec(object? cdid, int caindex)
+    //     {
+    //         object calamviec = "_";
 
-            return calamviec;
-        }
+    //         KQGCperCDOANofLOTKHSX targetKQ = dsachKQGCperCDOAN.FirstOrDefault(rs => rs.TargetLOT.NCID.Value?.ToString()?.Trim() == cdid?.ToString()?.Trim()) ?? new();
 
-        public object? GetNhanVien(object? cdid, int caindex)
-        {
-            object? nhanvien = null;
+    //         calamviec = Common.GetElementOrNew(targetKQ.ResultCalamviecs, caindex).Ca ?? "_";
 
-            KQGCperCDOANofLOTKHSX targetKQ = dsachKQGCperCDOAN.FirstOrDefault(rs => rs.TargetLOT.NCID.Value?.ToString()?.Trim() == cdid?.ToString()?.Trim()) ?? new();
+    //         return calamviec;
+    //     }
 
-            nhanvien = Common.GetElementOrNew(targetKQ.ResultCalamviecs, caindex).NhanVien ?? null;
+    //     public object? GetNhanVien(object? cdid, int caindex)
+    //     {
+    //         object? nhanvien = null;
 
-            return nhanvien;
-        }
+    //         KQGCperCDOANofLOTKHSX targetKQ = dsachKQGCperCDOAN.FirstOrDefault(rs => rs.TargetLOT.NCID.Value?.ToString()?.Trim() == cdid?.ToString()?.Trim()) ?? new();
 
-        public object? GetNgayGC(object? cdid, int caindex)
-        {
-            object ngayGC = "_";
+    //         nhanvien = Common.GetElementOrNew(targetKQ.ResultCalamviecs, caindex).NhanVien ?? null;
 
-            KQGCperCDOANofLOTKHSX targetKQ = dsachKQGCperCDOAN.FirstOrDefault(rs => rs.TargetLOT.NCID.Value?.ToString()?.Trim() == cdid?.ToString()?.Trim()) ?? new();
+    //         return nhanvien;
+    //     }
 
-            ngayGC = Common.GetElementOrNew(targetKQ.ResultCalamviecs, caindex).NgayGiaCong ?? "_";
+    //     public object? GetNgayGC(object? cdid, int caindex)
+    //     {
+    //         object ngayGC = "_";
 
-            return ngayGC;
-        }
+    //         KQGCperCDOANofLOTKHSX targetKQ = dsachKQGCperCDOAN.FirstOrDefault(rs => rs.TargetLOT.NCID.Value?.ToString()?.Trim() == cdid?.ToString()?.Trim()) ?? new();
 
-        public object? GetSLOK(object? cdid, int caindex)
-        {
-            object slok = 0;
+    //         ngayGC = Common.GetElementOrNew(targetKQ.ResultCalamviecs, caindex).NgayGiaCong ?? "_";
 
-            KQGCperCDOANofLOTKHSX targetKQ = dsachKQGCperCDOAN.FirstOrDefault(rs => rs.TargetLOT.NCID.Value?.ToString()?.Trim() == cdid?.ToString()?.Trim()) ?? new();
+    //         return ngayGC;
+    //     }
 
-            slok = Common.GetElementOrNew(targetKQ.ResultCalamviecs, caindex).SLOK ?? 0;
+    //     public object? GetSLOK(object? cdid, int caindex)
+    //     {
+    //         object slok = 0;
 
-            return slok;
-        }
+    //         KQGCperCDOANofLOTKHSX targetKQ = dsachKQGCperCDOAN.FirstOrDefault(rs => rs.TargetLOT.NCID.Value?.ToString()?.Trim() == cdid?.ToString()?.Trim()) ?? new();
 
-        public object? GetSLNG(object? cdid, int caindex)
-        {
-            object slng = 0;
+    //         slok = Common.GetElementOrNew(targetKQ.ResultCalamviecs, caindex).SLOK ?? 0;
 
-            KQGCperCDOANofLOTKHSX targetKQ = dsachKQGCperCDOAN.FirstOrDefault(rs => rs.TargetLOT.NCID.Value?.ToString()?.Trim() == cdid?.ToString()?.Trim()) ?? new();
+    //         return slok;
+    //     }
 
-            slng = Common.GetElementOrNew(targetKQ.ResultCalamviecs, caindex).SLNG ?? 0;
+    //     public object? GetSLNG(object? cdid, int caindex)
+    //     {
+    //         object slng = 0;
 
-            return slng;
-        }
-    }
+    //         KQGCperCDOANofLOTKHSX targetKQ = dsachKQGCperCDOAN.FirstOrDefault(rs => rs.TargetLOT.NCID.Value?.ToString()?.Trim() == cdid?.ToString()?.Trim()) ?? new();
+
+    //         slng = Common.GetElementOrNew(targetKQ.ResultCalamviecs, caindex).SLNG ?? 0;
+
+    //         return slng;
+    //     }
+    // }
 
     // Convert ID to stringValue
+
     private string GetColumnValueByID(object? id, string colName)
     {
         string value = string.Empty;
@@ -557,12 +647,22 @@
 
 
             // Asign dsachKQGCperCDOAN for resultPerLOTKHSX
-            resultPerLOTKHSX.dsachKQGCperCDOAN = dsachKQGCperCDOAN;
+            resultPerLOTKHSX.DsachKQGCperCDOAN = dsachKQGCperCDOAN;
 
             resultPerLOTKHSXs.Add(resultPerLOTKHSX);
         }
 
         return resultPerLOTKHSXs;
+    }
+
+    // Open dialog DongThung
+    private async Task OpenDialogAsignSPforNVL(ResultPerLOTKHSX? resultPerLOTKHSX)
+    {
+        if (resultPerLOTKHSX != null && resultPerLOTKHSX.isLastCDoanDone)
+        {
+            await DialogService.OpenAsync<DialogCreateThungTPham>(null, new Dictionary<string, object>() { { "TargetLotResult", resultPerLOTKHSX } },
+            new DialogOptions() { ShowTitle = false, Width = "50%", Height = "80%", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
+        }
     }
 
     // Datagrid selected changed event
