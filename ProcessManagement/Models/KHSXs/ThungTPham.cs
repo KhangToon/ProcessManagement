@@ -3,30 +3,42 @@ using System.Reflection;
 
 namespace ProcessManagement.Models.KHSXs
 {
-    public class DongThung
+    public class ThungTPham
     {
-        public static class DongThungDBName
+        public static class DBName
         {
-            public const string Table_DongThung = "KHSX_DongThung";
-            public const string DTID = "DTID";
-            public const string KQGCID = "KQGCID";
-            public const string SoIDThung = "SoIDThung";
-            public const string SoLuong = "SoLuong";
-            public const string NgayDongThung = "NgayDongThung";
+            public const string Table_ThungTPham = "KHSX_ThungTPham";
+            public const string TTPID = "TTPID";
+            public const string KHSXID = "KHSXID";
+            public const string MaQuanLyLot = "maquanlylot";
+            public const string IDThung = "IDThung";
+            public const string SoLuong = "soluong";
+            public const string NgayDongThung = "ngaydongthung";
         }
 
-        public Propertyy DTID { get; set; } = new() { DBName = DongThungDBName.DTID, DisplayName = "DTID", Type = typeof(int), AlowDatabase = false, AlowDisplay = false, DispDatagrid = false }; // Identity ID
-        public Propertyy KQGCID { get; set; } = new() { DBName = DongThungDBName.KQGCID, DisplayName = "KQGCID", Type = typeof(int), AlowDatabase = true };
-        public Propertyy SoIDThung { get; set; } = new() { DBName = DongThungDBName.SoIDThung, DisplayName = "Số ID Thùng", Type = typeof(string), AlowDatabase = true };
-        public Propertyy SoLuong { get; set; } = new() { DBName = DongThungDBName.SoLuong, DisplayName = "Số Lượng", Type = typeof(int), AlowDatabase = true };
-        public Propertyy NgayDongThung { get; set; } = new() { DBName = DongThungDBName.NgayDongThung, DisplayName = "Ngày Đóng Thùng", Type = typeof(DateTime), AlowDatabase = true };
+        public static class DispName
+        {
+            public const string TTPID = "TTPID";
+            public const string KHSXID = "KHSXID";
+            public const string MaQuanLyLot = "Mã quản lý LOT";
+            public const string IDThung = "IDThung";
+            public const string SoLuong = "Số lượng";
+            public const string NgayDongThung = "Ngày đóng thùng";
+        }
+
+        public Propertyy TTPID { get; set; } = new() { DBName = DBName.TTPID, DisplayName = DispName.TTPID, Type = typeof(int), AlowDatabase = false, AlowDisplay = false, DispDatagrid = false }; // Identity ID
+        public Propertyy KHSXID { get; set; } = new() { DBName = DBName.KHSXID, DisplayName = DispName.KHSXID, Type = typeof(int), AlowDatabase = true };
+        public Propertyy MaQuanLyLot { get; set; } = new() { DBName = DBName.MaQuanLyLot, DisplayName = DispName.MaQuanLyLot, Type = typeof(string), AlowDatabase = true };
+        public Propertyy IDThung { get; set; } = new() { DBName = DBName.IDThung, DisplayName = DispName.IDThung, Type = typeof(string), AlowDatabase = true };
+        public Propertyy SoLuong { get; set; } = new() { DBName = DBName.SoLuong, DisplayName = DispName.SoLuong, Type = typeof(int), AlowDatabase = true };
+        public Propertyy NgayDongThung { get; set; } = new() { DBName = DBName.NgayDongThung, DisplayName = DispName.NgayDongThung, Type = typeof(DateTime), AlowDatabase = true };
 
         // Get all property of this class
         public static List<Propertyy> GetClassProperties()
         {
-            Type propertyType = typeof(DongThung); 
+            Type propertyType = typeof(ThungTPham);
 
-            DongThung instance = new();
+            ThungTPham instance = new();
 
             FieldInfo[] fields = propertyType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
@@ -52,7 +64,7 @@ namespace ProcessManagement.Models.KHSXs
 
         public List<Propertyy> GetPropertiesValues()
         {
-            Type propertyType = typeof(DongThung);
+            Type propertyType = typeof(ThungTPham);
 
             FieldInfo[] fields = propertyType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 

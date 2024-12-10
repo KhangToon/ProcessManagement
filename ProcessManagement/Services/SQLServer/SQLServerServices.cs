@@ -14,7 +14,7 @@ using ProcessManagement.Models.SANPHAM;
 using ProcessManagement.Models.TienDoGCs;
 using System.Data;
 using System.Text.RegularExpressions;
-using static ProcessManagement.Models.KHSXs.DongThung;
+using static ProcessManagement.Models.KHSXs.ThungTPham;
 using static ProcessManagement.Models.KHSXs.KetQuaGC;
 
 namespace ProcessManagement.Services.SQLServer
@@ -7708,19 +7708,19 @@ namespace ProcessManagement.Services.SQLServer
                 if (rs != null && int.TryParse(rs.ToString(), out result) && result > 0)
                 {
                     // Successfully inserted; proceed with DongThung insertion if necessary
-                    if (ketquaGC.DSDongThung != null && ketquaGC.DSDongThung.Any())
-                    {
-                        foreach (var dongThung in ketquaGC.DSDongThung)
-                        {
-                            var (dongThungResult, dongThungError) = InsertDongThung(connection, result, dongThung);
-                            if (dongThungResult == -1)
-                            {
-                                // If there's an error inserting DongThung, rollback and return the error
-                                transaction.Rollback();
-                                return (-1, $"Error inserting DongThung: {dongThungError}");
-                            }
-                        }
-                    }
+                    //if (ketquaGC.DSDongThung != null && ketquaGC.DSDongThung.Any())
+                    //{
+                    //    foreach (var dongThung in ketquaGC.DSDongThung)
+                    //    {
+                    //        var (dongThungResult, dongThungError) = InsertDongThung(connection, result, dongThung);
+                    //        if (dongThungResult == -1)
+                    //        {
+                    //            // If there's an error inserting DongThung, rollback and return the error
+                    //            transaction.Rollback();
+                    //            return (-1, $"Error inserting DongThung: {dongThungError}");
+                    //        }
+                    //    }
+                    //}
 
                     // Commit transaction if all operations were successful
                     transaction.Commit();
@@ -7819,19 +7819,19 @@ namespace ProcessManagement.Services.SQLServer
                 if (result > 0)
                 {
                     // Successfully updated; proceed with DongThung update if necessary
-                    if (ketquaGC.DSDongThung != null && ketquaGC.DSDongThung.Any())
-                    {
-                        foreach (var dongThung in ketquaGC.DSDongThung)
-                        {
-                            var (dongThungResult, dongThungError) = UpdateDongThung(connection, ketquaGCId, dongThung);
-                            if (dongThungResult == -1)
-                            {
-                                // If there's an error updating DongThung, rollback and return the error
-                                transaction.Rollback();
-                                return (-1, $"Error updating DongThung: {dongThungError}");
-                            }
-                        }
-                    }
+                    //if (ketquaGC.DSDongThung != null && ketquaGC.DSDongThung.Any())
+                    //{
+                    //    foreach (var dongThung in ketquaGC.DSDongThung)
+                    //    {
+                    //        var (dongThungResult, dongThungError) = UpdateDongThung(connection, ketquaGCId, dongThung);
+                    //        if (dongThungResult == -1)
+                    //        {
+                    //            // If there's an error updating DongThung, rollback and return the error
+                    //            transaction.Rollback();
+                    //            return (-1, $"Error updating DongThung: {dongThungError}");
+                    //        }
+                    //    }
+                    //}
                     // Commit transaction if all operations were successful
                     transaction.Commit();
                 }
@@ -7904,7 +7904,7 @@ namespace ProcessManagement.Services.SQLServer
                         // Get DongThung for this KetQuaGC
                         if (ketQuaGC.KQGCID.Value != null)
                         {
-                            ketQuaGC.DSDongThung = GetListDongThung(ketQuaGC.KQGCID.Value);
+                            //ketQuaGC.DSDongThung = GetListDongThung(ketQuaGC.KQGCID.Value);
                         }
 
                         listKetQuaGC.Add(ketQuaGC);
@@ -7976,7 +7976,7 @@ namespace ProcessManagement.Services.SQLServer
                         // Get DongThung for this KetQuaGC
                         if (ketQuaGC.KQGCID.Value != null)
                         {
-                            ketQuaGC.DSDongThung = GetListDongThung(ketQuaGC.KQGCID.Value);
+                            //ketQuaGC.DSDongThung = GetListDongThung(ketQuaGC.KQGCID.Value);
                         }
 
                         listKetQuaGC.Add(ketQuaGC);
@@ -7994,17 +7994,17 @@ namespace ProcessManagement.Services.SQLServer
         #endregion
 
         // ------------------------------------------------------------------------------------- //
-        #region KHSX_DongThung
+        #region KHSX_ThungTPham
         // Insert 
-        public (int, string) InsertDongThung(SqlConnection connection, int kqgcId, DongThung dongThung)
+        public (int, string) InsertThungTPham(SqlConnection connection, ThungTPham thungtpham)
         {
             int result = -1;
             string errorMess = string.Empty;
 
             // Check for null input
-            if (dongThung == null) return (result, "Error: DongThung is null");
+            if (thungtpham == null) return (result, "Error: ThungTPham is null");
 
-            List<Propertyy> properties = dongThung.GetPropertiesValues()
+            List<Propertyy> properties = thungtpham.GetPropertiesValues()
                 .Where(po => po.AlowDatabase == true && po.Value != null)
                 .ToList();
 
@@ -8024,7 +8024,7 @@ namespace ProcessManagement.Services.SQLServer
                 string columns = string.Join(", ", properties.Select(p => $"[{p.DBName}]"));
                 string parameters = string.Join(", ", properties.Select(p => $"@{Regex.Replace(p.DBName ?? string.Empty, @"[^\w]+", "")}"));
 
-                command.CommandText = $@"INSERT INTO [{DongThungDBName.Table_DongThung}] ({columns}, [{DongThungDBName.KQGCID}]) VALUES ({parameters}, @KQGCID)";
+                command.CommandText = $@"INSERT INTO [{DBName.Table_ThungTPham}] ({columns}) VALUES ({parameters})";
 
                 // Add parameters
                 foreach (var prop in properties)
@@ -8034,9 +8034,6 @@ namespace ProcessManagement.Services.SQLServer
 
                     command.Parameters.AddWithValue(parameterName, parameterValue);
                 }
-
-                // Add KQGCID parameter
-                command.Parameters.AddWithValue("@KQGCID", kqgcId);
 
                 // Execute command
                 object? rs = command.ExecuteScalar();
@@ -8066,16 +8063,17 @@ namespace ProcessManagement.Services.SQLServer
 
             return (result, errorMess);
         }
+
         // Update 
-        public (int, string) UpdateDongThung(SqlConnection connection, int kqgcId, DongThung dongThung)
+        public (int, string) UpdateThungTPham(SqlConnection connection, ThungTPham thungtpham)
         {
             int result = -1;
             string errorMess = string.Empty;
 
             // Check for null input
-            if (dongThung == null) return (result, "Error: DongThung is null");
+            if (thungtpham == null) return (result, "Error: ThungTPham is null");
 
-            List<Propertyy> properties = dongThung.GetPropertiesValues()
+            List<Propertyy> properties = thungtpham.GetPropertiesValues()
                 .Where(po => po.AlowDatabase == true && po.Value != null)
                 .ToList();
 
@@ -8085,7 +8083,7 @@ namespace ProcessManagement.Services.SQLServer
                 return (result, "Error: No valid properties to update.");
             }
 
-            using var transaction = connection.BeginTransaction(); // Start transaction for DongThung
+            using var transaction = connection.BeginTransaction(); // Start transaction for ThungTPham
 
             try
             {
@@ -8094,7 +8092,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 string updateSet = string.Join(", ", properties.Select(p => $"[{p.DBName}] = @{Regex.Replace(p.DBName ?? string.Empty, @"[^\w]+", "")}"));
 
-                command.CommandText = $@"UPDATE [{DongThungDBName.Table_DongThung}] SET {updateSet} WHERE [{DongThungDBName.DTID}] = '{dongThung.DTID.Value}' AND [{DongThungDBName.KQGCID}] = @KQGCID";
+                command.CommandText = $@"UPDATE [{DBName.Table_ThungTPham}] SET {updateSet} WHERE [{DBName.TTPID}] = '{thungtpham.TTPID.Value}'";
 
                 // Add parameters
                 foreach (var prop in properties)
@@ -8103,9 +8101,6 @@ namespace ProcessManagement.Services.SQLServer
                     object? parameterValue = prop.Value ?? DBNull.Value;
                     command.Parameters.AddWithValue(parameterName, parameterValue);
                 }
-
-                // Add KQGCID parameter
-                command.Parameters.AddWithValue("@KQGCID", kqgcId);
 
                 // Execute command
                 result = command.ExecuteNonQuery();
@@ -8137,10 +8132,13 @@ namespace ProcessManagement.Services.SQLServer
 
             return (result, errorMess);
         }
+
         // Get
-        private List<DongThung> GetListDongThung(object ketQuaGCID)
+        public (List<ThungTPham>, string) GetListThungTPhams(Dictionary<string, object?> parameters, bool isgetAll = false)
         {
-            List<DongThung> listDongThung = new();
+            List<ThungTPham> listThungTPhams = new();
+
+            string errorMessage = string.Empty;
 
             using (var connection = new SqlConnection(connectionString))
             {
@@ -8148,19 +8146,33 @@ namespace ProcessManagement.Services.SQLServer
                 {
                     connection.Open();
 
-                    using var command = connection.CreateCommand();
+                    var conditions = new List<string>();
+                    var command = connection.CreateCommand();
+                    command.CommandText = $"SELECT * FROM [{DBName.Table_ThungTPham}]";
 
-                    command.CommandText = $"SELECT * FROM [{DongThungDBName.Table_DongThung}] WHERE [{DongThungDBName.KQGCID}] = @KQGCID";
+                    if (!isgetAll)
+                    {
+                        // Process each parameter in the dictionary
+                        foreach (var param in parameters)
+                        {
+                            conditions.Add($"[{param.Key}] = @{param.Key}");
 
-                    command.Parameters.AddWithValue("@KQGCID", ketQuaGCID);
+                            command.Parameters.AddWithValue($"@{param.Key}", param.Value);
+                        }
+
+                        if (conditions.Any())
+                        {
+                            command.CommandText += " WHERE " + string.Join(" AND ", conditions);
+                        }
+                    }
 
                     using var reader = command.ExecuteReader();
 
                     while (reader.Read())
                     {
-                        DongThung dongThung = new();
+                        ThungTPham thungtpham = new();
 
-                        List<Propertyy> rowItems = dongThung.GetPropertiesValues();
+                        List<Propertyy> rowItems = thungtpham.GetPropertiesValues();
 
                         foreach (var item in rowItems)
                         {
@@ -8174,17 +8186,19 @@ namespace ProcessManagement.Services.SQLServer
                             }
                         }
 
-                        listDongThung.Add(dongThung);
+                        listThungTPhams.Add(thungtpham);
                     }
                 }
                 catch (Exception ex)
                 {
-                    // Log the exception or handle it as appropriate
-                    Console.WriteLine($"Error in GetListDongThung: {ex.Message}");
+                    errorMessage = $"Error: {ex.Message}";
+                    listThungTPhams.Clear(); // Clear the list in case of error
                 }
             }
-            return listDongThung;
+            return (listThungTPhams, errorMessage);
         }
+
+
         #endregion
 
         // ------------------------------------------------------------------------------------- //
@@ -9269,9 +9283,9 @@ namespace ProcessManagement.Services.SQLServer
 
                     while (reader.Read())
                     {
-                        LogKiemKe lotkhsx = new();
+                        LogKiemKe logkiemke = new();
 
-                        List<Propertyy> rowItems = lotkhsx.GetPropertiesValues();
+                        List<Propertyy> rowItems = logkiemke.GetPropertiesValues();
 
                         foreach (var item in rowItems)
                         {
@@ -9285,7 +9299,7 @@ namespace ProcessManagement.Services.SQLServer
                             }
                         }
 
-                        listLogkiemkes.Add(lotkhsx);
+                        listLogkiemkes.Add(logkiemke);
                     }
                 }
                 catch (Exception ex)

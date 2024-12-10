@@ -23,7 +23,7 @@ namespace ProcessManagement.Models.KHSXs
         public Propertyy ThoiGianLamViec { get; set; } = new() { DBName = KQGCDBName.ThoiGianLamViec, DisplayName = KQGCDisplayName.ThoiGianLamViec, Type = typeof(double), AlowDatabase = true, CheckErrors = new() { Propertyy.ErrType.NotEmptyValue } };
         public Propertyy GhiChu { get; set; } = new() { DBName = KQGCDBName.GhiChu, DisplayName = KQGCDisplayName.GhiChu, Type = typeof(string), AlowDatabase = true, CheckErrors = new() { Propertyy.ErrType.NotEmptyValue } };
 
-        public List<DongThung> DSDongThung { get; set; } = new();
+        //public List<DongThung> DSDongThung { get; set; } = new();
         public List<NhanVien> DSNhanVien { get; set; } = new();
         public List<NGType> DSNGType { get; set; } = new();
         public static class KQGCDBName
