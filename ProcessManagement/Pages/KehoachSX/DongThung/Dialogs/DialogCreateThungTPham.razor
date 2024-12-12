@@ -34,8 +34,8 @@
                                     <RadzenStack Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                         <RadzenNumeric Disabled="@(!isEditingSoluong)" Placeholder="@($"* số lượng/thùng")" TValue="int" TextAlign=TextAlign.Center
                                                        Min="1" Max="999999"
-                                                       Value="@(SLtakefromLOT)"
-                                                       ValueChanged="@((args) => { SLtakefromLOT = args; })"
+                                                       Value="@(SLdefaultPerThung)"
+                                                       ValueChanged="@((args) => { SLdefaultPerThung = args; })"
                                                        Style="--rz-input-font-size: 18px; font-weight: 600; height: 35px; border-width: 1px; width: 100%" />
                                     </RadzenStack>
                                 </RadzenStack>
@@ -47,7 +47,7 @@
                                     <RadzenButton Visible="@(isEditingSoluong)" Icon="check" Click="(() => {isEditingSoluong = false;})"
                                                   ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 18px; height: 35px; width: 50px" />
                                 </RadzenStack>
-                                <RadzenButton Disabled="@(SLtakefromLOT <= 1)" Text="Tạo thùng thành phẩm" Icon="add"
+                                <RadzenButton Disabled="@(SLdefaultPerThung <= 1)" Text="Tạo thùng thành phẩm" Icon="add"
                                               ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 18px; min-height: 35px; height: contain " />
 
                             </RadzenStack>
@@ -136,7 +136,7 @@
     public KHSX TargetKHSX { get; set; } = new();
 
     private int SLdefaultPerThung = 180;
-    private int SLtakefromLOT = 0;
+
     public bool isEditingSoluong = false;
 
     private List<ThungTPham> DSachOriginThungTPhams = new(); // from Database of KHSX
@@ -157,24 +157,149 @@
         });
     }
 
-    private void AddNewThungTPham()
+    private async Task CreateListNewThungTPham()
+    {
+        await Task.Run(() =>
+        {
+            int SLOKofLOT = TargetLotResult.GetTotalOKlastCDoan(); // so luong OK con lai cua LOT (cong doan cuoi)
+
+            List<ThungTPham> newthungTPhams = new();
+
+            var lastestThungTPham = DSachOriginThungTPhams.LastOrDefault();
+
+            if (lastestThungTPham != null)
+            {
+                // PreThungTPham is existing
+                // Thieu:
+                _ = int.TryParse(lastestThungTPham.SoLuong.Value?.ToString(), out int lastestTTPsoluong) ? lastestTTPsoluong : 0;
+
+                int newSLtakefromLOT = SLdefaultPerThung - lastestTTPsoluong; // Lay so luong can bu them vao thung dang bi thieu
+
+                int soluongConlai = 0;
+                int soluongTake = 0;
+
+                if (SLOKofLOT <= newSLtakefromLOT)
+                {
+                    soluongTake = SLOKofLOT;
+                }
+                else
+                {
+
+                }
+
+                while (soluongConlai > 0)
+                {
+                    (ThungTPham newthung, int newslconlai) = AddNewThungTPham(soluongTake);
+
+                    soluongConlai = newslconlai;
+
+                    newthungTPhams.Add(newthung);
+                }
+            }
+            else
+            {
+                int soluongConlai = SLOKofLOT;
+
+                while (soluongConlai > 0)
+                {
+                    (ThungTPham newthung, soluongConlai) = AddNewThungTPham(soluongConlai);
+
+                    newthungTPhams.Add(newthung);
+                }
+            }
+        });
+    }
+
+    private async Task CreateNewListThungTPhams()
+    {
+        await Task.Run(() =>
+        {
+            int SLOKofLOT = TargetLotResult.GetTotalOKlastCDoan(); // so luong OK con lai cua LOT (cong doan cuoi)
+
+            List<ThungTPham> newthungTPhams = new();
+
+            var lastestThungTPham = DSachOriginThungTPhams.LastOrDefault();
+
+            if (lastestThungTPham != null)
+            {
+                _ = int.TryParse(lastestThungTPham.SoLuong.Value?.ToString(), out int lastestTTPsoluong) ? lastestTTPsoluong : 0;
+
+                int soluongConThieu = SLdefaultPerThung - lastestTTPsoluong;
+
+                if (soluongConThieu > 0)
+                {
+                    if (SLOKofLOT <= soluongConThieu)
+                    {
+                        ThungTPham thungTPham = new() { SoLuong = { Value = SLOKofLOT }, IDThung = { Value = lastestThungTPham.IDThung.Value } };
+
+                        newthungTPhams.Add(thungTPham);
+                    }
+                    else
+                    {
+                        ThungTPham thungTPham = new() { SoLuong = { Value = soluongConThieu }, IDThung = { Value = lastestThungTPham.IDThung.Value } };
+
+                        newthungTPhams.Add(thungTPham);
+
+                        int soluongConlai = 0;
+
+                        int soluongTake = SLOKofLOT - soluongConThieu;
+
+                        while (soluongConlai > 0)
+                        {
+                            (ThungTPham newthung, soluongConlai) = AddNewThungTPham(soluongTake);
+
+                            newthungTPhams.Add(newthung);
+                        }
+                    }
+                }
+                else if (soluongConThieu == 0)
+                {
+                    int soluongConlai = 0;
+
+                    int soluongTake = SLOKofLOT;
+
+                    while (soluongConlai > 0)
+                    {
+                        (ThungTPham newthung, soluongConlai) = AddNewThungTPham(soluongTake);
+
+                        newthungTPhams.Add(newthung);
+                    }
+                }
+            }
+
+        });
+    }
+
+    private (ThungTPham, int) AddNewThungTPham(int soluongTake)
     {
         ThungTPham newThungTP = new();
+
         newThungTP.KHSXID.Value = TargetKHSX.KHSXID.Value?.ToString();
+
         newThungTP.MaQuanLyLot.Value = TargetLotResult.MaQuanLyLot?.ToString();
 
-        int sluongchenhlech = SLdefaultPerThung - SLtakefromLOT;
+        newThungTP.IDThung.Value = "Craete new";
 
-        if (sluongchenhlech >= 0)
-        {
-            newThungTP.SoLuong.Value = SLtakefromLOT;
-            // Add new ThungTPham voi sluongchenhlech
-        }
-        else
-        {
-            newThungTP.SoLuong.Value = TargetLotResult.GetTotalOKlastCDoan(); // get SLOK last CDoan
-        }
+        int soluongConlai = soluongTake - SLdefaultPerThung;
 
+        if (soluongConlai == 0) // du soluong
+        {
+            newThungTP.SoLuong.Value = soluongTake;
+
+            return (newThungTP, 0);
+        }
+        else if (soluongConlai < 0) // thieu soluong
+        {
+            newThungTP.SoLuong.Value = soluongTake;
+
+            return (newThungTP, soluongTake);
+        }
+        else // thua soluong
+        {
+            newThungTP.SoLuong.Value = SLdefaultPerThung;
+
+            return (newThungTP, soluongConlai);
+        }
     }
 
     private void DialogClosePress()

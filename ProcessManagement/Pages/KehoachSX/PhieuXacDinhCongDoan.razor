@@ -35,13 +35,13 @@
 
         <table class="table" style="width: 100%; border-collapse: collapse;">
             <tr>
-                <td colspan="3">Tên sản phẩm: Khớp nối</td>
-                <td>Mã số SP: P5053-500-1</td>
-                <td colspan="2">MSNB</td>
-                <td>A010</td>
+                <td colspan="3">Tên sản phẩm: @TargetKHSX.TargetSanPham?.SP_TenSanPham.Value?.ToString()</td>
+                <td>Mã số SP: @TargetKHSX.TargetSanPham?.SP_MaSP.Value?.ToString()</td>
+                <td colspan="3">MSNB</td>
+                <td>@TargetKHSX.MaLSX.Value?.ToString()</td>
             </tr>
             <tr>
-                <td colspan="7">Lot NVL</td>
+                <td colspan="8">Lot NVL: @MaQLyLot</td>
             </tr>
             <tr>
                 <td>Tên công đoạn</td>
@@ -81,21 +81,42 @@
 
 
 @code {
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "khsxid")]
+    public int KHSXID { get; set; } = 0;
+
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "lot")]
+    public string MaQLyLot { get; set; } = string.Empty;
+
+    private KHSX TargetKHSX = new();
 
     protected override Task OnInitializedAsync()
-    {   
+    {
+        TargetKHSX = SQLServerServices.GetKHSXbyID(KHSXID);
+
+        manufacturingSteps = new();
+
+        int index = 0;
+        foreach (var cdoan in TargetKHSX.DSachCongDoans)
+        {
+            index++;
+            ManufacturingStep manufacturing = new() { Name = $"{index}. {cdoan.TenCongDoan.Value?.ToString()}", Date = "", Employee = "", Machine = "", Shift = "", Quantity = "", Confirmation = "", Notes = "" };
+            manufacturingSteps.Add(manufacturing);
+        }
+
         return base.OnInitializedAsync();
     }
 
-    private List<ManufacturingStep> manufacturingSteps = new List<ManufacturingStep>
-    {
-        new ManufacturingStep { Name = "1. NC1 (Tiện phi), kiểm pin 100%", Date = "", Employee = "", Machine = "", Shift = "", Quantity = "", Confirmation = "", Notes = "" },
-        new ManufacturingStep { Name = "2. MC1 (Khoan lỗ), kiểm JIG 100%", Date = "", Employee = "", Machine = "", Shift = "", Quantity = "", Confirmation = "", Notes = "" },
-        new ManufacturingStep { Name = "3. NC2 (Tiện ren), kiểm ren 5pcs/11", Date = "", Employee = "", Machine = "", Shift = "", Quantity = "", Confirmation = "", Notes = "" },
-        new ManufacturingStep { Name = "4. Rửa", Date = "", Employee = "", Machine = "", Shift = "", Quantity = "", Confirmation = "", Notes = "" },
-        new ManufacturingStep { Name = "5. Kiểm Pin, M3, ren RC3/8 100%", Date = "", Employee = "", Machine = "", Shift = "", Quantity = "", Confirmation = "", Notes = "" },
-        new ManufacturingStep { Name = "6. Ngoại quan + đóng thùng", Date = "", Employee = "", Machine = "", Shift = "", Quantity = "", Confirmation = "", Notes = "" }
-    };
+    private List<ManufacturingStep> manufacturingSteps = new List<ManufacturingStep>();
+    // {
+    //     // new ManufacturingStep { Name = "1. NC1 (Tiện phi), kiểm pin 100%", Date = "", Employee = "", Machine = "", Shift = "", Quantity = "", Confirmation = "", Notes = "" },
+    //     // new ManufacturingStep { Name = "2. MC1 (Khoan lỗ), kiểm JIG 100%", Date = "", Employee = "", Machine = "", Shift = "", Quantity = "", Confirmation = "", Notes = "" },
+    //     // new ManufacturingStep { Name = "3. NC2 (Tiện ren), kiểm ren 5pcs/11", Date = "", Employee = "", Machine = "", Shift = "", Quantity = "", Confirmation = "", Notes = "" },
+    //     // new ManufacturingStep { Name = "4. Rửa", Date = "", Employee = "", Machine = "", Shift = "", Quantity = "", Confirmation = "", Notes = "" },
+    //     // new ManufacturingStep { Name = "5. Kiểm Pin, M3, ren RC3/8 100%", Date = "", Employee = "", Machine = "", Shift = "", Quantity = "", Confirmation = "", Notes = "" },
+    //     // new ManufacturingStep { Name = "6. Ngoại quan + đóng thùng", Date = "", Employee = "", Machine = "", Shift = "", Quantity = "", Confirmation = "", Notes = "" }
+    // };
 
     public class ManufacturingStep
     {

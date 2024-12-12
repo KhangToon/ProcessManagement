@@ -12,6 +12,7 @@
 @inject DialogService DialogService
 @inject SQLServerServices SQLServerServices
 @inject TooltipService TooltipService
+@inject NavigationManager NavigationManager
 
 <style>
     .rz-grid-table {
@@ -48,6 +49,7 @@
                               Icon="chevron_left" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />
                 <RadzenButton Visible="@(!isexpandingAll)" Text="Mở tất cả" Style="border-radius: 20px; min-width: 100px;" Click="@(() => { isexpandingAll = true; SetExpandingAll(isexpandingAll);})"
                               Icon="chevron_right" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />
+
             </RadzenStack>
         </HeaderTemplate>
         <Columns>
@@ -93,6 +95,8 @@
                         <RadzenStack Style="width: contain; height: contain" Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                             <RadzenText Text="@($"{lotrow.MaQuanLyLot?.ToString()?? "_"}")" Style="font-size: 15px; min-width: 150px; height: contain; font-weight: 500"></RadzenText>
                             <RadzenButton Click="@(() => OnOpenQR_ImageDialog(lotrow.MaQuanLyLot?.ToString() ?? string.Empty, "Mã quản lý"))" Icon="qr_code" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Variant="Variant.Flat"
+                                          Style="font-size: 17px; font-weight: 600; height: contain; min-height: contain; width: contain;" />
+                            <RadzenButton Click="@(() => NavigateToPhieuXDCD(lotrow))" Icon="print" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Variant="Variant.Flat"
                                           Style="font-size: 17px; font-weight: 600; height: contain; min-height: contain; width: contain;" />
                         </RadzenStack>
                     </Template>
@@ -663,6 +667,15 @@
             await DialogService.OpenAsync<DialogCreateThungTPham>(null, new Dictionary<string, object>() { { "TargetLotResult", resultPerLOTKHSX } },
             new DialogOptions() { ShowTitle = false, Width = "50%", Height = "80%", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
         }
+    }
+
+    private void NavigateToPhieuXDCD(ResultPerLOTKHSX selectRow)
+    {
+        _ = int.TryParse(TargetKHSX?.KHSXID.Value?.ToString(), out int khsxid) ? khsxid : 0;
+
+        var url = $"phieu-xac-dinh-cong-doan?khsxid={khsxid}&lot={selectRow.MaQuanLyLot}";
+
+        NavigationManager.NavigateTo(url);
     }
 
     // Datagrid selected changed event
