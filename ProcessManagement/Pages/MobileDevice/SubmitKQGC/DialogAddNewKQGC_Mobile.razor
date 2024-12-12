@@ -217,6 +217,12 @@
                                                     {
                                                         max = (int.TryParse(newKetQuaGC.SLperLOT.Value?.ToString(), out int num) ? num : 999999);
                                                     }
+                                                    else if (property.DBName == KetQuaGC.KQGCDBName.SLNG)
+                                                    {
+                                                        _ = int.TryParse(newKetQuaGC.SLperLOT.Value?.ToString(), out int sllot) ? sllot : 0;
+                                                        _ = int.TryParse(newKetQuaGC.SLOK.Value?.ToString(), out int slok) ? slok : 0;
+                                                        max = sllot - slok;
+                                                    }
 
                                                     <RadzenStack Style="width: 85%;">
                                                         <RadzenNumeric Disabled="@(property.DBName == KetQuaGC.KQGCDBName.SLperLOT)" class="custom-numeric" TValue="int" Placeholder="0" Step="1"
@@ -626,6 +632,8 @@
         }
         else if (propertyy.DBName == KetQuaGC.KQGCDBName.MaQuanLyLot)
         {
+            await Task.Delay(100);
+
             var targetItem = dsachMaQLyLots.FirstOrDefault(lot => lot.KHSXLOTID.Value?.ToString()?.Trim() == selectedValues.FirstOrDefault().Key);
 
             //Asign sluong OK/NG last Result

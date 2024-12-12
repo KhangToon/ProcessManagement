@@ -84,7 +84,7 @@
                                                                         TValue="KeyValuePair<string, string>"
                                                                         Data="@(ComboboxDSachKeys(property.DBName))"
                                                                         SelectedItem="@(ITemSelecteds[property.DBName])"
-                                                                        Value="@(ITemSelecteds[property.DBName])" SearchTextChanged="@((args) => OnComboboxInputTextChange(property.DBName, args))"
+                                                                        Value="@(ITemSelecteds[property.DBName])" SearchTextChanged="@(async (args) => await OnComboboxInputTextChange(property.DBName, args))"
                                                                         ValueChanged="@((KeyValuePair<string, string> args) => OnComboboxDSachKeysSelectedChanged(new List<KeyValuePair<string, string>>{args}, property))">
                                                             <!--Custom style off dropdownbox items-->
                                                             <Template>
@@ -222,6 +222,12 @@
                                                             if (property.DBName == KetQuaGC.KQGCDBName.SLOK || property.DBName == KetQuaGC.KQGCDBName.SLperLOT)
                                                             {
                                                                 max = (int.TryParse(newKetQuaGC.SLperLOT.Value?.ToString(), out int num) ? num : 999999);
+                                                            }
+                                                            else if (property.DBName == KetQuaGC.KQGCDBName.SLNG)
+                                                            {
+                                                                _ = int.TryParse(newKetQuaGC.SLperLOT.Value?.ToString(), out int sllot) ? sllot : 0;
+                                                                _ = int.TryParse(newKetQuaGC.SLOK.Value?.ToString(), out int slok) ? slok : 0;
+                                                                max = sllot - slok;
                                                             }
 
                                                             <RadzenStack Style="width: 50%;">
@@ -468,36 +474,38 @@
         {
             var targetItem = dsachMaQLyLots.FirstOrDefault(lot => lot.MaQuanLyLot.Value?.ToString()?.Trim() == args.ToString()?.Trim());
 
-            //
-            KHSX_LOT preRSultLotTargetCD = new();
-            KHSX_LOT curRSultLotinTargetCD = new();
-
-            List<KHSX_LOT> dsanhResultofLotAllCdoan = dsachMaQLyLots.Where(lot => lot.MaQuanLyLot.Value?.ToString()?.Trim() == args.ToString()?.Trim()).ToList();
-
-            curRSultLotinTargetCD = dsanhResultofLotAllCdoan.FirstOrDefault(lot => lot.NCID.Value?.ToString()?.Trim() == newKetQuaGC.NCID.Value?.ToString()?.Trim()) ?? new();
-
-            // SL ok + ng da submit cua curRSultLotinTargetCD
-            _ = int.TryParse(curRSultLotinTargetCD.SLOKsubmited.Value?.ToString(), out int curSLOKsubmited) ? curSLOKsubmited : 0;
-            _ = int.TryParse(curRSultLotinTargetCD.SLNGsubmited.Value?.ToString(), out int curSLNGsubmited) ? curSLNGsubmited : 0;
-
-            int indexcurrentCD = dsanhResultofLotAllCdoan.IndexOf(curRSultLotinTargetCD);
-
-            preRSultLotTargetCD = Common.GetElementOrNew(dsanhResultofLotAllCdoan, indexcurrentCD - 1);
-
-            // SL ok + ng da submit cua preRSultLotTargetCD
-            _ = int.TryParse(preRSultLotTargetCD.SLOKsubmited.Value?.ToString(), out int preSLOKsubmited) ? preSLOKsubmited : 0;
-            _ = int.TryParse(preRSultLotTargetCD.SLNGsubmited.Value?.ToString(), out int preSLNGsubmited) ? preSLNGsubmited : 0;
-            _ = int.TryParse(targetItem?.SLLOT.Value?.ToString(), out int slperlotBase) ? slperlotBase : 0;
-
-            if (!string.IsNullOrEmpty(preRSultLotTargetCD.KHSXLOTID.Value?.ToString()))
+            if (targetItem != null)
             {
-                // New pre != null --> gan slpreok cho sllimit current
-                newKetQuaGC.SLperLOT.Value = preSLOKsubmited - (curSLOKsubmited + curSLNGsubmited); // Tru so luong da submit cua currentlot
+                //
+                KHSX_LOT preRSultLotTargetCD = new();
+                KHSX_LOT curRSultLotinTargetCD = new();
+
+                List<KHSX_LOT> dsanhResultofLotAllCdoan = dsachMaQLyLots.Where(lot => lot.MaQuanLyLot.Value?.ToString()?.Trim() == args.ToString()?.Trim()).ToList();
+
+                curRSultLotinTargetCD = dsanhResultofLotAllCdoan.FirstOrDefault(lot => lot.NCID.Value?.ToString()?.Trim() == newKetQuaGC.NCID.Value?.ToString()?.Trim()) ?? new();
+
+                // SL ok + ng da submit cua curRSultLotinTargetCD
+                _ = int.TryParse(curRSultLotinTargetCD.SLOKsubmited.Value?.ToString(), out int curSLOKsubmited) ? curSLOKsubmited : 0;
+                _ = int.TryParse(curRSultLotinTargetCD.SLNGsubmited.Value?.ToString(), out int curSLNGsubmited) ? curSLNGsubmited : 0;
+
+                int indexcurrentCD = dsanhResultofLotAllCdoan.IndexOf(curRSultLotinTargetCD);
+
+                preRSultLotTargetCD = Common.GetElementOrNew(dsanhResultofLotAllCdoan, indexcurrentCD - 1);
+
+                // SL ok + ng da submit cua preRSultLotTargetCD
+                _ = int.TryParse(preRSultLotTargetCD.SLOKsubmited.Value?.ToString(), out int preSLOKsubmited) ? preSLOKsubmited : 0;
+                _ = int.TryParse(preRSultLotTargetCD.SLNGsubmited.Value?.ToString(), out int preSLNGsubmited) ? preSLNGsubmited : 0;
+                _ = int.TryParse(targetItem?.SLLOT.Value?.ToString(), out int slperlotBase) ? slperlotBase : 0;
+
+                if (!string.IsNullOrEmpty(preRSultLotTargetCD.KHSXLOTID.Value?.ToString()))
+                {
+                    // New pre != null --> gan slpreok cho sllimit current
+                    newKetQuaGC.SLperLOT.Value = preSLOKsubmited - (curSLOKsubmited + curSLNGsubmited); // Tru so luong da submit cua currentlot
+                }
+                else newKetQuaGC.SLperLOT.Value = slperlotBase - (curSLOKsubmited + curSLNGsubmited); // Tru so luong da submit cua currentlot
+
+                //
             }
-            else newKetQuaGC.SLperLOT.Value = slperlotBase - (curSLOKsubmited + curSLNGsubmited); // Tru so luong da submit cua currentlot
-
-            //
-
 
             if (targetItem != null)
             {
@@ -564,6 +572,7 @@
         }
         else if (propertyy.DBName == KetQuaGC.KQGCDBName.MaQuanLyLot)
         {
+            await Task.Delay(100);
 
             var targetItem = dsachMaQLyLots.FirstOrDefault(lot => lot.KHSXLOTID.Value?.ToString()?.Trim() == selectedValues.FirstOrDefault().Key);
 

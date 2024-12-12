@@ -151,7 +151,25 @@
                                                     }
                                                     else
                                                     {
-                                                        <RadzenText Text="@($"{kqgc.GetPropertyValue(colName)}")" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
+                                                        if (colName == KetQuaGC.KQGCDBName.SLOK)
+                                                        {
+                                                            <RadzenText Text="@($"{kqgc.GetPropertyValue(colName)}")" Style="color: darkgreen; font-size: 15px; height: contain; font-weight: 500"></RadzenText>
+                                                        }
+                                                        else if (colName == KetQuaGC.KQGCDBName.SLNG)
+                                                        {
+                                                            _ = int.TryParse(kqgc.GetPropertyValue(colName)?.ToString(), out int slng) ? slng : 0;
+
+                                                            <RadzenText Visible="@(slng > 0)" Text="@($"{slng}")" Style="color: red; font-size: 15px; height: contain; font-weight: 500"></RadzenText>
+                                                            <RadzenText Visible="@(slng == 0)" Text="@($"{slng}")" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
+                                                        }
+                                                        else if (colName == KetQuaGC.KQGCDBName.MaQuanLyLot)
+                                                        {
+                                                            <RadzenText Text="@($"{kqgc.GetPropertyValue(colName)}")" Style="font-size: 15px; height: contain; font-weight: 600"></RadzenText>
+                                                        }
+                                                        else
+                                                        {
+                                                            <RadzenText Text="@($"{kqgc.GetPropertyValue(colName)}")" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
+                                                        }
                                                     }
                                                 }
                                             }
@@ -160,9 +178,9 @@
                                             <RadzenText Visible="@(colName == KetQuaGC.KQGCDBName.SLperLOT)" Text="@(((DSachKetQuaGCs.Sum(kqgc => int.TryParse(kqgc.SLperLOT.Value?.ToString(), out int sumslperlot)? sumslperlot : 0)).ToString()))"
                                                         Style="color: black; font-size: 18px; height: contain; min-width: 50px; font-weight: 600;"></RadzenText>
                                             <RadzenText Visible="@(colName == KetQuaGC.KQGCDBName.SLOK)" Text="@(((DSachKetQuaGCs.Sum(kqgc => int.TryParse(kqgc.SLOK.Value?.ToString(), out int sumok)? sumok : 0)).ToString()))"
-                                                        Style="color: black; font-size: 18px; height: contain; min-width: 50px; font-weight: 600;"></RadzenText>
+                                                        Style="color: darkgreen; font-size: 18px; height: contain; min-width: 50px; font-weight: 600;"></RadzenText>
                                             <RadzenText Visible="@(colName == KetQuaGC.KQGCDBName.SLNG)" Text="@(((DSachKetQuaGCs.Sum(kqgc => int.TryParse(kqgc.SLNG.Value?.ToString(), out int sumng)? sumng : 0)).ToString()))"
-                                                        Style="color: black; font-size: 18px; height: contain; min-width: 50px; font-weight: 600;"></RadzenText>
+                                                        Style="color: red; font-size: 18px; height: contain; min-width: 50px; font-weight: 600;"></RadzenText>
                                         </FooterTemplate>
                                     </RadzenDataGridColumn>
                                 }

@@ -57,7 +57,7 @@ namespace ProcessManagement.Models.KHSXs
             public const string MaMay = "Mã máy";
             public const string CaLamViec = "Ca";
             public const string ThoiGianGC = "TGian GC";
-            public const string MaQuanLyLot = "Mã LOT";
+            public const string MaQuanLyLot = "Mã quản lý LOT";
             public const string SLOK = "SL OK";
             public const string SLNG = "SL NG";
             public const string SLperLOT = "Tổng";
