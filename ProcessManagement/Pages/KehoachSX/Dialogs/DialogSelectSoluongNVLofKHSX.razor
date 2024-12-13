@@ -15,7 +15,7 @@
     <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style=" height: 100%; width: 100%; padding: 0px; padding-bottom: 10px " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
         <RadzenStack Gap="20px" Style="height: contain; width: 100%; padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
             <RadzenText Text="Chỉ định số lượng nguyên liệu sản xuất" Style="color: darkgreen; font-weight: 600; font-size: 18px"></RadzenText>
-            <RadzenText Text="@($"{selectSanPham.SP_TenSanPham.Value?.ToString()}")" Style="color: darkblue; font-weight: 600; font-size: 18px; font-style: italic"></RadzenText>
+            <RadzenText Text="@($"{selectSanPham.SP_TenSanPham.Value?.ToString()} ({selectSanPham.SP_MaSP.Value?.ToString()})")" Style="color: darkblue; font-weight: 600; font-size: 18px; font-style: italic"></RadzenText>
         </RadzenStack>
 
         <!--Chi dinh so luong san pham-->
@@ -23,7 +23,7 @@
             <!--Loai NVL-->
             <RadzenStack Gap="10px" Style="width: contain; height: contain;" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
                 <RadzenText Text="Loại nguyên liệu" Style="color: black; font-weight: 600; font-size: 16px"></RadzenText>
-                <RadzenDropDown AllowFiltering = "true" AllowClear="true" Placeholder="* chọn loại nguyên liệu" Disabled="(DsachloaiNVLs?.Count == 0 || DsachloaiNVLs == null)" TValue="string" Style="width: 100%; height: contain; font-size: 14px; font-weight: 600"
+                <RadzenDropDown AllowFiltering="true" AllowClear="true" Placeholder="* chọn loại nguyên liệu" Disabled="(DsachloaiNVLs?.Count == 0 || DsachloaiNVLs == null)" TValue="string" Style="width: 100%; height: contain; font-size: 14px; font-weight: 600"
                                 Value="selectLoaiNVL?.TenLoaiNVL.Value?.ToString()"
                                 Data=@(DsachloaiNVLs?.Select(lnvl => lnvl.TenLoaiNVL.Value?.ToString()?.Trim()) ?? Enumerable.Empty<string>())
                                 Change="@(args =>
@@ -60,26 +60,15 @@
             <RadzenStack Gap="10px" Style="width: contain; height: contain;" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
                 <RadzenText Text="Chỉ định sản phẩm" Style="color: black; font-weight: 600; font-size: 16px"></RadzenText>
                 <RadzenDropDown AllowFiltering="true" AllowClear="true" Placeholder="* chọn sản phẩm" Disabled="(DsachSPs?.Count == 0 || DsachSPs == null)" TValue="string" Style="width: 100%; height: contain; font-size: 14px; font-weight: 600"
-                                Value="selectSanPham?.SP_TenSanPham.Value?.ToString()"
-                                Data=@(DsachSPs?.Select(sp => sp.SP_TenSanPham.Value?.ToString()?.Trim()) ?? Enumerable.Empty<string>())
+                                Value="selectSanPham?.SP_MaSP.Value?.ToString()"
+                                Data=@(DsachSPs?.Select(sp => sp.SP_MaSP.Value?.ToString()?.Trim()) ?? Enumerable.Empty<string>())
                                 Change="@(args =>
                                         {
-                                            selectSanPham = DsachSPs?.FirstOrDefault(sp => sp.SP_TenSanPham.Value?.ToString()?.Trim() == args?.ToString()) ?? new();
+                                            selectSanPham = DsachSPs?.FirstOrDefault(sp => sp.SP_MaSP.Value?.ToString()?.Trim() == args?.ToString()?.Trim()) ?? new();
                                             generLot.isGenerateListLotOK = false;
                                             generLot.isCheckSLNVLisOK = false;
                                             generLot.ResetDefault();
                                         })">
-                </RadzenDropDown>
-
-                <RadzenDropDown Visible="false" AllowClear="true" Placeholder="* chọn sản phẩm" Disabled="(DsachSPs?.Count == 0 || DsachSPs == null)"
-                                Value="@generLot.NewKHSX.TargetSanPham?.SP_TenSanPham.Value?.ToString()" TValue="string"
-                                ValueChanged="@((args) =>
-                                            { generLot.isGenerateListLotOK = false;
-                                            generLot.isCheckSLNVLisOK = false;
-                                            generLot.SetCurrentKHSXsanPham(args, DsachSPs);
-                                            selectSanPham = generLot.NewKHSX.TargetSanPham ?? new();
-                                            generLot.ResetDefault(); })"
-                                Data=@(GetDSMaSPs(DsachSPs)) Style="width: contain; border-radius: 5px; border-width: 1px; font-size: 16px; ">
                 </RadzenDropDown>
             </RadzenStack>
 
@@ -363,7 +352,7 @@
 
     public List<string> GetDSMaSPs(List<SanPham>? sanPhams)
     {
-        List<string> result = sanPhams?.Select(sp => sp.SP_TenSanPham.Value?.ToString() ?? string.Empty).ToList() ?? new();
+        List<string> result = sanPhams?.Select(sp => sp.SP_MaSP.Value?.ToString() ?? string.Empty).ToList() ?? new();
 
         return result;
     }

@@ -196,20 +196,11 @@ namespace ProcessManagement.Models
             NewKHSX.DSachNVLofKHSXs = new();
         }
 
-        public void SetCurrentKHSXsanPham(string? tenSP, List<SanPham>? sanPhams)
+        public void SetCurrentKHSXsanPham(string? maSP, List<SanPham>? sanPhams)
         {
             DSachSanPhams = sanPhams?.ToList()?? new();
 
-            NewKHSX.TargetSanPham = DSachSanPhams.FirstOrDefault(sp => sp.SP_TenSanPham.Value?.ToString()?.Trim() == tenSP?.ToString()) ?? new();
-        }
-
-        public List<string> GetDSMaSPs()
-        {
-            DSachSanPhams = SQLServerServices.GetDanhSachSanPham();
-
-            List<string> result = DSachSanPhams.Select(sp => sp.SP_TenSanPham.Value?.ToString() ?? string.Empty).ToList();
-
-            return result;
+            NewKHSX.TargetSanPham = DSachSanPhams.FirstOrDefault(sp => sp.SP_MaSP.Value?.ToString()?.Trim() == maSP?.ToString()) ?? new();
         }
 
         private static string AutoGenerateLSXCode()

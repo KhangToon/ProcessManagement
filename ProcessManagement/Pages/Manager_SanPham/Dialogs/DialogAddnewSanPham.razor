@@ -48,7 +48,7 @@
                                     @{
                                         <RadzenStack Style="width: 50%;">
                                             <RadzenTextBox class="custom-placeholder" Placeholder="@($" * nhập { NewSanPham.SP_TenSanPham.DisplayName}")" Value="@NewSanPham.SP_TenSanPham.Value?.ToString()" Style="font-size: 16px; height: contain; border-width: 1px;"
-                                                           @oninput="@(async (args) => { NewSanPham.SP_TenSanPham.Value = args.Value; await DefaultThongTinSanPham_ValueIsOK(NewSanPham.SP_TenSanPham, true);})">
+                                                           @oninput="@(async (args) => { NewSanPham.SP_TenSanPham.Value = args.Value; await DefaultThongTinSanPham_ValueIsOK(NewSanPham.SP_TenSanPham, false);})">
                                             </RadzenTextBox>
                                         </RadzenStack>
 
@@ -82,7 +82,7 @@
                                 </RadzenStack>
                             </RadzenStack>
                         </RadzenStack>
-                    
+
 
                         <!--Hien thi thong tin khac-->
                         @foreach (var thongtinSP in NewSanPham.DSThongTin)
@@ -171,12 +171,12 @@
 @code {
     private SanPham NewSanPham = new();
 
-    protected override Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
     {
         // Get default danh sach thong tin
-        NewSanPham.DSThongTin = LoadDanhSachThongTinMacDinh().ToList();
+        NewSanPham.DSThongTin = await LoadDanhSachThongTinMacDinh();
 
-        return base.OnInitializedAsync();
+        await base.OnInitializedAsync();
     }
 
     // Add new thong tin san pham
@@ -312,7 +312,7 @@
     }
 
     // Load danh sach thong tin mac dinh
-    private List<ThongTinSanPham> LoadDanhSachThongTinMacDinh()
+    private async Task<List<ThongTinSanPham>> LoadDanhSachThongTinMacDinh()
     {
         List<LoaiThongTinSanPham> loaiThongTinSanPhams = SQLServerServices.GetDanhSachLoaiThongTinSanPham(1);
 
@@ -321,6 +321,16 @@
         foreach (var loaitt in loaiThongTinSanPhams)
         {
             ThongTinSanPham thongtin = new() { LoaiThongTin = loaitt, LoaiTTSPID = { Value = loaitt.LoaiTTSPID.Value } };
+
+            if (string.IsNullOrEmpty(thongtin.GiaTri.Value?.ToString()?.Trim()))
+            {
+                thongtin.GiaTri.Value = loaitt.GiaTriMacDinh.Value;
+            }
+
+            foreach (var property in thongtin.GetPropertiesValues())
+            {
+                await DefaultThongTinSanPham_ValueIsOK(property, false);
+            }
 
             thongTinSanPhams.Add(thongtin);
         }
@@ -380,7 +390,7 @@
                 {
                     ShowNotification("Thêm mới sản phẩm thành công!", NotificationSeverity.Success, 3000);
 
-                    bool? thoat = await DialogService.Alert($"Thêm mới sản phẩm {NewSanPham.SP_TenSanPham.Value?.ToString()} thành công", "<strong><span style='color: green'>Success!</span></strong>", new AlertOptions() { OkButtonText = "Thoát", ShowClose = true });
+                    bool? thoat = await DialogService.Alert($"Thêm mới sản phẩm {NewSanPham.SP_TenSanPham.Value?.ToString()} ({NewSanPham.SP_MaSP.Value?.ToString()}) thành công", "<strong><span style='color: green'>Success!</span></strong>", new AlertOptions() { OkButtonText = "Thoát", ShowClose = true });
 
                     if (thoat.Value)
                     {
