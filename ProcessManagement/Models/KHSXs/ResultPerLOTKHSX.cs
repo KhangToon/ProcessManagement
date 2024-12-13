@@ -45,6 +45,22 @@ namespace ProcessManagement.Models.KHSXs
             return sumNG;
         }
 
+        public int GetTotalOKAllCDoan()
+        {
+            _ = int.TryParse(SLperLOT?.ToString(), out int sldefaultLot) ? sldefaultLot : 0;
+
+            int sumAllOK = sldefaultLot - GetTotalNGAllCDoan();
+
+            return (sumAllOK < 0) ? 0 : sumAllOK;
+        }
+
+        public int GetTotalNGAllCDoan()
+        {
+            int sumAllNG = DsachKQGCperCDOAN.Sum(cd => cd.TotalNG);
+
+            return sumAllNG;
+        }
+
         public object? GetCaLamViec(object? cdid, int caindex)
         {
             object calamviec = "_";
