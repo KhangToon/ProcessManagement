@@ -1407,7 +1407,7 @@ namespace ProcessManagement.Services.SQLServer
                         item.Value = columnValue;
                     }
 
-                    nvl.TenNVL = GetTenNguyenVatLieu(nvl.NVLID.Value).TenNVL.Value?.ToString() ?? string.Empty;
+                    nvl.TenNVL = GetTenNguyenVatLieu(nvl.NVLID.Value).MaNVL.Value?.ToString() ?? string.Empty;
 
                     listnvls.Add(nvl);
                 }
@@ -1480,7 +1480,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"SELECT * FROM [{Common.Table_NguyenVatLieu}] WHERE [{Common.TenNVL}] = '{tenNVL}'";
+                command.CommandText = $"SELECT * FROM [{Common.Table_NguyenVatLieu}] WHERE [{Common.MaNVL}] = '{tenNVL}'";
 
                 using var reader = command.ExecuteReader();
 
@@ -1662,7 +1662,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 var command = connection.CreateCommand();
 
-                command.CommandText = $"SELECT [{Common.NVLID}] FROM [{Common.Table_NguyenVatLieu}] WHERE [{Common.TenNVL}] = '{tenNVL}'";
+                command.CommandText = $"SELECT [{Common.NVLID}] FROM [{Common.Table_NguyenVatLieu}] WHERE [{Common.MaNVL}] = '{tenNVL}'";
 
                 using var reader = command.ExecuteReader();
 

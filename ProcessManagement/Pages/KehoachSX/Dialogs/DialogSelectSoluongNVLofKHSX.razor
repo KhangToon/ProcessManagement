@@ -43,11 +43,11 @@
             <RadzenStack Gap="10px" Style="width: contain; height: contain;" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
                 <RadzenText Text="Tên nguyên liệu" Style="color: black; font-weight: 600; font-size: 16px"></RadzenText>
                 <RadzenDropDown AllowFiltering="true" AllowClear="true" Placeholder="* chọn nguyên liệu" Disabled="(DsachNVLs?.Count == 0 || DsachNVLs == null)" TValue="string" Style="width: 100%; height: contain; font-size: 14px; font-weight: 600"
-                                Value="selectNguyenVL?.TenNVL.Value?.ToString()"
-                                Data=@(DsachNVLs?.Select(nvl => nvl.TenNVL.Value?.ToString()?.Trim()) ?? Enumerable.Empty<string>())
+                                Value="selectNguyenVL?.MaNVL.Value?.ToString()"
+                                Data=@(DsachNVLs?.Select(nvl => nvl.MaNVL.Value?.ToString()?.Trim()) ?? Enumerable.Empty<string>())
                                 Change="@(args =>
                                         {
-                                            selectNguyenVL = DsachNVLs?.FirstOrDefault(nvl => nvl.TenNVL.Value?.ToString()?.Trim() == args?.ToString());
+                                            selectNguyenVL = DsachNVLs?.FirstOrDefault(nvl => nvl.MaNVL.Value?.ToString()?.Trim() == args?.ToString());
                                             DsachSPs = LoadDSachSanPham(selectNguyenVL);
                                             selectSanPham = new(); // reset selected SanPham
                                             generLot.NewKHSX.TargetSanPham = null;
@@ -138,7 +138,7 @@
                                                 <!--Ten NVL-->
                                                 <RadzenStack Style="width: 15%; height: contain; border-left: var(--rz-grid-cell-border); border-right: var(--rz-grid-cell-border); padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                     <RadzenStack Style="height: contain; min-height: 35px; width: 100%; border-radius: 5px; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                        <RadzenText Text="@($"{nvlofsp.TargetNgLieu.TenNVL.Value?.ToString()}")" Style="color: darkblue; font-weight: 600; font-size: 15px"></RadzenText>
+                                                        <RadzenText Text="@($"{nvlofsp.TargetNgLieu.MaNVL.Value?.ToString()}")" Style="color: darkblue; font-weight: 600; font-size: 15px"></RadzenText>
                                                     </RadzenStack>
                                                 </RadzenStack>
 

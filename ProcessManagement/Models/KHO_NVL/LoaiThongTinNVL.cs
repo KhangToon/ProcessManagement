@@ -13,6 +13,7 @@ namespace ProcessManagement.Models.KHO_NVL
         public Propertyy IsDefault { get; set; } = new() { DBName = Common.IsDefault, DisplayName = "IsDefault", Type = typeof(bool), AlowDatabase = true, };
         public Propertyy TenTruyXuat { get; set; } = new() { DBName = Common.TenTruyXuat, DisplayName = "Tên truy xuất", Type = typeof(string), AlowDatabase = true, AlowDisplay = false, DispDatagrid = false };
         public Propertyy IsDisplayDatagrid { get; set; } = new() { DBName = Common.IsDisplayDatagrid, DisplayName = "IsDisplayDatagrid", Type = typeof(bool), AlowDatabase = true, };
+        public Propertyy IsAllowEmptyValue { get; set; } = new() { DBName = Common.IsAllowEmptyValue, DisplayName = "IsAllowEmptyValue", Type = typeof(bool), AlowDatabase = true, };
 
         public bool IsAddForAll { get; set; } = false; // Add truong thong tin cho tat cac NVL (chi dung luc them moi truong thong tin)
 

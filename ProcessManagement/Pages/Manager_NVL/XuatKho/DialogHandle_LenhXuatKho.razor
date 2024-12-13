@@ -24,7 +24,7 @@
             </RadzenStack>
             <RadzenStack Gap="10px" Style="height: contain; width: contain; border-radius: 5px; padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                 <RadzenText Text="@($"Tên nguyên liệu:")" Style="font-weight: 600; font-size: 16px; color: black; font-style: italic"></RadzenText>
-                <RadzenText Text="@($"{LXK?.ViTriofNVL.NgLieuInfor.TenNVL.Value?.ToString()}")" Style="font-weight: bold; font-size: 16px; color: black; font-style: italic"></RadzenText>
+                <RadzenText Text="@($"{LXK?.ViTriofNVL.NgLieuInfor.MaNVL.Value?.ToString()}")" Style="font-weight: bold; font-size: 16px; color: black; font-style: italic"></RadzenText>
             </RadzenStack>
             <RadzenStack Gap="10px" Style="height: contain; width: contain; border-radius: 5px; padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                 <RadzenText Text="@($"Số lượng xuất:")" Style="font-weight: 600; font-size: 16px; color: black; font-style: italic"></RadzenText>
@@ -296,7 +296,7 @@
                         LogTonKhoTruoc = { Value = LXK.ViTriofNVL.NgLieuInfor.TonKho },
                         LogSoLuong = { Value = LXK.LXKSoLuong.Value },
                         LogTonKhoSau = { Value = LXK.ViTriofNVL.NgLieuInfor.TonKho - soluongXuatdi },
-                        LogTenNVL = { Value = LXK.ViTriofNVL.NgLieuInfor.TenNVL.Value },
+                        LogTenNVL = { Value = LXK.ViTriofNVL.NgLieuInfor.MaNVL.Value },
                         LogThoiDiem = { Value = DateTime.Now },
                         NVLID = { Value = scanLXK.NVLID.Value },
                         VTID = { Value = scanLXK.VTID.Value }
@@ -472,7 +472,7 @@
                     LogSoLuong = { Value = savedLXK.LXKSoLuong.Value },
                     LogTonKhoTruoc = { Value = savedLXK.ViTriofNVL.NgLieuInfor.TonKho },
                     LogTonKhoSau = { Value = savedLXK.ViTriofNVL.NgLieuInfor.TonKho - soluongXuatra },
-                    LogTenNVL = { Value = savedLXK.ViTriofNVL.NgLieuInfor.TenNVL.Value },
+                    LogTenNVL = { Value = savedLXK.ViTriofNVL.NgLieuInfor.MaNVL.Value },
                     LogThoiDiem = { Value = DateTime.Now },
                     LotVitri = { Value = savedLXK.LotVitri.Value },
                     NVLID = { Value = savedLXK.NVLID.Value },
@@ -488,7 +488,7 @@
             }
 
             // Feedback xuat kho thanh cong
-            await DialogService.Alert($"Đã xuất kho nguyên liệu: \n {savedLXK.ViTriofNVL.NgLieuInfor.TenNVL.Value?.ToString()} \n Số lượng : {soluongxuatfromClient} (pcs)", "<strong><span style='color: darkgreen'>Success!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+            await DialogService.Alert($"Đã xuất kho nguyên liệu: \n {savedLXK.ViTriofNVL.NgLieuInfor.MaNVL.Value?.ToString()} \n Số lượng : {soluongxuatfromClient} (pcs)", "<strong><span style='color: darkgreen'>Success!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
         }
     }
 
@@ -503,7 +503,7 @@
 
         if (string.IsNullOrWhiteSpace(maPXK) || !string.Equals(maPXK, PXK.MaPhieuXK.Value?.ToString())) { return; }
         if (string.IsNullOrWhiteSpace(maViTri) || !string.Equals(maViTri, savedLXK.ViTriofNVL.VitriInfor.MaViTri.Value?.ToString())) { return; }
-        if (string.IsNullOrWhiteSpace(maNVL) || !string.Equals(maNVL, savedLXK.ViTriofNVL.NgLieuInfor.TenNVL.Value?.ToString())) { return; }
+        if (string.IsNullOrWhiteSpace(maNVL) || !string.Equals(maNVL, savedLXK.ViTriofNVL.NgLieuInfor.MaNVL.Value?.ToString())) { return; }
         if (soluongxuatfromClient == 0) { return; }
 
 
@@ -603,7 +603,7 @@
                     LogSoLuong = { Value = savedLXK.LXKSoLuong.Value },
                     LogTonKhoTruoc = { Value = savedLXK.ViTriofNVL.NgLieuInfor.TonKho },
                     LogTonKhoSau = { Value = savedLXK.ViTriofNVL.NgLieuInfor.TonKho - soluongXuatra },
-                    LogTenNVL = { Value = savedLXK.ViTriofNVL.NgLieuInfor.TenNVL.Value },
+                    LogTenNVL = { Value = savedLXK.ViTriofNVL.NgLieuInfor.MaNVL.Value },
                     LogThoiDiem = { Value = DateTime.Now },
                     LotVitri = { Value = savedLXK.LotVitri.Value },
                     NVLID = { Value = savedLXK.NVLID.Value },

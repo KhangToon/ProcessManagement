@@ -85,7 +85,7 @@
                                             <span style="font-weight: 600; font-size: 15px; color: white">Tên NVL</span>
                                         </HeaderTemplate>
                                         <Template Context="nvl">
-                                            <span style="color: black; font-weight: bold;">@($"{nvl?.TargetNgLieu.TenNVL.Value?.ToString()}")</span>
+                                            <span style="color: black; font-weight: bold;">@($"{nvl?.TargetNgLieu.MaNVL.Value?.ToString()}")</span>
                                         </Template>
                                     </RadzenDataGridColumn>
 
@@ -214,7 +214,7 @@
                         <RadzenStack Gap="0" Style="height: 100%; width: 100%; padding: 5px; padding-top: 10px; border-radius: 10px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                             <RadzenStack Visible="@(PNK.DSNVLofPNKs.Count > 0)" Gap="10px" Style="height: contain; width: 100%; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                 <RadzenText Text="Chỉ định vị trí trả kho" Style="color: darkred; font-weight: 600; font-size: 16px; height: contain; width: contain; font-style: italic;"></RadzenText>
-                                <RadzenText Text="@($"(nguyên liệu {SelectedNVLofPNK.TargetNgLieu.TenNVL.Value?.ToString()})")" Style="color: black; font-weight: 600; font-size: 16px; height: contain; width: contain; font-style: italic;"></RadzenText>
+                                <RadzenText Text="@($"(nguyên liệu {SelectedNVLofPNK.TargetNgLieu.MaNVL.Value?.ToString()})")" Style="color: black; font-weight: 600; font-size: 16px; height: contain; width: contain; font-style: italic;"></RadzenText>
                             </RadzenStack>
                             <RadzenStack Style="height: 100%; width: 100%; padding: 5px; padding-top: 5px; padding-right: 0;" Gap="5px" Orientation="Orientation.Vertical">
                                 <!--Display list VitriLuutri-->
@@ -661,7 +661,7 @@
 
                 string randomkey = Common.GenerateUppercaseChars(5);
 
-                qridlot = $"QRLOT-{randomkey}{DateTime.Now.ToString("ddMMyy")}-{returnLNK.TargetNgLieu.TenNVL.Value?.ToString()}";
+                qridlot = $"QRLOT-{randomkey}{DateTime.Now.ToString("ddMMyy")}-{returnLNK.TargetNgLieu.MaNVL.Value?.ToString()}";
 
                 returnLNK.QRIDLOT.Value = qridlot;
             }
@@ -705,7 +705,7 @@
         {
             if (nvlpnk.IsAsignedVitri == false)
             {
-                await DialogService.Alert($"Chưa chỉ định đầy đủ vị trí cho nguyên vật liệu ({nvlpnk.TargetNgLieu.TenNVL.Value})", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                await DialogService.Alert($"Chưa chỉ định đầy đủ vị trí cho nguyên vật liệu ({nvlpnk.TargetNgLieu.MaNVL.Value})", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
                 isAsignedVitriOK = false;
                 break;
             }

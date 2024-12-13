@@ -403,7 +403,7 @@ namespace ParamountBed_Warehouse.Services.SocketService
             {
                 _ = int.TryParse(lenh.PNKID.Value?.ToString(), out int pnkid) ? pnkid : -1;
                 _ = int.TryParse(lenh.LenhNKID.Value?.ToString(), out int lnkid) ? lnkid : -1;
-                string tennvl = lenh.TargetNgLieu.TenNVL.Value?.ToString() ?? string.Empty;
+                string tennvl = lenh.TargetNgLieu.MaNVL.Value?.ToString() ?? string.Empty;
 
                 string mavitri = lenh.TargertVitri.MaViTri.Value?.ToString() ?? string.Empty;
                 _ = int.TryParse(lenh.LNKSoLuong.Value?.ToString(), out int soluongnhap) ? soluongnhap : 0;
@@ -565,7 +565,7 @@ namespace ParamountBed_Warehouse.Services.SocketService
                                 LogSoLuong = { Value = savedLNK.LNKSoLuong.Value },
                                 LogTonKhoTruoc = { Value = savedLNK.TargetNgLieu.TonKho },
                                 LogTonKhoSau = { Value = savedLNK.TargetNgLieu.TonKho + soluongThemvao },
-                                LogTenNVL = { Value = savedLNK.TargetNgLieu.TenNVL.Value },
+                                LogTenNVL = { Value = savedLNK.TargetNgLieu.MaNVL.Value },
                                 LogThoiDiem = { Value = DateTime.Now },
                                 LotVitri = { Value = savedLNK.LotVitri.Value },
                                 NVLID = { Value = savedLNK.NVLID.Value },
@@ -682,7 +682,7 @@ namespace ParamountBed_Warehouse.Services.SocketService
                     LogSoLuong = { Value = soluongnhapfromClient },
                     LogTonKhoTruoc = { Value = targetNVL.TonKho },
                     LogTonKhoSau = { Value = targetNVL.TonKho + soluongnhapfromClient },
-                    LogTenNVL = { Value = targetNVL.TenNVL.Value },
+                    LogTenNVL = { Value = targetNVL.MaNVL.Value },
                     LogThoiDiem = { Value = DateTime.Now },
                     NVLID = { Value = targetNVL.NVLID.Value },
                     VTID = { Value = targetVitri.VTID.Value }
@@ -756,7 +756,7 @@ namespace ParamountBed_Warehouse.Services.SocketService
 
                 lenh.ViTriofNVL.NgLieuInfor = SQLServerServices.GetNguyenVatLieuByID(lenh.NVLID.Value);
 
-                string tennvl = lenh.ViTriofNVL.NgLieuInfor.TenNVL.Value?.ToString() ?? string.Empty;
+                string tennvl = lenh.ViTriofNVL.NgLieuInfor.MaNVL.Value?.ToString() ?? string.Empty;
 
                 string mavitri = lenh.ViTriofNVL.VitriInfor.MaViTri.Value?.ToString() ?? string.Empty;
 
@@ -892,7 +892,7 @@ namespace ParamountBed_Warehouse.Services.SocketService
                         LogSoLuong = { Value = savedLXK.LXKSoLuong.Value },
                         LogTonKhoTruoc = { Value = savedLXK.ViTriofNVL.NgLieuInfor.TonKho },
                         LogTonKhoSau = { Value = savedLXK.ViTriofNVL.NgLieuInfor.TonKho - soluongXuatra },
-                        LogTenNVL = { Value = savedLXK.ViTriofNVL.NgLieuInfor.TenNVL.Value },
+                        LogTenNVL = { Value = savedLXK.ViTriofNVL.NgLieuInfor.MaNVL.Value },
                         LogThoiDiem = { Value = DateTime.Now },
                         LotVitri = { Value = savedLXK.LotVitri.Value },
                         NVLID = { Value = savedLXK.NVLID.Value },
@@ -988,7 +988,7 @@ namespace ParamountBed_Warehouse.Services.SocketService
                     LogSoLuong = { Value = soluongxuatfromClient },
                     LogTonKhoTruoc = { Value = targetNVL.TonKho },
                     LogTonKhoSau = { Value = targetNVL.TonKho - soluongxuatfromClient },
-                    LogTenNVL = { Value = targetNVL.TenNVL.Value },
+                    LogTenNVL = { Value = targetNVL.MaNVL.Value },
                     LogThoiDiem = { Value = DateTime.Now },
                     NVLID = { Value = targetNVL.NVLID.Value },
                     VTID = { Value = targetVitri.VTID.Value }
@@ -1082,7 +1082,7 @@ namespace ParamountBed_Warehouse.Services.SocketService
                         }
                     }
 
-                    dataSend.Add(targetNVL?.TenNVL.Value?.ToString() ?? "###", dataNVLDetails);
+                    dataSend.Add(targetNVL?.MaNVL.Value?.ToString() ?? "###", dataNVLDetails);
 
                     // 2 - Add vitri luu kho
                     if (targetNVL != null && targetNVL.DSViTri.Count > 0)
@@ -1130,7 +1130,7 @@ namespace ParamountBed_Warehouse.Services.SocketService
 
                             nvl.NgLieuInfor = SQLServerServices.GetNguyenVatLieuByID(nvl.NVLID.Value);
 
-                            string tennvl = nvl.NgLieuInfor.TenNVL.Value?.ToString() ?? string.Empty;
+                            string tennvl = nvl.NgLieuInfor.MaNVL.Value?.ToString() ?? string.Empty;
                             string lotvitri = nvl.LotVitri.Value?.ToString() ?? string.Empty;
 
                             int soluongtaivitri = int.TryParse(nvl.VTNVLSoLuong.Value?.ToString(), out int sl) ? sl : 0;

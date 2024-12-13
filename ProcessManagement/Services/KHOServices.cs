@@ -161,7 +161,7 @@ namespace ProcessManagement.Services
                                 LogSoLuong = { Value = savedLNK.LNKSoLuong.Value },
                                 LogTonKhoTruoc = { Value = savedLNK.TargetNgLieu.TonKho },
                                 LogTonKhoSau = { Value = savedLNK.TargetNgLieu.TonKho + soluongThemvao },
-                                LogTenNVL = { Value = savedLNK.TargetNgLieu.TenNVL.Value },
+                                LogTenNVL = { Value = savedLNK.TargetNgLieu.MaNVL.Value },
                                 LogThoiDiem = { Value = DateTime.Now },
                                 LotVitri = { Value = savedLNK.LotVitri.Value },
                                 NVLID = { Value = savedLNK.NVLID.Value },
@@ -178,10 +178,10 @@ namespace ProcessManagement.Services
 
                             if (string.IsNullOrEmpty(savedLNK.NgayNhapKho.Value?.ToString()?.Trim()))
                             {
-                                return (-1, $"Đã {((modeTraKho) ? "trả" : "nhập")} kho nguyên liệu: \n {savedLNK.TargetNgLieu.TenNVL.Value?.ToString()} \n Số lượng : {soluongnhapfromClient} (pcs), \n \n Lỗi trống ngày {((modeTraKho) ? "trả" : "nhập")} kho!");
+                                return (-1, $"Đã {((modeTraKho) ? "trả" : "nhập")} kho nguyên liệu: \n {savedLNK.TargetNgLieu.MaNVL.Value?.ToString()} \n Số lượng : {soluongnhapfromClient} (pcs), \n \n Lỗi trống ngày {((modeTraKho) ? "trả" : "nhập")} kho!");
                             }
 
-                            return (1, $"Đã {((modeTraKho) ? "trả" : "nhập")} kho nguyên liệu: \n {savedLNK.TargetNgLieu.TenNVL.Value?.ToString()} \n Số lượng : {soluongnhapfromClient} (pcs)");
+                            return (1, $"Đã {((modeTraKho) ? "trả" : "nhập")} kho nguyên liệu: \n {savedLNK.TargetNgLieu.MaNVL.Value?.ToString()} \n Số lượng : {soluongnhapfromClient} (pcs)");
                         }
                     }
                 }
@@ -321,7 +321,7 @@ namespace ProcessManagement.Services
                         LogSoLuong = { Value = savedLXK.LXKSoLuong.Value },
                         LogTonKhoTruoc = { Value = savedLXK.ViTriofNVL.NgLieuInfor.TonKho },
                         LogTonKhoSau = { Value = savedLXK.ViTriofNVL.NgLieuInfor.TonKho - soluongXuatra },
-                        LogTenNVL = { Value = savedLXK.ViTriofNVL.NgLieuInfor.TenNVL.Value },
+                        LogTenNVL = { Value = savedLXK.ViTriofNVL.NgLieuInfor.MaNVL.Value },
                         LogThoiDiem = { Value = DateTime.Now },
                         LotVitri = { Value = savedLXK.LotVitri.Value },
                         NVLID = { Value = savedLXK.NVLID.Value },
@@ -333,11 +333,11 @@ namespace ProcessManagement.Services
 
                     if (logId == -1)
                     {
-                        return (-1, $"Đã xuất kho nguyên liệu: \n {savedLXK.ViTriofNVL.NgLieuInfor.TenNVL.Value?.ToString()} \n Số lượng : {soluongxuatfromClient} (pcs) \n Lỗi insert loging!");
+                        return (-1, $"Đã xuất kho nguyên liệu: \n {savedLXK.ViTriofNVL.NgLieuInfor.MaNVL.Value?.ToString()} \n Số lượng : {soluongxuatfromClient} (pcs) \n Lỗi insert loging!");
                     }
 
                     // Feedback xuat kho thanh cong
-                    return (1, $"Đã xuất kho nguyên liệu: \n {savedLXK.ViTriofNVL.NgLieuInfor.TenNVL.Value?.ToString()} \n Số lượng : {soluongxuatfromClient} (pcs)");
+                    return (1, $"Đã xuất kho nguyên liệu: \n {savedLXK.ViTriofNVL.NgLieuInfor.MaNVL.Value?.ToString()} \n Số lượng : {soluongxuatfromClient} (pcs)");
                 }
             });
         }
@@ -403,7 +403,7 @@ namespace ProcessManagement.Services
                         LogTonKhoTruoc = { Value = viTriofNVL.NgLieuInfor.TonKho },
                         LogSoLuong = { Value = Math.Abs(slafteruUpdated - slhientai) },
                         LogTonKhoSau = { Value = viTriofNVL.NgLieuInfor.TonKho + (slafteruUpdated - slhientai) },
-                        LogTenNVL = { Value = viTriofNVL.NgLieuInfor.TenNVL.Value?.ToString() },
+                        LogTenNVL = { Value = viTriofNVL.NgLieuInfor.MaNVL.Value?.ToString() },
                         LogThoiDiem = { Value = DateTime.Now },
                         LotVitri = { Value = viTriofNVL.LotVitri.Value?.ToString() },
                         NVLID = { Value = viTriofNVL.NVLID.Value?.ToString() },

@@ -141,6 +141,7 @@ namespace ProcessManagement.Commons
         // Table KHO_NguyenVatLieu //
         public const string Table_NguyenVatLieu = "KHO_NguyenVatLieu";
         public const string NVLID = "NVLID";
+        public const string MaNVL = "MaNVL";
         public const string TenNVL = "TenNVL";
         public const string NVLTonKho = "Tồn kho";
         public const string DonViTinh = "DonViTinh";
@@ -173,6 +174,7 @@ namespace ProcessManagement.Commons
         public const string MacDinh = "Mặc định";
         public const string IsDefault = "IsDefault";
         public const string IsDisplayDatagrid = "IsDisplayDataGrid";
+        public const string IsAllowEmptyValue = "IsAllowEmptyValue";
         public const string TenTruyXuat = "Tên truy xuất";
 
         // Table KHO_ThongTinNVL

@@ -84,7 +84,8 @@
                                 </RadzenStack>
                             </RadzenStack>
                         </RadzenStack>
-                        <!--Ten nvl-->
+
+                        <!--Ten nvl - allow same name-->
                         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 5px; border-bottom: var(--rz-grid-cell-border);">
                             <RadzenStack Style="width: 20%;">
                                 <RadzenText Text="@(NewNguyenVatLieu.TenNVL.DisplayName)" Style="color: var(--rz-primary-darker); font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
@@ -94,13 +95,36 @@
                                     @{
                                         <RadzenStack Style="width: 50%;">
                                             <RadzenTextBox class="custom-placeholder" Placeholder="@($" * nhập { NewNguyenVatLieu.TenNVL.DisplayName}")" Value="@NewNguyenVatLieu.TenNVL.Value?.ToString()" Style="font-size: 16px; height: contain; border-width: 1px;"
-                                                           @oninput="@(async (args) => { NewNguyenVatLieu.TenNVL.Value = args.Value; await DefaultThongTinNguyenVatLieu_ValueIsOK(NewNguyenVatLieu.TenNVL, true);})">
+                                                           @oninput="@(async (args) => { NewNguyenVatLieu.TenNVL.Value = args.Value; await DefaultThongTinNguyenVatLieu_ValueIsOK(NewNguyenVatLieu.TenNVL, false);})">
                                             </RadzenTextBox>
                                         </RadzenStack>
 
                                         <RadzenStack Style="width: 50%;">
                                             <RadzenAlert Visible="@(!NewNguyenVatLieu.TenNVL.IsCheckValueOK)" Text="@NewNguyenVatLieu.TenNVL.NotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
                                             <RadzenAlert Visible="@(NewNguyenVatLieu.TenNVL.IsCheckValueOK)" Text="@NewNguyenVatLieu.TenNVL.NotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Success" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                                        </RadzenStack>
+                                    }
+                                </RadzenStack>
+                            </RadzenStack>
+                        </RadzenStack>
+
+                        <!--Ma nvl-->
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 5px; border-bottom: var(--rz-grid-cell-border);">
+                            <RadzenStack Style="width: 20%;">
+                                <RadzenText Text="@(NewNguyenVatLieu.MaNVL.DisplayName)" Style="color: var(--rz-primary-darker); font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
+                            </RadzenStack>
+                            <RadzenStack Style="width: 80%; padding-left: 10px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
+                                    @{
+                                        <RadzenStack Style="width: 50%;">
+                                            <RadzenTextBox class="custom-placeholder" Placeholder="@($" * nhập { NewNguyenVatLieu.MaNVL.DisplayName}")" Value="@NewNguyenVatLieu.MaNVL.Value?.ToString()" Style="font-size: 16px; height: contain; border-width: 1px;"
+                                                           @oninput="@(async (args) => { NewNguyenVatLieu.MaNVL.Value = args.Value; await DefaultThongTinNguyenVatLieu_ValueIsOK(NewNguyenVatLieu.MaNVL, true);})">
+                                            </RadzenTextBox>
+                                        </RadzenStack>
+
+                                        <RadzenStack Style="width: 50%;">
+                                            <RadzenAlert Visible="@(!NewNguyenVatLieu.MaNVL.IsCheckValueOK)" Text="@NewNguyenVatLieu.MaNVL.NotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                                            <RadzenAlert Visible="@(NewNguyenVatLieu.MaNVL.IsCheckValueOK)" Text="@NewNguyenVatLieu.MaNVL.NotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Success" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
                                         </RadzenStack>
                                     }
                                 </RadzenStack>
@@ -224,7 +248,7 @@
 
     private List<LoaiNVL>? LoaiNVLs;
 
-    protected override Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
     {
         danhMucNVLs = LoadListDanhmucNguyenVatLieu();
 
@@ -238,9 +262,13 @@
         LoaiNVLs = LoadListLoaiNguyenVatLieu(SelectDanhmuc);
 
         // Get default danh sach thong tin
-        NewNguyenVatLieu.DSThongTin = LoadDanhSachThongTinMacDinh().ToList();
+        NewNguyenVatLieu.DSThongTin = await LoadDanhSachThongTinMacDinh();
 
-        return base.OnInitializedAsync();
+        NewNguyenVatLieu.DonViTinh.Value = "PCS";
+
+        await DefaultThongTinNguyenVatLieu_ValueIsOK(NewNguyenVatLieu.DonViTinh, false);
+
+        await base.OnInitializedAsync();
     }
 
     // Load list danh muc nvl
@@ -361,7 +389,16 @@
 
             if (string.IsNullOrEmpty(value.Trim()))
             {
-                thongTin.GiaTri.IsCheckValueOK = false; thongTin.GiaTri.NotifyMess = $"{displayName} không được để trống";
+                _ = int.TryParse(thongTin.LoaiThongTin?.IsAllowEmptyValue.Value?.ToString(), out int isallowEmpty) ? isallowEmpty : 0;
+
+                if (isallowEmpty == 0)
+                {
+                    thongTin.GiaTri.IsCheckValueOK = false; thongTin.GiaTri.NotifyMess = $"{displayName} không được để trống";
+                }
+                else
+                {
+                    thongTin.GiaTri.IsCheckValueOK = true; thongTin.GiaTri.NotifyMess = string.Empty;
+                }
             }
             else
             {
@@ -398,7 +435,7 @@
     {
         bool isOK = true;
 
-        isOK = (NewNguyenVatLieu.TenNVL.IsCheckValueOK == true);
+        isOK = (NewNguyenVatLieu.MaNVL.IsCheckValueOK == true);
 
         isOK = (NewNguyenVatLieu.LOAINVLID.Value != null);
 
@@ -418,7 +455,7 @@
     }
 
     // Load danh sach thong tin mac dinh
-    private List<ThongTinNVL> LoadDanhSachThongTinMacDinh()
+    private async Task<List<ThongTinNVL>> LoadDanhSachThongTinMacDinh()
     {
         List<LoaiThongTinNVL> loaiThongTinNVLs = SQLServerServices.GetDanhSachLoaiThongTinNguyenVatLieu(1);
 
@@ -431,6 +468,19 @@
                     LoaiThongTin = loaitt,
                     LoaiTTNVLID = { Value = loaitt.LoaiTTNVLID.Value }
                 };
+
+
+            if (string.IsNullOrEmpty(thongtin.GiaTri.Value?.ToString()?.Trim()))
+            {
+                thongtin.GiaTri.Value = loaitt.GiaTriMacDinh.Value;
+            }
+
+            foreach (var property in thongtin.GetPropertiesValues())
+            {
+                await DefaultThongTinNguyenVatLieu_ValueIsOK(property, false);
+            }
+
+            await AnotherThongTinNguyenVatLieu_ValueIsOK(thongtin, int.Parse(thongtin.LoaiThongTin.KieuDuLieu.Value?.ToString() ?? "0"));
 
             thongTinNVLs.Add(thongtin);
         }
@@ -491,7 +541,7 @@
                 {
                     ShowNotification("Thêm mới nguyên vật liệu thành công!", NotificationSeverity.Success, 3000);
 
-                    bool? exit = await DialogService.Alert($"Thêm mới nguyên vật liệu {NewNguyenVatLieu.TenNVL.Value?.ToString()} thành công", "<strong><span style='color: green'>Success!</span></strong>", new AlertOptions() { OkButtonText = "Thoát", ShowClose = true });
+                    bool? exit = await DialogService.Alert($"Thêm mới nguyên vật liệu {NewNguyenVatLieu.MaNVL.Value?.ToString()} thành công", "<strong><span style='color: green'>Success!</span></strong>", new AlertOptions() { OkButtonText = "Thoát", ShowClose = true });
 
                     if (exit.Value)
                     {

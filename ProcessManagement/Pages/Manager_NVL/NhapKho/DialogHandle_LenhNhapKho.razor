@@ -24,7 +24,7 @@
             </RadzenStack>
             <RadzenStack Gap="10px" Style="height: contain; width: contain; border-radius: 5px; padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                 <RadzenText Text="@($"Tên nguyên liệu:")" Style="font-weight: 600; font-size: 16px; color: black; font-style: italic"></RadzenText>
-                <RadzenText Text="@($"{LNK?.TargetNgLieu.TenNVL.Value?.ToString()}")" Style="font-weight: bold; font-size: 16px; color: black; font-style: italic"></RadzenText>
+                <RadzenText Text="@($"{LNK?.TargetNgLieu.MaNVL.Value?.ToString()}")" Style="font-weight: bold; font-size: 16px; color: black; font-style: italic"></RadzenText>
             </RadzenStack>
             <RadzenStack Gap="10px" Style="height: contain; width: contain; border-radius: 5px; padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                 <RadzenText Text="@($"Số lượng nhập:")" Style="font-weight: 600; font-size: 16px; color: black; font-style: italic"></RadzenText>
@@ -342,7 +342,7 @@
                             LogSoLuong = { Value = savedLNK.LNKSoLuong.Value },
                             LogTonKhoTruoc = { Value = savedLNK.TargetNgLieu.TonKho },
                             LogTonKhoSau = { Value = savedLNK.TargetNgLieu.TonKho + soluongThemvao },
-                            LogTenNVL = { Value = savedLNK.TargetNgLieu.TenNVL.Value },
+                            LogTenNVL = { Value = savedLNK.TargetNgLieu.MaNVL.Value },
                             LogThoiDiem = { Value = DateTime.Now },
                             LotVitri = { Value = savedLNK.LotVitri.Value },
                             NVLID = { Value = savedLNK.NVLID.Value },
@@ -358,7 +358,7 @@
                     }
 
                     // Feedback nhap kho thanh cong
-                    await DialogService.Alert($"Đã nhập kho nguyên liệu: \n {savedLNK.TargetNgLieu.TenNVL.Value?.ToString()} \n Số lượng : {soluongnhapfromClient} (pcs)", "<strong><span style='color: darkgreen'>Success!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                    await DialogService.Alert($"Đã nhập kho nguyên liệu: \n {savedLNK.TargetNgLieu.MaNVL.Value?.ToString()} \n Số lượng : {soluongnhapfromClient} (pcs)", "<strong><span style='color: darkgreen'>Success!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
 
                 }
             }
@@ -376,7 +376,7 @@
 
         if (string.IsNullOrWhiteSpace(maPNK) || !string.Equals(maPNK, PNK.MaPhieuNK.Value?.ToString())) { return; }
         if (string.IsNullOrWhiteSpace(maVitri) || !string.Equals(maVitri, savedLNK.TargertVitri.MaViTri.Value?.ToString())) { return; }
-        if (string.IsNullOrWhiteSpace(maNVL) || !string.Equals(maNVL, savedLNK.TargetNgLieu.TenNVL.Value?.ToString())) { return; }
+        if (string.IsNullOrWhiteSpace(maNVL) || !string.Equals(maNVL, savedLNK.TargetNgLieu.MaNVL.Value?.ToString())) { return; }
         if (soluongnhapfromClient == 0) { return; }
 
         if (savedLNK.LenhNKID.Value == null)
@@ -497,7 +497,7 @@
                             LogSoLuong = { Value = savedLNK.LNKSoLuong.Value },
                             LogTonKhoTruoc = { Value = savedLNK.TargetNgLieu.TonKho },
                             LogTonKhoSau = { Value = savedLNK.TargetNgLieu.TonKho + soluongThemvao },
-                            LogTenNVL = { Value = savedLNK.TargetNgLieu.TenNVL.Value },
+                            LogTenNVL = { Value = savedLNK.TargetNgLieu.MaNVL.Value },
                             LogThoiDiem = { Value = DateTime.Now },
                             LotVitri = { Value = savedLNK.LotVitri.Value },
                             NVLID = { Value = savedLNK.NVLID.Value },
