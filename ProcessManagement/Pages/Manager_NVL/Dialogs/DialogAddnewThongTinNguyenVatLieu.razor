@@ -172,17 +172,21 @@
                         </RadzenStack>
                     </RadzenStack>
 
-                    <RadzenStack Style="width: 100%; padding: 10px; border-top: var(--rz-grid-cell-border)" Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                    <RadzenStack Style="width: 100%; padding: 5px; border-top: var(--rz-grid-cell-border)" Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                        <RadzenCheckBox TValue="bool" Value="@IsAllowEmptyValue" Change="@((args) => IsAllowEmptyValue = args)" Name="isallowemptyproperty" />
+                        <RadzenLabel Text="Cho phép để trống giá trị" Style="font-size: 14px; font-weight: 500;" Component="isallowemptyproperty" />
+                    </RadzenStack>
+                    <RadzenStack Style="width: 100%; padding: 5px; border-top: var(--rz-grid-cell-border)" Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                         <RadzenCheckBox TValue="bool" Value="@IsDefault" Change="@((args) => IsDefault = args)" Name="isdefaultproperty" />
-                        <RadzenLabel Text="Đặt làm trường thông tin mặc định" Style="font-size: 14px; font-weight: bold; font-style: italic" Component="isdefaultproperty" />
+                        <RadzenLabel Text="Đặt làm trường thông tin mặc định" Style="font-size: 14px; font-weight: 500;" Component="isdefaultproperty" />
                     </RadzenStack>
-                    <RadzenStack Style="width: 100%; padding: 10px; padding-top: 0" Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                    <RadzenStack Style="width: 100%; padding: 5px; border-top: var(--rz-grid-cell-border)" Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                         <RadzenCheckBox TValue="bool" Value="@IsDisplayDatagrid" Change="@((args) => IsDisplayDatagrid = args)" Name="isdisplaydatagridproperty" />
-                        <RadzenLabel Text="Đặt làm trường thông tin hiển thị chính" Style="font-size: 14px; font-weight: bold; font-style: italic" Component="isdisplaydatagridproperty" />
+                        <RadzenLabel Text="Đặt làm trường thông tin hiển thị chính" Style="font-size: 14px; font-weight: 500;" Component="isdisplaydatagridproperty" />
                     </RadzenStack>
-                    <RadzenStack Style="width: 100%; padding: 10px; padding-top: 0" Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                    <RadzenStack Style="width: 100%; padding: 5px; border-top: var(--rz-grid-cell-border)" Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                         <RadzenCheckBox TValue="bool" Value="@IsAddForAll_mode1" Change="@((args) => IsAddForAll_mode1 = args)" Name="isaddallpropertymode1" />
-                        <RadzenLabel Text="Thêm cho tất cả nguyên vật liệu khác" Style="font-size: 14px; font-weight: bold; font-style: italic" Component="isaddallpropertymode1" />
+                        <RadzenLabel Text="Thêm cho tất cả nguyên vật liệu khác" Style="font-size: 14px; font-weight: 500;" Component="isaddallpropertymode1" />
                     </RadzenStack>
 
                     <!-- Button save Trường thông tin tạo mới -->
@@ -267,6 +271,7 @@
     private bool IsDisplayDatagrid = false; // set hien thi len datagrid
     private bool IsAddForAll_mode1 = false; // them truong thong tin cho tat ca NVL mode 1
     private bool IsAddForAll_mode2 = false; // them truong thong tin cho tat ca NVL mode 2
+    private bool IsAllowEmptyValue = false;
 
     protected override Task OnInitializedAsync()
     {
@@ -377,6 +382,8 @@
             {
                 // Gán tên truy xuất
                 NewLoaiTTNVL_mode1.TenTruyXuat.Value = Common.RemoveDiacriticsAndSpaces(NewLoaiTTNVL_mode1.TenLoaiThongTin.Value?.ToString() ?? string.Empty);
+                // IsAllowEmpty?
+                NewLoaiTTNVL_mode1.IsAllowEmptyValue.Value = (IsAllowEmptyValue) ? 1 : 0;
                 // IsDefault?
                 NewLoaiTTNVL_mode1.IsDefault.Value = (IsDefault) ? 1 : 0;
                 // IsDisplayDatagrid?
@@ -400,6 +407,34 @@
             }
         }
     }
+
+    // private async Task AddNewThongTinNVLforAllNVLs(LoaiThongTinNVL loaiThongTinNVL, object? exceptedID = null)
+    // {
+    //     await Task.Run(() =>
+    //     {
+    //         List<int> nvlids = SQLServerServices.GetlistNgVatLieuId();
+
+    //         // if ((int.TryParse(exceptedID?.ToString(), out int removeID) ? removeID : 0) > 0)
+    //         // {
+    //         //     if (nvlids.Contains(removeID))
+    //         //     {
+    //         //         nvlids.Remove(removeID);
+    //         //     }
+    //         // }
+
+    //         foreach (var nvlid in nvlids)
+    //         {
+    //             ThongTinNVL thongTinNVL = new()
+    //                 {
+    //                     LoaiTTNVLID = { Value = loaiThongTinNVL.LoaiTTNVLID.Value },
+    //                     NVLID = { Value = nvlid },
+    //                     GiaTri = { Value = (IsAddWithValue_mode1) ? loaiThongTinNVL.GiaTriMacDinh.Value : null },
+    //                     LoaiThongTin = loaiThongTinNVL
+    //                 };
+    //             int result = SQLServerServices.InsertThongTinNguyenVatLieu(thongTinNVL).Item1;
+    //         }
+    //     });
+    // }
 
     // Button save new loai thong tin
     private async Task SaveLoaiThongTinNguyenVatLieu_Mode2()

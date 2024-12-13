@@ -241,6 +241,9 @@
     [Parameter]
     public LoaiNVL? SelectLoaiNVL { get; set; }
 
+    [Parameter]
+    public List<NguyenVatLieu> DSNguyenVatLieus { get; set; } = new();
+
     public NguyenVatLieu NewNguyenVatLieu = new();
 
     private List<DanhMucNVL>? danhMucNVLs;
@@ -332,8 +335,6 @@
                     NewNguyenVatLieu.DSThongTin.Add(thongTin);
                 }
             }
-
-            //StateHasChanged();
 
             ShowNotification("Đã thêm thông tin mới!", NotificationSeverity.Success, 3000);
         }
@@ -507,21 +508,42 @@
         if (confirm.Value)
         {
             // Add new nguyen vat lieu
-            (int nvlid, string errorMess) = SQLServerServices.InsertNewNguyenVatLieu(NewNguyenVatLieu);
+            (int newNVLid, string errorMess) = SQLServerServices.InsertNewNguyenVatLieu(NewNguyenVatLieu);
 
-            if (nvlid > 0)
+            if (newNVLid > 0)
             {
                 // Gán id cho nguyen vat lieu mới
-                NewNguyenVatLieu.NVLID.Value = nvlid;
-                int result = nvlid;
+                NewNguyenVatLieu.NVLID.Value = newNVLid;
+                int result = 0;
+                string err = string.Empty;
 
                 // Link danh sách thông tin với nguyen vat lieu vừa tạo
                 foreach (var thongtin in NewNguyenVatLieu.DSThongTin)
                 {
-                    // Gán NVLID
-                    thongtin.NVLID.Value = result;
+                    if (thongtin.LoaiThongTin.IsAddForAll) // Them cho tat ca NVL
+                    {
+                        if (DSNguyenVatLieus != null && DSNguyenVatLieus.Count > 0)
+                        {
+                            foreach (var nvl in DSNguyenVatLieus)
+                            {
+                                var isExisting = nvl.DSThongTin.Any(nvltt => nvltt.LoaiThongTin.TenTruyXuat.Value?.ToString()?.Trim() == thongtin.LoaiThongTin.TenTruyXuat.Value?.ToString()?.Trim());
 
-                    (int ttnvlid, string err) = SQLServerServices.InsertThongTinNguyenVatLieu(thongtin);
+                                if (!isExisting)
+                                {
+                                    // Gan NVLID
+                                    thongtin.NVLID.Value = nvl.NVLID.Value;
+                                    // Them truong thong tin
+                                    (result, err) = SQLServerServices.InsertThongTinNguyenVatLieu(thongtin);
+                                    if (result < 0) break;
+                                }
+                            }
+                        }
+                    }
+
+                    // Gán NVLID
+                    thongtin.NVLID.Value = newNVLid;
+
+                    (int ttnvlid, err) = SQLServerServices.InsertThongTinNguyenVatLieu(thongtin);
 
                     if (ttnvlid < 0)
                     {
@@ -529,12 +551,14 @@
                         errorMess = err;
                         break;
                     }
+
+
                 }
 
                 // Recheck sau khi link danh sách thongtinnguyenvatlieu
                 if (result < 0)
                 {
-                    SQLServerServices.DeleteNguyenVatLieu(nvlid);
+                    SQLServerServices.DeleteNguyenVatLieu(newNVLid);
                     await DialogService.Alert($"{errorMess}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
                 }
                 else

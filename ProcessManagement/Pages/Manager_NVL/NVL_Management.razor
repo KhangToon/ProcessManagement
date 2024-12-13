@@ -63,7 +63,8 @@
                                             <RadzenStack Gap="15px" Style="height: 100%; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                 <RadzenTextBox @oninput="@((args) => FilterNVL(args?.Value))" Placeholder="Tìm theo mã nguyên liệu" Style="border-radius: 20px; padding-left: 20px; border-width: 2px; border-color: var(--rz-primary-light); width: 70% "></RadzenTextBox>
                                                 <RadzenButton Icon="search" ButtonStyle="ButtonStyle.Primary" Style="border-radius: 20px;" />
-                                                <RadzenButton Click="@(() => { LoadList_LoaiNVL(); LoadList_NguyenVatLieu(); ReSelectCurrentNguyenVatLieu(Common.SelectedNVLid); })" Style="border-radius: 20px;" Icon="autorenew" ButtonStyle="ButtonStyle.Primary" />
+                                                <RadzenButton Click="@(async() => { await ButtonReloadPress(); })"
+                                                              Style="border-radius: 20px;" Icon="autorenew" IsBusy="@isLoadingDSNVL" BusyText=" Loading..." ButtonStyle="ButtonStyle.Primary" />
                                             </RadzenStack>
                                         </RadzenColumn>
                                         <RadzenColumn SizeMD="4" Size="12">
@@ -174,7 +175,7 @@
                                         </RadzenStack>
                                         <!--Table listNVL-->
                                         <RadzenStack Visible="@(DSNguyenVatLieus != null && DSNguyenVatLieus.Count > 0)" Style="height: contain; width: 100%; padding-top: 10px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                            <RadzenDataGrid class="rz-grid-table-fixed-2" Data="@(DSNguyenVatLieus)" TItem="NguyenVatLieu"
+                                            <RadzenDataGrid class="rz-grid-table-fixed-2" Data="@(DSNguyenVatLieus)" TItem="NguyenVatLieu" IsLoading="@isLoadingDSNVL"
                                                             EmptyText="Danh sách nguyên liệu trống." Style="overflow-x: scroll; width: 100%; height: contain; max-height: 800px"
                                                             ShowColumnTitleAsTooltip="true" ShowCellDataAsTooltip="true"
                                                             AllowFiltering="false" FilterMode="FilterMode.Simple" AllowVirtualization="true"
@@ -746,6 +747,8 @@
 
     private bool isEditNVLDetail = false;
 
+    private bool isLoadingDSNVL = false;
+
     protected override Task OnParametersSetAsync()
     {
         if (AsignCurrentTabIndex > 0)
@@ -781,7 +784,7 @@
     // Them moi nvl
     private async Task OnThemMoiNguyenVatLieu()
     {
-        NguyenVatLieu newNVL = await DialogService.OpenAsync<DialogAddnewNVL>(null, new Dictionary<string, object>() { { "SelectLoaiNVL", SelectedLoaiNVL ?? new() } },
+        NguyenVatLieu newNVL = await DialogService.OpenAsync<DialogAddnewNVL>(null, new Dictionary<string, object>() { { "SelectLoaiNVL", SelectedLoaiNVL ?? new() }, { "DSNguyenVatLieus", DSNguyenVatLieus ?? new() } },
         new DialogOptions() { ShowTitle = false, Width = "50%", Height = "95%", Resizable = false, Draggable = false, ShowClose = false, Style = "background-color: while; border-radius: 0px; padding: 0px" });
 
         if (newNVL != null)
@@ -815,6 +818,27 @@
             isEditNVLDetail = true;
         }
     }
+
+    // Button Reload
+    private async Task ButtonReloadPress()
+    {
+        await Task.Run(async () =>
+        {
+            if (isLoadingDSNVL == false)
+            {
+                isLoadingDSNVL = true;
+
+                LoadList_LoaiNVL();
+                LoadList_NguyenVatLieu();
+                ReSelectCurrentNguyenVatLieu(Common.SelectedNVLid);
+
+                await Task.Delay(200);
+
+                isLoadingDSNVL = false;
+            }
+        });
+    }
+
     // Searching
     private async Task FilterNVL(object? args)
     {
@@ -859,7 +883,7 @@
         {
             if (isDisplaybyDay)
             {
-                DSNguyenVatLieus = SQLServerServices.GetListNgVatLieuByDanhmucID(SelectedDanhMuc?.DMID.Value).Where(sp => (startSearchDay <= Convert.ToDateTime(sp.NgaySuDung.Value) && Convert.ToDateTime(sp.NgaySuDung.Value) < offsetendDay)).ToList();
+                //DSNguyenVatLieus = SQLServerServices.GetListNgVatLieuByDanhmucID(SelectedDanhMuc?.DMID.Value).Where(sp => (startSearchDay <= Convert.ToDateTime(sp.NgaySuDung.Value) && Convert.ToDateTime(sp.NgaySuDung.Value) < offsetendDay)).ToList();
             }
             else
             {
@@ -870,8 +894,8 @@
         {
             if (isDisplaybyDay)
             {
-                DSNguyenVatLieus = SQLServerServices.GetListNguyenVatLieuByLoaiNvlID(SelectedLoaiNVL?.LOAINVLID.Value).Where(nvl => (startSearchDay <= Convert.ToDateTime(nvl.NgaySuDung.Value)
-                                                        && Convert.ToDateTime(nvl.NgaySuDung.Value) < offsetendDay)).ToList();
+                // DSNguyenVatLieus = SQLServerServices.GetListNguyenVatLieuByLoaiNvlID(SelectedLoaiNVL?.LOAINVLID.Value).Where(nvl => (startSearchDay <= Convert.ToDateTime(nvl.NgaySuDung.Value)
+                //                                         && Convert.ToDateTime(nvl.NgaySuDung.Value) < offsetendDay)).ToList();
             }
             else
             {

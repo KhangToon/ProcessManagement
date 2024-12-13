@@ -13,7 +13,7 @@ namespace ProcessManagement.Models.KHO_NVL
         public Propertyy LOAINVLID { get; set; } = new() { DBName = Common.LOAINVLID, DisplayName = "Loại nguyên liệu", Type = typeof(int), AlowDatabase = true, AlowDisplay = false, DispDatagrid = false };
         public Propertyy DMID { get; set; } = new() { DBName = Common.DMID, DisplayName = "Danh mục", Type = typeof(int), AlowDatabase = true, AlowDisplay = false, DispDatagrid = false };
         public Propertyy DonViTinh { get; set; } = new() { DBName = Common.DonViTinh, DisplayName = "Đơn vị tính", Type = typeof(string), AlowDatabase = true, DispDatagrid = false };
-        public Propertyy NgaySuDung { get; set; } = new() { DBName = Common.NgaySuDung, DisplayName = "Ngày sử dụng", Type = typeof(DateTime), AlowDatabase = true };
+        //public Propertyy NgaySuDung { get; set; } = new() { DBName = Common.NgaySuDung, DisplayName = "Ngày sử dụng", Type = typeof(DateTime), AlowDatabase = true };
 
         public int SLSanXuat = 0;
 
