@@ -2597,6 +2597,88 @@ namespace ProcessManagement.Services.SQLServer
         // ------------------------------------------------------------------------------------- //
         #region Table_KHO_ViTriLuuTru
 
+        // Insert
+        public (int, string) InsertViTriLuuTru(VitriLuuTru vitriluutru)
+        {
+            int result = -1;
+            string errorMess = string.Empty;
+
+            if (vitriluutru == null) return (result, "Error: log is null");
+
+            List<Propertyy> properties = vitriluutru.GetPropertiesValues()
+                .Where(po => po.AlowDatabase == true && po.Value != null)
+                .ToList();
+
+            if (properties.Count == 0)
+            {
+                return (result, "Error: No valid properties to insert.");
+            }
+
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+            using var transaction = connection.BeginTransaction();
+
+            try
+            {
+                var command = connection.CreateCommand();
+                command.Transaction = transaction;
+
+                string columns = string.Join(", ", properties.Select(p => $"[{p.DBName}]"));
+                string parameters = string.Join(", ", properties.Select(p => $"@{Regex.Replace(p.DBName ?? string.Empty, @"[^\w]+", "")}"));
+                command.CommandText = $@"INSERT INTO [{Common.Table_ViTriLuuTru}] ({columns}) OUTPUT INSERTED.{Common.VTID} VALUES ({parameters})";
+
+                foreach (var prop in properties)
+                {
+                    string parameterName = $"@{Regex.Replace(prop.DBName ?? string.Empty, @"[^\w]+", "")}";
+                    object? parameterValue = prop.Value ?? DBNull.Value;
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                object? rs = command.ExecuteScalar();
+                if (rs != null && int.TryParse(rs.ToString(), out result) && result > 0)
+                {
+                    transaction.Commit();
+                }
+                else
+                {
+                    result = -1;
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMess = $"Error: {ex.Message}";
+                try
+                {
+                    transaction.Rollback();
+                }
+                catch (Exception rollbackEx)
+                {
+                    errorMess += $" | Rollback Error: {rollbackEx.Message}";
+                }
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
+        // Check gia tri truong thong tin mac dinh is exsting? 
+        public bool DefaultThongTinViTriLuuTru_ValueIsExisting(string? proValue, string proName)
+        {
+            using (var connection = new SqlConnection(connectionString))
+            {
+                string query = $"SELECT COUNT(*) FROM [{Common.Table_ViTriLuuTru}] WHERE [{proName}] = N'{proValue?.Trim()}'";
+
+                using (var command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+
+                    int count = (int)command.ExecuteScalar();
+
+                    return count > 0;
+                }
+            }
+        }
+
         // Tính số lượng trống còn lại của vị trí
         public (int, string) GetViTriLuuTruSoLuongTrong(object? vtltID)
         {
@@ -2813,6 +2895,36 @@ namespace ProcessManagement.Services.SQLServer
             }
         }
 
+        // Delete
+        public (bool, string) DeleteViTriLuuTru(object? vtid)
+        {
+            // Check for valid ID
+            if (vtid == null)
+            {
+                return (false, "Can not delete!");
+            }
+
+            using var connection = new SqlConnection(connectionString);
+
+            connection.Open();
+
+            string query = $"DELETE FROM [{Common.Table_ViTriLuuTru}] WHERE [{Common.VTID}] = @VTID";
+
+            using var command = new SqlCommand(query, connection);
+
+            command.Parameters.AddWithValue("@VTID", vtid);
+
+            try
+            {
+                int rowsAffected = command.ExecuteNonQuery();
+
+                return (rowsAffected > 0, string.Empty); // Return true if a row was deleted
+            }
+            catch (Exception ex)
+            {
+                return (false, $"Error: {ex.Message}"); // Return false and the error message
+            }
+        }
         #endregion
 
         // ------------------------------------------------------------------------------------- //

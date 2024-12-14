@@ -56,9 +56,21 @@
 <RadzenRow Gap="10px" Style="height: 100%; width: 100%; border-top: var(--rz-grid-cell-border); padding: 0;">
     <RadzenColumn Size="12" SizeMD="6" Style="height: contain; width: 100%;">
         <RadzenStack Gap="0px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start" Style="height: 100%; width: 100%;">
-            <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding: 10px; padding-left: 10px; border-bottom: var(--rz-grid-cell-border) " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                <RadzenText Text="Danh sách vị trí trong kho nguyên liệu" Style="color: darkred; font-weight: 600; font-size: 17px; height: contain; width: contain; font-style: italic;"></RadzenText>
-                <RadzenText Text="@($"( {DSVitris.Count} vị trí )")" Style="color: black; font-weight: 600; font-size: 16px; height: contain; width: contain; font-style: italic;"></RadzenText>
+            <RadzenStack Gap="10px" Style="height: contain; width: 100%; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                <RadzenRow Style="height: 100%; width: 100%;">
+                    <RadzenColumn SizeMD="8" Size="12">
+                        <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding: 10px; padding-left: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                            <RadzenText Text="Danh sách vị trí trong kho nguyên liệu" Style="color: darkred; font-weight: 600; font-size: 17px; height: contain; width: contain; font-style: italic;"></RadzenText>
+                            <RadzenText Text="@($"( {DSVitris.Count} vị trí )")" Style="color: black; font-weight: 600; font-size: 16px; height: contain; width: contain; font-style: italic;"></RadzenText>
+                        </RadzenStack>
+                    </RadzenColumn>
+                    <RadzenColumn SizeMD="4" Size="12">
+                        <RadzenStack Style="height: 100%; width: 100%; padding-left: 10px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenButton Click="OnAddNewViTriLuuTru" Icon="add" Text="Thêm vị trí mới" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
+                                          Style="height: contain; width: 100%; font-size: 15px;" />
+                        </RadzenStack>
+                    </RadzenColumn>
+                </RadzenRow>
             </RadzenStack>
             <RadzenDataList Style="height: 100%; width: 100%" Density="Density.Default" PagerPosition="PagerPosition.Top" PageSize="12" AllowPaging="false" WrapItems="true" Data="@DSVitris" TItem="VitriLuuTru">
                 <Template Context="vitri">
@@ -429,6 +441,20 @@
     {
         await DialogService.OpenAsync<DialogQR_Image>(null, new Dictionary<string, object>() { { "CONTENT", content }, { "HEADER", header } },
         new DialogOptions() { CloseDialogOnEsc = true, CloseDialogOnOverlayClick = true, ShowTitle = true, Width = "contain", Height = "contain", Resizable = true, Draggable = true, ShowClose = true, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
+    }
+
+    private async Task OnAddNewViTriLuuTru()
+    {
+        VitriLuuTru newVitri = await DialogService.OpenAsync<DialogAddNewViTriLuuTru>(null, new Dictionary<string, object>() { { "DSVitris", DSVitris ?? new() } },
+        new DialogOptions() { ShowTitle = true, Width = "50%", Height = "95%", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 0px; padding: 0px" });
+
+        if (newVitri != null)
+        {
+            // Load dsvitri
+            await LoadDSachViTriLuuTru();
+
+            SelectedViTri = DSVitris?.FirstOrDefault(vt => vt.VTID.Value?.ToString() == newVitri.VTID.Value?.ToString()) ?? new();
+        }
     }
 
     private async Task CopyToClipboard(string content)

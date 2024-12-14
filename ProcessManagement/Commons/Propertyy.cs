@@ -20,6 +20,8 @@
 
         public string NotifyMess { get; set; } = string.Empty; // Dung khi check value ok 
 
+        public bool IsCheckSameValue { get; set; } = false; // Kiem tra trung gia tri
+
         public List<ErrType> CheckErrors { get; set; } = new() { ErrType.NotEmptyValue };
 
         public enum ErrType

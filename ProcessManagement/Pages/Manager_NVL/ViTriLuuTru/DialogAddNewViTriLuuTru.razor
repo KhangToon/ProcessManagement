@@ -1,0 +1,235 @@
+﻿@using ProcessManagement.Commons
+@using ProcessManagement.Models.KHO_NVL
+@using ProcessManagement.Services.SQLServer
+@using Radzen.Blazor
+@using Radzen
+@using ProcessManagement.Models
+
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject SQLServerServices SQLServerServices
+
+<RadzenCard Style="height: 100%; width: 100%; padding: 5px" Variant="Variant.Flat">
+    <RadzenStack Gap="0" Style="height: 100%; width: 100%; margin: 0; padding: 0; padding-bottom: 10px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start">
+        <RadzenStack Gap="20px" Style="height: contain; width: 100%; padding: 10px; background-color: var(--rz-primary-darker);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+            <RadzenText Text="THÊM MỚI VỊ TRÍ LƯU TRỮ" Style="color: white; font-weight: 500; font-size: 18px"></RadzenText>
+        </RadzenStack>
+
+        <RadzenRow Gap="10px" Style="height: contain; width: 100%; border-top: var(--rz-grid-cell-border); padding: 0; overflow-y: scroll">
+            <RadzenColumn Size="12" SizeMD="12" Style="height: 100%; width: 100%; padding: 15px; padding-right: 0">
+                <RadzenStack Gap="10px" Style="height: contain; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                    <RadzenText Text="Nhập thông tin vị trí" Style="color: var(--rz-primary-darker); font-size: 18px; font-weight: 600; height: contain; width: contain"></RadzenText>
+                    <RadzenButton Style="width: contain; height: contain;" Icon="add" Text="Thêm thông tin khác" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat"
+                                  Click="@(() => OnOpenDialogAddThongTinKhac())" />
+                </RadzenStack>
+
+                <RadzenCard Variant="Variant.Flat" Style="min-height: 300px; width: 100%; padding: 0px; margin-top: 10px; background-color: white">
+                    <RadzenStack Style="height: 100%; width: 100%; padding: 10px;" Gap="0" Orientation="Orientation.Vertical">
+
+                        @foreach (var columnProperty in newVitriLuuTru.GetPropertiesValues().Where(vt => vt.AlowDatabase == true).ToList())
+                        {
+                            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 5px; border-bottom: var(--rz-grid-cell-border);">
+                                <RadzenStack Style="width: 20%;">
+                                    <RadzenText Text="@(columnProperty.DisplayName)" Style="color: var(--rz-primary-darker); font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
+                                </RadzenStack>
+                                <RadzenStack Style="width: 80%; padding-left: 10px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                    <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
+                                        @{
+                                            if (columnProperty.Type == typeof(string)) // kieu ky tu
+                                            {
+                                                <RadzenStack Style="width: 50%;">
+                                                    <RadzenTextBox class="custom-placeholder" Placeholder="@($" * nhập { columnProperty.DisplayName}")" Value="@columnProperty.Value?.ToString()" Style="font-size: 16px; height: contain; border-width: 1px;"
+                                                                   @oninput="@(async (args) => { columnProperty.Value = args.Value; await DefaultThongTinViTriLuuTru_ValueIsOK(columnProperty, columnProperty.IsCheckSameValue);})">
+                                                    </RadzenTextBox>
+                                                </RadzenStack>
+                                            }
+                                            else if (columnProperty.Type == typeof(int)) // Kieu so
+                                            {
+                                                <RadzenStack Style="width: 50%;">
+                                                    <RadzenNumeric class="custom-placeholder" Placeholder="@($" * nhập { columnProperty.DisplayName}")" TValue="int"
+                                                                   Value="@(int.Parse(columnProperty.Value?.ToString()?? "0"))"
+                                                                   ValueChanged="@(async (args) =>
+                                                                        {   columnProperty.Value = args;
+                                                                            await DefaultThongTinViTriLuuTru_ValueIsOK(columnProperty, columnProperty.IsCheckSameValue);
+                                                                        })"
+                                                                   Style="font-size: 16px; height: contain;" Min="0" />
+                                                </RadzenStack>
+                                            }
+                                            else if (columnProperty.Type == typeof(int)) // kieu ngay thang
+                                            {
+                                                bool ishaveValueOfday = DateTime.TryParse(columnProperty.Value?.ToString(), out DateTime selectday);
+                                                if (ishaveValueOfday) selectday = selectday.Date.Add(DateTime.Now.TimeOfDay);
+                                                <RadzenStack Style="width: 50%;">
+                                                    <RadzenDatePicker class="custom-datepicker" Placeholder="@($"* nhập {columnProperty.DisplayName}")"
+                                                                      TValue="DateTime" Value="selectday" AllowClear="true"
+                                                                      Change="@(async (args) =>
+                                                                                {
+                                                                                    if (args != null)
+                                                                                    {
+                                                                                        DateTime value = args.Value.Date.Add(DateTime.Now.TimeOfDay);
+                                                                                        columnProperty.Value = value;
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        columnProperty.Value = string.Empty;
+                                                                                    }
+                                                                                    await DefaultThongTinViTriLuuTru_ValueIsOK(columnProperty, columnProperty.IsCheckSameValue);
+                                                                                })"
+                                                                      ShowTime="false" HourFormat="12" DateFormat="@Common.FormatNoTime_yyyMMdd" ParseInput="@Common.ParseDate_ddMMyyyy" AllowInput="true"
+                                                                      Style="height: contain; font-size: 16px">
+                                                    </RadzenDatePicker>
+                                                </RadzenStack>
+                                            }
+
+                                            <RadzenStack Style="width: 50%;">
+                                                <RadzenAlert Visible="@(!columnProperty.IsCheckValueOK)" Text="@columnProperty.NotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                                                <RadzenAlert Visible="@(columnProperty.IsCheckValueOK)" Text="@columnProperty.NotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Success" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                                            </RadzenStack>
+                                        }
+                                    </RadzenStack>
+                                </RadzenStack>
+                            </RadzenStack>
+                        }
+
+                    </RadzenStack>
+                </RadzenCard>
+            </RadzenColumn>
+        </RadzenRow>
+
+        <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding-right: 15px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+            <RadzenButton Disabled="@(!IsAllValueThongTinOK())" Click="@(() => OnAddNew())" Style="width: contain; height: 80%;" Icon="check" Text="Xác nhận thêm" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Default" Size="ButtonSize.Small" Variant="Variant.Filled" />
+            <RadzenButton Style="width: contain; height: 80%;" Icon="close" Text="Thoát" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" Click="@(() => OnCancelAddnew())" />
+        </RadzenStack>
+    </RadzenStack>
+</RadzenCard>
+
+@code {
+    [Parameter]
+    public List<VitriLuuTru> DSVitris { get; set; } = new();
+
+    private VitriLuuTru newVitriLuuTru = new();
+
+
+    // Check trang thai gia tri cua tat ca truong thong tin isOK
+    private bool IsAllValueThongTinOK()
+    {
+        bool isOK = true;
+
+        isOK = (newVitriLuuTru.MaViTri.IsCheckValueOK == true);
+
+        isOK = (newVitriLuuTru.VTSucChua.Value != null);
+
+        isOK = (newVitriLuuTru.ViTriHang.Value != null);
+
+        isOK = (newVitriLuuTru.ViTriKe.Value != null);
+
+        isOK = (newVitriLuuTru.ViTriCot.Value != null);
+
+        return isOK;
+    }
+
+    private async Task OnOpenDialogAddThongTinKhac()
+    {
+        await DialogService.Alert("Function not yet complete!");
+    }
+
+    private async Task DefaultThongTinViTriLuuTru_ValueIsOK(Propertyy propertyy, bool checkExisting)
+    {
+        await Task.Run(() =>
+        {
+            string value = propertyy.Value?.ToString() ?? string.Empty;
+            string? dbname = propertyy.DBName ?? string.Empty;
+            string? displayName = propertyy.DisplayName ?? string.Empty;
+
+            if (!string.IsNullOrEmpty(value.Trim()))
+            {
+                if (checkExisting)
+                {
+                    bool isExisting = SQLServerServices.DefaultThongTinViTriLuuTru_ValueIsExisting(value, dbname);
+
+                    if (isExisting)
+                    {
+                        propertyy.IsCheckValueOK = false;
+                        propertyy.NotifyMess = $"{displayName} đã tồn tại";
+                    }
+                    else
+                    {
+                        propertyy.IsCheckValueOK = true;
+                        propertyy.NotifyMess = $"Giá trị hợp lệ";
+                    }
+                }
+                else
+                {
+                    propertyy.IsCheckValueOK = true;
+                    propertyy.NotifyMess = $"Giá trị hợp lệ";
+                }
+            }
+            else
+            {
+                propertyy.IsCheckValueOK = false;
+                propertyy.NotifyMess = $"{displayName} không được để trống";
+            }
+        });
+    }
+
+    private async Task OnAddNew()
+    {
+        bool? confirm = await DialogService.Confirm($"Thêm vị trí mới này?", "Xác nhận", new ConfirmOptions() { OkButtonText = "Đồng ý", CancelButtonText = "Hủy" });
+
+        if (confirm.Value)
+        {
+            // Add new
+            (int newVTID, string errorMess) = SQLServerServices.InsertViTriLuuTru(newVitriLuuTru);
+
+            if (newVTID > 0)
+            {
+                // Gán id
+                newVitriLuuTru.VTID.Value = newVTID;
+                string err = string.Empty;
+
+                // Recheck
+                if (newVTID < 0)
+                {
+                    SQLServerServices.DeleteViTriLuuTru(newVTID);
+
+                    await DialogService.Alert($"{errorMess}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                }
+                else
+                {
+                    ShowNotification("Thêm mới vị trí liệu thành công!", NotificationSeverity.Success, 3000);
+
+                    bool? exit = await DialogService.Alert($"Thêm mới vị trí <span>{newVitriLuuTru.MaViTri.Value?.ToString()}</span> thành công", "<strong><span style='color: green'>Success!</span></strong>", new AlertOptions() { OkButtonText = "Thoát", ShowClose = true });
+
+                    if (exit.Value)
+                    {
+                        DialogService.Close(newVitriLuuTru);
+                    }
+                }
+            }
+            else
+            {
+                await DialogService.Alert($"{errorMess}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+            }
+        }
+    }
+
+    // Cancel add new
+    private void OnCancelAddnew()
+    {
+        DialogService.Close(null);
+    }
+
+    // Notification
+    void ShowNotification(string message, NotificationSeverity notifytype, double time)
+    {
+        NotificationMessage notify = new NotificationMessage
+            {
+                Style = "position: fixed; top: 0; right: 0;",
+                Severity = notifytype,
+                Summary = message,
+                Duration = time
+            };
+
+        NotificationService.Notify(notify);
+    }
+}
