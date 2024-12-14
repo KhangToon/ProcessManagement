@@ -198,7 +198,7 @@ namespace ProcessManagement.Models
 
         public void SetCurrentKHSXsanPham(string? maSP, List<SanPham>? sanPhams)
         {
-            DSachSanPhams = sanPhams?.ToList()?? new();
+            DSachSanPhams = sanPhams?.ToList() ?? new();
 
             NewKHSX.TargetSanPham = DSachSanPhams.FirstOrDefault(sp => sp.SP_MaSP.Value?.ToString()?.Trim() == maSP?.ToString()) ?? new();
         }
@@ -373,6 +373,38 @@ namespace ProcessManagement.Models
             SLLot = ListTempLOT_NVLs?.Count ?? 0;
 
             return (1, error);
+        }
+
+        public Dictionary<object, int> GenerateLotWithFIFO(List<ViTriofNVL> viTriofNVLs, int soluongTong)
+        {
+            Dictionary<object, int> keyValuePairs = new();
+
+            foreach (var vitriofnvl in viTriofNVLs)
+            {
+                if (soluongTong == 0) break;
+
+                _ = int.TryParse(vitriofnvl.VTNVLSoLuong.Value?.ToString(), out int slIncurrentLotvitri) ? slIncurrentLotvitri : 0;
+
+                int sltake = 0;
+
+                if (soluongTong >= slIncurrentLotvitri)
+                {
+                    sltake = slIncurrentLotvitri;
+                }
+                else
+                {
+                    sltake = soluongTong;
+                }
+
+                soluongTong -= sltake;
+
+                if (vitriofnvl.NgayNhapKho.Value != null && sltake > 0)
+                {
+                    keyValuePairs.Add(vitriofnvl.NgayNhapKho.Value, sltake);
+                }
+            }
+
+            return keyValuePairs;
         }
     }
 }

@@ -15,7 +15,6 @@
     <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style=" height: 100%; width: 100%; padding: 0px; padding-bottom: 10px " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
         <RadzenStack Gap="20px" Style="height: contain; width: 100%; padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
             <RadzenText Text="Chỉ định số lượng nguyên liệu sản xuất" Style="color: darkgreen; font-weight: 600; font-size: 18px"></RadzenText>
-            <RadzenText Text="@($"{selectSanPham.SP_TenSanPham.Value?.ToString()} ({selectSanPham.SP_MaSP.Value?.ToString()})")" Style="color: darkblue; font-weight: 600; font-size: 18px; font-style: italic"></RadzenText>
         </RadzenStack>
 
         <!--Chi dinh so luong san pham-->
@@ -42,9 +41,9 @@
             <!--Ten NVL-->
             <RadzenStack Gap="10px" Style="width: contain; height: contain;" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
                 <RadzenText Text="Tên nguyên liệu" Style="color: black; font-weight: 600; font-size: 16px"></RadzenText>
-                <RadzenDropDown AllowFiltering="true" AllowClear="true" Placeholder="* chọn nguyên liệu" Disabled="(DsachNVLs?.Count == 0 || DsachNVLs == null)" TValue="string" Style="width: 100%; height: contain; font-size: 14px; font-weight: 600"
+                <RadzenDropDown AllowFiltering="true" AllowClear="true" Placeholder="* chọn nguyên liệu" TValue="string" Style="width: 100%; height: contain; font-size: 14px; font-weight: 600"
                                 Value="selectNguyenVL?.MaNVL.Value?.ToString()"
-                                Data=@(DsachNVLs?.Select(nvl => nvl.MaNVL.Value?.ToString()?.Trim()) ?? Enumerable.Empty<string>())
+                                Data=@(LoadListNguyenVatLieu(selectLoaiNVL)?.Select(nvl => nvl.MaNVL.Value?.ToString()?.Trim()) ?? Enumerable.Empty<string>())
                                 Change="@(args =>
                                         {
                                             selectNguyenVL = DsachNVLs?.FirstOrDefault(nvl => nvl.MaNVL.Value?.ToString()?.Trim() == args?.ToString());
@@ -325,7 +324,15 @@
     {
         int loaiNVLID = int.TryParse(selectedresult?.LOAINVLID?.Value?.ToString(), out int lnvlid) ? lnvlid : 0;
 
-        var nguyenlieus = SQLServerServices.GetListNguyenVatLieuByLoaiNvlID(loaiNVLID);
+        List<NguyenVatLieu> nguyenlieus = new();
+
+        if (loaiNVLID > 0)
+        {
+            nguyenlieus = SQLServerServices.GetListNguyenVatLieuByLoaiNvlID(loaiNVLID);
+        }
+        else nguyenlieus = SQLServerServices.GetListNgVatLieuByDanhmucID(SelectDanhmuc?.DMID.Value);
+
+        DsachNVLs = nguyenlieus;
 
         return nguyenlieus;
     }

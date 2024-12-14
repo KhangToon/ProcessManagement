@@ -72,10 +72,10 @@
                                         <Template Context="vitri">
                                             <RadzenCard Style="width: 150px; height: contain; padding: 0; margin-right: 0" Variant="Variant.Flat">
                                                 <RadzenStack Style="height: 100%; width: 100%;" Gap="0px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                    <RadzenCard class="@(IsVitriSelected(vitri))" Style="width: 100%; height: contain; padding: 10px" Variant="Variant.Filled">
+                                                    <RadzenCard class="@(IsVitriSelected(vitri))" Style="width: 100%; height: contain; padding: 10px;" Variant="Variant.Filled">
                                                         <RadzenStack onclick="@(async() => await OnViTriLuuTruClick(vitri))" Style="width: contain; height: 100%; padding: 0" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                             <RadzenCard Style="height: 100%; width: 100%; padding: 10px;" Variant="@((vitri.VTID.Value?.Equals(SelectedViTri.VTID.Value)?? false)? Variant.Flat : Variant.Outlined)">
-                                                                <RadzenStack Style="width: 100%; height: 100%;" Gap="10px" Orientation=Orientation.Vertical AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                <RadzenStack Style="width: 100%; height: 100%; cursor: pointer" Gap="10px" Orientation=Orientation.Vertical AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                                     <RadzenStack Gap="10px" Style="width: 100%; height: contain;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                                         <RadzenStack Style="height: contain; width: contain; min-width: 30px; border-radius: 5px; background-color: var(--rz-primary-lighter); padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                                             <RadzenText Text="@((DSVitris.IndexOf(vitri) + 1).ToString())" Style="color: rgba(58,71,77); font-weight: 600; font-size: 15px"></RadzenText>
@@ -480,9 +480,12 @@
         slallcanchidinh = int.TryParse(TarGetNVLofPNK.NVLNKSoLuongAll.Value?.ToString(), out int sl) ? sl : 0;
 
         // Load dsvitri
-        await GetFilterDSachVitriLuuTru(string.Empty);
+
+        await LoadDSachViTriLuuTru();
 
         SelectedViTri = DSVitris.FirstOrDefault() ?? new();
+
+        await LoadDSachViTriofNVLofSelectedViTri();
 
         await base.OnInitializedAsync();
     }
@@ -543,6 +546,38 @@
         });
     }
 
+    private async Task LoadDSachViTriofNVLofSelectedViTri()
+    {
+        await Task.Run(() =>
+        {
+            SelectedViTri.DSachViTriofNVL = SQLServerServices.GetListViTriOfNgVatLieuByVTid(SelectedViTri.VTID.Value);
+
+            SelectedViTri.DSachViTriofNVL = RangeIncreaseLOTs(SelectedViTri.DSachViTriofNVL);
+
+            // Load nguyen lieu infor
+            Parallel.ForEach(SelectedViTri.DSachViTriofNVL, vitriofnvl =>
+            {
+                _ = int.TryParse(vitriofnvl.NVLID.Value?.ToString(), out int nvlid) ? nvlid : 0;
+
+                if ((nvlid) > 0)
+                {
+                    vitriofnvl.NgLieuInfor = SQLServerServices.GetNguyenVatLieuByID(vitriofnvl.NVLID.Value);
+                }
+            });
+        });
+    }
+
+    private List<ViTriofNVL> RangeIncreaseLOTs(List<ViTriofNVL> inputList)
+    {
+        // Sort the list based on extracting the numeric part of the Lot property
+        return inputList.OrderBy(item =>
+        int.TryParse(
+            item.LotVitri.Value?.ToString()?.Replace("LOT", ""),
+            out int lotNumber
+        ) ? lotNumber : int.MaxValue
+        ).ToList();
+    }
+
     private async Task OnViTriLuuTruClick(VitriLuuTru selectVitri)
     {
         await Task.Run(() =>
@@ -590,7 +625,7 @@
                 if (!string.IsNullOrEmpty(keyWord.Trim()))
                 {
                     DSVitris = DSVitris.Where(vitri => vitri.MaViTri.Value?.ToString()?.IndexOf(keyWord.Trim(), StringComparison.OrdinalIgnoreCase) >= 0
-                                                    || vitri.DSachViTriofNVL.Any(nvl => nvl.NgLieuInfor.MaNVL.Value?.ToString()?.IndexOf(keyWord.Trim(), StringComparison.OrdinalIgnoreCase) >= 0)).ToList();
+                                                || vitri.DSachViTriofNVL.Any(nvl => nvl.NgLieuInfor.MaNVL.Value?.ToString()?.IndexOf(keyWord.Trim(), StringComparison.OrdinalIgnoreCase) >= 0)).ToList();
                 }
             }
             else if (modeSearch == 4) // vi tri con trong
@@ -600,7 +635,7 @@
                 if (!string.IsNullOrEmpty(keyWord.Trim()))
                 {
                     DSVitris = DSVitris.Where(vitri => vitri.MaViTri.Value?.ToString()?.IndexOf(keyWord.Trim(), StringComparison.OrdinalIgnoreCase) >= 0
-                                                    || vitri.DSachViTriofNVL.Any(nvl => nvl.NgLieuInfor.MaNVL.Value?.ToString()?.IndexOf(keyWord.Trim(), StringComparison.OrdinalIgnoreCase) >= 0)).ToList();
+                                                || vitri.DSachViTriofNVL.Any(nvl => nvl.NgLieuInfor.MaNVL.Value?.ToString()?.IndexOf(keyWord.Trim(), StringComparison.OrdinalIgnoreCase) >= 0)).ToList();
                 }
             }
             else
@@ -608,7 +643,7 @@
                 if (!string.IsNullOrEmpty(keyWord.Trim()))
                 {
                     DSVitris = DSVitris.Where(vitri => vitri.MaViTri.Value?.ToString()?.IndexOf(keyWord.Trim(), StringComparison.OrdinalIgnoreCase) >= 0
-                                                    || vitri.DSachViTriofNVL.Any(nvl => nvl.NgLieuInfor.MaNVL.Value?.ToString()?.IndexOf(keyWord.Trim(), StringComparison.OrdinalIgnoreCase) >= 0)).ToList();
+                                                || vitri.DSachViTriofNVL.Any(nvl => nvl.NgLieuInfor.MaNVL.Value?.ToString()?.IndexOf(keyWord.Trim(), StringComparison.OrdinalIgnoreCase) >= 0)).ToList();
                 }
             }
 
@@ -617,6 +652,7 @@
                 SelectedViTri = DSVitris.FirstOrDefault() ?? new();
             }
             else SelectedViTri = new();
+            await LoadDSachViTriofNVLofSelectedViTri();
 
             isSearching = false;
         }

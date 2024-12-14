@@ -96,9 +96,6 @@
                                                 {
                                                     <RadzenButton Text="@($"Còn trống {((vitri.SLConTrong > 0)? $"({vitri.SLConTrong})" : string.Empty)}")" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Dark" Variant="Variant.Flat"
                                                                   Style="border-radius: 5px; --rz-icon-size: 18px; height: 20px; width: 100%; cursor: default; font-weight: 600" />
-                                                    <RadzenButton Disabled="@((vitri.SLConTrong == 0))"
-                                                                  Click="@(async () => await RemoveViTriLuuTru(vitri))" Icon="delete" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Darker" Variant="Variant.Flat"
-                                                                  Style="font-size: 18px; height: contain; width: contain;" />
                                                 }
                                                 else
                                                 {
@@ -166,8 +163,12 @@
                                     else
                                     {
                                         <RadzenButton Text="@($"Số lượng trống: {SelectedViTri.SLConTrong}")" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Dark" Variant="Variant.Text"
-                                                      Style="border-radius: 5px; --rz-icon-size: 18px; height: 20px; width: 100%; cursor: default; background-color: rgb(229,245,233); font-weight: 600" />
+                                                      Style="border-radius: 5px; --rz-icon-size: 18px; height: 20px; width: contain; cursor: default; background-color: rgb(229,245,233); font-weight: 600" />
                                     }
+
+                                    <RadzenButton Disabled="@(CountDSVitriofNVL(SelectedViTri) > 0)" Click="@(async () => await RemoveViTriLuuTru(SelectedViTri))" Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Shade="Shade.Darker" Variant="Variant.Flat"
+                                                  Text="Xóa vị trí" Style="font-size: 15px; height: contain; width: contain;" />
+
                                 </RadzenStack>
                             </RadzenStack>
                             <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding: 5px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
@@ -189,6 +190,7 @@
                                     </RadzenCard>
                                 </RadzenStack>
                                 <RadzenStack Gap="10px" Style="height: contain; width: 50%; padding: 5px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+
                                     <RadzenStack Gap="0" Style="height: contain; width: 100%; padding-bottom: 5px; padding-top: 5px; padding-left: 10px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                         <RadzenStack Style="width: 35%; padding-left: 10px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                             <RadzenText Text="Vị trí kệ" Style="font-size: 16px; font-weight: 600;  height: contain; width: 100% "></RadzenText>
@@ -526,6 +528,7 @@
             await LoadDSachViTriLuuTru();
 
             SelectedViTri = DSVitris?.FirstOrDefault(vt => vt.VTID.Value?.ToString() == newVitri.VTID.Value?.ToString()) ?? new();
+
             await LoadDSachViTriofNVLofSelectedViTri();
         }
     }
@@ -591,6 +594,13 @@
             out int lotNumber
         ) ? lotNumber : int.MaxValue
         ).ToList();
+    }
+
+    private int CountDSVitriofNVL(VitriLuuTru viTriLuuTru)
+    {
+        int count = viTriLuuTru.DSachViTriofNVL.Where(vt => (int.TryParse(vt.VTNVLSoLuong.Value?.ToString(), out int vtsl) ? vtsl : 0) > 0).ToList().Count();
+
+        return count;
     }
 
     private async Task RemoveViTriLuuTru(VitriLuuTru selectedViTri)
