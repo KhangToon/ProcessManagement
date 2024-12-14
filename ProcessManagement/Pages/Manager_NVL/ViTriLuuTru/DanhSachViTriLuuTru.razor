@@ -86,8 +86,8 @@
                                             <RadzenStack Style="height: contain; width: contain; border-radius: 5px; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                 @if (vitri.SLConTrong > 0)
                                                 {
-                                                    <RadzenButton Text="@($"Còn trống {((vitri.SLConTrong > 0)? $"({vitri.SLConTrong})" : string.Empty)}")" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Dark" Variant="Variant.Outlined"
-                                                                  Style="border-radius: 5px; --rz-icon-size: 18px; height: 20px; width: 100%; cursor: default; background-color: rgb(229,245,233); font-weight: 600" />
+                                                    <RadzenButton Text="@($"Còn trống {((vitri.SLConTrong > 0)? $"({vitri.SLConTrong})" : string.Empty)}")" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Dark" Variant="Variant.Flat"
+                                                                  Style="border-radius: 5px; --rz-icon-size: 18px; height: 20px; width: 100%; cursor: default; font-weight: 600" />
                                                 }
                                                 else
                                                 {
@@ -207,7 +207,11 @@
 
                             <RadzenStack Gap="20px" Style="height: contain; width: 100%; background-color: var(--rz-primary-darker); padding: 5px; padding-right: 20px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                                 <RadzenStack Gap="10px" Style="height: contain; width: contain; padding-left: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                    <RadzenText Text="Danh sách nguyên vật liệu " Style="color: white; font-weight: 600; font-size: 16px"></RadzenText>
+                                    <RadzenText Text="Danh sách LOT lưu trữ" Style="color: white; font-weight: 600; font-size: 16px"></RadzenText>
+                                </RadzenStack>
+                                <RadzenStack Gap="10px" Style="height: contain; width: contain; padding-left: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                    <RadzenButton Click="@(() => OnAddNewLotForViTriLuuTru(SelectedViTri))" Icon="add" Text="Thêm LOT cho vị trí" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat" Shade="Shade.Lighter"
+                                                  Style="height: contain; width: 100%; font-size: 15px; color: black; background-color: white;" />
                                 </RadzenStack>
                                 <RadzenStack Gap="10px" Style="height: contain; width: contain; padding-left: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                     <RadzenButton Text="@($"Số lượng: {SelectedViTri.DSachViTriofNVL.Where(vt => int.Parse(vt.VTNVLSoLuong.Value?.ToString() ?? "0") > 0).Count()}")" Size="ButtonSize.Small" Shade="Shade.Dark" Variant="Variant.Text"
@@ -347,6 +351,8 @@
                 // Load ds nguyen lieu trong vi tri
                 vitri.DSachViTriofNVL = SQLServerServices.GetListViTriOfNgVatLieuByVTid(vitri.VTID.Value);
 
+                vitri.DSachViTriofNVL = RangeIncreaseLOTs(vitri.DSachViTriofNVL);
+
                 // Load nguyen lieu infor
                 Parallel.ForEach(vitri.DSachViTriofNVL, vitriofnvl =>
                 {
@@ -455,6 +461,69 @@
 
             SelectedViTri = DSVitris?.FirstOrDefault(vt => vt.VTID.Value?.ToString() == newVitri.VTID.Value?.ToString()) ?? new();
         }
+    }
+
+    private async Task OnAddNewLotForViTriLuuTru(VitriLuuTru selectedViTri)
+    {
+        await Task.Run(() =>
+        {
+            var dsachLots = SQLServerServices.GetListViTriOfNgVatLieuByVTid(selectedViTri.VTID.Value);
+
+            var listLotIndexs = dsachLots.Select(lot => int.Parse(lot.LotVitri.Value?.ToString()?.Replace("LOT", "") ?? "-1"));
+
+            int maxIndex = (listLotIndexs.Count() > 0) ? listLotIndexs.Max() : 0;
+
+            int newIndex = -1;
+
+            for (int i = 1; i < maxIndex; i++)
+            {
+                if (!listLotIndexs.Contains(i))
+                {
+                    newIndex = i;
+                    break;
+                }
+            }
+
+            if (newIndex == -1)
+            {
+                newIndex = maxIndex + 1;
+            }
+
+            if (newIndex != -1)
+            {
+                ViTriofNVL newviTriofNVL = new()
+                    {
+                        VTID = { Value = selectedViTri.VTID.Value },
+                        NVLID = { Value = 0 },
+                        VTNVLSoLuong = { Value = 0 },
+                        LotVitri = { Value = $"LOT{newIndex}" },
+                    };
+
+                (int newvitriID, string error) = SQLServerServices.InsertNewViTriOfNgVatLieu(newviTriofNVL);
+
+                if (newvitriID == -1)
+                {
+
+                }
+                else
+                {
+                    selectedViTri.DSachViTriofNVL = SQLServerServices.GetListViTriOfNgVatLieuByVTid(selectedViTri.VTID.Value);
+
+                    selectedViTri.DSachViTriofNVL = RangeIncreaseLOTs(selectedViTri.DSachViTriofNVL);
+                }
+            }
+        });
+    }
+
+    public List<ViTriofNVL> RangeIncreaseLOTs(List<ViTriofNVL> inputList)
+    {
+        // Sort the list based on extracting the numeric part of the Lot property
+        return inputList.OrderBy(item =>
+            int.TryParse(
+                item.LotVitri.Value?.ToString()?.Replace("LOT", ""),
+                out int lotNumber
+            ) ? lotNumber : int.MaxValue
+        ).ToList();
     }
 
     private async Task CopyToClipboard(string content)
