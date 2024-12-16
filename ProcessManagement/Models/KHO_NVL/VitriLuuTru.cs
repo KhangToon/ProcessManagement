@@ -8,8 +8,8 @@ namespace ProcessManagement.Models.KHO_NVL
         public Propertyy VTID { get; set; } = new() { DBName = Common.VTID, Type = typeof(int), AlowDatabase = false }; // ID
         public Propertyy MaViTri { get; set; } = new() { DBName = Common.MaViTri, DisplayName = Common.MaViTri, Type = typeof(string), AlowDatabase = true, IsCheckSameValue = true };
         public Propertyy VTSucChua { get; set; } = new() { DBName = Common.VTSucChua, DisplayName = Common.VTSucChua, Type = typeof(int), AlowDatabase = true };
-        public Propertyy ViTriHang { get; set; } = new() { DBName = Common.ViTriHang, DisplayName = Common.ViTriHang, Type = typeof(string), AlowDatabase = true };
         public Propertyy ViTriKe { get; set; } = new() { DBName = Common.ViTriKe, DisplayName = Common.ViTriKe, Type = typeof(string), AlowDatabase = true };
+        public Propertyy ViTriHang { get; set; } = new() { DBName = Common.ViTriHang, DisplayName = Common.ViTriHang, Type = typeof(string), AlowDatabase = true };
         public Propertyy ViTriCot { get; set; } = new() { DBName = Common.ViTriCot, DisplayName = Common.ViTriCot, Type = typeof(string), AlowDatabase = true };
 
         public int SLConTrong = 0;
