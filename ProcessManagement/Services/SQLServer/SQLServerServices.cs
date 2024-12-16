@@ -1421,6 +1421,78 @@ namespace ProcessManagement.Services.SQLServer
         // ------------------------------------------------------------------------------------- //
         #region Table KHO_NguyenVatLieu
 
+        // Get Nguyen Vat Lieu by ID using multitask
+        public NguyenVatLieu GetNguyenVatLieuByID_MultipleTask(object? nvlID)
+        {
+            NguyenVatLieu nvl = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_NguyenVatLieu}] WHERE [{Common.NVLID}] = '{nvlID}'";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    List<Propertyy> rowitems = nvl.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue.ToString()?.Trim();
+                    }
+
+                }
+            }
+
+            if (nvl.NVLID.Value != null)
+            {
+                // Use Task.WhenAll for parallel loading of dependent data
+                var tasks = new List<Task>
+                {
+                    Task.Run(() => nvl.DSThongTin = GetNguyenVatLieuDetails(nvl.NVLID.Value)),
+                    Task.Run(() => nvl.DanhMuc = GetDanhMucbyID(nvl.DMID.Value)),
+                    Task.Run(() => nvl.LoaiNVL = GetLoaiNVLbyID(nvl.LOAINVLID.Value)),
+                    Task.Run(() => nvl.DSViTri = GetListViTriOfNgVatLieuByNVLid(nvl.NVLID.Value)),
+                    Task.Run(() => nvl.DSachSPofNVLs = GetDSachNVLwithSanPham_byNVLID(nvl.NVLID.Value))
+                };
+
+                // Wait for all tasks to complete
+                Task.WhenAll(tasks).Wait();
+
+                // Compute TonKho after parallel loading
+                nvl.TonKho = nvl.DSViTri.Sum(vitri =>
+                    int.TryParse(vitri.VTNVLSoLuong.Value?.ToString(), out int slvt) ? slvt : 0);
+
+
+            }
+
+
+            // Load Details NVL 
+            nvl.DSThongTin = GetNguyenVatLieuDetails(nvl.NVLID.Value);
+            // Load Danh muc
+            nvl.DanhMuc = GetDanhMucbyID(nvl.DMID.Value);
+            // Load Loai NVL
+            nvl.LoaiNVL = GetLoaiNVLbyID(nvl.LOAINVLID.Value);
+            // Load list vi tri 
+            nvl.DSViTri = GetListViTriOfNgVatLieuByNVLid(nvl.NVLID.Value);
+            // Tinh so luong ton kho
+            nvl.TonKho = nvl.DSViTri.Sum(vitri => int.TryParse(vitri.VTNVLSoLuong.Value?.ToString(), out int slvt) ? slvt : 0);
+
+            // Load danh sach SPofNVL
+            nvl.DSachSPofNVLs = GetDSachNVLwithSanPham_byNVLID(nvl.NVLID.Value);
+
+            return nvl;
+        }
+
+
         // Get Nguyen Vat Lieu by ID 
         public NguyenVatLieu GetNguyenVatLieuByID(object? nvlID)
         {

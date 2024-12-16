@@ -74,15 +74,17 @@
                         <RadzenStack Style="height: 100%; width: 100%; padding-left: 10px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                             <RadzenButton Click="OnAddNewViTriLuuTru" Icon="add" Text="Thêm vị trí mới" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
                                           Style="height: contain; width: 100%; font-size: 15px;" />
+                            <RadzenButton Visible="false" Click="@(async() => await AutoAddViTriLuuTru())" Icon="add" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
+                                          Style="height: contain; width: 100%; font-size: 15px;" />
                         </RadzenStack>
                     </RadzenColumn>
                 </RadzenRow>
             </RadzenStack>
-            <RadzenDataList Style="height: 100%; width: 100%" Density="Density.Default" PagerPosition="PagerPosition.Top" PageSize="12" AllowPaging="false" WrapItems="true" Data="@DSVitris" TItem="VitriLuuTru">
+            <RadzenDataList Style="height: 100%; width: 100%" Density="Density.Default" PagerPosition="PagerPosition.Top" PageSize="12" AllowPaging="true" WrapItems="true" AllowVirtualization="false" Data="@DSVitris" TItem="VitriLuuTru">
                 <Template Context="vitri">
                     <RadzenCard Style="width: 250px; height: contain; padding: 0" Variant="Variant.Flat">
                         <RadzenCard class="@(IsVitriSelected(vitri))" Style="width: 100%; height: 100%; padding: 10px" Variant="Variant.Flat">
-                            <RadzenStack onclick="@(() => OnViTriLuuTruClick(vitri))" Style="width: 100%; height: 100%; padding: 0" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenStack onclick="@(async() => await OnViTriLuuTruClick(vitri))" Style="width: 100%; height: 100%; padding: 0" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                 <RadzenCard class="rz-shadow-4" Variant="@((vitri.VTID.Value?.Equals(SelectedViTri.VTID.Value)?? false)? Variant.Outlined : Variant.Flat)" Style="height: 100%; width: 100%; padding: 10px; background-color: white">
                                     <RadzenStack Style="width: 100%; height: 100%;" Gap="10px" Orientation=Orientation.Vertical AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                         <RadzenStack Gap="0" Style="width: 100%; height: contain; padding-bottom: 5px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
@@ -343,6 +345,7 @@
         await LoadDSachViTriLuuTru();
 
         SelectedViTri = DSVitris.FirstOrDefault() ?? new();
+        await LoadDSachViTriofNVLofSelectedViTri();
 
         await base.OnInitializedAsync();
     }
@@ -377,32 +380,55 @@
         {
             DSVitris = SQLServerServices.GetAllViTriLuuTru();
 
-            Parallel.ForEach(DSVitris, vitri =>
-            {
-                // Load ds nguyen lieu trong vi tri
-                vitri.DSachViTriofNVL = SQLServerServices.GetListViTriOfNgVatLieuByVTid(vitri.VTID.Value);
+            // Parallel.ForEach(DSVitris, vitri =>
+            // {
+            //     // Load ds nguyen lieu trong vi tri
+            //     vitri.DSachViTriofNVL = SQLServerServices.GetListViTriOfNgVatLieuByVTid(vitri.VTID.Value);
 
-                vitri.DSachViTriofNVL = RangeIncreaseLOTs(vitri.DSachViTriofNVL);
+            //     vitri.DSachViTriofNVL = RangeIncreaseLOTs(vitri.DSachViTriofNVL);
 
-                // Load nguyen lieu infor
-                Parallel.ForEach(vitri.DSachViTriofNVL, vitriofnvl =>
-                {
-                    _ = int.TryParse(vitriofnvl.NVLID.Value?.ToString(), out int nvlid) ? nvlid : 0;
+            //     // Load nguyen lieu infor
+            //     Parallel.ForEach(vitri.DSachViTriofNVL, vitriofnvl =>
+            //     {
+            //         _ = int.TryParse(vitriofnvl.NVLID.Value?.ToString(), out int nvlid) ? nvlid : 0;
 
-                    if ((nvlid) > 0)
-                    {
-                        vitriofnvl.NgLieuInfor = SQLServerServices.GetNguyenVatLieuByID(vitriofnvl.NVLID.Value);
-                    }
-                });
-            });
+            //         if ((nvlid) > 0)
+            //         {
+            //             vitriofnvl.NgLieuInfor = SQLServerServices.GetNguyenVatLieuByID(vitriofnvl.NVLID.Value);
+            //         }
+            //     });
+            // });
         });
     }
 
-    private void OnViTriLuuTruClick(VitriLuuTru selectVitri)
+    private async Task OnViTriLuuTruClick(VitriLuuTru selectVitri)
     {
         SelectedViTri = selectVitri;
 
+        await LoadDSachViTriofNVLofSelectedViTri();
+
         StateHasChanged();
+    }
+
+    private async Task LoadDSachViTriofNVLofSelectedViTri()
+    {
+        await Task.Run(() =>
+        {
+            SelectedViTri.DSachViTriofNVL = SQLServerServices.GetListViTriOfNgVatLieuByVTid(SelectedViTri.VTID.Value);
+
+            SelectedViTri.DSachViTriofNVL = RangeIncreaseLOTs(SelectedViTri.DSachViTriofNVL);
+
+            // Load nguyen lieu infor
+            Parallel.ForEach(SelectedViTri.DSachViTriofNVL, vitriofnvl =>
+            {
+                _ = int.TryParse(vitriofnvl.NVLID.Value?.ToString(), out int nvlid) ? nvlid : 0;
+
+                if ((nvlid) > 0)
+                {
+                    vitriofnvl.NgLieuInfor = SQLServerServices.GetNguyenVatLieuByID(vitriofnvl.NVLID.Value);
+                }
+            });
+        });
     }
 
     private void OnViTriofNVLClick(ViTriofNVL selectViTriofNVL)
@@ -464,6 +490,8 @@
             }
             else SelectedViTri = new();
 
+            await LoadDSachViTriofNVLofSelectedViTri();
+
             isSearching = false;
         }
     }
@@ -498,6 +526,7 @@
             await LoadDSachViTriLuuTru();
 
             SelectedViTri = DSVitris?.FirstOrDefault(vt => vt.VTID.Value?.ToString() == newVitri.VTID.Value?.ToString()) ?? new();
+            await LoadDSachViTriofNVLofSelectedViTri();
         }
     }
 
@@ -566,23 +595,30 @@
 
     private async Task RemoveViTriLuuTru(VitriLuuTru selectedViTri)
     {
-        await Task.Run(() =>
+        bool? confirm = await DialogService.Confirm("Xóa vị trí này?", "Xác nhận", new ConfirmOptions() { OkButtonText = "OK", CancelButtonText = "Hủy", ShowClose = false });
+
+        if (confirm.Value)
         {
-            (bool deleted, string error) = SQLServerServices.DeleteViTriLuuTru(selectedViTri.VTID.Value);
-
-            if (deleted == false)
+            await Task.Run(() =>
             {
-                ShowNotification($"Error: {error}!", NotificationSeverity.Error, 2000);
-            }
-            else
-            {
-                ShowNotification("Removed!", NotificationSeverity.Success, 2000);
-            }
-        });
+                (bool deleted, string error) = SQLServerServices.DeleteViTriLuuTru(selectedViTri.VTID.Value);
 
-        await LoadDSachViTriLuuTru();
+                if (deleted == false)
+                {
+                    ShowNotification($"Error: {error}!", NotificationSeverity.Error, 2000);
+                }
+                else
+                {
+                    ShowNotification("Removed!", NotificationSeverity.Success, 2000);
+                }
+            });
 
-        SelectedViTri = DSVitris?.FirstOrDefault(vt => vt.VTID.Value?.ToString() == selectedViTri.VTID.Value?.ToString()) ?? new();
+            await LoadDSachViTriLuuTru();
+
+            SelectedViTri = DSVitris?.FirstOrDefault(vt => vt.VTID.Value?.ToString() == selectedViTri.VTID.Value?.ToString()) ?? new();
+            await LoadDSachViTriofNVLofSelectedViTri();
+
+        }
     }
 
     private void RemoveViTriofNVL(ViTriofNVL removeViTriofNVL, VitriLuuTru selectedViTri)
@@ -658,5 +694,48 @@
             };
 
         NotificationService.Notify(notify);
+    }
+
+    private async Task AutoAddViTriLuuTru()
+    {
+        int maxke = 10;
+        int maxhang = 3;
+        int maxcot = 5;
+        int maxlot = 10;
+        int succhua = 100000;
+
+        for (int i = 1; i <= maxke; i++)
+        {
+            for (int j = 1; j <= maxhang; j++)
+            {
+                for (int k = 1; k <= maxcot; k++)
+                {
+                    VitriLuuTru vitriLuuTru = new()
+                        {
+                            MaViTri = { Value = $"#{i}#{j}#{k}" },
+                            VTSucChua = { Value = succhua },
+                            ViTriKe = { Value = i },
+                            ViTriHang = { Value = j },
+                            ViTriCot = { Value = k }
+                        };
+
+                    (int newvtid, string err) = SQLServerServices.InsertViTriLuuTru(vitriLuuTru);
+
+                    if (newvtid > 0)
+                    {
+                        vitriLuuTru.VTID.Value = newvtid;
+
+                        for (int l = 0; l < maxlot; l++)
+                        {
+                            await OnAddNewLotForViTriLuuTru(vitriLuuTru);
+                        }
+                    }
+                    else
+                    {
+
+                    }
+                }
+            }
+        }
     }
 }
