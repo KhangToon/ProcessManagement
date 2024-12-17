@@ -345,7 +345,8 @@ namespace ProcessManagement.Services
         // Update ngaynhapkho/ngayxuatkho cua dsLOTofKHSX
         private static (int, string) UpdateNgayNhapXuatKho_dsLOTofKHSX(object? khsxid, LenhXuatKho targetLXK)
         {
-            Dictionary<string, object?> parameters = new() { { Models.KHSXs.KHSX_LOT.DBName.KHSXID, khsxid } };
+            Dictionary<string, object?> parameters = new() { { Models.KHSXs.KHSX_LOT.DBName.KHSXID, khsxid }, { Models.KHSXs.KHSX_LOT.DBName.NgayNhapKho, targetLXK.NgayNhapKho.Value } };
+            // ---> chi load nhung lotKHSX theo ngay nhap kho
             (var resultdslots, string getError) = SQLServerServices.GetListLOT_khsx(parameters);
 
             if (resultdslots != null && resultdslots.Any())
@@ -354,21 +355,21 @@ namespace ProcessManagement.Services
                 {
                     foreach (var lot in resultdslots)
                     {
-                        lot.NgayNhapKho.Value = targetLXK.ViTriofNVL.NgayNhapKho.Value;
+                        //lot.NgayNhapKho.Value = targetLXK.ViTriofNVL.NgayNhapKho.Value; --> Da get ngaynhapkho luc tao KHSX
                         lot.NgayXuatKho.Value = targetLXK.NgayXuatKho.Value;
 
                         (int updatelot, string updateloterr) = SQLServerServices.UpdateLOT_khsx(lot);
 
                         if (updatelot == -1)
                         {
-
+                            return (-1, updateloterr);
                         }
                     }
 
-                    return (1, string.Empty);
+                    return (1, "Success!");
                 }
 
-                return (-1, "Error");
+                return (-1, "Error!");
 
             }
             else return (-1, "Danh sách LOT của KHSX không tồn tại!");
