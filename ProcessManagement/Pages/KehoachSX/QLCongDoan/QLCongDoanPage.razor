@@ -385,7 +385,7 @@
                                 totalAllOK = lotrow.GetTotalOKAllCDoan();
                                 totalAllNG = lotrow.GetTotalNGAllCDoan();
                             }
-                            <RadzenText Text="@($"{totalAllOK}")" Style="font-size: 16px; color: seagreen; height: contain; font-weight: 600"></RadzenText>
+                            <RadzenText Text="@($"{totalAllOK}")" Style="font-size: 16px; color: green; height: contain; font-weight: 600"></RadzenText>
                         </Template>
                     </RadzenDataGridColumn>
 
@@ -396,8 +396,18 @@
                         </HeaderTemplate>
                         <Template Context="lotrow">
                             <RadzenText Visible="@(totalAllNG > 0)" Text="@($"{totalAllNG}")" Style="font-size: 16px; color: darkred; height: contain; font-weight: 600"></RadzenText>
-                            <RadzenText Visible="@(totalAllNG == 0 && !lotrow.isLastCDoanDone)" Text="@($"{totalAllNG}")" Style="font-size: 16px; color: darkred; height: contain; font-weight: 600"></RadzenText>
-                            <RadzenButton Visible="@(totalAllNG == 0 && lotrow.isLastCDoanDone)" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Darker" Variant="Variant.Text" Icon="check_circle" Style="font-size: 16px; height: contain; font-weight: 600"></RadzenButton>
+                            <RadzenText Visible="@(totalAllNG == 0 && totalAllOK > 0 && lotrow.IsLastCDoanDone)" Style="font-size: 16px; color: darkgreen; height: contain; font-weight: 600"></RadzenText>
+                        </Template>
+                    </RadzenDataGridColumn>
+
+                    <!--TRANG THAI-->
+                    <RadzenDataGridColumn Resizable=true TItem="ResultPerLOTKHSX" Title="TỔNG NG" TextAlign="TextAlign.Center">
+                        <HeaderTemplate>
+                            <RadzenText Text="TRẠNG THÁI" Style="font-size: 17px; height: contain; font-weight: 600; color: white; padding: 5px;"></RadzenText>
+                        </HeaderTemplate>
+                        <Template Context="lotrow">
+                            <RadzenButton Visible="@(!lotrow.IsLastCDoanDone)" ButtonStyle="ButtonStyle.Warning" Size="ButtonSize.Small" Shade="Shade.Darker" Variant="Variant.Text" Text="Pending" Style="font-size: 16px; height: contain; font-weight: 500"></RadzenButton>
+                            <RadzenButton Visible="@(lotrow.IsLastCDoanDone)" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Darker" Variant="Variant.Text" Icon="check" Text="Done" Style="font-size: 16px; height: contain; font-weight: 600"></RadzenButton>
                         </Template>
                     </RadzenDataGridColumn>
                 }
@@ -645,9 +655,11 @@
                 dsachKQGCperCDOAN.Add(kQGCperLOTofKHSX);
             }
 
-
             // Asign dsachKQGCperCDOAN for resultPerLOTKHSX
             resultPerLOTKHSX.DsachKQGCperCDOAN = dsachKQGCperCDOAN;
+
+            // Asign IsDoneLastCDoan
+            resultPerLOTKHSX.IsLastCDoanDone = resultPerLOTKHSX.DsachKQGCperCDOAN.LastOrDefault()?.DanhGia == 1;
 
             resultPerLOTKHSXs.Add(resultPerLOTKHSX);
         }
@@ -658,7 +670,7 @@
     // Open dialog DongThung
     private async Task OpenDialogAsignSPforNVL(ResultPerLOTKHSX? resultPerLOTKHSX)
     {
-        if (resultPerLOTKHSX != null && resultPerLOTKHSX.isLastCDoanDone)
+        if (resultPerLOTKHSX != null && resultPerLOTKHSX.IsLastCDoanDone)
         {
             await DialogService.OpenAsync<DialogCreateThungTPham>(null, new Dictionary<string, object>() { { "TargetLotResult", resultPerLOTKHSX } },
             new DialogOptions() { ShowTitle = false, Width = "50%", Height = "80%", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 10px; padding: 0px;" });

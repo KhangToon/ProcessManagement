@@ -8,8 +8,7 @@ namespace ProcessManagement.Models.KHSXs
         public object? MaSP { get; set; }
         public object? MaQuanLyLot { get; set; }
         public object? SLperLOT { get; set; }
-
-        public bool isLastCDoanDone = true;
+        public bool IsLastCDoanDone { get; set; }
 
         public List<KQGCperCDOANofLOTKHSX> DsachKQGCperCDOAN { get; set; } = new(); // KQGC of current LOT per cong doan
 
@@ -28,14 +27,12 @@ namespace ProcessManagement.Models.KHSXs
             return targetKQ;
         }
 
-        public int GetTotalOKlastCDoan()
+        public (int sumOK, int sumNG) GetTotalNGOKlastCDoan()
         {
             int sumOK = DsachKQGCperCDOAN.LastOrDefault()?.TotalOK ?? 0;
+            int sumNG = DsachKQGCperCDOAN.LastOrDefault()?.TotalNG ?? 0;
 
-            // Text 
-            sumOK = 178;
-
-            return sumOK;
+            return (sumOK, sumNG);
         }
 
         public int GetTotalNGlastCDoan()
@@ -47,11 +44,9 @@ namespace ProcessManagement.Models.KHSXs
 
         public int GetTotalOKAllCDoan()
         {
-            _ = int.TryParse(SLperLOT?.ToString(), out int sldefaultLot) ? sldefaultLot : 0;
+            int sumAllOK = DsachKQGCperCDOAN.Where(kq => (kq.TotalOK + kq.TotalNG) > 0).LastOrDefault()?.TotalOK ?? 0;
 
-            int sumAllOK = sldefaultLot - GetTotalNGAllCDoan();
-
-            return (sumAllOK < 0) ? 0 : sumAllOK;
+            return sumAllOK;
         }
 
         public int GetTotalNGAllCDoan()
