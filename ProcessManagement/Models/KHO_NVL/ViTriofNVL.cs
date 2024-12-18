@@ -20,6 +20,11 @@ namespace ProcessManagement.Models.KHO_NVL
         public bool isEditVTNVLSoLuong = false; // Dung trong modul kiemke
         public object tempVTNVLSoLuong = 0; // Dung trong modul kiemke
 
+        public int SLTake = 0; // Dung trong KHSX, lay NVL
+        public bool isAllowselect = false; // Dung trong KHSX, lay NVL
+        public bool isPicked = false; // Dung trong KHSX, lay NVL
+        public int id = 0; // Dung trong KHSX, lay NVL
+
         public List<Propertyy> GetPropertiesValues()
         {
             Type propertyType = typeof(ViTriofNVL);

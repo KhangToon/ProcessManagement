@@ -1,4 +1,5 @@
 ﻿using ProcessManagement.Commons;
+using ProcessManagement.Models.KHO_NVL;
 using System.Reflection;
 
 namespace ProcessManagement.Models
@@ -15,6 +16,8 @@ namespace ProcessManagement.Models
         public Propertyy ThoiDiem { get; set; } = new() { DBName = Common.ThoiDiem, Type = typeof(DateTime), AlowDatabase = true };
 
         public string TenNVL { get; set; } = string.Empty;
+
+        public List<ViTriofNVL> dsVitriofNVLs { get; set; } = new(); // dung cho generate KHSX
 
         public List<Propertyy> GetPropertiesValues()
         {
