@@ -1141,7 +1141,7 @@ namespace ProcessManagement.Services.SQLServer
                     }
 
                     // Load target nguyen vat lieu
-                    nvlofsp.TargetNgLieu = GetNguyenVatLieuByID(nvlofsp.NVLID.Value);
+                    nvlofsp.TargetNgLieu = GetNguyenVatLieuByID_MultipleTask(nvlofsp.NVLID.Value);
 
                     listNVLofSanphams.Add(nvlofsp);
                 }
@@ -1468,75 +1468,22 @@ namespace ProcessManagement.Services.SQLServer
                 Task.WhenAll(tasks).Wait();
 
                 // Compute TonKho after parallel loading
-                nvl.TonKho = nvl.DSViTri.Sum(vitri =>
-                    int.TryParse(vitri.VTNVLSoLuong.Value?.ToString(), out int slvt) ? slvt : 0);
-
-
+                nvl.TonKho = nvl.DSViTri.Sum(vitri => int.TryParse(vitri.VTNVLSoLuong.Value?.ToString(), out int slvt) ? slvt : 0);
             }
 
+            //// Load Details NVL 
+            //nvl.DSThongTin = GetNguyenVatLieuDetails(nvl.NVLID.Value);
+            //// Load Danh muc
+            //nvl.DanhMuc = GetDanhMucbyID(nvl.DMID.Value);
+            //// Load Loai NVL
+            //nvl.LoaiNVL = GetLoaiNVLbyID(nvl.LOAINVLID.Value);
+            //// Load list vi tri 
+            //nvl.DSViTri = GetListViTriOfNgVatLieuByNVLid(nvl.NVLID.Value);
+            //// Tinh so luong ton kho
+            //nvl.TonKho = nvl.DSViTri.Sum(vitri => int.TryParse(vitri.VTNVLSoLuong.Value?.ToString(), out int slvt) ? slvt : 0);
 
-            // Load Details NVL 
-            nvl.DSThongTin = GetNguyenVatLieuDetails(nvl.NVLID.Value);
-            // Load Danh muc
-            nvl.DanhMuc = GetDanhMucbyID(nvl.DMID.Value);
-            // Load Loai NVL
-            nvl.LoaiNVL = GetLoaiNVLbyID(nvl.LOAINVLID.Value);
-            // Load list vi tri 
-            nvl.DSViTri = GetListViTriOfNgVatLieuByNVLid(nvl.NVLID.Value);
-            // Tinh so luong ton kho
-            nvl.TonKho = nvl.DSViTri.Sum(vitri => int.TryParse(vitri.VTNVLSoLuong.Value?.ToString(), out int slvt) ? slvt : 0);
-
-            // Load danh sach SPofNVL
-            nvl.DSachSPofNVLs = GetDSachNVLwithSanPham_byNVLID(nvl.NVLID.Value);
-
-            return nvl;
-        }
-
-
-        // Get Nguyen Vat Lieu by ID 
-        public NguyenVatLieu GetNguyenVatLieuByID(object? nvlID)
-        {
-            NguyenVatLieu nvl = new();
-
-            using (var connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-
-                var command = connection.CreateCommand();
-
-                command.CommandText = $"SELECT * FROM [{Common.Table_NguyenVatLieu}] WHERE [{Common.NVLID}] = '{nvlID}'";
-
-                using var reader = command.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    List<Propertyy> rowitems = nvl.GetPropertiesValues();
-
-                    foreach (var item in rowitems)
-                    {
-                        string? columnName = item.DBName;
-
-                        object columnValue = reader[columnName];
-
-                        item.Value = columnValue.ToString()?.Trim();
-                    }
-
-                }
-            }
-
-            // Load Details NVL 
-            nvl.DSThongTin = GetNguyenVatLieuDetails(nvl.NVLID.Value);
-            // Load Danh muc
-            nvl.DanhMuc = GetDanhMucbyID(nvl.DMID.Value);
-            // Load Loai NVL
-            nvl.LoaiNVL = GetLoaiNVLbyID(nvl.LOAINVLID.Value);
-            // Load list vi tri 
-            nvl.DSViTri = GetListViTriOfNgVatLieuByNVLid(nvl.NVLID.Value);
-            // Tinh so luong ton kho
-            nvl.TonKho = nvl.DSViTri.Sum(vitri => int.TryParse(vitri.VTNVLSoLuong.Value?.ToString(), out int slvt) ? slvt : 0);
-
-            // Load danh sach SPofNVL
-            nvl.DSachSPofNVLs = GetDSachNVLwithSanPham_byNVLID(nvl.NVLID.Value);
+            //// Load danh sach SPofNVL
+            //nvl.DSachSPofNVLs = GetDSachNVLwithSanPham_byNVLID(nvl.NVLID.Value);
 
             return nvl;
         }
@@ -3034,7 +2981,7 @@ namespace ProcessManagement.Services.SQLServer
 
             // Get vitriluutru infor
             vitriofnvl.VitriInfor = GetViTriLuuTruByID(vitriofnvl.VTID.Value);
-            vitriofnvl.NgLieuInfor = GetNguyenVatLieuByID(vitriofnvl.NVLID.Value);
+            vitriofnvl.NgLieuInfor = GetNguyenVatLieuByID_MultipleTask(vitriofnvl.NVLID.Value);
 
             return vitriofnvl;
         }
@@ -3097,7 +3044,7 @@ namespace ProcessManagement.Services.SQLServer
                     {
                         // Get vitriluutru infor
                         vitriofnvl.VitriInfor = GetViTriLuuTruByID(vitriofnvl.VTID.Value);
-                        vitriofnvl.NgLieuInfor = GetNguyenVatLieuByID(vitriofnvl.NVLID.Value);
+                        vitriofnvl.NgLieuInfor = GetNguyenVatLieuByID_MultipleTask(vitriofnvl.NVLID.Value);
                     }
 
                     vitriofnvls.Add(vitriofnvl);
@@ -3164,7 +3111,7 @@ namespace ProcessManagement.Services.SQLServer
             {
                 // Get vitriluutru infor
                 vitriofnvl.VitriInfor = GetViTriLuuTruByID(vitriofnvl.VTID.Value);
-                vitriofnvl.NgLieuInfor = GetNguyenVatLieuByID(vitriofnvl.NVLID.Value);
+                vitriofnvl.NgLieuInfor = GetNguyenVatLieuByID_MultipleTask(vitriofnvl.NVLID.Value);
             }
 
             return vitriofnvl;
@@ -4274,7 +4221,7 @@ namespace ProcessManagement.Services.SQLServer
                         else if (islenhdone == 1) { nvlpnk.IsNhapKhoDone = true; }
                     }
                     // Load target Nguyenvatlieu
-                    nvlpnk.TargetNgLieu = GetNguyenVatLieuByID(nvlpnk.NVLID.Value);
+                    nvlpnk.TargetNgLieu = GetNguyenVatLieuByID_MultipleTask(nvlpnk.NVLID.Value);
 
                     listNvlofPnk.Add(nvlpnk);
                 }
@@ -4366,7 +4313,7 @@ namespace ProcessManagement.Services.SQLServer
             lnkho.TargertVitri = GetViTriLuuTruByID(lnkho.VTID.Value);
 
             // Get ng vat lieu nhap kho
-            lnkho.TargetNgLieu = GetNguyenVatLieuByID(lnkho.NVLID.Value);
+            lnkho.TargetNgLieu = GetNguyenVatLieuByID_MultipleTask(lnkho.NVLID.Value);
 
             return lnkho;
         }
@@ -4406,7 +4353,7 @@ namespace ProcessManagement.Services.SQLServer
             lnkho.TargertVitri = GetViTriLuuTruByID(lnkho.VTID.Value);
 
             // Get ng vat lieu nhap kho
-            lnkho.TargetNgLieu = GetNguyenVatLieuByID(lnkho.NVLID.Value);
+            lnkho.TargetNgLieu = GetNguyenVatLieuByID_MultipleTask(lnkho.NVLID.Value);
 
             return lnkho;
         }
@@ -4483,7 +4430,7 @@ namespace ProcessManagement.Services.SQLServer
                     lenhnk.TargertVitri = GetViTriLuuTruByID(lenhnk.VTID.Value);
 
                     // Get ng vat lieu nhap kho
-                    lenhnk.TargetNgLieu = GetNguyenVatLieuByID(lenhnk.NVLID.Value);
+                    lenhnk.TargetNgLieu = GetNguyenVatLieuByID_MultipleTask(lenhnk.NVLID.Value);
 
                     lenhNKhos.Add(lenhnk);
                 }
@@ -5236,7 +5183,7 @@ namespace ProcessManagement.Services.SQLServer
                     }
 
                     // Load target Nguyenvatlieu
-                    nvlpxk.TargetNgLieu = GetNguyenVatLieuByID(nvlpxk.NVLID.Value);
+                    nvlpxk.TargetNgLieu = GetNguyenVatLieuByID_MultipleTask(nvlpxk.NVLID.Value);
 
                     listNvlofPxk.Add(nvlpxk);
                 }

@@ -754,7 +754,7 @@ namespace ParamountBed_Warehouse.Services.SocketService
 
                 _ = int.TryParse(lenh.LenhXKID.Value?.ToString(), out int lxkid) ? lxkid : -1;
 
-                lenh.ViTriofNVL.NgLieuInfor = SQLServerServices.GetNguyenVatLieuByID(lenh.NVLID.Value);
+                lenh.ViTriofNVL.NgLieuInfor = SQLServerServices.GetNguyenVatLieuByID_MultipleTask(lenh.NVLID.Value);
 
                 string tennvl = lenh.ViTriofNVL.NgLieuInfor.MaNVL.Value?.ToString() ?? string.Empty;
 
@@ -1128,7 +1128,7 @@ namespace ParamountBed_Warehouse.Services.SocketService
                         {
                             Dictionary<string, object> vitridetails = new();
 
-                            nvl.NgLieuInfor = SQLServerServices.GetNguyenVatLieuByID(nvl.NVLID.Value);
+                            nvl.NgLieuInfor = SQLServerServices.GetNguyenVatLieuByID_MultipleTask(nvl.NVLID.Value);
 
                             string tennvl = nvl.NgLieuInfor.MaNVL.Value?.ToString() ?? string.Empty;
                             string lotvitri = nvl.LotVitri.Value?.ToString() ?? string.Empty;

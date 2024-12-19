@@ -347,7 +347,7 @@
         await LoadDSachViTriLuuTru();
 
         SelectedViTri = DSVitris.FirstOrDefault() ?? new();
-        await LoadDSachViTriofNVLofSelectedViTri();
+        //await LoadDSachViTriofNVLofSelectedViTri();
 
         await base.OnInitializedAsync();
     }
@@ -382,24 +382,23 @@
         {
             DSVitris = SQLServerServices.GetAllViTriLuuTru();
 
-            // Parallel.ForEach(DSVitris, vitri =>
-            // {
-            //     // Load ds nguyen lieu trong vi tri
-            //     vitri.DSachViTriofNVL = SQLServerServices.GetListViTriOfNgVatLieuByVTid(vitri.VTID.Value);
+            Parallel.ForEach(DSVitris, vitri =>
+            {
+                vitri.DSachViTriofNVL = SQLServerServices.GetListViTriOfNgVatLieuByVTid(vitri.VTID.Value);
 
-            //     vitri.DSachViTriofNVL = RangeIncreaseLOTs(vitri.DSachViTriofNVL);
+                vitri.DSachViTriofNVL = RangeIncreaseLOTs(vitri.DSachViTriofNVL);
 
-            //     // Load nguyen lieu infor
-            //     Parallel.ForEach(vitri.DSachViTriofNVL, vitriofnvl =>
-            //     {
-            //         _ = int.TryParse(vitriofnvl.NVLID.Value?.ToString(), out int nvlid) ? nvlid : 0;
+                // Load nguyen lieu infor
+                Parallel.ForEach(vitri.DSachViTriofNVL, vitriofnvl =>
+                {
+                    _ = int.TryParse(vitriofnvl.NVLID.Value?.ToString(), out int nvlid) ? nvlid : 0;
 
-            //         if ((nvlid) > 0)
-            //         {
-            //             vitriofnvl.NgLieuInfor = SQLServerServices.GetNguyenVatLieuByID(vitriofnvl.NVLID.Value);
-            //         }
-            //     });
-            // });
+                    if ((nvlid) > 0)
+                    {
+                        vitriofnvl.NgLieuInfor = SQLServerServices.GetNguyenVatLieuByID_MultipleTask(vitriofnvl.NVLID.Value);
+                    }
+                });
+            });
         });
     }
 
@@ -407,7 +406,8 @@
     {
         SelectedViTri = selectVitri;
 
-        await LoadDSachViTriofNVLofSelectedViTri();
+        await Task.Delay(1);
+        //await LoadDSachViTriofNVLofSelectedViTri();
 
         StateHasChanged();
     }
@@ -427,7 +427,7 @@
 
                 if ((nvlid) > 0)
                 {
-                    vitriofnvl.NgLieuInfor = SQLServerServices.GetNguyenVatLieuByID(vitriofnvl.NVLID.Value);
+                    vitriofnvl.NgLieuInfor = SQLServerServices.GetNguyenVatLieuByID_MultipleTask(vitriofnvl.NVLID.Value);
                 }
             });
         });
@@ -492,7 +492,7 @@
             }
             else SelectedViTri = new();
 
-            await LoadDSachViTriofNVLofSelectedViTri();
+            //await LoadDSachViTriofNVLofSelectedViTri();
 
             isSearching = false;
         }
@@ -529,7 +529,7 @@
 
             SelectedViTri = DSVitris?.FirstOrDefault(vt => vt.VTID.Value?.ToString() == newVitri.VTID.Value?.ToString()) ?? new();
 
-            await LoadDSachViTriofNVLofSelectedViTri();
+            //await LoadDSachViTriofNVLofSelectedViTri();
         }
     }
 
@@ -626,7 +626,7 @@
             await LoadDSachViTriLuuTru();
 
             SelectedViTri = DSVitris?.FirstOrDefault(vt => vt.VTID.Value?.ToString() == selectedViTri.VTID.Value?.ToString()) ?? new();
-            await LoadDSachViTriofNVLofSelectedViTri();
+            //await LoadDSachViTriofNVLofSelectedViTri();
 
         }
     }
