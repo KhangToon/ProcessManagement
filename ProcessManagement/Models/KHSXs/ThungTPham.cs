@@ -12,6 +12,7 @@ namespace ProcessManagement.Models.KHSXs
         public Propertyy MaQuanLyLot { get; set; } = new() { DBName = DBName.MaQuanLyLot, DisplayName = DispName.MaQuanLyLot, Type = typeof(string), AlowDatabase = true };
         public Propertyy IDThung { get; set; } = new() { DBName = DBName.IDThung, DisplayName = DispName.IDThung, Type = typeof(string), AlowDatabase = true };
         public Propertyy SoLuong { get; set; } = new() { DBName = DBName.SoLuong, DisplayName = DispName.SoLuong, Type = typeof(int), AlowDatabase = true };
+        public Propertyy SLRequired { get; set; } = new() { DBName = DBName.SLRequired, DisplayName = DispName.SLRequired, Type = typeof(int), AlowDatabase = true };
         public Propertyy NgayDongThung { get; set; } = new() { DBName = DBName.NgayDongThung, DisplayName = DispName.NgayDongThung, Type = typeof(DateTime), AlowDatabase = true };
 
 
@@ -23,6 +24,7 @@ namespace ProcessManagement.Models.KHSXs
             public const string MaQuanLyLot = "maquanlylot";
             public const string IDThung = "IDThung";
             public const string SoLuong = "soluong";
+            public const string SLRequired = "slrequired";
             public const string NgayDongThung = "ngaydongthung";
         }
 
@@ -33,6 +35,7 @@ namespace ProcessManagement.Models.KHSXs
             public const string MaQuanLyLot = "Mã quản lý LOT";
             public const string IDThung = "IDThung";
             public const string SoLuong = "Số lượng";
+            public const string SLRequired = "Số lượng đóng thùng";
             public const string NgayDongThung = "Ngày đóng thùng";
         }
 
