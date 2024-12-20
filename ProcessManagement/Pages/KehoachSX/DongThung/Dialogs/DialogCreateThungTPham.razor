@@ -47,8 +47,11 @@
                                     <RadzenButton Visible="@(isEditingSoluong)" Icon="check" Click="(() => {isEditingSoluong = false;})"
                                                   ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 18px; height: 35px; width: 50px" />
                                 </RadzenStack>
-                                <RadzenButton Disabled="@(SLdefaultPerThung <= 1)" Text="Tạo thùng thành phẩm" Icon="add"
-                                              ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 18px; min-height: 35px; height: contain " />
+
+                                <!--Button tao thungTP-->
+                                <RadzenButton Disabled="@(SLdefaultPerThung <= 1 || isEditingSoluong)" Text="Tạo thùng thành phẩm" Icon="@(isCreatedThungTP? "autorenew" : "add")"
+                                              Click="@(async () => await CreateNewListThungTPhams())"
+                                              ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Light" Style="border-radius: 5px; --rz-icon-size: 18px; min-height: 35px; height: contain " />
 
                             </RadzenStack>
 
@@ -57,22 +60,25 @@
                                     <RadzenText Text="@($"Danh sách thùng thành phẩm của KHSX")" Style="font-size: 18px; font-weight: 500; color: black"></RadzenText>
                                 </RadzenStack>
                                 <!--Button reload-->
-                                <RadzenButton Text="Reload" Icon="autorenew" Click="@(async () => await LoadDSachThungTPhams(TargetKHSX.KHSXID.Value))"
+                                <RadzenButton Visible="false" Text="Reload" Icon="autorenew" Click="@(async () => await LoadDSachThungTPhams(TargetKHSX.KHSXID.Value))"
                                               ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 18px; height: 30px; " />
+                                <RadzenStack Orientation="Orientation.Horizontal" Gap="10px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: 100%; width: contain; padding: 0px">
+                                    <RadzenText Text="@($"Số lượng thùng: {DSachNewThungTPhams.Count}")" Style="font-size: 16px; font-weight: 500; color: darkgreen"></RadzenText>
+                                </RadzenStack>
                             </RadzenStack>
 
-                            <RadzenCard Variant="Variant.Flat" Style="height: contain; width: 100%; padding: 10px;">
+                            <RadzenCard Variant="Variant.Flat" Style="height: 300px; width: 100%; padding: 10px; padding-right: 0; overflow-y: scroll">
                                 <RadzenStack Gap="10px" Style="height: contain; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                    <RadzenDataList Style="height: contain; width: 100%;" PagerPosition="PagerPosition.Top" PageSize="3" WrapItems="true" AllowPaging="false" Data="@DSachOriginThungTPhams" TItem="ThungTPham">
+                                    <RadzenDataList Style="height: contain; width: 100%;" PagerPosition="PagerPosition.Top" WrapItems="true" AllowPaging="false" Data="@DSachNewThungTPhams" TItem="ThungTPham">
                                         <Template Context="thungtpham">
-                                            <RadzenCard Style="width: 100%; height: contain; padding: 0" Variant="Variant.Flat">
+                                            <RadzenCard Style="width: contain; height: contain; padding: 0" Variant="Variant.Flat">
                                                 <RadzenCard Style="width: 100%; height: contain;" Variant="Variant.Filled">
                                                     <RadzenStack Style="width: 100%; height: 100%; padding: 0" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                         <RadzenCard Variant="@(Variant.Outlined)" Style="height: 100%; width: 100%; padding: 10px;">
                                                             <RadzenStack Style="width: 100%; height: 100%;" Gap="10px" Orientation=Orientation.Vertical AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                                                 <RadzenStack Gap="0" Style="width: 100%; height: contain; padding-bottom: 5px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                                                                     <RadzenStack Style="height: contain; width: contain; min-width: 30px; border-radius: 5px; background-color: var(--rz-primary-lighter); padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                        <RadzenText Text="@((DSachOriginThungTPhams.IndexOf(thungtpham) + 1).ToString())" Style="color: rgba(58,71,77); font-weight: 600; font-size: 15px"></RadzenText>
+                                                                        <RadzenText Text="@((DSachNewThungTPhams.IndexOf(thungtpham) + 1).ToString())" Style="color: rgba(58,71,77); font-weight: 600; font-size: 15px"></RadzenText>
                                                                     </RadzenStack>
                                                                     <RadzenStack Style="height: contain; width: contain; border-radius: 5px; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
 
@@ -83,15 +89,16 @@
                                                                         <RadzenText Text="ID thùng" Style="font-size: 16px; font-weight: 500; height: contain; color: rgba(58,71,77)"></RadzenText>
                                                                     </RadzenStack>
                                                                     <RadzenStack Style="width: 60%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
-                                                                        <RadzenText Text="@($"{thungtpham.IDThung.Value?.ToString()}")" Style="color: darkblue; font-weight: 700; font-size: 18px"></RadzenText>
+                                                                        <RadzenButton Text="@($"{thungtpham.IDThung.Value?.ToString()}")" Style="color: darkblue; font-weight: 700; font-size: 18px; min-width: 40px"
+                                                                                      ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Lighter"></RadzenButton>
                                                                     </RadzenStack>
                                                                 </RadzenStack>
                                                                 <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                                                                     <RadzenStack Style="width: 40%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                                                        <RadzenText Text="Số lượng" Style="font-size: 16px; font-weight: 500; height: contain; color: rgba(58,71,77)"></RadzenText>
+                                                                        <RadzenText Text="Số lượng/thùng" Style="font-size: 16px; font-weight: 500; height: contain; color: rgba(58,71,77)"></RadzenText>
                                                                     </RadzenStack>
                                                                     <RadzenStack Style="width: 60%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
-                                                                        <RadzenText Text="@($"{thungtpham.SoLuong.Value?.ToString()}")" Style="font-size: 16px; font-weight: 600; height: contain; color: rgba(58,71,77)"></RadzenText>
+                                                                        <RadzenText Text="@($"{thungtpham.SoLuong.Value?.ToString()} (PCS)")" Style="font-size: 17px; font-weight: 600; height: contain; color: darkred"></RadzenText>
                                                                     </RadzenStack>
                                                                 </RadzenStack>
                                                                 <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
@@ -99,7 +106,7 @@
                                                                         <RadzenText Text="Mã quản lý LOT" Style="font-size: 16px; font-weight: 500; height: contain; color: rgba(58,71,77)"></RadzenText>
                                                                     </RadzenStack>
                                                                     <RadzenStack Style="width: 60%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
-                                                                        <RadzenText Text="@($"{thungtpham.MaQuanLyLot.Value?.ToString()}")" Style="font-size: 16px; font-weight: 600; height: contain; color: rgba(58,71,77)"></RadzenText>
+                                                                        <RadzenText Text="@($"{thungtpham.MaQuanLyLot.Value?.ToString()}")" Style="font-size: 16px; font-weight: 600; height: contain; color: darkblue"></RadzenText>
                                                                     </RadzenStack>
                                                                 </RadzenStack>
                                                             </RadzenStack>
@@ -119,7 +126,7 @@
         </RadzenRow>
         <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding-top: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
             <!--Button comfirm-->
-            <RadzenButton Text="Xác nhận" Icon="check"
+            <RadzenButton Disabled="@(!DSachNewThungTPhams.Any())" Text="Lưu thùng thành phẩm" Icon="check" Click="@(async () => await OnSaveThungThanhPham())"
                           ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Dark" Style="border-radius: 5px; --rz-icon-size: 18px; height: 30px; " />
 
             <RadzenButton Style="width: 120px; height: 80%;" Click="DialogClosePress" Icon="close" Text="Thoát" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" />
@@ -135,9 +142,11 @@
     [Parameter]
     public KHSX TargetKHSX { get; set; } = new();
 
-    private int SLdefaultPerThung = 180;
+    private int SLdefaultPerThung = 0;
 
     public bool isEditingSoluong = false;
+
+    public bool isCreatedThungTP = false;
 
     private List<ThungTPham> DSachOriginThungTPhams = new(); // from Database of KHSX
     private List<ThungTPham> DSachNewThungTPhams = new();
@@ -157,59 +166,6 @@
         });
     }
 
-    private async Task CreateListNewThungTPham()
-    {
-        await Task.Run(() =>
-        {
-            int SLOKofLOT = TargetLotResult.GetTotalNGOKlastCDoan().sumOK; // so luong OK con lai cua LOT (cong doan cuoi)
-
-            List<ThungTPham> newthungTPhams = new();
-
-            var lastestThungTPham = DSachOriginThungTPhams.LastOrDefault();
-
-            if (lastestThungTPham != null)
-            {
-                // PreThungTPham is existing
-                // Thieu:
-                _ = int.TryParse(lastestThungTPham.SoLuong.Value?.ToString(), out int lastestTTPsoluong) ? lastestTTPsoluong : 0;
-
-                int newSLtakefromLOT = SLdefaultPerThung - lastestTTPsoluong; // Lay so luong can bu them vao thung dang bi thieu
-
-                int soluongConlai = 0;
-                int soluongTake = 0;
-
-                if (SLOKofLOT <= newSLtakefromLOT)
-                {
-                    soluongTake = SLOKofLOT;
-                }
-                else
-                {
-
-                }
-
-                while (soluongConlai > 0)
-                {
-                    (ThungTPham newthung, int newslconlai) = AddNewThungTPham(soluongTake);
-
-                    soluongConlai = newslconlai;
-
-                    newthungTPhams.Add(newthung);
-                }
-            }
-            else
-            {
-                int soluongConlai = SLOKofLOT;
-
-                while (soluongConlai > 0)
-                {
-                    (ThungTPham newthung, soluongConlai) = AddNewThungTPham(soluongConlai);
-
-                    newthungTPhams.Add(newthung);
-                }
-            }
-        });
-    }
-
     private async Task CreateNewListThungTPhams()
     {
         await Task.Run(() =>
@@ -220,57 +176,81 @@
 
             var lastestThungTPham = DSachOriginThungTPhams.LastOrDefault();
 
-            if (lastestThungTPham != null)
+            _ = int.TryParse(lastestThungTPham?.SoLuong.Value?.ToString(), out int lastestTTPsoluong) ? lastestTTPsoluong : 0;
+
+            // Bo sung so luong cho thung thanh pham truoc do (chi khi thieu)
+            int soluongBosung = SLdefaultPerThung - lastestTTPsoluong;
+
+
+            if (soluongBosung > 0)
             {
-                _ = int.TryParse(lastestThungTPham.SoLuong.Value?.ToString(), out int lastestTTPsoluong) ? lastestTTPsoluong : 0;
-
-                int soluongConThieu = SLdefaultPerThung - lastestTTPsoluong;
-
-                if (soluongConThieu > 0)
+                if (SLOKofLOT <= soluongBosung)
                 {
-                    if (SLOKofLOT <= soluongConThieu)
-                    {
-                        ThungTPham thungTPham = new() { SoLuong = { Value = SLOKofLOT }, IDThung = { Value = lastestThungTPham.IDThung.Value } };
-
-                        newthungTPhams.Add(thungTPham);
-                    }
-                    else
-                    {
-                        ThungTPham thungTPham = new() { SoLuong = { Value = soluongConThieu }, IDThung = { Value = lastestThungTPham.IDThung.Value } };
-
-                        newthungTPhams.Add(thungTPham);
-
-                        int soluongConlai = 0;
-
-                        int soluongTake = SLOKofLOT - soluongConThieu;
-
-                        while (soluongConlai > 0)
+                    // Lay IDThung truoc
+                    ThungTPham thungTPham = new()
                         {
-                            (ThungTPham newthung, soluongConlai) = AddNewThungTPham(soluongTake);
+                            SoLuong = { Value = SLOKofLOT },
+                            IDThung = { Value = lastestThungTPham?.IDThung.Value ?? 1 },
+                            KHSXID = { Value = TargetKHSX.KHSXID.Value },
+                            MaQuanLyLot = { Value = TargetLotResult.MaQuanLyLot },
+                            NgayDongThung = { Value = DateTime.Now.ToString(Common.FormatNoTime_yyyddMM) }
+                        };
 
-                            newthungTPhams.Add(newthung);
-                        }
-                    }
+                    newthungTPhams.Add(thungTPham);
                 }
-                else if (soluongConThieu == 0)
+                else
                 {
-                    int soluongConlai = 0;
+                    // Lay IDThung truoc
+                    ThungTPham thungTPham = new()
+                        {
+                            SoLuong = { Value = soluongBosung },
+                            IDThung = { Value = lastestThungTPham?.IDThung.Value ?? 1 },
+                            KHSXID = { Value = TargetKHSX.KHSXID.Value },
+                            MaQuanLyLot = { Value = TargetLotResult.MaQuanLyLot },
+                            NgayDongThung = { Value = DateTime.Now.ToString(Common.FormatNoTime_yyyddMM) }
+                        };
 
-                    int soluongTake = SLOKofLOT;
+                    newthungTPhams.Add(thungTPham);
+
+                    int soluongConlai = SLOKofLOT - soluongBosung;
+
+                    _ = int.TryParse(thungTPham.IDThung.Value.ToString(), out int idthung) ? idthung : 1;
 
                     while (soluongConlai > 0)
                     {
-                        (ThungTPham newthung, soluongConlai) = AddNewThungTPham(soluongTake);
+                        (ThungTPham newthung, soluongConlai) = AddNewThungTPham(soluongConlai, idthung);
+
+                        idthung = int.TryParse(newthung.IDThung.Value?.ToString(), out int newid) ? newid : 1;
 
                         newthungTPhams.Add(newthung);
                     }
                 }
             }
+            else if (soluongBosung == 0)
+            {
+                int soluongConlai = SLOKofLOT;
 
+                int idthung = 1;
+
+                while (soluongConlai > 0)
+                {
+                    (ThungTPham newthung, soluongConlai) = AddNewThungTPham(soluongConlai, idthung);
+
+                    idthung = int.TryParse(newthung.IDThung.Value?.ToString(), out int newid) ? newid : 1;
+
+                    newthungTPhams.Add(newthung);
+                }
+            }
+
+            DSachNewThungTPhams = newthungTPhams;
+
+            isCreatedThungTP = true;
         });
+
+        ShowNotification("Created!", NotificationSeverity.Success, 2000);
     }
 
-    private (ThungTPham, int) AddNewThungTPham(int soluongTake)
+    private (ThungTPham, int) AddNewThungTPham(int soluongTake, int lastIDthung)
     {
         ThungTPham newThungTP = new();
 
@@ -278,21 +258,17 @@
 
         newThungTP.MaQuanLyLot.Value = TargetLotResult.MaQuanLyLot?.ToString();
 
-        newThungTP.IDThung.Value = "Craete new";
+        newThungTP.IDThung.Value = (lastIDthung + 1);
+
+        newThungTP.NgayDongThung.Value = DateTime.Now.ToString(Common.FormatNoTime_yyyddMM);
 
         int soluongConlai = soluongTake - SLdefaultPerThung;
 
-        if (soluongConlai == 0) // du soluong
+        if (soluongConlai <= 0) // du soluong  // thieu soluong
         {
             newThungTP.SoLuong.Value = soluongTake;
 
             return (newThungTP, 0);
-        }
-        else if (soluongConlai < 0) // thieu soluong
-        {
-            newThungTP.SoLuong.Value = soluongTake;
-
-            return (newThungTP, soluongTake);
         }
         else // thua soluong
         {
@@ -302,8 +278,52 @@
         }
     }
 
+    private async Task OnSaveThungThanhPham()
+    {
+        int result = 1; string error = string.Empty;
+
+        // Insert new list ThungTP to Database
+        foreach (var thungtp in DSachNewThungTPhams)
+        {
+            (result, error) = SQLServerServices.InsertThungTPham(thungtp);
+
+            if (result <= 0)
+            {
+                break;
+            }
+        }
+
+        if (result <= 0)
+        {
+            await DialogService.Alert($"Error: {error}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+
+            DialogService.Close(null);
+        }
+        else
+        {
+            // Update trang thai created thungTP cho targetLotResult
+
+            await DialogService.Alert($"Lưu thùng thành phẩm thành công! <strong><span>{TargetLotResult.MaQuanLyLot}</span></strong>", "<strong><span style='color: green'>Success!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+
+            DialogService.Close(DSachNewThungTPhams);
+        }
+    }
+
     private void DialogClosePress()
     {
         DialogService.Close(null);
+    }
+
+    private void ShowNotification(string message, NotificationSeverity notifytype, double time)
+    {
+        NotificationMessage notify = new NotificationMessage
+            {
+                Style = "position: fixed; top: 0; right: 0;",
+                Severity = notifytype,
+                Summary = message,
+                Duration = time
+            };
+
+        NotificationService.Notify(notify);
     }
 }

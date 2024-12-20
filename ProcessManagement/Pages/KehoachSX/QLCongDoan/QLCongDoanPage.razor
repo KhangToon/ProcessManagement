@@ -154,7 +154,7 @@
                                                 <span style="font-weight: 600; font-size: 15px; color: black; padding-left: 10px; padding-right: 10px">Ca</span>
                                             </HeaderTemplate>
                                             <Template Context="lotrow">
-                                                <RadzenText Text="@(lotrow.GetCaLamViec(cdoancolumn.NCID.Value, resultIndex)?.ToString())" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
+                                                <RadzenText Text="@(lotrow.GetCaLamViec(cdoancolumn.NCID.Value, resultIndex)?.ToString())" Style="font-size: 15px; height: contain; font-weight: 600"></RadzenText>
                                             </Template>
                                         </RadzenDataGridColumn>
 
@@ -223,9 +223,9 @@
                                                 <Template Context="lotrow">
                                                     @{
                                                         var targetkqgc = lotrow.TargetKQGC(cdoancolumn.NCID.Value);
+
+                                                        <RadzenText Visible="@((targetkqgc.TotalOK + targetkqgc.TotalNG) > 0)" Text="@(targetkqgc.TotalOK.ToString())" Style="font-size: 15px; height: contain; color: darkgreen; font-weight: 600"></RadzenText>
                                                     }
-                                                    <RadzenText Visible="@(targetkqgc.TotalOK > 0)" Text="@(targetkqgc.TotalOK.ToString())" Style="font-size: 15px; height: contain; font-weight: 600"></RadzenText>
-                                                    <RadzenText Visible="@(targetkqgc.TotalOK == 0)" Text="@(targetkqgc.TotalOK.ToString())" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
                                                 </Template>
                                                 <FooterTemplate>
                                                     <RadzenText Text="@((DSachResultPerLOTKHSX.Sum(lot => lot.TargetKQGC(cdoancolumn.NCID.Value).TotalOK).ToString()))" Style="color: black; font-size: 18px; height: contain; min-width: 50px; font-weight: 600;"></RadzenText>
@@ -240,9 +240,13 @@
                                                 <Template Context="lotrow">
                                                     @{
                                                         var targetkqgc = lotrow.TargetKQGC(cdoancolumn.NCID.Value);
+
+                                                        if ((targetkqgc.TotalOK + targetkqgc.TotalNG) > 0)
+                                                        {
+                                                            <RadzenText Visible="@(targetkqgc.TotalNG > 0)" Text="@(targetkqgc.TotalNG.ToString())" Style="font-size: 15px; color: red; height: contain; font-weight: 600"></RadzenText>
+                                                            <RadzenText Visible="@(targetkqgc.TotalNG == 0)" Text="@(targetkqgc.TotalNG.ToString())" Style="font-size: 15px; height: contain; font-weight: 600"></RadzenText>
+                                                        }
                                                     }
-                                                    <RadzenText Visible="@(targetkqgc.TotalNG > 0)" Text="@(targetkqgc.TotalNG.ToString())" Style="font-size: 15px; color: red; height: contain; font-weight: 600"></RadzenText>
-                                                    <RadzenText Visible="@(targetkqgc.TotalNG == 0)" Text="@(targetkqgc.TotalNG.ToString())" Style="font-size: 15px; color: red; height: contain; font-weight: 500"></RadzenText>
                                                 </Template>
                                                 <FooterTemplate>
                                                     <RadzenText Text="@((DSachResultPerLOTKHSX.Sum(lot => lot.TargetKQGC(cdoancolumn.NCID.Value).TotalNG).ToString()))" Style="color: red; font-size: 18px; height: contain; min-width: 50px; font-weight: 600;"></RadzenText>
@@ -269,9 +273,9 @@
                                                 <Template Context="lotrow">
                                                     @{
                                                         var targetkqgc = lotrow.TargetKQGC(cdoancolumn.NCID.Value);
+
+                                                        <RadzenText Visible="@((targetkqgc.TotalOK + targetkqgc.TotalNG) > 0)" Text="@(targetkqgc.TotalOK.ToString())" Style="font-size: 15px; height: contain; color: darkgreen; font-weight: 600"></RadzenText>
                                                     }
-                                                    <RadzenText Visible="@(targetkqgc.TotalOK > 0)" Text="@(targetkqgc.TotalOK.ToString())" Style="font-size: 15px; height: contain; font-weight: 600"></RadzenText>
-                                                    <RadzenText Visible="@(targetkqgc.TotalOK == 0)" Text="@(targetkqgc.TotalOK.ToString())" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
                                                 </Template>
                                                 <FooterTemplate>
                                                     <RadzenText Text="@((DSachResultPerLOTKHSX.Sum(lot => lot.TargetKQGC(cdoancolumn.NCID.Value).TotalOK).ToString()))" Style="color: black; font-size: 18px; height: contain; min-width: 50px; font-weight: 600;"></RadzenText>
@@ -286,9 +290,13 @@
                                                 <Template Context="lotrow">
                                                     @{
                                                         var targetkqgc = lotrow.TargetKQGC(cdoancolumn.NCID.Value);
+
+                                                        if ((targetkqgc.TotalOK + targetkqgc.TotalNG) > 0)
+                                                        {
+                                                            <RadzenText Visible="@(targetkqgc.TotalNG > 0)" Text="@(targetkqgc.TotalNG.ToString())" Style="font-size: 15px; color: red; height: contain; font-weight: 600"></RadzenText>
+                                                            <RadzenText Visible="@(targetkqgc.TotalNG == 0)" Text="@(targetkqgc.TotalNG.ToString())" Style="font-size: 15px; height: contain; font-weight: 600"></RadzenText>
+                                                        }
                                                     }
-                                                    <RadzenText Visible="@(targetkqgc.TotalNG > 0)" Text="@(targetkqgc.TotalNG.ToString())" Style="font-size: 15px; color: red; height: contain; font-weight: 600"></RadzenText>
-                                                    <RadzenText Visible="@(targetkqgc.TotalNG == 0)" Text="@(targetkqgc.TotalNG.ToString())" Style="font-size: 15px; color: red; height: contain; font-weight: 500"></RadzenText>
                                                 </Template>
                                                 <FooterTemplate>
                                                     <RadzenText Text="@((DSachResultPerLOTKHSX.Sum(lot => lot.TargetKQGC(cdoancolumn.NCID.Value).TotalNG).ToString()))" Style="color: red; font-size: 18px; height: contain; min-width: 50px; font-weight: 600;"></RadzenText>
@@ -312,7 +320,7 @@
                                 var targetkqgc = lotrow.TargetKQGC(cdoancolumn.NCID.Value);
                             }
                             <RadzenButton Visible="@(targetkqgc.DanhGia == 0)" Text="FALSE" ButtonStyle="ButtonStyle.Danger" Shade="Shade.Dark" Size="ButtonSize.Small" Variant="Variant.Flat" Style="font-size: 15px; font-weight: 600; width: 100%; cursor: default"></RadzenButton>
-                            <RadzenButton Visible="@(targetkqgc.DanhGia == 1)" Text="TRUE" ButtonStyle="ButtonStyle.Success" Shade="Shade.Dark" Size="ButtonSize.Small" Variant="Variant.Flat" Style="font-size: 15px; width: 100%; font-weight: 600; cursor: default"></RadzenButton>
+                            <RadzenButton Visible="@(targetkqgc.DanhGia == 1)" Text="TRUE" ButtonStyle="ButtonStyle.Success" Shade="Shade.Light" Size="ButtonSize.Small" Variant="Variant.Flat" Style="font-size: 15px; width: 100%; font-weight: 600; cursor: default"></RadzenButton>
                             <RadzenText Visible="@(targetkqgc.DanhGia == 2)" Text="_" Style="font-size: 15px; height: contain; font-weight: 600"></RadzenText>
                         </Template>
                         <FooterTemplate>
@@ -330,31 +338,34 @@
                         </RadzenStack>
                     </HeaderTemplate>
                     <Columns>
-                        <!--ID thung-->
-                        <RadzenDataGridColumn Resizable=true TItem="ResultPerLOTKHSX" Title="ID thùng"
-                                              TextAlign="TextAlign.Center">
-                            <HeaderTemplate>
-                                <span style="font-weight: 700; font-size: 15px; color: black; padding-left: 10px; padding-right: 10px">ID thùng</span>
-                            </HeaderTemplate>
-                            <Template Context="lotrow">
-                                <RadzenText Text="@(lotrow.ThungTPhams.FirstOrDefault()?.IDThung.Value?.ToString())" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
-                            </Template>
-                            <FooterTemplate>
+                        @foreach (var index in ResultPerLOTKHSX.GenerateListColumnIndex(MaxThungTP))
+                        {
+                            <!--ID thung-->
+                            <RadzenDataGridColumn Resizable=true TItem="ResultPerLOTKHSX" Title="ID thùng"
+                                                  TextAlign="TextAlign.Center">
+                                <HeaderTemplate>
+                                    <span style="font-weight: 700; font-size: 15px; color: black; padding-left: 10px; padding-right: 10px">ID thùng</span>
+                                </HeaderTemplate>
+                                <Template Context="lotrow">
+                                    <RadzenText Text="@(lotrow.ThungTPhams.ElementAtOrDefault(index)?.IDThung.Value?.ToString())" Style="font-size: 16px; color: darkblue; height: contain; font-weight: 600"></RadzenText>
+                                </Template>
+                                <FooterTemplate>
 
-                            </FooterTemplate>
-                        </RadzenDataGridColumn>
-                        <!--So luong-->
-                        <RadzenDataGridColumn Resizable=true TItem="ResultPerLOTKHSX" Title="Số lượng"
-                                              TextAlign="TextAlign.Center">
-                            <HeaderTemplate>
-                                <span style="font-weight: 700; font-size: 15px; color: black; padding-left: 10px; padding-right: 10px">Số lượng</span>
-                            </HeaderTemplate>
-                            <Template Context="lotrow">
-                                <RadzenText Text="@(lotrow.ThungTPhams.FirstOrDefault()?.SoLuong.Value?.ToString())" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
-                            </Template>
-                            <FooterTemplate>
-                            </FooterTemplate>
-                        </RadzenDataGridColumn>
+                                </FooterTemplate>
+                            </RadzenDataGridColumn>
+                            <!--So luong-->
+                            <RadzenDataGridColumn Resizable=true TItem="ResultPerLOTKHSX" Title="Số lượng"
+                                                  TextAlign="TextAlign.Center">
+                                <HeaderTemplate>
+                                    <span style="font-weight: 700; font-size: 15px; color: black; padding-left: 10px; padding-right: 10px">Số lượng</span>
+                                </HeaderTemplate>
+                                <Template Context="lotrow">
+                                    <RadzenText Text="@(lotrow.ThungTPhams.ElementAtOrDefault(index)?.SoLuong.Value?.ToString())" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
+                                </Template>
+                                <FooterTemplate>
+                                </FooterTemplate>
+                            </RadzenDataGridColumn>
+                        }
                     </Columns>
                 </RadzenDataGridColumn>
 
@@ -366,7 +377,10 @@
                         </RadzenStack>
                     </HeaderTemplate>
                     <Template Context="lotrow">
-                        <RadzenButton Disabled="@(!lotrow.IsLastCDoanDone)" Text="Đóng thùng" Click="@(async () => await OpenDialogAsignSPforNVL(lotrow))" ButtonStyle="ButtonStyle.Secondary" Icon="add" Shade="Shade.Darker" Size="ButtonSize.Small" Variant="Variant.Flat" Style="font-size: 15px; width: 100%; font-weight: 500; background-color: Highlight"></RadzenButton>
+                        <RadzenButton Disabled="@(!lotrow.IsLastCDoanDone)" Visible="@(!lotrow.IsCreatedThungTP)" Text="Đóng thùng"
+                                      Click="@(async () => await OpenDialogAsignSPforNVL(lotrow))" ButtonStyle="ButtonStyle.Secondary" Icon="add" Shade="Shade.Darker" Size="ButtonSize.Small" Variant="Variant.Flat" Style="font-size: 15px; width: 100%; font-weight: 500; background-color: Highlight"></RadzenButton>
+                        <RadzenButton Disabled="@(!lotrow.IsLastCDoanDone)" Visible="@(lotrow.IsCreatedThungTP)" Text="Đã đóng thùng"
+                                      Click="@(async () => await OpenDialogAsignSPforNVL(lotrow))" ButtonStyle="ButtonStyle.Success" Icon="check" Shade="Shade.Default" Size="ButtonSize.Small" Variant="Variant.Flat" Style="font-size: 15px; width: 100%; font-weight: 500;"></RadzenButton>
                     </Template>
                 </RadzenDataGridColumn>
 
@@ -395,7 +409,7 @@
                             <RadzenText Text="TỔNG NG" Style="font-size: 17px; height: contain; font-weight: 600; color: white; padding: 5px;"></RadzenText>
                         </HeaderTemplate>
                         <Template Context="lotrow">
-                            <RadzenText Visible="@(totalAllNG > 0)" Text="@($"{totalAllNG}")" Style="font-size: 16px; color: darkred; height: contain; font-weight: 600"></RadzenText>
+                            <RadzenText Visible="@(totalAllNG > 0)" Text="@($"{totalAllNG}")" Style="font-size: 16px; color: red; height: contain; font-weight: 600"></RadzenText>
                             <RadzenText Visible="@(totalAllNG == 0 && totalAllOK > 0 && lotrow.IsLastCDoanDone)" Text="@($"{totalAllNG}")" Style="font-size: 16px; color: darkgreen; height: contain; font-weight: 600"></RadzenText>
                         </Template>
                     </RadzenDataGridColumn>
@@ -406,8 +420,8 @@
                             <RadzenText Text="TRẠNG THÁI" Style="font-size: 17px; height: contain; font-weight: 600; color: white; padding: 5px;"></RadzenText>
                         </HeaderTemplate>
                         <Template Context="lotrow">
-                            <RadzenButton Visible="@(!lotrow.IsLastCDoanDone)" ButtonStyle="ButtonStyle.Warning" Size="ButtonSize.Small" Shade="Shade.Darker" Variant="Variant.Text" Text="Pending" Style="font-size: 16px; height: contain; font-weight: 500"></RadzenButton>
-                            <RadzenButton Visible="@(lotrow.IsLastCDoanDone)" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Dark" Variant="Variant.Flat" Icon="check" Text="Done" Style="font-size: 16px; height: contain; font-weight: 600"></RadzenButton>
+                            <RadzenButton Visible="@(!(lotrow.IsLastCDoanDone && lotrow.IsCreatedThungTP))" ButtonStyle="ButtonStyle.Warning" Size="ButtonSize.Small" Shade="Shade.Darker" Variant="Variant.Text" Text="Pending" Style="font-size: 16px; height: contain; font-weight: 500"></RadzenButton>
+                            <RadzenButton Visible="@(lotrow.IsLastCDoanDone && lotrow.IsCreatedThungTP)" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Dark" Variant="Variant.Flat" Icon="check" Text="Completed" Style="font-size: 16px; height: contain; font-weight: 500"></RadzenButton>
                         </Template>
                     </RadzenDataGridColumn>
                 }
@@ -425,6 +439,8 @@
     private bool isLoading = false;
     private string pagingSummaryFormat = "Displaying page {0} of {1} <b>(total {2} records)</b>";
     private bool isexpandingAll = false;
+
+    private int MaxThungTP = 2;
 
     private List<KHSX_LOT> DSLOTKHSXs = new();
 
@@ -445,6 +461,7 @@
         }
     }
 
+    // Get so luong toi da cua column resultCalamviec/perCongdoan
     private int GetMaxIndexColumnCDoan(object? cdid)
     {
         int defaultmaxindex = 2;
@@ -453,6 +470,17 @@
 
         return (maxindex > defaultmaxindex) ? maxindex : defaultmaxindex;
     }
+
+    // Get max index of ThungTP in all results
+    private int GetMaxIndexThungTP()
+    {
+        int defaultmaxindex = 2;
+
+        var maxindex = DSachResultPerLOTKHSX.Max(rs => rs.ThungTPhams.Count());
+
+        return (maxindex > defaultmaxindex) ? maxindex : defaultmaxindex;
+    }
+
 
     private bool revisiblepage = false;
     private async Task ReVisiblePage()
@@ -498,7 +526,7 @@
                 DSLOTKHSXs = dsLots;
 
                 // Load KQGC perLOTKHSX
-                DSachResultPerLOTKHSX = LoadKQGCperLOTofKHSX(dsLots, TargetKHSX.KHSXID.Value);
+                DSachResultPerLOTKHSX = await LoadKQGCperLOTofKHSX(dsLots, TargetKHSX.KHSXID.Value);
 
                 isLoading = false;
             }
@@ -627,7 +655,7 @@
 
 
     // Load kqgc per CDoan for dsachLOTKHSX
-    private List<ResultPerLOTKHSX> LoadKQGCperLOTofKHSX(List<KHSX_LOT> lOTs, object? khsxid)
+    private async Task<List<ResultPerLOTKHSX>> LoadKQGCperLOTofKHSX(List<KHSX_LOT> lOTs, object? khsxid)
     {
         List<ResultPerLOTKHSX> resultPerLOTKHSXs = new();
 
@@ -661,10 +689,32 @@
             // Asign IsDoneLastCDoan
             resultPerLOTKHSX.IsLastCDoanDone = resultPerLOTKHSX.DsachKQGCperCDOAN.LastOrDefault()?.DanhGia == 1;
 
+            resultPerLOTKHSX.ThungTPhams = await LoadDSachThungTPhams(TargetKHSX.KHSXID.Value, resultPerLOTKHSX.MaQuanLyLot);
+
+            int numofThungTP = resultPerLOTKHSX.ThungTPhams.Count();
+
+            if (numofThungTP > MaxThungTP)
+            {
+                MaxThungTP = numofThungTP;
+            }
+
+            // Asign IsCreatedThungTP
+            resultPerLOTKHSX.IsCreatedThungTP = resultPerLOTKHSX.ThungTPhams.Any();
+
             resultPerLOTKHSXs.Add(resultPerLOTKHSX);
         }
 
         return resultPerLOTKHSXs;
+    }
+
+    private async Task<List<ThungTPham>> LoadDSachThungTPhams(object? khsxid, object? maquanlylot)
+    {
+        return await Task.Run(() =>
+        {
+            var thungTPhams = SQLServerServices.GetListThungTPhams(new Dictionary<string, object?>() { { KHSX_LOT.DBName.KHSXID, khsxid }, { KHSX_LOT.DBName.MaQuanLyLot, maquanlylot } }).thungTPhams;
+
+            return thungTPhams;
+        });
     }
 
     // Open dialog DongThung
@@ -672,8 +722,13 @@
     {
         if (resultPerLOTKHSX != null && resultPerLOTKHSX.IsLastCDoanDone)
         {
-            await DialogService.OpenAsync<DialogCreateThungTPham>(null, new Dictionary<string, object>() { { "TargetLotResult", resultPerLOTKHSX } },
+            var results = await DialogService.OpenAsync<DialogCreateThungTPham>(null, new Dictionary<string, object>() { { "TargetLotResult", resultPerLOTKHSX }, { "TargetKHSX", TargetKHSX } },
             new DialogOptions() { ShowTitle = false, Width = "50%", Height = "80%", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
+
+            if (results != null)
+            {
+                await LoadDSachLOTofKHSX(TargetKHSX.KHSXID.Value, 300);
+            }
         }
     }
 

@@ -8127,7 +8127,7 @@ namespace ProcessManagement.Services.SQLServer
         // ------------------------------------------------------------------------------------- //
         #region KHSX_ThungTPham
         // Insert 
-        public (int, string) InsertThungTPham(SqlConnection connection, ThungTPham thungtpham)
+        public (int, string) InsertThungTPham(ThungTPham thungtpham)
         {
             int result = -1;
             string errorMess = string.Empty;
@@ -8145,6 +8145,9 @@ namespace ProcessManagement.Services.SQLServer
                 return (result, "Error: No valid properties to insert.");
             }
 
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+
             using var transaction = connection.BeginTransaction(); // Start transaction 
 
             try
@@ -8155,7 +8158,7 @@ namespace ProcessManagement.Services.SQLServer
                 string columns = string.Join(", ", properties.Select(p => $"[{p.DBName}]"));
                 string parameters = string.Join(", ", properties.Select(p => $"@{Regex.Replace(p.DBName ?? string.Empty, @"[^\w]+", "")}"));
 
-                command.CommandText = $@"INSERT INTO [{DBName.Table_ThungTPham}] ({columns}) VALUES ({parameters})";
+                command.CommandText = $@"INSERT INTO [{DBName.Table_ThungTPham}] ({columns}) OUTPUT INSERTED.{DBName.TTPID} VALUES ({parameters})";
 
                 // Add parameters
                 foreach (var prop in properties)
@@ -8196,7 +8199,7 @@ namespace ProcessManagement.Services.SQLServer
         }
 
         // Update 
-        public (int, string) UpdateThungTPham(SqlConnection connection, ThungTPham thungtpham)
+        public (int, string) UpdateThungTPham(ThungTPham thungtpham)
         {
             int result = -1;
             string errorMess = string.Empty;
@@ -8213,6 +8216,9 @@ namespace ProcessManagement.Services.SQLServer
             {
                 return (result, "Error: No valid properties to update.");
             }
+
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
 
             using var transaction = connection.BeginTransaction(); // Start transaction
 

@@ -9,6 +9,7 @@ namespace ProcessManagement.Models.KHSXs
         public object? MaQuanLyLot { get; set; }
         public object? SLperLOT { get; set; }
         public bool IsLastCDoanDone { get; set; }
+        public bool IsCreatedThungTP { get; set; } = false;
 
         public List<KQGCperCDOANofLOTKHSX> DsachKQGCperCDOAN { get; set; } = new(); // KQGC of current LOT per cong doan
 
@@ -25,6 +26,16 @@ namespace ProcessManagement.Models.KHSXs
         {
             KQGCperCDOANofLOTKHSX targetKQ = DsachKQGCperCDOAN.FirstOrDefault(rs => rs.TargetLOT.NCID.Value?.ToString()?.Trim() == cdid?.ToString()?.Trim()) ?? new();
             return targetKQ;
+        }
+
+        public static List<int> GenerateListColumnIndex(int lenght)
+        {
+            var list = new List<int>();
+            for (int i = 0; i < lenght; i++)
+            {
+                list.Add(i);
+            }
+            return list;
         }
 
         public (int sumOK, int sumNG) GetTotalNGOKlastCDoan()
