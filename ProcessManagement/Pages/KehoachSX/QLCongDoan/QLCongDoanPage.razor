@@ -41,7 +41,7 @@
                     CellRender="@OnCellRender" FooterCellRender="@HeaderFooterCellRender" Value="@DatagridSeleted" ValueChanged="@((args) => OnDatagridSelectChanged(args))">
 
         <HeaderTemplate>
-            <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+            <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                 <!--Button Reload-->
                 <RadzenButton Text="Reload" Style="border-radius: 20px; min-width: 100px;" Click="@(async() => { await LoadDSachLOTofKHSX(TargetKHSX.KHSXID.Value, 300); })"
                               IsBusy="@isLoading" BusyText=" Loading..." Icon="autorenew" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />
@@ -124,11 +124,11 @@
                     <RadzenDataGridColumn Resizable=true TItem="ResultPerLOTKHSX" Title="@tencongdoan"
                                           TextAlign="TextAlign.Center">
                         <HeaderTemplate>
-                            <RadzenStack Gap="30px" Style="width: 100%; height: 100%" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Orientation="Orientation.Horizontal">
+                            <RadzenStack Gap="20px" Style="width: 100%; height: 100%" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Orientation="Orientation.Horizontal">
                                 <RadzenText @onclick="@(() => SetCongDoanExpand(cdoancolumn))" Text="@tencongdoan" Style="font-size: 17px; height: contain; font-weight: 600; padding: 5px; color: white; cursor: pointer"></RadzenText>
-                                <RadzenButton Click="@( async() => {cdoancolumn.isExpandColumn = false;})" Visible="@(cdoancolumn.isExpandColumn)" Icon="chevron_left" Text="Đóng" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Light" Variant="Variant.Flat"
+                                <RadzenButton Click="@( async() => {cdoancolumn.isExpandColumn = false;})" Visible="@(cdoancolumn.isExpandColumn)" Icon="chevron_left" Text="Thu gọn" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Light" Variant="Variant.Flat"
                                               Style="font-size: 15px; height: contain; min-height: contain; width: contain;" />
-                                <RadzenButton Click="@( async() => {cdoancolumn.isExpandColumn = true;})" Visible="@(!cdoancolumn.isExpandColumn)" Icon="chevron_right" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Light" Variant="Variant.Flat"
+                                <RadzenButton Click="@( async() => {cdoancolumn.isExpandColumn = true;})" Visible="@(!cdoancolumn.isExpandColumn)" Icon="chevron_right" Text="Chi tiết" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Light" Variant="Variant.Flat"
                                               Style="font-size: 15px; height: contain; min-height: contain; width: contain;" />
                             </RadzenStack>
                         </HeaderTemplate>
@@ -313,7 +313,9 @@
                     <RadzenDataGridColumn Width="60px" TItem="ResultPerLOTKHSX" Title="Đánh giá"
                                           TextAlign="TextAlign.Center">
                         <HeaderTemplate>
-                            <span style="font-weight: 600; font-size: 15px; color: white;">Đánh giá</span>
+                            <RadzenStack Gap="30px" Style="width: 100%; height: 100%; padding-left: 5px; padding-right: 5px;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Orientation="Orientation.Horizontal">
+                                <RadzenText Text="Đánh giá" Style="font-size: 15px; height: contain; font-weight: 600; color: white; padding: 5px;"></RadzenText>
+                            </RadzenStack>
                         </HeaderTemplate>
                         <Template Context="lotrow">
                             @{
@@ -333,7 +335,11 @@
                 <!--DongThung-->
                 <RadzenDataGridColumn Resizable=true TItem="ResultPerLOTKHSX" Title="Thùng thành phẩm" TextAlign="TextAlign.Center">
                     <HeaderTemplate>
-                        <RadzenText Text="Thùng thành phẩm" Style="font-size: 17px; height: contain; font-weight: 600; padding: 5px; color: white; cursor: pointer"></RadzenText>
+                        <RadzenStack Gap="30px" Style="width: 100%; height: 100%; padding-left: 5px; padding-right: 5px;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Orientation="Orientation.Horizontal">
+                            <RadzenText Text="Thùng thành phẩm" Style="font-size: 17px; height: contain; font-weight: 600; padding: 5px; color: white; cursor: pointer"></RadzenText>
+                            <RadzenButton Icon="share" Text="Xem danh sách thùng" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Light" Variant="Variant.Flat"
+                                          Style="font-size: 15px; height: contain; min-height: contain; width: contain;" />
+                        </RadzenStack>
                     </HeaderTemplate>
                     <Columns>
                         @foreach (var index in ResultPerLOTKHSX.GenerateListColumnIndex(MaxThungTP))
@@ -370,7 +376,9 @@
                 <!--Button DongThung-->
                 <RadzenDataGridColumn Resizable=true TItem="ResultPerLOTKHSX" Title="Đóng thùng" TextAlign="TextAlign.Center">
                     <HeaderTemplate>
-                        <RadzenText Text="Đóng thùng" Style="font-size: 15px; height: contain; font-weight: 600; color: white; padding: 5px;"></RadzenText>
+                        <RadzenStack Gap="30px" Style="width: 100%; height: 100%; padding-left: 5px; padding-right: 5px;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Orientation="Orientation.Horizontal">
+                            <RadzenText Text="Đóng thùng" Style="font-size: 15px; height: contain; font-weight: 600; color: white; padding: 5px;"></RadzenText>
+                        </RadzenStack>
                     </HeaderTemplate>
                     <Template Context="lotrow">
                         <RadzenButton Disabled="@(!lotrow.IsLastCDoanDone)" Visible="@(!lotrow.IsCreatedThungTP)" Text="Đóng thùng"
@@ -388,7 +396,9 @@
                     <!--TONG OK-->
                     <RadzenDataGridColumn Resizable=true TItem="ResultPerLOTKHSX" Title="TỔNG OK" TextAlign="TextAlign.Center">
                         <HeaderTemplate>
-                            <RadzenText Text="TỔNG OK" Style="font-size: 17px; height: contain; font-weight: 600; color: white; padding: 5px;"></RadzenText>
+                            <RadzenStack Gap="30px" Style="width: 100%; height: 100%; padding-left: 5px; padding-right: 5px;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Orientation="Orientation.Horizontal">
+                                <RadzenText Text="TỔNG OK" Style="font-size: 17px; height: contain; font-weight: 600; color: white; padding: 5px;"></RadzenText>
+                            </RadzenStack>
                         </HeaderTemplate>
                         <Template Context="lotrow">
                             @{
@@ -406,7 +416,9 @@
                     <!--TONG NG-->
                     <RadzenDataGridColumn Resizable=true TItem="ResultPerLOTKHSX" Title="TỔNG NG" TextAlign="TextAlign.Center">
                         <HeaderTemplate>
-                            <RadzenText Text="TỔNG NG" Style="font-size: 17px; height: contain; font-weight: 600; color: white; padding: 5px;"></RadzenText>
+                            <RadzenStack Gap="30px" Style="width: 100%; height: 100%; padding-left: 5px; padding-right: 5px;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Orientation="Orientation.Horizontal">
+                                <RadzenText Text="TỔNG NG" Style="font-size: 17px; height: contain; font-weight: 600; color: white; padding: 5px;"></RadzenText>
+                            </RadzenStack>
                         </HeaderTemplate>
                         <Template Context="lotrow">
                             <RadzenText Visible="@(totalAllNG > 0)" Text="@($"{totalAllNG}")" Style="font-size: 16px; color: red; height: contain; font-weight: 600"></RadzenText>
@@ -421,7 +433,9 @@
                     <!--TRANG THAI-->
                     <RadzenDataGridColumn Resizable=true TItem="ResultPerLOTKHSX" Title="TỔNG NG" TextAlign="TextAlign.Center">
                         <HeaderTemplate>
-                            <RadzenText Text="TRẠNG THÁI" Style="font-size: 17px; height: contain; font-weight: 600; color: white; padding: 5px;"></RadzenText>
+                            <RadzenStack Gap="30px" Style="width: 100%; height: 100%; padding-left: 5px; padding-right: 5px;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Orientation="Orientation.Horizontal">
+                                <RadzenText Text="TRẠNG THÁI" Style="font-size: 17px; height: contain; font-weight: 600; color: white; padding: 5px;"></RadzenText>
+                            </RadzenStack>
                         </HeaderTemplate>
                         <Template Context="lotrow">
                             <RadzenButton Visible="@(!(lotrow.IsLastCDoanDone && lotrow.IsCreatedThungTP))" ButtonStyle="ButtonStyle.Warning" Size="ButtonSize.Small" Shade="Shade.Darker" Variant="Variant.Text" Text="Processing" Style="font-size: 16px; height: contain; font-weight: 500"></RadzenButton>
@@ -729,10 +743,7 @@
             var results = await DialogService.OpenAsync<DialogCreateThungTPham>(null, new Dictionary<string, object>() { { "TargetLotResult", resultPerLOTKHSX }, { "TargetKHSX", TargetKHSX } },
             new DialogOptions() { ShowTitle = false, Width = "50%", Height = "80%", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
 
-            if (results != null)
-            {
-                await LoadDSachLOTofKHSX(TargetKHSX.KHSXID.Value, 300);
-            }
+            await LoadDSachLOTofKHSX(TargetKHSX.KHSXID.Value, 300);
         }
     }
 

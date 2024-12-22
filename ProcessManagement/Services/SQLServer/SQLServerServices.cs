@@ -8335,6 +8335,34 @@ namespace ProcessManagement.Services.SQLServer
             return (listThungTPhams, errorMessage);
         }
 
+        // Delete
+        public (bool, string) DeleteThungTP(object? ttpid)
+        {
+            // Check for valid ID
+            if (ttpid == null)
+            {
+                return (false, "Error");
+            }
+
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+
+            string query = $"DELETE FROM [{DBName.Table_ThungTPham}] WHERE [{DBName.TTPID}] = @TTPID";
+
+            using var command = new SqlCommand(query, connection);
+            command.Parameters.AddWithValue("@TTPID", ttpid);
+
+            try
+            {
+                int rowsAffected = command.ExecuteNonQuery();
+                return (rowsAffected > 0, string.Empty); // Return true if a row was deleted
+            }
+            catch (Exception ex)
+            {
+                return (false, $"Error: {ex.Message}"); // Return false and the error message
+            }
+        }
+
 
         #endregion
 
