@@ -174,16 +174,25 @@
                                                 }
                                             }
                                         </Template>
-@*                                         <FooterTemplate>
-                                            <RadzenText Visible="@(colName == KetQuaGC.KQGCDBName.SLperLOT)" Text="@(((DSachKetQuaGCs.Sum(kqgc => int.TryParse(kqgc.SLperLOT.Value?.ToString(), out int sumslperlot)? sumslperlot : 0)).ToString()))"
-                                                        Style="color: black; font-size: 18px; height: contain; min-width: 50px; font-weight: 600;"></RadzenText>
-                                            <RadzenText Visible="@(colName == KetQuaGC.KQGCDBName.SLOK)" Text="@(((DSachKetQuaGCs.Sum(kqgc => int.TryParse(kqgc.SLOK.Value?.ToString(), out int sumok)? sumok : 0)).ToString()))"
-                                                        Style="color: darkgreen; font-size: 18px; height: contain; min-width: 50px; font-weight: 600;"></RadzenText>
-                                            <RadzenText Visible="@(colName == KetQuaGC.KQGCDBName.SLNG)" Text="@(((DSachKetQuaGCs.Sum(kqgc => int.TryParse(kqgc.SLNG.Value?.ToString(), out int sumng)? sumng : 0)).ToString()))"
-                                                        Style="color: red; font-size: 18px; height: contain; min-width: 50px; font-weight: 600;"></RadzenText>
-                                        </FooterTemplate> *@
+                                        @*                                         <FooterTemplate>
+                                <RadzenText Visible="@(colName == KetQuaGC.KQGCDBName.SLperLOT)" Text="@(((DSachKetQuaGCs.Sum(kqgc => int.TryParse(kqgc.SLperLOT.Value?.ToString(), out int sumslperlot)? sumslperlot : 0)).ToString()))"
+                                Style="color: black; font-size: 18px; height: contain; min-width: 50px; font-weight: 600;"></RadzenText>
+                                <RadzenText Visible="@(colName == KetQuaGC.KQGCDBName.SLOK)" Text="@(((DSachKetQuaGCs.Sum(kqgc => int.TryParse(kqgc.SLOK.Value?.ToString(), out int sumok)? sumok : 0)).ToString()))"
+                                Style="color: darkgreen; font-size: 18px; height: contain; min-width: 50px; font-weight: 600;"></RadzenText>
+                                <RadzenText Visible="@(colName == KetQuaGC.KQGCDBName.SLNG)" Text="@(((DSachKetQuaGCs.Sum(kqgc => int.TryParse(kqgc.SLNG.Value?.ToString(), out int sumng)? sumng : 0)).ToString()))"
+                                Style="color: red; font-size: 18px; height: contain; min-width: 50px; font-weight: 600;"></RadzenText>
+                                </FooterTemplate> *@
                                     </RadzenDataGridColumn>
                                 }
+                                <RadzenDataGridColumn TItem="KetQuaGC" Title="Delete"
+                                                      Property="delete" TextAlign="TextAlign.Center">
+                                    <HeaderTemplate>
+                                        <span style="font-weight: 600; font-size: 15px; color: white;"></span>
+                                    </HeaderTemplate>
+                                    <Template Context="kqgc">
+                                        <RadzenButton Click="@(() => OnDeleteKQGC(kqgc))" Icon="delete" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat" Shade="Shade.Light"></RadzenButton>
+                                    </Template>
+                                </RadzenDataGridColumn>
                             }
                         </Columns>
                     </RadzenDataGrid>
@@ -433,6 +442,58 @@
             Common.SelectedKQGCid = newKetQuaGCid;
 
             ShowNotification("Reload success!", NotificationSeverity.Success, 2000);
+        }
+    }
+
+    private async Task OnDeleteKQGC(KetQuaGC removeKQGC)
+    {
+        bool? confirm = await DialogService.Confirm($"Xóa kết quả gia công này?", "Xác nhận", new ConfirmOptions() { OkButtonText = "OK", CancelButtonText = "Hủy", ShowClose = false });
+
+        if (confirm.Value)
+        {
+            // Get target LOT-KHSX
+            Dictionary<string, object?> parameters = new Dictionary<string, object?>(){
+                { KHSX_LOT.DBName.KHSXID, TargetKHSX.KHSXID.Value },
+                { KHSX_LOT.DBName.NCID, removeKQGC.NCID.Value },
+                { KHSX_LOT.DBName.MaQuanLyLot, removeKQGC.MaQuanLyLot.Value } };
+
+            var targetlotKHSX = SQLServerServices.GetListLOT_khsx(parameters).Item1.FirstOrDefault();
+
+            if (targetlotKHSX != null)
+            {
+                (bool isOK, string error) = SQLServerServices.DeleteKetQuaGC(removeKQGC.KQGCID.Value);
+
+                if (isOK)
+                {
+                    targetlotKHSX.IsDone.Value = 0;
+                    targetlotKHSX.SLOKsubmited.Value = 0;
+                    targetlotKHSX.SLNGsubmited.Value = 0;
+
+                    // Update sluong (Reset to 0)
+                    (int updatereturn, string updateerror) = SQLServerServices.UpdateLOT_khsx(targetlotKHSX);
+
+                    if (updatereturn > 0)
+                    {
+                        await DialogService.Alert($"Xóa thành công!", "<strong><span style='color: green'>Success!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+
+                        await LoadAllDanhsachKQGCBase(100);
+
+                        await FilterDSachKetQuaGCProcessing();
+                    }
+                    else
+                    {
+                        await DialogService.Alert($"Error: {updateerror}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                    }
+                }
+                else
+                {
+                    await DialogService.Alert($"Error: {error}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                }
+            }
+            else
+            {
+                await DialogService.Alert($"Error: Không tìm thấy LOTNVL", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+            }
         }
     }
 

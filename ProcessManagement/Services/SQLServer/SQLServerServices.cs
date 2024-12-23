@@ -7879,10 +7879,10 @@ namespace ProcessManagement.Services.SQLServer
             return (result, errorMess);
         }
         // Delete 
-        public (bool, string) DeleteKetQuaGC(int kqgcId)
+        public (bool, string) DeleteKetQuaGC(object? kqgcId)
         {
             // Check for valid ID
-            if (kqgcId <= 0)
+            if (kqgcId == null)
             {
                 return (false, "Error: Invalid KQGCID.");
             }
