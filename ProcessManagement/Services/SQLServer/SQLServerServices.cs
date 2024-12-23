@@ -8447,10 +8447,10 @@ namespace ProcessManagement.Services.SQLServer
             return (result, errorMess);
         }
         // Delete
-        public (bool, string) DeleteTienDoGC(int tdgcid)
+        public (bool, string) DeleteTienDoGC(object? tdgcid)
         {
             // Check for valid ID
-            if (tdgcid <= 0)
+            if (tdgcid == null)
             {
                 return (false, "Error: Invalid TDGCID.");
             }
@@ -8768,6 +8768,35 @@ namespace ProcessManagement.Services.SQLServer
 
             return (result, errorMess);
         }
+
+        // Delete
+        public (bool, string) DeleteTienDoGCRow(object? tdgcrowid)
+        {
+            // Check for valid ID
+            if (tdgcrowid == null)
+            {
+                return (false, "Error");
+            }
+
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+
+            string query = $"DELETE FROM [{TienDoGCRow.DBName.Table_TienDoGCRow}] WHERE [{TienDoGCRow.DBName.TDGCRowID}] = @TDGCRowID";
+
+            using var command = new SqlCommand(query, connection);
+            command.Parameters.AddWithValue("@TDGCRowID", tdgcrowid);
+
+            try
+            {
+                int rowsAffected = command.ExecuteNonQuery();
+                return (rowsAffected > 0, string.Empty); // Return true if a row was deleted
+            }
+            catch (Exception ex)
+            {
+                return (false, $"Error: {ex.Message}"); // Return false and the error message
+            }
+        }
+
 
         public (int, string) InsertSingleTienDoGCRow(int tdgcid, TienDoGCRow tiendoGCRow)
         {
