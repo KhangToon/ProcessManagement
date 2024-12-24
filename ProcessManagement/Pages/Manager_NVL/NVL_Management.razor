@@ -1093,6 +1093,20 @@
             }
             else
             {
+                if (selectedNguyenVatLieu?.DSViTri.Count > 0)
+                {
+                    // Remove VitriofNVL of this NVL
+                    foreach (var vitriofnvl in selectedNguyenVatLieu.DSViTri)
+                    {
+                        vitriofnvl.NVLID.Value = 0;
+                        vitriofnvl.NgayNhapKho.Value = string.Empty;
+                        vitriofnvl.QRIDLOT.Value = string.Empty;
+                        vitriofnvl.VTNVLSoLuong.Value = 0;
+
+                        (int udresult, string uderror) = SQLServerServices.UpdateViTriOfNgVatLieu(vitriofnvl);
+                    }
+                }
+
                 LoadList_LoaiNVL();
 
                 LoadList_NguyenVatLieu();

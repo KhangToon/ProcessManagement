@@ -1856,6 +1856,11 @@ namespace ProcessManagement.Services.SQLServer
                 return (-1, errorMess);
             }
 
+            if (result > 0)
+            {
+                // Delete danh sach VitriofNVL 
+            }
+
             return (result, errorMess);
         }
         #endregion
@@ -3348,6 +3353,8 @@ namespace ProcessManagement.Services.SQLServer
             }
             return (result, errorMess);
         }
+
+
         #endregion
 
         // ------------------------------------------------------------------------------------- //
