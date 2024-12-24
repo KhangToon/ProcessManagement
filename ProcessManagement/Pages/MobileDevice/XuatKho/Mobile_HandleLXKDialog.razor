@@ -95,7 +95,7 @@
         </RadzenStack>
     </RadzenStack>
     <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding-right: 10px; padding-top: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
-        <RadzenButton Disabled="@(string.IsNullOrWhiteSpace(TargetPXK.MaPhieuXK.Value?.ToString()) || !isScanqridlotlok || !isScanmavitriok)" Click="@(() => OnHandleLenhXuatKhousingKhoServices(TargetPXK, LXK, maVitri, qrIDLOT))" Style="padding: 5px; width: contain; height: contain; font-size: 12px" Icon="check" Text="Xác nhận thêm" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Default" Size="ButtonSize.ExtraSmall" Variant="Variant.Filled" />
+        <RadzenButton Disabled="@(string.IsNullOrWhiteSpace(TargetPXK.MaPhieuXK.Value?.ToString()) || !isScanqridlotlok || !isScanmavitriok)" Click="@(() => OnHandleLenhXuatKhousingKhoServices(TargetPXK, LXK, maVitri, qrIDLOT))" Style="padding: 5px; width: contain; height: contain; font-size: 12px" Icon="check" Text="Xác nhận" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Default" Size="ButtonSize.ExtraSmall" Variant="Variant.Filled" />
         <RadzenButton Style="width: contain; height: contain; font-size: 12px; padding: 5px" Icon="close" Text="Thoát" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.ExtraSmall" Variant="Variant.Flat" Click="@(() => DialogService.Close(null))" />
     </RadzenStack>
 </RadzenStack>
@@ -126,7 +126,7 @@
     {
         maVitri = mavitri.Trim();
 
-        if (!string.IsNullOrEmpty(mavitri) && string.Equals(qrIDLOT, LXK.QRIDLOT.Value?.ToString()?.Trim()))
+        if (!string.IsNullOrEmpty(mavitri))
         {
             VitriLuuTru targetVitri = SQLServerServices.GetViTriLuuTruByMaVitri(mavitri);
 
@@ -144,7 +144,7 @@
     {
         qrIDLOT = qridlot.Trim();
 
-        if (!string.IsNullOrEmpty(qridlot))
+        if (!string.IsNullOrEmpty(qridlot) && string.Equals(qrIDLOT, LXK.QRIDLOT.Value?.ToString()?.Trim()))
         {
             isScanqridlotlok = true;
             return;

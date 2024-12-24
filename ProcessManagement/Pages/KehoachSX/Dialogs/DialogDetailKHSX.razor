@@ -110,7 +110,7 @@
                                     <RadzenStack Style="width: 45%; height: contain; padding-right: 10px" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
                                     </RadzenStack>
                                     <RadzenStack Style="width: 55%; height: contain;" Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
-                                        <RadzenText Text="@($"{SelectKHSX?.SLLotChan.Value} ({SelectKHSX?.SLperLotChan.Value} PCS) + {SelectKHSX?.SLLotLe.Value} ({SelectKHSX?.SLperLotLe.Value} PCS)")" Style="font-size: 16px; font-weight: 600; height: contain; color: black"></RadzenText>
+                                        <RadzenText Text="@($"{SelectKHSX?.SLLotChan.Value} ({SelectKHSX?.SLperLotChan.Value} PCS) + {SelectKHSX?.SLLotLe.Value}")" Style="font-size: 16px; font-weight: 600; height: contain; color: black"></RadzenText>
                                     </RadzenStack>
                                 </RadzenStack>
 
@@ -253,7 +253,7 @@
                                     </RadzenStack>
                                     <RadzenStack Style="width: 25%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                         <RadzenText Text="Số lượng" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
-                                    </RadzenStack>                                    
+                                    </RadzenStack>
                                     <RadzenStack Style="width: 25%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                         <RadzenText Text="Ngày nhập kho" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
                                     </RadzenStack>
@@ -440,6 +440,8 @@
         {
             await DialogService.OpenAsync<Manager_NVL.XuatKho.PhieuXuatKhoDetails>(tilte, new Dictionary<string, object>() { { "PXK", PXKofKHSX } },
             new DialogOptions() { ShowTitle = true, Width = "70%", Height = "contain", Resizable = true, Draggable = true, ShowClose = true, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
+
+            ReloadCurrentKHSX(SelectKHSX.KHSXID.Value);
         }
     }
 
