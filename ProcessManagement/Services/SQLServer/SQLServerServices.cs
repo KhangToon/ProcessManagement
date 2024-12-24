@@ -8522,21 +8522,6 @@ namespace ProcessManagement.Services.SQLServer
                 result = command.ExecuteNonQuery();
                 if (result > 0)
                 {
-                    // Update child records if they exist
-                    if (tiendoGC.DSachTienDoRows != null && tiendoGC.DSachTienDoRows.Any())
-                    {
-                        foreach (var tiendorow in tiendoGC.DSachTienDoRows)
-                        {
-                            var (rowResult, rowError) = UpdateTienDoGCRow(connection, transaction, tiendoGC.TDGCID.Value, tiendorow);
-
-                            if (rowResult == -1)
-                            {
-                                transaction.Rollback();
-                                return (-1, $"Error updating TienDoGCRow: {rowError}");
-                            }
-                        }
-                    }
-
                     transaction.Commit();
                 }
                 else

@@ -29,6 +29,7 @@ namespace ProcessManagement.Models.TienDoGCs
         public string MaSanPham { get; set; } = string.Empty;
         public string TenCongDoan { get; set; } = string.Empty;
 
+        public bool IsEditing { get; set; } = false;
         // Get all property of this class
         public static List<Propertyy> GetClassProperties()
         {

@@ -314,6 +314,9 @@
     private TienDoGCRow newTDGCRow = new();
     private List<MayMoc> dsachMayMocs = new();
     private List<NhanVien> dsachNhanViens = new();
+    // Selected item changed
+    private IEnumerable<KeyValuePair<string, string>>? NhanviensSelected;
+    private IEnumerable<KeyValuePair<string, string>>? NGTypesSelected;
 
     protected override void OnInitialized()
     {
@@ -331,6 +334,13 @@
         newTDGCRow.TDGCID.Value = TDGCID;
 
         base.OnInitialized();
+    }
+
+    protected override Task OnParametersSetAsync()
+    {   
+
+
+        return base.OnParametersSetAsync();
     }
 
     #region Combobox
@@ -383,10 +393,6 @@
         }
         return results;
     }
-
-    // Selected item changed
-    private IEnumerable<KeyValuePair<string, string>>? NhanviensSelected;
-    private IEnumerable<KeyValuePair<string, string>>? NGTypesSelected;
 
     private async Task OnComboboxDSachKeysSelectedChanged(IEnumerable<KeyValuePair<string, string>> selectedValues, Propertyy propertyy)
     {
