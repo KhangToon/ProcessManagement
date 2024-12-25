@@ -1,6 +1,7 @@
 ﻿@using ProcessManagement.Commons
 @using ProcessManagement.Models.KHO_NVL
 @using ProcessManagement.Models.KHO_NVL.XuatKho
+@using ProcessManagement.Models.KHSXs
 @using ProcessManagement.Pages.Manager_NVL.Dialogs
 @using ProcessManagement.Pages.Manager_NguyenCong.Dialogs
 @using ProcessManagement.Pages.Manager_SanPham.Dialogs
@@ -239,6 +240,52 @@
                 <RadzenText Text="@($"Danh sách LOT nguyên vật liệu ({SelectKHSX?.DSLOT_KHSXs.Count ?? 0})")" Style="color: black; font-style: italic; font-weight: 600; font-size: 16px"></RadzenText>
             </RadzenStack>
             <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style=" height: 95%; width: 100%; padding: 10px; border-top: var(--rz-grid-cell-border);" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start">
+                <!--Lot detail-->
+                <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style="height: contain; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                    <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style=" height: contain; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                        <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: 100%; padding: 5px; padding-right: 0px;">
+                            <RadzenStack Style="width: 100%; height: contain" Gap="0" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenStack Style="width: 30%; height: contain; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                    <RadzenText Text="Ngày nhập kho" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                                </RadzenStack>
+                                <RadzenStack Style="width: 25%; height: contain; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                    <RadzenText Text="Lot chẳn" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                                </RadzenStack>
+                                <RadzenStack Style="width: 25%; height: contain; padding-left: 10px; padding-right: 10px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                    <RadzenText Text="Lot lẻ" Style="color: black; font-size: 14px; font-weight: 600; height: contain;"></RadzenText>
+                                </RadzenStack>
+                                <RadzenStack Style="width: 20%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                    <RadzenText Text="Tổng" Style="color: black; font-size: 14px; font-weight: 600; height: contain;"></RadzenText>
+                                </RadzenStack>
+                            </RadzenStack>
+                        </RadzenCard>
+                    </RadzenStack>
+
+                    <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style=" height: 90%; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                        @foreach (var lotkhsx in DetailLotKHSXes)
+                        {
+                            <RadzenCard Variant="Variant.Outlined" Style="width: 100%; height: contain; padding: 5px; padding-right: 0px; background-color: white">
+                                <RadzenStack Style="width: 100%; height: 100%" Gap="10px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                    <RadzenStack Style="width: 30%; height: contain; border-right: var(--rz-grid-cell-border); padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                        <RadzenText Text="@lotkhsx.NgayNhapKho?.ToString()" Style="color: darkblue; font-weight: 600; font-size: 14px"></RadzenText>
+                                    </RadzenStack>
+                                    <RadzenStack Gap="10px" Style="width: 25%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                        <RadzenText Visible="@(lotkhsx.SLLotChan > 0)" Text="@($"{lotkhsx.SLLotChan.ToString()} LOT")" Style="font-size: 14px; font-weight: 600; height: contain; color: rgba(58,71,77)"></RadzenText>
+                                        <RadzenText Visible="@(lotkhsx.SLLotChan > 0)" Text="@($"{lotkhsx.SLperLotChan.ToString()} PCS")" Style="font-size: 14px; font-weight: 600; height: contain; color: rgba(58,71,77)"></RadzenText>
+                                    </RadzenStack>
+                                    <RadzenStack Gap="10px" Style="width: 25%; height: contain; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                        <RadzenText Visible="@(lotkhsx.SLLotLe > 0)" Text="@($"{lotkhsx.SLLotLe.ToString()} LOT")" Style="font-size: 14px; font-weight: 600; height: contain; color: rgba(58,71,77)"></RadzenText>
+                                        <RadzenText Visible="@(lotkhsx.SLLotLe > 0)" Text="@($"{lotkhsx.SLperLotLe.ToString()} PCS")" Style="font-size: 14px; font-weight: 600; height: contain; color: rgba(58,71,77)"></RadzenText>
+                                    </RadzenStack>
+                                    <RadzenStack Gap="10px" Style="width: 20%; height: contain; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                        <RadzenText Text="@($"{(lotkhsx.SLLotChan*lotkhsx.SLperLotChan + lotkhsx.SLLotLe*lotkhsx.SLperLotLe).ToString()} PCS")" Style="font-size: 14px; font-weight: 600; height: contain; color: rgba(58,71,77)"></RadzenText>
+                                    </RadzenStack>
+                                </RadzenStack>
+                            </RadzenCard>
+                        }
+                    </RadzenStack>
+                </RadzenStack>
+
                 <!--LOT List-->
                 <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: 100%; padding: 5px;">
                     <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style=" height: 100%; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
@@ -373,12 +420,16 @@
 
     private PhieuXuatKho PXKofKHSX = new();
 
+    private List<DetailLotKHSX> DetailLotKHSXes = new();
+
     protected async override Task OnInitializedAsync()
     {
         await Task.Run(() =>
         {
             ReloadCurrentKHSX(SelectKHSX?.KHSXID.Value);
         });
+
+        DetailLotKHSXes = GetListDetailLotKHSXs();
 
         await base.OnInitializedAsync();
     }
@@ -391,6 +442,45 @@
         }
 
         await base.OnParametersSetAsync();
+    }
+
+    private List<DetailLotKHSX> GetListDetailLotKHSXs()
+    {
+        List<object?> ngaynhapkhos = SelectKHSX?.DSLOT_KHSXs.DistinctBy(lot => lot.NgayNhapKho.Value?.ToString()).Select(rs => rs.NgayNhapKho.Value).ToList() ?? new();
+
+        _ = int.TryParse(SelectKHSX?.SLperLotChan.Value?.ToString(), out int slperlotchan) ? slperlotchan : 0;
+
+        List<DetailLotKHSX> detailLotKHSXes = new();
+
+        foreach (var nnk in ngaynhapkhos)
+        {
+            if (nnk != null)
+            {
+                var results = SelectKHSX?.DSLOT_KHSXs.Where(lot => lot.NgayNhapKho.Value?.ToString() == nnk.ToString()).ToList();
+
+                if (results != null)
+                {
+                    int sllotchan = results.Where(lot => (int.TryParse(lot.SLLOT.Value?.ToString(), out int sllot) ? sllot : 0) == slperlotchan).Count();
+
+                    int sllotle = results.Count() - sllotchan;
+
+                    int sllperlotle = results.Sum(lot => (int.TryParse(lot.SLLOT.Value?.ToString(), out int sllot) ? sllot : 0)) - sllotchan * slperlotchan;
+
+                    DetailLotKHSX detailLotKHSX = new()
+                        {
+                            NgayNhapKho = nnk,
+                            SLLotChan = sllotchan,
+                            SLLotLe = sllotle,
+                            SLperLotChan = slperlotchan,
+                            SLperLotLe = sllperlotle
+                        };
+
+                    detailLotKHSXes.Add(detailLotKHSX);
+                }
+            }
+        }
+
+        return detailLotKHSXes;
     }
 
     private void ReloadCurrentKHSX(object? currentKHSXid)

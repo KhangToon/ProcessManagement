@@ -1,4 +1,6 @@
-﻿using ProcessManagement.Models.KHO_NVL;
+﻿using NuGet.Packaging.Signing;
+using ProcessManagement.Models.KHO_NVL;
+using ProcessManagement.Models.KHSXs;
 using ProcessManagement.Models.SANPHAM;
 using ProcessManagement.Services.SQLServer;
 
@@ -365,6 +367,8 @@ namespace ProcessManagement.Models
         }
 
 
+        public List<DetailLotKHSX> DetailLotKHSXs { get; set; } = new();
+
         public List<TemLotNVL>? GenerateLotNVL_perVitriofNVL(List<ViTriofNVL> dsvitris, int soluong, int slperlotchan)
         {
             if (slperlotchan == 0 || soluong == 0 || dsvitris.Count == 0)
@@ -379,6 +383,8 @@ namespace ProcessManagement.Models
 
             int startIndex = 0;
 
+            DetailLotKHSXs = new();
+
             foreach (var vitri in dsvitris)
             {
                 var results = GenerateLotNVL_withNgayNhapKho(vitri, slperlotchan, startIndex);
@@ -390,9 +396,14 @@ namespace ProcessManagement.Models
                 sllotle += results.sllotle;
 
                 if (results.temLotNVLs != null) { temLotNVLs.AddRange(results.temLotNVLs); }
+
+                DetailLotKHSX lotKHSXdetail = new() { NgayNhapKho = vitri.NgayNhapKho.Value, SLLotChan = results.sllotchan, SLperLotChan = slperlotchan, SLLotLe = results.sllotle, SLperLotLe = results.slperlotle };
+
+                DetailLotKHSXs.Add(lotKHSXdetail);
             }
 
             SLLotChan = sllotchan;
+
             SLLotLe = sllotle;
 
             SLLot = SLLotChan + SLLotLe;
@@ -404,62 +415,70 @@ namespace ProcessManagement.Models
         {
             int soluong = viTriofNVL.SLTake;
 
-            if (SLNgVatLieuSX == 0 || slperlotchan == 0 || (soluong / slperlotchan < 1))
+            if (SLNgVatLieuSX == 0 || slperlotchan == 0 || (soluong == 0))
             {
                 return (0, 0, 0, 0, null);
             }
 
-            Thread.Sleep(500);
-
             List<TemLotNVL> temLotNVLs = new();
 
-            int sllotchan;
-            int sllotle;
-            int slperlotle;
+            int sllotchan = soluong / slperlotchan;
+            int sllotle = soluong % slperlotchan;
+            int slperlotle = 0;
 
-            // Tinh dinh muc
-            //soluong = (int)(SLNgVatLieuSX + SLNgVatLieuSX * (TiLeLoi / 100));
-
-            // Tinh so luong lot chan
-            sllotchan = soluong / slperlotchan;
-
-            // Calculate and generate list lot nvl
-            for (int index = 1; index <= sllotchan; index++)
+            if (sllotchan < 0)
             {
+                sllotle = 0; slperlotle = 0; sllotchan = 1;
+
                 startIndex++;
 
                 TemLotNVL nVL = new();
                 nVL.LoaiNVL.Value = NewKHSX.LoaiNVL?.TenLoaiNVL.Value;
                 nVL.MaSP.Value = NewKHSX.TargetSanPham?.SP_MaSP.Value;
                 nVL.MaQuanLy.Value = MaLSX + "-" + NewKHSX.TargetSanPham?.SP_MaSP.Value + "-" + startIndex.ToString(NumberDigit);
-                nVL.SoLuong.Value = slperlotchan;
+                nVL.SoLuong.Value = soluong;
                 nVL.NgayNhap.Value = viTriofNVL.NgayNhapKho.Value;
-                //nVL.NgayXuat.Value = DateTime.Now;
                 temLotNVLs?.Add(nVL);
             }
-
-            if (soluong % slperlotchan > 0)
+            else
             {
-                startIndex++;
+                // Calculate and generate list lot nvl
+                for (int index = 1; index <= sllotchan; index++)
+                {
+                    startIndex++;
 
-                sllotle = 1;
+                    TemLotNVL nVL = new();
+                    nVL.LoaiNVL.Value = NewKHSX.LoaiNVL?.TenLoaiNVL.Value;
+                    nVL.MaSP.Value = NewKHSX.TargetSanPham?.SP_MaSP.Value;
+                    nVL.MaQuanLy.Value = MaLSX + "-" + NewKHSX.TargetSanPham?.SP_MaSP.Value + "-" + startIndex.ToString(NumberDigit);
+                    nVL.SoLuong.Value = slperlotchan;
+                    nVL.NgayNhap.Value = viTriofNVL.NgayNhapKho.Value;
+                    temLotNVLs?.Add(nVL);
+                }
 
-                // Tinh so luong per lot le
-                slperlotle = soluong - slperlotchan * sllotchan;
+                if (sllotle > 0)
+                {
+                    startIndex++;
 
-                // Add lot le
-                TemLotNVL lotnvlle = new();
-                lotnvlle.LoaiNVL.Value = NewKHSX.LoaiNVL?.TenLoaiNVL.Value;
-                lotnvlle.MaSP.Value = NewKHSX.TargetSanPham?.SP_MaSP.Value;
-                lotnvlle.MaQuanLy.Value = MaLSX + "-" + NewKHSX.TargetSanPham?.SP_MaSP.Value + "-" + startIndex.ToString(NumberDigit);
-                lotnvlle.SoLuong.Value = slperlotle;
-                lotnvlle.NgayNhap.Value = viTriofNVL.NgayNhapKho.Value;
-                //lotnvlle.NgayXuat.Value = DateTime.Now;
-                temLotNVLs?.Add(lotnvlle);
+                    sllotle = 1;
+
+                    // Tinh so luong per lot le
+                    slperlotle = soluong - slperlotchan * sllotchan;
+
+                    // Add lot le
+                    TemLotNVL lotnvlle = new();
+                    lotnvlle.LoaiNVL.Value = NewKHSX.LoaiNVL?.TenLoaiNVL.Value;
+                    lotnvlle.MaSP.Value = NewKHSX.TargetSanPham?.SP_MaSP.Value;
+                    lotnvlle.MaQuanLy.Value = MaLSX + "-" + NewKHSX.TargetSanPham?.SP_MaSP.Value + "-" + startIndex.ToString(NumberDigit);
+                    lotnvlle.SoLuong.Value = slperlotle;
+                    lotnvlle.NgayNhap.Value = viTriofNVL.NgayNhapKho.Value;
+                    temLotNVLs?.Add(lotnvlle);
+                }
             }
-            else { sllotle = 0; slperlotle = 0; }
 
             return (startIndex, sllotchan, sllotle, slperlotle, temLotNVLs);
         }
+
+
     }
 }

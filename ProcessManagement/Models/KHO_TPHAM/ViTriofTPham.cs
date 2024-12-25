@@ -13,8 +13,6 @@ namespace ProcessManagement.Models.KHO_TPHAM
         public Propertyy VTTPSoLuong { get; set; } = new() { DBName = DBName.VTTPSoLuong, DisplayName = DispName.VTTPSoLuong, Type = typeof(int), AlowDatabase = true };
         public Propertyy NgayNhapKho { get; set; } = new() { DBName = DBName.NgayNhapKho, DisplayName = DispName.NgayNhapKho, Type = typeof(string), AlowDatabase = true };
         public Propertyy LotVitri { get; set; } = new() { DBName = DBName.LotVitri, DisplayName = DispName.LotVitri, Type = typeof(string), AlowDatabase = true };
-        public Propertyy QRIDLOT { get; set; } = new() { DBName = DBName.QRIDLOT, DisplayName = DispName.QRIDLOT, Type = typeof(string), AlowDatabase = true };
-
         public SanPham TargetSanPham { get; set; } = new(); // chi dung khi can (khong load khi load ViTriofTPham)
 
         public KHSX_LOT TargetLot { get; set; } = new(); // chi dung khi can 
@@ -28,7 +26,6 @@ namespace ProcessManagement.Models.KHO_TPHAM
             public const string VTTPSoLuong = "Soluong";
             public const string NgayNhapKho = "NgayNhapKho";
             public const string LotVitri = "Lot";
-            public const string QRIDLOT = "QRIDLOT";
         }
 
         private class DispName
@@ -39,7 +36,6 @@ namespace ProcessManagement.Models.KHO_TPHAM
             public const string VTTPSoLuong = "Số lượng";
             public const string NgayNhapKho = "Ngày nhập";
             public const string LotVitri = "Lot";
-            public const string QRIDLOT = "QRIDLOT";
         }
 
         // Get all property of this class
