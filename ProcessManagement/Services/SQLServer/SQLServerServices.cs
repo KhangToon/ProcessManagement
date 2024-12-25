@@ -9691,6 +9691,10 @@ namespace ProcessManagement.Services.SQLServer
                             }
                         }
 
+                        _ = int.TryParse(vitrithpham.VTSucChua.Value?.ToString(), out int suchua) ? suchua : 0;
+
+                        vitrithpham.SLConTrong = suchua - GetViTriTPhamSoLuongTrong(vitrithpham.VTTPID.Value).soluong;
+
                         listViTriTPhams.Add(vitrithpham);
                     }
                 }
@@ -9728,6 +9732,61 @@ namespace ProcessManagement.Services.SQLServer
             catch (Exception ex)
             {
                 return (false, $"Error: {ex.Message}"); // Return false and the error message
+            }
+        }
+
+        // Tính số lượng trống còn lại của vị trí
+        public (int soluong, string) GetViTriTPhamSoLuongTrong(object? vttpid)
+        {
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+
+                    var command = connection.CreateCommand();
+
+                    command.CommandText = $"SELECT SUM(CAST([{ViTriofTPham.DBName.VTTPSoLuong}] AS INT)) AS TongSoLuong FROM [{ViTriofTPham.DBName.Table_ViTriofTPham}] WHERE [{ViTriofTPham.DBName.VTTPID}] = '{vttpid}'";
+
+                    object result = command.ExecuteScalar();
+
+                    if (result != null && result != DBNull.Value)
+                    {
+                        int tongSoLuong = Convert.ToInt32(result);
+
+                        return (tongSoLuong, string.Empty);
+                    }
+                    else
+                    {
+                        return (0, "Null value");
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                return (-1, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return (-1, ex.Message);
+            }
+        }
+
+        // Check gia tri truong thong tin mac dinh is exsting? 
+        public bool DefaultThongTinViTriThanhPham_ValueIsExisting(string? proValue, string proName)
+        {
+            using (var connection = new SqlConnection(connectionString))
+            {
+                string query = $"SELECT COUNT(*) FROM [{ViTriTPham.DBName.Table_ViTriTPham}] WHERE [{proName}] = N'{proValue?.Trim()}'";
+
+                using (var command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+
+                    int count = (int)command.ExecuteScalar();
+
+                    return count > 0;
+                }
             }
         }
 

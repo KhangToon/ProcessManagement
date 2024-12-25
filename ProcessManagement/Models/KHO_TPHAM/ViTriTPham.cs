@@ -1,4 +1,5 @@
 ﻿using ProcessManagement.Commons;
+using ProcessManagement.Models.SANPHAM;
 using System.Reflection;
 
 namespace ProcessManagement.Models.KHO_TPHAM
@@ -11,6 +12,10 @@ namespace ProcessManagement.Models.KHO_TPHAM
         public Propertyy ViTriKe { get; set; } = new() { DBName = DBName.ViTriKe, DisplayName = DispName.ViTriKe, Type = typeof(string), AlowDatabase = true };
         public Propertyy ViTriHang { get; set; } = new() { DBName = DBName.ViTriHang, DisplayName = DispName.ViTriHang, Type = typeof(string), AlowDatabase = true };
         public Propertyy ViTriCot { get; set; } = new() { DBName = DBName.ViTriCot, DisplayName = DispName.ViTriCot, Type = typeof(string), AlowDatabase = true };
+
+        public List<ViTriofTPham> DSachViTriofTPhams = new(); // chi dung khi can (khong load khi load ViTriofTPham)
+
+        public int SLConTrong = 0;
 
         public static class DBName
         {

@@ -1,0 +1,48 @@
+﻿@page "/khotpmanagement"
+@attribute [Authorize(Roles = "Admin")]
+@* this limited access into page *@
+
+@using ProcessManagement.Commons
+@using ProcessManagement.Models
+@using ProcessManagement.Pages.Kho_ThanhPham.ViTriLuuTru
+@using ProcessManagement.Services.QRCodes
+@using ProcessManagement.Services.SQLServer
+@using ProcessManagement.Pages.Manager_NVL.Dialogs
+@using Radzen.Blazor
+@using Radzen
+
+@inject NotificationService NotificationService
+@inject TooltipService TooltipService
+@inject ContextMenuService ContextMenuService
+@inject DialogService DialogService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject SQLServerServices SQLServerServices
+@inject QRCodeServices QRCodeServices
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
+
+<RadzenRow class="rowbackground-style" Gap="0" Style="height: 100%; width: 100%; overflow-y: auto;">
+    <RadzenColumn Size="12" SizeMD="12" Style="height: 100%; width: 100%; padding-right: 0">
+        <RadzenTabs Style="width: 100%; height: 100%; padding-right: 0" SelectedIndex="@((SelectedTabIndex - 1))">
+            <Tabs>
+                <RadzenTabsItem @onclick="@(() => SelectedTabIndex = 2)">
+                    <Template>
+                        <RadzenText Text="Kho thành phẩm" Style=@($"{((SelectedTabIndex == 2)? "color: black; font-weight: 600; font-size: 16px" : "color: var(--rz-primary-dark); font-weight: 600; font-size: 16px")}")></RadzenText>
+                    </Template>
+                    <ChildContent>
+                        <RadzenCard Variant="Variant.Flat" Style="height: 100%; width: 100%; padding: 10px;">
+                            <RadzenStack Gap="5" Style="height: 100%; width: 100%;">
+                                <DanhSachViTriThanhPham></DanhSachViTriThanhPham>
+                            </RadzenStack>
+                        </RadzenCard>
+                    </ChildContent>
+                </RadzenTabsItem>
+            </Tabs>
+        </RadzenTabs>
+    </RadzenColumn>
+</RadzenRow>
+
+@code {
+    public static int SelectedTabIndex { get; set; } = 1;
+
+}

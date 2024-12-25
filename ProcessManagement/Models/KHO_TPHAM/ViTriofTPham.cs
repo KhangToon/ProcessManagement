@@ -1,4 +1,6 @@
 ﻿using ProcessManagement.Commons;
+using ProcessManagement.Models.KHSXs;
+using ProcessManagement.Models.SANPHAM;
 using System.Reflection;
 
 namespace ProcessManagement.Models.KHO_TPHAM
@@ -13,13 +15,17 @@ namespace ProcessManagement.Models.KHO_TPHAM
         public Propertyy LotVitri { get; set; } = new() { DBName = DBName.LotVitri, DisplayName = DispName.LotVitri, Type = typeof(string), AlowDatabase = true };
         public Propertyy QRIDLOT { get; set; } = new() { DBName = DBName.QRIDLOT, DisplayName = DispName.QRIDLOT, Type = typeof(string), AlowDatabase = true };
 
+        public SanPham TargetSanPham { get; set; } = new(); // chi dung khi can (khong load khi load ViTriofTPham)
+
+        public KHSX_LOT TargetLot { get; set; } = new(); // chi dung khi can 
+
         public static class DBName
         {
-            public const string Table_ViTriofTPham = "KHO_ViTriofTPham";
+            public const string Table_ViTriofTPham = "KHO_VTofTPham";
             public const string VTofTPID = "VTofTPID";
             public const string VTTPID = "VTTPID";
             public const string SPID = "SPID";
-            public const string VTTPSoLuong = "VTTPSoLuong";
+            public const string VTTPSoLuong = "Soluong";
             public const string NgayNhapKho = "NgayNhapKho";
             public const string LotVitri = "Lot";
             public const string QRIDLOT = "QRIDLOT";
