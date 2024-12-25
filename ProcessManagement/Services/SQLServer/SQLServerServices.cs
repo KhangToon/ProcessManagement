@@ -16,6 +16,7 @@ using System.Data;
 using System.Text.RegularExpressions;
 using static ProcessManagement.Models.KHSXs.ThungTPham;
 using static ProcessManagement.Models.KHSXs.KetQuaGC;
+using ProcessManagement.Models.KHO_TPHAM;
 
 namespace ProcessManagement.Services.SQLServer
 {
@@ -8789,7 +8790,6 @@ namespace ProcessManagement.Services.SQLServer
             }
         }
 
-
         public (int, string) InsertSingleTienDoGCRow(int tdgcid, TienDoGCRow tiendoGCRow)
         {
             int result = -1;
@@ -9367,6 +9367,7 @@ namespace ProcessManagement.Services.SQLServer
         }
         #endregion
 
+        // ------------------------------------------------------------------------------------- //
         #region Table_KHO_LogKiemKe
         // Insert
         public (int, string) InsertLogKiemKe(LogKiemKe logkiemke)
@@ -9496,6 +9497,473 @@ namespace ProcessManagement.Services.SQLServer
             }
             return (listLogkiemkes, errorMessage);
         }
+        #endregion
+
+        // ------------------------------------------------------------------------------------- //
+        #region Table_KHO_ViTriTPham
+
+        // Insert
+        public (int, string) InsertViTriTPham(ViTriTPham vitrithpham)
+        {
+            int result = -1;
+            string errorMess = string.Empty;
+
+            if (vitrithpham == null) return (result, "Error: ViTriTPham is null");
+
+            List<Propertyy> properties = vitrithpham.GetPropertiesValues()
+                .Where(po => po.AlowDatabase == true && po.Value != null)
+                .ToList();
+
+            if (properties.Count == 0)
+            {
+                return (result, "Error: No valid properties to insert.");
+            }
+
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+            using var transaction = connection.BeginTransaction();
+
+            try
+            {
+                var command = connection.CreateCommand();
+                command.Transaction = transaction;
+
+                string columns = string.Join(", ", properties.Select(p => $"[{p.DBName}]"));
+                string parameters = string.Join(", ", properties.Select(p => $"@{Regex.Replace(p.DBName ?? string.Empty, @"[^\w]+", "")}"));
+                command.CommandText = $@"INSERT INTO [{ViTriTPham.DBName.Table_ViTriTPham}] ({columns}) OUTPUT INSERTED.{ViTriTPham.DBName.VTTPID} VALUES ({parameters})";
+
+                foreach (var prop in properties)
+                {
+                    string parameterName = $"@{Regex.Replace(prop.DBName ?? string.Empty, @"[^\w]+", "")}";
+                    object? parameterValue = prop.Value ?? DBNull.Value;
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                object? rs = command.ExecuteScalar();
+                if (rs != null && int.TryParse(rs.ToString(), out result) && result > 0)
+                {
+                    transaction.Commit();
+                }
+                else
+                {
+                    result = -1;
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMess = $"Error: {ex.Message}";
+                try
+                {
+                    transaction.Rollback();
+                }
+                catch (Exception rollbackEx)
+                {
+                    errorMess += $" | Rollback Error: {rollbackEx.Message}";
+                }
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
+        // Update 
+        public (int, string) UpdateViTriTPham(ViTriTPham vitrithpham)
+        {
+            int result = -1;
+            string errorMess = string.Empty;
+
+            // Check for null input
+            if (vitrithpham == null) return (result, "Error: is null");
+
+            List<Propertyy> properties = vitrithpham.GetPropertiesValues()
+                .Where(po => po.AlowDatabase == true && po.Value != null)
+                .ToList();
+
+            // Validate properties before proceeding
+            if (properties.Count == 0)
+            {
+                return (result, "Error: No valid properties to update.");
+            }
+
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+
+            using var transaction = connection.BeginTransaction(); // Start transaction
+
+            try
+            {
+                var command = connection.CreateCommand();
+                command.Transaction = transaction; // Associate command with the transaction
+
+                string updateSet = string.Join(", ", properties.Select(p => $"[{p.DBName}] = @{Regex.Replace(p.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $@"UPDATE [{ViTriTPham.DBName.Table_ViTriTPham}] SET {updateSet} WHERE [{ViTriTPham.DBName.VTTPID}] = '{vitrithpham.VTTPID.Value}'";
+
+                // Add parameters
+                foreach (var prop in properties)
+                {
+                    string parameterName = $"@{Regex.Replace(prop.DBName ?? string.Empty, @"[^\w]+", "")}";
+                    object? parameterValue = prop.Value ?? DBNull.Value;
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                // Execute command
+                result = command.ExecuteNonQuery();
+
+                if (result > 0)
+                {
+                    // Successfully updated
+                    transaction.Commit(); // Commit the transaction
+                }
+                else
+                {
+                    result = -1; // Set to -1 if update was not successful
+                    errorMess = "No rows were updated. The specified may not exist.";
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMess = $"Error: {ex.Message}";
+                try
+                {
+                    transaction.Rollback(); // Rollback transaction in case of error
+                }
+                catch (Exception rollbackEx)
+                {
+                    errorMess += $" | Rollback Error: {rollbackEx.Message}";
+                }
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
+        // Get
+        public (List<ViTriTPham> viTriTPhams, string error) GetListViTriTPhams(Dictionary<string, object?> parameters, bool isgetAll = false)
+        {
+            List<ViTriTPham> listViTriTPhams = new();
+
+            string errorMessage = string.Empty;
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                try
+                {
+                    connection.Open();
+
+                    var conditions = new List<string>();
+                    var command = connection.CreateCommand();
+                    command.CommandText = $"SELECT * FROM [{ViTriTPham.DBName.Table_ViTriTPham}]";
+
+                    if (!isgetAll)
+                    {
+                        // Process each parameter in the dictionary
+                        foreach (var param in parameters)
+                        {
+                            conditions.Add($"[{param.Key}] = @{param.Key}");
+
+                            command.Parameters.AddWithValue($"@{param.Key}", param.Value);
+                        }
+
+                        if (conditions.Any())
+                        {
+                            command.CommandText += " WHERE " + string.Join(" AND ", conditions);
+                        }
+                    }
+
+                    using var reader = command.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        ViTriTPham vitrithpham = new();
+
+                        List<Propertyy> rowItems = vitrithpham.GetPropertiesValues();
+
+                        foreach (var item in rowItems)
+                        {
+                            string? columnName = item.DBName;
+
+                            if (!string.IsNullOrEmpty(columnName) && reader.GetOrdinal(columnName) != -1)
+                            {
+                                object columnValue = reader[columnName];
+
+                                item.Value = columnValue == DBNull.Value ? null : columnValue;
+                            }
+                        }
+
+                        listViTriTPhams.Add(vitrithpham);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    errorMessage = $"Error: {ex.Message}";
+                    listViTriTPhams.Clear(); // Clear the list in case of error
+                }
+            }
+            return (listViTriTPhams, errorMessage);
+        }
+
+        // Delete
+        public (bool, string) DeleteViTriTPham(object? vttpid)
+        {
+            // Check for valid ID
+            if (vttpid == null)
+            {
+                return (false, "Error");
+            }
+
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+
+            string query = $"DELETE FROM [{ViTriTPham.DBName.Table_ViTriTPham}] WHERE [{ViTriTPham.DBName.VTTPID}] = @VTTPID";
+
+            using var command = new SqlCommand(query, connection);
+            command.Parameters.AddWithValue("@VTTPID", vttpid);
+
+            try
+            {
+                int rowsAffected = command.ExecuteNonQuery();
+                return (rowsAffected > 0, string.Empty); // Return true if a row was deleted
+            }
+            catch (Exception ex)
+            {
+                return (false, $"Error: {ex.Message}"); // Return false and the error message
+            }
+        }
+
+        #endregion
+
+        #region Table_KHO_ViTriofTPham
+
+        // Insert
+        public (int, string) InsertViTriofTPham(ViTriofTPham vitrioftp)
+        {
+            int result = -1;
+            string errorMess = string.Empty;
+
+            if (vitrioftp == null) return (result, "Error: is null");
+
+            List<Propertyy> properties = vitrioftp.GetPropertiesValues()
+                .Where(po => po.AlowDatabase == true && po.Value != null)
+                .ToList();
+
+            if (properties.Count == 0)
+            {
+                return (result, "Error: No valid properties to insert.");
+            }
+
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+            using var transaction = connection.BeginTransaction();
+
+            try
+            {
+                var command = connection.CreateCommand();
+                command.Transaction = transaction;
+
+                string columns = string.Join(", ", properties.Select(p => $"[{p.DBName}]"));
+                string parameters = string.Join(", ", properties.Select(p => $"@{Regex.Replace(p.DBName ?? string.Empty, @"[^\w]+", "")}"));
+                command.CommandText = $@"INSERT INTO [{ViTriofTPham.DBName.Table_ViTriofTPham}] ({columns}) OUTPUT INSERTED.{ViTriofTPham.DBName.VTofTPID} VALUES ({parameters})";
+
+                foreach (var prop in properties)
+                {
+                    string parameterName = $"@{Regex.Replace(prop.DBName ?? string.Empty, @"[^\w]+", "")}";
+                    object? parameterValue = prop.Value ?? DBNull.Value;
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                object? rs = command.ExecuteScalar();
+                if (rs != null && int.TryParse(rs.ToString(), out result) && result > 0)
+                {
+                    transaction.Commit();
+                }
+                else
+                {
+                    result = -1;
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMess = $"Error: {ex.Message}";
+                try
+                {
+                    transaction.Rollback();
+                }
+                catch (Exception rollbackEx)
+                {
+                    errorMess += $" | Rollback Error: {rollbackEx.Message}";
+                }
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
+        // Update 
+        public (int, string) UpdateViTriofTPham(ViTriofTPham vitrioftp)
+        {
+            int result = -1;
+            string errorMess = string.Empty;
+
+            // Check for null input
+            if (vitrioftp == null) return (result, "Error: is null");
+
+            List<Propertyy> properties = vitrioftp.GetPropertiesValues()
+                .Where(po => po.AlowDatabase == true && po.Value != null)
+                .ToList();
+
+            // Validate properties before proceeding
+            if (properties.Count == 0)
+            {
+                return (result, "Error: No valid properties to update.");
+            }
+
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+
+            using var transaction = connection.BeginTransaction(); // Start transaction
+
+            try
+            {
+                var command = connection.CreateCommand();
+                command.Transaction = transaction; // Associate command with the transaction
+
+                string updateSet = string.Join(", ", properties.Select(p => $"[{p.DBName}] = @{Regex.Replace(p.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $@"UPDATE [{ViTriofTPham.DBName.Table_ViTriofTPham}] SET {updateSet} WHERE [{ViTriofTPham.DBName.VTofTPID}] = '{vitrioftp.VTofTPID.Value}'";
+
+                // Add parameters
+                foreach (var prop in properties)
+                {
+                    string parameterName = $"@{Regex.Replace(prop.DBName ?? string.Empty, @"[^\w]+", "")}";
+                    object? parameterValue = prop.Value ?? DBNull.Value;
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                // Execute command
+                result = command.ExecuteNonQuery();
+
+                if (result > 0)
+                {
+                    // Successfully updated
+                    transaction.Commit(); // Commit the transaction
+                }
+                else
+                {
+                    result = -1; // Set to -1 if update was not successful
+                    errorMess = "No rows were updated. The specified may not exist.";
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMess = $"Error: {ex.Message}";
+                try
+                {
+                    transaction.Rollback(); // Rollback transaction in case of error
+                }
+                catch (Exception rollbackEx)
+                {
+                    errorMess += $" | Rollback Error: {rollbackEx.Message}";
+                }
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
+        // Get
+        public (List<ViTriofTPham> viTriofTPhams, string error) GetListViTriofTPhams(Dictionary<string, object?> parameters, bool isgetAll = false)
+        {
+            List<ViTriofTPham> listViTriofTPhams = new();
+
+            string errorMessage = string.Empty;
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                try
+                {
+                    connection.Open();
+
+                    var conditions = new List<string>();
+                    var command = connection.CreateCommand();
+                    command.CommandText = $"SELECT * FROM [{ViTriofTPham.DBName.Table_ViTriofTPham}]";
+
+                    if (!isgetAll)
+                    {
+                        // Process each parameter in the dictionary
+                        foreach (var param in parameters)
+                        {
+                            conditions.Add($"[{param.Key}] = @{param.Key}");
+
+                            command.Parameters.AddWithValue($"@{param.Key}", param.Value);
+                        }
+
+                        if (conditions.Any())
+                        {
+                            command.CommandText += " WHERE " + string.Join(" AND ", conditions);
+                        }
+                    }
+
+                    using var reader = command.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        ViTriofTPham vitrioftp = new();
+
+                        List<Propertyy> rowItems = vitrioftp.GetPropertiesValues();
+
+                        foreach (var item in rowItems)
+                        {
+                            string? columnName = item.DBName;
+
+                            if (!string.IsNullOrEmpty(columnName) && reader.GetOrdinal(columnName) != -1)
+                            {
+                                object columnValue = reader[columnName];
+
+                                item.Value = columnValue == DBNull.Value ? null : columnValue;
+                            }
+                        }
+
+                        listViTriofTPhams.Add(vitrioftp);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    errorMessage = $"Error: {ex.Message}";
+                    listViTriofTPhams.Clear(); // Clear the list in case of error
+                }
+            }
+            return (listViTriofTPhams, errorMessage);
+        }
+
+        // Delete
+        public (bool, string) DeleteViTriofTPham(object? vtoftpid)
+        {
+            // Check for valid ID
+            if (vtoftpid == null)
+            {
+                return (false, "Error");
+            }
+
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+
+            string query = $"DELETE FROM [{ViTriofTPham.DBName.Table_ViTriofTPham}] WHERE [{ViTriofTPham.DBName.VTofTPID}] = @VTofTPID";
+
+            using var command = new SqlCommand(query, connection);
+            command.Parameters.AddWithValue("@VTofTPID", vtoftpid);
+
+            try
+            {
+                int rowsAffected = command.ExecuteNonQuery();
+                return (rowsAffected > 0, string.Empty); // Return true if a row was deleted
+            }
+            catch (Exception ex)
+            {
+                return (false, $"Error: {ex.Message}"); // Return false and the error message
+            }
+        }
+
         #endregion
     }
 }

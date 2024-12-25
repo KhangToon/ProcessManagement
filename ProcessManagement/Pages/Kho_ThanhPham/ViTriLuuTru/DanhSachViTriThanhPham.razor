@@ -1,0 +1,79 @@
+﻿@using ProcessManagement.Commons
+@using ProcessManagement.Models.KHO_TPHAM
+@using ProcessManagement.Pages.Manager_NVL.Dialogs
+@using ProcessManagement.Services.QRCodes
+@using ProcessManagement.Services.SQLServer
+@using Radzen.Blazor
+@using Radzen
+@using ProcessManagement.Models
+
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject TooltipService TooltipService
+@inject SQLServerServices SQLServerServices
+@inject QRCodeServices QRCodeServices
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
+
+<style>
+    .vitri_IsSelected {
+        border-style: solid;
+        border-width: 2px;
+        border-color: green;
+    }
+
+    .vitriofNVL_IsSelected {
+        border-style: solid;
+        border-width: 2px;
+        border-color: green;
+    }
+</style>
+
+@code {
+    private List<ViTriTPham> DSVitris = new();
+
+    private ViTriTPham SelectedViTri = new();
+
+    private ViTriofTPham SelectedViTriofNVL = new();
+
+    private Dictionary<int, string> DSachModeSearch = new() { { 0, "Tất cả vị trí" }, { 1, "Mã vị trí" }, { 2, "Tên nguyên liệu" }, { 3, "Vị trí đầy" }, { 4, "Vị trí còn trống" } };
+    private int modeSearch = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Load dsvitri
+        await LoadDSachViTriLuuTru();
+
+        SelectedViTri = DSVitris.FirstOrDefault() ?? new();
+
+        await base.OnInitializedAsync();
+    }
+
+    // Load danh sach vi tri trong kho luu tru
+    private async Task LoadDSachViTriLuuTru(object? vtid = null)
+    {
+        await Task.Run(() =>
+        {
+            // DSVitris = SQLServerServices.GetAllViTriLuuTru();
+
+            // Parallel.ForEach(DSVitris, vitri =>
+            // {
+            //     vitri.DSachViTriofNVL = SQLServerServices.GetListViTriOfNgVatLieuByVTid(vitri.VTID.Value);
+
+            //     vitri.DSachViTriofNVL = RangeIncreaseLOTs(vitri.DSachViTriofNVL);
+
+            //     // Load nguyen lieu infor
+            //     Parallel.ForEach(vitri.DSachViTriofNVL, vitriofnvl =>
+            //     {
+            //         _ = int.TryParse(vitriofnvl.NVLID.Value?.ToString(), out int nvlid) ? nvlid : 0;
+
+            //         if ((nvlid) > 0)
+            //         {
+            //             vitriofnvl.NgLieuInfor = SQLServerServices.GetNguyenVatLieuByID_MultipleTask(vitriofnvl.NVLID.Value);
+            //         }
+            //     });
+            // });
+        });
+    }
+
+}
