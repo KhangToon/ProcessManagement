@@ -9,6 +9,7 @@ namespace ProcessManagement.Models.KHSXs
 
         public Propertyy TTPID { get; set; } = new() { DBName = DBName.TTPID, DisplayName = DispName.TTPID, Type = typeof(int), AlowDatabase = false, AlowDisplay = false, DispDatagrid = false }; // Identity ID
         public Propertyy KHSXID { get; set; } = new() { DBName = DBName.KHSXID, DisplayName = DispName.KHSXID, Type = typeof(int), AlowDatabase = true };
+        public Propertyy VTofTPID { get; set; } = new() { DBName = DBName.VTofTPID, DisplayName = DispName.VTofTPID, Type = typeof(int), AlowDatabase = true };
         public Propertyy MaQuanLyLot { get; set; } = new() { DBName = DBName.MaQuanLyLot, DisplayName = DispName.MaQuanLyLot, Type = typeof(string), AlowDatabase = true };
         public Propertyy IDThung { get; set; } = new() { DBName = DBName.IDThung, DisplayName = DispName.IDThung, Type = typeof(string), AlowDatabase = true };
         public Propertyy SoLuong { get; set; } = new() { DBName = DBName.SoLuong, DisplayName = DispName.SoLuong, Type = typeof(int), AlowDatabase = true };
@@ -21,6 +22,7 @@ namespace ProcessManagement.Models.KHSXs
             public const string Table_ThungTPham = "KHSX_ThungTPham";
             public const string TTPID = "TTPID";
             public const string KHSXID = "KHSXID";
+            public const string VTofTPID = "VTofTPID";
             public const string MaQuanLyLot = "maquanlylot";
             public const string IDThung = "IDThung";
             public const string SoLuong = "soluong";
@@ -32,6 +34,7 @@ namespace ProcessManagement.Models.KHSXs
         {
             public const string TTPID = "TTPID";
             public const string KHSXID = "KHSXID";
+            public const string VTofTPID = "VTofTPID";
             public const string MaQuanLyLot = "Mã quản lý LOT";
             public const string IDThung = "IDThung";
             public const string SoLuong = "Số lượng";

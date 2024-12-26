@@ -338,7 +338,7 @@
                         <RadzenStack Gap="30px" Style="width: 100%; height: 100%; padding-left: 5px; padding-right: 5px;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Orientation="Orientation.Horizontal">
                             <RadzenText Text="Thùng thành phẩm" Style="font-size: 17px; height: contain; font-weight: 600; padding: 5px; color: white; cursor: pointer"></RadzenText>
                             <RadzenButton Icon="share" Text="Xem danh sách thùng" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Light" Variant="Variant.Flat"
-                                          Style="font-size: 15px; height: contain; min-height: contain; width: contain;" />
+                                          Click="@(async () => await OpenDialogDSachThungTPham())" Style="font-size: 15px; height: contain; min-height: contain; width: contain;" />
                         </RadzenStack>
                     </HeaderTemplate>
                     <Columns>
@@ -742,6 +742,13 @@
             new DialogOptions() { ShowTitle = false, Width = "50%", Height = "80%", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
 
         await LoadDSachLOTofKHSX(TargetKHSX.KHSXID.Value, 300);
+    }
+
+    // Open dialog DanhSachThungTPham
+    private async Task OpenDialogDSachThungTPham()
+    {
+        var results = await DialogService.OpenAsync<DialogDSachThungTPhams>(null, new Dictionary<string, object>() { { "TargetKHSX", TargetKHSX } },
+            new DialogOptions() { ShowTitle = false, Width = "50%", Height = "contain", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
     }
 
     private void NavigateToPhieuXDCD(ResultPerLOTKHSX selectRow)
