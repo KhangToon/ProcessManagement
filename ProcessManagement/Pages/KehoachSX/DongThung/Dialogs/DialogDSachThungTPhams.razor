@@ -2,6 +2,7 @@
 @using ProcessManagement.Models.KHO_NVL
 @using ProcessManagement.Models.KHO_TPHAM
 @using ProcessManagement.Models.KHSXs
+@using ProcessManagement.Pages.Kho_ThanhPham.ViTriLuuTru
 @using ProcessManagement.Services.SQLServer
 @using Radzen.Blazor
 @using Radzen
@@ -41,7 +42,7 @@
                                             <RadzenCard Style="width: contain; height: contain; padding: 0" Variant="Variant.Flat">
                                                 <RadzenStack Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                                     <RadzenText Text="@($"Thùng {ThungTPhamExtends.IndexOf(thungtpham) + 1}")" Style="font-size: 16px; font-weight: 600; height: contain; color: rgba(58,71,77)"></RadzenText>
-                                                    <RadzenButton Text="Nhập kho" Icon="download"
+                                                    <RadzenButton Text="Nhập kho" Icon="download" Click="@(async() => await OnSelectViTriLuuKho(thungtpham))"
                                                                   ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Light" Style="border-radius: 5px; --rz-icon-size: 16px;" />
                                                 </RadzenStack>
                                                 <RadzenCard Style="width: 100%; height: contain;" Variant="Variant.Filled">
@@ -153,5 +154,11 @@
                 ThungTPhamExtends = groupedResults;
             }
         });
+    }
+
+    private async Task OnSelectViTriLuuKho(ThungTPhamExtend thungTPhamExtend)
+    {
+        var results = await DialogService.OpenAsync<DialogChonViTriKhoTPham>(null, new Dictionary<string, object>() { { "TarGetThungTPhamEx", thungTPhamExtend } },
+        new DialogOptions() { ShowTitle = true, Width = "90%", Height = "90%", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 10px; padding: 0px" });
     }
 }
