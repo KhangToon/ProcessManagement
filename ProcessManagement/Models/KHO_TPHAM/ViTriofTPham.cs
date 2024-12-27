@@ -9,7 +9,6 @@ namespace ProcessManagement.Models.KHO_TPHAM
     {
         public Propertyy VTofTPID { get; set; } = new() { DBName = DBName.VTofTPID, Type = typeof(int), AlowDatabase = false }; // ID
         public Propertyy VTTPID { get; set; } = new() { DBName = DBName.VTTPID, Type = typeof(int), AlowDatabase = true };
-        public Propertyy SPID { get; set; } = new() { DBName = DBName.SPID, Type = typeof(int), AlowDatabase = true };
         public Propertyy VTTPSoLuong { get; set; } = new() { DBName = DBName.VTTPSoLuong, DisplayName = DispName.VTTPSoLuong, Type = typeof(int), AlowDatabase = true };
         public Propertyy NgayNhapKho { get; set; } = new() { DBName = DBName.NgayNhapKho, DisplayName = DispName.NgayNhapKho, Type = typeof(string), AlowDatabase = true };
         public Propertyy LotVitri { get; set; } = new() { DBName = DBName.LotVitri, DisplayName = DispName.LotVitri, Type = typeof(string), AlowDatabase = true };
@@ -17,12 +16,15 @@ namespace ProcessManagement.Models.KHO_TPHAM
 
         public KHSX_LOT TargetLot { get; set; } = new(); // chi dung khi can 
 
+        public ThungTPhamExtend ThungTPhamExtend { get; set; } = new();
+
+        public bool IsPicked { get; set; } = false;
+
         public static class DBName
         {
             public const string Table_ViTriofTPham = "KHO_VTofTPham";
             public const string VTofTPID = "VTofTPID";
             public const string VTTPID = "VTTPID";
-            public const string SPID = "SPID";
             public const string VTTPSoLuong = "Soluong";
             public const string NgayNhapKho = "NgayNhapKho";
             public const string LotVitri = "Lot";
@@ -32,7 +34,6 @@ namespace ProcessManagement.Models.KHO_TPHAM
         {
             public const string VTofTPID = "VTofTPID";
             public const string VTTPID = "VTTPID";
-            public const string TPID = "SPID";
             public const string VTTPSoLuong = "Số lượng";
             public const string NgayNhapKho = "Ngày nhập";
             public const string LotVitri = "Lot";

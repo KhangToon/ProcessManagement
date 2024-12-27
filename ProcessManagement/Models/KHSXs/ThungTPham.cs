@@ -15,6 +15,7 @@ namespace ProcessManagement.Models.KHSXs
         public Propertyy SoLuong { get; set; } = new() { DBName = DBName.SoLuong, DisplayName = DispName.SoLuong, Type = typeof(int), AlowDatabase = true };
         public Propertyy SLRequired { get; set; } = new() { DBName = DBName.SLRequired, DisplayName = DispName.SLRequired, Type = typeof(int), AlowDatabase = true };
         public Propertyy NgayDongThung { get; set; } = new() { DBName = DBName.NgayDongThung, DisplayName = DispName.NgayDongThung, Type = typeof(DateTime), AlowDatabase = true };
+        public Propertyy SPID { get; set; } = new() { DBName = DBName.SPID, DisplayName = DispName.SPID, Type = typeof(int), AlowDatabase = true };
 
 
         public static class DBName
@@ -22,6 +23,7 @@ namespace ProcessManagement.Models.KHSXs
             public const string Table_ThungTPham = "KHSX_ThungTPham";
             public const string TTPID = "TTPID";
             public const string KHSXID = "KHSXID";
+            public const string SPID = "SPID";
             public const string VTofTPID = "VTofTPID";
             public const string MaQuanLyLot = "maquanlylot";
             public const string IDThung = "IDThung";
@@ -34,6 +36,7 @@ namespace ProcessManagement.Models.KHSXs
         {
             public const string TTPID = "TTPID";
             public const string KHSXID = "KHSXID";
+            public const string SPID = "SPID";
             public const string VTofTPID = "VTofTPID";
             public const string MaQuanLyLot = "Mã quản lý LOT";
             public const string IDThung = "IDThung";
