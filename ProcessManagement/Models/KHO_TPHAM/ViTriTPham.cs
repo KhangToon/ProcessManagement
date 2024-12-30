@@ -15,7 +15,7 @@ namespace ProcessManagement.Models.KHO_TPHAM
 
         public List<ViTriofTPham> DSachViTriofTPhams = new(); // chi dung khi can (khong load khi load ViTriofTPham)
 
-        public int SLConTrong = 0;
+        public int SLConTrong { get; set; } = 0;
 
         public static class DBName
         {
