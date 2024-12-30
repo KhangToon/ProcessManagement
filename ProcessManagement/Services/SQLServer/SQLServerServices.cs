@@ -9707,6 +9707,21 @@ namespace ProcessManagement.Services.SQLServer
             return (listViTriTPhams, errorMessage);
         }
 
+        // Get 
+        public ViTriTPham GetViTriTPhamByVTofTPID(object? vtoftpid)
+        {
+            ViTriTPham viTriTPham = new();
+
+            var viTriofTPham = GetListViTriofTPhams(new Dictionary<string, object?>() { { ViTriofTPham.DBName.VTofTPID, vtoftpid } }).viTriofTPhams.FirstOrDefault();
+
+            if (viTriofTPham != null)
+            {
+                viTriTPham = GetListViTriTPhams(new Dictionary<string, object?>() { { ViTriTPham.DBName.VTTPID, viTriofTPham.VTTPID.Value } }).viTriTPhams.FirstOrDefault() ?? new();
+            }
+
+            return viTriTPham;
+        }
+
         // Delete
         public (bool, string) DeleteViTriTPham(object? vttpid)
         {
@@ -9789,6 +9804,8 @@ namespace ProcessManagement.Services.SQLServer
                 }
             }
         }
+
+
 
         #endregion
 

@@ -29,35 +29,39 @@
                                 <RadzenText Text="@($"{TargetLotResult.GetTotalNGOKlastCDoan().sumOK.ToString()}")" Style="font-size: 18px; font-weight: 600; color: darkgreen"></RadzenText>
                             </RadzenStack>
 
-                            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
-                                <RadzenStack Style="width: 150px; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                    <RadzenStack Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                        <RadzenNumeric Disabled="@(!isEditingSoluong || TargetLotResult.IsCreatedThungTP)" Placeholder="@($"* số lượng/thùng")" TValue="int" TextAlign=TextAlign.Center
-                                                       Min="1" Max="999999"
-                                                       Value="@(SLrequiredPerThung_currentLOT)"
-                                                       ValueChanged="@((args) => { SLrequiredPerThung_currentLOT = args; })"
-                                                       Style="--rz-input-font-size: 18px; font-weight: 600; height: 35px; border-width: 1px; width: 100%" />
+                            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween" Style="height: contain; width: 100%; padding: 0px;">
+                                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: contain; padding: 0px;">
+                                    <RadzenStack Style="width: 150px; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                        <RadzenStack Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                            <RadzenNumeric Disabled="@(!isEditingSoluong || TargetLotResult.IsCreatedThungTP)" Placeholder="@($"* số lượng/thùng")" TValue="int" TextAlign=TextAlign.Center
+                                                           Min="1" Max="999999"
+                                                           Value="@(SLrequiredPerThung_currentLOT)"
+                                                           ValueChanged="@((args) => { SLrequiredPerThung_currentLOT = args; })"
+                                                           Style="--rz-input-font-size: 18px; font-weight: 600; height: 35px; border-width: 1px; width: 100%" />
+                                        </RadzenStack>
                                     </RadzenStack>
-                                </RadzenStack>
-                                <RadzenStack Gap="5px" Style="width: contain; height: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                    <!--Button edit-->
-                                    <RadzenButton Visible="@(!isEditingSoluong)" Disabled="@(TargetLotResult.IsCreatedThungTP)" Text="Edit" Icon="edit" Click="(() => { isEditingSoluong = !(isEditingSoluong);} )"
-                                                  ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 18px; height: 35px; " />
-                                    <!--Button save-->
-                                    <RadzenButton Visible="@(isEditingSoluong)" Disabled="@(TargetLotResult.IsCreatedThungTP)" Icon="check" Click="(() => {isEditingSoluong = false;})"
-                                                  ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 18px; height: 35px; width: 50px" />
-                                </RadzenStack>
+                                    <RadzenStack Gap="5px" Style="width: contain; height: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                        <!--Button edit-->
+                                        <RadzenButton Visible="@(!isEditingSoluong)" Disabled="@(TargetLotResult.IsCreatedThungTP)" Text="Edit" Icon="edit" Click="(() => { isEditingSoluong = !(isEditingSoluong);} )"
+                                                      ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 18px; height: 35px; " />
+                                        <!--Button save-->
+                                        <RadzenButton Visible="@(isEditingSoluong)" Disabled="@(TargetLotResult.IsCreatedThungTP)" Icon="check" Click="(() => {isEditingSoluong = false;})"
+                                                      ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 18px; height: 35px; width: 50px" />
+                                    </RadzenStack>
 
-                                <!--Button tao thungTP-->
-                                <RadzenButton Disabled="@(SLrequiredPerThung_currentLOT <= 1 || isEditingSoluong || TargetLotResult.IsCreatedThungTP)" Text="Tạo thùng thành phẩm" Icon="@(isCreatedThungTP? "autorenew" : "add")"
-                                              Click="@(async () => await CreateNewListThungTPhams())"
-                                              ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Light" Style="border-radius: 5px; --rz-icon-size: 18px; min-height: 35px; height: contain " />
+                                    <!--Button tao thungTP-->
+                                    <RadzenButton Disabled="@(SLrequiredPerThung_currentLOT <= 1 || isEditingSoluong || TargetLotResult.IsCreatedThungTP)" Text="Tạo thùng thành phẩm" Icon="@(isCreatedThungTP? "autorenew" : "add")"
+                                                  Click="@(async () => await CreateNewListThungTPhams())"
+                                                  ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Light" Style="border-radius: 5px; --rz-icon-size: 18px; min-height: 35px; height: contain " />
 
+                                </RadzenStack>
+                                <RadzenButton Visible="@(TargetLotResult.IsCreatedThungTP)" Text="Thùng thành phẩm đã được tạo" Icon="check"
+                                              ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Default" Style="border-radius: 5px; --rz-icon-size: 17px; height: 35px; font-size: 16px;" />
                             </RadzenStack>
 
                             <RadzenStack Orientation="Orientation.Horizontal" Gap="10px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween" Style="height: contain; width: 100%; padding: 0px; padding-top: 10px; padding-bottom: 10px; border-top: var(--rz-grid-cell-border); border-bottom: var(--rz-grid-cell-border);">
                                 <RadzenStack Orientation="Orientation.Horizontal" Gap="10px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: 100%; width: contain; padding: 0px">
-                                    <RadzenText Text="@($"Danh sách thùng thành phẩm của KHSX")" Style="font-size: 18px; font-weight: 500; color: black"></RadzenText>
+                                    <RadzenText Text="@($"Danh sách thùng thành phẩm tạo từ mã quản lý")" Style="font-size: 18px; font-weight: 500; color: black"></RadzenText>
                                 </RadzenStack>
                                 <!--Button reload-->
                                 <RadzenButton Visible="false" Text="Reload" Icon="autorenew" Click="@(async () => await LoadDSachThungTPhams(TargetKHSX.KHSXID.Value))"

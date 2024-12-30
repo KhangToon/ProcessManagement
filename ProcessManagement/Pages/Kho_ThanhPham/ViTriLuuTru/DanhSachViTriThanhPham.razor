@@ -278,13 +278,14 @@
                                                                           Text="Xóa thùng thành phẩm" Style="--rz-icon-size: 18px; font-weight: 600; margin-bottom: 5px; height: contain; min-height: 20px; width: contain;" />
                                                         </RadzenStack>
 
-                                                        <RadzenCard Visible="@(thungtpham.ThungTPhams.Any())" Variant="Variant.Outlined" Style="height: contain; width: 100%; padding: 10px;">
+                                                        <RadzenCard Visible="@(thungtpham.ThungTPhams.Any())" Variant="Variant.Outlined" Style="height: contain; width: 100%; padding: 10px; border-width: 1px;">
                                                             <RadzenRow Style="width: 100%; height: contain" Gap="10px">
                                                                 <RadzenColumn Size="12" SizeMD="5" Style="width: 100%; height: contain">
-                                                                    <RadzenStack Gap="15px" Orientation="Orientation.Vertical" Style=" height: contain; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                                                                        <RadzenStack Gap="50px" Orientation="Orientation.Horizontal" Style="height: contain; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                                    <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style=" height: contain; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                                                        <RadzenStack Gap="5px" Orientation="Orientation.Horizontal" Style="height: contain; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                                                             <RadzenText Text="Thùng thành phẩm" Style="color: black; font-weight: 600; font-size: 17px; font-style: italic"></RadzenText>
                                                                         </RadzenStack>
+
                                                                         <RadzenStack Gap="50px" Orientation="Orientation.Horizontal" Style="height: contain; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                                                             <RadzenCard Style="width: contain; min-width: 80px; height: contain; padding: 5px; " Variant="Variant.Flat">
                                                                                 <RadzenStack Gap="0" Style="width: contain; height: contain;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
@@ -305,6 +306,11 @@
                                                                                     <RadzenText Text="@($"{thungtpham.ThungTPhams.Sum(ttp => int.TryParse(ttp.SoLuong.Value?.ToString(), out int sl)? sl: 0).ToString()} (PCS)")" Style="font-size: 17px; font-weight: 600; height: contain; color: darkred"></RadzenText>
                                                                                 </RadzenStack>
                                                                             </RadzenStack>
+                                                                        </RadzenStack>
+
+                                                                        <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" Style="height: contain; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                                            <RadzenText Text="@($"Ngày nhập kho: ")" Style="font-weight: 500; font-size: 16px;"></RadzenText>
+                                                                            <RadzenText Text="@($"{Common.ParseSqlDateTime(thungtpham.ThungTPhams.FirstOrDefault()?.NgayNhapKho.Value?.ToString())?.ToString(Common.FormatNoTime_yyyddMM)}")" Style="font-weight: 600; font-size: 16px;"></RadzenText>
                                                                         </RadzenStack>
                                                                     </RadzenStack>
                                                                 </RadzenColumn>
@@ -785,6 +791,8 @@
                 foreach (var thung in TarGetThungTPhamEx.ThungTPhams)
                 {
                     thung.VTofTPID.Value = 0;
+
+                    thung.NgayNhapKho.Value = DBNull.Value;
 
                     (int udresult, string uderror) = SQLServerServices.UpdateThungTPham(thung);
 

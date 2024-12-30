@@ -492,6 +492,26 @@ namespace ProcessManagement.Commons
             return null;
         }
 
+        public static DateTime? ParseSqlDateTime(string? input)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+                return null;
+
+            string[] formats = {
+            "MM/dd/yyyy h:mm:ss tt",    // 12/30/2024 5:33:00 PM
+            "MM/dd/yyyy h:mm tt",       // 12/30/2024 5:33 PM
+            "MM/dd/yyyy h tt",          // 12/30/2024 5 PM
+            "MM/dd/yyyy"                // 12/30/2024
+            };
+
+            return DateTime.TryParseExact(
+                input.Trim(),
+                formats,
+                new CultureInfo("en-US"),
+                DateTimeStyles.None,
+                out DateTime result) ? result : null;
+        }
+
         public static DateTime? ParseDate_MMddyyyy(string? input)
         {
             string[] formats = { "M/d/yyyy", "MM-dd-yyyy", "MM/dd/yyyy", "MM-dd-yy", "MM/dd/yy", "MMddyyyy", "MMddyy", "MMdd", "MM/dd", "MMdd" };

@@ -15,6 +15,7 @@ namespace ProcessManagement.Models.KHSXs
         public Propertyy SoLuong { get; set; } = new() { DBName = DBName.SoLuong, DisplayName = DispName.SoLuong, Type = typeof(int), AlowDatabase = true };
         public Propertyy SLRequired { get; set; } = new() { DBName = DBName.SLRequired, DisplayName = DispName.SLRequired, Type = typeof(int), AlowDatabase = true };
         public Propertyy NgayDongThung { get; set; } = new() { DBName = DBName.NgayDongThung, DisplayName = DispName.NgayDongThung, Type = typeof(DateTime), AlowDatabase = true };
+        public Propertyy NgayNhapKho { get; set; } = new() { DBName = DBName.NgayNhapKho, DisplayName = DispName.NgayNhapKho, Type = typeof(DateTime), AlowDatabase = true };
         public Propertyy SPID { get; set; } = new() { DBName = DBName.SPID, DisplayName = DispName.SPID, Type = typeof(int), AlowDatabase = true };
 
 
@@ -30,6 +31,7 @@ namespace ProcessManagement.Models.KHSXs
             public const string SoLuong = "soluong";
             public const string SLRequired = "slrequired";
             public const string NgayDongThung = "ngaydongthung";
+            public const string NgayNhapKho = "ngaynhapkho";
         }
 
         public static class DispName
@@ -43,6 +45,7 @@ namespace ProcessManagement.Models.KHSXs
             public const string SoLuong = "Số lượng";
             public const string SLRequired = "Số lượng đóng thùng";
             public const string NgayDongThung = "Ngày đóng thùng";
+            public const string NgayNhapKho = "Ngày nhập kho";
         }
 
         // Get all property of this class

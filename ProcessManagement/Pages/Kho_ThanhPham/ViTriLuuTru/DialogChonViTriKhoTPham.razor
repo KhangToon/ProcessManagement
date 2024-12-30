@@ -701,6 +701,8 @@
             {
                 thung.VTofTPID.Value = PickedVTofTPham.VTofTPID.Value;
 
+                thung.NgayNhapKho.Value = DateTime.Now;
+
                 (int udresult, string uderror) = SQLServerServices.UpdateThungTPham(thung);
 
                 if (udresult < 0)
@@ -734,6 +736,8 @@
                 {
                     thung.VTofTPID.Value = 0;
 
+                    thung.NgayNhapKho.Value = DBNull.Value;
+
                     (int udresult, string uderror) = SQLServerServices.UpdateThungTPham(thung);
 
                     if (udresult < 0)
@@ -741,7 +745,7 @@
                         result = -1;
 
                         await DialogService.Alert($"Không thể xóa vị trí!", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
-                        
+
                         return;
                     }
                 }
