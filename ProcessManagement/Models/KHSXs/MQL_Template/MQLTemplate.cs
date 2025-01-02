@@ -20,6 +20,10 @@ namespace ProcessManagement.Models.KHSXs.MQL_Template
             public const string MQLTLID = "MQLTLID";
         }
 
+        public static readonly string Property_MaLenhSX = "malenhsanxuat";
+        public static readonly string Property_MaSanPham = "masanpham";
+        public static readonly string Property_NgayNhapKho = "ngaynhapkho";
+
         // Get all property of this class
         public static List<Propertyy> GetClassProperties()
         {

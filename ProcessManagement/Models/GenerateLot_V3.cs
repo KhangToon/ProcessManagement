@@ -1,6 +1,7 @@
 ﻿using NuGet.Packaging.Signing;
 using ProcessManagement.Models.KHO_NVL;
 using ProcessManagement.Models.KHSXs;
+using ProcessManagement.Models.KHSXs.MQL_Template;
 using ProcessManagement.Models.SANPHAM;
 using ProcessManagement.Services.SQLServer;
 
@@ -312,6 +313,23 @@ namespace ProcessManagement.Models
             }
         }
 
+        public bool IsAllowGenerateLOTNVL()
+        {
+            bool isallow = true;
+
+            if (NewKHSX.TargetSanPham?.SP_SPID.Value == null)
+            {
+                isallow = false;
+            }
+
+            if (!(SLperLotChan > 0))
+            {
+                isallow = false;
+            }
+
+            return isallow;
+        }
+
         // Generate lot nvl
         public (int, string) GenerateLotNVL()
         {
@@ -371,7 +389,7 @@ namespace ProcessManagement.Models
 
         public List<DetailLotKHSX> DetailLotKHSXs { get; set; } = new();
 
-        public List<TemLotNVL>? GenerateLotNVL_perVitriofNVL(List<ViTriofNVL> dsvitris, int soluong, int slperlotchan)
+        public List<TemLotNVL>? GenerateLotNVL_perVitriofNVL(List<ViTriofNVL> dsvitris, int soluong, int slperlotchan, MQLTemplate? mQLTemplate)
         {
             if (slperlotchan == 0 || soluong == 0 || dsvitris.Count == 0)
             {
@@ -389,7 +407,7 @@ namespace ProcessManagement.Models
 
             foreach (var vitri in dsvitris)
             {
-                var results = GenerateLotNVL_withNgayNhapKho(vitri, slperlotchan, startIndex);
+                var results = GenerateLotNVL_withNgayNhapKho(vitri, slperlotchan, startIndex, mQLTemplate);
 
                 startIndex = results.lastIndex;
 
@@ -413,7 +431,7 @@ namespace ProcessManagement.Models
             return temLotNVLs;
         }
 
-        private (int lastIndex, int sllotchan, int sllotle, int slperlotle, List<TemLotNVL>? temLotNVLs) GenerateLotNVL_withNgayNhapKho(ViTriofNVL viTriofNVL, int slperlotchan, int startIndex)
+        private (int lastIndex, int sllotchan, int sllotle, int slperlotle, List<TemLotNVL>? temLotNVLs) GenerateLotNVL_withNgayNhapKho(ViTriofNVL viTriofNVL, int slperlotchan, int startIndex, MQLTemplate? mQLTemplate)
         {
             int soluong = viTriofNVL.SLTake;
 
@@ -437,7 +455,14 @@ namespace ProcessManagement.Models
                 TemLotNVL nVL = new();
                 nVL.LoaiNVL.Value = NewKHSX.LoaiNVL?.TenLoaiNVL.Value;
                 nVL.MaSP.Value = NewKHSX.TargetSanPham?.SP_MaSP.Value;
-                nVL.MaQuanLy.Value = MaLSX + "-" + NewKHSX.TargetSanPham?.SP_MaSP.Value + "-" + startIndex.ToString(NumberDigit);
+                if (mQLTemplate == null)
+                {
+                    nVL.MaQuanLy.Value = MaLSX + "-" + NewKHSX.TargetSanPham?.SP_MaSP.Value + "-" + startIndex.ToString(NumberDigit);
+                }
+                else
+                {
+                    nVL.MaQuanLy.Value = GetResultFromTemplate(mQLTemplate, viTriofNVL.NgayNhapKho.Value) + "-" + startIndex.ToString(NumberDigit);
+                }
                 nVL.SoLuong.Value = soluong;
                 nVL.NgayNhap.Value = viTriofNVL.NgayNhapKho.Value;
                 temLotNVLs?.Add(nVL);
@@ -452,7 +477,14 @@ namespace ProcessManagement.Models
                     TemLotNVL nVL = new();
                     nVL.LoaiNVL.Value = NewKHSX.LoaiNVL?.TenLoaiNVL.Value;
                     nVL.MaSP.Value = NewKHSX.TargetSanPham?.SP_MaSP.Value;
-                    nVL.MaQuanLy.Value = MaLSX + "-" + NewKHSX.TargetSanPham?.SP_MaSP.Value + "-" + startIndex.ToString(NumberDigit);
+                    if (mQLTemplate == null)
+                    {
+                        nVL.MaQuanLy.Value = MaLSX + "-" + NewKHSX.TargetSanPham?.SP_MaSP.Value + "-" + startIndex.ToString(NumberDigit);
+                    }
+                    else
+                    {
+                        nVL.MaQuanLy.Value = GetResultFromTemplate(mQLTemplate, viTriofNVL.NgayNhapKho.Value) + "-" + startIndex.ToString(NumberDigit);
+                    }
                     nVL.SoLuong.Value = slperlotchan;
                     nVL.NgayNhap.Value = viTriofNVL.NgayNhapKho.Value;
                     temLotNVLs?.Add(nVL);
@@ -471,7 +503,14 @@ namespace ProcessManagement.Models
                     TemLotNVL lotnvlle = new();
                     lotnvlle.LoaiNVL.Value = NewKHSX.LoaiNVL?.TenLoaiNVL.Value;
                     lotnvlle.MaSP.Value = NewKHSX.TargetSanPham?.SP_MaSP.Value;
-                    lotnvlle.MaQuanLy.Value = MaLSX + "-" + NewKHSX.TargetSanPham?.SP_MaSP.Value + "-" + startIndex.ToString(NumberDigit);
+                    if (mQLTemplate == null)
+                    {
+                        lotnvlle.MaQuanLy.Value = MaLSX + "-" + NewKHSX.TargetSanPham?.SP_MaSP.Value + "-" + startIndex.ToString(NumberDigit);
+                    }
+                    else
+                    {
+                        lotnvlle.MaQuanLy.Value = GetResultFromTemplate(mQLTemplate, viTriofNVL.NgayNhapKho.Value) + "-" + startIndex.ToString(NumberDigit);
+                    }
                     lotnvlle.SoLuong.Value = slperlotle;
                     lotnvlle.NgayNhap.Value = viTriofNVL.NgayNhapKho.Value;
                     temLotNVLs?.Add(lotnvlle);
@@ -481,6 +520,33 @@ namespace ProcessManagement.Models
             return (startIndex, sllotchan, sllotle, slperlotle, temLotNVLs);
         }
 
+        private string GetResultFromTemplate(MQLTemplate mQLTemplate, object? ngaynhapkho)
+        {
+            string resultTemplate;
 
+            List<string> resultList = new();
+
+            foreach (var mqltlitem in mQLTemplate.MQLTemplateItems)
+            {
+                string tentruyxuat = mqltlitem.MQLTemplateProperty.TenTruyXuat.Value?.ToString() ?? string.Empty;
+
+                if (tentruyxuat == MQLTemplate.Property_NgayNhapKho)
+                {
+                    DateTime? dateresult = Commons.Common.ParseDate_MMddyyyy(ngaynhapkho?.ToString());
+
+                    string reformatNNK = dateresult?.ToString("ddMMyy") ?? string.Empty;
+
+                    resultList.Add(reformatNNK);
+                }
+                else
+                {
+                    resultList.Add(mqltlitem.GiaTri.Value?.ToString() ?? string.Empty);
+                }
+            }
+
+            resultTemplate = string.Join("-", resultList);
+
+            return resultTemplate;
+        }
     }
 }

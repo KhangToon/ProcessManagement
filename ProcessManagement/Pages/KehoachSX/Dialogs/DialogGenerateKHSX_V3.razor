@@ -1,6 +1,7 @@
 ﻿@using ProcessManagement.Commons
 @using ProcessManagement.Models.KHO_NVL
 @using ProcessManagement.Models.KHSXs
+@using ProcessManagement.Models.KHSXs.MQL_Template
 @using ProcessManagement.Pages.KehoachSX.MQL_Template
 @using ProcessManagement.Pages.Manager_NguyenCong.Dialogs
 @using ProcessManagement.Services.SQLServer
@@ -70,7 +71,7 @@
                                     </RadzenStack>
                                     <RadzenStack Gap="10px" Style="width: 50%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                         <!--Chua chi dinh so luong NVL-->
-                                        <RadzenButton Visible="@(!generLot.isCheckSLNVLisOK)" Click="@(() => OpenDialogSelectNVLofKHSX())" Style="width: 100%;" Icon="add" Text="Lấy nguyên vật liệu" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Variant="Variant.Flat" />
+                                        <RadzenButton Visible="@(!generLot.isCheckSLNVLisOK)" Click="@(() => OpenDialogSelectNVLofKHSX())" Style="width: 100%; font-weight: 600" Icon="add" Text="Lấy nguyên vật liệu" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Variant="Variant.Flat" />
                                         <!--Da chi dinh so luong NVL-->
                                         <RadzenButton Visible="@generLot.isCheckSLNVLisOK" Click="@(() => OpenDialogSelectNVLofKHSX())" Style="width: 100%; font-size: 16px" Icon="check" Text="Đã chọn NVL" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Success" Shade="Shade.Lighter" Variant="Variant.Flat" />
                                     </RadzenStack>
@@ -151,21 +152,21 @@
                                         </RadzenStack>
                                     </RadzenStack>
 
-                                    <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style="height: 100%; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                    <RadzenStack Visible="@(generLot.DetailLotKHSXs.Any())" Gap="10px" Orientation="Orientation.Vertical" Style="height: 100%; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                         <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style=" height: contain; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                            <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: 100%; padding: 5px; padding-right: 0px;">
+                                            <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: 100%; padding: 5px; padding-right: 0px; background-color: var(--rz-primary-dark)">
                                                 <RadzenStack Style="width: 100%; height: contain" Gap="0" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                     <RadzenStack Style="width: 30%; height: contain; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                        <RadzenText Text="Ngày nhập kho" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                                                        <RadzenText Text="Ngày nhập kho" Style="color: white; font-weight: 600; font-size: 15px"></RadzenText>
                                                     </RadzenStack>
                                                     <RadzenStack Style="width: 25%; height: contain; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                        <RadzenText Text="Lot chẳn" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                                                        <RadzenText Text="Lot chẳn" Style="color: white; font-weight: 600; font-size: 15px"></RadzenText>
                                                     </RadzenStack>
                                                     <RadzenStack Style="width: 25%; height: contain; padding-left: 10px; padding-right: 10px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                        <RadzenText Text="Lot lẻ" Style="color: black; font-size: 14px; font-weight: 600; height: contain;"></RadzenText>
+                                                        <RadzenText Text="Lot lẻ" Style="color: white; font-size: 15px; font-weight: 600; height: contain;"></RadzenText>
                                                     </RadzenStack>
                                                     <RadzenStack Style="width: 20%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                        <RadzenText Text="Tổng" Style="color: black; font-size: 14px; font-weight: 600; height: contain;"></RadzenText>
+                                                        <RadzenText Text="Tổng" Style="color: white; font-size: 15px; font-weight: 600; height: contain;"></RadzenText>
                                                     </RadzenStack>
                                                 </RadzenStack>
                                             </RadzenCard>
@@ -210,18 +211,18 @@
                             </RadzenStack>
                             <RadzenStack Orientation="Orientation.Horizontal" Style="width: 100%; height: contain;" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
                                 <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" Style="width: 100%; height: contain;" AlignItems="AlignItems.Start">
-                                    <RadzenStack Visible="@(!generLot.isGenerateListLotOK)" Style="width: 50%; height: 100%" JustifyContent="JustifyContent.Center">
-                                        <RadzenButton Click="@(async () => { await CreateListLot();})" Icon="autorenew" Text="Tạo danh sách LOT" IsBusy="@waitgetlistlot" BusyText="Creating..."
-                                                      Style="font-size: 16px; border-radius: 5px; width: 100% " Shade="Shade.Dark" Variant="Variant.Filled" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small"></RadzenButton>
-                                    </RadzenStack>
                                     <!--Button generate success-->
                                     <RadzenStack Visible="@(generLot.isGenerateListLotOK)" Style="width: 50%; height: 100%" JustifyContent="JustifyContent.Center">
-                                        <RadzenButton Click="@(async () => { await CreateListLot();})" Icon="check" Text="Đã tạo danh sách LOT" IsBusy="@waitgetlistlot" BusyText="Creating..."
+                                        <RadzenButton Click="@(async () => { await CreateListLot(TargetMQLTemplate);})" Icon="check" Text="Đã tạo danh sách LOT" IsBusy="@waitgetlistlot" BusyText="Creating..."
                                                       Style="font-size: 16px; border-radius: 5px; width: 100% " Shade="Shade.Lighter" Variant="Variant.Filled" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small"></RadzenButton>
                                     </RadzenStack>
                                     <RadzenStack Visible="@(!generLot.isGenerateListLotOK)" Style="width: 50%; height: 100%" JustifyContent="JustifyContent.Center">
-                                        <RadzenButton Click="@(async () => { await OpenCreateListLotUsingTemplate();})" Icon="autorenew" Text="Tạo LOT với template" IsBusy="@waitgetlistlot" BusyText="Creating..."
-                                                      Style="font-size: 16px; border-radius: 5px; width: 100% " Shade="Shade.Dark" Variant="Variant.Filled" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small"></RadzenButton>
+                                        <RadzenButton Disabled="@(!generLot.IsAllowGenerateLOTNVL())" Click="@(async () => { await OpenCreateListLotUsingTemplate();})" Icon="autorenew" Text="Tạo LOT với template" IsBusy="@waitgetlistlot" BusyText="Creating..."
+                                                      Style="font-size: 16px; border-radius: 5px; width: 100%;" Shade="Shade.Dark" Variant="Variant.Filled" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small"></RadzenButton>
+                                    </RadzenStack>
+                                    <RadzenStack Visible="@(generLot.isGenerateListLotOK)" Style="width: 50%; height: 100%" JustifyContent="JustifyContent.Center">
+                                        <RadzenButton Click="@(async () => { await OpenCreateListLotUsingTemplate();})" Icon="edit" Text="Đổi TEMPLATE LOT" IsBusy="@waitgetlistlot" BusyText="Creating..."
+                                                      Style="font-size: 16px; border-radius: 5px; width: 100% " Shade="Shade.Lighter" Variant="Variant.Filled" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small"></RadzenButton>
                                     </RadzenStack>
                                 </RadzenStack>
                             </RadzenStack>
@@ -430,14 +431,14 @@
     private bool isAddingLSXtodatabase = false;
     private int selectNCongTab = 1;
 
+    private MQLTemplate? TargetMQLTemplate;
 
     // Tao danh sach LOT
-    private async Task CreateListLot()
+    private async Task CreateListLot(MQLTemplate? mQLTemplate)
     {
         generLot.ListTempLOT_NVLs = new();
 
         generLot.isGenerateListLotOK = false;
-
 
         await Task.Run(async () =>
         {
@@ -449,9 +450,7 @@
 
             List<TemLotNVL>? temLotNVLs = null;
 
-            //await Task.Run(() => { (result, error) = generLot.GenerateLotNVL(); });
-            await Task.Run(() => { temLotNVLs = generLot.GenerateLotNVL_perVitriofNVL(dsvitris, generLot.DinhMuc, generLot.SLperLotChan); });
-
+            await Task.Run(() => { temLotNVLs = generLot.GenerateLotNVL_perVitriofNVL(dsvitris, generLot.DinhMuc, generLot.SLperLotChan, mQLTemplate); });
 
             if (temLotNVLs == null)
             {
@@ -478,9 +477,15 @@
 
     private async Task OpenCreateListLotUsingTemplate()
     {
-        var results = await DialogService.OpenAsync<DialogMQLTemplateGeneration>(null, new Dictionary<string, object>() { { "MaLSX", generLot.MaLSX }, { "MaSanPham", generLot.NewKHSX.TargetSanPham?.SP_MaSP.Value ?? string.Empty } },
+        var result = await DialogService.OpenAsync<DialogMQLTemplateGeneration>(null, new Dictionary<string, object>() { { "MaLSX", generLot.MaLSX }, { "MaSanPham", generLot.NewKHSX.TargetSanPham?.SP_MaSP.Value ?? string.Empty }, { "GenerateLot_V3", generLot } },
         new DialogOptions() { Width = "80%", Height = "contain", Resizable = false, Draggable = true, ShowTitle = false, ShowClose = false, Style = "background-color: while; border-radius: 0px; padding: 0px" });
 
+        if (result != null)
+        {
+            TargetMQLTemplate = result;
+        }
+
+        await CreateListLot(TargetMQLTemplate);
     }
 
     // Delete ke hoach san xuat
