@@ -17,6 +17,7 @@ using System.Text.RegularExpressions;
 using static ProcessManagement.Models.KHSXs.ThungTPham;
 using static ProcessManagement.Models.KHSXs.KetQuaGC;
 using ProcessManagement.Models.KHO_TPHAM;
+using ProcessManagement.Models.KHSXs.MQL_Template;
 
 namespace ProcessManagement.Services.SQLServer
 {
@@ -10040,6 +10041,252 @@ namespace ProcessManagement.Services.SQLServer
             }
         }
 
+        #endregion
+
+        // ------------------------------------------------------------------------------------- //
+        #region Table_MQLTemplateProperty
+        // Insert
+        public (int, string) InsertMQLTemplateProperty(MQLTemplateProperty mqltemplateProperty)
+        {
+            int result = -1;
+            string errorMess = string.Empty;
+
+            if (mqltemplateProperty == null) return (result, "Error: is null");
+
+            List<Propertyy> properties = mqltemplateProperty.GetPropertiesValues()
+                .Where(po => po.AlowDatabase == true && po.Value != null)
+                .ToList();
+
+            if (properties.Count == 0)
+            {
+                return (result, "Error: No valid properties to insert.");
+            }
+
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+            using var transaction = connection.BeginTransaction();
+
+            try
+            {
+                var command = connection.CreateCommand();
+                command.Transaction = transaction;
+
+                string columns = string.Join(", ", properties.Select(p => $"[{p.DBName}]"));
+                string parameters = string.Join(", ", properties.Select(p => $"@{Regex.Replace(p.DBName ?? string.Empty, @"[^\w]+", "")}"));
+                command.CommandText = $@"INSERT INTO [{MQLTemplateProperty.DBName.Table_MQLTLProperty}] ({columns}) OUTPUT INSERTED.{MQLTemplateProperty.DBName.MQLTLpropertyID} VALUES ({parameters})";
+
+                foreach (var prop in properties)
+                {
+                    string parameterName = $"@{Regex.Replace(prop.DBName ?? string.Empty, @"[^\w]+", "")}";
+                    object? parameterValue = prop.Value ?? DBNull.Value;
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                object? rs = command.ExecuteScalar();
+                if (rs != null && int.TryParse(rs.ToString(), out result) && result > 0)
+                {
+                    transaction.Commit();
+                }
+                else
+                {
+                    result = -1;
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMess = $"Error: {ex.Message}";
+                try
+                {
+                    transaction.Rollback();
+                }
+                catch (Exception rollbackEx)
+                {
+                    errorMess += $" | Rollback Error: {rollbackEx.Message}";
+                }
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+        // Update 
+        public (int, string) UpdateMQLTemplateProperty(MQLTemplateProperty mqltemplateProperty)
+        {
+            int result = -1;
+            string errorMess = string.Empty;
+
+            // Check for null input
+            if (mqltemplateProperty == null) return (result, "Error: is null");
+
+            List<Propertyy> properties = mqltemplateProperty.GetPropertiesValues()
+                .Where(po => po.AlowDatabase == true && po.Value != null)
+                .ToList();
+
+            // Validate properties before proceeding
+            if (properties.Count == 0)
+            {
+                return (result, "Error: No valid properties to update.");
+            }
+
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+
+            using var transaction = connection.BeginTransaction(); // Start transaction
+
+            try
+            {
+                var command = connection.CreateCommand();
+                command.Transaction = transaction; // Associate command with the transaction
+
+                string updateSet = string.Join(", ", properties.Select(p => $"[{p.DBName}] = @{Regex.Replace(p.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $@"UPDATE [{MQLTemplateProperty.DBName.Table_MQLTLProperty}] SET {updateSet} WHERE [{MQLTemplateProperty.DBName.MQLTLpropertyID}] = '{mqltemplateProperty.MQLTLpropertyID.Value}'";
+
+                // Add parameters
+                foreach (var prop in properties)
+                {
+                    string parameterName = $"@{Regex.Replace(prop.DBName ?? string.Empty, @"[^\w]+", "")}";
+                    object? parameterValue = prop.Value ?? DBNull.Value;
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                // Execute command
+                result = command.ExecuteNonQuery();
+
+                if (result > 0)
+                {
+                    // Successfully updated
+                    transaction.Commit(); // Commit the transaction
+                }
+                else
+                {
+                    result = -1; // Set to -1 if update was not successful
+                    errorMess = "No rows were updated. The specified may not exist.";
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMess = $"Error: {ex.Message}";
+                try
+                {
+                    transaction.Rollback(); // Rollback transaction in case of error
+                }
+                catch (Exception rollbackEx)
+                {
+                    errorMess += $" | Rollback Error: {rollbackEx.Message}";
+                }
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+        // Get
+        public (List<MQLTemplateProperty> mQLTemplates, string error) GetListMQLTLPropertiess(Dictionary<string, object?> parameters, bool isgetAll = false)
+        {
+            List<MQLTemplateProperty> listMQLTLproperties = new();
+
+            string errorMessage = string.Empty;
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                try
+                {
+                    connection.Open();
+
+                    var conditions = new List<string>();
+                    var command = connection.CreateCommand();
+                    command.CommandText = $"SELECT * FROM [{MQLTemplateProperty.DBName.Table_MQLTLProperty}]";
+
+                    if (!isgetAll)
+                    {
+                        // Process each parameter in the dictionary
+                        foreach (var param in parameters)
+                        {
+                            conditions.Add($"[{param.Key}] = @{param.Key}");
+
+                            command.Parameters.AddWithValue($"@{param.Key}", param.Value);
+                        }
+
+                        if (conditions.Any())
+                        {
+                            command.CommandText += " WHERE " + string.Join(" AND ", conditions);
+                        }
+                    }
+
+                    using var reader = command.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        MQLTemplateProperty mqltemplateproperty = new();
+
+                        List<Propertyy> rowItems = mqltemplateproperty.GetPropertiesValues();
+
+                        foreach (var item in rowItems)
+                        {
+                            string? columnName = item.DBName;
+
+                            if (!string.IsNullOrEmpty(columnName) && reader.GetOrdinal(columnName) != -1)
+                            {
+                                object columnValue = reader[columnName];
+
+                                item.Value = columnValue == DBNull.Value ? null : columnValue;
+                            }
+                        }
+
+                        listMQLTLproperties.Add(mqltemplateproperty);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    errorMessage = $"Error: {ex.Message}";
+                    listMQLTLproperties.Clear(); // Clear the list in case of error
+                }
+            }
+            return (listMQLTLproperties, errorMessage);
+        }
+        // Delete
+        public (bool, string) DeleteMQLTemplateProperty(object? mqltemplateProperty)
+        {
+            // Check for valid ID
+            if (mqltemplateProperty == null)
+            {
+                return (false, "Error");
+            }
+
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+
+            string query = $"DELETE FROM [{MQLTemplateProperty.DBName.Table_MQLTLProperty}] WHERE [{MQLTemplateProperty.DBName.MQLTLpropertyID}] = @MQLTLpropertyID";
+
+            using var command = new SqlCommand(query, connection);
+            command.Parameters.AddWithValue("@MQLTLpropertyID", mqltemplateProperty);
+
+            try
+            {
+                int rowsAffected = command.ExecuteNonQuery();
+                return (rowsAffected > 0, string.Empty); // Return true if a row was deleted
+            }
+            catch (Exception ex)
+            {
+                return (false, $"Error: {ex.Message}"); // Return false and the error message
+            }
+        }
+
+        public bool IsThongTinMQLTemplateProperty_ValueIsExisting(string? proValue, string proName)
+        {
+            using (var connection = new SqlConnection(connectionString))
+            {
+                string query = $"SELECT COUNT(*) FROM [{MQLTemplateProperty.DBName.Table_MQLTLProperty}] WHERE [{proName}] = N'{proValue?.Trim()}'";
+
+                using (var command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+
+                    int count = (int)command.ExecuteScalar();
+
+                    return count > 0;
+                }
+            }
+        }
         #endregion
     }
 }

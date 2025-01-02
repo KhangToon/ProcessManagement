@@ -1,6 +1,7 @@
 ﻿@using ProcessManagement.Commons
 @using ProcessManagement.Models.KHO_NVL
 @using ProcessManagement.Models.KHSXs
+@using ProcessManagement.Pages.KehoachSX.MQL_Template
 @using ProcessManagement.Pages.Manager_NguyenCong.Dialogs
 @using ProcessManagement.Services.SQLServer
 @using Radzen.Blazor
@@ -209,14 +210,18 @@
                             </RadzenStack>
                             <RadzenStack Orientation="Orientation.Horizontal" Style="width: 100%; height: contain;" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
                                 <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" Style="width: 100%; height: contain;" AlignItems="AlignItems.Start">
-                                    <RadzenStack Visible="@(!generLot.isGenerateListLotOK)" Style="width: 100%; height: 100%" JustifyContent="JustifyContent.Center">
+                                    <RadzenStack Visible="@(!generLot.isGenerateListLotOK)" Style="width: 50%; height: 100%" JustifyContent="JustifyContent.Center">
                                         <RadzenButton Click="@(async () => { await CreateListLot();})" Icon="autorenew" Text="Tạo danh sách LOT" IsBusy="@waitgetlistlot" BusyText="Creating..."
                                                       Style="font-size: 16px; border-radius: 5px; width: 100% " Shade="Shade.Dark" Variant="Variant.Filled" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small"></RadzenButton>
                                     </RadzenStack>
                                     <!--Button generate success-->
-                                    <RadzenStack Visible="@(generLot.isGenerateListLotOK)" Style="width: 100%; height: 100%" JustifyContent="JustifyContent.Center">
+                                    <RadzenStack Visible="@(generLot.isGenerateListLotOK)" Style="width: 50%; height: 100%" JustifyContent="JustifyContent.Center">
                                         <RadzenButton Click="@(async () => { await CreateListLot();})" Icon="check" Text="Đã tạo danh sách LOT" IsBusy="@waitgetlistlot" BusyText="Creating..."
                                                       Style="font-size: 16px; border-radius: 5px; width: 100% " Shade="Shade.Lighter" Variant="Variant.Filled" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small"></RadzenButton>
+                                    </RadzenStack>
+                                    <RadzenStack Visible="@(!generLot.isGenerateListLotOK)" Style="width: 50%; height: 100%" JustifyContent="JustifyContent.Center">
+                                        <RadzenButton Click="@(async () => { await OpenCreateListLotUsingTemplate();})" Icon="autorenew" Text="Tạo LOT với template" IsBusy="@waitgetlistlot" BusyText="Creating..."
+                                                      Style="font-size: 16px; border-radius: 5px; width: 100% " Shade="Shade.Dark" Variant="Variant.Filled" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small"></RadzenButton>
                                     </RadzenStack>
                                 </RadzenStack>
                             </RadzenStack>
@@ -436,7 +441,6 @@
 
         await Task.Run(async () =>
         {
-
             waitgetlistlot = true;
 
             //int result = -1; string error = "Không thể tạo danh sách lot nguyên vật liệu!";
@@ -470,6 +474,13 @@
             waitgetlistlot = false;
 
         });
+    }
+
+    private async Task OpenCreateListLotUsingTemplate()
+    {
+        var results = await DialogService.OpenAsync<DialogMQLTemplateGeneration>(null, new Dictionary<string, object>() { { "MaLSX", generLot.MaLSX }, { "MaSanPham", generLot.NewKHSX.TargetSanPham?.SP_MaSP.Value ?? string.Empty } },
+        new DialogOptions() { Width = "80%", Height = "contain", Resizable = false, Draggable = true, ShowTitle = false, ShowClose = false, Style = "background-color: while; border-radius: 0px; padding: 0px" });
+
     }
 
     // Delete ke hoach san xuat

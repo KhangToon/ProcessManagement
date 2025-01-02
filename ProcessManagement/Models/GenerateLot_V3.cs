@@ -278,6 +278,8 @@ namespace ProcessManagement.Models
 
         public (int, string) ReCalculate() // Tinh Dinhmuc, SLLot, SLperLot,...
         {
+            DetailLotKHSXs = new();
+
             // Reset so luong cua moi nvl cua lsx khi bat ki thong so nao thay doi (loai nvl, ti le loi, slsx, ...)
             isGenerateListLotOK = false; // false bit generate LOT
             ListTempLOT_NVLs = new(); // reset danh sach LOT NVL

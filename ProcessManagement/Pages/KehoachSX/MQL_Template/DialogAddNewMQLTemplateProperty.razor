@@ -1,0 +1,417 @@
+﻿@using ProcessManagement.Commons
+@using ProcessManagement.Services.SQLServer
+@using Radzen.Blazor
+@using Radzen
+@using ProcessManagement.Models.KHSXs.MQL_Template
+
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject TooltipService TooltipService
+@inject SQLServerServices SQLServerServices
+
+<style>
+
+    .custom-placeholder::placeholder {
+        color: #888888; /* Change this to your desired color */
+        font-size: 14px; /* Change this to your desired font size */
+    }
+</style>
+
+
+<RadzenCard Variant="Variant.Filled" Style="height: 100%; width: 100%; padding: 10px;">
+    <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style=" height: 100%; width: 100%; padding: 0px;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+        <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style="height: 100%; width: 100%; padding: 0px;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+            <RadzenStack Gap="20px" Style="height: contain; width: 100%; padding: 10px; background-color: var(--rz-primary-dark);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                <RadzenText Text="THÊM TRƯỜNG THUỘC TÍNH CHO TEMPLATE LOT" Style="color: white; font-weight: 500; font-size: 18px"></RadzenText>
+            </RadzenStack>
+        </RadzenStack>
+
+        <RadzenStack Style="height: contain; width: 100%; padding: 10px; border-top: var(--rz-grid-cell-border); border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+            <RadzenStack Gap="20px" Style="height: contain; width: contain; padding: 0;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                <RadzenRadioButtonList Value=@IsCreateNew TValue="bool" ValueChanged=@(args => OnModeAddMQLTLPropertySelectChanged(args))>
+                    <Items>
+                        <RadzenRadioButtonListItem Style="@($"{((!IsCreateNew)? "color: darkgreen; font-size: 17px; font-weight: 600" : "")} ; font-size: 16px; cursor: pointer; padding: 5px; padding-right: 0px;")" Text="Trường thuộc tính đã có" Value="false" />
+                        <RadzenRadioButtonListItem Style="@($"{((IsCreateNew)? "color: darkgreen; font-size: 17px; font-weight: 600" : "")} ; font-size: 16px; cursor: pointer; padding: 5px; padding-right: 0px;")" Text="Tạo trường thuộc tính mới" Value="true" />
+                    </Items>
+                </RadzenRadioButtonList>
+            </RadzenStack>
+        </RadzenStack>
+
+        <RadzenCard Variant="Variant.Text" Style="height: 370px; width: 100%; padding: 10px; border-radius: 10px;">
+            <RadzenStack Style="height: 100%; width: 100%; padding: 0px;" Gap="0" Orientation="Orientation.Vertical">
+                @if (IsCreateNew) // Tao moi truong thong tin
+                {
+                    <!--Ten thong tin mode 1-->
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 5px; border-bottom: var(--rz-grid-cell-border);">
+                        <RadzenStack Style="width: 20%;">
+                            <RadzenText Text="Tên thuộc tính" Style="color: var(--rz-primary-darker); font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
+                        </RadzenStack>
+                        <RadzenStack Style="width: 80%; padding-left: 10px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
+                                @{
+                                    <RadzenStack Style="width: 50%;">
+                                        <RadzenTextBox class="custom-placeholder" Placeholder="@($" * nhập tên thuộc tính")" Value="@NewMQLTemplateProperty_mode1.TemplateName.Value?.ToString()" Style="font-size: 16px; height: contain; border-width: 1px;"
+                                                       @oninput="@(async (args) => { NewMQLTemplateProperty_mode1.TemplateName.Value = args.Value; await CheckMQLTemplateProperty_NameIsOK(NewMQLTemplateProperty_mode1.TemplateName);})">
+                                        </RadzenTextBox>
+                                    </RadzenStack>
+
+                                    <RadzenStack Style="width: 50%;">
+                                        <RadzenAlert Visible="@(tenOK.Equals(-1))" Text="@tenNotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                                        <RadzenAlert Visible="@(tenOK.Equals(1))" Text="@tenNotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Success" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                                    </RadzenStack>
+                                }
+                            </RadzenStack>
+                        </RadzenStack>
+                    </RadzenStack>
+
+                    <!--Kieu du lieu M1-->
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 5px; border-bottom: var(--rz-grid-cell-border);">
+                        <RadzenStack Style="width: 20%;">
+                            <RadzenText Text="Kiểu dữ liệu" Style="color: var(--rz-primary-darker); font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
+                        </RadzenStack>
+                        <RadzenStack Style="width: 80%; padding-left: 10px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
+                                <RadzenDropDown class="custom-placeholder" Style="width: 50%; height: contain; font-size: 16px;"
+                                                Value="@(DataTypes[int.Parse(NewMQLTemplateProperty_mode1.KieuDuLieu.Value?.ToString()?? "1")])"
+                                                Data=@DataTypes.Values AllowClear="false" Placeholder="@("* chọn kiểu dữ liệu")" TValue="string"
+                                                Change="@(args =>
+                                                {
+                                                    if (NewMQLTemplateProperty_mode1!= null)
+                                                    {
+                                                        NewMQLTemplateProperty_mode1.DefaultValue.Value = null;
+
+                                                        if (args != null)
+                                                        {
+                                                            if (args.ToString() == Kytu)
+                                                            {
+                                                                NewMQLTemplateProperty_mode1.KieuDuLieu.Value = 1;
+                                                            }
+                                                            else if (args.ToString() == Soluong)
+                                                            {
+                                                                NewMQLTemplateProperty_mode1.KieuDuLieu.Value = 2;
+                                                            }
+                                                            else if (args.ToString() == Ngaythang)
+                                                            {
+                                                                NewMQLTemplateProperty_mode1.KieuDuLieu.Value = 3;
+                                                            }
+                                                        }
+                                                        else{ NewMQLTemplateProperty_mode1.KieuDuLieu.Value = null; }
+
+                                                        giatriOK = -1;
+                                                    }
+                                                })">
+                                </RadzenDropDown>
+                                <RadzenStack Style="width: 50%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                    <RadzenCheckBox TValue="bool" Value=@IsAddWithValue_mode1 Change=@(args => IsAddWithValue_mode1 = args) Name="isallowemptymode1" />
+                                    <RadzenLabel Text="Thêm với giá trị" Style="font-size: 14px; font-weight: bold; font-style: italic" Component="isallowemptymode1" />
+                                </RadzenStack>
+                            </RadzenStack>
+                        </RadzenStack>
+                    </RadzenStack>
+
+                    <!--// Gia tri M1-->
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 5px; padding-bottom: 15px">
+                        <RadzenStack Style="width: 20%;">
+                            <RadzenText Text="Giá trị" Style="color: var(--rz-primary-darker); font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
+                        </RadzenStack>
+                        <RadzenStack Style="width: 80%; padding-left: 10px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
+                                @{
+                                    currentKieudulieu = int.TryParse(NewMQLTemplateProperty_mode1.KieuDuLieu.Value?.ToString(), out int kdl) ? kdl : 0;
+
+                                    // Kieu ki tu
+                                    <RadzenStack Visible="@(currentKieudulieu.Equals(1))" Style="width: 50%;">
+                                        <RadzenTextBox Disabled="@(!IsAddWithValue_mode1)" class="custom-placeholder" Placeholder="@($" * nhập giá trị { NewMQLTemplateProperty_mode1.TemplateName.Value?.ToString()}")"
+                                                       Value="@NewMQLTemplateProperty_mode1.DefaultValue.Value?.ToString()" Style="font-size: 16px; height: contain; border-width: 1px;"
+                                                       @oninput="@(async (args) => { NewMQLTemplateProperty_mode1.DefaultValue.Value = args.Value; await CheckMQLTemplateProperty_ValueIsOK(NewMQLTemplateProperty_mode1, currentKieudulieu); })">
+                                        </RadzenTextBox>
+                                    </RadzenStack>
+                                    // Kieu so
+                                    <RadzenStack Visible="@(currentKieudulieu.Equals(2))" Style="width: 50%;">
+                                        <RadzenNumeric Disabled="@(!IsAddWithValue_mode1)" class="custom-placeholder" Placeholder="@($" * nhập giá trị { NewMQLTemplateProperty_mode1.TemplateName.Value?.ToString()}")" TValue="int"
+                                                       ValueChanged="@(async (args) =>
+                                                       {
+                                                           NewMQLTemplateProperty_mode1.DefaultValue.Value = args;
+                                                           await CheckMQLTemplateProperty_ValueIsOK(NewMQLTemplateProperty_mode1, currentKieudulieu);
+                                                       })"
+                                                       Style="font-size: 16px; height: contain;" Min="0" Max="999999" />
+                                    </RadzenStack>
+                                    // Kieu ngay thang
+                                    bool ishaveValueOfday = DateTime.TryParse(NewMQLTemplateProperty_mode1.DefaultValue.Value?.ToString(), out DateTime selectday);
+                                    if (ishaveValueOfday) selectday = selectday.Date.Add(DateTime.Now.TimeOfDay);
+                                    <RadzenStack Visible="@(currentKieudulieu.Equals(3))" Style="width: 50%;">
+                                        <RadzenDatePicker Disabled="@(!IsAddWithValue_mode1)" class="custom-datepicker" Placeholder="@($"* nhập {NewMQLTemplateProperty_mode1.TemplateName.Value?.ToString()}")"
+                                                          TValue="DateTime" Value="selectday" AllowClear="true"
+                                                          Change="@(async (args) =>
+                                                          {
+                                                              if (args != null)
+                                                              {
+                                                                  DateTime value = args.Value.Date.Add(DateTime.Now.TimeOfDay);
+                                                                  NewMQLTemplateProperty_mode1.DefaultValue.Value = args;
+                                                              }
+                                                              else
+                                                              {
+                                                                  NewMQLTemplateProperty_mode1.DefaultValue.Value = string.Empty;
+                                                              }
+                                                              await CheckMQLTemplateProperty_ValueIsOK(NewMQLTemplateProperty_mode1, currentKieudulieu);
+                                                          })"
+                                                          ShowTime="false" HourFormat="12" DateFormat="@Common.FormatNoTime_yyyMMdd" ParseInput="@Common.ParseDate_ddMMyyyy" AllowInput="true"
+                                                          Style="height: contain; font-size: 16px">
+                                        </RadzenDatePicker>
+                                    </RadzenStack>
+
+                                    <RadzenStack Style="width: 50%;">
+                                        <RadzenAlert Visible="@(giatriOK.Equals(-1) && IsAddWithValue_mode1)" Text="@giatriNotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                                        <RadzenAlert Visible="@(giatriOK.Equals(1) && IsAddWithValue_mode1)" Text="@giatriNotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Success" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                                    </RadzenStack>
+                                }
+                            </RadzenStack>
+                        </RadzenStack>
+                    </RadzenStack>
+
+
+                    <RadzenStack Style="width: 100%; padding: 10px" Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                        <RadzenCheckBox TValue="bool" Value=@IsDefault Change=@(args => IsDefault = args) Name="isdefaultproperty" />
+                        <RadzenLabel Text="Đặt làm trường thuộc tính mặc định" Style="font-size: 14px; font-weight: bold; font-style: italic" Component="isdefaultproperty" />
+                    </RadzenStack>
+
+                    <!--Button save Truong thong tin tao moi-->
+                    <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding-top: 10px; border-top: var(--rz-grid-cell-border) " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                        <RadzenButton Disabled="@(tenOK == -1 || (giatriOK == -1 && IsAddWithValue_mode1 == true))" Click="(() => SaveNewMQLTLProperty_Mode1())"
+                                      Style="width: 120px;" Icon="check" Text="Thêm" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Dark" Variant="Variant.Flat" />
+                        <RadzenButton Style="width: 120px;" Icon="close" Text="Thoát" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" Click="@(() => DialogService.Close(new List<MQLTemplateProperty>()))" />
+                    </RadzenStack>
+                }
+                else
+                {
+                    <RadzenCard class="rz-shadow-4" Style="width: 100%; height: 100%; padding: 10px; padding-top: 0px; border-radius: 10px">
+                        <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style=" height: 100%; width: 100%; padding: 0px;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenPickList @bind-Source="@(DSachMQLTemplateProperty)" @bind-Target="@DSachMQLTemplateProperty_get" Style="height: 75%; width:100%;" Orientation="Orientation.Horizontal"
+                                            AllowFiltering="true" Multiple="false" ShowHeader="true"
+                                            ButtonGap="10px" ButtonJustifyContent="JustifyContent.Center" ButtonStyle="ButtonStyle.Secondary" ButtonSize="ButtonSize.Small" ButtonShade="Shade.Default" ButtonVariant="Variant.Filled">
+                                <SourceHeader>
+                                    <RadzenText Text="Danh sách trường thuộc tính:" Style="color: black; font-weight: 500; font-size: 16px"></RadzenText>
+                                </SourceHeader>
+                                <TargetHeader>
+                                    <RadzenText Text="Trường thuộc tính đã chọn:" Style="color: black; font-weight: 500; font-size: 16px"></RadzenText>
+                                </TargetHeader>
+                                <Template>
+                                    <RadzenStack Style="height: contain; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                        <RadzenText Text="@($"{context.TemplateName.Value?.ToString()}")" Style="color: black; font-weight: 500; font-size: 16px"></RadzenText>
+                                        @{
+                                            int index = DSachMQLTemplateProperty_get?.ToList().IndexOf(context) ?? -1;
+                                        }
+                                        <RadzenText Text="@((index == -1)? string.Empty : "["+(index + 1).ToString()+"]")" Style="color: darkblue; font-weight: 600; font-size: 16px"></RadzenText>
+                                    </RadzenStack>
+                                </Template>
+                            </RadzenPickList>
+                            <!--Button save danh sach chon truong thong tin da co-->
+                            <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding-top: 10px; margin-top: 10px; border-top: var(--rz-grid-cell-border) " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                                <RadzenButton Disabled="@(DSachMQLTemplateProperty_get == null)" Click="(() => SaveMQLTLProperty_Mode2())"
+                                              Style="width: 120px;" Icon="check" Text="Thêm" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Dark" Variant="Variant.Flat" />
+                                <RadzenButton Style="width: 120px;" Icon="close" Text="Thoát" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" Click="@(() => DialogService.Close(new List<MQLTemplateProperty>()))" />
+                            </RadzenStack>
+                        </RadzenStack>
+                    </RadzenCard>
+                }
+            </RadzenStack>
+
+        </RadzenCard>
+
+    </RadzenStack>
+</RadzenCard>
+
+@code {
+    [Parameter]
+    public MQLTemplate TargetMQLTemplate { get; set; } = new();
+
+    private IEnumerable<MQLTemplateProperty>? DSachMQLTemplateProperty = null;
+    private IEnumerable<MQLTemplateProperty>? DSachMQLTemplateProperty_get = null;
+
+    private const string Kytu = "Ký tự";
+    private const string Soluong = "Số lượng";
+    private const string Ngaythang = "Ngày tháng";
+    private int currentKieudulieu = 1;
+
+    private Dictionary<int, string> DataTypes = new() { { 1, Kytu }, { 2, Soluong }, { 3, Ngaythang } };
+
+    private bool IsCreateNew = false;
+
+    private int tenOK = -1;
+    private string tenNotifyMess = "Giá trị không được để trống";
+    private int giatriOK = -1;
+    private string giatriNotifyMess = "Giá trị không được để trống";
+
+    private MQLTemplateProperty NewMQLTemplateProperty_mode1 = new() { KieuDuLieu = { Value = 1 } };
+    private bool IsAddForAll_mode1 = false;
+    private bool IsAddWithValue_mode1 = false;
+    private bool IsDefault = false;
+    private bool IsAddAll = false;
+
+    protected override Task OnInitializedAsync()
+    {
+        DSachMQLTemplateProperty = LoadDSachMQLTLProperties();
+
+        return base.OnInitializedAsync();
+    }
+
+    // Tai danh sach loai thong tin
+    private List<MQLTemplateProperty> LoadDSachMQLTLProperties()
+    {
+        // Tai danh sach loai thong tin
+        var dsLoaiTTNV = SQLServerServices.GetListMQLTLPropertiess(new Dictionary<string, object?>(), true);
+
+        return dsLoaiTTNV.mQLTemplates;
+    }
+
+    // Button save new loai thong tin
+    private async Task SaveNewMQLTLProperty_Mode1()
+    {
+        bool? comfirm = await DialogService.Confirm($"Thêm mới trường thuộc tính này?", "Xác nhận", new ConfirmOptions() { OkButtonText = "Đồng ý", CancelButtonText = "Hủy", ShowClose = false });
+
+        if (comfirm.Value)
+        {
+            if (IsCreateNew)
+            {
+                // Gan ten truy xuat
+                NewMQLTemplateProperty_mode1.TenTruyXuat.Value = Common.RemoveDiacriticsAndSpaces(NewMQLTemplateProperty_mode1.TemplateName.Value?.ToString() ?? string.Empty);
+                // Isdefault?
+                NewMQLTemplateProperty_mode1.IsDefault.Value = (IsDefault) ? 1 : 0;
+
+                // Them vao database
+                (int newMQLTLprpertyID, string error) = SQLServerServices.InsertMQLTemplateProperty(NewMQLTemplateProperty_mode1);
+
+                if (newMQLTLprpertyID > 0)
+                {
+                    NewMQLTemplateProperty_mode1.MQLTLpropertyID.Value = newMQLTLprpertyID;
+
+                    DialogService.Close(new List<MQLTemplateProperty>() { NewMQLTemplateProperty_mode1 });
+                }
+                else
+                {
+                    await DialogService.Alert($"Lỗi: {error}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                }
+            }
+        }
+    }
+
+    // Button save new loai thong tin
+    private async Task SaveMQLTLProperty_Mode2()
+    {
+        bool? comfirm = await DialogService.Confirm($"Thêm danh sách trường thuộc tính này?", "Xác nhận", new ConfirmOptions() { OkButtonText = "Đồng ý", CancelButtonText = "Hủy", ShowClose = false });
+
+        if (comfirm.Value)
+        {
+            if (!IsCreateNew)
+            {
+                if (DSachMQLTemplateProperty_get != null)
+                {
+                    DialogService.Close(DSachMQLTemplateProperty_get.ToList());
+                }
+                else
+                {
+                    await DialogService.Alert($"Lỗi: Danh sách trường thuộc tính trống!", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                }
+            }
+        }
+    }
+
+    // Kiem tra ten loai thong tin is OK
+    private async Task CheckMQLTemplateProperty_NameIsOK(Propertyy propertyy)
+    {
+        await Task.Run(() =>
+        {
+            string? namevalue = propertyy.Value?.ToString()?.Trim();
+
+            string? displayName = propertyy.DisplayName ?? string.Empty;
+
+            if (!string.IsNullOrEmpty(namevalue))
+            {
+                string tentruyxuat = Common.RemoveDiacriticsAndSpaces(namevalue);
+
+                List<Propertyy> columns = TargetMQLTemplate?.GetPropertiesValues() ?? new();
+
+                bool isMainNameExisting = columns.Any(cl => Common.RemoveDiacriticsAndSpaces(cl.DBName ?? string.Empty) == tentruyxuat);
+
+                bool isExisting = SQLServerServices.IsThongTinMQLTemplateProperty_ValueIsExisting(tentruyxuat, MQLTemplateProperty.DBName.TenTruyXuat);
+
+                if (isExisting || isMainNameExisting)
+                {
+                    tenOK = -1; tenNotifyMess = $"{displayName} đã tồn tại";
+                }
+                else
+                {
+                    tenOK = 1; tenNotifyMess = $"{displayName} hợp lệ";
+                }
+            }
+            else
+            {
+                tenOK = -1; tenNotifyMess = $"{displayName} không được để trống";
+            }
+        });
+    }
+
+    // Kiem tra gia tri cua loai thong tin is OK
+    private async Task CheckMQLTemplateProperty_ValueIsOK(MQLTemplateProperty loaitt, int kieudulieu)
+    {
+        await Task.Run(() =>
+        {
+            bool isValueOK = false;
+
+            if (loaitt.DefaultValue.Value == null)
+            {
+                giatriOK = -1; giatriNotifyMess = "Giá trị không được để trống";
+            }
+
+            if (kieudulieu == 1)
+            {
+                isValueOK = !string.IsNullOrEmpty(loaitt.DefaultValue.Value?.ToString());
+            }
+            else if (kieudulieu == 2)
+            {
+                isValueOK = int.TryParse(loaitt.DefaultValue.Value?.ToString(), out int soluong) && soluong > 0;
+            }
+            else if (kieudulieu == 3)
+            {
+                isValueOK = DateTime.TryParse(loaitt.DefaultValue.Value?.ToString(), out DateTime ngay);
+            }
+
+            if (isValueOK)
+            {
+                giatriOK = 1; giatriNotifyMess = "Giá trị hợp lệ";
+            }
+            else
+            {
+                giatriOK = -1; giatriNotifyMess = "Giá trị không hợp lệ";
+            }
+        });
+    }
+
+
+    // Select mode changed
+    private void OnModeAddMQLTLPropertySelectChanged(bool mode)
+    {
+        IsAddAll = false;
+
+        if (IsCreateNew)
+        {
+            NewMQLTemplateProperty_mode1 = new() { KieuDuLieu = { Value = 1 } };
+            IsAddForAll_mode1 = false;
+            IsAddWithValue_mode1 = false;
+            IsDefault = false;
+            tenOK = -1;
+            tenNotifyMess = "Giá trị không được để trống";
+            giatriOK = -1;
+            giatriNotifyMess = "Giá trị không được để trống";
+        }
+        else
+        {
+            DSachMQLTemplateProperty = null;
+            DSachMQLTemplateProperty_get = null;
+            // Reload danh sach truong thong tin
+            DSachMQLTemplateProperty = LoadDSachMQLTLProperties();
+        }
+
+        IsCreateNew = mode;
+    }
+}

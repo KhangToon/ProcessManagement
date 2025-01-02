@@ -1,0 +1,253 @@
+﻿@using ProcessManagement.Commons
+@using ProcessManagement.Services.SQLServer
+@using Radzen.Blazor
+@using Radzen
+@using ProcessManagement.Models.KHSXs.MQL_Template
+
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject TooltipService TooltipService
+@inject SQLServerServices SQLServerServices
+
+<RadzenCard Style="height: 100%; width: 100%; padding: 5px" Variant="Variant.Flat">
+    <RadzenStack Gap="0" Style="height: 100%; width: 100%; margin: 0; padding: 0; padding-bottom: 10px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start">
+        <RadzenStack Gap="20px" Style="height: contain; width: 100%; padding: 10px; background-color: var(--rz-primary-darker);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+            <RadzenText Text="TẠO MÃ QUẢN LÝ TEMPLATE" Style="color: white; font-weight: 500; font-size: 18px"></RadzenText>
+        </RadzenStack>
+
+        <RadzenRow Gap="10px" Style="height: contain; width: 100%; border-top: var(--rz-grid-cell-border); padding: 0; overflow-y: scroll">
+            <RadzenColumn Size="12" SizeMD="12" Style="height: 100%; width: 100%; padding: 15px; padding-right: 0">
+                <RadzenStack Gap="10px" Style="height: contain; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                    <RadzenText Text="Danh sách thuộc tính của TEMPLATE LOT" Style="color: var(--rz-primary-darker); font-size: 16px; font-weight: 600; height: contain; "></RadzenText>
+
+                    <RadzenButton Style="width: contain; height: contain; font-weight: 600" Icon="add" Text="Thêm thuộc tính khác" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat"
+                                  Click="@(() => OnOpenDialogAddThongTinKhac())" />
+                </RadzenStack>
+
+                <RadzenCard Variant="Variant.Flat" Style="min-height: 300px; width: 100%; padding: 0px; margin-top: 10px; background-color: white">
+                    <RadzenStack Style="height: 100%; width: 100%; padding: 10px;" Gap="0" Orientation="Orientation.Vertical">
+                        <!--Hien thi thong tin khac-->
+                        @foreach (var mqlItem in NewMQLTemplate.MQLTemplateItems)
+                        {
+                            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 5px; border-bottom: var(--rz-grid-cell-border);">
+                                <RadzenStack Style="width: 5%;">
+                                    <RadzenText Text="@($"[{NewMQLTemplate.MQLTemplateItems.IndexOf(mqlItem) + 1}]")" Style="color: var(--rz-primary-darker); font-size: 17px; font-weight: 600; height: contain; width: 100% "></RadzenText>
+                                </RadzenStack>
+                                <RadzenStack Style="width: 20%;">
+                                    <RadzenText Text="@(mqlItem.MQLTemplateProperty.TemplateName.Value?.ToString())" Style="color: var(--rz-primary-darker); font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
+                                </RadzenStack>
+                                <RadzenStack Style="width: 75%; padding-left: 10px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                    <RadzenStack Gap="10px" Style="height: 100%; width: 100%; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                        @{
+                                            int kieudulieu = int.TryParse(mqlItem.MQLTemplateProperty.KieuDuLieu.Value?.ToString(), out int kdl) ? kdl : 0;
+
+                                            if (kieudulieu == 1) // kieu ky tu
+                                            {
+                                                <RadzenStack Style="width: 50%;">
+                                                    <RadzenTextBox class="custom-placeholder" Placeholder="@($" * nhập {mqlItem.MQLTemplateProperty.TemplateName.Value?.ToString()}")" Value="@mqlItem.GiaTri.Value?.ToString()" Style="font-size: 16px; height: contain; border-width: 1px;"
+                                                                   @oninput="@(async (args) => {mqlItem.GiaTri.Value = args.Value; await AnotherMQLTemplateItem_ValueIsOK(mqlItem, kieudulieu);})">
+                                                    </RadzenTextBox>
+                                                </RadzenStack>
+                                            }
+                                            else if (kieudulieu == 2) // Kieu so
+                                            {
+                                                <RadzenStack Style="width: 50%;">
+                                                    <RadzenNumeric class="custom-placeholder" Placeholder="@($" * nhập {mqlItem.MQLTemplateProperty.TemplateName.Value?.ToString()}")" TValue="int"
+                                                                   Value="@(int.Parse(mqlItem.GiaTri.Value?.ToString()?? "0"))"
+                                                                   ValueChanged="@(async (args) =>
+                                                                        {   mqlItem.GiaTri.Value = args;
+                                                                            await AnotherMQLTemplateItem_ValueIsOK(mqlItem, kieudulieu);
+                                                                        })"
+                                                                   Style="font-size: 16px; height: contain;" Min="0" Max="999999" />
+                                                </RadzenStack>
+                                            }
+                                            else if (kieudulieu == 3) // kieu ngay thang
+                                            {
+                                                bool ishaveValueOfday = DateTime.TryParse(mqlItem.GiaTri.Value?.ToString(), out DateTime selectday);
+                                                if (ishaveValueOfday) selectday = selectday.Date.Add(DateTime.Now.TimeOfDay);
+                                                <RadzenStack Style="width: 50%;">
+                                                    <RadzenDatePicker class="custom-datepicker" Placeholder="@($"* nhập {mqlItem.MQLTemplateProperty.TemplateName.Value?.ToString()}")"
+                                                                      TValue="DateTime" Value="selectday" AllowClear="true"
+                                                                      Change="@(async (args) =>
+                                                                                {
+                                                                                    if (args != null)
+                                                                                    {
+                                                                                        DateTime value = args.Value.Date.Add(DateTime.Now.TimeOfDay);
+                                                                                        mqlItem.GiaTri.Value = value;
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        mqlItem.GiaTri.Value = string.Empty;
+                                                                                    }
+                                                                                    await AnotherMQLTemplateItem_ValueIsOK(mqlItem, kieudulieu);
+                                                                                })"
+                                                                      ShowTime="false" HourFormat="12" DateFormat="@Common.FormatNoTime_yyyMMdd" ParseInput="@Common.ParseDate_ddMMyyyy" AllowInput="true"
+                                                                      Style="height: contain; font-size: 16px">
+                                                    </RadzenDatePicker>
+                                                </RadzenStack>
+                                            }
+
+                                            <RadzenStack Style="width: 40%;">
+                                                <RadzenAlert Visible="@(!mqlItem.GiaTri.IsCheckValueOK)" Text="@mqlItem.GiaTri.NotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                                                <RadzenAlert Visible="@(mqlItem.GiaTri.IsCheckValueOK)" Text="@mqlItem.GiaTri.NotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Success" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                                            </RadzenStack>
+                                            <RadzenStack Style="width: 8%; height: 100%" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                <RadzenButton Click="@(() => OnRemoveMQLTemplate(mqlItem))" Icon="delete"
+                                                              ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 18px; width: 100%; height: 100%" />
+                                            </RadzenStack>
+                                        }
+                                    </RadzenStack>
+                                </RadzenStack>
+                            </RadzenStack>
+                        }
+
+                    </RadzenStack>
+                </RadzenCard>
+            </RadzenColumn>
+        </RadzenRow>
+
+        <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding-right: 15px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+            <RadzenButton Style="width: contain; height: 80%;" Icon="check" Text="Xác nhận" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Default" Size="ButtonSize.Small" Variant="Variant.Filled" />
+            <RadzenButton Style="width: contain; height: 80%;" Icon="close" Text="Thoát" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" Click="@(() => DialogService.Close(null))" />
+        </RadzenStack>
+    </RadzenStack>
+</RadzenCard>
+
+<style>
+    .custom-placeholder::placeholder {
+        color: #888888;
+        font-size: 14px;
+        font-style: italic;
+    }
+
+    .custom-datepicker input[type="text"]::placeholder {
+        color: #888888;
+        font-size: 14px;
+        font-style: italic;
+    }
+</style>
+
+@code {
+    [Parameter]
+    public MQLTemplate NewMQLTemplate { get; set; } = new();
+
+    [Parameter]
+    public object? MaLSX { get; set; }
+
+    [Parameter]
+    public object? MaSanPham { get; set; }
+
+    private readonly string Property_MaLenhSX = "malenhsanxuat";
+    private readonly string Property_MaSanPham = "masanpham";
+    private readonly string Property_NgayNhapKho = "ngaynhapkho";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadMQLTemplateItems();
+
+        await base.OnInitializedAsync();
+    }
+
+    private async Task LoadMQLTemplateItems()
+    {
+        List<MQLTemplateProperty> mQLTLproperties = SQLServerServices.GetListMQLTLPropertiess(new Dictionary<string, object?>(), true).mQLTemplates;
+
+        await CreateMQLTemplateItems(mQLTLproperties);
+    }
+
+    private async Task OnOpenDialogAddThongTinKhac()
+    {
+        List<MQLTemplateProperty> mqltemplateProperties = await DialogService.OpenAsync<DialogAddNewMQLTemplateProperty>(null, new Dictionary<string, object>() { { "TargetMQLTemplate", NewMQLTemplate } },
+        new DialogOptions() { ShowTitle = false, Width = "45%", Height = "contain", Resizable = false, Draggable = false, ShowClose = false, Style = "background-color: while; border-radius: 10px; padding: 0px" });
+
+        await CreateMQLTemplateItems(mqltemplateProperties);
+    }
+
+    private async Task CreateMQLTemplateItems(List<MQLTemplateProperty> mqltemplateProperties)
+    {
+        if (mqltemplateProperties != null && mqltemplateProperties.Count > 0)
+        {
+            foreach (var mqltlProperty in mqltemplateProperties)
+            {
+                var isexisting = NewMQLTemplate.MQLTemplateItems.Any(thongtin => thongtin.MQLTemplateProperty.TenTruyXuat.Value?.ToString() == mqltlProperty.TenTruyXuat.Value?.ToString());
+
+                if (!isexisting)
+                {
+                    await Task.Delay(100);
+
+                    string tentruyxuat = mqltlProperty.TenTruyXuat.Value?.ToString() ?? string.Empty;
+
+                    if (tentruyxuat == Property_MaLenhSX)
+                    {
+                        mqltlProperty.DefaultValue.Value = MaLSX;
+                    }
+                    else if (tentruyxuat == Property_MaSanPham)
+                    {
+                        mqltlProperty.DefaultValue.Value = MaSanPham;
+                    }
+                    else if (tentruyxuat == Property_NgayNhapKho)
+                    {
+
+                    }
+
+                    MQLTemplateItem thongTin = new()
+                        {
+                            MQLTLpropertyID = { Value = mqltlProperty.MQLTLpropertyID.Value },
+                            MQLTemplateProperty = mqltlProperty,
+                            GiaTri = { Value = mqltlProperty.DefaultValue.Value }
+                        };
+
+                    await AnotherMQLTemplateItem_ValueIsOK(thongTin, int.Parse(thongTin.MQLTemplateProperty.KieuDuLieu.Value?.ToString() ?? "0"));
+
+                    NewMQLTemplate.MQLTemplateItems.Add(thongTin);
+                }
+            }
+        }
+    }
+
+    private async Task AnotherMQLTemplateItem_ValueIsOK(MQLTemplateItem mqlItem, int kieudulieu)
+    {
+        await Task.Run(() =>
+        {
+            string value = mqlItem.GiaTri.Value?.ToString() ?? string.Empty;
+            string? displayName = mqlItem.MQLTemplateProperty.TemplateName.Value?.ToString() ?? string.Empty;
+
+            if (string.IsNullOrEmpty(value.Trim()))
+            {
+                mqlItem.GiaTri.IsCheckValueOK = false; mqlItem.GiaTri.NotifyMess = $"{displayName} không được để trống";
+            }
+            else
+            {
+                bool isValueOK = false;
+
+                if (kieudulieu == 1) // Kieu ki tu
+                {
+                    isValueOK = !string.IsNullOrEmpty(value.Trim());
+                }
+                else if (kieudulieu == 2) // Kieu so luong
+                {
+                    isValueOK = int.TryParse(value, out int soluong) && soluong > 0;
+                }
+                else if (kieudulieu == 3) // Kieu ngay thang
+                {
+                    isValueOK = DateTime.TryParse(value, out DateTime ngay);
+                }
+                else isValueOK = false;
+
+                if (isValueOK)
+                {
+                    mqlItem.GiaTri.IsCheckValueOK = true; mqlItem.GiaTri.NotifyMess = "Giá trị hợp lệ";
+                }
+                else
+                {
+                    mqlItem.GiaTri.IsCheckValueOK = false; mqlItem.GiaTri.NotifyMess = "Giá trị không hợp lệ";
+                }
+            }
+        });
+    }
+
+    private void OnRemoveMQLTemplate(MQLTemplateItem removeMQLtemplateItem)
+    {
+        NewMQLTemplate.MQLTemplateItems.Remove(removeMQLtemplateItem);
+    }
+}
