@@ -1,6 +1,7 @@
 ﻿@using ProcessManagement.Commons
 @using ProcessManagement.Models.KHO_NVL
 @using ProcessManagement.Models.KHO_NVL.NhapKho
+@using ProcessManagement.Pages.Manager_NVL.Dialogs
 @using ProcessManagement.Services.QRCodes
 @using ProcessManagement.Services.SQLServer
 @using Radzen.Blazor
@@ -184,7 +185,7 @@
                             </RadzenStack>
                         </RadzenStack>
                         <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: contain; padding: 5px; border-radius: 0">
-                            <RadzenStack Style="height: contain; width: contain" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenStack @onclick="@(() => OnOpenQRIDLOT_ImageDialog(PNK.MaPhieuNK.Value?.ToString() ?? string.Empty, "Mã phiếu"))" Style="height: contain; width: contain; cursor: pointer" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                 @{
                                     string qrBase64string = QRCodeServices.GenerateQRCode(PNK.MaPhieuNK.Value?.ToString() ?? string.Empty, 120);
                                     <img style="border-radius: 10px;" src="@($"data:image/png;base64,{qrBase64string}")" alt="QR Code">
@@ -440,6 +441,12 @@
         DatagridSelectedNVLofPNK = selectedNgvatlieu;
 
         SelectedNVLofPNK = DatagridSelectedNVLofPNK.FirstOrDefault() ?? new();
+    }
+
+    private async Task OnOpenQRIDLOT_ImageDialog(object content, string header)
+    {
+        await DialogService.OpenAsync<DialogQR_Image>(null, new Dictionary<string, object>() { { "CONTENT", content }, { "HEADER", header } },
+        new DialogOptions() { CloseDialogOnEsc = true, CloseDialogOnOverlayClick = true, ShowTitle = true, Width = "contain", Height = "contain", Resizable = true, Draggable = true, ShowClose = true, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
     }
 
     private async Task CopyToClipboard(string content)

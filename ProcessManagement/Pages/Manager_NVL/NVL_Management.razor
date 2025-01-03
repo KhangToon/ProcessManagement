@@ -382,7 +382,7 @@
                                                                             <RadzenStack Gap="10" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                                                 <RadzenText Text="@($"{SelectedNgVatLieu?.MaNVL.Value?.ToString()}")" Style="font-weight: 600; font-size: 16px; color: darkblue;"></RadzenText>
                                                                             </RadzenStack>
-                                                                            <RadzenImage Style="max-width: 100px; max-height: 100px; padding: 0px; margin: 0" Path="@($"data:image/png;base64,{qrBase64string}")"></RadzenImage>
+                                                                            <RadzenImage Click="@(() => OnOpenQR_ImageDialog(SelectedNgVatLieu?.MaNVL.Value?.ToString() ?? string.Empty, "Mã NVL"))" Style="max-width: 100px; max-height: 100px; padding: 0px; margin: 0; cursor: pointer" Path="@($"data:image/png;base64,{qrBase64string}")"></RadzenImage>
                                                                         }
                                                                         else
                                                                         {
@@ -1396,6 +1396,14 @@
                                                 ContextMenuService.Close();
                                             });
         }
+    }
+
+
+    // Open QRIDLOT Image dialog
+    private async Task OnOpenQR_ImageDialog(object content, string header)
+    {
+        await DialogService.OpenAsync<DialogQR_Image>(null, new Dictionary<string, object>() { { "CONTENT", content }, { "HEADER", header } },
+        new DialogOptions() { CloseDialogOnEsc = true, CloseDialogOnOverlayClick = true, ShowTitle = true, Width = "contain", Height = "contain", Resizable = true, Draggable = true, ShowClose = true, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
     }
 
     // Tooltip
