@@ -110,7 +110,7 @@
                                                              Style="width: contain; height: contain; min-height: 35px; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Success" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
                                             </RadzenStack>
                                             <RadzenStack Style="width: 8%; height: 100%" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                <RadzenButton Click="@(() => OnRemoveMQLTemplate(mqlItem))" Icon="delete"
+                                                <RadzenButton Disabled="@(mqlItem.MQLTemplateProperty.TenTruyXuat.Value?.ToString() == MQLTemplate.Property_MaLenhSX)" Click="@(() => OnRemoveMQLTemplate(mqlItem))" Icon="delete"
                                                               ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 18px; width: 100%; height: contain; min-height: 35px" />
                                             </RadzenStack>
                                         }
@@ -272,6 +272,25 @@
 
     private async Task CreateMQLTemplateItems(List<MQLTemplateProperty> mqltemplateProperties)
     {
+        // Add MLenhSX is Default
+
+        // if (!(NewMQLTemplate.MQLTemplateItems.Any(mqltl => mqltl.MQLTemplateProperty.TenTruyXuat.Value?.ToString() == MQLTemplate.Property_MaLenhSX)))
+        // {
+        //     var maLSXtemplate = mqltemplateProperties.FirstOrDefault(x => x.TenTruyXuat.Value?.ToString() == MQLTemplate.Property_MaLenhSX);
+
+        //     if (maLSXtemplate != null)
+        //     {
+        //         MQLTemplateItem mqltlItem = new()
+        //             {
+        //                 MQLTLpropertyID = { Value = maLSXtemplate.MQLTLpropertyID.Value },
+        //                 MQLTemplateProperty = maLSXtemplate,
+        //                 GiaTri = { Value = maLSXtemplate.DefaultValue.Value }
+        //             };
+
+        //         NewMQLTemplate.MQLTemplateItems.Add(mqltlItem);
+        //     }
+        // }
+
         if (mqltemplateProperties != null && mqltemplateProperties.Count > 0)
         {
             foreach (var mqltlProperty in mqltemplateProperties)

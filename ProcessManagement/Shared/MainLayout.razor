@@ -8,6 +8,7 @@
 
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject ServerSocketAsync ServerSocketAsync
+@inject TooltipService TooltipService
 
 <RadzenLayout Style="height: contain; width: 100%;">
     <RadzenHeader Style="height: 5%; align-items: center;">
@@ -15,7 +16,7 @@
             <RadzenSidebarToggle Click="@SidebarToggleClick" Style="color: rgba(28, 49, 90)" />
             <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center" Style="width: 100%">
                 <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween" Style="width: 100%; padding-left: 20px; padding-right: 20px">
-                    <RadzenLabel Text="Process Management" Style="color: rgba(28, 49, 90); font-size: 18px " />
+                    <RadzenLabel MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, $"{ServerSocketAsync._server?.LocalEndPoint}", 100, 1000))" Text="Process Management" Style="color: rgba(28, 49, 90); font-size: 18px " />
                     <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="width: contain; height: 100%">
                         <LoginDisplay />
                     </RadzenStack>
@@ -79,5 +80,13 @@
         // --> auto direction to "/" page
 
         await base.OnInitializedAsync();
+    }
+
+    // Tooltip
+    void ShowToolTip(ElementReference elementReference, TooltipPosition position, string content, int delay, int duration = 500)
+    {
+        TooltipOptions options = new TooltipOptions() { Position = position, Delay = delay, Duration = duration, Style = "background-color: var(--rz-primary-light)" };
+
+        TooltipService.Open(elementReference, content, options);
     }
 }

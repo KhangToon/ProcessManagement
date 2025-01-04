@@ -190,7 +190,7 @@
                                                     @if (DSNguyenVatLieus != null && DSNguyenVatLieus.Count > 0)
                                                     {
                                                         List<Propertyy> columns = DSNguyenVatLieus.FirstOrDefault()?.GetPropertiesValues() ?? new();
-                                                        List<ThongTinNVL>? extracolumns = DSNguyenVatLieus.FirstOrDefault()?.DSThongTin.Where(tt => tt.LoaiThongTin.IsDisplayDatagrid.Value?.ToString() == "1")?.ToList();
+                                                        List<ThongTinNVL>? extracolumns = DSNguyenVatLieus.FirstOrDefault()?.DSThongTin.Where(tt => tt.LoaiThongTin.IsDisplayDatagrid.Value?.ToString() == "1").OrderBy(tt => int.TryParse(tt.LoaiThongTin.ThuTuHienThi.Value?.ToString(), out int stt) ? stt : 0).ToList();
 
                                                         <RadzenDataGridColumn Width="40px" Frozen="true" FrozenPosition="FrozenColumnPosition.Left" Filterable="false"
                                                                               TItem="NguyenVatLieu" Title="#"

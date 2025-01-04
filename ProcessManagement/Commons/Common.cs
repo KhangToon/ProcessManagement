@@ -177,6 +177,7 @@ namespace ProcessManagement.Commons
         public const string IsDisplayDatagrid = "IsDisplayDataGrid";
         public const string IsAllowEmptyValue = "IsAllowEmptyValue";
         public const string TenTruyXuat = "Tên truy xuất";
+        public const string ThuTuHienThi = "Thứ tự";
 
         // Table KHO_ThongTinNVL
         public const string Table_ThongTinNVL = "KHO_ThongTinNVL";
