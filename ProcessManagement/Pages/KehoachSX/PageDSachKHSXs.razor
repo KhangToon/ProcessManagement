@@ -41,9 +41,9 @@
                 </RadzenColumn>
                 <RadzenColumn SizeMD="6" Size="12">
                     <RadzenStack Gap="15px" Style="height: 100%; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                        <RadzenTextBox Placeholder="Nhập mã kế hoạch sản xuất để tìm kiếm" Style="border-radius: 20px; padding-left: 20px; border-width: 2px; border-color: var(--rz-primary-light); width: 50% "></RadzenTextBox>
+                        <RadzenTextBox @oninput="@((args) => SearchingKHSX(args?.Value))" Placeholder="Nhập mã kế hoạch sản xuất để tìm kiếm" Style="border-radius: 20px; padding-left: 20px; border-width: 2px; border-color: var(--rz-primary-light); width: 50% "></RadzenTextBox>
                         <RadzenButton Icon="search" ButtonStyle="ButtonStyle.Primary" Style="border-radius: 20px;" />
-                        <RadzenButton Style="border-radius: 20px;" Icon="autorenew" ButtonStyle="ButtonStyle.Primary" />
+                        <RadzenButton Style="border-radius: 20px;" BusyText="Loading" IsBusy="@reloadpage" Click="@(async () => await ButtonReloadPress())" Icon="autorenew" ButtonStyle="ButtonStyle.Primary" />
                     </RadzenStack>
                 </RadzenColumn>
                 <RadzenColumn SizeMD="3" Size="12">
@@ -153,7 +153,7 @@
                                             <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style="height: 50%; width: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                 <RadzenText Text="Tỉ lệ lỗi cho phép" Style="font-size: 16px; font-weight: 500; color: darkgray "></RadzenText>
                                                 @{
-                                                    int slloichophep = (int.TryParse(khsx.DinhMuc.Value?.ToString(), out int dinhmuc) ? dinhmuc : 0) - (int.TryParse(khsx.SLNVLSanXuat.Value?.ToString(), out int slsx) ? slsx : 0);
+                                                    int slloichophep = (int.TryParse(khsx.DinhMuc.Value?.ToString(), out int dinhmuc) ? dinhmuc : 0) - (int.TryParse(khsx.SLSanPhamSX.Value?.ToString(), out int slsx) ? slsx : 0);
                                                 }
                                                 <RadzenText Text="@($"{khsx?.TileLoi.Value?.ToString()?? "0"} (%) ({slloichophep} pcs)")" Style="font-size: 16px; font-weight: bold; color: darkred "></RadzenText>
                                             </RadzenStack>
@@ -244,6 +244,8 @@
     private static object? selectKHSXID;
     private bool reloadpage = false;
 
+    private List<KHSX> DSKHSXs_base = new();
+
     protected override async Task OnInitializedAsync()
     {
         await OnGetListKHSXs();
@@ -289,6 +291,8 @@
                 SelectedKHSX = DSKHSXs.FirstOrDefault(x => object.Equals(x.KHSXID.Value, selectKHSXID)) ?? new();
             }
             else SelectedKHSX = DSKHSXs.FirstOrDefault() ?? new();
+
+            DSKHSXs_base = DSKHSXs;
         }
     }
 
@@ -338,6 +342,69 @@
         await Task.Delay(10);
         reloadpage = false;
         StateHasChanged();
+    }
+
+    // Searching
+    private async Task SearchingKHSX(object? args)
+    {
+        await Task.Run(async () =>
+        {
+            if (reloadpage == false)
+            {
+                reloadpage = true;
+
+                string keysearch = args?.ToString()?.Trim() ?? string.Empty;
+
+                if (!string.IsNullOrEmpty(keysearch))
+                {
+                    // Search by ma KHSX
+                    var results = DSKHSXs_base.FindAll(nv => nv.MaLSX.Value?.ToString()?.IndexOf(keysearch, StringComparison.OrdinalIgnoreCase) >= 0);
+
+                    if (!results.Any())
+                    {
+                        // Search by ma QLLot
+                        results = DSKHSXs_base.FindAll(khsx => khsx.DSLOT_KHSXs.Any(lot => lot.MaQuanLyLot.Value?.ToString()?.IndexOf(keysearch, StringComparison.OrdinalIgnoreCase) >= 0));
+
+                        if (!results.Any())
+                        {
+                            // Search by ma ThungTP
+                        }
+                    }
+
+                    if (results.Any())
+                    {
+                        DSKHSXs = results;
+                    }
+                    else DSKHSXs = new();
+                }
+                else
+                {
+                    await OnGetListKHSXs();
+                }
+
+                await Task.Delay(100);
+
+                reloadpage = false;
+            }
+        });
+    }
+
+    // Button Reload
+    private async Task ButtonReloadPress()
+    {
+        await Task.Run(async () =>
+        {
+            if (reloadpage == false)
+            {
+                reloadpage = true;
+
+                await OnGetListKHSXs();
+
+                await Task.Delay(200);
+
+                reloadpage = false;
+            }
+        });
     }
 
     // Them ke hoach san xuat

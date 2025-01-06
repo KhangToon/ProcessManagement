@@ -77,7 +77,7 @@
                 <RadzenText Text="Số lượng cần sản xuất" Style="color: black; font-weight: 600; font-size: 16px"></RadzenText>
                 <RadzenNumeric TValue="int" TextAlign=TextAlign.Center
                                Min="0" Max="999999"
-                               Value="@(generLot.SLSanPhamSX)"
+                               Value="@(generLot.SLSanPhamPO)"
                                ValueChanged="@((args) => { OnNumOfSanPhamChanged(args); })"
                                Style="--rz-input-font-size: 18px; font-weight: 600; height: 35px; border-width: 1px; width: contain" />
             </RadzenStack>
@@ -589,7 +589,7 @@
     private void OnNumOfSanPhamChanged(int args)
     {
         // Update SL Sanpham can SX
-        generLot.SLSanPhamSX = args;
+        generLot.SLSanPhamPO = args;
 
         foreach (var nvlofsp in selectSanPham.DanhSachNVLs)
         {
@@ -598,7 +598,7 @@
             if (iscanconvert)
             {
                 // Update so luong can lay cua moi NVL
-                nvlofsp.allsoLuongcanLay = generLot.SLSanPhamSX * slforsp;
+                nvlofsp.allsoLuongcanLay = generLot.SLSanPhamPO * slforsp;
                 // Tinh dinh muc/ti le loi
                 GetDinhMucSX(nvlofsp);
             }
@@ -645,7 +645,7 @@
             }
         }
 
-        if (generLot.SLSanPhamSX == 0)
+        if (generLot.SLSanPhamPO == 0)
         {
             isallow = false;
         }

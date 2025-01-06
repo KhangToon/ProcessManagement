@@ -14,7 +14,7 @@ namespace ProcessManagement.Models
         private static readonly string NumberDigit = "D3";
 
         public string MaLSX { get; set; } = string.Empty;
-        public int SLSanPhamSX { get; set; } = 0;
+        public int SLSanPhamPO { get; set; } = 0;
         public int SLNgVatLieuSX { get; set; } = 0;
         public double TiLeLoi { get; set; } = 0;
         public int SLLoi { get; set; } = 0;
@@ -107,7 +107,7 @@ namespace ProcessManagement.Models
 
         public bool CheckSoluongLoiChophep()
         {
-            int tongSLloi = DinhMuc - SLNgVatLieuSX;
+            int tongSLloi = DinhMuc - SLSanPhamPO;
 
             int slloinew = 0;
 
@@ -169,7 +169,7 @@ namespace ProcessManagement.Models
         {
             NewKHSX.MaLSX.Value = MaLSX;
             NewKHSX.LOAINVLID.Value = NewKHSX.LoaiNVL?.LOAINVLID.Value;
-            NewKHSX.SLSanPhamSX.Value = SLSanPhamSX;
+            NewKHSX.SLSanPhamSX.Value = SLSanPhamPO;
             NewKHSX.SLNVLSanXuat.Value = SLNgVatLieuSX;
             NewKHSX.DinhMuc.Value = DinhMuc;
             NewKHSX.TileLoi.Value = TiLeLoi;
@@ -184,7 +184,7 @@ namespace ProcessManagement.Models
 
         public void ResetDefault()
         {
-            SLSanPhamSX = 0;
+            SLSanPhamPO = 0;
             SLNgVatLieuSX = 0;
             TiLeLoi = 0;
             SLLoi = 0;
@@ -415,7 +415,7 @@ namespace ProcessManagement.Models
 
                 if (results.temLotNVLs != null) { temLotNVLs.AddRange(results.temLotNVLs); }
 
-                DetailLotKHSX lotKHSXdetail = new() { MaNVL = SQLServerServices.GetTenNguyenVatLieu(vitri.NVLID.Value).MaNVL.Value?.ToString() ?? string.Empty, NgayNhapKho = vitri.NgayNhapKho.Value, SLLotChan = results.sllotchan, SLperLotChan = slperlotchan, SLLotLe = results.sllotle, SLperLotLe = results.slperlotle };
+                DetailLotKHSX lotKHSXdetail = new() { MaNVL = vitri.NgLieuInfor.MaNVL.Value?.ToString() ?? string.Empty, NgayNhapKho = vitri.NgayNhapKho.Value, SLLotChan = results.sllotchan, SLperLotChan = slperlotchan, SLLotLe = results.sllotle, SLperLotLe = results.slperlotle };
 
                 detailLotKHSXs.Add(lotKHSXdetail);
             }

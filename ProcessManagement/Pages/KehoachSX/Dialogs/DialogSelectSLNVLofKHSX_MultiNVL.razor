@@ -77,8 +77,8 @@
                 <RadzenText Text="Số lượng PO" Style="color: black; font-weight: 600; font-size: 16px"></RadzenText>
                 <RadzenNumeric TValue="int" TextAlign=TextAlign.Center
                                Min="0" Max="999999"
-                               Value="@(generLot.SLSanPhamSX)"
-                               ValueChanged="@((args) => { generLot.SLSanPhamSX = args; CalculateSLLoichoPhep();})"
+                               Value="@(generLot.SLSanPhamPO)"
+                               ValueChanged="@((args) => { generLot.SLSanPhamPO = args; CalculateSLLoichoPhep();})"
                                Style="--rz-input-font-size: 18px; font-weight: 600; height: 35px; border-width: 1px; width: contain" />
             </RadzenStack>
 
@@ -97,7 +97,7 @@
                 <RadzenText Text="Số lượng sản xuất" Style="color: black; font-weight: 600; font-size: 16px"></RadzenText>
                 <RadzenNumeric Disabled="true" TValue="int" TextAlign=TextAlign.Center
                                Min="0" Max="999999"
-                               Value="@(generLot.SLSanPhamSX + generLot.SLLoi)"
+                               Value="@(generLot.SLSanPhamPO + generLot.SLLoi)"
                                Style="--rz-input-font-size: 18px; font-weight: 600; height: 35px; border-width: 1px; width: contain" />
             </RadzenStack>
         </RadzenStack>
@@ -576,7 +576,7 @@
     private void OnNumOfSanPhamChanged(int args)
     {
         // Update SL Sanpham can SX
-        generLot.SLSanPhamSX = args;
+        generLot.SLSanPhamPO = args;
 
         foreach (var nvlofsp in selectSanPham.DanhSachNVLs)
         {
@@ -605,7 +605,7 @@
 
     public void CalculateSLLoichoPhep()
     {
-        int slloi = (int)Math.Round(generLot.SLSanPhamSX * (generLot.TiLeLoi / 100), MidpointRounding.AwayFromZero); // lam tron len neu > 0.
+        int slloi = (int)Math.Round(generLot.SLSanPhamPO * (generLot.TiLeLoi / 100), MidpointRounding.AwayFromZero); // lam tron len neu > 0.
 
         generLot.SLLoi = slloi;
 
@@ -620,7 +620,7 @@
     {
         int quycach = int.TryParse(targetnvlofsp.QuyCach.Value?.ToString(), out int qc) ? qc : 0;
 
-        int slmax = (generLot.SLSanPhamSX + generLot.SLLoi) * quycach;
+        int slmax = (generLot.SLSanPhamPO + generLot.SLLoi) * quycach;
 
         return slmax;
     }
@@ -645,7 +645,7 @@
             }
         }
 
-        if (generLot.SLSanPhamSX == 0)
+        if (generLot.SLSanPhamPO == 0)
         {
             isallow = false;
         }
@@ -671,8 +671,14 @@
                         SoLuong = { Value = nvl.allsoLuongcanLay },
                         TiLeLoi = { Value = nvl.tileloi },
                         DinhMuc = { Value = nvl.allsoLuongcanLay },
-                        dsVitriofNVLs = nvl.TargetNgLieu.DSViTri.Where(vt => vt.SLTake > 0).ToList() ?? new()
+                        dsVitriofNVLs = nvl.TargetNgLieu.DSViTri.Where(vt => vt.SLTake > 0).ToList() ?? new(),
+
                     };
+
+                foreach (var vtofnvl in nVLofKHSX.dsVitriofNVLs)
+                {
+                    vtofnvl.NgLieuInfor = nvl.TargetNgLieu;
+                }
 
                 generLot.NewKHSX.DSachNVLofKHSXs?.Add(nVLofKHSX);
             }

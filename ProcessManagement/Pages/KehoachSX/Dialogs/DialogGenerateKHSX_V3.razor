@@ -107,13 +107,13 @@
                                     </RadzenStack>
                                 </RadzenStack>
 
-                                <!--Số lượng SX-->
+                                <!--Số lượng PO-->
                                 <RadzenStack Gap="0" Style="width: 100%; height: contain; padding-top: 10px; border-top: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                     <RadzenStack Style="width: 50%; height: contain; padding-right: 10px" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
                                         <RadzenText Text="Số lượng PO" Style="font-size: 16px; font-weight: 600; color: black"></RadzenText>
                                     </RadzenStack>
                                     <RadzenStack Style="width: 50%; height: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                        <RadzenText Text="@($"{generLot.SLNgVatLieuSX.ToString()} (PCS)")" Style="font-size: 18px; font-weight: 600; width: 100%; height: contain; color: darkblue"></RadzenText>
+                                        <RadzenText Text="@($"{generLot.SLSanPhamPO.ToString()} (PCS)")" Style="font-size: 18px; font-weight: 600; width: 100%; height: contain; color: darkblue"></RadzenText>
                                     </RadzenStack>
                                 </RadzenStack>
 
@@ -125,7 +125,7 @@
                                     <RadzenStack Gap="15px" Style="width: 50%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                         <RadzenText Text="@($"{generLot.TiLeLoi.ToString()} (%)")" Style="font-size: 18px; font-weight: 600; width: contain; height: contain; color: darkblue"></RadzenText>
 
-                                        <RadzenText Visible="(generLot.TiLeLoi != 0)" Text="@($"~ {generLot.DinhMuc - generLot.SLNgVatLieuSX} (PCS)")" Style="font-size: 18px; font-weight: 600; color: black"></RadzenText>
+                                        <RadzenText Visible="(generLot.TiLeLoi != 0)" Text="@($"~ {generLot.DinhMuc - generLot.SLSanPhamPO} (PCS)")" Style="font-size: 18px; font-weight: 600; color: black"></RadzenText>
                                     </RadzenStack>
                                 </RadzenStack>
 
@@ -340,7 +340,7 @@
                                                             <RadzenStack Gap="20px" Visible="@(generLot.DinhMuc != 0)" Style="height: contain; width: 100%; background-color: var(--rz-success-lighter); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                                                 <RadzenText Text="Tỉ lệ lỗi cho phép: " Style="color: green; font-weight: 600; color: black; font-size: 16px"></RadzenText>
                                                                 <RadzenText Text="@($"{generLot.TiLeLoi} %")" Style="color: darkred; font-weight: 600; color: black; font-size: 16px"></RadzenText>
-                                                                <RadzenText Text="@($"{generLot.DinhMuc - generLot.SLNgVatLieuSX} (PCS)")" Style="color: darkred; font-weight: 600; color: black; font-size: 16px"></RadzenText>
+                                                                <RadzenText Text="@($"{generLot.DinhMuc - generLot.SLSanPhamPO} (PCS)")" Style="color: darkred; font-weight: 600; color: black; font-size: 16px"></RadzenText>
                                                             </RadzenStack>
                                                             <RadzenRow Gap="10px" Style="width: contain; height: 100%;">
                                                                 <RadzenColumn Size="12" SizeMD="9" Style="width: 100%; height: 100%; border-right: var(--rz-grid-cell-border)">
@@ -562,7 +562,7 @@
     // Chia deu so luong loi cho cac congdoan/nguyencong
     private void ChiadeuSLloiNguyencong()
     {
-        generLot.SLLoi = generLot.DinhMuc - generLot.SLNgVatLieuSX;
+        generLot.SLLoi = generLot.DinhMuc - generLot.SLSanPhamPO;
 
         if (generLot.SLLoi >= 0 && generLot.NewKHSX.DSachCongDoans.Count() > 0)
         {
