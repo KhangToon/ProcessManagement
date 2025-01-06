@@ -7,7 +7,7 @@ namespace ProcessManagement.Models
 {
     public class TemLotNVL
     {
-        public Propertyy NVLID = new() { DBName = Common.NVLID, Type = typeof(int), DispDatagrid = false, AlowDatabase = false };
+        public Propertyy NVLID  = new() { DBName = Common.NVLID, Type = typeof(int), DispDatagrid = false, AlowDatabase = false };
 
         public Propertyy LoaiNVL = new() { DBName = Common.LoaiNL, Type = typeof(string), AlowDatabase = true };
 

@@ -453,6 +453,8 @@ namespace ProcessManagement.Models
                 TemLotNVL nVL = new();
                 nVL.LoaiNVL.Value = NewKHSX.LoaiNVL?.TenLoaiNVL.Value;
                 nVL.MaSP.Value = NewKHSX.TargetSanPham?.SP_MaSP.Value;
+                nVL.NVLID.Value = viTriofNVL.NVLID.Value;
+
                 if (mQLTemplate == null)
                 {
                     nVL.MaQuanLy.Value = MaLSX + "-" + NewKHSX.TargetSanPham?.SP_MaSP.Value + "-" + startIndex.ToString(NumberDigit);
@@ -475,6 +477,8 @@ namespace ProcessManagement.Models
                     TemLotNVL nVL = new();
                     nVL.LoaiNVL.Value = NewKHSX.LoaiNVL?.TenLoaiNVL.Value;
                     nVL.MaSP.Value = NewKHSX.TargetSanPham?.SP_MaSP.Value;
+                    nVL.NVLID.Value = viTriofNVL.NVLID.Value;
+
                     if (mQLTemplate == null)
                     {
                         nVL.MaQuanLy.Value = MaLSX + "-" + NewKHSX.TargetSanPham?.SP_MaSP.Value + "-" + startIndex.ToString(NumberDigit);
@@ -501,6 +505,8 @@ namespace ProcessManagement.Models
                     TemLotNVL lotnvlle = new();
                     lotnvlle.LoaiNVL.Value = NewKHSX.LoaiNVL?.TenLoaiNVL.Value;
                     lotnvlle.MaSP.Value = NewKHSX.TargetSanPham?.SP_MaSP.Value;
+                    lotnvlle.NVLID.Value = viTriofNVL.NVLID.Value;
+
                     if (mQLTemplate == null)
                     {
                         lotnvlle.MaQuanLy.Value = MaLSX + "-" + NewKHSX.TargetSanPham?.SP_MaSP.Value + "-" + startIndex.ToString(NumberDigit);
