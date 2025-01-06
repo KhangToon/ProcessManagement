@@ -270,9 +270,15 @@
                                                                               ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 17px; font-size: 16px;" />
                                                                 <RadzenText Visible="@(!thungtpham.ThungTPhams.Any())" Text="Chưa có thùng thành phẩm" Style="font-size: 16px; font-weight: 500; height: contain; color: red"></RadzenText>
                                                             </RadzenStack>
+
                                                             <RadzenButton Visible="@(!thungtpham.ThungTPhams.Any() && IsViTriofTPhamSelected(vitriofTP))" Click="@(async () => await RemoveViTriofTP(vitriofTP, SelectedViTri))" Icon="delete" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Darker" Variant="Variant.Flat"
                                                                           MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Xóa LOT vị trí", 100, 1000))"
                                                                           Style="--rz-icon-size: 18px; font-weight: 600; height: contain; min-height: 20px; width: contain;" />
+
+                                                            <RadzenButton Text="@($"{thungtpham.ThungTPhams.FirstOrDefault()?.MaQuanLyThung.Value?.ToString()}")" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Variant="Variant.Flat"
+                                                                          MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Mã quản lý thùng", 100, 1000))"
+                                                                          Style="border-radius: 5px; --rz-icon-size: 18px; font-weight: 600; height: contain; min-height: 20px; width: contain; min-width: 80px" />
+
                                                             <RadzenButton Visible="@(thungtpham.ThungTPhams.Any() && IsViTriofTPhamSelected(vitriofTP))" Click="@(async () => await OnDeleteThungTPhamFromLOTViTriofTPham(vitriofTP.ThungTPhamExtend, SelectedViTri))" Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Shade="Shade.Darker" Variant="Variant.Flat"
                                                                           MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Xóa thùng khỏi vị trí", 100, 1000))"
                                                                           Text="Xóa thùng thành phẩm" Style="--rz-icon-size: 18px; font-weight: 600; margin-bottom: 5px; height: contain; min-height: 20px; width: contain;" />
@@ -309,8 +315,13 @@
                                                                         </RadzenStack>
 
                                                                         <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" Style="height: contain; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                                            @{
+                                                                                DateTime? ngaynk = DateTime.TryParse(thungtpham.ThungTPhams.FirstOrDefault()?.NgayNhapKho.Value?.ToString(), out DateTime nnk) ? nnk : null;
+
+                                                                                string _ngaynk = ngaynk?.ToString("dd/MM/yyyy") ?? "---";
+                                                                            }
                                                                             <RadzenText Text="@($"Ngày nhập kho: ")" Style="font-weight: 500; font-size: 16px;"></RadzenText>
-                                                                            <RadzenText Text="@($"{Common.ParseSqlDateTime(thungtpham.ThungTPhams.FirstOrDefault()?.NgayNhapKho.Value?.ToString())?.ToString(Common.FormatNoTime_yyyddMM)}")" Style="font-weight: 600; font-size: 16px;"></RadzenText>
+                                                                            <RadzenText Text="@($"{_ngaynk}")" Style="font-weight: 600; font-size: 16px;"></RadzenText>
                                                                         </RadzenStack>
                                                                     </RadzenStack>
                                                                 </RadzenColumn>

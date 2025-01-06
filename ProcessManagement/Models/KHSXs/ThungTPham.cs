@@ -9,6 +9,7 @@ namespace ProcessManagement.Models.KHSXs
         public Propertyy KHSXID { get; set; } = new() { DBName = DBName.KHSXID, DisplayName = DispName.KHSXID, Type = typeof(int), AlowDatabase = true };
         public Propertyy VTofTPID { get; set; } = new() { DBName = DBName.VTofTPID, DisplayName = DispName.VTofTPID, Type = typeof(int), AlowDatabase = true };
         public Propertyy MaQuanLyLot { get; set; } = new() { DBName = DBName.MaQuanLyLot, DisplayName = DispName.MaQuanLyLot, Type = typeof(string), AlowDatabase = true };
+        public Propertyy MaQuanLyThung { get; set; } = new() { DBName = DBName.MaQuanLyThung, DisplayName = DispName.MaQuanLyThung, Type = typeof(string), AlowDatabase = true };
         public Propertyy IDThung { get; set; } = new() { DBName = DBName.IDThung, DisplayName = DispName.IDThung, Type = typeof(string), AlowDatabase = true };
         public Propertyy SoLuong { get; set; } = new() { DBName = DBName.SoLuong, DisplayName = DispName.SoLuong, Type = typeof(int), AlowDatabase = true };
         public Propertyy SLRequired { get; set; } = new() { DBName = DBName.SLRequired, DisplayName = DispName.SLRequired, Type = typeof(int), AlowDatabase = true };
@@ -25,6 +26,7 @@ namespace ProcessManagement.Models.KHSXs
             public const string SPID = "SPID";
             public const string VTofTPID = "VTofTPID";
             public const string MaQuanLyLot = "maquanlylot";
+            public const string MaQuanLyThung = "maquanlythungtp";
             public const string IDThung = "IDThung";
             public const string SoLuong = "soluong";
             public const string SLRequired = "slrequired";
@@ -39,6 +41,7 @@ namespace ProcessManagement.Models.KHSXs
             public const string SPID = "SPID";
             public const string VTofTPID = "VTofTPID";
             public const string MaQuanLyLot = "Mã quản lý LOT";
+            public const string MaQuanLyThung = "Mã quản lý thùng";
             public const string IDThung = "IDThung";
             public const string SoLuong = "Số lượng";
             public const string SLRequired = "Số lượng đóng thùng";
