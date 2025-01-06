@@ -7,5 +7,6 @@
         public int SLLotChan { get; set; }
         public int SLperLotLe { get; set; }
         public int SLperLotChan { get; set; }
+        public string MaNVL { get; set; } = string.Empty;
     }
 }

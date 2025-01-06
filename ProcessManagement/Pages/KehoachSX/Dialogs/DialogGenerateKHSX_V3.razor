@@ -446,28 +446,56 @@
 
             //int result = -1; string error = "Không thể tạo danh sách lot nguyên vật liệu!";
 
-            List<ViTriofNVL> dsvitris = generLot.NewKHSX.DSachNVLofKHSXs.FirstOrDefault()?.dsVitriofNVLs ?? new(); // lay NVL dau tien
+            List<TemLotNVL>? resulttemLotNVLs = new();
 
-            List<TemLotNVL>? temLotNVLs = null;
+            List<DetailLotKHSX>? resultdetaillotKHSXs = new();
 
-            await Task.Run(() => { temLotNVLs = generLot.GenerateLotNVL_perVitriofNVL(dsvitris, generLot.DinhMuc, generLot.SLperLotChan, mQLTemplate); });
+            int startIndex = 0;
 
-            if (temLotNVLs == null)
+            foreach (var nvlofkhsx in generLot.NewKHSX.DSachNVLofKHSXs)
+            {
+                List<ViTriofNVL> dsvitris = nvlofkhsx?.dsVitriofNVLs ?? new();
+
+                await Task.Run(() =>
+                {
+                    var results = generLot.GenerateLotNVL_perVitriofNVL(dsvitris, generLot.DinhMuc, generLot.SLperLotChan, mQLTemplate, startIndex);
+
+                    var temLotNVLs = results.temLotNVLs;
+
+                    var detaillotKHSXs = results.detailLotKHSXs;
+
+                    startIndex = results.lastindex;
+
+                    if (temLotNVLs != null && temLotNVLs.Any())
+                    {
+                        resulttemLotNVLs?.AddRange(temLotNVLs);
+                    }
+
+                    if (detaillotKHSXs != null && detaillotKHSXs.Any())
+                    {
+                        resultdetaillotKHSXs?.AddRange(detaillotKHSXs);
+                    }
+                });
+            }
+
+            if (resulttemLotNVLs == null)
             {
                 //await DialogService.Alert($"{error}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
                 await DialogService.Alert($"Không thể tạo LOT", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
             }
             else
             {
-                generLot.ListTempLOT_NVLs = temLotNVLs;
+                generLot.ListTempLOT_NVLs = resulttemLotNVLs;
 
-                int sumslpertemlot = temLotNVLs.Sum(tem => int.TryParse(tem.SoLuong.Value?.ToString(), out int sl) ? sl : 0);
+                int sumslpertemlot = resulttemLotNVLs.Sum(tem => int.TryParse(tem.SoLuong.Value?.ToString(), out int sl) ? sl : 0);
 
                 if (sumslpertemlot == generLot.DinhMuc)
                 {
                     generLot.isGenerateListLotOK = true;
                 }
                 else generLot.isGenerateListLotOK = false;
+
+                generLot.DetailLotKHSXs = resultdetaillotKHSXs;
             }
 
             waitgetlistlot = false;
@@ -519,7 +547,7 @@
     // Chon nguyen vat lieu san xuat
     private async Task OpenDialogSelectNVLofKHSX()
     {
-        List<NVLofKHSX> nVLofKHSXs = await DialogService.OpenAsync<DialogSelectSoluongNVLofKHSX_V3>(null, new Dictionary<string, object>() { { "generLot", generLot } },
+        List<NVLofKHSX> nVLofKHSXs = await DialogService.OpenAsync<DialogSelectSLNVLofKHSX_MultiNVL>(null, new Dictionary<string, object>() { { "generLot", generLot } },
         new DialogOptions() { Width = "80%", Height = "contain", Resizable = false, Draggable = true, ShowTitle = false, ShowClose = false, Style = "background-color: while; border-radius: 0px; padding: 0px" });
 
 

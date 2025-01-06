@@ -389,21 +389,19 @@ namespace ProcessManagement.Models
 
         public List<DetailLotKHSX> DetailLotKHSXs { get; set; } = new();
 
-        public List<TemLotNVL>? GenerateLotNVL_perVitriofNVL(List<ViTriofNVL> dsvitris, int soluong, int slperlotchan, MQLTemplate? mQLTemplate)
+        public (List<TemLotNVL>? temLotNVLs, int lastindex, List<DetailLotKHSX> detailLotKHSXs) GenerateLotNVL_perVitriofNVL(List<ViTriofNVL> dsvitris, int soluong, int slperlotchan, MQLTemplate? mQLTemplate, int startIndex = 0)
         {
+            List<DetailLotKHSX> detailLotKHSXs = new();
+
             if (slperlotchan == 0 || soluong == 0 || dsvitris.Count == 0)
             {
-                return null;
+                return (null, 0, detailLotKHSXs);
             }
 
             int sllotchan = 0;
             int sllotle = 0;
 
             List<TemLotNVL> temLotNVLs = new();
-
-            int startIndex = 0;
-
-            DetailLotKHSXs = new();
 
             foreach (var vitri in dsvitris)
             {
@@ -417,9 +415,9 @@ namespace ProcessManagement.Models
 
                 if (results.temLotNVLs != null) { temLotNVLs.AddRange(results.temLotNVLs); }
 
-                DetailLotKHSX lotKHSXdetail = new() { NgayNhapKho = vitri.NgayNhapKho.Value, SLLotChan = results.sllotchan, SLperLotChan = slperlotchan, SLLotLe = results.sllotle, SLperLotLe = results.slperlotle };
+                DetailLotKHSX lotKHSXdetail = new() { MaNVL = SQLServerServices.GetTenNguyenVatLieu(vitri.NVLID.Value).MaNVL.Value?.ToString() ?? string.Empty, NgayNhapKho = vitri.NgayNhapKho.Value, SLLotChan = results.sllotchan, SLperLotChan = slperlotchan, SLLotLe = results.sllotle, SLperLotLe = results.slperlotle };
 
-                DetailLotKHSXs.Add(lotKHSXdetail);
+                detailLotKHSXs.Add(lotKHSXdetail);
             }
 
             SLLotChan = sllotchan;
@@ -428,7 +426,7 @@ namespace ProcessManagement.Models
 
             SLLot = SLLotChan + SLLotLe;
 
-            return temLotNVLs;
+            return (temLotNVLs, startIndex, detailLotKHSXs);
         }
 
         private (int lastIndex, int sllotchan, int sllotle, int slperlotle, List<TemLotNVL>? temLotNVLs) GenerateLotNVL_withNgayNhapKho(ViTriofNVL viTriofNVL, int slperlotchan, int startIndex, MQLTemplate? mQLTemplate)
