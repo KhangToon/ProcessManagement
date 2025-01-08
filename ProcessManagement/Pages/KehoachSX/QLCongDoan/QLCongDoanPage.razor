@@ -521,6 +521,9 @@
         else congdoanColumn.isExpandColumn = true;
     }
 
+    [Parameter]
+    public KHSX_LOT? TargetMQLLot { get; set; }
+
     private async Task LoadDSachLOTofKHSX(object? khsxid, int delay)
     {
         await Task.Run(async () =>
@@ -545,8 +548,13 @@
 
                 DSLOTKHSXs = dsLots;
 
+                if (TargetMQLLot != null) // Inmode search with mqllot
+                {
+                    DSLOTKHSXs = DSLOTKHSXs.Where(lot => lot.MaQuanLyLot.Value?.ToString() == TargetMQLLot.MaQuanLyLot.Value?.ToString()).ToList();
+                }
+
                 // Load KQGC perLOTKHSX
-                DSachResultPerLOTKHSX = await LoadKQGCperLOTofKHSX(dsLots, TargetKHSX.KHSXID.Value);
+                DSachResultPerLOTKHSX = await LoadKQGCperLOTofKHSX(DSLOTKHSXs, TargetKHSX.KHSXID.Value);
 
                 isLoading = false;
             }

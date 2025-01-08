@@ -4,6 +4,7 @@
 
 @using ProcessManagement.Commons
 @using ProcessManagement.Models
+@using ProcessManagement.Models.KHO_TPHAM
 @using ProcessManagement.Models.KHSXs
 @using ProcessManagement.Models.TienDoGCs
 @using ProcessManagement.Pages.KehoachSX.Dialogs
@@ -40,10 +41,10 @@
                     </RadzenStack>
                 </RadzenColumn>
                 <RadzenColumn SizeMD="6" Size="12">
-                    <RadzenStack Gap="15px" Style="height: 100%; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                        <RadzenTextBox @oninput="@((args) => SearchingKHSX(args?.Value))" Placeholder="Nhập mã kế hoạch sản xuất để tìm kiếm" Style="border-radius: 20px; padding-left: 20px; border-width: 2px; border-color: var(--rz-primary-light); width: 50% "></RadzenTextBox>
+                    <RadzenStack Gap="15px" Style="height: 100%; width: 100%; padding-left: 70px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                        <RadzenTextBox @oninput="@((args) => SearchingKHSX(args?.Value))" Placeholder="Nhập mã kế hoạch sản xuất, mã quản lý lot hoặc mã thùng để truy xuất" Style="border-radius: 20px; padding-left: 20px; border-width: 2px; border-color: var(--rz-primary-light); width: 70% "></RadzenTextBox>
                         <RadzenButton Icon="search" ButtonStyle="ButtonStyle.Primary" Style="border-radius: 20px;" />
-                        <RadzenButton Style="border-radius: 20px;" BusyText="Loading" IsBusy="@reloadpage" Click="@(async () => await ButtonReloadPress())" Icon="autorenew" ButtonStyle="ButtonStyle.Primary" />
+                        <RadzenButton Style="border-radius: 20px;" BusyText="Searching..." IsBusy="@reloadpage" Click="@(async () => await ButtonReloadPress())" Icon="autorenew" ButtonStyle="ButtonStyle.Primary" />
                     </RadzenStack>
                 </RadzenColumn>
                 <RadzenColumn SizeMD="3" Size="12">
@@ -86,7 +87,7 @@
                                             <RadzenText Text="@($"THÔNG TIN KHSX - {khsx.MaLSX.Value?.ToString()}")" Style="color: darkred; font-weight: 500; font-size: 15px"></RadzenText>
                                         </Template>
                                         <ChildContent>
-                                            <DialogDetailKHSX SelectKHSX="@khsx" IsNotDialog="true"></DialogDetailKHSX>
+                                            <DialogDetailKHSX TargetMQLLot="@TargetMQLLot" SelectKHSX="@khsx" IsNotDialog="true"></DialogDetailKHSX>
                                         </ChildContent>
                                     </RadzenTabsItem>
                                     <RadzenTabsItem>
@@ -112,7 +113,7 @@
                                             <RadzenText Text="QUẢN LÝ CÔNG ĐOẠN" Style="color: darkred; font-weight: 500; font-size: 15px"></RadzenText>
                                         </Template>
                                         <ChildContent>
-                                            <QLCongDoanPage TargetKHSX="@khsx"></QLCongDoanPage>
+                                            <QLCongDoanPage TargetMQLLot="@TargetMQLLot" TargetKHSX="@khsx"></QLCongDoanPage>
                                         </ChildContent>
                                     </RadzenTabsItem>
                                 </Tabs>
@@ -246,6 +247,8 @@
 
     private List<KHSX> DSKHSXs_base = new();
 
+    private KHSX_LOT? TargetMQLLot;
+
     protected override async Task OnInitializedAsync()
     {
         await OnGetListKHSXs();
@@ -351,6 +354,8 @@
         {
             if (reloadpage == false)
             {
+                TargetMQLLot = null; DSKHSXs = new();
+
                 reloadpage = true;
 
                 string keysearch = args?.ToString()?.Trim() ?? string.Empty;
@@ -365,28 +370,48 @@
                         // Search by ma QLLot
                         results = DSKHSXs_base.FindAll(khsx => khsx.DSLOT_KHSXs.Any(lot => lot.MaQuanLyLot.Value?.ToString()?.IndexOf(keysearch, StringComparison.OrdinalIgnoreCase) >= 0));
 
-                        if (!results.Any())
+                        if (results.Any())
+                        {
+                            TargetMQLLot = results.FirstOrDefault()?.DSLOT_KHSXs.FirstOrDefault(lot => lot.MaQuanLyLot.Value?.ToString()?.Trim() == keysearch);
+                        }
+                        else
                         {
                             // Search by ma ThungTP
+                            var resutThungEx = await LoadDSachThungTPhams(keysearch);
+
+                            if (resutThungEx != null && resutThungEx.Any())
+                            {
+                                var targetThung = resutThungEx.FirstOrDefault()?.ThungTPhams.FirstOrDefault();
+
+                                var khsxid = targetThung?.KHSXID.Value;
+
+                                results = DSKHSXs_base.Where(khsx => khsx.KHSXID.Value?.ToString() == khsxid?.ToString()).ToList();
+
+                                if (targetThung != null)
+                                {
+                                    TargetMQLLot = results.FirstOrDefault()?.DSLOT_KHSXs.FirstOrDefault(lot => lot.MaQuanLyLot.Value?.ToString() == targetThung.MaQuanLyLot.Value?.ToString());
+                                }
+                            }
                         }
                     }
 
-                    if (results.Any())
-                    {
-                        DSKHSXs = results;
-                    }
-                    else DSKHSXs = new();
+                    DSKHSXs = results;
                 }
                 else
                 {
+                    TargetMQLLot = null;
+
                     await OnGetListKHSXs();
                 }
 
-                await Task.Delay(100);
+                await Task.Delay(200);
 
                 reloadpage = false;
+
             }
         });
+
+        //await InvokeAsync(StateHasChanged);
     }
 
     // Button Reload
@@ -404,6 +429,44 @@
 
                 reloadpage = false;
             }
+        });
+    }
+
+    private async Task<List<ThungTPhamExtend>?> LoadDSachThungTPhams(object? maquanlythung)
+    {
+        return await Task.Run(() =>
+        {
+            List<ThungTPhamExtend>? thungTPhamExtends = null;
+
+            List<ThungTPham> thungTPhams = SQLServerServices.GetListThungTPhams(new Dictionary<string, object?>() { { ThungTPham.DBName.MaQuanLyThung, maquanlythung } }).thungTPhams;
+
+            // Group the ThungTPham objects by IDThung
+            var groupedResults = thungTPhams.Where(ttp => ttp.IDThung.Value != null)
+                                            .GroupBy(ttp => ttp.IDThung.Value)
+                                            .Select(group => new ThungTPhamExtend
+                                                {
+                                                    IDThung = group.Key,
+                                                    ThungTPhams = group.ToList(),
+                                                    Total = group.ToList().Sum(ttp => int.TryParse(ttp.SoLuong.Value?.ToString(), out int sl) ? sl : 0),
+                                                    MaSanPham = SQLServerServices.GetMaSanphamByID(group.ToList().FirstOrDefault()?.SPID.Value),
+                                                }).ToList();
+            if (groupedResults != null)
+            {
+                foreach (var thung in groupedResults)
+                {
+                    foreach (var ttp in thung.ThungTPhams)
+                    {
+                        if (int.TryParse(ttp.VTofTPID.Value?.ToString(), out int vtid))
+                        {
+                            thung.DaNhapKho = vtid > 0;
+                        }
+                    }
+                }
+
+                thungTPhamExtends = groupedResults;
+            }
+
+            return thungTPhamExtends;
         });
     }
 

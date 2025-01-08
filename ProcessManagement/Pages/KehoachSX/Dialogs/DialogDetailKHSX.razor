@@ -2,6 +2,7 @@
 @using ProcessManagement.Models.KHO_NVL
 @using ProcessManagement.Models.KHO_NVL.XuatKho
 @using ProcessManagement.Models.KHSXs
+@using ProcessManagement.Models.QLCDOAN
 @using ProcessManagement.Pages.Manager_NVL.Dialogs
 @using ProcessManagement.Pages.Manager_NguyenCong.Dialogs
 @using ProcessManagement.Pages.Manager_SanPham.Dialogs
@@ -302,7 +303,13 @@
 
                         <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style=" height: contain; width: 100%; max-height: 500px; overflow-y: scroll" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                             @{
-                                var listlotnvl = SelectKHSX?.DSLOT_KHSXs;
+                                List<KHSX_LOT>? listlotnvl;
+
+                                if (TargetMQLLot == null)
+                                {
+                                    listlotnvl = SelectKHSX?.DSLOT_KHSXs;
+                                }
+                                else listlotnvl = TargetKHSX_LOTs;
                             }
                             @if (listlotnvl != null)
                             {
@@ -349,7 +356,7 @@
                         </RadzenStack>
                         <RadzenRow Gap="10px" Style="width: 100%; height: 80%;">
                             <RadzenColumn Size="12" SizeMD="12" Style="width: 100%; height: 100%;">
-                                <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style="height: 100%; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                <RadzenStack Visible="@(TargetMQLLot == null)" Gap="10px" Orientation="Orientation.Vertical" Style="height: 100%; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                     <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style=" height: contain; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                         <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: 100%; padding: 5px;">
                                             <RadzenStack Style="width: 100%; height: contain" Gap="0" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
@@ -391,6 +398,58 @@
                                         }
                                     </RadzenStack>
                                 </RadzenStack>
+
+                                <RadzenStack Visible="@(TargetMQLLot != null)" Gap="10px" Orientation="Orientation.Vertical" Style="height: 100%; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                    <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style=" height: contain; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                        <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: 100%; padding: 5px;">
+                                            <RadzenStack Style="width: 100%; height: contain" Gap="0" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                <RadzenStack Style="width: 5%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                    <RadzenText Text="#" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                                                </RadzenStack>
+                                                <RadzenStack Style="width: 50%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                    <RadzenText Text="Nguyên công" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                                                </RadzenStack>
+                                                <RadzenStack Style="width: 20%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                    <RadzenText Text="SL OK" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                                                </RadzenStack>
+                                                <RadzenStack Style="width: 20%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                    <RadzenText Text="SL NG" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                                                </RadzenStack>
+                                            </RadzenStack>
+                                        </RadzenCard>
+                                    </RadzenStack>
+
+                                    <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style=" height: contain; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                        @{
+                                            var dsnguyencong = SelectKHSX?.DSachCongDoans;
+                                        }
+                                        @if (dsnguyencong != null)
+                                        {
+                                            @foreach (var nguyencong in dsnguyencong)
+                                            {
+                                                <RadzenCard Variant="Variant.Outlined" Style="width: 100%; height: contain; padding: 5px; padding-right: 0px; background-color: white">
+                                                    <RadzenStack Style="width: 100%; height: 100%" Gap="10px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                        @{
+                                                            var targetNC = ResultPerLOTKHSXes.FirstOrDefault()?.DsachKQGCperCDOAN.Where(cd => cd.TargetLOT.NCID.Value?.ToString() == nguyencong.NCID.Value?.ToString()).ToList();
+                                                        }
+                                                        <RadzenStack Style="width: 5%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                            <RadzenText Text="@((dsnguyencong.IndexOf(nguyencong) + 1).ToString())" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                                                        </RadzenStack>
+                                                        <RadzenStack Style="width: 50%; height: contain; border-left: var(--rz-grid-cell-border); border-right: var(--rz-grid-cell-border); padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                            <RadzenText Text="@nguyencong.TenCongDoan.Value?.ToString()" Style="color: darkblue; font-weight: 600; font-size: 14px"></RadzenText>
+                                                        </RadzenStack>
+                                                        <RadzenStack Style="width: 20%; height: contain; border-right: var(--rz-grid-cell-border); padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                            <RadzenText Text="@($"{targetNC?.Sum(rs => rs.TotalOK)} (pcs)")" Style="font-size: 16px; font-weight: 600; height: contain; color: rgba(58,71,77)"></RadzenText>
+                                                        </RadzenStack>
+                                                        <RadzenStack Style="width: 20%; height: contain; " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                            <RadzenText Text="@($"{targetNC?.Sum(rs => rs.TotalNG)} (pcs)")" Style="font-size: 16px; font-weight: 600; height: contain; color: rgba(58,71,77)"></RadzenText>
+                                                        </RadzenStack>
+                                                    </RadzenStack>
+                                                </RadzenCard>
+                                            }
+                                        }
+                                    </RadzenStack>
+                                </RadzenStack>
                             </RadzenColumn>
                         </RadzenRow>
                     </RadzenStack>
@@ -410,16 +469,20 @@
     [Parameter]
     public bool IsNotDialog { get; set; } = false;
 
+    [Parameter]
+    public KHSX_LOT? TargetMQLLot { get; set; }
+
+    private List<KHSX_LOT> TargetKHSX_LOTs = new();
+
+    private List<ResultPerLOTKHSX> ResultPerLOTKHSXes = new();
+
     private PhieuXuatKho PXKofKHSX = new();
 
     private List<DetailLotKHSX> DetailLotKHSXes = new();
 
     protected async override Task OnInitializedAsync()
     {
-        await Task.Run(() =>
-        {
-            ReloadCurrentKHSX(SelectKHSX?.KHSXID.Value);
-        });
+        await ReloadCurrentKHSX(SelectKHSX?.KHSXID.Value);
 
         DetailLotKHSXes = GetListDetailLotKHSXs();
 
@@ -475,9 +538,16 @@
         return detailLotKHSXes;
     }
 
-    private void ReloadCurrentKHSX(object? currentKHSXid)
+    private async Task ReloadCurrentKHSX(object? currentKHSXid)
     {
         SelectKHSX = SQLServerServices.GetKHSXbyID(currentKHSXid);
+
+        if (TargetMQLLot != null) // Inmode search with mqllot
+        {
+            TargetKHSX_LOTs = SelectKHSX.DSLOT_KHSXs.Where(lot => lot.MaQuanLyLot.Value?.ToString()?.Trim() == TargetMQLLot.MaQuanLyLot.Value?.ToString()?.Trim()).ToList();
+
+            ResultPerLOTKHSXes = await LoadKQGCperLOTofKHSX(TargetKHSX_LOTs, SelectKHSX.KHSXID.Value);
+        }
 
         if (SelectKHSX?.KHSXID.Value != null)
         {
@@ -486,6 +556,76 @@
             PXKofKHSX = SQLServerServices.GetPhieuXuatKhoByID(SelectKHSX.PXKID.Value);
         }
         else SelectKHSX = new();
+    }
+
+
+    int MaxThungTP = 2;
+    // Load kqgc per CDoan for dsachLOTKHSX
+    private async Task<List<ResultPerLOTKHSX>> LoadKQGCperLOTofKHSX(List<KHSX_LOT> lOTs, object? khsxid)
+    {
+        List<ResultPerLOTKHSX> resultPerLOTKHSXs = new();
+
+        int orginMaxThungTP = 1;
+
+        foreach (var lot in lOTs)
+        {
+            ResultPerLOTKHSX resultPerLOTKHSX = new() { MaSP = SelectKHSX?.TargetSanPham?.SP_MaSP.Value, MaQuanLyLot = lot.MaQuanLyLot.Value, SLperLOT = lot.SLLOT.Value };
+
+            Dictionary<string, object?> pars = new();
+            pars.Add($"{KHSX_LOT.DBName.KHSXID}", khsxid);
+            pars.Add($"{KHSX_LOT.DBName.MaQuanLyLot}", lot.MaQuanLyLot.Value);
+
+            // Get list CD per LOT ( 1 maquanlyLot with nhieu congdoan)
+            (List<KHSX_LOT> dsCDOANperLOTKHSX, string error) = SQLServerServices.GetListLOT_khsx(pars);
+
+            List<KQGCperCDOANofLOTKHSX> dsachKQGCperCDOAN = new();
+
+            foreach (var (index, cdperlot) in dsCDOANperLOTKHSX.Select((item, idx) => (idx, item)))
+            {
+                // Get lastest kqgc
+                var rekQGCperLOTofKHSX = dsachKQGCperCDOAN.LastOrDefault() ?? null;
+
+                // Get kqgc targetLOT with all CDoan
+                KQGCperCDOANofLOTKHSX kQGCperLOTofKHSX = new(cdperlot, rekQGCperLOTofKHSX);
+
+                dsachKQGCperCDOAN.Add(kQGCperLOTofKHSX);
+            }
+
+            // Asign dsachKQGCperCDOAN for resultPerLOTKHSX
+            resultPerLOTKHSX.DsachKQGCperCDOAN = dsachKQGCperCDOAN;
+
+            // Asign IsDoneLastCDoan
+            resultPerLOTKHSX.IsLastCDoanDone = resultPerLOTKHSX.DsachKQGCperCDOAN.LastOrDefault()?.DanhGia == 1;
+
+            resultPerLOTKHSX.ThungTPhams = await LoadDSachThungTPhams(SelectKHSX?.KHSXID.Value, resultPerLOTKHSX.MaQuanLyLot);
+
+            int numofThungTP = resultPerLOTKHSX.ThungTPhams.Count();
+
+            if (numofThungTP > orginMaxThungTP)
+            {
+                orginMaxThungTP = numofThungTP;
+            }
+
+            // Asign IsCreatedThungTP
+            resultPerLOTKHSX.IsCreatedThungTP = resultPerLOTKHSX.ThungTPhams.Any();
+
+            resultPerLOTKHSXs.Add(resultPerLOTKHSX);
+        }
+
+        // Gan max thung TP
+        MaxThungTP = orginMaxThungTP;
+
+        return resultPerLOTKHSXs;
+    }
+
+    private async Task<List<ThungTPham>> LoadDSachThungTPhams(object? khsxid, object? maquanlylot)
+    {
+        return await Task.Run(() =>
+        {
+            var thungTPhams = SQLServerServices.GetListThungTPhams(new Dictionary<string, object?>() { { KHSX_LOT.DBName.KHSXID, khsxid }, { KHSX_LOT.DBName.MaQuanLyLot, maquanlylot } }).thungTPhams;
+
+            return thungTPhams;
+        });
     }
 
     private async Task OnOpenDialogXemChitietNVL(NguyenVatLieu nguyenVatLieu)
@@ -511,7 +651,7 @@
             await DialogService.OpenAsync<Manager_NVL.XuatKho.DialogCreate_PhieuXuatKho>(null, new Dictionary<string, object>() { { "DSNVLofKHSX", SelectKHSX.DSachNVLofKHSXs }, { "CreatedWithKHSX", true }, { "KHSX", SelectKHSX } },
             new DialogOptions() { ShowTitle = false, Width = "100%", Height = "100%", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
 
-            ReloadCurrentKHSX(SelectKHSX.KHSXID.Value);
+            await ReloadCurrentKHSX(SelectKHSX.KHSXID.Value);
         }
     }
 
@@ -523,7 +663,7 @@
             await DialogService.OpenAsync<Manager_NVL.XuatKho.PhieuXuatKhoDetails>(tilte, new Dictionary<string, object>() { { "PXK", PXKofKHSX } },
             new DialogOptions() { ShowTitle = true, Width = "contain", Height = "contain", Resizable = true, Draggable = true, ShowClose = true, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
 
-            ReloadCurrentKHSX(SelectKHSX.KHSXID.Value);
+            await ReloadCurrentKHSX(SelectKHSX.KHSXID.Value);
         }
     }
 
