@@ -15,9 +15,9 @@ namespace ProcessManagement.Models.SANPHAM
         public SanPham TargetSP { get; set; } = new(); // Khong load trong DB (deadloop)
 
         public bool isEditingSoluong = false;
-        public int allsoLuongcanLay = 0; // dung khi chi ding so luong sp trong KHSX
+        public int allsoLuongcanLay_baogomloi = 0; // dung khi chi ding so luong sp trong KHSX
+        public int soluong_khongbaogomloi = 0; // dung khi chi ding so luong sp trong KHSX
         public bool isPickNVLok = false; // dung khi chi ding so luong sp trong KHSX
-        public double tileloi = 0; // dung khi chi ding so luong sp trong KHSX
         public int slloichophep = 0; // dung khi chi ding so luong sp trong KHSX
         public int dinhmuc = 0; // dung khi chi ding so luong sp trong KHSX
 

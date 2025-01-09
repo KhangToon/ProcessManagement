@@ -159,14 +159,19 @@
     {
         List<KHSX_LOT> dsLots = new();
 
-        Dictionary<string, object?> parameters = new Dictionary<string, object?>() { { KHSX_LOT.DBName.KHSXID, khsxid } };
-        (var resultdslots, string getError) = SQLServerServices.GetListLOT_khsx(parameters);
+        var fistCDoanID = TargetKHSX.DSachCongDoans.FirstOrDefault()?.NCID.Value ?? 0;
+
+        var resultdslots = SQLServerServices.GetListLOT_khsx(new() { { KHSX_LOT.DBName.KHSXID, khsxid }, { KHSX_LOT.DBName.NCID, fistCDoanID } }).Item1;
 
         if (resultdslots != null && resultdslots.Any())
         {
-            var resultDistinct = resultdslots.DistinctBy(lot => lot.MaQuanLyLot.Value?.ToString()?.Trim()).ToList();
+            // Get maNVL of KHSX_LOT
+            foreach (var lotkhsx in resultdslots)
+            {
+                lotkhsx.TargetNVL = SQLServerServices.GetMaNguyenVatLieuByID(lotkhsx.NVLID.Value);
+            }
 
-            return resultDistinct;
+            return resultdslots;
         }
 
         return dsLots;

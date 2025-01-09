@@ -207,16 +207,22 @@ namespace ProcessManagement.Services.SQLServer
 
                 khsx.DSachNVLofKHSXs = GetListNVLofKHSXbyID(khsx.KHSXID.Value);
 
-                var resultdslots = GetListLOT_khsx(new() { { KHSX_LOT.DBName.KHSXID, khsx.KHSXID.Value } }).Item1;
+                khsx.DSachCongDoans = GetlistCongdoans(khsx.KHSXID.Value);
+
+                var fistCDoanID = khsx.DSachCongDoans.FirstOrDefault()?.NCID.Value ?? 0;
+
+                var resultdslots = GetListLOT_khsx(new() { { KHSX_LOT.DBName.KHSXID, khsx.KHSXID.Value }, { KHSX_LOT.DBName.NCID, fistCDoanID } }).Item1;
 
                 if (resultdslots != null && resultdslots.Any())
                 {
-                    var resultDistinct = resultdslots.DistinctBy(lot => lot.MaQuanLyLot.Value?.ToString()?.Trim()).ToList();
+                    khsx.DSLOT_KHSXs = resultdslots;
 
-                    khsx.DSLOT_KHSXs = resultDistinct;
+                    // Get maNVL of KHSX_LOT
+                    foreach (var lotkhsx in khsx.DSLOT_KHSXs)
+                    {
+                        lotkhsx.TargetNVL = GetMaNguyenVatLieuByID(lotkhsx.NVLID.Value);
+                    }
                 }
-
-                khsx.DSachCongDoans = GetlistCongdoans(khsx.KHSXID.Value);
 
                 // Get trang thai xuat kho NVL
                 var colIsDonePXK = GetPXK_AnyColValuebyAnyParameters(new Dictionary<string, object?>() { { Common.KHSXID, khsx.KHSXID.Value } }, Common.IsDonePXK).columnValues.FirstOrDefault();
@@ -277,16 +283,22 @@ namespace ProcessManagement.Services.SQLServer
 
                     khsx.DSachNVLofKHSXs = GetListNVLofKHSXbyID(khsx.KHSXID.Value);
 
-                    var resultdslots = GetListLOT_khsx(new() { { KHSX_LOT.DBName.KHSXID, khsx.KHSXID.Value } }).Item1;
+                    khsx.DSachCongDoans = GetlistCongdoans(khsx.KHSXID.Value);
+
+                    var fistCDoanID = khsx.DSachCongDoans.FirstOrDefault()?.NCID.Value ?? 0;
+
+                    var resultdslots = GetListLOT_khsx(new() { { KHSX_LOT.DBName.KHSXID, khsx.KHSXID.Value }, { KHSX_LOT.DBName.NCID, fistCDoanID } }).Item1;
 
                     if (resultdslots != null && resultdslots.Any())
                     {
-                        var resultDistinct = resultdslots.DistinctBy(lot => lot.MaQuanLyLot.Value?.ToString()?.Trim()).ToList();
+                        khsx.DSLOT_KHSXs = resultdslots;
 
-                        khsx.DSLOT_KHSXs = resultDistinct;
+                        // Get maNVL of KHSX_LOT
+                        foreach (var lotkhsx in khsx.DSLOT_KHSXs)
+                        {
+                            lotkhsx.TargetNVL = GetMaNguyenVatLieuByID(lotkhsx.NVLID.Value);
+                        }
                     }
-
-                    khsx.DSachCongDoans = GetlistCongdoans(khsx.KHSXID.Value);
 
                     // Get trang thai xuat kho NVL
                     var colIsDonePXK = GetPXK_AnyColValuebyAnyParameters(new Dictionary<string, object?>() { { Common.KHSXID, khsx.KHSXID.Value } }, Common.IsDonePXK).columnValues.FirstOrDefault();
@@ -350,16 +362,22 @@ namespace ProcessManagement.Services.SQLServer
 
                     khsx.DSachNVLofKHSXs = GetListNVLofKHSXbyID(khsx.KHSXID.Value);
 
-                    var resultdslots = GetListLOT_khsx(new() { { KHSX_LOT.DBName.KHSXID, khsx.KHSXID.Value } }).Item1;
+                    khsx.DSachCongDoans = GetlistCongdoans(khsx.KHSXID.Value);
+
+                    var fistCDoanID = khsx.DSachCongDoans.FirstOrDefault()?.NCID.Value ?? 0;
+
+                    var resultdslots = GetListLOT_khsx(new() { { KHSX_LOT.DBName.KHSXID, khsx.KHSXID.Value }, { KHSX_LOT.DBName.NCID, fistCDoanID } }).Item1;
 
                     if (resultdslots != null && resultdslots.Any())
                     {
-                        var resultDistinct = resultdslots.DistinctBy(lot => lot.MaQuanLyLot.Value?.ToString()?.Trim()).ToList();
+                        khsx.DSLOT_KHSXs = resultdslots;
 
-                        khsx.DSLOT_KHSXs = resultDistinct;
+                        // Get maNVL of KHSX_LOT
+                        foreach (var lotkhsx in khsx.DSLOT_KHSXs)
+                        {
+                            lotkhsx.TargetNVL = GetMaNguyenVatLieuByID(lotkhsx.NVLID.Value);
+                        }
                     }
-
-                    khsx.DSachCongDoans = GetlistCongdoans(khsx.KHSXID.Value);
 
                     // Get trang thai xuat kho NVL
                     var colIsDonePXK = GetPXK_AnyColValuebyAnyParameters(new Dictionary<string, object?>() { { Common.KHSXID, khsx.KHSXID.Value } }, Common.IsDonePXK).columnValues.FirstOrDefault();
@@ -1409,7 +1427,7 @@ namespace ProcessManagement.Services.SQLServer
                         item.Value = columnValue;
                     }
 
-                    nvl.TenNVL = GetTenNguyenVatLieu(nvl.NVLID.Value).MaNVL.Value?.ToString() ?? string.Empty;
+                    nvl.TenNVL = GetMaNguyenVatLieuByID(nvl.NVLID.Value).MaNVL.Value?.ToString() ?? string.Empty;
 
                     listnvls.Add(nvl);
                 }
@@ -1538,7 +1556,7 @@ namespace ProcessManagement.Services.SQLServer
             return nvl;
         }
 
-        public NguyenVatLieu GetTenNguyenVatLieu(object? nvlid)
+        public NguyenVatLieu GetMaNguyenVatLieuByID(object? nvlid)
         {
             NguyenVatLieu nvl = new();
 

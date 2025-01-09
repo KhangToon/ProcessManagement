@@ -1,4 +1,5 @@
 ﻿using NuGet.Packaging.Signing;
+using ProcessManagement.Commons;
 using ProcessManagement.Models.KHO_NVL;
 using ProcessManagement.Models.KHSXs;
 using ProcessManagement.Models.KHSXs.MQL_Template;
@@ -15,10 +16,10 @@ namespace ProcessManagement.Models
 
         public string MaLSX { get; set; } = string.Empty;
         public int SLSanPhamPO { get; set; } = 0;
-        public int SLNgVatLieuSX { get; set; } = 0;
+        public int SLNgVatLieuPO { get; set; } = 0;
         public double TiLeLoi { get; set; } = 0;
         public int SLLoi { get; set; } = 0;
-        public int DinhMuc { get; set; } = 0;
+        public int DinhMucNVL { get; set; } = 0;
         public int SLLot { get; set; } = 0;
         public int SLperLotChan { get; set; } = 0;
         public int SLLotChan { get; set; } = 0;
@@ -30,7 +31,7 @@ namespace ProcessManagement.Models
         public List<TemLotNVL>? ListTempLOT_NVLs { get; set; }
         private List<SanPham> DSachSanPhams { get; set; } = new List<SanPham>();
 
-        public bool isErrorSLloiChophep = true;
+        public bool isErrorSLloiChophep { get; set; } = true;
         public bool isComfirmSLLoiNguyenCong = false;
         public bool isGenerateListLotOK = false;
         public bool isCheckSLNVLisOK = false;
@@ -98,16 +99,16 @@ namespace ProcessManagement.Models
 
         public bool CheckSLNVLisOK()
         {
-            int sumSL = NewKHSX.DSachNVLofKHSXs?.Sum(nvl => (int.TryParse(nvl.SoLuong.Value?.ToString(), out int sl) ? sl : 0)) ?? 0;
+            int sumDM = NewKHSX.DSachNVLofKHSXs?.Sum(nvl => (int.TryParse(nvl.DinhMuc.Value?.ToString(), out int dm) ? dm : 0)) ?? 0;
 
             int dinhmuc = int.TryParse(NewKHSX?.DinhMuc.Value?.ToString(), out int vl) ? vl : 0;
 
-            return (sumSL > 0);
+            return (sumDM > 0);
         }
 
         public bool CheckSoluongLoiChophep()
         {
-            int tongSLloi = DinhMuc - SLSanPhamPO;
+            int tongSLloi = SLLoi;
 
             int slloinew = 0;
 
@@ -169,9 +170,10 @@ namespace ProcessManagement.Models
         {
             NewKHSX.MaLSX.Value = MaLSX;
             NewKHSX.LOAINVLID.Value = NewKHSX.LoaiNVL?.LOAINVLID.Value;
-            NewKHSX.SLSanPhamSX.Value = SLSanPhamPO;
-            NewKHSX.SLNVLSanXuat.Value = SLNgVatLieuSX;
-            NewKHSX.DinhMuc.Value = DinhMuc;
+            NewKHSX.SLSanPhamPO.Value = SLSanPhamPO;
+            NewKHSX.SLSanPhamSX.Value = SLSanPhamPO + SLLoi;
+            NewKHSX.SLNVLSanXuat.Value = SLNgVatLieuPO;
+            NewKHSX.DinhMuc.Value = DinhMucNVL;
             NewKHSX.TileLoi.Value = TiLeLoi;
             NewKHSX.SLLot.Value = SLLot;
             NewKHSX.SLLotChan.Value = SLLotChan;
@@ -185,10 +187,10 @@ namespace ProcessManagement.Models
         public void ResetDefault()
         {
             SLSanPhamPO = 0;
-            SLNgVatLieuSX = 0;
+            SLNgVatLieuPO = 0;
             TiLeLoi = 0;
             SLLoi = 0;
-            DinhMuc = 0;
+            DinhMucNVL = 0;
             SLLot = 0;
             SLperLotChan = 0;
             SLLotChan = 0;
@@ -287,7 +289,7 @@ namespace ProcessManagement.Models
 
             int result = -1; string error = string.Empty;
 
-            if (SLNgVatLieuSX == 0 || SLperLotChan == 0 || (DinhMuc / SLperLotChan < 1))
+            if (SLNgVatLieuPO == 0 || SLperLotChan == 0 || (DinhMucNVL / SLperLotChan < 1))
             {
                 SLLot = 0;
 
@@ -296,13 +298,13 @@ namespace ProcessManagement.Models
             else
             {
                 // Tinh so luong 
-                SLLotChan = DinhMuc / SLperLotChan;
+                SLLotChan = DinhMucNVL / SLperLotChan;
 
-                if (DinhMuc % SLperLotChan > 0)
+                if (DinhMucNVL % SLperLotChan > 0)
                 {
                     SLLotLe = 1;
 
-                    SLperLotLe = DinhMuc - SLperLotChan * SLLotChan;
+                    SLperLotLe = DinhMucNVL - SLperLotChan * SLLotChan;
                 }
                 else { SLLotLe = 0; SLperLotLe = 0; }
 
@@ -335,7 +337,7 @@ namespace ProcessManagement.Models
         {
             int result = -1; string error = string.Empty;
 
-            if (SLNgVatLieuSX == 0 || SLperLotChan == 0 || (DinhMuc / SLperLotChan < 1))
+            if (SLNgVatLieuPO == 0 || SLperLotChan == 0 || (DinhMucNVL / SLperLotChan < 1))
             {
                 return (result, "Số lượng nhập vào không hợp lệ");
             }
@@ -348,7 +350,7 @@ namespace ProcessManagement.Models
             //DinhMuc = (int)(SLNgVatLieuSX + SLNgVatLieuSX * (TiLeLoi / 100));
 
             // Tinh so luong lot chan
-            SLLotChan = DinhMuc / SLperLotChan;
+            SLLotChan = DinhMucNVL / SLperLotChan;
 
             // Calculate and generate list lot nvl
             for (int index = 1; index <= SLLotChan; index++)
@@ -362,12 +364,12 @@ namespace ProcessManagement.Models
                 ListTempLOT_NVLs?.Add(nVL);
             }
 
-            if (DinhMuc % SLperLotChan > 0)
+            if (DinhMucNVL % SLperLotChan > 0)
             {
                 SLLotLe = 1;
 
                 // Tinh so luong per lot le
-                SLperLotLe = DinhMuc - SLperLotChan * SLLotChan;
+                SLperLotLe = DinhMucNVL - SLperLotChan * SLLotChan;
 
                 // Add lot le
                 TemLotNVL lotnvlle = new();
@@ -433,7 +435,7 @@ namespace ProcessManagement.Models
         {
             int soluong = viTriofNVL.SLTake;
 
-            if (SLNgVatLieuSX == 0 || slperlotchan == 0 || (soluong == 0))
+            if (SLNgVatLieuPO == 0 || slperlotchan == 0 || (soluong == 0))
             {
                 return (0, 0, 0, 0, null);
             }
@@ -536,7 +538,9 @@ namespace ProcessManagement.Models
 
                 if (tentruyxuat == MQLTemplate.Property_NgayNhapKho)
                 {
-                    DateTime? dateresult = Commons.Common.ParseDate_MMddyyyy(ngaynhapkho?.ToString());
+                    //DateTime? dateresult = Common.ParseDate_MMddyyyy(ngaynhapkho?.ToString());
+
+                    DateTime? dateresult = DateTime.TryParse(ngaynhapkho?.ToString(), out DateTime nnk)? nnk : null;
 
                     string reformatNNK = dateresult?.ToString("ddMMyy") ?? string.Empty;
 

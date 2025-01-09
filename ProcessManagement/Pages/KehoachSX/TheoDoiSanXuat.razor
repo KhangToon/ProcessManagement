@@ -16,7 +16,7 @@
 @inject SQLServerServices SQLServerServices
 @inject NavigationManager NavigationManager
 
-<RadzenSelectBar @bind-Value=selectBarIndex TValue="int" Style="margin-bottom: 15px">
+<RadzenSelectBar Value="@selectBarIndex" ValueChanged="@( async (args) => {await OnSelectBarValueChanged(args);})" TValue="int" Style="margin-bottom: 15px">
     <Items>
         <RadzenSelectBarItem Text="PHIẾU THEO DÕI GIA CÔNG" Style="font-weight: 600; font-size: 16px;" Value="-1"></RadzenSelectBarItem>
 
@@ -31,11 +31,16 @@
     <KetQuaGiaCong TargetKHSX="@TargetKHSX"></KetQuaGiaCong>
 </RadzenStack>
 
-@foreach (var item in SelectBarItems)
+@* @foreach (var item in SelectBarItems)
 {
     <RadzenStack Visible="@(selectBarIndex == item.Key)">
         <TienDoGiaCong TargetKHSX="@TargetKHSX" NCID="@SelectBarItems[selectBarIndex].NCID.Value" SPID="@TargetKHSX.SPID.Value"></TienDoGiaCong>
     </RadzenStack>
+} *@
+
+@if (selectBarIndex != -1 && isloading == false)
+{
+    <TienDoGiaCong TargetKHSX="@TargetKHSX" NCID="@SelectBarItems[selectBarIndex].NCID.Value" SPID="@TargetKHSX.SPID.Value"></TienDoGiaCong>
 }
 
 @code {
@@ -46,6 +51,8 @@
     private Dictionary<int, NguyenCongofKHSX> SelectBarItems = new();
     private static int selectBarIndex = -1;
 
+    private bool isloading = false;
+
     protected override async Task OnInitializedAsync()
     {
         LoadKHSXDatas();
@@ -53,20 +60,16 @@
         await base.OnInitializedAsync();
     }
 
-    // protected override async Task OnParametersSetAsync()
-    // {
-    //     if (_targetKHSX != TargetKHSX)
-    //     {
-    //         _targetKHSX = TargetKHSX;
+    private async Task OnSelectBarValueChanged(int selectIndex)
+    {
+        selectBarIndex = selectIndex;
 
-    //         LoadKHSXDatas();
-
-    //         await ParameterChanged();
-    //     }
-
-    //     await base.OnParametersSetAsync();
-
-    // }
+        isloading = true;
+        StateHasChanged();
+        await Task.Delay(10);
+        StateHasChanged();
+        isloading = false;
+    }
 
 
     private async Task ParameterChanged()

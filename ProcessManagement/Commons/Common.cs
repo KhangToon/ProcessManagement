@@ -100,6 +100,7 @@ namespace ProcessManagement.Commons
         public const string MaLSX = "Mã lệnh SX";
         public const string SLNVLSanXuat = "SL sản xuất";
         public const string SLSanPhamSX = "SLSanPhamSX";
+        public const string SLSanPhamPO = "SLSanPhamPO";
         public const string DinhMuc = "Định mức";
         public const string TileLoi = "Tỉ lệ lỗi";
         public const string SLLot = "SL lot";

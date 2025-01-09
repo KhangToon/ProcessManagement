@@ -12,9 +12,10 @@ namespace ProcessManagement.Models
         public Propertyy KHSXID { get; set; } = new() { DBName = Common.KHSXID, Type = typeof(int), AlowDatabase = true };
         public Propertyy MaLSX { get; set; } = new() { DBName = Common.MaLSX, Type = typeof(string), AlowDatabase = true };
         public Propertyy LOAINVLID { get; set; } = new() { DBName = Common.LOAINVLID, DisplayName = "Loại NVL", Type = typeof(int), AlowDatabase = true };
-        public Propertyy SLNVLSanXuat { get; set; } = new() { DBName = Common.SLNVLSanXuat, Type = typeof(int), AlowDatabase = true };
-        public Propertyy SLSanPhamSX { get; set; } = new() { DBName = Common.SLSanPhamSX, Type = typeof(int), AlowDatabase = true }; // SLSanPhamPO
-        public Propertyy DinhMuc { get; set; } = new() { DBName = Common.DinhMuc, Type = typeof(int), AlowDatabase = true };
+        public Propertyy SLNVLSanXuat { get; set; } = new() { DBName = Common.SLNVLSanXuat, Type = typeof(int), AlowDatabase = true }; // SLNVLPO
+        public Propertyy SLSanPhamPO { get; set; } = new() { DBName = Common.SLSanPhamPO, Type = typeof(int), AlowDatabase = true }; // SLSanPhamPO
+        public Propertyy SLSanPhamSX { get; set; } = new() { DBName = Common.SLSanPhamSX, Type = typeof(int), AlowDatabase = true }; // SLSanPhamSX
+        public Propertyy DinhMuc { get; set; } = new() { DBName = Common.DinhMuc, Type = typeof(int), AlowDatabase = true }; // SLNVLSanxuat
         public Propertyy TileLoi { get; set; } = new() { DBName = Common.TileLoi, Type = typeof(double), AlowDatabase = true };
         public Propertyy SLLot { get; set; } = new() { DBName = Common.SLLot, Type = typeof(int), AlowDatabase = true };
         public Propertyy SLLotChan { get; set; } = new() { DBName = Common.SLLotChan, Type = typeof(int), AlowDatabase = true };

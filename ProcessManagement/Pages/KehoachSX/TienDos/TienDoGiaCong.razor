@@ -417,12 +417,6 @@
         await base.OnInitializedAsync();
     }
 
-
-    private async Task ParameterChanged()
-    {
-        await InvokeAsync(StateHasChanged);
-    }
-
     // Convert ID to stringValue
     private string GetColumnValueByID(object? id, string colName)
     {
@@ -532,70 +526,70 @@
 
     private async Task ReLoadTienDoGCPage(object? tdgcID = null, object? ncid = null, object? khsxid = null, int delaytime = 10)
     {
-        isLoading = true;
-
-        await Task.Delay(delaytime);
-
-        await Task.Run(() =>
+        await Task.Run(async() =>
         {
-            List<TienDoGC> tienDoGCs = new();
-
-            (tienDoGCs, string error) = SQLServerServices.GetListTienDoGC(tdgcID, ncid, khsxid);
-
-            if (tienDoGCs.Any())
+            if (isLoading == false)
             {
-                iscreatenew = false;
+                isLoading = true;
 
-                var firtResult = tienDoGCs.FirstOrDefault();
-                if (firtResult != null)
+                List<TienDoGC> tienDoGCs = new();
+
+                (tienDoGCs, string error) = SQLServerServices.GetListTienDoGC(tdgcID, ncid, khsxid);
+
+                if (tienDoGCs.Any())
                 {
-                    TargetTienDoGC = firtResult;
+                    iscreatenew = false;
 
-                    if (TargetTienDoGC.DSachTienDoRows.Any())
+                    var firtResult = tienDoGCs.FirstOrDefault();
+                    if (firtResult != null)
                     {
-                        foreach (var tiendorow in TargetTienDoGC.DSachTienDoRows)
+                        TargetTienDoGC = firtResult;
+
+                        if (TargetTienDoGC.DSachTienDoRows.Any())
                         {
-                            Dictionary<string, object?> parameters = new();
-
-                            parameters.Add($"{KetQuaGC.KQGCDBName.KHSXID}", TargetTienDoGC.KHSXID.Value);
-
-                            parameters.Add($"{KetQuaGC.KQGCDBName.MMID}", tiendorow.MMID.Value);
-
-                            parameters.Add($"{KetQuaGC.KQGCDBName.CaLamViec}", tiendorow.CaLamViec.Value);
-
-                            parameters.Add($"{KetQuaGC.KQGCDBName.NVIDs}", tiendorow.NVIDs.Value?.ToString()?.Trim());
-
-                            (List<KetQuaGC> ketquaGCs, string getError) = SQLServerServices.GetListKetQuaGC(parameters, false);
-
-                            List<KetQuaGC> temptlistketquagcs = new();
-
-                            if (DateTime.TryParse(tiendorow.NgayGC.Value?.ToString(), out DateTime rowNgayGC))
+                            foreach (var tiendorow in TargetTienDoGC.DSachTienDoRows)
                             {
-                                foreach (var kqgc in ketquaGCs)
+                                Dictionary<string, object?> parameters = new();
+
+                                parameters.Add($"{KetQuaGC.KQGCDBName.KHSXID}", TargetTienDoGC.KHSXID.Value);
+
+                                parameters.Add($"{KetQuaGC.KQGCDBName.MMID}", tiendorow.MMID.Value);
+
+                                parameters.Add($"{KetQuaGC.KQGCDBName.CaLamViec}", tiendorow.CaLamViec.Value);
+
+                                parameters.Add($"{KetQuaGC.KQGCDBName.NVIDs}", tiendorow.NVIDs.Value?.ToString()?.Trim());
+
+                                (List<KetQuaGC> ketquaGCs, string getError) = SQLServerServices.GetListKetQuaGC(parameters, false);
+
+                                List<KetQuaGC> temptlistketquagcs = new();
+
+                                if (DateTime.TryParse(tiendorow.NgayGC.Value?.ToString(), out DateTime rowNgayGC))
                                 {
-                                    if (DateTime.TryParse(kqgc.SubMitDay.Value?.ToString(), out DateTime submitday))
+                                    foreach (var kqgc in ketquaGCs)
                                     {
-                                        if (!DateTime.Equals(submitday.Date, rowNgayGC.Date))
+                                        if (DateTime.TryParse(kqgc.SubMitDay.Value?.ToString(), out DateTime submitday))
                                         {
-                                            temptlistketquagcs.Add(kqgc);
+                                            if (!DateTime.Equals(submitday.Date, rowNgayGC.Date))
+                                            {
+                                                temptlistketquagcs.Add(kqgc);
+                                            }
                                         }
                                     }
                                 }
-                            }
 
-                            if (temptlistketquagcs.Any())
-                            {
-                                foreach (var item in temptlistketquagcs)
+                                if (temptlistketquagcs.Any())
                                 {
-                                    if (ketquaGCs.Contains(item))
+                                    foreach (var item in temptlistketquagcs)
                                     {
-                                        ketquaGCs.Remove(item);
+                                        if (ketquaGCs.Contains(item))
+                                        {
+                                            ketquaGCs.Remove(item);
+                                        }
                                     }
                                 }
-                            }
 
-                            // Calculate tong so luong OK thuc te
-                            int sumthucte = ketquaGCs.Sum(kqgc =>
+                                // Calculate tong so luong OK thuc te
+                                int sumthucte = ketquaGCs.Sum(kqgc =>
                             {
                                 if (int.TryParse(kqgc.SLOK.Value?.ToString(), out int slok))
                                 {
@@ -603,10 +597,10 @@
                                 }
                                 else return 0;
                             });
-                            tiendorow.ThucTe.Value = sumthucte;
+                                tiendorow.ThucTe.Value = sumthucte;
 
-                            // Calculate tong so luong NG
-                            int sumNG = ketquaGCs.Sum(kqgc =>
+                                // Calculate tong so luong NG
+                                int sumNG = ketquaGCs.Sum(kqgc =>
                             {
                                 if (int.TryParse(kqgc.SLNG.Value?.ToString(), out int slng))
                                 {
@@ -614,48 +608,53 @@
                                 }
                                 else return 0;
                             });
-                            tiendorow.SLNG.Value = sumNG;
+                                tiendorow.SLNG.Value = sumNG;
 
-                            // Calculate tong tien do
-                            int sumtiendo = sumthucte - (int.TryParse(tiendorow.KeHoach.Value?.ToString(), out int slkehoach) ? slkehoach : 0);
-                            tiendorow.TienDo.Value = sumtiendo;
+                                // Calculate tong tien do
+                                int sumtiendo = sumthucte - (int.TryParse(tiendorow.KeHoach.Value?.ToString(), out int slkehoach) ? slkehoach : 0);
+                                tiendorow.TienDo.Value = sumtiendo;
 
-                            // Calculate all results
-                            TargetTienDoGC.FooterSumKeHoach += slkehoach;
-                            TargetTienDoGC.FooterSumThucTe += sumthucte;
-                            TargetTienDoGC.FooterSumNG += sumNG;
-                            TargetTienDoGC.FooterSumTienDo += sumtiendo;
-                        }
+                                // Calculate all results
+                                TargetTienDoGC.FooterSumKeHoach += slkehoach;
+                                TargetTienDoGC.FooterSumThucTe += sumthucte;
+                                TargetTienDoGC.FooterSumNG += sumNG;
+                                TargetTienDoGC.FooterSumTienDo += sumtiendo;
+                            }
 
-                        // Calculate tile NG
-                        if (TargetTienDoGC.FooterSumKeHoach > 0)
-                        {
-                            TargetTienDoGC.TiLeNGTT = (double)TargetTienDoGC.FooterSumNG / TargetTienDoGC.FooterSumKeHoach * 100;
+                            // Calculate tile NG
+                            if (TargetTienDoGC.FooterSumKeHoach > 0)
+                            {
+                                TargetTienDoGC.TiLeNGTT = (double)TargetTienDoGC.FooterSumNG / TargetTienDoGC.FooterSumKeHoach * 100;
 
-                            TargetTienDoGC.TiLeNGTT = Math.Ceiling(TargetTienDoGC.TiLeNGTT * 100) / 100;
+                                TargetTienDoGC.TiLeNGTT = Math.Ceiling(TargetTienDoGC.TiLeNGTT * 100) / 100;
+                            }
                         }
                     }
                 }
-            }
-            else
-            {
-                TargetTienDoGC = new() { KHSXID = { Value = TargetKHSX.KHSXID.Value }, NCID = { Value = NCID }, SPID = { Value = SPID } };
+                else
+                {
+                    TargetTienDoGC = new() { KHSXID = { Value = TargetKHSX.KHSXID.Value }, NCID = { Value = NCID }, SPID = { Value = SPID } };
 
-                iscreatenew = true;
-                // Check allow load when in CreateNew mode
-                // await DialogService.Alert($"{(string.IsNullOrEmpty(error) ? "Danh sách trống!" : error)}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
-            }
+                    iscreatenew = true;
+                    // Check allow load when in CreateNew mode
+                    // await DialogService.Alert($"{(string.IsNullOrEmpty(error) ? "Danh sách trống!" : error)}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                }
 
-            if (TargetTienDoGC.TDGCID.Value == null)
-            {
-                // Load ma san pham
-                TargetTienDoGC.MaSanPham = SQLServerServices.GetMaSanphamByID(SPID);
-                // Load cong doan
-                TargetTienDoGC.TenCongDoan = SQLServerServices.GetNguyenCongByID(NCID);
+                if (TargetTienDoGC.TDGCID.Value == null)
+                {
+                    // Load ma san pham
+                    TargetTienDoGC.MaSanPham = SQLServerServices.GetMaSanphamByID(SPID);
+                    // Load cong doan
+                    TargetTienDoGC.TenCongDoan = SQLServerServices.GetNguyenCongByID(NCID);
+                }
+
+                await Task.Delay(delaytime);
+
+                isLoading = false;
+
             }
         });
 
-        isLoading = false;
     }
 
     private async Task OnDeleteTienDoGCRow(TienDoGCRow removeTienDoGCRow)
