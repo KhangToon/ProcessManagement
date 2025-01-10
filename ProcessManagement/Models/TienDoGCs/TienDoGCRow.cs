@@ -23,7 +23,7 @@ namespace ProcessManagement.Models.TienDoGCs
         public Propertyy TienDo { get; set; } = new() { DBName = DBName.TienDo, DisplayName = DispName.TienDo, Type = typeof(int), AlowDatabase = true, AlowDisplay = false };
         public Propertyy TiLeNG_CD { get; set; } = new() { DBName = DBName.TiLeNG_CD, DisplayName = DispName.TiLeNG_CD, Type = typeof(double), AlowDatabase = true, AlowDisplay = false };
         public Propertyy TiLeNG_TT { get; set; } = new() { DBName = DBName.TiLeNG_TT, DisplayName = DispName.TiLeNG_TT, Type = typeof(double), AlowDatabase = true, AlowDisplay = false };
-        public Propertyy GhiChu { get; set; } = new() { DBName = DBName.GhiChu, DisplayName = DispName.GhiChu, Type = typeof(string), AlowDatabase = true };
+        public Propertyy GhiChu { get; set; } = new() { DBName = DBName.GhiChu, DisplayName = DispName.GhiChu, Type = typeof(string), AlowDatabase = true, CheckErrors = new() { } };
 
         public List<NhanVien> DSNhanVien { get; set; } = new();
         public string MaSanPham { get; set; } = string.Empty;

@@ -171,7 +171,6 @@
                                 <RadzenNumeric Disabled="@(!isEditing)" ShowUpDown="false" TValue="int" Value="@int.Parse(TargetTienDoGC.XuatNVL.Value?.ToString()?? "0")" Min="0" Max="999999"
                                                ValueChanged="@((args) => { TargetTienDoGC.XuatNVL.Value = args; })"
                                                Style="font-size: 15px; height: 35px; border-width: 1px; width: 200px" />
-                                <RadzenText Visible=@(!iscreatenew) Text="@(TargetTienDoGC.XuatNVL.Value?.ToString())" Style="font-weight: 600; font-size: 15px; font-style: italic;"></RadzenText>
                             </RadzenStack>
                         </RadzenStack>
                     </RadzenStack>
@@ -478,7 +477,7 @@
                 }
                 else
                 {
-                    ShowNotification("Erorr add new!", NotificationSeverity.Error, 3000);
+                    await DialogService.Alert($"{error}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
                 }
             }
         }
@@ -526,7 +525,7 @@
 
     private async Task ReLoadTienDoGCPage(object? tdgcID = null, object? ncid = null, object? khsxid = null, int delaytime = 10)
     {
-        await Task.Run(async() =>
+        await Task.Run(async () =>
         {
             if (isLoading == false)
             {
@@ -680,7 +679,7 @@
 
     private async Task OnDeleteTienDoGC(TienDoGC removeTienDoGC)
     {
-        bool? confirm = await DialogService.Confirm($"Xóa (đặt lại) trang tiến độ gia công này?", "Xác nhận", new ConfirmOptions() { OkButtonText = "OK", CancelButtonText = "Hủy", ShowClose = false });
+        bool? confirm = await DialogService.Confirm($"Xóa (đặt lại) trang tiến độ gia công (<strong>{TargetTienDoGC.TenCongDoan}</strong>) này?", "Xác nhận", new ConfirmOptions() { OkButtonText = "OK", CancelButtonText = "Hủy", ShowClose = false });
 
         if (confirm.Value)
         {

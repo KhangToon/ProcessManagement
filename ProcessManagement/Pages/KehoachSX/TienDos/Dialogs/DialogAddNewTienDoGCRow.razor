@@ -264,7 +264,7 @@
                                                                                     {
                                                                                         if (args != null)
                                                                                         {
-                                                                                            DateTime value = args.Value.Date.Add(DateTime.Now.TimeOfDay);
+                                                                                            DateTime value = args.Value.Date;
                                                                                             property.Value = value;
                                                                                         }
                                                                                         else
@@ -325,7 +325,7 @@
     private IEnumerable<KeyValuePair<string, string>>? NhanviensSelected;
     private IEnumerable<KeyValuePair<string, string>>? NGTypesSelected;
 
-    protected override void OnInitialized()
+    protected async override Task OnInitializedAsync()
     {
         // Load target ma san pham
         newTDGCRow.SPID.Value = SPID;
@@ -340,7 +340,14 @@
         //
         newTDGCRow.TDGCID.Value = TDGCID;
 
-        base.OnInitialized();
+        newTDGCRow.ThoiGianLamViec.Value = 0;
+        newTDGCRow.ThoiGianGiaCong.Value = 0;
+
+        await DefaultThongTinTienDoGCRow_ValueIsOK(newTDGCRow.GhiChu);
+        await DefaultThongTinTienDoGCRow_ValueIsOK(newTDGCRow.ThoiGianLamViec);
+        await DefaultThongTinTienDoGCRow_ValueIsOK(newTDGCRow.ThoiGianGiaCong);
+
+        await base.OnInitializedAsync();
     }
 
     protected override Task OnParametersSetAsync()
