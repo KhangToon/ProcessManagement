@@ -245,9 +245,17 @@
                                                         else if (property.Type == typeof(DateTime)) // kieu ngay thang
                                                         {
                                                             bool ishaveValueOfday = DateTime.TryParse(property.Value?.ToString(), out DateTime selectday);
-                                                            if (ishaveValueOfday) selectday = selectday.Date.Add(DateTime.Now.TimeOfDay);
+                                                            if (ishaveValueOfday)
+                                                            {
+                                                                selectday = selectday.Date.Add(DateTime.Now.TimeOfDay);
+                                                            }
+                                                            // @if (DateTime.TryParse(property.Value?.ToString(), out DateTime selectday))
+                                                            // {
+
+                                                    // }
                                                             <RadzenStack Style="width: 50%;">
                                                                 <RadzenDatePicker class="custom-datepicker custom-datepicker" Placeholder="@($"* nhập {displayName}")"
+                                                                                  ShowTime="false" HourFormat="12" DateFormat="@Common.FormatNoTime_ddMMyyyy" AllowInput="true"
                                                                                   TValue="DateTime" Value="selectday" AllowClear="true"
                                                                                   Min="@((property.DBName == TienDoGCRow.DBName.NgayGC)? DayStart.AddDays(-1) : DateTime.MinValue)"
                                                                                   Max="@((property.DBName == TienDoGCRow.DBName.NgayGC)? DayEnd : DateTime.MaxValue)"
@@ -265,7 +273,6 @@
                                                                                         }
                                                                                         await DefaultThongTinTienDoGCRow_ValueIsOK(property);
                                                                                     })"
-                                                                                  ShowTime="false" HourFormat="12" DateFormat="@Common.FormatNoTime_yyyddMM" ParseInput="@Common.ParseDate_MMddyyyy" AllowInput="true"
                                                                                   Style="height: contain;">
                                                                 </RadzenDatePicker>
                                                             </RadzenStack>
@@ -337,7 +344,7 @@
     }
 
     protected override Task OnParametersSetAsync()
-    {   
+    {
 
 
         return base.OnParametersSetAsync();

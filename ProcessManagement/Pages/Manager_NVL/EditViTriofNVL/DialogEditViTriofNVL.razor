@@ -1,0 +1,282 @@
+﻿@using ProcessManagement.Commons
+@using ProcessManagement.Models.KHO_NVL
+@using ProcessManagement.Services.SQLServer
+@using Radzen.Blazor
+@using Radzen
+@using ProcessManagement.Models
+
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject TooltipService TooltipService
+@inject SQLServerServices SQLServerServices
+
+<style>
+    .custom-placeholder::placeholder {
+        color: #888888;
+        font-size: 15px;
+        font-style: italic;
+    }
+
+    .custom-datepicker input[type="text"]::placeholder {
+        color: #888888;
+        font-size: 15px;
+        font-style: italic;
+    }
+</style>
+
+<RadzenCard Variant="Variant.Filled" Style="height: 100%; width: 100%; padding: 10px;">
+    <RadzenStack Gap="20px" Style="height: contain; width: contain; border-radius: 5px; background-color: var(--rz-success-lighter); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+        <RadzenText Text="@($"Điều chỉnh thông tin lưu trữ nguyên vật liệu")" Style="font-weight: 600; font-size: 16px; color: darkgreen; font-style: italic"></RadzenText>
+    </RadzenStack>
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 5px; border-bottom: var(--rz-grid-cell-border);">
+        <RadzenStack Style="width: 20%;">
+            <RadzenText Text="Ngày nhập kho" Style="color: var(--rz-primary-darker); font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
+        </RadzenStack>
+        <RadzenStack Style="width: 80%; padding-left: 10px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+            <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
+                @if (TargetViTriofNVL != null)
+                {
+                    <RadzenStack Style="width: 50%;">
+                        @{
+                            DateTime? selectday = Common.ParseDate_ddMMyyyy(NewNgayNhapKho?.ToString()?.Trim());
+
+                            <RadzenStack Style="width: 100%;">
+                                <RadzenDatePicker class="custom-datepicker" Placeholder="@($"* nhập giá trị mới")"
+                                                  TValue="DateTime" Value="selectday" AllowClear="true"
+                                                  Change="@(async(args) =>
+                                                                {
+                                                                    if (args != null)
+                                                                    {
+                                                                        DateTime value = args.Value;
+                                                                        ChangeQRIDLOTbyNgayNhapKho(value, NewNgayNhapKho);
+                                                                        NewNgayNhapKho = value.ToString(Common.FormatNoTime_ddMMyyyy);
+                                                                        await NewValueIsOK(TargetViTriofNVL.QRIDLOT, NewQRIDLOT, true);
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        NewNgayNhapKho = null;
+                                                                    }
+
+                                                                    await NewValueIsOK(TargetViTriofNVL.NgayNhapKho, NewNgayNhapKho, false);
+                                                                })"
+                                                  ShowTime="false" HourFormat="12" DateFormat="@Common.FormatNoTime_ddMMyyyy" ParseInput="@Common.ParseDate_ddMMyyyy" AllowInput="true"
+                                                  Style="height: contain; font-size: 16px">
+                                </RadzenDatePicker>
+                            </RadzenStack>
+                        }
+                    </RadzenStack>
+
+                    <RadzenStack Style="width: 50%;">
+                        <RadzenAlert Visible="@(!TargetViTriofNVL.NgayNhapKho.IsCheckValueOK)" Text="@TargetViTriofNVL.NgayNhapKho.NotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                        <RadzenAlert Visible="@(TargetViTriofNVL.NgayNhapKho.IsCheckValueOK)" Text="@TargetViTriofNVL.NgayNhapKho.NotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Success" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                    </RadzenStack>
+                }
+            </RadzenStack>
+        </RadzenStack>
+    </RadzenStack>
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 5px; border-bottom: var(--rz-grid-cell-border);">
+        <RadzenStack Style="width: 20%;">
+            <RadzenText Text="Mã quản lý NVL" Style="color: var(--rz-primary-darker); font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
+        </RadzenStack>
+        <RadzenStack Style="width: 80%; padding-left: 10px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+            <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
+                @if (TargetViTriofNVL != null)
+                {
+                    <RadzenStack Style="width: 50%;">
+                        @{
+                            <RadzenTextBox class="custom-placeholder" Placeholder="@($" * nhập giá trị mới")" Value="@NewQRIDLOT?.ToString()" Style="font-size: 16px; height: contain; border-width: 1px;"
+                                           @oninput="@(async (args) => { NewQRIDLOT = args.Value; await NewValueIsOK(TargetViTriofNVL.QRIDLOT, NewQRIDLOT, true);})">
+                            </RadzenTextBox>
+                        }
+                    </RadzenStack>
+
+                    <RadzenStack Style="width: 50%;">
+                        <RadzenAlert Visible="@(!TargetViTriofNVL.QRIDLOT.IsCheckValueOK)" Text="@TargetViTriofNVL.QRIDLOT.NotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                        <RadzenAlert Visible="@(TargetViTriofNVL.QRIDLOT.IsCheckValueOK)" Text="@TargetViTriofNVL.QRIDLOT.NotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Success" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                    </RadzenStack>
+                }
+            </RadzenStack>
+        </RadzenStack>
+    </RadzenStack>
+    <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding-top: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+        @if (TargetViTriofNVL != null)
+        {
+            <RadzenButton Disabled="@((TargetViTriofNVL.NgayNhapKho.IsCheckValueOK == false && TargetViTriofNVL.QRIDLOT.IsCheckValueOK == false))" Style="width: contain;" Icon="check" Text="Lưu thay đổi" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Dark" Variant="Variant.Flat" Click="@(() => OnSaveNewName())" />
+            <RadzenButton Style="width: 120px;" Icon="close" Text="Hủy" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" Click="@(() => { TargetViTriofNVL.NgayNhapKho.Value = OldNgayNhapKho; TargetViTriofNVL.QRIDLOT.Value = OldQRIDLOT; DialogService.Close(null); })" />
+        }
+    </RadzenStack>
+</RadzenCard>
+
+@code {
+    [Parameter]
+    public ViTriofNVL? TargetViTriofNVL { get; set; }
+
+    private object? NewNgayNhapKho;
+    private object? NewQRIDLOT;
+    private object? OldNgayNhapKho;
+    private object? OldQRIDLOT;
+
+    protected async override Task OnInitializedAsync()
+    {
+
+        if (TargetViTriofNVL != null)
+        {
+            NewNgayNhapKho = TargetViTriofNVL.NgayNhapKho.Value;
+
+            NewQRIDLOT = TargetViTriofNVL.QRIDLOT.Value;
+
+            OldNgayNhapKho = TargetViTriofNVL.NgayNhapKho.Value;
+
+            OldQRIDLOT = TargetViTriofNVL.QRIDLOT.Value;
+
+            await NewValueIsOK(TargetViTriofNVL.NgayNhapKho, NewNgayNhapKho, false);
+
+            await NewValueIsOK(TargetViTriofNVL.QRIDLOT, NewQRIDLOT, true);
+        }
+        await base.OnInitializedAsync();
+    }
+
+    private async Task OnSaveNewName()
+    {
+        bool? confirm = await DialogService.Confirm("Xác nhận thay đổi và lưu?", "Xác nhận", new ConfirmOptions() { OkButtonText = "OK", CancelButtonText = "Hủy", ShowClose = false });
+
+        if (confirm.Value)
+        {
+            if (TargetViTriofNVL != null)
+            {
+                int udresult = -1; string uderror = "Không thể đổi!";
+
+                DateTime? newngaynhapkho = Common.ParseDate_ddMMyyyy(NewNgayNhapKho?.ToString()) ?? null;
+
+                string newNNK = newngaynhapkho?.ToString(Common.FormatNoTime_ddMMyyyy) ?? string.Empty;
+
+                if (!string.IsNullOrEmpty(newNNK))
+                {
+                    // // Get oldLNK with QRIDLOT
+                    // var lenhnk = SQLServerServices.GetLenhNhapKhoByQRIDLOT(TargetViTriofNVL.QRIDLOT.Value);
+
+                    // //var lenhxk = SQLServerServices.GetLenhXuatKho
+                    // Update list of lenhxk match with QR
+                    // Update vitriofNVL
+                    // Update history
+
+                    // if (lenhnk.LenhNKID.Value != null)
+                    // {
+                    //     TargetViTriofNVL.NgayNhapKho.Value = newNNK;
+
+                    //     TargetViTriofNVL.QRIDLOT.Value = NewQRIDLOT;
+
+                    //     // Update vitriofnvl
+                    //     (udresult, uderror) = SQLServerServices.UpdateViTriOfNgVatLieu(TargetViTriofNVL);
+
+                    //     if (udresult > 0)
+                    //     {
+                    //         // Update LNK QRIDLOT
+                    //         lenhnk.QRIDLOT.Value = TargetViTriofNVL.QRIDLOT.Value;
+                    //     }
+                    // }
+                }
+
+                if (udresult > 0)
+                {
+                    ShowNotification("Thành công!", NotificationSeverity.Success, 3000);
+
+                    DialogService.Close(TargetViTriofNVL);
+                }
+                else
+                {
+                    await DialogService.Alert($"Lỗi: {uderror}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                }
+            }
+        }
+
+        // if (result > 0)
+        // {
+        //     ShowNotification("Đổi tên thành công!", NotificationSeverity.Success, 3000);
+
+        //     DialogService.Close(newName);
+        // }
+        // else
+        // {
+        //     await DialogService.Alert($"Lỗi: {error}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+        // }
+    }
+
+    private void ChangeQRIDLOTbyNgayNhapKho(DateTime ngaynhapkho, object? lastnnk)
+    {
+        DateTime? oldNNK = Common.ParseDate_ddMMyyyy(lastnnk?.ToString());
+
+        if (oldNNK != null)
+        {
+            string newNNK = ngaynhapkho.ToString("ddMMyy");
+
+            NewQRIDLOT = NewQRIDLOT?.ToString().ReplaceFirst(oldNNK?.ToString("ddMMyy"), newNNK);
+        }
+    }
+
+    // Kiểm tra thông tin mặc định của nguyên vật liệu đã tồn tại
+    private async Task NewValueIsOK(Propertyy propertyy, object? newValue, bool isqridlot)
+    {
+        await Task.Run(() =>
+        {
+            string value = (newValue?.ToString() ?? string.Empty).Trim();
+
+            if (!string.IsNullOrEmpty(value))
+            {
+                if (isqridlot)
+                {
+                    var vitriofnvls = SQLServerServices.GetViTriOfNgVatLieuByAnyParameters(qridlot: newValue);
+
+                    if (vitriofnvls != null && vitriofnvls.Any())
+                    {
+                        propertyy.IsCheckValueOK = false;
+                        propertyy.NotifyMess = $"Mã QRLOTNVL đã tồn tại";
+                    }
+                    else
+                    {
+                        propertyy.IsCheckValueOK = true;
+                        propertyy.NotifyMess = $"Gía trị hợp lệ";
+                    }
+
+                    return;
+                }
+                else
+                {
+                    DateTime? oldNNK = DateTime.TryParse(propertyy.Value?.ToString(), out DateTime onnk) ? onnk : null;
+                    DateTime? newNNK = DateTime.TryParse(newValue?.ToString(), out DateTime newnnk) ? newnnk : null;
+
+                    if (oldNNK?.ToString("ddMMyyyy") == newNNK?.ToString("ddMMyyyy"))
+                    {
+                        propertyy.IsCheckValueOK = false;
+                        propertyy.NotifyMess = $"Hãy nhập giá trị khác";
+                    }
+                    else
+                    {
+                        propertyy.IsCheckValueOK = true;
+                        propertyy.NotifyMess = $"Gía trị hợp lệ";
+                    }
+                }
+
+            }
+            else
+            {
+                propertyy.IsCheckValueOK = false;
+                propertyy.NotifyMess = $"Không được để trống";
+            }
+        });
+    }
+
+    // Notification
+    void ShowNotification(string message, NotificationSeverity notifytype, double time)
+    {
+        NotificationMessage notify = new NotificationMessage
+            {
+                Style = "position: fixed; top: 0; right: 0;",
+                Severity = notifytype,
+                Summary = message,
+                Duration = time
+            };
+
+        NotificationService.Notify(notify);
+    }
+}

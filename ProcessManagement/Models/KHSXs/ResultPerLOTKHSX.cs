@@ -69,11 +69,11 @@ namespace ProcessManagement.Models.KHSXs
 
         public object? GetCaLamViec(object? cdid, int caindex)
         {
-            object calamviec = "_";
+            object calamviec = " ";
 
             KQGCperCDOANofLOTKHSX targetKQ = DsachKQGCperCDOAN.FirstOrDefault(rs => rs.TargetLOT.NCID.Value?.ToString()?.Trim() == cdid?.ToString()?.Trim()) ?? new();
 
-            calamviec = Common.GetElementOrNew(targetKQ.ResultCalamviecs, caindex).Ca ?? "_";
+            calamviec = Common.GetElementOrNew(targetKQ.ResultCalamviecs, caindex).Ca ?? " ";
 
             return calamviec;
         }
@@ -89,13 +89,33 @@ namespace ProcessManagement.Models.KHSXs
             return nhanvien;
         }
 
-        public object? GetNgayGC(object? cdid, int caindex)
+        public object? GetMayMoc(object? cdid, int caindex)
         {
-            object ngayGC = "_";
+            object? maymoc = null;
 
             KQGCperCDOANofLOTKHSX targetKQ = DsachKQGCperCDOAN.FirstOrDefault(rs => rs.TargetLOT.NCID.Value?.ToString()?.Trim() == cdid?.ToString()?.Trim()) ?? new();
 
-            ngayGC = Common.GetElementOrNew(targetKQ.ResultCalamviecs, caindex).NgayGiaCong ?? "_";
+            maymoc = Common.GetElementOrNew(targetKQ.ResultCalamviecs, caindex).MayMoc ?? null;
+
+            return maymoc;
+        }
+
+        public object? GetNgayGC(object? cdid, int caindex)
+        {
+            object ngayGC = " ";
+
+            KQGCperCDOANofLOTKHSX targetKQ = DsachKQGCperCDOAN.FirstOrDefault(rs => rs.TargetLOT.NCID.Value?.ToString()?.Trim() == cdid?.ToString()?.Trim()) ?? new();
+
+            ngayGC = Common.GetElementOrNew(targetKQ.ResultCalamviecs, caindex).NgayGiaCong ?? " ";
+
+            // Convert to datetime
+
+            if (DateTime.TryParse(ngayGC?.ToString(), out DateTime dateGC))
+            {
+                string dateGCfomarted = dateGC.ToString(Common.FormatNoTime_ddMMyyyy);
+
+                return dateGCfomarted;
+            }
 
             return ngayGC;
         }

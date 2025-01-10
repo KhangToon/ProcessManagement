@@ -76,7 +76,7 @@ namespace ProcessManagement.Services
                             NVLID = { Value = savedLNK.NVLID.Value },
                             VTNVLSoLuong = { Value = newtonkhotaivitri },
                             //NgayNhapKho = { Value = DateTime.Now.Date.ToShortDateString() },
-                            NgayNhapKho = { Value = (modeTraKho) ? savedLNK.NgayNhapKho.Value : DateTime.Now.Date.ToShortDateString() },
+                            NgayNhapKho = { Value = (modeTraKho) ? savedLNK.NgayNhapKho.Value : DateTime.Now.Date.ToString("dd/MM/yyyy") },
                             LotVitri = { Value = viTriofNVL?.LotVitri.Value },
                             QRIDLOT = { Value = savedLNK.QRIDLOT.Value }
                         };

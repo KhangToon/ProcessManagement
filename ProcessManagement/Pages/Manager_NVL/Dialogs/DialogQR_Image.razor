@@ -21,6 +21,9 @@
         <RadzenStack Gap="20px" Style="height: contain; width: 100%; border-radius: 5px; background-color: var(--rz-secondary-lighter); padding: 5px; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
             <RadzenText Text="@($"{HEADER}")" Style="font-weight: 600; font-size: 16px; color: black;"></RadzenText>
             <RadzenStack Gap="10" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                <RadzenButton Click="@(() => CopyToClipboard(CONTENT?.ToString()?? string.Empty))" Icon="content_copy" Style="--rz-icon-size: 18px;" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Light" />
+
+
                 <RadzenText Text="@($"{CONTENT?.ToString()}")" Style="font-weight: 600; font-size: 18px; color: darkgreen;"></RadzenText>
             </RadzenStack>
         </RadzenStack>
@@ -71,4 +74,48 @@
     {
         await JSRuntime.InvokeVoidAsync("generateBarcode", input);
     }
+
+    private async Task CopyToClipboard(string content)
+    {
+        try
+        {
+            // Try modern Clipboard API first
+            await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", content);
+
+            NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = "Copied!",
+                    Detail = $"{content}",
+                    Duration = 4000
+                });
+        }
+        catch (JSException)
+        {
+            try
+            {
+                // Fallback method
+                await JSRuntime.InvokeVoidAsync("fallbackCopyToClipboard", content);
+
+                NotificationService.Notify(new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Success,
+                        Summary = "Fallback Copied!",
+                        Detail = $"{content}",
+                        Duration = 4000
+                    });
+            }
+            catch (Exception)
+            {
+                NotificationService.Notify(new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Error,
+                        Summary = "Error",
+                        Detail = "Failed to copy text",
+                        Duration = 3000
+                    });
+            }
+        }
+    }
+
 }

@@ -5,6 +5,7 @@
 @using ProcessManagement.Commons
 @using ProcessManagement.Models
 @using ProcessManagement.Models.KHO_NVL
+@using ProcessManagement.Pages.Manager_NVL.EditViTriofNVL
 @using ProcessManagement.Pages.Manager_NVL.LoggingXNK
 @using ProcessManagement.Pages.Manager_NVL.TraKho
 @using ProcessManagement.Pages.Manager_NVL.ViTriLuuTru
@@ -427,10 +428,10 @@
                                                                                                             </RadzenStack>
                                                                                                             <RadzenStack Visible="@(!string.IsNullOrEmpty(vitri.QRIDLOT.Value?.ToString()))" Style="width: 100%; height: contain; padding-right: 10px; padding-top: 5px" Gap="10px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                                                                                                                 <RadzenButton Click="@(() => OnOpenQRIDLOT_ImageDialog(vitri.QRIDLOT.Value ?? string.Empty, "QR quản lý NVL"))" Text="@vitri.QRIDLOT.Value?.ToString()" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Lighter" Variant="Variant.Flat"
-                                                                                                                              Style="font-size: 17px; font-weight: 600; height: contain; min-height: contain; width: contain;" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Mã quản lý", 0, duration: 500))" />
+                                                                                                                              Style="font-size: 16px; font-weight: 500; height: contain; min-height: contain; width: contain;" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Mã quản lý", 0, duration: 500))" />
 
                                                                                                                 <RadzenStack Style="width: contain; height: contain;" Gap="10px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                                                                    <RadzenButton Click="@(() => CopyToClipboard(vitri.QRIDLOT.Value?.ToString()?? string.Empty))" Icon="content_copy" Style="--rz-icon-size: 18px;" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Light" />
+                                                                                                                    <RadzenButton Visible="false" Click="@(() => OnOpenEditVitriofNVLDialog(vitri))" Icon="edit" Style="--rz-icon-size: 18px;" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Light" />
                                                                                                                     <RadzenButton Click="@(() => NavigateToPrintQRIDLOTpage(vitri))" Icon="print" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Darker" Variant="Variant.Flat"
                                                                                                                                   Style="font-size: 18px; height: contain; min-height: contain; width: contain;" />
                                                                                                                 </RadzenStack>
@@ -1166,6 +1167,14 @@
     {
         await DialogService.OpenAsync<DialogQR_Image>(null, new Dictionary<string, object>() { { "CONTENT", content }, { "HEADER", header } },
         new DialogOptions() { CloseDialogOnEsc = true, CloseDialogOnOverlayClick = true, ShowTitle = true, Width = "contain", Height = "contain", Resizable = true, Draggable = true, ShowClose = true, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
+    }
+
+    private async Task OnOpenEditVitriofNVLDialog(ViTriofNVL viTriofNVL)
+    {
+        await DialogService.OpenAsync<DialogEditViTriofNVL>(null, new Dictionary<string, object>() { { "TargetViTriofNVL", viTriofNVL } },
+        new DialogOptions() { CloseDialogOnEsc = true, CloseDialogOnOverlayClick = false, ShowTitle = true, Width = "50%", Height = "contain", Resizable = true, Draggable = true, ShowClose = true, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
+    
+        
     }
 
     // Nhap kho dialog

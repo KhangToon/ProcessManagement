@@ -43,6 +43,7 @@ namespace ProcessManagement.Models.QLCDOAN
                     Ca = kqgc.CaLamViec.Value,
                     NgayGiaCong = DateTime.TryParse(kqgc.SubMitDay.Value?.ToString()?.Trim(), out var result) ? result.ToShortDateString() : null,
                     NhanVien = kqgc.NVIDs.Value,
+                    MayMoc = kqgc.MMID.Value,
                     SLOK = kqgc.SLOK.Value,
                     SLNG = kqgc.SLNG.Value,
                 };
@@ -112,6 +113,7 @@ namespace ProcessManagement.Models.QLCDOAN
             public object? Ca { get; set; }
             public object? NgayGiaCong { get; set; }
             public object? NhanVien { get; set; }
+            public object? MayMoc { get; set; }
             public object? SLOK { get; set; }
             public object? SLNG { get; set; }
         }
