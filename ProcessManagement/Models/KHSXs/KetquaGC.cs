@@ -21,7 +21,7 @@ namespace ProcessManagement.Models.KHSXs
         public Propertyy NVIDs { get; set; } = new() { DBName = KQGCDBName.NVIDs, DisplayName = KQGCDisplayName.DSTenNV, Type = typeof(string), AlowDatabase = true, CheckErrors = new() { Propertyy.ErrType.NotEmptyValue } };
         public Propertyy ThoiGianGC { get; set; } = new() { DBName = KQGCDBName.ThoiGianGC, DisplayName = KQGCDisplayName.ThoiGianGC, Type = typeof(int), AlowDatabase = true, CheckErrors = new() { Propertyy.ErrType.NotEmptyValue } };
         public Propertyy ThoiGianLamViec { get; set; } = new() { DBName = KQGCDBName.ThoiGianLamViec, DisplayName = KQGCDisplayName.ThoiGianLamViec, Type = typeof(double), AlowDatabase = true, CheckErrors = new() { Propertyy.ErrType.NotEmptyValue } };
-        public Propertyy GhiChu { get; set; } = new() { DBName = KQGCDBName.GhiChu, DisplayName = KQGCDisplayName.GhiChu, Type = typeof(string), AlowDatabase = true, CheckErrors = new() { Propertyy.ErrType.NotEmptyValue } };
+        public Propertyy GhiChu { get; set; } = new() { DBName = KQGCDBName.GhiChu, DisplayName = KQGCDisplayName.GhiChu, Type = typeof(string), AlowDatabase = true, CheckErrors = new() { } };
 
         //public List<DongThung> DSDongThung { get; set; } = new();
         public List<NhanVien> DSNhanVien { get; set; } = new();

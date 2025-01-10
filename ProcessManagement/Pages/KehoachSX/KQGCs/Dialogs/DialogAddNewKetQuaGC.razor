@@ -348,11 +348,18 @@
         newKetQuaGC.SLNG.Value = 0;
         newKetQuaGC.SPID.Value = SPID;
         newKetQuaGC.NGIDs.IsDisable = true;
+
+        newKetQuaGC.ThoiGianGC.Value = 0;
+        newKetQuaGC.ThoiGianLamViec.Value = 0;
         NGTypesSelected = null;
 
         await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.SubMitDay);
         await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.SLNG);
         await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.SPID);
+
+        await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.ThoiGianGC);
+        await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.ThoiGianLamViec);
+        await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.GhiChu);
 
         await base.OnInitializedAsync();
     }
@@ -802,7 +809,7 @@
                             await DialogService.Alert($"{errorMess}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
                         }
                         else
-                        {   
+                        {
                             targetlotKHSX.IsDone.Value = ((sumOKsubmited + slOKsubmit + sumNGsubmited + slNGsubmit) == lotTotal) ? 1 : 0;
                             targetlotKHSX.SLOKsubmited.Value = sumOKsubmited + slOKsubmit;
                             targetlotKHSX.SLNGsubmited.Value = sumNGsubmited + slNGsubmit;
