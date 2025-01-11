@@ -5,6 +5,7 @@ using ProcessManagement.Models.KHSXs;
 using ProcessManagement.Models.KHSXs.MQL_Template;
 using ProcessManagement.Models.SANPHAM;
 using ProcessManagement.Services.SQLServer;
+using System.Globalization;
 
 namespace ProcessManagement.Models
 {
@@ -540,11 +541,12 @@ namespace ProcessManagement.Models
                 {
                     //DateTime? dateresult = Common.ParseDate_MMddyyyy(ngaynhapkho?.ToString());
 
-                    DateTime? dateresult = DateTime.TryParse(ngaynhapkho?.ToString(), out DateTime nnk)? nnk : null;
+                    if (DateTime.TryParseExact(ngaynhapkho?.ToString(), Common.FormatNoTime_ddMMyyyy, null, DateTimeStyles.None, out DateTime dateresult))
+                    {
+                        string reformatNNK = dateresult.ToString("ddMMyy") ?? string.Empty;
 
-                    string reformatNNK = dateresult?.ToString("ddMMyy") ?? string.Empty;
-
-                    resultList.Add(reformatNNK);
+                        resultList.Add(reformatNNK);
+                    }
                 }
                 else
                 {

@@ -31,62 +31,78 @@
 
 <RadzenCard>
     <div id="printing-component">
-        <RadzenStack Gap="10px" Style="width: 100%; height: contain; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-            <RadzenStack Style="width: 100%; height: contain" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                <RadzenStack Gap="0px" Style="height: contain; width: 80%; padding-left: 100px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                    <RadzenText Text="PHIẾU XÁC ĐỊNH CÔNG ĐOẠN" Style="font-size: 20px; font-weight: 600; color: black"></RadzenText>
-                </RadzenStack>
-                <RadzenStack Gap="0px" Style="height: contain; width: contain" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
-                    @{
-                        string qrBase64string = QRCodeServices.GenerateQRCode(MaQLyLot, 80);
-                        <img style="border-radius: 10px;" src="@($"data:image/png;base64,{qrBase64string}")" alt="QR Code">
-                    }
-                    <RadzenText Text="@MaQLyLot" Style="font-size: 14px; font-weight: 600"></RadzenText>
-                </RadzenStack>
-            </RadzenStack>
-
+        <RadzenStack Gap="0px" Style="width: 100%; height: contain; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
             <table class="table" style="width: 100%; border-collapse: collapse;">
                 <tr>
-                    <td colspan="1" style="font-size: 14px;">Tên sản phẩm: @TargetKHSX.TargetSanPham?.SP_TenSanPham.Value?.ToString()</td>
-                    <td colspan="2" style="font-size: 14px; text-align: center;">Mã số SP: @TargetKHSX.TargetSanPham?.SP_MaSP.Value?.ToString()</td>
-                    <td colspan="1" style="font-size: 14px; text-align: center;">MSNB</td>
-                    <td colspan="4" style="text-align: center;">@TargetKHSX.MaLSX.Value?.ToString()</td>
+                    <td colspan="3" style="font-size: 22px; text-align: center; vertical-align: middle;  font-weight: bold">PHIẾU NHẬN DẠNG CÔNG ĐOẠN</td>
+                    <td colspan="2" style="font-size: 13px; text-align: center; vertical-align: middle;">
+                        <RadzenStack Gap="0px" Style="height: contain; width: contain" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            @{
+                                string qrBase64string = QRCodeServices.GenerateQRCode(MaQLyLot, 80);
+                                <img style="border-radius: 10px;" src="@($"data:image/png;base64,{qrBase64string}")" alt="QR Code">
+                            }
+                            <RadzenText Text="@MaQLyLot" Style="font-size: 13px; font-weight: 600"></RadzenText>
+                        </RadzenStack>
+                    </td>
+                    <td colspan="3" style="text-align: center; vertical-align: middle;">
+                        <table style="width: 100%; height: 100%; border-collapse: unset;">
+                            <tr>
+                                <td colspan="4" style="text-align: center; vertical-align: middle; font-size: 12px;">Số quản lý</td>
+                                <td colspan="4" style="text-align: center; vertical-align: middle; font-size: 12px;">PM-P-01/F04</td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" style="text-align: center; vertical-align: middle; font-size: 12px;">Số sửa đổi</td>
+                                <td colspan="4" style="text-align: center; vertical-align: middle; font-size: 12px;">0</td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" style="text-align: center; vertical-align: middle; font-size: 12px;">Ngày sửa đổi</td>
+                                <td colspan="4" style="text-align: center; vertical-align: middle; font-size: 12px;">_</td>
+                            </tr>
+                        </table>
+                    </td>
                 </tr>
                 <tr>
-                    <td style="font-size: 14px; text-align: center;">Tên công đoạn</td>
-                    <td style="font-size: 14px; text-align: center;">Ngày gia công</td>
-                    <td style="font-size: 14px; text-align: center;">Nhân viên</td>
-                    <td style="font-size: 14px; text-align: center;">Mã máy/ vị trí</td>
-                    <td style="font-size: 14px; text-align: center;">Ca</td>
-                    <td style="font-size: 14px; text-align: center;">Số lượng</td>
-                    <td style="font-size: 14px; text-align: center;">Xác nhận</td>
-                    <td style="font-size: 14px; text-align: center;">Ghi chú</td>
+                    <td colspan="3" style="font-size: 13px; text-align: center;">
+                        Tên sản phẩm: <strong>@TargetKHSX.TargetSanPham?.SP_TenSanPham.Value?.ToString()</strong>
+                    </td>
+                    <td colspan="5" style="font-size: 13px; text-align: center; vertical-align: middle;">
+                        Mã số SP: <strong>@TargetKHSX.TargetSanPham?.SP_MaSP.Value?.ToString()</strong>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="font-size: 13px; text-align: center; vertical-align: middle;">Tên công đoạn</td>
+                    <td style="font-size: 13px; text-align: center; vertical-align: middle;">Ngày GC</td>
+                    <td style="font-size: 13px; text-align: center; vertical-align: middle;">Nhân viên</td>
+                    <td style="font-size: 13px; text-align: center; vertical-align: middle;">Mã máy/vị trí</td>
+                    <td style="font-size: 13px; text-align: center; vertical-align: middle;">Ca</td>
+                    <td style="font-size: 13px; text-align: center; vertical-align: middle;">Số lượng</td>
+                    <td style="font-size: 13px; text-align: center; vertical-align: middle;">Xác nhận</td>
+                    <td style="font-size: 13px; text-align: center; vertical-align: middle;">Ghi chú</td>
                 </tr>
                 @foreach (var step in manufacturingSteps)
                 {
                     <tr>
-                        <td style="font-size: 14px;">@step.Name</td>
-                        <td style="font-size: 14px;">@step.Date</td>
-                        <td style="font-size: 14px;">@step.Employee</td>
-                        <td style="font-size: 14px;">@step.Machine</td>
-                        <td style="font-size: 14px;">@step.Shift</td>
-                        <td style="font-size: 14px;">@step.Quantity</td>
-                        <td style="font-size: 14px;">@step.Confirmation</td>
-                        <td style="font-size: 14px;">@step.Notes</td>
+                        <td style="font-size: 13px;">@step.Name</td>
+                        <td style="font-size: 13px;">@step.Date</td>
+                        <td style="font-size: 13px;">@step.Employee</td>
+                        <td style="font-size: 13px;">@step.Machine</td>
+                        <td style="font-size: 13px;">@step.Shift</td>
+                        <td style="font-size: 13px;">@step.Quantity</td>
+                        <td style="font-size: 13px;">@step.Confirmation</td>
+                        <td style="font-size: 13px;">@step.Notes</td>
                     </tr>
                 }
-                <tr>
-                    <td colspan="2">QP54/F01/@TargetKHSX.TargetSanPham?.SP_TenSanPham.Value?.ToString()</td>
-                    <td style="font-size: 14px;" colspan="2">Lần BH: 3</td>
-                    <td colspan="4" style="text-align:right; font-size: 14px;">@DateTime.Now.ToString("yyyy/MM/dd")</td>
-                </tr>
             </table>
-
+            <RadzenStack Gap="0px" Style="height: contain; width: 100%" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                <RadzenText Text="PM-P-01/F04" Style="font-size: 13px; font-weight: 400"></RadzenText>
+                <RadzenText Text="@DateTime.Now.ToString("yyyy/MM/dd")" Style="font-size: 13px; font-weight: 500"></RadzenText>
+                <RadzenText Text="Thời gian lưu: 15 năm" Style="font-size: 13px; font-weight: 400"></RadzenText>
+            </RadzenStack>
         </RadzenStack>
     </div>
-    <RadzenStack Style="width: 100%; height: contain" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+    <RadzenStack Style="width: 100%; height: contain; padding-top: 20px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
         <RadzenButton Click="@(() => PrintComponent())" Icon="print" Text="Print" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Size="ButtonSize.Small" Variant="Variant.Filled"
-                      Style="height: contain; width: contain; font-size: 14px;" />
+                      Style="height: contain; width: contain; font-size: 13px;" />
     </RadzenStack>
 </RadzenCard>
 

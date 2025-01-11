@@ -76,7 +76,7 @@ namespace ProcessManagement.Services
                             NVLID = { Value = savedLNK.NVLID.Value },
                             VTNVLSoLuong = { Value = newtonkhotaivitri },
                             //NgayNhapKho = { Value = DateTime.Now.Date.ToShortDateString() },
-                            NgayNhapKho = { Value = (modeTraKho) ? savedLNK.NgayNhapKho.Value : DateTime.Now.Date.ToString("dd/MM/yyyy") },
+                            NgayNhapKho = { Value = (modeTraKho) ? savedLNK.NgayNhapKho.Value : DateTime.Now.Date.ToString(Common.FormatNoTime_ddMMyyyy) },
                             LotVitri = { Value = viTriofNVL?.LotVitri.Value },
                             QRIDLOT = { Value = savedLNK.QRIDLOT.Value }
                         };
@@ -87,7 +87,7 @@ namespace ProcessManagement.Services
                         {
                             bool isnvlsame = object.Equals(viTriofNVL?.NVLID.Value, savedLNK.NVLID.Value);
                             //bool isngaynksame = viTriofNVL?.NgayNhapKho.Value?.ToString()?.Trim() == DateTime.Now.Date.ToShortDateString();
-                            bool isngaynksame = viTriofNVL?.NgayNhapKho.Value?.ToString()?.Trim() == ((modeTraKho) ? savedLNK.NgayNhapKho.Value?.ToString()?.Trim() : DateTime.Now.Date.ToShortDateString());
+                            bool isngaynksame = viTriofNVL?.NgayNhapKho.Value?.ToString()?.Trim() == ((modeTraKho) ? savedLNK.NgayNhapKho.Value?.ToString()?.Trim() : DateTime.Now.Date.ToString(Common.FormatNoTime_ddMMyyyy));
 
                             if (isnvlsame && isngaynksame)
                             {
@@ -121,7 +121,7 @@ namespace ProcessManagement.Services
                         {
                             // Update lenh nhap kho status
                             savedLNK.LNKIsDone.Value = 1;
-                            savedLNK.NgayNhapKho.Value = (modeTraKho) ? savedLNK.NgayNhapKho.Value : DateTime.Now.Date.ToShortDateString();
+                            savedLNK.NgayNhapKho.Value = (modeTraKho) ? savedLNK.NgayNhapKho.Value : DateTime.Now.Date.ToString(Common.FormatNoTime_ddMMyyyy);
                             //savedLNK.NgayNhapKho.Value = DateTime.Now.Date.ToShortDateString();
 
                             (int updatelnkResult, string updatelnkError) = SQLServerServices.UpdateLenhNhapKho(savedLNK);
@@ -271,7 +271,7 @@ namespace ProcessManagement.Services
 
                     // Update lenh xuat kho status
                     savedLXK.LXKIsDone.Value = 1;
-                    savedLXK.NgayXuatKho.Value = DateTime.Now.Date.ToShortDateString();
+                    savedLXK.NgayXuatKho.Value = DateTime.Now.Date.ToString(Common.FormatNoTime_ddMMyyyy);
                     (int updatelxkResult, string updatelxkError) = SQLServerServices.UpdateLenhXuatKho(savedLXK);
 
                     if (updatelxkResult == -1)
