@@ -199,7 +199,11 @@
 
             var lastestThungTPham = DSachOriginThungTPhams.LastOrDefault();
 
-            _ = int.TryParse(lastestThungTPham?.SoLuong.Value?.ToString(), out int lastestTTPsoluong) ? lastestTTPsoluong : 0;
+            var listLastestThungTPs = DSachOriginThungTPhams.Where(ttp => ttp.IDThung.Value?.ToString() == lastestThungTPham?.IDThung.Value?.ToString());
+
+            // _ = int.TryParse(lastestThungTPham?.SoLuong.Value?.ToString(), out int lastestTTPsoluong) ? lastestTTPsoluong : 0;
+
+            int lastestTTPsoluong = listLastestThungTPs.Sum(ttp => (int.TryParse(ttp?.SoLuong.Value?.ToString(), out int sl) ? sl : 0));
 
             // Lay so luong con thieu so voi LOT required perthung
             _ = int.TryParse(lastestThungTPham?.SLRequired.Value?.ToString(), out int lastestSLrequired) ? lastestSLrequired : 0;
@@ -216,6 +220,8 @@
             {
                 if (SLOKofLOT <= soluongBosung)
                 {
+                    string randomkey = Common.GenerateUppercaseChars(5);
+                    string mqlthungtp = $"TTP-{TargetKHSX.MaLSX.Value?.ToString()}-{randomkey}-{lastestThungTPham?.IDThung.Value ?? 1}";
                     // Lay IDThung truoc
                     ThungTPham thungTPham = new()
                         {
@@ -225,7 +231,8 @@
                             KHSXID = { Value = TargetKHSX.KHSXID.Value },
                             SPID = { Value = TargetKHSX.SPID.Value },
                             MaQuanLyLot = { Value = TargetLotResult.MaQuanLyLot },
-                            NgayDongThung = { Value = DateTime.Now.ToString(Common.FormatNoTime_yyyddMM) }
+                            NgayDongThung = { Value = DateTime.Now.ToString(Common.FormatNoTime_yyyddMM) },
+                            MaQuanLyThung = { Value = mqlthungtp }
                         };
 
                     newthungTPhams.Add(thungTPham);
