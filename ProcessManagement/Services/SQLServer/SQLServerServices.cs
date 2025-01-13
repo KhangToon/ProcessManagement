@@ -18,6 +18,7 @@ using static ProcessManagement.Models.KHSXs.ThungTPham;
 using static ProcessManagement.Models.KHSXs.KetQuaGC;
 using ProcessManagement.Models.KHO_TPHAM;
 using ProcessManagement.Models.KHSXs.MQL_Template;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace ProcessManagement.Services.SQLServer
 {
@@ -4697,6 +4698,104 @@ namespace ProcessManagement.Services.SQLServer
 
         }
 
+        public (List<PhieuXuatKho> phieuxuatkhos, string error) GetListPhieuXuatKhos(Dictionary<string, object?> parameters, bool isgetAll = false)
+        {
+            List<PhieuXuatKho> listPhieuXuatKhos = new();
+
+            string errorMessage = string.Empty;
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                try
+                {
+                    connection.Open();
+
+                    var conditions = new List<string>();
+                    var command = connection.CreateCommand();
+                    command.CommandText = $"SELECT * FROM [{Common.Table_PhieuXuatKho}]";
+
+                    if (!isgetAll)
+                    {
+                        // Process each parameter in the dictionary
+                        foreach (var param in parameters)
+                        {
+                            conditions.Add($"[{param.Key}] = @{param.Key}");
+
+                            command.Parameters.AddWithValue($"@{param.Key}", param.Value);
+                        }
+
+                        if (conditions.Any())
+                        {
+                            command.CommandText += " WHERE " + string.Join(" AND ", conditions);
+                        }
+                    }
+
+                    using var reader = command.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        PhieuXuatKho phieuxuatkho = new();
+
+                        List<Propertyy> rowItems = phieuxuatkho.GetPropertiesValues();
+
+                        foreach (var item in rowItems)
+                        {
+                            string? columnName = item.DBName;
+
+                            if (!string.IsNullOrEmpty(columnName) && reader.GetOrdinal(columnName) != -1)
+                            {
+                                object columnValue = reader[columnName];
+
+                                item.Value = columnValue == DBNull.Value ? null : columnValue;
+                            }
+                        }
+
+                        if (phieuxuatkho.PXKID.Value != null)
+                        {
+                            // Load danh sach nguyen vat lieu pxk
+                            phieuxuatkho.DSNVLofPXKs = GetListNVLofPXKs(phieuxuatkho.PXKID.Value);
+
+                            // Kiem tra phieu xuat kho da chi dinh du NVL chua
+                            phieuxuatkho.isChiDinhDuSLXuatKho = !(phieuxuatkho.DSNVLofPXKs.Any(nvlofpxk => IsChidinhDuSoLuongXuatKho(nvlofpxk) == false));
+
+                            // Check PXK isdone
+                            phieuxuatkho.isPXKDoneXuatKho = (int.TryParse(phieuxuatkho.IsDonePXK.Value?.ToString(), out int isdone) ? isdone : 0) == 1;
+
+                            // Check IsPhieuBoSungNVL
+                            phieuxuatkho.isPhieuBoSungNVL = (int.TryParse(phieuxuatkho.IsPhieuBoSungNVL.Value?.ToString(), out int isbsnvl) ? isbsnvl : 0) == 1;
+
+                            // Check IsPhieuBSungAddedLOTNVL
+                            phieuxuatkho.isPhieuBSungAddedLOTNVL = (int.TryParse(phieuxuatkho.IsPhieuBSungAddedLOTNVL.Value?.ToString(), out int isaddedlot) ? isaddedlot : 0) == 1;
+
+                            // Kiem tra trang thai tra NVL neu phieu tra kho da duoc tao
+                            _ = int.TryParse(phieuxuatkho.PNKID.Value?.ToString(), out int pnkid_trakho);
+                            _ = int.TryParse(phieuxuatkho.KHSXID.Value?.ToString(), out int khsxid_trakho);
+
+                            if (pnkid_trakho > 0 && khsxid_trakho > 0)
+                            {
+                                PhieuNhapKho phieuNhapKho = GetPhieuNhapKhoByID(phieuxuatkho.PNKID.Value);
+
+                                phieuxuatkho.PhieuTraKho = phieuNhapKho;
+
+                                phieuxuatkho.maPNKreturnNVL = phieuNhapKho.MaPhieuNK.Value?.ToString() ?? string.Empty;
+
+                                phieuxuatkho.isReturnedNVL = phieuNhapKho.isPNKDoneNhapKho;
+                            }
+                        }
+
+                        listPhieuXuatKhos.Add(phieuxuatkho);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    errorMessage = $"Error: {ex.Message}";
+                    listPhieuXuatKhos.Clear(); // Clear the list in case of error
+                }
+            }
+            return (listPhieuXuatKhos, errorMessage);
+        }
+
+
         // Get phiếu xuất kho by ID
         public PhieuXuatKho GetPhieuXuatKhoByID(object? pxkid)
         {
@@ -4734,8 +4833,14 @@ namespace ProcessManagement.Services.SQLServer
             phieuxuatkho.isChiDinhDuSLXuatKho = !(phieuxuatkho.DSNVLofPXKs.Any(nvlofpxk => IsChidinhDuSoLuongXuatKho(nvlofpxk) == false));
 
             // Check PXK isdone
-            //phieuxuatkho.isPXKDoneXuatKho = !(phieuxuatkho.DSNVLofPXKs.Any(nvlofpxk => nvlofpxk.IsXuatKhoDone == false));
             phieuxuatkho.isPXKDoneXuatKho = (int.TryParse(phieuxuatkho.IsDonePXK.Value?.ToString(), out int isdone) ? isdone : 0) == 1;
+
+            // Check IsPhieuBoSungNVL
+            phieuxuatkho.isPhieuBoSungNVL = (int.TryParse(phieuxuatkho.IsPhieuBoSungNVL.Value?.ToString(), out int isbsnvl) ? isbsnvl : 0) == 1;
+
+            // Check IsPhieuBSungAddedLOTNVL
+            phieuxuatkho.isPhieuBSungAddedLOTNVL = (int.TryParse(phieuxuatkho.IsPhieuBSungAddedLOTNVL.Value?.ToString(), out int isaddedlot) ? isaddedlot : 0) == 1;
+
 
             // Kiem tra trang thai tra NVL neu phieu tra kho da duoc tao
             _ = int.TryParse(phieuxuatkho.PNKID.Value?.ToString(), out int pnkid_trakho);
@@ -4794,6 +4899,12 @@ namespace ProcessManagement.Services.SQLServer
             //phieuxuatkho.isPXKDoneXuatKho = !(phieuxuatkho.DSNVLofPXKs.Any(nvlofpxk => nvlofpxk.IsXuatKhoDone == false));
 
             phieuxuatkho.isPXKDoneXuatKho = (int.TryParse(phieuxuatkho.IsDonePXK.Value?.ToString(), out int isdone) ? isdone : 0) == 1;
+
+            // Check IsPhieuBoSungNVL
+            phieuxuatkho.isPhieuBoSungNVL = (int.TryParse(phieuxuatkho.IsPhieuBoSungNVL.Value?.ToString(), out int isbsnvl) ? isbsnvl : 0) == 1;
+
+            // Check IsPhieuBSungAddedLOTNVL
+            phieuxuatkho.isPhieuBSungAddedLOTNVL = (int.TryParse(phieuxuatkho.IsPhieuBSungAddedLOTNVL.Value?.ToString(), out int isaddedlot) ? isaddedlot : 0) == 1;
 
             // Kiem tra trang thai tra NVL neu phieu tra kho da duoc tao
             _ = int.TryParse(phieuxuatkho.PNKID.Value?.ToString(), out int pnkid_trakho);
@@ -4855,6 +4966,13 @@ namespace ProcessManagement.Services.SQLServer
                     //phieuxuatkho.isPXKDoneXuatKho = !(phieuxuatkho.DSNVLofPXKs.Any(nvlofpxk => nvlofpxk.IsXuatKhoDone == false));
 
                     phieuxuatkho.isPXKDoneXuatKho = (int.TryParse(phieuxuatkho.IsDonePXK.Value?.ToString(), out int isdone) ? isdone : 0) == 1;
+
+                    // Check IsPhieuBoSungNVL
+                    phieuxuatkho.isPhieuBoSungNVL = (int.TryParse(phieuxuatkho.IsPhieuBoSungNVL.Value?.ToString(), out int isbsnvl) ? isbsnvl : 0) == 1;
+
+                    // Check IsPhieuBSungAddedLOTNVL
+                    phieuxuatkho.isPhieuBSungAddedLOTNVL = (int.TryParse(phieuxuatkho.IsPhieuBSungAddedLOTNVL.Value?.ToString(), out int isaddedlot) ? isaddedlot : 0) == 1;
+
 
                     // Kiem tra trang thai tra NVL neu phieu tra kho da duoc tao
                     _ = int.TryParse(phieuxuatkho.PNKID.Value?.ToString(), out int pnkid_trakho);
@@ -10306,78 +10424,78 @@ namespace ProcessManagement.Services.SQLServer
             }
         }
         #endregion
-    
+
     }
 }
 
-        
-        //// Get any columns of PXK by any paramaters
-        //public (List<object?> columnValues, string errorMessage) GetPXK_AnyColValuebyAnyParameters(Dictionary<string, object?> parameters, string? returnColumnName = null, bool isGetAll = false)
-        //{
-        //    List<object?> columnValues = new();
-        //    string errorMessage = string.Empty;
 
-        //    using (var connection = new SqlConnection(connectionString))
-        //    {
-        //        try
-        //        {
-        //            connection.Open();
-        //            var conditions = new List<string>();
-        //            var command = connection.CreateCommand();
+//// Get any columns of PXK by any paramaters
+//public (List<object?> columnValues, string errorMessage) GetPXK_AnyColValuebyAnyParameters(Dictionary<string, object?> parameters, string? returnColumnName = null, bool isGetAll = false)
+//{
+//    List<object?> columnValues = new();
+//    string errorMessage = string.Empty;
 
-        //            // If a specific column is requested, select only that column
-        //            string selectClause = returnColumnName != null
-        //                ? $"SELECT [{returnColumnName}]"
-        //                : "SELECT *";
+//    using (var connection = new SqlConnection(connectionString))
+//    {
+//        try
+//        {
+//            connection.Open();
+//            var conditions = new List<string>();
+//            var command = connection.CreateCommand();
 
-        //            command.CommandText = $"{selectClause} FROM [{Common.Table_PhieuXuatKho}]";
+//            // If a specific column is requested, select only that column
+//            string selectClause = returnColumnName != null
+//                ? $"SELECT [{returnColumnName}]"
+//                : "SELECT *";
 
-        //            if (!isGetAll)
-        //            {
-        //                // Process each parameter in the dictionary
-        //                foreach (var param in parameters)
-        //                {
-        //                    conditions.Add($"[{param.Key}] = @{param.Key}");
-        //                    command.Parameters.AddWithValue($"@{param.Key}", param.Value);
-        //                }
-        //                if (conditions.Any())
-        //                {
-        //                    command.CommandText += " WHERE " + string.Join(" AND ", conditions);
-        //                }
-        //            }
+//            command.CommandText = $"{selectClause} FROM [{Common.Table_PhieuXuatKho}]";
 
-        //            using var reader = command.ExecuteReader();
-        //            while (reader.Read())
-        //            {
-        //                // If no specific column is requested, read entire object
-        //                if (returnColumnName == null)
-        //                {
-        //                    PhieuXuatKho phieuxuatkho = new();
-        //                    List<Propertyy> rowItems = phieuxuatkho.GetPropertiesValues();
-        //                    foreach (var item in rowItems)
-        //                    {
-        //                        string? columnName = item.DBName;
-        //                        if (!string.IsNullOrEmpty(columnName) && reader.GetOrdinal(columnName) != -1)
-        //                        {
-        //                            object columnValue = reader[columnName];
-        //                            item.Value = columnValue == DBNull.Value ? null : columnValue;
-        //                        }
-        //                        columnValues.Add(phieuxuatkho);
-        //                    }
-        //                }
-        //                else
-        //                {
-        //                    // If a specific column is requested, read only that column
-        //                    object columnValue = reader[returnColumnName];
-        //                    columnValues.Add(columnValue == DBNull.Value ? null : columnValue);
-        //                }
-        //            }
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            errorMessage = $"Error: {ex.Message}";
-        //            columnValues.Clear(); // Clear the list in case of error
-        //        }
-        //    }
-        //    return (columnValues, errorMessage);
-        //}
+//            if (!isGetAll)
+//            {
+//                // Process each parameter in the dictionary
+//                foreach (var param in parameters)
+//                {
+//                    conditions.Add($"[{param.Key}] = @{param.Key}");
+//                    command.Parameters.AddWithValue($"@{param.Key}", param.Value);
+//                }
+//                if (conditions.Any())
+//                {
+//                    command.CommandText += " WHERE " + string.Join(" AND ", conditions);
+//                }
+//            }
+
+//            using var reader = command.ExecuteReader();
+//            while (reader.Read())
+//            {
+//                // If no specific column is requested, read entire object
+//                if (returnColumnName == null)
+//                {
+//                    PhieuXuatKho phieuxuatkho = new();
+//                    List<Propertyy> rowItems = phieuxuatkho.GetPropertiesValues();
+//                    foreach (var item in rowItems)
+//                    {
+//                        string? columnName = item.DBName;
+//                        if (!string.IsNullOrEmpty(columnName) && reader.GetOrdinal(columnName) != -1)
+//                        {
+//                            object columnValue = reader[columnName];
+//                            item.Value = columnValue == DBNull.Value ? null : columnValue;
+//                        }
+//                        columnValues.Add(phieuxuatkho);
+//                    }
+//                }
+//                else
+//                {
+//                    // If a specific column is requested, read only that column
+//                    object columnValue = reader[returnColumnName];
+//                    columnValues.Add(columnValue == DBNull.Value ? null : columnValue);
+//                }
+//            }
+//        }
+//        catch (Exception ex)
+//        {
+//            errorMessage = $"Error: {ex.Message}";
+//            columnValues.Clear(); // Clear the list in case of error
+//        }
+//    }
+//    return (columnValues, errorMessage);
+//}

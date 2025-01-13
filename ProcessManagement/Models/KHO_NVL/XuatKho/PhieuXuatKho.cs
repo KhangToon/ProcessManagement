@@ -14,6 +14,8 @@ namespace ProcessManagement.Models.KHO_NVL.XuatKho
         public Propertyy GhiChuPXK { get; set; } = new() { DBName = Common.GhiChuPXK, Type = typeof(string), AlowDatabase = true };
         public Propertyy PNKID { get; set; } = new() { DBName = Common.PNKID, Type = typeof(int), AlowDatabase = true }; // using for detect PXK is created return phieu tra kho
         public Propertyy IsDonePXK { get; set; } = new() { DBName = Common.IsDonePXK, Type = typeof(int), AlowDatabase = true };
+        public Propertyy IsPhieuBoSungNVL { get; set; } = new() { DBName = Common.IsPhieuBoSungNVL, Type = typeof(int), AlowDatabase = true };
+        public Propertyy IsPhieuBSungAddedLOTNVL { get; set; } = new() { DBName = Common.IsPhieuBSungAddedLOTNVL, Type = typeof(int), AlowDatabase = true };
 
         public bool isPXKDoneXuatKho = false; // Da load o SQLServices
 
@@ -22,6 +24,10 @@ namespace ProcessManagement.Models.KHO_NVL.XuatKho
         public bool isReturnedNVL = false; // using for detect PXK is returned phieu tra kho
 
         public string maPNKreturnNVL = string.Empty; // using for detect PXK is returned phieu tra kho
+
+        public bool isPhieuBoSungNVL = false; // Da load o SQLServices
+
+        public bool isPhieuBSungAddedLOTNVL = false; // Da load o SQLServices
 
         public List<NVLofPhieuXuatKho> DSNVLofPXKs { get; set; } = new();
 
