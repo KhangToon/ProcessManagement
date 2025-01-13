@@ -274,48 +274,20 @@
         return (sumok, sumng, (sumok + sumng));
     }
 
-    private async Task OnGetListKHSXs_()
+    private async Task OnGetListKHSXs_old()
     {
         DSKHSXs = new();
 
-        var listkhsxids = SQLServerServices.GetlistKHSXid();
-
-        // Create a list to hold the tasks
-        var tasks = new List<Task>();
-
-        foreach (var khsxid in listkhsxids)
+        DSKHSXs = await Task.Run(() =>
         {
-            tasks.Add(Task.Run(async () =>
+            var results = SQLServerServices.GetListKHSXs();
+
+            if (results.Any())
             {
-                KHSX kHSX = await GetKHSX(khsxid);
-
-                if (kHSX.KHSXID.Value != null)
-                {
-                    //int id = int.TryParse(kHSX.MaLSX.Value?.ToString()?.Substring(1), out int index) ? index : 0;
-
-                    DSKHSXs.Add(kHSX);
-                }
-            }));
-        }
-
-        // Wait for all tasks to complete
-        await Task.WhenAll(tasks);
-
-        if (DSKHSXs.Any())
-        {
-            DSKHSXs = DSKHSXs.OrderByDescending(khsx => int.TryParse(khsx.MaLSX.Value?.ToString()?.Substring(1), out int index) ? index : 0).ToList();
-        }
-
-        // DSKHSXs = await Task.Run(() =>
-        // {
-        //     var results = SQLServerServices.GetListKHSXs();
-
-        //     if (results.Any())
-        //     {
-        //         results.Reverse();
-        //     }
-        //     return results;
-        // });
+                results.Reverse();
+            }
+            return results;
+        });
 
         if (DSKHSXs.Any())
         {
@@ -328,6 +300,7 @@
             DSKHSXs_base = DSKHSXs;
         }
     }
+
 
     private async Task OnGetListKHSXs()
     {

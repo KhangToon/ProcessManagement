@@ -602,6 +602,48 @@
         }
     }
 
+    private async Task CreateDSLOT_KHSX(object? khsxid)
+    {
+        if (generLot.ListTempLOT_NVLs != null && generLot.ListTempLOT_NVLs.Any() && generLot.NewKHSX.DSachCongDoans.Any())
+        {
+            List<KHSX_LOT> dsahLOTkhsx = new();
+
+            foreach (var lotnvl in generLot.ListTempLOT_NVLs)
+            {
+                foreach (var congdoan in generLot.NewKHSX.DSachCongDoans.Where(cd => cd.IsUsing == true).ToList())
+                {
+                    KHSX_LOT lot_Khsx = new()
+                        {
+                            KHSXID = { Value = khsxid },
+                            MaQuanLyLot = { Value = lotnvl.MaQuanLy.Value },
+                            NCID = { Value = congdoan.NCID.Value },
+                            SLLOT = { Value = lotnvl.SoLuong.Value },
+                            NgayNhapKho = { Value = lotnvl.NgayNhap.Value },
+                            NVLID = { Value = lotnvl.NVLID.Value }
+                        };
+
+                    dsahLOTkhsx.Add(lot_Khsx);
+                }
+
+            }
+
+            if (dsahLOTkhsx.Any())
+            {
+                // Insert dslotkhsx to DB
+                foreach (var lotkhsx in dsahLOTkhsx)
+                {
+                    (int result, string error) = SQLServerServices.InsertLOT_khsx(lotkhsx);
+
+                    if (result == -1)
+                    {
+                        await DeleteKehoachSanxuat();
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
     // Luu ke hoach san xuat to Database
     private async Task SubmitKHSXtoDatabase()
     {
@@ -720,48 +762,6 @@
         isAddingLSXtodatabase = false;
 
         DialogService.Close(generLot.NewKHSX);
-    }
-
-    private async Task CreateDSLOT_KHSX(object? khsxid)
-    {
-        if (generLot.ListTempLOT_NVLs != null && generLot.ListTempLOT_NVLs.Any() && generLot.NewKHSX.DSachCongDoans.Any())
-        {
-            List<KHSX_LOT> dsahLOTkhsx = new();
-
-            foreach (var lotnvl in generLot.ListTempLOT_NVLs)
-            {
-                foreach (var congdoan in generLot.NewKHSX.DSachCongDoans.Where(cd => cd.IsUsing == true).ToList())
-                {
-                    KHSX_LOT lot_Khsx = new()
-                        {
-                            KHSXID = { Value = khsxid },
-                            MaQuanLyLot = { Value = lotnvl.MaQuanLy.Value },
-                            NCID = { Value = congdoan.NCID.Value },
-                            SLLOT = { Value = lotnvl.SoLuong.Value },
-                            NgayNhapKho = { Value = lotnvl.NgayNhap.Value },
-                            NVLID = { Value = lotnvl.NVLID.Value }
-                        };
-
-                    dsahLOTkhsx.Add(lot_Khsx);
-                }
-
-            }
-
-            if (dsahLOTkhsx.Any())
-            {
-                // Insert dslotkhsx to DB
-                foreach (var lotkhsx in dsahLOTkhsx)
-                {
-                    (int result, string error) = SQLServerServices.InsertLOT_khsx(lotkhsx);
-
-                    if (result == -1)
-                    {
-                        await DeleteKehoachSanxuat();
-                        break;
-                    }
-                }
-            }
-        }
     }
 
 }

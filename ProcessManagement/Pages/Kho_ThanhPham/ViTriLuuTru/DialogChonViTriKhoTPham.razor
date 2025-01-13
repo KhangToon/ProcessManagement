@@ -207,7 +207,7 @@
                                                     {
                                                         var thungtpham = vitriofTP.ThungTPhamExtend;
 
-                                                        <RadzenCard onclick="@(() => {OnVTofNVLSelected(vitriofTP);})" Variant="Variant.Flat" class="@(((IsVTofNVLSelected(vitriofTP))? "vtofnvl_IsSelectd rz-shadow-4" : "vtofnvl_UnSelectd rz-shadow-4"))">
+                                                        <RadzenCard onclick="@(() => {OnVTofNVLSelected(vitriofTP);})" Style="@((vitriofTP.ThungTPhamExtend.ThungTPhams.Any())? "cursor: not-allowed;" : "")" Variant="Variant.Flat" class="@(((IsVTofNVLSelected(vitriofTP))? "vtofnvl_IsSelectd rz-shadow-4" : "vtofnvl_UnSelectd rz-shadow-4"))">
                                                             <RadzenStack Style="width: 100%; height: 100%; padding: 0" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                                 <RadzenCard Variant="Variant.Filled" Style="height: contain; width: 100%; padding: 10px;">
                                                                     @if (thungtpham.ThungTPhams.Any())
@@ -487,22 +487,12 @@
 
     private void OnVTofNVLSelected(ViTriofTPham selected)
     {
+        if (selected.ThungTPhamExtend.ThungTPhams.Any())
+        {
+            return;
+        }
+
         bool nnk = selected.NgayNhapKho.Value?.ToString()?.Trim() == DateTime.Now.Date.ToShortDateString();
-
-        // _ = int.TryParse(SelectedVTofTPham.VTofTPID.Value?.ToString(), out int a) ? a : 0;
-        // _ = int.TryParse(selected.VTofTPID.Value?.ToString(), out int b) ? b : 0;
-
-        // if (b != 0)
-        // {
-        //     if (a != b)
-        //     {
-        //         SelectedVTofTPham = selected;
-        //     }
-        //     else
-        //     {
-        //         SelectedVTofTPham = new();
-        //     }
-        // }
 
         SelectedVTofTPham = selected;
 
@@ -543,9 +533,56 @@
         StateHasChanged();
     }
 
+    private async Task LoadDSachViTriTPham(object? vtid = null)
+    {
+        await Task.Run(async () =>
+        {
+            DSVitris = SQLServerServices.GetListViTriTPhams(new Dictionary<string, object?>(), true).viTriTPhams;
+
+            await Task.WhenAll(DSVitris.Select(async vitri =>
+            {
+                Dictionary<string, object?> parameters = new() { { ViTriofTPham.DBName.VTTPID, vitri.VTTPID.Value } };
+
+                vitri.DSachViTriofTPhams = SQLServerServices.GetListViTriofTPhams(parameters, false).viTriofTPhams;
+
+                vitri.DSachViTriofTPhams = RangeIncreaseLOTs(vitri.DSachViTriofTPhams);
+
+                // Load san pham infor
+                await Task.WhenAll(vitri.DSachViTriofTPhams.Select(async vitrioftp =>
+                {
+                    var results = await LoadDSachThungTPhams(null, vitrioftp.VTofTPID?.Value);
+
+                    if (results != null && results.Any())
+                    {
+                        vitrioftp.ThungTPhamExtend = results.FirstOrDefault() ?? new();
+
+                        foreach (var thung in vitrioftp.ThungTPhamExtend.ThungTPhams)
+                        {
+                            if (int.TryParse(thung.SPID.Value?.ToString(), out int spid) && spid > 0)
+                            {
+                                vitrioftp.TargetSanPham.SP_MaSP.Value = SQLServerServices.GetMaSanphamByID(spid);
+                            }
+                        }
+                    }
+
+                    if (TarGetThungTPhamEx.DaNhapKho &&
+                        vitrioftp.VTofTPID?.Value?.ToString() == TargetSelectedVTofTPham.VTofTPID?.Value?.ToString())
+                    {
+                        SelectedViTri = vitri;
+                        SelectedVTofTPham = vitrioftp;
+                    }
+                }));
+            }));
+
+            if (!TarGetThungTPhamEx.DaNhapKho)
+            {
+                SelectedViTri = DSVitris.FirstOrDefault() ?? new();
+            }
+        });
+    }
 
     // Load danh sach vi tri trong kho luu tru
-    private async Task LoadDSachViTriTPham(object? vtid = null)
+    private async Task LoadDSachViTriTPham_old(object? vtid = null)
     {
         await Task.Run(() =>
         {
@@ -562,7 +599,8 @@
                 // Load san pham infor
                 Parallel.ForEach(vitri.DSachViTriofTPhams, async vitrioftp =>
                 {
-                    var results = await LoadDSachThungTPhams(TargetKHSX.KHSXID.Value, vitrioftp.VTofTPID.Value);
+                    //var results = await LoadDSachThungTPhams(TargetKHSX.KHSXID.Value, vitrioftp.VTofTPID.Value);
+                    var results = await LoadDSachThungTPhams(null, vitrioftp.VTofTPID.Value);
 
                     if (results.Any())
                     {
@@ -603,18 +641,25 @@
         {
             List<ThungTPhamExtend> thungTPhamExtends = new();
 
-            List<ThungTPham> thungTPhams = SQLServerServices.GetListThungTPhams(new Dictionary<string, object?>() { { ThungTPham.DBName.KHSXID, khsxid }, { ThungTPham.DBName.VTofTPID, vtofttpID } }).thungTPhams;
+            Dictionary<string, object?> pars = new Dictionary<string, object?>() { { ThungTPham.DBName.VTofTPID, vtofttpID } };
+
+            if (khsxid != null)
+            {
+                pars.Add(ThungTPham.DBName.KHSXID, khsxid);
+            }
+
+            List<ThungTPham> thungTPhams = SQLServerServices.GetListThungTPhams(pars).thungTPhams;
 
             // Group the ThungTPham objects by IDThung
             var groupedResults = thungTPhams.Where(ttp => ttp.IDThung.Value != null)
-                                            .GroupBy(ttp => ttp.IDThung.Value)
-                                            .Select(group => new ThungTPhamExtend
-                                                {
-                                                    IDThung = group.Key,
-                                                    MaSanPham = SQLServerServices.GetMaSanphamByID(group.ToList().FirstOrDefault()?.SPID.Value),
-                                                    Total = group.ToList().Sum(ttp => int.TryParse(ttp.SoLuong.Value?.ToString(), out int sl) ? sl : 0),
-                                                    ThungTPhams = group.ToList()
-                                                }).ToList();
+                                        .GroupBy(ttp => ttp.IDThung.Value)
+                                        .Select(group => new ThungTPhamExtend
+                                            {
+                                                IDThung = group.Key,
+                                                MaSanPham = SQLServerServices.GetMaSanphamByID(group.ToList().FirstOrDefault()?.SPID.Value),
+                                                Total = group.ToList().Sum(ttp => int.TryParse(ttp.SoLuong.Value?.ToString(), out int sl) ? sl : 0),
+                                                ThungTPhams = group.ToList()
+                                            }).ToList();
             if (groupedResults.Any())
             {
                 thungTPhamExtends = groupedResults;
@@ -629,8 +674,8 @@
         // Sort the list based on extracting the numeric part of the Lot property
         return inputList.OrderBy(item =>
         int.TryParse(
-            item.LotVitri.Value?.ToString()?.Replace("LOT", ""),
-            out int lotNumber
+        item.LotVitri.Value?.ToString()?.Replace("LOT", ""),
+        out int lotNumber
         ) ? lotNumber : int.MaxValue
         ).ToList();
     }

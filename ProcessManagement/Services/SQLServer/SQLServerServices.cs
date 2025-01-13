@@ -10306,5 +10306,78 @@ namespace ProcessManagement.Services.SQLServer
             }
         }
         #endregion
+    
     }
 }
+
+        
+        //// Get any columns of PXK by any paramaters
+        //public (List<object?> columnValues, string errorMessage) GetPXK_AnyColValuebyAnyParameters(Dictionary<string, object?> parameters, string? returnColumnName = null, bool isGetAll = false)
+        //{
+        //    List<object?> columnValues = new();
+        //    string errorMessage = string.Empty;
+
+        //    using (var connection = new SqlConnection(connectionString))
+        //    {
+        //        try
+        //        {
+        //            connection.Open();
+        //            var conditions = new List<string>();
+        //            var command = connection.CreateCommand();
+
+        //            // If a specific column is requested, select only that column
+        //            string selectClause = returnColumnName != null
+        //                ? $"SELECT [{returnColumnName}]"
+        //                : "SELECT *";
+
+        //            command.CommandText = $"{selectClause} FROM [{Common.Table_PhieuXuatKho}]";
+
+        //            if (!isGetAll)
+        //            {
+        //                // Process each parameter in the dictionary
+        //                foreach (var param in parameters)
+        //                {
+        //                    conditions.Add($"[{param.Key}] = @{param.Key}");
+        //                    command.Parameters.AddWithValue($"@{param.Key}", param.Value);
+        //                }
+        //                if (conditions.Any())
+        //                {
+        //                    command.CommandText += " WHERE " + string.Join(" AND ", conditions);
+        //                }
+        //            }
+
+        //            using var reader = command.ExecuteReader();
+        //            while (reader.Read())
+        //            {
+        //                // If no specific column is requested, read entire object
+        //                if (returnColumnName == null)
+        //                {
+        //                    PhieuXuatKho phieuxuatkho = new();
+        //                    List<Propertyy> rowItems = phieuxuatkho.GetPropertiesValues();
+        //                    foreach (var item in rowItems)
+        //                    {
+        //                        string? columnName = item.DBName;
+        //                        if (!string.IsNullOrEmpty(columnName) && reader.GetOrdinal(columnName) != -1)
+        //                        {
+        //                            object columnValue = reader[columnName];
+        //                            item.Value = columnValue == DBNull.Value ? null : columnValue;
+        //                        }
+        //                        columnValues.Add(phieuxuatkho);
+        //                    }
+        //                }
+        //                else
+        //                {
+        //                    // If a specific column is requested, read only that column
+        //                    object columnValue = reader[returnColumnName];
+        //                    columnValues.Add(columnValue == DBNull.Value ? null : columnValue);
+        //                }
+        //            }
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            errorMessage = $"Error: {ex.Message}";
+        //            columnValues.Clear(); // Clear the list in case of error
+        //        }
+        //    }
+        //    return (columnValues, errorMessage);
+        //}

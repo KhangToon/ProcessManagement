@@ -119,7 +119,7 @@
                                     </RadzenStack>
                                 </RadzenStack>
                             </RadzenStack>
-                            <RadzenStack Orientation="Orientation.Vertical" Style="height: contain; width: 100%; padding: 10px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenStack Orientation="Orientation.Vertical" Style="height: contain; width: 100%; padding: 10px; padding-left: 0; padding-right: 0" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                 @{
                                     if (PXKofKHSX.isReturnedNVL)
                                     {
@@ -151,6 +151,12 @@
                                         <!--Da tao phieu xuat kho/ Da tao phieu xuat kho/ Da hoan thanh xuat kho -->
                                         <RadzenButton Visible="@(PXKofKHSX.PXKID.Value != null && PXKofKHSX.isChiDinhDuSLXuatKho && PXKofKHSX.isPXKDoneXuatKho)" Icon="visibility" Click="@(() => OnOpenDialogXemPhieuXuatKho("Xem phiếu xuất kho NVL"))" Text="Xem phiếu xuất kho NVL" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Dark"
                                                       Style="height: contain; width: 100%; font-size: 14px;" />
+
+                                        // <!-- Bo sung NVL cho KHSX -->
+                                        // <RadzenButton Visible="@(PXKofKHSX.PXKID.Value != null && PXKofKHSX.isChiDinhDuSLXuatKho && PXKofKHSX.isPXKDoneXuatKho)" Icon="add"
+                                        //               Text="Bổ sung nguyên vật liệu" Click="OnOpenDialogCreatePhieuBoSungNVL"
+                                        //               Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
+                                        //               Style="height: contain; width: 100%; font-size: 14px; font-weight: 600" />
                                     }
 
                                 }
@@ -695,6 +701,18 @@
         {
             await DialogService.OpenAsync<Manager_NVL.XuatKho.PhieuXuatKhoDetails>(tilte, new Dictionary<string, object>() { { "PXK", PXKofKHSX } },
             new DialogOptions() { ShowTitle = true, Width = "contain", Height = "contain", Resizable = true, Draggable = true, ShowClose = true, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
+
+            await ReloadCurrentKHSX(SelectKHSX.KHSXID.Value);
+        }
+    }
+
+    // Tao phieu bo sung NVL dialog
+    private async Task OnOpenDialogCreatePhieuBoSungNVL()
+    {
+        if (SelectKHSX?.DSachNVLofKHSXs.Count > 0)
+        {
+            await DialogService.OpenAsync<BoSungNVL.DialogPhieuBoSungNVL>(null, new Dictionary<string, object>() { { "DSNVLofKHSX", SelectKHSX.DSachNVLofKHSXs }, { "CreatedWithKHSX", true }, { "KHSX", SelectKHSX } },
+            new DialogOptions() { ShowTitle = false, Width = "100%", Height = "100%", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
 
             await ReloadCurrentKHSX(SelectKHSX.KHSXID.Value);
         }
