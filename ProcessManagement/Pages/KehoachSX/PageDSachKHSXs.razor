@@ -250,8 +250,8 @@
     private KHSX_LOT? TargetMQLLot;
 
     protected override async Task OnInitializedAsync()
-    {
-        await OnGetListKHSXs();
+    {   
+        await ButtonReloadPress();
 
         await base.OnInitializedAsync();
     }
@@ -274,7 +274,7 @@
         return (sumok, sumng, (sumok + sumng));
     }
 
-    private async Task OnGetListKHSXs()
+    private async Task OnGetListKHSXs_()
     {
         DSKHSXs = new();
 
@@ -285,11 +285,12 @@
 
         foreach (var khsxid in listkhsxids)
         {
-            tasks.Add(Task.Run(() =>
+            tasks.Add(Task.Run(async () =>
             {
-                KHSX kHSX = SQLServerServices.GetKHSXbyID(khsxid);
+                KHSX kHSX = await GetKHSX(khsxid);
+
                 if (kHSX.KHSXID.Value != null)
-                {   
+                {
                     //int id = int.TryParse(kHSX.MaLSX.Value?.ToString()?.Substring(1), out int index) ? index : 0;
 
                     DSKHSXs.Add(kHSX);
@@ -326,6 +327,60 @@
 
             DSKHSXs_base = DSKHSXs;
         }
+    }
+
+    private async Task OnGetListKHSXs()
+    {
+        DSKHSXs = new List<KHSX>();
+        var listkhsxids = SQLServerServices.GetlistKHSXid();
+        var tasks = new List<Task>();
+        var semaphore = new SemaphoreSlim(10); // Limit to 5 concurrent tasks
+
+        foreach (var khsxid in listkhsxids)
+        {
+            await semaphore.WaitAsync(); // Wait for an available slot
+            tasks.Add(Task.Run(async () =>
+            {
+                try
+                {
+                    KHSX kHSX = await GetKHSX(khsxid);
+
+                    if (kHSX != null && kHSX.KHSXID.Value != null)
+                    {
+                        DSKHSXs.Add(kHSX);
+                    }
+                }
+                catch (Exception)
+                {
+                    // Log or handle the exception
+                }
+                finally
+                {
+                    semaphore.Release(); // Release the slot
+                }
+            }));
+        }
+
+        await Task.WhenAll(tasks);
+
+        if (DSKHSXs.Any())
+        {
+            DSKHSXs = DSKHSXs.OrderByDescending(khsx => int.TryParse(khsx.MaLSX.Value?.ToString()?.Trim()?.Substring(1), out int index) ? index : 0).ToList();
+
+            SelectedKHSX = selectKHSXID != null
+                ? DSKHSXs.FirstOrDefault(x => object.Equals(x.KHSXID.Value, selectKHSXID)) ?? new KHSX()
+                : DSKHSXs.FirstOrDefault() ?? new KHSX();
+
+            DSKHSXs_base = DSKHSXs;
+        }
+    }
+
+    private async Task<KHSX> GetKHSX(object? khsxid)
+    {
+        return await Task.Run(() =>
+        {
+            return SQLServerServices.GetKHSXbyID(khsxid);
+        });
     }
 
     private string IsKHSXSelected(KHSX selectKHSX)
@@ -454,7 +509,7 @@
 
                 await OnGetListKHSXs();
 
-                await Task.Delay(200);
+                //await Task.Delay(100);
 
                 reloadpage = false;
             }
