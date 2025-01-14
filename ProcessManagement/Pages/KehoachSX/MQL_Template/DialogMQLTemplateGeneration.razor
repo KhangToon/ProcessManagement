@@ -254,6 +254,9 @@
     [Parameter]
     public GenerateLot_V3 GenerateLot_V3 { get; set; } = new();
 
+    [Parameter]
+    public int StartIndex { get; set; } = 0; // Using for BSung NVL
+
     protected override async Task OnInitializedAsync()
     {
         await LoadMQLTemplateItems();
@@ -319,7 +322,7 @@
                     }
                     else if (tentruyxuat == MQLTemplate.Property_NgayNhapKho)
                     {
-                       // Add NgayNhapKho after dialog close
+                        // Add NgayNhapKho after dialog close
                     }
 
                     MQLTemplateItem thongTin = new()
@@ -389,7 +392,7 @@
 
     private async Task OnGenerateDSachLotwithTemplate()
     {
-        int startIndex = 0;
+        int startIndex = StartIndex;
 
         GenerateLot_V3.DetailLotKHSXs = new();
 

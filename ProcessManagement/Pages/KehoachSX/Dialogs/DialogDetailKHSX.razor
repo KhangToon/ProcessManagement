@@ -158,11 +158,12 @@
                                             foreach (var extPXK in ExTraPhieuXKhos)
                                             {
                                                 <!--Da tao phieu xuat kho/ Da chi dinh vi tri NVL/ Chua hoan thanh xuat kho-->
-                                                <RadzenStack Visible="@(extPXK.PXKID.Value != null && extPXK.isChiDinhDuSLXuatKho && !extPXK.isPXKDoneXuatKho)" Style="height: contain; width: 100%; padding: 0px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                <RadzenStack Visible="@(extPXK.PXKID.Value != null && extPXK.isChiDinhDuSLXuatKho && extPXK.isPhieuBSungAddedLOTNVL && !extPXK.isPXKDoneXuatKho)" Style="height: contain; width: 100%; padding: 0px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                                     <RadzenAlert Text="Chưa hoàn thành bổ sung NVL cho KHSX" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; padding-right: 10px; margin: 0" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Dark"></RadzenAlert>
                                                 </RadzenStack>
                                                 <!--Da tao phieu xuat kho/ Da chi dinh vi tri NVL/ Chua hoan thanh xuat kho-->
-                                                <RadzenButton Visible="@(extPXK.PXKID.Value != null && extPXK.isChiDinhDuSLXuatKho && !extPXK.isPXKDoneXuatKho)" Icon="upload" Click="@(() => NavigateToHandlePhieuXuatKho(extPXK.PXKID.Value))" Text="@($"Tiến hành bổ sung NVL ({extPXK.MaPhieuXK.Value?.ToString()})")" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Dark"
+                                                <RadzenButton Visible="@(extPXK.PXKID.Value != null && extPXK.isChiDinhDuSLXuatKho && extPXK.isPhieuBSungAddedLOTNVL && !extPXK.isPXKDoneXuatKho)" Icon="upload" Click="@(() => NavigateToHandlePhieuXuatKho(extPXK.PXKID.Value))"
+                                                              Text="@($"Tiến hành bổ sung NVL ({extPXK.MaPhieuXK.Value?.ToString()})")" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Dark"
                                                               Style="height: contain; width: 100%; font-size: 14px;" />
 
                                                 <!--Da tao phieu xuat kho/ Da chi dinh vi tri NVL/ Da hoan thanh xuat kho-->
@@ -170,16 +171,22 @@
                                                     <RadzenAlert Text="Đã xuất kho NVL cho kế hoạch sản xuất" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; padding-right: 10px; margin: 0" AlertStyle="AlertStyle.Success" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Light"></RadzenAlert>
                                                 </RadzenStack>
                                                 <!--Da tao phieu xuat kho/ Da tao phieu xuat kho/ Da hoan thanh xuat kho -->
-                                                <RadzenButton Visible="@(extPXK.PXKID.Value != null && extPXK.isChiDinhDuSLXuatKho && extPXK.isPXKDoneXuatKho)" Icon="visibility" Click="@(() => OnOpenDialogXemPhieuXuatKho("Xem phiếu bổ sung NVL", extPXK))" Text="@($"Xem phiếu bổ sung NVL {extPXK.MaPhieuXK.Value?.ToString()}")" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Dark"
+                                                <RadzenButton Visible="@(extPXK.PXKID.Value != null && extPXK.isChiDinhDuSLXuatKho && extPXK.isPXKDoneXuatKho)" Icon="visibility" Click="@(() => OnOpenDialogXemPhieuXuatKho("Xem phiếu bổ sung NVL", extPXK))"
+                                                              Text="@($"Xem phiếu bổ sung NVL {extPXK.MaPhieuXK.Value?.ToString()}")" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Dark"
                                                               Style="height: contain; width: 100%; font-size: 14px;" />
 
-                                                <RadzenButton Visible="@(extPXK.PXKID.Value != null && extPXK.isChiDinhDuSLXuatKho && extPXK.isPXKDoneXuatKho && !extPXK.isPhieuBSungAddedLOTNVL)" Icon="add" Text="@($"Tạo mã quản lý cho NVL bổ sung")" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Dark"
-                                                              Style="height: contain; width: 100%; font-size: 14px;" />
+                                                <RadzenStack Visible="@(extPXK.PXKID.Value != null && extPXK.isChiDinhDuSLXuatKho && !extPXK.isPXKDoneXuatKho && !extPXK.isPhieuBSungAddedLOTNVL)" Style="height: contain; width: 100%; padding: 0px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                    <RadzenAlert Text="Chưa tạo mã quản lý cho NVL bổ sung" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; padding-right: 10px; margin: 0" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Light"></RadzenAlert>
+                                                </RadzenStack>
+
+                                                <RadzenButton Visible="@(extPXK.PXKID.Value != null && extPXK.isChiDinhDuSLXuatKho && !extPXK.isPXKDoneXuatKho && !extPXK.isPhieuBSungAddedLOTNVL)" Icon="add"
+                                                              Text="@($"Tạo mã quản lý cho NVL bổ sung")" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
+                                                              Click="@(async() => await OnOpenDialogGenerateLotforNVLbosung(extPXK))" Style="height: contain; width: 100%; font-size: 14px; font-weight: 600" />
                                             }
                                         }
 
                                         <!-- Bo sung NVL cho KHSX -->
-                                        <RadzenButton Visible="@(PXKofKHSX.PXKID.Value != null && PXKofKHSX.isChiDinhDuSLXuatKho && PXKofKHSX.isPXKDoneXuatKho)" Icon="add"
+                                        <RadzenButton Visible="@(ExTraPhieuXKhos.All(expxk => expxk.isPXKDoneXuatKho && expxk.isChiDinhDuSLXuatKho && expxk.isPhieuBSungAddedLOTNVL) && PXKofKHSX.PXKID.Value != null && PXKofKHSX.isChiDinhDuSLXuatKho && PXKofKHSX.isPXKDoneXuatKho)" Icon="add"
                                                       Text="Bổ sung nguyên vật liệu" Click="OnOpenDialogCreatePhieuBoSungNVL"
                                                       Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
                                                       Style="height: contain; width: 100%; font-size: 14px; font-weight: 600" />
@@ -739,7 +746,9 @@
     {
         if (SelectKHSX?.DSachNVLofKHSXs.Count > 0)
         {
-            await DialogService.OpenAsync<Manager_NVL.XuatKho.DialogCreate_PhieuXuatKho>(null, new Dictionary<string, object>() { { "DSNVLofKHSX", SelectKHSX.DSachNVLofKHSXs }, { "CreatedWithKHSX", true }, { "KHSX", SelectKHSX } },
+            int stt_pxk = (((PXKofKHSX.PNKID.Value != null) ? 1 : 0) + ExTraPhieuXKhos.Count()) + 1; // next index of PXK
+
+            await DialogService.OpenAsync<Manager_NVL.XuatKho.DialogCreate_PhieuXuatKho>(null, new Dictionary<string, object>() { { "STT_PXK", stt_pxk }, { "DSNVLofKHSX", SelectKHSX.DSachNVLofKHSXs }, { "CreatedWithKHSX", true }, { "KHSX", SelectKHSX } },
             new DialogOptions() { ShowTitle = false, Width = "100%", Height = "100%", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
 
             await ReloadCurrentKHSX(SelectKHSX.KHSXID.Value);
@@ -762,11 +771,25 @@
     private async Task OnOpenDialogCreatePhieuBoSungNVL()
     {
         if (SelectKHSX?.DSachNVLofKHSXs.Count > 0)
-        {
-            await DialogService.OpenAsync<BoSungNVL.DialogPhieuBoSungNVL>(null, new Dictionary<string, object>() { { "DSNVLofKHSX", SelectKHSX.DSachNVLofKHSXs }, { "CreatedWithKHSX", true }, { "KHSX", SelectKHSX } },
+        {   
+            int stt_pxk = (((PXKofKHSX.PNKID.Value != null) ? 1 : 0) + ExTraPhieuXKhos.Count()) + 1; // next index of PXK
+
+            // Xu ly trung NVLofKHSXs
+
+            await DialogService.OpenAsync<BoSungNVL.DialogPhieuBoSungNVL>(null, new Dictionary<string, object>() { { "STT_PXK", stt_pxk }, { "DSNVLofKHSX", SelectKHSX.DSachNVLofKHSXs }, { "CreatedWithKHSX", true }, { "KHSX", SelectKHSX } },
             new DialogOptions() { ShowTitle = false, Width = "100%", Height = "100%", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
 
             await ReloadCurrentKHSX(SelectKHSX.KHSXID.Value);
+        }
+    }
+
+    private async Task OnOpenDialogGenerateLotforNVLbosung(PhieuXuatKho extraPXK)
+    {
+        if (SelectKHSX != null)
+        {
+            await DialogService.OpenAsync<BoSungNVL.DialogGenerateKHSX_bosung>(null, new Dictionary<string, object>() { { "ExTraPXK", extraPXK }, { "TargetKHSX", SelectKHSX } },
+            new DialogOptions() { ShowTitle = false, Width = "100%", Height = "100%", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
+
         }
     }
 

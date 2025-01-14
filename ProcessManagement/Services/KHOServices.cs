@@ -302,7 +302,7 @@ namespace ProcessManagement.Services
                         //// update IsDonePXKofKHSX is done (da xuat kho cho KHSX)
                         //SQLServerServices.UpdateKHSXProperty(khsxid, Common.IsDonePXK, PXK.IsDonePXK.Value);
 
-                        (int updatelotstatus, string errorlot) = UpdateNgayNhapXuatKho_dsLOTofKHSX(khsxid, savedLXK);
+                        (int updatelotstatus, string errorlot) = UpdateNgayNhapXuatKho_dsLOTofKHSX(khsxid, savedLXK, PXK.STT_PXK.Value);
                     }
 
                     // update status to UI
@@ -343,10 +343,11 @@ namespace ProcessManagement.Services
         }
 
         // Update ngaynhapkho/ngayxuatkho cua dsLOTofKHSX
-        private static (int, string) UpdateNgayNhapXuatKho_dsLOTofKHSX(object? khsxid, LenhXuatKho targetLXK)
+        private static (int, string) UpdateNgayNhapXuatKho_dsLOTofKHSX(object? khsxid, LenhXuatKho targetLXK, object? stt_pxk)
         {
-            Dictionary<string, object?> parameters = new() { { Models.KHSXs.KHSX_LOT.DBName.KHSXID, khsxid }, { Models.KHSXs.KHSX_LOT.DBName.NgayNhapKho, targetLXK.NgayNhapKho.Value } };
-            // ---> chi load nhung lotKHSX theo ngay nhap kho
+            Dictionary<string, object?> parameters = new() { { Models.KHSXs.KHSX_LOT.DBName.KHSXID, khsxid }, { Models.KHSXs.KHSX_LOT.DBName.NgayNhapKho, targetLXK.NgayNhapKho.Value },
+                                                             { Models.KHSXs.KHSX_LOT.DBName.NVLID, targetLXK.NVLID.Value }, { Models.KHSXs.KHSX_LOT.DBName.STT_PXK, stt_pxk} };
+
             (var resultdslots, string getError) = SQLServerServices.GetListLOT_khsx(parameters);
 
             if (resultdslots != null && resultdslots.Any())

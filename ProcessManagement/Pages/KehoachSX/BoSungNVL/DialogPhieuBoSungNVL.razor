@@ -419,6 +419,9 @@
     [Parameter]
     public KHSX KHSX { get; set; } = new(); // Chi dung khi tao PXK voi KHSX
 
+    [Parameter]
+    public int STT_PXK { get; set; }
+
     private static object? selectedNVLofPXKid = 0;
 
     protected async override Task OnInitializedAsync()
@@ -428,14 +431,12 @@
         {
             DSachNVL_XuatKho = new();
 
-            foreach (var nvlofkhsx in DSNVLofKHSX)
-            {
-                NguyenVatLieu nguyenVatLieu = SQLServerServices.GetNguyenVatLieuByID_MultipleTask(nvlofkhsx.NVLID.Value);
+            // Chi lay 1 NVLofKHSX neu trung ( chi khi bo sung NVL)
+            NguyenVatLieu nguyenVatLieu = SQLServerServices.GetNguyenVatLieuByID_MultipleTask(DSNVLofKHSX.FirstOrDefault()?.NVLID.Value);
 
-                if (nguyenVatLieu.NVLID.Value != null)
-                {
-                    DSachNVL_XuatKho.Add(nguyenVatLieu);
-                }
+            if (nguyenVatLieu.NVLID.Value != null)
+            {
+                DSachNVL_XuatKho.Add(nguyenVatLieu);
             }
         }
         //////////
@@ -453,6 +454,8 @@
             PXK.NguoiLapPXK.Value = PXKNguoiLapPhieu;
             PXK.IsPhieuBoSungNVL.Value = 1;
             PXK.IsPhieuBSungAddedLOTNVL.Value = 0;
+
+            PXK.STT_PXK.Value = STT_PXK;
 
             // Insert in to DB new PXK
             (int newpxkID, string newpxkerror) = SQLServerServices.InsertNewPhieuXuatKho(PXK);

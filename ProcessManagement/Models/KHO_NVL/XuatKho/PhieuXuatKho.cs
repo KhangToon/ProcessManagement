@@ -16,6 +16,7 @@ namespace ProcessManagement.Models.KHO_NVL.XuatKho
         public Propertyy IsDonePXK { get; set; } = new() { DBName = Common.IsDonePXK, Type = typeof(int), AlowDatabase = true };
         public Propertyy IsPhieuBoSungNVL { get; set; } = new() { DBName = Common.IsPhieuBoSungNVL, Type = typeof(int), AlowDatabase = true };
         public Propertyy IsPhieuBSungAddedLOTNVL { get; set; } = new() { DBName = Common.IsPhieuBSungAddedLOTNVL, Type = typeof(int), AlowDatabase = true };
+        public Propertyy STT_PXK { get; set; } = new() { DBName = Common.STT_PXK, Type = typeof(int), AlowDatabase = true, AlowDisplay = false, DispDatagrid = false };
 
         public bool isPXKDoneXuatKho = false; // Da load o SQLServices
 

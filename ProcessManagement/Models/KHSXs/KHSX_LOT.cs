@@ -17,6 +17,7 @@ namespace ProcessManagement.Models.KHSXs
         public Propertyy IsDone { get; set; } = new() { DBName = DBName.IsDone, DisplayName = DispName.IsDone, Type = typeof(int), AlowDatabase = true, DispDatagrid = false };
         public Propertyy SLOKsubmited { get; set; } = new() { DBName = DBName.SLOKsubmited, DisplayName = DispName.SLOKsubmited, Type = typeof(int), AlowDatabase = true, DispDatagrid = false };
         public Propertyy SLNGsubmited { get; set; } = new() { DBName = DBName.SLNGsubmited, DisplayName = DispName.SLNGsubmited, Type = typeof(int), AlowDatabase = true, DispDatagrid = false };
+        public Propertyy STT_PXK { get; set; } = new() { DBName = DBName.STT_PXK, DisplayName = DispName.STT_PXK, Type = typeof(int), AlowDatabase = true, DispDatagrid = false };
 
         public NguyenVatLieu TargetNVL { get; set; } = new(); // not load when load list KHSX_LOT in GetList method
 
@@ -26,6 +27,7 @@ namespace ProcessManagement.Models.KHSXs
             public const string KHSXLOTID = "KHSXLOTID";
             public const string KHSXID = "KHSXID";
             public const string NCID = "NCID";
+            public const string STT_PXK = "STT_PXK";        // STT of PhieuXKho of KHSX
             public const string NVLID = "NVLID";
             public const string MaQuanLyLot = "maquanlylot";
             public const string SLLOT = "soluongcualot";
@@ -41,6 +43,7 @@ namespace ProcessManagement.Models.KHSXs
             public const string KHSXLOTID = "KHSXLOTID";
             public const string KHSXID = "Mã KHSX";
             public const string NCID = "Công đoạn";
+            public const string STT_PXK = "STT_PXK";
             public const string NVLID = "Mã NVL";
             public const string MaQuanLyLot = "Mã quản lý LOT";
             public const string SLLOT = "Số lượng";
