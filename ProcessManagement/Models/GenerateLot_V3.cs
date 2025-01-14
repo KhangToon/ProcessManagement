@@ -541,9 +541,15 @@ namespace ProcessManagement.Models
                 {
                     //DateTime? dateresult = Common.ParseDate_MMddyyyy(ngaynhapkho?.ToString());
 
-                    if (DateTime.TryParseExact(ngaynhapkho?.ToString(), Common.FormatNoTime_ddMMyyyy, null, DateTimeStyles.None, out DateTime dateresult))
+                    if (DateTime.TryParseExact(ngaynhapkho?.ToString(), Common.FormatNoTime_ddMMyyyy, null, DateTimeStyles.None, out DateTime dateresult_1))
                     {
-                        string reformatNNK = dateresult.ToString("ddMMyy") ?? string.Empty;
+                        string reformatNNK = dateresult_1.ToString("ddMMyy") ?? string.Empty;
+
+                        resultList.Add(reformatNNK);
+                    }
+                    else if (DateTime.TryParseExact(ngaynhapkho?.ToString(), "yyyy/MM/dd", null, DateTimeStyles.None, out DateTime dateresult_2))
+                    {
+                        string reformatNNK = dateresult_2.ToString("ddMMyy") ?? string.Empty;
 
                         resultList.Add(reformatNNK);
                     }
