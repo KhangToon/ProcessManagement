@@ -330,7 +330,16 @@
                         </HeaderTemplate>
                         <Template Context="lotrow">
                             @{
+                                if (lotrow.MaQuanLyLot?.ToString() == "A006-501-1-051224-003")
+                                {
+                                    if (cdoancolumn.NCID.Value?.ToString() == "4")
+                                    {
+
+                                    }
+                                }
+
                                 var targetkqgc = lotrow.TargetKQGC(cdoancolumn.NCID.Value);
+
                             }
                             <RadzenButton Visible="@(targetkqgc.DanhGia == 0)" Text="FALSE" ButtonStyle="ButtonStyle.Danger" Shade="Shade.Dark" Size="ButtonSize.Small" Variant="Variant.Flat" Style="font-size: 15px; font-weight: 600; width: 100%; cursor: default"></RadzenButton>
                             <RadzenButton Visible="@(targetkqgc.DanhGia == 1)" Text="TRUE" ButtonStyle="ButtonStyle.Success" Shade="Shade.Light" Size="ButtonSize.Small" Variant="Variant.Flat" Style="font-size: 15px; width: 100%; font-weight: 600; cursor: default"></RadzenButton>
@@ -555,7 +564,7 @@
                     dsLots = resultDistinct;
                 }
 
-                await Task.Delay(delay);
+                //await Task.Delay(delay);
 
                 DSLOTKHSXs = dsLots;
 
@@ -619,59 +628,62 @@
     // Load kqgc per CDoan for dsachLOTKHSX
     private async Task<List<ResultPerLOTKHSX>> LoadKQGCperLOTofKHSX(List<KHSX_LOT> lOTs, object? khsxid)
     {
-        List<ResultPerLOTKHSX> resultPerLOTKHSXs = new();
-
-        int orginMaxThungTP = 1;
-
-        foreach (var lot in lOTs)
+        return await Task.Run(async () =>
         {
-            ResultPerLOTKHSX resultPerLOTKHSX = new() { MaSP = TargetKHSX.TargetSanPham?.SP_MaSP.Value, MaQuanLyLot = lot.MaQuanLyLot.Value, SLperLOT = lot.SLLOT.Value };
+            List<ResultPerLOTKHSX> resultPerLOTKHSXs = new();
 
-            Dictionary<string, object?> pars = new();
-            pars.Add($"{KHSX_LOT.DBName.KHSXID}", khsxid);
-            pars.Add($"{KHSX_LOT.DBName.MaQuanLyLot}", lot.MaQuanLyLot.Value);
+            int orginMaxThungTP = 1;
 
-            // Get list CD per LOT ( 1 maquanlyLot with nhieu congdoan)
-            (List<KHSX_LOT> dsCDOANperLOTKHSX, string error) = SQLServerServices.GetListLOT_khsx(pars);
-
-            List<KQGCperCDOANofLOTKHSX> dsachKQGCperCDOAN = new();
-
-            foreach (var (index, cdperlot) in dsCDOANperLOTKHSX.Select((item, idx) => (idx, item)))
+            foreach (var lot in lOTs)
             {
-                // Get lastest kqgc
-                var rekQGCperLOTofKHSX = dsachKQGCperCDOAN.LastOrDefault() ?? null;
+                ResultPerLOTKHSX resultPerLOTKHSX = new() { MaSP = TargetKHSX.TargetSanPham?.SP_MaSP.Value, MaQuanLyLot = lot.MaQuanLyLot.Value, SLperLOT = lot.SLLOT.Value };
 
-                // Get kqgc targetLOT with all CDoan
-                KQGCperCDOANofLOTKHSX kQGCperLOTofKHSX = new(cdperlot, rekQGCperLOTofKHSX);
+                Dictionary<string, object?> pars = new();
+                pars.Add($"{KHSX_LOT.DBName.KHSXID}", khsxid);
+                pars.Add($"{KHSX_LOT.DBName.MaQuanLyLot}", lot.MaQuanLyLot.Value);
 
-                dsachKQGCperCDOAN.Add(kQGCperLOTofKHSX);
+                // Get list CD per LOT ( 1 maquanlyLot with nhieu congdoan)
+                (List<KHSX_LOT> dsCDOANperLOTKHSX, string error) = SQLServerServices.GetListLOT_khsx(pars);
+
+                List<KQGCperCDOANofLOTKHSX> dsachKQGCperCDOAN = new();
+
+                foreach (var (index, cdperlot) in dsCDOANperLOTKHSX.Select((item, idx) => (idx, item)))
+                {
+                    // Get lastest kqgc
+                    var rekQGCperLOTofKHSX = dsachKQGCperCDOAN.LastOrDefault() ?? null;
+
+                    // Get kqgc targetLOT with all CDoan
+                    KQGCperCDOANofLOTKHSX kQGCperLOTofKHSX = new(cdperlot, rekQGCperLOTofKHSX);
+
+                    dsachKQGCperCDOAN.Add(kQGCperLOTofKHSX);
+                }
+
+                // Asign dsachKQGCperCDOAN for resultPerLOTKHSX
+                resultPerLOTKHSX.DsachKQGCperCDOAN = dsachKQGCperCDOAN;
+
+                // Asign IsDoneLastCDoan
+                resultPerLOTKHSX.IsLastCDoanDone = resultPerLOTKHSX.DsachKQGCperCDOAN.LastOrDefault()?.DanhGia == 1;
+
+                resultPerLOTKHSX.ThungTPhams = await LoadDSachThungTPhams(TargetKHSX.KHSXID.Value, resultPerLOTKHSX.MaQuanLyLot);
+
+                int numofThungTP = resultPerLOTKHSX.ThungTPhams.Count();
+
+                if (numofThungTP > orginMaxThungTP)
+                {
+                    orginMaxThungTP = numofThungTP;
+                }
+
+                // Asign IsCreatedThungTP
+                resultPerLOTKHSX.IsCreatedThungTP = resultPerLOTKHSX.ThungTPhams.Any();
+
+                resultPerLOTKHSXs.Add(resultPerLOTKHSX);
             }
 
-            // Asign dsachKQGCperCDOAN for resultPerLOTKHSX
-            resultPerLOTKHSX.DsachKQGCperCDOAN = dsachKQGCperCDOAN;
+            // Gan max thung TP
+            MaxThungTP = orginMaxThungTP;
 
-            // Asign IsDoneLastCDoan
-            resultPerLOTKHSX.IsLastCDoanDone = resultPerLOTKHSX.DsachKQGCperCDOAN.LastOrDefault()?.DanhGia == 1;
-
-            resultPerLOTKHSX.ThungTPhams = await LoadDSachThungTPhams(TargetKHSX.KHSXID.Value, resultPerLOTKHSX.MaQuanLyLot);
-
-            int numofThungTP = resultPerLOTKHSX.ThungTPhams.Count();
-
-            if (numofThungTP > orginMaxThungTP)
-            {
-                orginMaxThungTP = numofThungTP;
-            }
-
-            // Asign IsCreatedThungTP
-            resultPerLOTKHSX.IsCreatedThungTP = resultPerLOTKHSX.ThungTPhams.Any();
-
-            resultPerLOTKHSXs.Add(resultPerLOTKHSX);
-        }
-
-        // Gan max thung TP
-        MaxThungTP = orginMaxThungTP;
-
-        return resultPerLOTKHSXs;
+            return resultPerLOTKHSXs;
+        });
     }
 
     private async Task<List<ThungTPham>> LoadDSachThungTPhams(object? khsxid, object? maquanlylot)
