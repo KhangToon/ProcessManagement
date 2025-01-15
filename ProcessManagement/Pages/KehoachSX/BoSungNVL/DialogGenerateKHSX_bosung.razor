@@ -374,7 +374,7 @@
 
         StartIndex = (TargetKHSX.DSachCongDoans.FirstOrDefault()?.DSachNVLCongDoans.Count > 0 ? TargetKHSX.DSachCongDoans.FirstOrDefault()?.DSachNVLCongDoans.Count : 0) ?? 0;
 
-        var result = await DialogService.OpenAsync<DialogMQLTemplateGeneration>(null, new Dictionary<string, object>() { { "StartIndex", StartIndex }, { "MaLSX", generLot.MaLSX }, { "MaSanPham", generLot.NewKHSX.TargetSanPham?.SP_MaSP.Value ?? string.Empty }, { "GenerateLot_V3", generLot } },
+        var result = await DialogService.OpenAsync<DialogMQLTemplateGeneration>(null, new Dictionary<string, object>() { { "StartIndex", StartIndex }, { "MaLSX", TargetKHSX.MaLSX.Value?.ToString() ?? string.Empty }, { "MaSanPham", TargetKHSX.TargetSanPham?.SP_MaSP.Value ?? string.Empty }, { "GenerateLot_V3", generLot } },
         new DialogOptions() { Width = "80%", Height = "contain", Resizable = false, Draggable = true, ShowTitle = false, ShowClose = false, Style = "background-color: while; border-radius: 0px; padding: 0px" });
 
         if (result != null)
