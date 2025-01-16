@@ -8,6 +8,8 @@ namespace ProcessManagement.Commons
 {
     public static class Common
     {
+        public static readonly List<string> ListCaLamViecs = new() { "Ngày", "Đêm", "Ca 1", "Ca 2", "Ca 3" };
+
         public const string Format_yyyyMMdd = "yyyy-MM-dd HH:mm:ss";
         public const string Format_yyyyddMM = "MM-dd-yyyy HH:mm:ss";
         public const string FormatNoTime_yyyMMdd = "yyyy-MM-dd";
