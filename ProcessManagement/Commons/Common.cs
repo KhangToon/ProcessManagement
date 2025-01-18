@@ -100,6 +100,8 @@ namespace ProcessManagement.Commons
         // Table Kehoachsanxuat //
         public const string TableKHSX = "Table_KHSX";
         public const string KHSXID = "KHSXID";
+        public const string IsAllowDisplay = "IsAllowDisplay";
+        public const string IsCollapsed = "IsCollapsed";
         public const string MaLSX = "Mã lệnh SX";
         public const string SLNVLSanXuat = "SL sản xuất";
         public const string SLSanPhamSX = "SLSanPhamSX";

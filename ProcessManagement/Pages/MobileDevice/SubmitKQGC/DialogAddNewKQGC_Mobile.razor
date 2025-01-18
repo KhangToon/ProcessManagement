@@ -321,8 +321,8 @@
 
     private KetQuaGC newKetQuaGC = new();
     private List<SanPham> dsachSanPhams = new();
-    //private List<NguyenCong> dsachNguyenCongs = new();
-    private List<NguyenCongofKHSX> dsNCofKHSXs = new();
+    private List<NguyenCong> dsachNguyenCongs = new();
+    //private List<NguyenCongofKHSX> dsNCofKHSXs = new();
     private List<MayMoc> dsachMayMocs = new();
     private List<NhanVien> dsachNhanViens = new();
     private List<NGType> dsachNGTypes = new();
@@ -404,29 +404,29 @@
         }
         else if (colName == KetQuaGC.KQGCDBName.NCID)
         {
-            dsNCofKHSXs = SQLServerServices.GetlistCongdoans(KHSXID);
+            // dsNCofKHSXs = SQLServerServices.GetlistCongdoans(KHSXID);
 
-            if (dsNCofKHSXs != null)
-            {
-                results = dsNCofKHSXs
-                    .Where(item => item.NCIDofKHSX.Value != null)
-                    .Select(item => new KeyValuePair<string, string>(
-                        item.NCID.Value?.ToString() ?? string.Empty,
-                        item.TenCongDoan.Value?.ToString()?.Trim() ?? string.Empty
-                    ))
-                    .Where(x => !string.IsNullOrEmpty(x.Value) && !string.IsNullOrEmpty(x.Key))
-                    .Distinct();
-            }
-
-            // dsachNguyenCongs = SQLServerServices.GetListNguyenCongs();
-            // results = dsachNguyenCongs
-            //         .Where(item => item.NCID.Value != null)
+            // if (dsNCofKHSXs != null)
+            // {
+            //     results = dsNCofKHSXs
+            //         .Where(item => item.NCIDofKHSX.Value != null)
             //         .Select(item => new KeyValuePair<string, string>(
             //             item.NCID.Value?.ToString() ?? string.Empty,
-            //             item.TenNguyenCong.Value?.ToString()?.Trim() ?? string.Empty
+            //             item.TenCongDoan.Value?.ToString()?.Trim() ?? string.Empty
             //         ))
             //         .Where(x => !string.IsNullOrEmpty(x.Value) && !string.IsNullOrEmpty(x.Key))
             //         .Distinct();
+            // }
+
+            dsachNguyenCongs = SQLServerServices.GetListNguyenCongs();
+            results = dsachNguyenCongs
+                    .Where(item => item.NCID.Value != null)
+                    .Select(item => new KeyValuePair<string, string>(
+                        item.NCID.Value?.ToString() ?? string.Empty,
+                        item.TenNguyenCong.Value?.ToString()?.Trim() ?? string.Empty
+                    ))
+                    .Where(x => !string.IsNullOrEmpty(x.Value) && !string.IsNullOrEmpty(x.Key))
+                    .Distinct();
         }
         else if (colName == KetQuaGC.KQGCDBName.MMID)
         {
@@ -630,7 +630,7 @@
         }
         else if (propertyy.DBName == KetQuaGC.KQGCDBName.NCID)
         {
-            var targetItem = dsNCofKHSXs.FirstOrDefault(sp => sp.NCID.Value?.ToString()?.Trim() == selectedValues.FirstOrDefault().Key);
+            var targetItem = dsachNguyenCongs.FirstOrDefault(sp => sp.NCID.Value?.ToString()?.Trim() == selectedValues.FirstOrDefault().Key);
 
             if (targetItem != null)
             {

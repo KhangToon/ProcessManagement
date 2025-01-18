@@ -118,6 +118,71 @@ namespace ProcessManagement.Services.SQLServer
             return listKHSXid;
         }
 
+        public (List<KHSX> kHSXes, string) GetListKHSXsByAnyParmeters(Dictionary<string, object?> parameters, bool isgetAll = false)
+        {
+            List<KHSX> khsxs = new();
+
+            string errorMessage = string.Empty;
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                try
+                {
+                    connection.Open();
+
+                    var conditions = new List<string>();
+                    var command = connection.CreateCommand();
+                    command.CommandText = $"SELECT * FROM [{Common.TableKHSX}]";
+
+                    if (!isgetAll)
+                    {
+                        // Process each parameter in the dictionary
+                        foreach (var param in parameters)
+                        {
+                            conditions.Add($"[{param.Key}] = @{param.Key}");
+
+                            command.Parameters.AddWithValue($"@{param.Key}", param.Value);
+                        }
+
+                        if (conditions.Any())
+                        {
+                            command.CommandText += " WHERE " + string.Join(" AND ", conditions);
+                        }
+                    }
+
+                    using var reader = command.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        KHSX khsx = new();
+
+                        List<Propertyy> rowItems = khsx.GetPropertiesValues();
+
+                        foreach (var item in rowItems)
+                        {
+                            string? columnName = item.DBName;
+
+                            if (!string.IsNullOrEmpty(columnName) && reader.GetOrdinal(columnName) != -1)
+                            {
+                                object columnValue = reader[columnName];
+
+                                item.Value = columnValue == DBNull.Value ? null : columnValue;
+                            }
+                        }
+
+                        khsxs.Add(khsx);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    errorMessage = $"Error: {ex.Message}";
+                    khsxs.Clear(); // Clear the list in case of error
+                }
+            }
+            return (khsxs, errorMessage);
+        }
+
+
         // Get last ke hoach san xuat
         public KHSX GetLastKHSX()
         {
@@ -171,6 +236,15 @@ namespace ProcessManagement.Services.SQLServer
             return khsx;
         }
 
+        //// Use Task.WhenAll for parallel loading of dependent data
+        //var tasks = new List<Task>
+        //{
+        //    Task.Run(() => khsx.TargetSanPham = GetSanpham(int.TryParse(khsx.SPID.Value?.ToString(), out int spid) ? spid : 0)),
+        //    Task.Run(() => khsx.LoaiNVL = GetLoaiNVLbyID(int.TryParse(khsx.LOAINVLID.Value?.ToString(), out int loainvlid) ? loainvlid : 0)),
+        //    Task.Run(() => khsx.DSachNVLofKHSXs = GetListNVLofKHSXbyID(khsx.KHSXID.Value)),
+        //    Task.Run(() => khsx.DSachCongDoans = GetlistCongdoans(khsx.KHSXID.Value))
+        //};
+
         // Load ke hoach san xuat by ID
         public KHSX GetKHSXbyID(object? khsxID)
         {
@@ -201,6 +275,17 @@ namespace ProcessManagement.Services.SQLServer
                         item.Value = columnValue;
                     }
                 }
+
+                //// Use Task.WhenAll for parallel loading of dependent data
+                //var tasks = new List<Task>
+                //{
+                //    Task.Run(() => khsx.TargetSanPham = GetSanpham(int.TryParse(khsx.SPID.Value?.ToString(), out int spid) ? spid : 0)),
+                //    Task.Run(() => khsx.LoaiNVL = GetLoaiNVLbyID(int.TryParse(khsx.LOAINVLID.Value?.ToString(), out int loainvlid) ? loainvlid : 0)),
+                //    Task.Run(() => khsx.DSachNVLofKHSXs = GetListNVLofKHSXbyID(khsx.KHSXID.Value)),
+                //    Task.Run(() => khsx.DSachCongDoans = GetlistCongdoans(khsx.KHSXID.Value))
+                //};
+
+                //await Task.WhenAll(tasks);
 
                 khsx.TargetSanPham = GetSanpham(int.TryParse(khsx.SPID.Value?.ToString(), out int spid) ? spid : 0);
 
@@ -242,6 +327,12 @@ namespace ProcessManagement.Services.SQLServer
                     {
                         khsx.isReturnedNVL = isPNKdone == 1;
                     }
+                }
+
+                // Get collapsed KHSX
+                if (int.TryParse(khsx.IsCollapsed.Value?.ToString(), out int isCollapsed))
+                {
+                    khsx.isCollapsed = isCollapsed == 1;
                 }
             }
 

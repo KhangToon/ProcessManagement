@@ -14,6 +14,8 @@
 @using ProcessManagement.Services.SQLServer
 @using Radzen.Blazor
 @using Radzen
+@using System.Collections.Concurrent
+@using System.Diagnostics
 
 @inject NotificationService NotificationService
 @inject TooltipService TooltipService
@@ -31,20 +33,38 @@
     }
 </style>
 
-<RadzenCard Variant="Variant.Flat" Style="height: 100%; width: 100%; padding: 5px;">
+<RadzenCard Variant="Variant.Filled" Style="height: 100%; width: 100%; padding: 5px;">
     <RadzenStack Gap="20px" Style="height: 100%; width: 100%;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
         <RadzenStack Style="height: contain; width: 100%; padding-bottom: 10px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
             <RadzenRow Style="height: 100%; width: 100%;">
-                <RadzenColumn SizeMD="3" Size="12">
-                    <RadzenStack Style="height: 100%; width: 100%; border-radius: 10px; background-color: var(--rz-success-lighter); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                        <RadzenText Text="DANH SÁCH KẾ HOẠCH SẢN XUẤT" Style="color: green; font-weight: 600; font-size: 18px"></RadzenText>
-                    </RadzenStack>
+                <RadzenColumn SizeMD="4" Size="12">
+                    <RadzenRow Style="height: 100%; width: 100%;">
+                        <RadzenColumn SizeMD="7" Size="12">
+                            <RadzenStack Style="height: 100%; width: 100%; border-radius: 10px; background-color: var(--rz-success-lighter); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenText Text="DANH SÁCH KẾ HOẠCH SẢN XUẤT" Style="color: green; font-weight: 600; font-size: 18px"></RadzenText>
+                            </RadzenStack>
+                        </RadzenColumn>
+                        <RadzenColumn SizeMD="5" Size="12">
+                            <RadzenStack Gap="15px" Style="height: 100%; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenMenu Style="height: contain; width: 100%; padding: 0; margin: 0; border-radius: 10px;">
+                                    <RadzenMenuItem Style="height: 100%; width: 100%;" Text="@($" {DSachModeSearchKHSX[modeSearchKHSX]}")" Icon="filter_alt">
+                                        <RadzenMenuItem Text="@DSachModeSearchKHSX[0]" Click="@(async() => {modeSearchKHSX = 0;await ButtonReloadPress();})" Icon="search"></RadzenMenuItem>
+                                        <RadzenMenuItem Text="@DSachModeSearchKHSX[1]" Click="@(async() => {modeSearchKHSX = 1;await ButtonReloadPress();})" Icon="search"></RadzenMenuItem>
+                                        <RadzenMenuItem Text="@DSachModeSearchKHSX[2]" Click="@(async() => {modeSearchKHSX = 2;await ButtonReloadPress();})" Icon="search"></RadzenMenuItem>
+                                        <RadzenMenuItem Text="@DSachModeSearchKHSX[3]" Click="@(async() => {modeSearchKHSX = 3;await ButtonReloadPress();})" Icon="search"></RadzenMenuItem>
+                                        <RadzenMenuItem Text="@DSachModeSearchKHSX[4]" Click="@(async() => {modeSearchKHSX = 4;await ButtonReloadPress();})" Icon="search"></RadzenMenuItem>
+                                    </RadzenMenuItem>
+                                </RadzenMenu>
+                            </RadzenStack>
+                        </RadzenColumn>
+                    </RadzenRow>
                 </RadzenColumn>
-                <RadzenColumn SizeMD="6" Size="12">
-                    <RadzenStack Gap="15px" Style="height: 100%; width: 100%; padding-left: 70px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                        <RadzenTextBox @oninput="@((args) => SearchingKHSX(args?.Value))" Placeholder="Nhập mã kế hoạch sản xuất, mã quản lý lot hoặc mã thùng để truy xuất" Style="border-radius: 20px; padding-left: 20px; border-width: 2px; border-color: var(--rz-primary-light); width: 70% "></RadzenTextBox>
+                <RadzenColumn SizeMD="5" Size="12">
+                    <RadzenStack Gap="15px" Style="height: 100%; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                        <RadzenButton Style="border-radius: 20px;" IsBusy="@reloadpage" Click="@(async () => await ButtonReloadPress())" Icon="autorenew" ButtonStyle="ButtonStyle.Primary" />
+                        <RadzenTextBox @oninput="@((args) => SearchingKHSX(args?.Value))" Placeholder="Nhập mã kế hoạch sản xuất, mã quản lý lot hoặc mã thùng để truy xuất" Style="border-radius: 20px; padding-left: 20px; border-width: 2px; border-color: var(--rz-primary-light); width: 80% "></RadzenTextBox>
                         <RadzenButton Icon="search" ButtonStyle="ButtonStyle.Primary" Style="border-radius: 20px;" />
-                        <RadzenButton Style="border-radius: 20px;" BusyText="Searching..." IsBusy="@reloadpage" Click="@(async () => await ButtonReloadPress())" Icon="autorenew" ButtonStyle="ButtonStyle.Primary" />
+                        <RadzenText Visible="false" Text="@($"{loadinngtime} ms")" Style="font-weight: 600; font-size: 12px"></RadzenText>
                     </RadzenStack>
                 </RadzenColumn>
                 <RadzenColumn SizeMD="3" Size="12">
@@ -64,9 +84,9 @@
             @foreach (var khsx in DSKHSXs)
             {
                 <RadzenCard class="rz-shadow-5" Variant="Variant.Filled" Style="width: 100%; height: contain; padding: 2px;">
-                    <RadzenPanel AllowCollapse="true" Style="width: 100%; padding-bottom: 10px;" Collapsed="@khsx.IsCollapsed" Collapse="@(() => {khsx.IsCollapsed = true;})">
+                    <RadzenPanel AllowCollapse="true" Style="width: 100%; padding-bottom: 10px;" Collapsed="@(khsx.isCollapsed == true)" Collapse="@(() => {khsx.isCollapsed = true;})">
                         <HeaderTemplate>
-                            <RadzenStack Style="width: 100%; cursor: pointer; padding-right: 10px" @onclick=@(() => {khsx.IsCollapsed = !khsx.IsCollapsed;}) Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                            <RadzenStack Style="width: 100%; cursor: pointer; padding-right: 10px" @onclick="() => {khsx.isCollapsed = !khsx.isCollapsed; OnCollapsedKHSXDetails(khsx);}" Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                                 <RadzenStack Style="width: contain; cursor: pointer" Gap="10px" Orientation="Orientation.Horizontal">
                                     <RadzenText TextStyle="TextStyle.H6" class="rz-display-flex rz-align-items-center rz-m-0">
                                         <RadzenIcon Icon="account_box" class="rz-me-1" />
@@ -80,7 +100,17 @@
                                         <b>@khsx.TargetSanPham?.SP_MaSP.Value?.ToString()</b>
                                     </RadzenText>
                                 </RadzenStack>
-                                <RadzenButton Text="@($"{(khsx.IsCollapsed? "Mở rộng" : "Thu gọn")}")" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Variant="Variant.Flat" Size="ButtonSize.ExtraSmall" Style="font-weight: 500; font-size: 14px; padding-left: 15px; padding-right: 15px; cursor: default"></RadzenButton>
+
+                                <RadzenStack Style="width: contain;" Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                    @{
+                                        _ = int.TryParse(khsx.IsAllowDisplay.Value?.ToString(), out int allowdisplay) ? allowdisplay : 0;
+                                    }
+                                    <RadzenCheckBox TValue="bool" Value="@(allowdisplay == 1)" Change="@(async(args) => await OnAllowHienThiKHSXChanged(khsx, args))" Name="isallowemptyproperty" />
+                                    <RadzenLabel Visible="@(allowdisplay == 1)" Text="Hiển thị" Style="color: darkgreen; font-size: 14px; font-weight: 500;" Component="isallowdisplayproperty" />
+                                    <RadzenLabel Visible="@(allowdisplay == 0)" Text="Hiển thị" Style="color: red; font-size: 14px; font-weight: 500;" Component="isallowdisplayproperty" />
+                                    <RadzenButton Text="@($"{(khsx.isCollapsed? "Mở rộng" : "Thu gọn")}")" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Variant="Variant.Flat" Size="ButtonSize.ExtraSmall" Style="font-weight: 500; font-size: 14px; padding-left: 15px; padding-right: 15px; cursor: default"></RadzenButton>
+                                </RadzenStack>
+
                             </RadzenStack>
                         </HeaderTemplate>
                         <ChildContent>
@@ -126,7 +156,7 @@
                         <SummaryTemplate>
                             <!--LSX infor-->
                             <RadzenStack Style="width: 100%; height: contain; padding: 20px; padding-top: 10px;" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                <RadzenCard @onclick=@(() => {khsx.IsCollapsed = false;}) Visible=@(khsx.KHSXID.Value != null) Variant="Variant.Flat" Style="cursor: pointer; width: 100%; height: contain; padding: 0px; border-radius: 10px; border-width: 2px">
+                                <RadzenCard @onclick="() => {khsx.isCollapsed = false;}" Visible=@(khsx.KHSXID.Value != null) Variant="Variant.Flat" Style="cursor: pointer; width: 100%; height: contain; padding: 0px; border-radius: 10px; border-width: 2px">
                                     <RadzenStack Orientation="Orientation.Vertical" Gap="0" Style="height: 100%; width: 100%; padding: 10px; padding-top: 0; padding-bottom: 0" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                         <RadzenStack Gap="15px" Orientation="Orientation.Horizontal" Style="height: 100%; width: 100%; padding: 10px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                                             <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style="height: 50%; width: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
@@ -173,7 +203,7 @@
                                                 <RadzenText Visible="@(khsx.DSLOT_KHSXs.Count > 0)" Text="@($"{khsx.DSLOT_KHSXs.Count} (lot)")" Style="font-size: 16px; font-weight: bold; color: black "></RadzenText>
                                             </RadzenStack>
 
-                                            <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style="height: 50%; width: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                            <RadzenStack Visible="false" Gap="0" Orientation="Orientation.Vertical" Style="height: 50%; width: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                 <RadzenText Text="Mã quản lý LOT" Style="font-size: 16px; font-weight: 500; color: darkgray "></RadzenText>
                                                 @{
                                                     NguyenCongofKHSX? fistCongdoan = khsx?.DSachCongDoans.FirstOrDefault();
@@ -187,7 +217,7 @@
                                                 @if (khsx?.NgayTao.Value != null)
                                                 {
                                                     DateTime ngaytao = Convert.ToDateTime(khsx?.NgayTao.Value?.ToString());
-                                                    <RadzenText Text="@ngaytao.ToString(Common.FormatNoTime_yyyMMdd)" Style="font-size: 16px; font-weight: bold; color: black "></RadzenText>
+                                                    <RadzenText Text="@ngaytao.ToString(Common.FormatNoTime_ddMMyyyy)" Style="font-size: 16px; font-weight: bold; color: black "></RadzenText>
                                                 }
                                                 else
                                                 {
@@ -241,7 +271,6 @@
     </RadzenStack>
 </RadzenCard>
 
-
 @code {
     private List<KHSX> DSKHSXs = new();
     private KHSX SelectedKHSX = new();
@@ -253,8 +282,11 @@
 
     private KHSX_LOT? TargetMQLLot;
 
+    private Dictionary<int, string> DSachModeSearchKHSX = new() { { 0, "Tất cả" }, { 1, "Được hiển thị" }, { 2, "Đã ẩn" }, { 3, "Đã hoàn thành" }, { 4, "Chưa hoàn thành" } };
+    private static int modeSearchKHSX = 0;
+
     protected override async Task OnInitializedAsync()
-    {   
+    {
         await ButtonReloadPress();
 
         await base.OnInitializedAsync();
@@ -278,8 +310,10 @@
         return (sumok, sumng, (sumok + sumng));
     }
 
-    private async Task OnGetListKHSXs_old()
+    private async Task OnGetListKHSXs_()
     {
+        var stopwatch = Stopwatch.StartNew(); // Start the timer
+
         DSKHSXs = new();
 
         DSKHSXs = await Task.Run(() =>
@@ -303,33 +337,61 @@
 
             DSKHSXs_base = DSKHSXs;
         }
+
+        stopwatch.Stop(); // Stop the timer
+        loadinngtime = stopwatch.ElapsedMilliseconds; // Get the elapsed time
     }
 
+    long loadinngtime;
 
     private async Task OnGetListKHSXs()
     {
-        DSKHSXs = new List<KHSX>();
-        var listkhsxids = SQLServerServices.GetlistKHSXid();
-        var tasks = new List<Task>();
-        var semaphore = new SemaphoreSlim(10); // Limit to 5 concurrent tasks
+        var stopwatch = Stopwatch.StartNew(); // Start the timer
 
-        foreach (var khsxid in listkhsxids)
+        var dskhsxs = new ConcurrentBag<KHSX>(); // using for not missing item in await task
+                                                 //var listkhsxids = SQLServerServices.GetlistKHSXid();
+
+        List<KHSX> baseKHSXs = new(); // danh sach KHSX (chi cac truong mac dinh)
+
+        // Apply filtering
+
+        if (modeSearchKHSX == 0) // Tat ca
+        {
+            baseKHSXs = SQLServerServices.GetListKHSXsByAnyParmeters(new(), true).kHSXes;
+        }
+        else if (modeSearchKHSX == 1) // Duoc hien thi
+        {
+            baseKHSXs = SQLServerServices.GetListKHSXsByAnyParmeters(new() { { Common.IsAllowDisplay, 1 } }, false).kHSXes;
+        }
+        else if (modeSearchKHSX == 2) // Khong duoc hien thi
+        {
+            baseKHSXs = SQLServerServices.GetListKHSXsByAnyParmeters(new() { { Common.IsAllowDisplay, 0 } }, false).kHSXes;
+        }
+
+
+        var tasks = new List<Task>();
+        var semaphore = new SemaphoreSlim(20); // Increase concurrency limit
+
+        foreach (var khsx in baseKHSXs)
         {
             await semaphore.WaitAsync(); // Wait for an available slot
             tasks.Add(Task.Run(async () =>
             {
                 try
                 {
-                    KHSX kHSX = await GetKHSX(khsxid);
-
-                    if (kHSX != null && kHSX.KHSXID.Value != null)
+                    if (int.TryParse(khsx.KHSXID.Value?.ToString(), out int khsxid))
                     {
-                        DSKHSXs.Add(kHSX);
+                        KHSX kHSX = await GetKHSX(khsxid);
+
+                        if (kHSX.KHSXID.Value != null)
+                        {
+                            dskhsxs.Add(kHSX);
+                        }
                     }
                 }
                 catch (Exception)
                 {
-                    // Log or handle the exception
+                    // Log or handle the exception, possibly with ex.Message
                 }
                 finally
                 {
@@ -340,16 +402,24 @@
 
         await Task.WhenAll(tasks);
 
-        if (DSKHSXs.Any())
+        if (dskhsxs.Any())
         {
-            DSKHSXs = DSKHSXs.OrderByDescending(khsx => int.TryParse(khsx.MaLSX.Value?.ToString()?.Trim()?.Substring(1), out int index) ? index : 0).ToList();
+            DSKHSXs_base = dskhsxs
+                .OrderByDescending(khsx => int.TryParse(khsx.KHSXID.Value?.ToString(), out int index) ? index : 0)
+                .ToList();
 
             SelectedKHSX = selectKHSXID != null
                 ? DSKHSXs.FirstOrDefault(x => object.Equals(x.KHSXID.Value, selectKHSXID)) ?? new KHSX()
                 : DSKHSXs.FirstOrDefault() ?? new KHSX();
 
-            DSKHSXs_base = DSKHSXs;
+            DSKHSXs = DSKHSXs_base;
         }
+        else { DSKHSXs = new(); }
+
+
+
+        stopwatch.Stop(); // Stop the timer
+        loadinngtime = stopwatch.ElapsedMilliseconds; // Get the elapsed time
     }
 
     private async Task<KHSX> GetKHSX(object? khsxid)
@@ -462,7 +532,7 @@
                 {
                     TargetMQLLot = null;
 
-                    await OnGetListKHSXs();
+                    DSKHSXs = DSKHSXs_base;
                 }
 
                 await Task.Delay(200);
@@ -486,11 +556,23 @@
 
                 await OnGetListKHSXs();
 
-                //await Task.Delay(100);
-
                 reloadpage = false;
             }
         });
+    }
+
+    private async Task OnAllowHienThiKHSXChanged(KHSX targetkhsx, bool allowhienthi)
+    {
+        (int udresult, string uderror) = SQLServerServices.UpdateKHSXProperty(targetkhsx.KHSXID.Value, Common.IsAllowDisplay, allowhienthi ? 1 : 0);
+
+        await ButtonReloadPress();
+    }
+
+    private void OnCollapsedKHSXDetails(KHSX targetkhsx)
+    {
+        targetkhsx.IsCollapsed.Value = targetkhsx.isCollapsed ? 1 : 0;
+
+        (int udresult, string uderror) = SQLServerServices.UpdateKHSXProperty(targetkhsx.KHSXID.Value, Common.IsCollapsed, targetkhsx.IsCollapsed.Value);
     }
 
     private async Task<List<ThungTPhamExtend>?> LoadDSachThungTPhams(object? maquanlythung)
