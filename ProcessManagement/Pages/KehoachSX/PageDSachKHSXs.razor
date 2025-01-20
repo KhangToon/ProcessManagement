@@ -33,9 +33,9 @@
     }
 </style>
 
-<RadzenCard Variant="Variant.Filled" Style="height: 100%; width: 100%; padding: 5px;">
-    <RadzenStack Gap="20px" Style="height: 100%; width: 100%;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-        <RadzenStack Style="height: contain; width: 100%; padding-bottom: 10px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+<RadzenCard Variant="Variant.Filled" Style="height: 100%; width: 100%; padding: 5px; overflow-y: scroll;">
+    <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding-bottom: 10px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+        <RadzenStack Style="height: contain; width: 100%; padding-bottom: 5px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
             <RadzenRow Style="height: 100%; width: 100%;">
                 <RadzenColumn SizeMD="4" Size="12">
                     <RadzenRow Style="height: 100%; width: 100%;">
@@ -46,7 +46,7 @@
                         </RadzenColumn>
                         <RadzenColumn SizeMD="5" Size="12">
                             <RadzenStack Gap="15px" Style="height: 100%; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                <RadzenMenu Style="height: contain; width: 100%; padding: 0; margin: 0; border-radius: 10px;">
+                                <RadzenMenu Style="height: contain; width: contain; padding: 0; margin: 0; border-radius: 10px;">
                                     <RadzenMenuItem Style="height: 100%; width: 100%;" Text="@($" {DSachModeSearchKHSX[modeSearchKHSX]}")" Icon="filter_alt">
                                         <RadzenMenuItem Text="@DSachModeSearchKHSX[0]" Click="@(async() => {modeSearchKHSX = 0;await ButtonReloadPress();})" Icon="search"></RadzenMenuItem>
                                         <RadzenMenuItem Text="@DSachModeSearchKHSX[1]" Click="@(async() => {modeSearchKHSX = 1;await ButtonReloadPress();})" Icon="search"></RadzenMenuItem>
@@ -55,6 +55,7 @@
                                         <RadzenMenuItem Text="@DSachModeSearchKHSX[4]" Click="@(async() => {modeSearchKHSX = 4;await ButtonReloadPress();})" Icon="search"></RadzenMenuItem>
                                     </RadzenMenuItem>
                                 </RadzenMenu>
+                                <RadzenText Text="@($"{loadinngtime} ms")" Style="font-weight: 600; font-size: 12px"></RadzenText>
                             </RadzenStack>
                         </RadzenColumn>
                     </RadzenRow>
@@ -64,7 +65,6 @@
                         <RadzenButton Style="border-radius: 20px;" IsBusy="@reloadpage" Click="@(async () => await ButtonReloadPress())" Icon="autorenew" ButtonStyle="ButtonStyle.Primary" />
                         <RadzenTextBox @oninput="@((args) => SearchingKHSX(args?.Value))" Placeholder="Nhập mã kế hoạch sản xuất, mã quản lý lot hoặc mã thùng để truy xuất" Style="border-radius: 20px; padding-left: 20px; border-width: 2px; border-color: var(--rz-primary-light); width: 80% "></RadzenTextBox>
                         <RadzenButton Icon="search" ButtonStyle="ButtonStyle.Primary" Style="border-radius: 20px;" />
-                        <RadzenText Visible="false" Text="@($"{loadinngtime} ms")" Style="font-weight: 600; font-size: 12px"></RadzenText>
                     </RadzenStack>
                 </RadzenColumn>
                 <RadzenColumn SizeMD="3" Size="12">

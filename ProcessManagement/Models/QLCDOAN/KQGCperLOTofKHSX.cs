@@ -65,14 +65,6 @@ namespace ProcessManagement.Models.QLCDOAN
                 int predoneOK = preKQGCperCDOANofLOTKHSX.TotalOK;
                 int predoneNG = preKQGCperCDOANofLOTKHSX.TotalNG;
 
-                if (preKQGCperCDOANofLOTKHSX.TargetLOT.MaQuanLyLot.Value?.ToString() == "A006-501-1-051224-003")
-                {
-                    if (preKQGCperCDOANofLOTKHSX._targetlot.NCID.Value?.ToString() == "4")
-                    {
-
-                    }
-                }
-
                 if (predoneOK > 0 || predoneNG > 0)
                 {
                     DanhGia = ((TotalOK + TotalNG) == predoneOK) ? 1 : 0;

@@ -330,20 +330,11 @@
                         </HeaderTemplate>
                         <Template Context="lotrow">
                             @{
-                                if (lotrow.MaQuanLyLot?.ToString() == "A006-501-1-051224-003")
-                                {
-                                    if (cdoancolumn.NCID.Value?.ToString() == "4")
-                                    {
-
-                                    }
-                                }
-
                                 var targetkqgc = lotrow.TargetKQGC(cdoancolumn.NCID.Value);
-
                             }
                             <RadzenButton Visible="@(targetkqgc.DanhGia == 0)" Text="FALSE" ButtonStyle="ButtonStyle.Danger" Shade="Shade.Dark" Size="ButtonSize.Small" Variant="Variant.Flat" Style="font-size: 15px; font-weight: 600; width: 100%; cursor: default"></RadzenButton>
                             <RadzenButton Visible="@(targetkqgc.DanhGia == 1)" Text="TRUE" ButtonStyle="ButtonStyle.Success" Shade="Shade.Light" Size="ButtonSize.Small" Variant="Variant.Flat" Style="font-size: 15px; width: 100%; font-weight: 600; cursor: default"></RadzenButton>
-                            <RadzenText Visible="@(targetkqgc.DanhGia == 2)" Text="_" Style="font-size: 15px; height: contain; font-weight: 600"></RadzenText>
+                            <RadzenText Visible="@(targetkqgc.DanhGia == 2)" Text="" Style="font-size: 15px; height: contain; font-weight: 600"></RadzenText>
                         </Template>
                         <FooterTemplate>
                             <RadzenText Text="@(((DSachResultPerLOTKHSX.Any(lot => lot.TargetKQGC(cdoancolumn.NCID.Value).DanhGia == 0 || lot.TargetKQGC(cdoancolumn.NCID.Value).DanhGia == 2))? "FALSE" : "TRUE"))"

@@ -9420,6 +9420,9 @@ namespace ProcessManagement.Services.SQLServer
                         }
                     }
 
+                    // Set odery by KHSXLOTID ( unique column (KHSXID, MQLLOT, NCID) not follow KHSXLOTID ascending)
+                    command.CommandText += $" ORDER BY {KHSX_LOT.DBName.KHSXLOTID}";
+
                     using var reader = command.ExecuteReader();
 
                     while (reader.Read())
