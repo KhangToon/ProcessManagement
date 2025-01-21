@@ -3,6 +3,7 @@
 @using ProcessManagement.Models.KHO_TPHAM
 @using ProcessManagement.Models.KHSXs
 @using ProcessManagement.Pages.Kho_ThanhPham.ViTriLuuTru
+@using ProcessManagement.Pages.Manager_NVL.Dialogs
 @using ProcessManagement.Services.SQLServer
 @using Radzen.Blazor
 @using Radzen
@@ -147,9 +148,11 @@
                                                             <RadzenText Text="Mã thùng" Style="font-size: 16px; font-weight: 600; height: contain; color: rgba(58,71,77)"></RadzenText>
                                                         </RadzenStack>
                                                         <RadzenStack Style="width: 60%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
-                                                            <RadzenText Text="@($"{thungtpham.ThungTPhams.FirstOrDefault()?.MaQuanLyThung.Value?.ToString()}")"
-                                                                        MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Mã quản lý thùng", 100, 1000))" 
-                                                                        Style="font-size: 16px; font-weight: 600; height: contain; color: darkgreen"></RadzenText>
+                                                            <RadzenButton Text="@($"{thungtpham.ThungTPhams.FirstOrDefault()?.MaQuanLyThung.Value?.ToString()}")"
+                                                                          MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Mã quản lý thùng", 100, 1000))"
+                                                                          Click="@(() => OnOpenQR_ImageDialog(thungtpham.ThungTPhams.FirstOrDefault()?.MaQuanLyThung.Value?.ToString() ?? string.Empty, "Mã quản lý thùng thành phẩm"))" Icon="qr_code"
+                                                                          Variant="Variant.Text" Size="ButtonSize.Small"
+                                                                          Style="font-size: 16px; font-weight: 600; height: contain; color: darkgreen"></RadzenButton>
                                                         </RadzenStack>
                                                     </RadzenStack>
 
@@ -233,5 +236,12 @@
         TooltipOptions options = new TooltipOptions() { Position = position, Delay = delay, Duration = duration, Style = "background-color: var(--rz-primary-light)" };
 
         TooltipService.Open(elementReference, content, options);
+    }
+
+    // Open QRIDLOT Image dialog
+    private async Task OnOpenQR_ImageDialog(object content, string header)
+    {
+        await DialogService.OpenAsync<DialogQR_Image>(null, new Dictionary<string, object>() { { "CONTENT", content }, { "HEADER", header } },
+        new DialogOptions() { CloseDialogOnEsc = true, CloseDialogOnOverlayClick = true, ShowTitle = true, Width = "contain", Height = "contain", Resizable = true, Draggable = true, ShowClose = true, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
     }
 }

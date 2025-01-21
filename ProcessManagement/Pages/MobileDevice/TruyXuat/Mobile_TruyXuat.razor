@@ -1,0 +1,627 @@
+﻿@page "/mobile_search"
+@attribute [Authorize(Roles = "User")]
+
+@using ProcessManagement.Models
+@using ProcessManagement.Models.KHO_NVL
+@using ProcessManagement.Models.KHO_NVL.NhapKho
+@using ProcessManagement.Models.KHO_NVL.XuatKho
+@using ProcessManagement.Models.KHO_TPHAM
+@using ProcessManagement.Models.KHSXs
+@using ProcessManagement.Models.QLCDOAN
+@using ProcessManagement.Pages.Manager_NVL.NhapKho
+@using ProcessManagement.Services
+@using ProcessManagement.Services.SQLServer
+@using Radzen.Blazor
+@using Radzen
+@using Microsoft.AspNetCore.Components
+
+@inject NotificationService NotificationService
+@inject DialogService DialogService
+@inject NavigationManager NavigationManager
+@inject SQLServerServices SQLServerServices
+
+<RadzenStack Gap="0" Style="height: 100%; width: 100%; margin: 0; padding: 0;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start">
+    <RadzenStack Style="height: contain; width: 100%; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+        <RadzenButton Text="@($"TRUY XUẤT NGUỒN GỐC")" ButtonStyle="ButtonStyle.Success" Shade="Shade.Lighter" Variant="Variant.Flat" Style="font-weight: 700; width: 100%; font-size: 16px; color: darkgreen;"></RadzenButton>
+    </RadzenStack>
+
+    <RadzenStack Gap="5px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="margin-top: 10px; height: contain; width: 100%; padding: 0px; padding-left: 0; padding-right: 0;">
+        <RadzenLabel Text="Scan QR để truy xuất" Style="color: darkred; font-size: 12px; font-weight: 600; height: contain; width: 100% "></RadzenLabel>
+        <RadzenStack Gap="5px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween" Style="height: contain; width: 100%; padding: 0px;">
+            @{
+                <RadzenStack Style="width: 80%;">
+                    <RadzenTextBox class="custom-placeholder" Placeholder="@($" * quét mã quản lý, mã thùng")" Value="@scanQRvalue?.ToString()" Style="font-size: 12px; height: contain; border-width: 1px; color: black; font-weight: 500"
+                                   @ref="reftxtScanInput"
+                                   @oninput="@(async(args) => { await SearchingKHSX(args.Value); })">
+                    </RadzenTextBox>
+                </RadzenStack>
+                <RadzenStack Style="width: 20%; height: 100%" Orientation="Orientation.Horizontal">
+                    <RadzenButton Style="padding: 5px; width: contain; height: 100%; font-size: 12px" Icon="search" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.ExtraSmall" Variant="Variant.Filled" />
+                    <RadzenButton @ref="refdefault" Click="(async() => { scanQRvalue = string.Empty; await reftxtScanInput.FocusAsync();})" Style="padding: 5px; width: contain; height: 100%; font-size: 12px" Icon="clear" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.ExtraSmall" Variant="Variant.Filled" />
+                </RadzenStack>
+            }
+        </RadzenStack>
+    </RadzenStack>
+
+    <RadzenCard Variant="Variant.Outlined" Style="margin-top: 10px; height:contain; width: 100%; padding: 5px; background-color: white">
+        <RadzenStack Visible="@(TargetKHSX.KHSXID.Value != null && !string.IsNullOrEmpty(scanQRvalue))" Style="width: 100%; height: 100%; padding: 10px; " Gap="10px" Orientation=Orientation.Vertical AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+            <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                    <RadzenText Text="Kế hoạch sản xuất" Style="font-size: 12px; font-weight: 600; height: contain; color: var(--rz-primary-darker)"></RadzenText>
+                </RadzenStack>
+                <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                    <RadzenText Text="@($"{TargetKHSX.MaLSX.Value?.ToString()}")" Style="font-size: 14px; font-weight: 700; height: contain; color: red"></RadzenText>
+                </RadzenStack>
+            </RadzenStack>
+
+            <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                <RadzenStack Style="width: 40%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                    <RadzenText Text="Ngày tạo" Style="font-size: 12px; font-weight: 600; height: contain; color: var(--rz-primary-darker)"></RadzenText>
+                </RadzenStack>
+                <RadzenStack Style="width: 60%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                    <RadzenText Text="@($"{TargetKHSX.NgayTao.Value?.ToString()}")" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                </RadzenStack>
+            </RadzenStack>
+
+            <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                <RadzenStack Style="width: 40%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                    <RadzenText Text="Sản phẩm" Style="font-size: 12px; font-weight: 600; height: contain; color: var(--rz-primary-darker)"></RadzenText>
+                </RadzenStack>
+                <RadzenStack Style="width: 60%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                    <RadzenText Visible="@(TargetKHSX.KHSXID.Value != null)" Text="@($"{TargetKHSX.TargetSanPham?.SP_TenSanPham.Value?.ToString()} ({TargetKHSX.TargetSanPham?.SP_MaSP.Value?.ToString()})")" Style="font-size: 14px; font-weight: 600; height: contain; color: black"></RadzenText>
+                </RadzenStack>
+            </RadzenStack>
+
+            <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                <RadzenStack Style="width: 40%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                    <RadzenText Text="Số lượng PO" Style="font-size: 12px; font-weight: 600; height: contain; color: var(--rz-primary-darker)"></RadzenText>
+                </RadzenStack>
+                <RadzenStack Style="width: 60%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                    <RadzenText Text="@($"{TargetKHSX.SLSanPhamPO.Value?.ToString()}")" Style="font-size: 14px; font-weight: 600; height: contain; color: black"></RadzenText>
+                </RadzenStack>
+            </RadzenStack>
+        </RadzenStack>
+        <RadzenStack Visible="@(TargetKHSX.KHSXID.Value == null || string.IsNullOrEmpty(scanQRvalue))" Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+            <RadzenText Text="Không tìm thấy kết quả" Style="font-size: 12px; font-weight: 600; height: contain; color: red"></RadzenText>
+        </RadzenStack>
+    </RadzenCard>
+    <RadzenCard Visible="@(TargetKHSX.KHSXID.Value != null && !string.IsNullOrEmpty(scanQRvalue))" Variant="Variant.Outlined" Style="margin-top: 5px; height:contain; width: 100%; padding: 5px; background-color: white">
+        <RadzenStack Style="width: 100%; height: 100%; padding: 10px; " Gap="10px" Orientation=Orientation.Vertical AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+            <RadzenLabel Text="Mã quản lý" Style="color: darkred; font-size: 12px; font-weight: 600; height: contain; width: 100% "></RadzenLabel>
+            <RadzenStack Visible="@(isSearhbyMQL)" Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                    <RadzenText Text="" Style="font-size: 12px; font-weight: 600; height: contain; color: var(--rz-primary-darker)"></RadzenText>
+                </RadzenStack>
+                <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                    <RadzenText Text="@($"{TargetMQLLot?.MaQuanLyLot.Value?.ToString()}")" Style="font-size: 13px; font-weight: 700; height: contain; color: darkgreen"></RadzenText>
+                </RadzenStack>
+            </RadzenStack>
+
+            @if (!isSearhbyMQL)
+            {
+                foreach (var thung in ThungTPbyMaThung)
+                {
+                    <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                        <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                            <RadzenText Text="" Style="font-size: 12px; font-weight: 600; height: contain; color: var(--rz-primary-darker)"></RadzenText>
+                        </RadzenStack>
+                        <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                            <RadzenText Text="@($"{thung?.MaQuanLyLot.Value?.ToString()}")" Style="font-size: 12px; font-weight: 700; height: contain; color: darkgreen"></RadzenText>
+                        </RadzenStack>
+                    </RadzenStack>
+                }
+            }
+        </RadzenStack>
+    </RadzenCard>
+
+    <RadzenCard Visible="@(TargetKHSX.KHSXID.Value != null && !string.IsNullOrEmpty(scanQRvalue))" Variant="Variant.Outlined" Style="margin-top: 5px; height:contain; width: 100%; padding: 5px; background-color: white">
+        <RadzenStack Style="width: 100%; height: 100%; padding: 10px;" Gap="10px" Orientation=Orientation.Vertical AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+            <RadzenLabel Text="Nguyên vật liệu" Style="color: darkred; font-size: 12px; font-weight: 600; height: contain; width: 100% "></RadzenLabel>
+            @foreach (var nvlinfor in nVLInfors)
+            {
+                <RadzenCard Variant="Variant.Flat" Style="height:contain; width: 100%; padding: 5px;">
+                    <RadzenStack Style="width: 100%; height: 100%; padding: 10px;" Gap="10px" Orientation=Orientation.Vertical AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                        <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                            <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                <RadzenText Text="Mã nguyên liệu" Style="font-size: 12px; font-weight: 600; height: contain; color: var(--rz-primary-darker)"></RadzenText>
+                            </RadzenStack>
+                            <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                                <RadzenText Text="@($"{nvlinfor.NVLofPXK.TargetNgLieu.TenNVL.Value?.ToString()} ({nvlinfor.NVLofPXK.TargetNgLieu.MaNVL.Value?.ToString()})")" Style="font-size: 13px; font-weight: 700; height: contain; color: darkblue"></RadzenText>
+                            </RadzenStack>
+                        </RadzenStack>
+
+                        <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                            <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                <RadzenText Text="Lot NVL" Style="font-size: 12px; font-weight: 600; height: contain; color: var(--rz-primary-darker)"></RadzenText>
+                            </RadzenStack>
+                            <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                                <RadzenText Text="@($"{nvlinfor.LXK.QRIDLOT.Value}")" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                            </RadzenStack>
+                        </RadzenStack>
+
+                        <RadzenStack Visible="false" Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                            <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                <RadzenText Text="Quy cách" Style="font-size: 12px; font-weight: 600; height: contain; color: var(--rz-primary-darker)"></RadzenText>
+                            </RadzenStack>
+                            <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                                <RadzenText Text="" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                            </RadzenStack>
+                        </RadzenStack>
+
+                        <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                            <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                <RadzenText Text="Ngày nhập" Style="font-size: 12px; font-weight: 600; height: contain; color: var(--rz-primary-darker)"></RadzenText>
+                            </RadzenStack>
+                            <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                                <RadzenText Text="@($"{nvlinfor.LXK.NgayNhapKho.Value}")" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                            </RadzenStack>
+                        </RadzenStack>
+
+                        <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                            <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                <RadzenText Text="Ngày xuất" Style="font-size: 12px; font-weight: 600; height: contain; color: var(--rz-primary-darker)"></RadzenText>
+                            </RadzenStack>
+                            <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                                <RadzenText Text="@($"{nvlinfor.LXK.NgayXuatKho.Value}")" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                            </RadzenStack>
+                        </RadzenStack>
+                    </RadzenStack>
+                </RadzenCard>
+            }
+        </RadzenStack>
+    </RadzenCard>
+
+    <RadzenCard Visible="@(TargetKHSX.KHSXID.Value != null && !string.IsNullOrEmpty(scanQRvalue))" Variant="Variant.Outlined" Style="margin-top: 5px; height:contain; width: 100%; padding: 5px; background-color: white">
+        <RadzenStack Style="width: 100%; height: 100%; padding: 10px;" Gap="10px" Orientation=Orientation.Vertical AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+            <RadzenLabel Text="Thùng thành phẩm" Style="color: darkred; font-size: 12px; font-weight: 600; height: contain; width: 100% "></RadzenLabel>
+            <RadzenStack Visible="@(TargetThungTPs.Any() == false)" Style="width: 100%; height: 100%; padding: 10px;" Gap="10px" Orientation=Orientation.Vertical AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                <RadzenButton Text="Chưa đóng thùng" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.ExtraSmall" Variant="Variant.Text" Icon="warning" Style="font-size: 12px; font-weight: 600; height: contain; color: red"></RadzenButton>
+            </RadzenStack>
+
+            @foreach (var thungtp in TargetThungTPs)
+            {
+                <RadzenCard Variant="Variant.Flat" Style="height:contain; width: 100%; padding: 5px;">
+                    <RadzenStack Style="width: 100%; height: 100%; padding: 10px;" Gap="10px" Orientation=Orientation.Vertical AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                        <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                            <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                <RadzenText Text="Mã quản lý thùng" Style="font-size: 12px; font-weight: 600; height: contain; color: var(--rz-primary-darker)"></RadzenText>
+                            </RadzenStack>
+                            <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                                <RadzenText Text="@($"{thungtp.ThungTPhams.FirstOrDefault()?.MaQuanLyThung.Value?.ToString()}")" Style="font-size: 13px; font-weight: 700; height: contain; color: darkgreen"></RadzenText>
+                            </RadzenStack>
+                        </RadzenStack>
+
+                        <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                            <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                <RadzenText Text="Số lượng/thùng" Style="font-size: 12px; font-weight: 600; height: contain; color: var(--rz-primary-darker)"></RadzenText>
+                            </RadzenStack>
+                            <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                                <RadzenText Text="@($"{thungtp.ThungTPhams.Sum(ttp => int.TryParse(ttp.SoLuong.Value?.ToString(), out int sl)? sl: 0).ToString()} (PCS)")" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                            </RadzenStack>
+                        </RadzenStack>
+
+                        <RadzenStack Visible="@thungtp.DaNhapKho" Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                            <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                <RadzenText Text="Ngày nhập kho" Style="font-size: 12px; font-weight: 600; height: contain; color: var(--rz-primary-darker)"></RadzenText>
+                            </RadzenStack>
+                            <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                                @{
+                                    DateTime? ngaynk = DateTime.TryParse(thungtp.ThungTPhams.FirstOrDefault()?.NgayNhapKho.Value?.ToString(), out DateTime nnk) ? nnk : null;
+
+                                    string _ngaynk = ngaynk?.ToString(Commons.Common.FormatNoTime_ddMMyyyy) ?? "---";
+                                }
+                                <RadzenText Text="@($"{_ngaynk}")" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                            </RadzenStack>
+                        </RadzenStack>
+
+                        <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                            <RadzenStack Visible="@(!thungtp.DaNhapKho)" Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                <RadzenButton Text="Chưa nhập kho" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.ExtraSmall" Variant="Variant.Text" Icon="warning" Style="font-size: 12px; font-weight: 600; height: contain; color: red"></RadzenButton>
+                            </RadzenStack>
+                            <RadzenStack Visible="@thungtp.DaNhapKho" Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                <RadzenButton Text="Đã nhập kho" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.ExtraSmall" Variant="Variant.Text" Icon="check" Style="font-size: 12px; font-weight: 600; height: contain;"></RadzenButton>
+                            </RadzenStack>
+                            <RadzenStack Visible="@thungtp.DaNhapKho" Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                                <RadzenText Text="@($"Vị trí: {SQLServerServices.GetViTriTPhamByVTofTPID(thungtp.ThungTPhams.FirstOrDefault()?.VTofTPID.Value?.ToString()).MaViTri.Value}")" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                            </RadzenStack>
+                        </RadzenStack>
+                    </RadzenStack>
+                </RadzenCard>
+            }
+        </RadzenStack>
+    </RadzenCard>
+
+    <RadzenCard Visible="@(TargetKHSX.KHSXID.Value != null && isSearhbyMQL && !string.IsNullOrEmpty(scanQRvalue))" Variant="Variant.Outlined" Style="margin-top: 5px; height:contain; width: 100%; padding: 5px; background-color: white">
+        <RadzenStack Style="width: 100%; height: 100%; padding: 10px;" Gap="10px" Orientation=Orientation.Vertical AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+            <RadzenLabel Text="Quá trình sản xuất" Style="color: darkred; font-size: 12px; font-weight: 600; height: contain; width: 100% "></RadzenLabel>
+            <RadzenStack Visible="@(TargetMQLLot != null)" Gap="5px" Orientation="Orientation.Vertical" Style="height: 100%; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style=" height: contain; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                    <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: 100%; padding: 5px; padding-right: 0px;">
+                        <RadzenStack Style="width: 100%; height: contain" Gap="0" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenStack Style="width: 5%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenText Text="#" Style="color: black; font-weight: 600; font-size: 12px"></RadzenText>
+                            </RadzenStack>
+                            <RadzenStack Style="width: 50%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenText Text="Nguyên công" Style="color: black; font-weight: 600; font-size: 12px"></RadzenText>
+                            </RadzenStack>
+                            <RadzenStack Style="width: 20%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenText Text="SL OK" Style="color: black; font-weight: 600; font-size: 12px"></RadzenText>
+                            </RadzenStack>
+                            <RadzenStack Style="width: 20%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenText Text="SL NG" Style="color: black; font-weight: 600; font-size: 12px"></RadzenText>
+                            </RadzenStack>
+                        </RadzenStack>
+                    </RadzenCard>
+                </RadzenStack>
+
+                <RadzenStack Gap="5px" Orientation="Orientation.Vertical" Style=" height: contain; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                    @{
+                        var dsnguyencong = TargetKHSX?.DSachCongDoans;
+                    }
+                    @if (dsnguyencong != null)
+                    {
+                        @foreach (var nguyencong in dsnguyencong)
+                        {
+                            <RadzenCard Variant="Variant.Outlined" Style="width: 100%; height: contain; padding: 5px; padding-right: 0px; background-color: white">
+                                <RadzenStack Style="width: 100%; height: 100%" Gap="10px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                    @{
+                                        var targetNC = ResultPerLOTKHSXes.FirstOrDefault()?.DsachKQGCperCDOAN.Where(cd => cd.TargetLOT.NCID.Value?.ToString() == nguyencong.NCID.Value?.ToString()).ToList();
+                                    }
+                                    <RadzenStack Style="width: 5%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                        <RadzenText Text="@((dsnguyencong.IndexOf(nguyencong) + 1).ToString())" Style="color: black; font-weight: 600; font-size: 12px"></RadzenText>
+                                    </RadzenStack>
+                                    <RadzenStack Style="width: 50%; height: contain; border-left: var(--rz-grid-cell-border); border-right: var(--rz-grid-cell-border); padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                        <RadzenText Text="@nguyencong.TenCongDoan.Value?.ToString()" Style="color: darkblue; font-weight: 600; font-size: 12px"></RadzenText>
+                                    </RadzenStack>
+                                    <RadzenStack Style="width: 20%; height: contain; border-right: var(--rz-grid-cell-border); padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                        <RadzenText Text="@($"{targetNC?.Sum(rs => rs.TotalOK)}")" Style="font-size: 12px; font-weight: 600; height: contain; color: darkgreen"></RadzenText>
+                                    </RadzenStack>
+                                    <RadzenStack Style="width: 20%; height: contain; " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                        <RadzenText Text="@($"{targetNC?.Sum(rs => rs.TotalNG)}")" Style="font-size: 12px; font-weight: 600; height: contain; color: red"></RadzenText>
+                                    </RadzenStack>
+                                </RadzenStack>
+                            </RadzenCard>
+                        }
+                    }
+                </RadzenStack>
+            </RadzenStack>
+
+        </RadzenStack>
+    </RadzenCard>
+
+</RadzenStack>
+
+@code {
+    private string scanQRvalue = string.Empty;
+
+    private KHSX TargetKHSX = new();
+    private PhieuXuatKho TargetPXK = new();
+    private static int selectedTabIndex = 0;
+    private static object? selectKHSXID;
+    private bool searching = false;
+
+    private List<KHSX> DSKHSXs_base = new();
+
+    private KHSX_LOT? TargetMQLLot;
+    private List<ResultPerLOTKHSX> ResultPerLOTKHSXes = new();
+    private bool isallowfocus = true;
+    private RadzenTextBox reftxtScanInput = new();
+    private RadzenButton refdefault = new();
+
+    private List<NVLInfor> nVLInfors = new();
+    private List<ThungTPhamExtend> TargetThungTPs = new();
+    private List<ThungTPham> ThungTPbyMaThung = new();
+    private bool isSearhbyMQL = true;
+
+    private class NVLInfor
+    {
+        public NVLofPhieuXuatKho NVLofPXK { get; set; } = new();
+        public LenhXuatKho LXK { get; set; } = new();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await OnGetListKHSXs();
+
+        await base.OnInitializedAsync();
+    }
+
+    private async Task OnGetListKHSXs()
+    {
+        DSKHSXs_base = new List<KHSX>();
+        var listkhsxids = SQLServerServices.GetlistKHSXid();
+        var tasks = new List<Task>();
+        var semaphore = new SemaphoreSlim(5); // Limit to 5 concurrent tasks
+
+        foreach (var khsxid in listkhsxids)
+        {
+            await semaphore.WaitAsync(); // Wait for an available slot
+            tasks.Add(Task.Run(async () =>
+            {
+                try
+                {
+                    KHSX kHSX = await GetKHSX(khsxid);
+
+                    if (kHSX != null && kHSX.KHSXID.Value != null)
+                    {
+                        DSKHSXs_base.Add(kHSX);
+                    }
+                }
+                catch (Exception)
+                {
+                    // Log or handle the exception
+                }
+                finally
+                {
+                    semaphore.Release(); // Release the slot
+                }
+            }));
+        }
+
+        await Task.WhenAll(tasks);
+    }
+
+    private async Task<KHSX> GetKHSX(object? khsxid)
+    {
+        return await Task.Run(() =>
+        {
+            return SQLServerServices.GetKHSXbyID(khsxid);
+        });
+    }
+
+    // Searching
+    private async Task SearchingKHSX(object? args)
+    {
+        await refdefault.Element.FocusAsync();
+
+        scanQRvalue = args?.ToString() ?? string.Empty;
+
+        await Task.Run(async () =>
+        {
+            if (searching == false)
+            {
+                TargetMQLLot = null; TargetKHSX = new();
+
+                searching = true;
+
+                string keysearch = args?.ToString()?.Trim() ?? string.Empty;
+
+                if (!string.IsNullOrEmpty(keysearch))
+                {
+                    // Search by ma KHSX
+                    //var results = DSKHSXs_base.FindAll(nv => nv.MaLSX.Value?.ToString()?.IndexOf(keysearch, StringComparison.OrdinalIgnoreCase) >= 0);
+                    var results = DSKHSXs_base.FindAll(nv => nv.MaLSX.Value?.ToString()?.Trim() == keysearch);
+
+                    if (results.Any())
+                    {
+                        TargetKHSX = results.FirstOrDefault() ?? new();
+                    }
+                    else
+                    {
+                        // Search by ma QLLot
+                        //results = DSKHSXs_base.FindAll(khsx => khsx.DSLOT_KHSXs.Any(lot => lot.MaQuanLyLot.Value?.ToString()?.IndexOf(keysearch, StringComparison.OrdinalIgnoreCase) >= 0));
+                        results = DSKHSXs_base.FindAll(khsx => khsx.DSLOT_KHSXs.Any(lot => lot.MaQuanLyLot.Value?.ToString()?.Trim() == keysearch));
+
+                        if (results.Any())
+                        {
+                            isSearhbyMQL = true;
+
+                            TargetMQLLot = results.FirstOrDefault()?.DSLOT_KHSXs.FirstOrDefault(lot => lot.MaQuanLyLot.Value?.ToString()?.Trim() == keysearch);
+
+                            TargetKHSX = results.FirstOrDefault() ?? new();
+
+                            ResultPerLOTKHSXes = await LoadKQGCperLOTofKHSX(new List<KHSX_LOT>() { TargetMQLLot ?? new() }, TargetKHSX.KHSXID.Value);
+
+                        }
+                        else
+                        {
+                            // Search by ma ThungTP
+                            var resutThungEx = await LoadDSachThungTPhamsByMQLThung(keysearch);
+
+                            if (resutThungEx != null && resutThungEx.Any())
+                            {
+                                var targetThung = resutThungEx.FirstOrDefault()?.ThungTPhams.FirstOrDefault();
+
+                                var khsxid = targetThung?.KHSXID.Value;
+
+                                results = DSKHSXs_base.Where(khsx => khsx.KHSXID.Value?.ToString() == khsxid?.ToString()).ToList();
+
+                                if (targetThung != null)
+                                {
+                                    isSearhbyMQL = false;
+
+                                    TargetMQLLot = results.FirstOrDefault()?.DSLOT_KHSXs.FirstOrDefault(lot => lot.MaQuanLyLot.Value?.ToString() == targetThung.MaQuanLyLot.Value?.ToString());
+
+                                    TargetKHSX = results.FirstOrDefault() ?? new();
+
+                                    ThungTPbyMaThung = await LoadDSachThungTPhamsByIDthung(TargetKHSX.KHSXID.Value, targetThung.IDThung.Value) ?? new();
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (TargetKHSX.KHSXID.Value != null)
+                {
+                    TargetPXK = SQLServerServices.GetPhieuXuatKhoByID(TargetKHSX.PXKID.Value);
+
+                    nVLInfors = new();
+
+                    foreach (var nvlofpxk in TargetPXK.DSNVLofPXKs)
+                    {
+                        foreach (var lxk in nvlofpxk.DSLenhXKs)
+                        {
+                            NVLInfor nVLInfor = new() { NVLofPXK = nvlofpxk, LXK = lxk };
+
+                            nVLInfors.Add(nVLInfor);
+                        }
+                    }
+
+                    // Get thung TP
+                    TargetThungTPs = await LoadDSachThungTPhamsByMQLLot(TargetMQLLot?.MaQuanLyLot.Value) ?? new();
+
+                }
+
+                await Task.Delay(100);
+
+                searching = false;
+            }
+        });
+    }
+
+    private async Task<List<ThungTPhamExtend>?> LoadDSachThungTPhamsByMQLLot(object? maquanlylot)
+    {
+        return await Task.Run(() =>
+        {
+            List<ThungTPhamExtend>? thungTPhamExtends = null;
+
+            List<ThungTPham> thungTPhams = SQLServerServices.GetListThungTPhams(new Dictionary<string, object?>() { { ThungTPham.DBName.MaQuanLyLot, maquanlylot } }).thungTPhams;
+
+            // Group the ThungTPham objects by IDThung
+            var groupedResults = thungTPhams.Where(ttp => ttp.IDThung.Value != null)
+                                            .GroupBy(ttp => ttp.IDThung.Value)
+                                            .Select(group => new ThungTPhamExtend
+                                                {
+                                                    IDThung = group.Key,
+                                                    ThungTPhams = group.ToList(),
+                                                    Total = group.ToList().Sum(ttp => int.TryParse(ttp.SoLuong.Value?.ToString(), out int sl) ? sl : 0),
+                                                    MaSanPham = SQLServerServices.GetMaSanphamByID(group.ToList().FirstOrDefault()?.SPID.Value),
+                                                }).ToList();
+            if (groupedResults != null)
+            {
+                foreach (var thung in groupedResults)
+                {
+                    foreach (var ttp in thung.ThungTPhams)
+                    {
+                        if (int.TryParse(ttp.VTofTPID.Value?.ToString(), out int vtid))
+                        {
+                            thung.DaNhapKho = vtid > 0;
+                        }
+                    }
+                }
+
+                thungTPhamExtends = groupedResults;
+            }
+
+            return thungTPhamExtends;
+        });
+    }
+
+
+    private async Task<List<ThungTPhamExtend>?> LoadDSachThungTPhamsByMQLThung(object? maquanlythung)
+    {
+        return await Task.Run(() =>
+        {
+            List<ThungTPhamExtend>? thungTPhamExtends = null;
+
+            List<ThungTPham> thungTPhams = SQLServerServices.GetListThungTPhams(new Dictionary<string, object?>() { { ThungTPham.DBName.MaQuanLyThung, maquanlythung } }).thungTPhams;
+
+            // Group the ThungTPham objects by IDThung
+            var groupedResults = thungTPhams.Where(ttp => ttp.IDThung.Value != null)
+                                            .GroupBy(ttp => ttp.IDThung.Value)
+                                            .Select(group => new ThungTPhamExtend
+                                                {
+                                                    IDThung = group.Key,
+                                                    ThungTPhams = group.ToList(),
+                                                    Total = group.ToList().Sum(ttp => int.TryParse(ttp.SoLuong.Value?.ToString(), out int sl) ? sl : 0),
+                                                    MaSanPham = SQLServerServices.GetMaSanphamByID(group.ToList().FirstOrDefault()?.SPID.Value),
+                                                }).ToList();
+            if (groupedResults != null)
+            {
+                foreach (var thung in groupedResults)
+                {
+                    foreach (var ttp in thung.ThungTPhams)
+                    {
+                        if (int.TryParse(ttp.VTofTPID.Value?.ToString(), out int vtid))
+                        {
+                            thung.DaNhapKho = vtid > 0;
+                        }
+                    }
+                }
+
+                thungTPhamExtends = groupedResults;
+            }
+
+            return thungTPhamExtends;
+        });
+    }
+
+    private async Task<List<ThungTPham>> LoadDSachThungTPhams(object? khsxid, object? maquanlylot)
+    {
+        return await Task.Run(() =>
+        {
+            var thungTPhams = SQLServerServices.GetListThungTPhams(new Dictionary<string, object?>() { { KHSX_LOT.DBName.KHSXID, khsxid }, { KHSX_LOT.DBName.MaQuanLyLot, maquanlylot } }).thungTPhams;
+
+            return thungTPhams;
+        });
+    }
+
+    private async Task<List<ThungTPham>> LoadDSachThungTPhamsByIDthung(object? khsxid, object? idthung)
+    {
+        return await Task.Run(() =>
+        {
+            var thungTPhams = SQLServerServices.GetListThungTPhams(new Dictionary<string, object?>() { { KHSX_LOT.DBName.KHSXID, khsxid }, { ThungTPham.DBName.IDThung, idthung } }).thungTPhams;
+
+            return thungTPhams;
+        });
+    }
+
+    int MaxThungTP = 2;
+    // Load kqgc per CDoan for dsachLOTKHSX
+    private async Task<List<ResultPerLOTKHSX>> LoadKQGCperLOTofKHSX(List<KHSX_LOT> lOTs, object? khsxid)
+    {
+        List<ResultPerLOTKHSX> resultPerLOTKHSXs = new();
+
+        int orginMaxThungTP = 1;
+
+        foreach (var lot in lOTs)
+        {
+            ResultPerLOTKHSX resultPerLOTKHSX = new() { MaSP = TargetKHSX?.TargetSanPham?.SP_MaSP.Value, MaQuanLyLot = lot.MaQuanLyLot.Value, SLperLOT = lot.SLLOT.Value };
+
+            Dictionary<string, object?> pars = new();
+            pars.Add($"{KHSX_LOT.DBName.KHSXID}", khsxid);
+            pars.Add($"{KHSX_LOT.DBName.MaQuanLyLot}", lot.MaQuanLyLot.Value);
+
+            // Get list CD per LOT ( 1 maquanlyLot with nhieu congdoan)
+            (List<KHSX_LOT> dsCDOANperLOTKHSX, string error) = SQLServerServices.GetListLOT_khsx(pars);
+
+            List<KQGCperCDOANofLOTKHSX> dsachKQGCperCDOAN = new();
+
+            foreach (var (index, cdperlot) in dsCDOANperLOTKHSX.Select((item, idx) => (idx, item)))
+            {
+                // Get lastest kqgc
+                var rekQGCperLOTofKHSX = dsachKQGCperCDOAN.LastOrDefault() ?? null;
+
+                // Get kqgc targetLOT with all CDoan
+                KQGCperCDOANofLOTKHSX kQGCperLOTofKHSX = new(cdperlot, rekQGCperLOTofKHSX);
+
+                dsachKQGCperCDOAN.Add(kQGCperLOTofKHSX);
+            }
+
+            // Asign dsachKQGCperCDOAN for resultPerLOTKHSX
+            resultPerLOTKHSX.DsachKQGCperCDOAN = dsachKQGCperCDOAN;
+
+            // Asign IsDoneLastCDoan
+            resultPerLOTKHSX.IsLastCDoanDone = resultPerLOTKHSX.DsachKQGCperCDOAN.LastOrDefault()?.DanhGia == 1;
+
+            resultPerLOTKHSX.ThungTPhams = await LoadDSachThungTPhams(TargetKHSX?.KHSXID.Value, resultPerLOTKHSX.MaQuanLyLot);
+
+            int numofThungTP = resultPerLOTKHSX.ThungTPhams.Count();
+
+            if (numofThungTP > orginMaxThungTP)
+            {
+                orginMaxThungTP = numofThungTP;
+            }
+
+            // Asign IsCreatedThungTP
+            resultPerLOTKHSX.IsCreatedThungTP = resultPerLOTKHSX.ThungTPhams.Any();
+
+            resultPerLOTKHSXs.Add(resultPerLOTKHSX);
+        }
+
+        // Gan max thung TP
+        MaxThungTP = orginMaxThungTP;
+
+        return resultPerLOTKHSXs;
+    }
+}
