@@ -289,6 +289,89 @@
         </RadzenStack>
     </RadzenCard>
 
+    @if (ResultPerLOTKHSXes.Any())
+    {
+        foreach (var result in ResultPerLOTKHSXes)
+        {
+            foreach (var cdoancolumn in TargetKHSX.DSachCongDoans)
+            {
+                int maxindexColumn = GetMaxIndexColumnCDoan(cdoancolumn.NCID.Value);
+
+                string tencongdoan = cdoancolumn.TenCongDoan.Value?.ToString() ?? string.Empty;
+
+                <RadzenCard Variant="Variant.Outlined" Style="margin-top: 5px; height:contain; width: 100%; padding: 5px; background-color: white">
+                    <RadzenStack Style="width: 100%; height: 100%; padding: 10px;" Gap="10px" Orientation=Orientation.Vertical AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                        <RadzenLabel Text="@tencongdoan" Style="color: black; font-size: 12px; font-weight: 600; height: contain; width: 100% "></RadzenLabel>
+
+                        @foreach (var resultIndex in cdoancolumn.GenerateListColumnIndex(maxindexColumn))
+                        {
+                            <RadzenCard Variant="Variant.Flat" Style="height:contain; width: 100%; padding: 5px;">
+                                <RadzenStack Style="width: 100%; height: 100%; padding: 10px;" Gap="10px" Orientation=Orientation.Vertical AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                    <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                        <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                            <RadzenText Text="Máy" Style="font-size: 12px; font-weight: 600; height: contain; color: var(--rz-primary-darker)"></RadzenText>
+                                        </RadzenStack>
+                                        <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                                            <RadzenText Text="@(GetColumnValueByID(result.GetMayMoc(cdoancolumn.NCID.Value, resultIndex)?.ToString(), KetQuaGC.KQGCDBName.MMID))" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                                        </RadzenStack>
+                                    </RadzenStack>
+
+                                    <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                        <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                            <RadzenText Text="Ca" Style="font-size: 12px; font-weight: 600; height: contain; color: var(--rz-primary-darker)"></RadzenText>
+                                        </RadzenStack>
+                                        <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                                            <RadzenText Text="@(result.GetCaLamViec(cdoancolumn.NCID.Value, resultIndex)?.ToString())" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                                        </RadzenStack>
+                                    </RadzenStack>
+
+                                    <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                        <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                            <RadzenText Text="Ngày gia công" Style="font-size: 12px; font-weight: 600; height: contain; color: var(--rz-primary-darker)"></RadzenText>
+                                        </RadzenStack>
+                                        <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                                            <RadzenText Text="@(result.GetNgayGC(cdoancolumn.NCID.Value, resultIndex)?.ToString())" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                                        </RadzenStack>
+                                    </RadzenStack>
+
+                                    <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                        <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                            <RadzenText Text="Nhân viên" Style="font-size: 12px; font-weight: 600; height: contain; color: var(--rz-primary-darker)"></RadzenText>
+                                        </RadzenStack>
+                                        <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                                            <RadzenText Text="@(GetColumnValueByID(result.GetNhanVien(cdoancolumn.NCID.Value, resultIndex)?.ToString(), KetQuaGC.KQGCDBName.NVIDs))" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                                        </RadzenStack>
+                                    </RadzenStack>
+
+                                    <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                        <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                            <RadzenText Text="SLOK" Style="font-size: 12px; font-weight: 600; height: contain; color: var(--rz-primary-darker)"></RadzenText>
+                                        </RadzenStack>
+                                        <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                                            <RadzenText Text="@(((ResultPerLOTKHSXes.Sum(lot => int.TryParse(lot.GetSLOK(cdoancolumn.NCID.Value, resultIndex)?.ToString(), out int sumok)? sumok : 0)).ToString()))" Style="color: darkgreen; font-weight: 600; font-size: 14px"></RadzenText>
+                                        </RadzenStack>
+                                    </RadzenStack>
+
+                                    <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                        <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                            <RadzenText Text="SLNG" Style="font-size: 12px; font-weight: 600; height: contain; color: var(--rz-primary-darker)"></RadzenText>
+                                        </RadzenStack>
+                                        <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                                            <RadzenText Text="@(((ResultPerLOTKHSXes.Sum(lot => int.TryParse(lot.GetSLNG(cdoancolumn.NCID.Value, resultIndex)?.ToString(), out int sumng)? sumng : 0)).ToString()))" Style="color: darkred; font-weight: 600; font-size: 14px"></RadzenText>
+                                        </RadzenStack>
+                                    </RadzenStack>
+                                </RadzenStack>
+                            </RadzenCard>
+                        }
+
+                    </RadzenStack>
+                </RadzenCard>
+
+            }
+
+        }
+    }
+
 </RadzenStack>
 
 @code {
@@ -324,6 +407,16 @@
         await OnGetListKHSXs();
 
         await base.OnInitializedAsync();
+    }
+
+    // Get so luong toi da cua column resultCalamviec/perCongdoan
+    private int GetMaxIndexColumnCDoan(object? cdid)
+    {
+        int defaultmaxindex = 2;
+
+        var maxindex = ResultPerLOTKHSXes.Max(rs => rs.TargetKQGC(cdid).ResultCalamviecs.Count());
+
+        return (maxindex > defaultmaxindex) ? maxindex : defaultmaxindex;
     }
 
     private async Task OnGetListKHSXs()
@@ -624,4 +717,49 @@
 
         return resultPerLOTKHSXs;
     }
+
+    // Convert ID to stringValue
+
+    private string GetColumnValueByID(object? id, string colName)
+    {
+        string value = string.Empty;
+
+        if (colName == KetQuaGC.KQGCDBName.NVIDs)
+        {
+            string ids = id?.ToString()?.Trim() ?? string.Empty;
+
+            if (!string.IsNullOrEmpty(ids))
+            {
+                List<string> nvids = ids.Split(",").ToList();
+
+                value = string.Join(", ", nvids
+                        .Select(nvid => (SQLServerServices.GetNhanVienbyID(nvid).GetThongTinNhanVienByName("Tên nhân viên")).GiaTri.Value?.ToString() ?? string.Empty)
+                        .Where(name => !string.IsNullOrEmpty(name)))
+                        .Trim(',');
+            }
+            else value = " ";
+        }
+        else if (colName == KetQuaGC.KQGCDBName.NGIDs)
+        {
+            string ids = id?.ToString()?.Trim() ?? string.Empty;
+
+            if (!string.IsNullOrEmpty(ids))
+            {
+                List<string> ngids = ids.Split(",").ToList();
+
+                value = string.Join(", ", ngids
+                        .Select(ngid => SQLServerServices.GetNoiDungNGbyID(ngid))
+                        .Where(name => !string.IsNullOrEmpty(name)))
+                        .Trim(',');
+            }
+        }
+        else if (colName == KetQuaGC.KQGCDBName.MMID)
+        {
+            value = SQLServerServices.GetMaMayMocbyID(id);
+        }
+
+        return value;
+    }
+
+
 }
