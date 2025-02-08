@@ -43,7 +43,7 @@
 
 <RadzenRow class="rowbackground-style" Gap="0" Style="height: 100%; width: 100%; overflow-y: auto;">
     <RadzenColumn Size="12" SizeMD="12" Style="height: 100%; width: 100%; padding-right: 0">
-        <RadzenTabs Style="width: 100%; height: 100%; padding-right: 0" SelectedIndex="@((SelectedTabIndex - 1))">
+        <RadzenTabs Style="width: 100%; height: 100%; padding-right: 0" SelectedIndexChanged="@( async (args) => await SelectedIndexTabChanged(args))" SelectedIndex="@((SelectedTabIndex - 1))">
             <Tabs>
                 <RadzenTabsItem @onclick="@(() => SelectedTabIndex = 1)">
                     <Template>
@@ -787,6 +787,14 @@
         await base.OnInitializedAsync();
     }
 
+    private async Task SelectedIndexTabChanged(int tabindex)
+    {
+        if (tabindex == 0)
+        {
+            await ButtonReloadPress(10);
+        }
+    }
+
     // Them moi nvl
     private async Task OnThemMoiNguyenVatLieu()
     {
@@ -826,7 +834,7 @@
     }
 
     // Button Reload
-    private async Task ButtonReloadPress()
+    private async Task ButtonReloadPress(int delay = 200)
     {
         await Task.Run(async () =>
         {
@@ -838,7 +846,7 @@
                 LoadList_NguyenVatLieu();
                 ReSelectCurrentNguyenVatLieu(Common.SelectedNVLid);
 
-                await Task.Delay(200);
+                await Task.Delay(delay);
 
                 isLoadingDSNVL = false;
             }
@@ -1173,8 +1181,8 @@
     {
         await DialogService.OpenAsync<DialogEditViTriofNVL>(null, new Dictionary<string, object>() { { "TargetViTriofNVL", viTriofNVL } },
         new DialogOptions() { CloseDialogOnEsc = true, CloseDialogOnOverlayClick = false, ShowTitle = true, Width = "50%", Height = "contain", Resizable = true, Draggable = true, ShowClose = true, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
-    
-        
+
+
     }
 
     // Nhap kho dialog

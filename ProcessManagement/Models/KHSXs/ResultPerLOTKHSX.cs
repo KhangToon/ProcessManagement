@@ -100,6 +100,18 @@ namespace ProcessManagement.Models.KHSXs
             return maymoc;
         }
 
+
+        public object? GetNGType(object? cdid, int caindex)
+        {
+            object? NGids = null;
+
+            KQGCperCDOANofLOTKHSX targetKQ = DsachKQGCperCDOAN.FirstOrDefault(rs => rs.TargetLOT.NCID.Value?.ToString()?.Trim() == cdid?.ToString()?.Trim()) ?? new();
+
+            NGids = Common.GetElementOrNew(targetKQ.ResultCalamviecs, caindex).NGIDs ?? null;
+
+            return NGids;
+        }
+
         public object? GetNgayGC(object? cdid, int caindex)
         {
             object ngayGC = " ";

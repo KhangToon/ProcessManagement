@@ -24,6 +24,8 @@
 
         public List<ErrType> CheckErrors { get; set; } = new() { ErrType.NotEmptyValue };
 
+        public int TabIndex { get; set; } = -1;
+
         public enum ErrType
         {
             NotEmptyValue,

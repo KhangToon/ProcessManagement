@@ -46,6 +46,7 @@ namespace ProcessManagement.Models.QLCDOAN
                     MayMoc = kqgc.MMID.Value,
                     SLOK = kqgc.SLOK.Value,
                     SLNG = kqgc.SLNG.Value,
+                    NGIDs = kqgc.NGIDs.Value,
                 };
 
                 if (resultperCDoan != null)
@@ -116,6 +117,7 @@ namespace ProcessManagement.Models.QLCDOAN
             public object? MayMoc { get; set; }
             public object? SLOK { get; set; }
             public object? SLNG { get; set; }
+            public object? NGIDs { get; set; }
         }
     }
 }

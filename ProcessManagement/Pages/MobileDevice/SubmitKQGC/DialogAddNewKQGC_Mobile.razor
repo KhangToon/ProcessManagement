@@ -52,7 +52,7 @@
         </RadzenStack>
         <RadzenRow Gap="10px" Style="height: 85%; width: 100%; border-top: var(--rz-grid-cell-border); padding: 0; overflow-y: scroll;">
             <RadzenColumn Size="12" SizeMD="12" Style="height: 100%; width: 100%; padding: 0">
-                <RadzenCard Variant="Variant.Flat" Style="height:contain; width: 100%; padding: 5px; background-color: white">
+                <RadzenCard Variant="Variant.Flat" Style="height:contain; width: 100%; padding: 0; background-color: white">
                     <RadzenStack Style="height: contain; width: 100%; padding: 0;" Gap="0" Orientation="Orientation.Vertical">
                         @{
                             foreach (var property in properties)
@@ -65,9 +65,9 @@
                                         <RadzenStack Style="width: 100%;">
                                             <RadzenLabel Text="@(displayName)" Style="color: black; font-size: 12px; font-weight: 600; height: contain;"></RadzenLabel>
                                         </RadzenStack>
-                                        <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
+                                        <RadzenStack Gap="5px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
                                             <RadzenStack Style="width: 85%;">
-                                                <RadzenDropDown AllowClear="true" Disabled="@((property.DBName != KetQuaGC.KQGCDBName.MaQuanLyLot && string.IsNullOrEmpty(newKetQuaGC.MaQuanLyLot.Value?.ToString()) || property.DBName == KetQuaGC.KQGCDBName.SPID))"
+                                                <RadzenDropDown OpenOnFocus="true" AllowClear="true" Disabled="@((property.DBName != KetQuaGC.KQGCDBName.MaQuanLyLot && string.IsNullOrEmpty(newKetQuaGC.MaQuanLyLot.Value?.ToString()) || property.DBName == KetQuaGC.KQGCDBName.SPID) || property.IsDisable)"
                                                                 Style="width: 100%; height: contain; font-size: 12px; font-weight: 600; background-color: white"
                                                                 Placeholder="@($" * chọn {displayName}")"
                                                                 AllowVirtualization="true"
@@ -104,7 +104,7 @@
                                         <RadzenStack Style="width: 100%;">
                                             <RadzenLabel Text="@(displayName)" Style="color: black; font-size: 12px; font-weight: 600; height: contain;"></RadzenLabel>
                                         </RadzenStack>
-                                        <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
+                                        <RadzenStack Gap="5px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
                                             <RadzenStack Style="width: 85%;">
                                                 <RadzenDropDown AllowClear="true" Disabled="@property.IsDisable"
                                                                 Style="width: 100%; height: contain; font-size: 12px; font-weight: 600; color: black; background-color: white"
@@ -149,12 +149,12 @@
                                         <RadzenStack Style="width: 100%;">
                                             <RadzenLabel Text="@(displayName)" Style="color: black; font-size: 12px; font-weight: 600; height: contain;"></RadzenLabel>
                                         </RadzenStack>
-                                        <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
+                                        <RadzenStack Gap="5px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
                                             <RadzenStack Style="width: 85%;">
-                                                <RadzenDropDown AllowClear="true" Disabled="@(string.IsNullOrEmpty(newKetQuaGC.NCID.Value?.ToString()))"
+                                                <RadzenDropDown AllowClear="true" Disabled="@(string.IsNullOrEmpty(newKetQuaGC.NCID.Value?.ToString()) || property.IsDisable)"
                                                                 Style="width: 100%; height: contain; font-size: 12px; font-weight: 600; color: black; background-color: white"
                                                                 Placeholder="@($" * chọn {displayName}")"
-                                                                TValue="string" Data="@(Common.ListCaLamViecs)"
+                                                                TValue="string" Data="@(Common.ListCaLamViecs)" Value="@(newKetQuaGC.CaLamViec.Value?.ToString())"
                                                                 ValueChanged="@(async (args) =>{newKetQuaGC.CaLamViec.Value = args;await DefaultThongTinKetQuaGC_ValueIsOK(property);})">
                                                     <!--Custom style off dropdownbox items-->
                                                     <Template>
@@ -181,12 +181,12 @@
                                         <RadzenStack Style="width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                             <RadzenLabel Text="@(displayName)" Style="color: black; font-size: 12px; font-weight: 600; height: contain;"></RadzenLabel>
                                         </RadzenStack>
-                                        <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
+                                        <RadzenStack Gap="5px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
                                             @{
                                                 if (property.Type == typeof(string)) // kieu ky tu
                                                 {
                                                     <RadzenStack Style="width: 85%;">
-                                                        <RadzenTextBox class="custom-placeholder" Placeholder="@($" * nhập {displayName}")" Value="@property.Value?.ToString()" Style="font-size: 12px; height: contain; border-width: 1px; color: black; font-weight: 500"
+                                                        <RadzenTextBox Disabled="@property.IsDisable" class="custom-placeholder" Placeholder="@($" * nhập {displayName}")" Value="@property.Value?.ToString()" Style="font-size: 12px; height: contain; border-width: 1px; color: black; font-weight: 500"
                                                                        @oninput="@(async (args) => { property.Value = args.Value; await DefaultThongTinKetQuaGC_ValueIsOK(property);})">
                                                         </RadzenTextBox>
                                                     </RadzenStack>
@@ -194,8 +194,9 @@
                                                 else if (property.Type == typeof(double)) // Kieu double
                                                 {
                                                     <RadzenStack Style="width: 85%;">
-                                                        <RadzenNumeric class="custom-numeric" TValue="double" Placeholder="0.0" Step="0.5"
+                                                        <RadzenNumeric Disabled="@property.IsDisable" class="custom-numeric" TValue="double" Placeholder="0.0" Step="0.5"
                                                                        Min="0" Max="999999"
+                                                                       Value="@((double.TryParse(property.Value?.ToString(), out double num)? num : 0))"
                                                                        ValueChanged="@(async (args) =>
                                                                                {
                                                                                     property.Value = args;
@@ -220,7 +221,7 @@
                                                     }
 
                                                     <RadzenStack Style="width: 85%;">
-                                                        <RadzenNumeric Disabled="@(property.DBName == KetQuaGC.KQGCDBName.SLperLOT)" class="custom-numeric" TValue="int" Placeholder="0" Step="1"
+                                                        <RadzenNumeric Disabled="@(property.DBName == KetQuaGC.KQGCDBName.SLperLOT || property.IsDisable)" class="custom-numeric" TValue="int" Placeholder="0" Step="1"
                                                                        Min="0" Max="max"
                                                                        Value="@((int.TryParse(property.Value?.ToString(), out int num)? num : 0))"
                                                                        ValueChanged="@(async (args) =>
@@ -283,7 +284,7 @@
                                                     </RadzenStack>
                                                 }
 
-                                                <RadzenStack Visible="@(!property.IsDisable)" Style="width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                                                <RadzenStack Style="width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
                                                     <RadzenAlert Visible="@(!property.IsCheckValueOK)" Style="width: contain; height: 100%; font-size: 12px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
                                                     <RadzenAlert Visible="@(property.IsCheckValueOK)" Style="width: contain; height: 100%; font-size: 12px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Success" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
                                                 </RadzenStack>
@@ -317,12 +318,14 @@
 
     private KetQuaGC newKetQuaGC = new();
     private List<SanPham> dsachSanPhams = new();
-    private List<NguyenCong> dsachNguyenCongs = new();
-    //private List<NguyenCongofKHSX> dsNCofKHSXs = new();
+    //private List<NguyenCong> dsachNguyenCongs = new();
+    private List<NguyenCongofKHSX> dsNCofKHSXs = new();
     private List<MayMoc> dsachMayMocs = new();
     private List<NhanVien> dsachNhanViens = new();
     private List<NGType> dsachNGTypes = new();
     private List<KHSX_LOT> dsachMaQLyLots = new();
+
+    private RadzenDropDown<KeyValuePair<string, string>> refradzenDrop = new();
 
     // Selected item changed
     private IEnumerable<KeyValuePair<string, string>>? NhanviensSelected;
@@ -333,20 +336,10 @@
     protected override async Task OnInitializedAsync()
     {
         newKetQuaGC.SubMitDay.Value = DateTime.Now;
-        newKetQuaGC.SLNG.Value = 0;
-        newKetQuaGC.NGIDs.IsDisable = true;
-        NGTypesSelected = null;
-
-        newKetQuaGC.ThoiGianGC.Value = 0;
-        newKetQuaGC.ThoiGianLamViec.Value = 0;
-
         await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.SubMitDay);
-        await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.SLNG);
-        await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.NGIDs);
 
-        await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.ThoiGianGC);
-        await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.ThoiGianLamViec);
-        await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.GhiChu);
+        ResetNewKQGCbyMQLLOTChanged(new List<string>());
+        await UpdateUINewKQGCbyMQLLOTChanged(new List<string>());
 
         await base.OnInitializedAsync();
     }
@@ -382,7 +375,8 @@
                     .Where(item => item.SP_SPID.Value != null)
                     .Select(item => new KeyValuePair<string, string>(
                         item.SP_SPID.Value?.ToString() ?? string.Empty,
-                        $"{item.SP_MaSP.Value?.ToString()?.Trim()} ({item.SP_MaSP.Value?.ToString()?.Trim()})"
+                        $"{item.SP_MaSP.Value?.ToString()?.Trim()}"
+                    //$"{item.SP_MaSP.Value?.ToString()?.Trim()} ({item.SP_TenSanPham.Value?.ToString()?.Trim()})"
                     ))
                     .Where(x => !string.IsNullOrEmpty(x.Value) && !string.IsNullOrEmpty(x.Key))
                     .Distinct();
@@ -401,29 +395,29 @@
         }
         else if (colName == KetQuaGC.KQGCDBName.NCID)
         {
-            // dsNCofKHSXs = SQLServerServices.GetlistCongdoans(KHSXID);
+            dsNCofKHSXs = SQLServerServices.GetlistCongdoans(KHSXID);
 
-            // if (dsNCofKHSXs != null)
-            // {
-            //     results = dsNCofKHSXs
-            //         .Where(item => item.NCIDofKHSX.Value != null)
-            //         .Select(item => new KeyValuePair<string, string>(
-            //             item.NCID.Value?.ToString() ?? string.Empty,
-            //             item.TenCongDoan.Value?.ToString()?.Trim() ?? string.Empty
-            //         ))
-            //         .Where(x => !string.IsNullOrEmpty(x.Value) && !string.IsNullOrEmpty(x.Key))
-            //         .Distinct();
-            // }
-
-            dsachNguyenCongs = SQLServerServices.GetListNguyenCongs();
-            results = dsachNguyenCongs
-                    .Where(item => item.NCID.Value != null)
+            if (dsNCofKHSXs != null)
+            {
+                results = dsNCofKHSXs
+                    .Where(item => item.NCIDofKHSX.Value != null)
                     .Select(item => new KeyValuePair<string, string>(
                         item.NCID.Value?.ToString() ?? string.Empty,
-                        item.TenNguyenCong.Value?.ToString()?.Trim() ?? string.Empty
+                        item.TenCongDoan.Value?.ToString()?.Trim() ?? string.Empty
                     ))
                     .Where(x => !string.IsNullOrEmpty(x.Value) && !string.IsNullOrEmpty(x.Key))
                     .Distinct();
+            }
+
+            // dsachNguyenCongs = SQLServerServices.GetListNguyenCongs();
+            // results = dsachNguyenCongs
+            //         .Where(item => item.NCID.Value != null)
+            //         .Select(item => new KeyValuePair<string, string>(
+            //             item.NCID.Value?.ToString() ?? string.Empty,
+            //             item.TenNguyenCong.Value?.ToString()?.Trim() ?? string.Empty
+            //         ))
+            //         .Where(x => !string.IsNullOrEmpty(x.Value) && !string.IsNullOrEmpty(x.Key))
+            //         .Distinct();
         }
         else if (colName == KetQuaGC.KQGCDBName.MMID)
         {
@@ -446,7 +440,8 @@
                     .Where(item => item.KHSXLOTID.Value != null)
                     .Select(item => new KeyValuePair<string, string>(
                         item.KHSXLOTID.Value?.ToString() ?? string.Empty,
-                        $"{item.MaQuanLyLot.Value?.ToString()?.Trim()} (số lượng: {item.SLLOT.Value?.ToString()?.Trim()})"
+                        $"{item.MaQuanLyLot.Value?.ToString()?.Trim()}"
+                    // $"{item.MaQuanLyLot.Value?.ToString()?.Trim()} (số lượng: {item.SLLOT.Value?.ToString()?.Trim()})"
                     ))
                     .Where(x => !string.IsNullOrEmpty(x.Value) && !string.IsNullOrEmpty(x.Key))
                     .DistinctBy(x => x.Value);
@@ -494,6 +489,10 @@
     {
         if (proName == KetQuaGC.KQGCDBName.MaQuanLyLot && args != null)
         {
+            // Reset all value after scaningMQL value changed
+            ResetNewKQGCbyMQLLOTChanged(new List<string>());
+            await UpdateUINewKQGCbyMQLLOTChanged(new List<string>());
+
             // Split maLOT get maKHSX
             string targetMaKHSX = GetMaKHSXbyMaQuanLyLot(args.ToString() ?? string.Empty);
 
@@ -509,105 +508,42 @@
 
             if (dsLots?.Count > 0 && dsLots.Any(lot => lot.MaQuanLyLot.Value?.ToString() == args.ToString()))
             {
+                // Asign KHSXID
                 newKetQuaGC.KHSXID.Value = KHSXID;
-
-                // Asign target SPham
-                SPID = SQLServerServices.GetSPIDbyMaKHSX(targetMaKHSX);
-
-                if (SPID > 0)
-                {
-                    var targetsp = dsachSanPhams.FirstOrDefault(sp => sp.SP_SPID.Value?.ToString()?.Trim() == SPID.ToString());
-
-                    if (targetsp != null)
-                    {
-                        ITemSelecteds[KetQuaGC.KQGCDBName.SPID] = new KeyValuePair<string, string>(targetsp.SP_SPID.Value?.ToString() ?? string.Empty,
-                            $"{targetsp.SP_MaSP.Value?.ToString()?.Trim()} ({targetsp.SP_MaSP.Value?.ToString()?.Trim()})");
-
-                        newKetQuaGC.SPID.Value = SPID;
-                    }
-                    else { ITemSelecteds[KetQuaGC.KQGCDBName.SPID] = null; newKetQuaGC.SPID.Value = null; };
-                }
-
-
 
                 // Asign target MaquanlyLot
                 var targetLot = dsachMaQLyLots.FirstOrDefault(lot => lot.MaQuanLyLot.Value?.ToString()?.Trim() == args.ToString()?.Trim());
 
-                // Asign sluong OK/NG last Result
-                KHSX_LOT preRSultLotTargetCD = new();
-                KHSX_LOT curRSultLotinTargetCD = new();
-                KHSX_LOT nextRSultLotTargetCD = new();
-
-                List<KHSX_LOT> dsanhResultofLotAllCdoan = dsachMaQLyLots.Where(lot => lot.MaQuanLyLot.Value?.ToString()?.Trim() == args.ToString()?.Trim()).ToList();
-
-                curRSultLotinTargetCD = dsanhResultofLotAllCdoan.FirstOrDefault(lot => lot.NCID.Value?.ToString()?.Trim() == newKetQuaGC.NCID.Value?.ToString()?.Trim()) ?? new();
-
-                // SL ok + ng da submit cua curRSultLotinTargetCD
-                _ = int.TryParse(curRSultLotinTargetCD.SLOKsubmited.Value?.ToString(), out int curSLOKsubmited) ? curSLOKsubmited : 0;
-                _ = int.TryParse(curRSultLotinTargetCD.SLNGsubmited.Value?.ToString(), out int curSLNGsubmited) ? curSLNGsubmited : 0;
-
-                int indexcurrentCD = dsanhResultofLotAllCdoan.IndexOf(curRSultLotinTargetCD);
-
-                preRSultLotTargetCD = Common.GetElementOrNew(dsanhResultofLotAllCdoan, indexcurrentCD - 1);
-
-                // SL ok + ng da submit cua preRSultLotTargetCD
-                _ = int.TryParse(preRSultLotTargetCD.SLOKsubmited.Value?.ToString(), out int preSLOKsubmited) ? preSLOKsubmited : 0;
-                _ = int.TryParse(preRSultLotTargetCD.SLNGsubmited.Value?.ToString(), out int preSLNGsubmited) ? preSLNGsubmited : 0;
-
-                //nextRSultLotTargetCD = Common.GetElementOrNew(dsanhResultofLotAllCdoan, indexcurrentCD + 1);
-
-                _ = int.TryParse(targetLot?.SLLOT.Value?.ToString(), out int slperlotBase) ? slperlotBase : 0;
-
-                if (!string.IsNullOrEmpty(preRSultLotTargetCD.KHSXLOTID.Value?.ToString()))
-                {
-                    // New pre != null --> gan slpreok cho sllimit current
-                    newKetQuaGC.SLperLOT.Value = preSLOKsubmited - (curSLOKsubmited + curSLNGsubmited); // Tru so luong da submit cua currentlot
-                }
-                else newKetQuaGC.SLperLOT.Value = slperlotBase - (curSLOKsubmited + curSLNGsubmited); // Tru so luong da submit cua currentlot
-
-                //
-
                 if (targetLot != null)
                 {
-                    ITemSelecteds[proName] = new KeyValuePair<string, string>(targetLot.KHSXLOTID.Value?.ToString() ?? string.Empty, $"{targetLot.MaQuanLyLot.Value?.ToString()?.Trim()} (số lượng: {targetLot.SLLOT.Value?.ToString()?.Trim()})");
-
-                    //newKetQuaGC.SLperLOT.Value = targetLot.SLLOT.Value;
+                    ITemSelecteds[proName] = new KeyValuePair<string, string>(targetLot.KHSXLOTID.Value?.ToString() ?? string.Empty, $"{targetLot.MaQuanLyLot.Value?.ToString()?.Trim()}");
+                    //ITemSelecteds[proName] = new KeyValuePair<string, string>(targetLot.KHSXLOTID.Value?.ToString() ?? string.Empty, $"{targetLot.MaQuanLyLot.Value?.ToString()?.Trim()} (số lượng: {targetLot.SLLOT.Value?.ToString()?.Trim()})");
                     newKetQuaGC.MaQuanLyLot.Value = targetLot.MaQuanLyLot.Value;
-                    newKetQuaGC.SLOK.Value = 0; // reset SLOK
-                    newKetQuaGC.SLNG.Value = 0; // reset SLNG
-                }
-                else
-                {
-                    ITemSelecteds[proName] = null; // reset selected value
 
-                    newKetQuaGC.MaQuanLyLot.Value = null; // reset MaQuanLyLot
-                    newKetQuaGC.SLperLOT.Value = null; // reset SLperLOT
-                    newKetQuaGC.SLOK.Value = null; // reset SLOK
-                    newKetQuaGC.SLNG.Value = 0; // reset SLNG
+                    // Asign SPID
+                    SPID = SQLServerServices.GetSPIDbyMaKHSX(targetMaKHSX);
+
+                    if (SPID > 0)
+                    {
+                        var targetsp = dsachSanPhams.FirstOrDefault(sp => sp.SP_SPID.Value?.ToString()?.Trim() == SPID.ToString());
+
+                        if (targetsp != null)
+                        {
+                            ITemSelecteds[KetQuaGC.KQGCDBName.SPID] = new KeyValuePair<string, string>(targetsp.SP_SPID.Value?.ToString() ?? string.Empty,
+                                $"{targetsp.SP_MaSP.Value?.ToString()?.Trim()} ({targetsp.SP_MaSP.Value?.ToString()?.Trim()})");
+
+                            newKetQuaGC.SPID.Value = SPID;
+                        }
+                        else { ITemSelecteds[KetQuaGC.KQGCDBName.SPID] = null; newKetQuaGC.SPID.Value = null; };
+                    }
+
+                    // Asign dsNguyencong
+                    dsNCofKHSXs = SQLServerServices.GetlistCongdoans(KHSXID);
+
+                    await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.MaQuanLyLot);
+                    await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.SPID);
                 }
             }
-            else
-            {
-                dsachMaQLyLots = new();
-                KHSXID = 0;
-                newKetQuaGC.KHSXID.Value = null;
-                newKetQuaGC.MaQuanLyLot.Value = null;
-                ITemSelecteds[KetQuaGC.KQGCDBName.SPID] = null;
-                newKetQuaGC.SPID.Value = null;
-
-                ITemSelecteds[proName] = null; // reset selected value
-                newKetQuaGC.SLperLOT.Value = null; // reset SLperLOT
-                newKetQuaGC.SLOK.Value = null; // reset SLOK
-                newKetQuaGC.SLNG.Value = null; // reset SLNG
-            }
-
-
-            // Update checking value UI
-            await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.SLOK);
-            await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.SLNG);
-            await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.SLperLOT);
-            await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.MaQuanLyLot);
-            await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.SPID);
         }
     }
 
@@ -627,15 +563,62 @@
         }
         else if (propertyy.DBName == KetQuaGC.KQGCDBName.NCID)
         {
-            var targetItem = dsachNguyenCongs.FirstOrDefault(sp => sp.NCID.Value?.ToString()?.Trim() == selectedValues.FirstOrDefault().Key);
+            var targetItem = dsNCofKHSXs.FirstOrDefault(sp => sp.NCID.Value?.ToString()?.Trim() == selectedValues.FirstOrDefault().Key);
+
+            // Reset Value
+            ResetNewKQGCbyMQLLOTChanged(new() { KetQuaGC.KQGCDBName.KHSXID, KetQuaGC.KQGCDBName.MaQuanLyLot, KetQuaGC.KQGCDBName.SPID });
 
             if (targetItem != null)
             {
                 ITemSelecteds[propertyy.DBName] = selectedValues.FirstOrDefault();
 
                 newKetQuaGC.NCID.Value = targetItem.NCID.Value;
+
+                // Asign SLTong, SLOK, SLNG (dem xuong combobox NCong Changed - chi dinh khi NC change)
+                if (newKetQuaGC.NCID.Value != null)
+                {
+                    // Asign sluong OK/NG last Result
+                    KHSX_LOT preRSultLotTargetCD = new();
+                    KHSX_LOT curRSultLotinTargetCD = new();
+                    KHSX_LOT nextRSultLotTargetCD = new();
+
+                    List<KHSX_LOT> dsanhResultofLotAllCdoan = dsachMaQLyLots.Where(lot => lot.MaQuanLyLot.Value?.ToString()?.Trim() == newKetQuaGC.MaQuanLyLot.Value?.ToString()?.Trim()).ToList();
+
+                    curRSultLotinTargetCD = dsanhResultofLotAllCdoan.FirstOrDefault(lot => lot.NCID.Value?.ToString()?.Trim() == newKetQuaGC.NCID.Value?.ToString()?.Trim()) ?? new();
+
+                    // SL ok + ng da submit cua curRSultLotinTargetCD
+                    _ = int.TryParse(curRSultLotinTargetCD.SLOKsubmited.Value?.ToString(), out int curSLOKsubmited) ? curSLOKsubmited : 0;
+                    _ = int.TryParse(curRSultLotinTargetCD.SLNGsubmited.Value?.ToString(), out int curSLNGsubmited) ? curSLNGsubmited : 0;
+
+                    int indexcurrentCD = dsanhResultofLotAllCdoan.IndexOf(curRSultLotinTargetCD);
+
+                    preRSultLotTargetCD = Common.GetElementOrNew(dsanhResultofLotAllCdoan, indexcurrentCD - 1);
+
+                    // SL ok + ng da submit cua preRSultLotTargetCD
+                    _ = int.TryParse(preRSultLotTargetCD.SLOKsubmited.Value?.ToString(), out int preSLOKsubmited) ? preSLOKsubmited : 0;
+                    _ = int.TryParse(preRSultLotTargetCD.SLNGsubmited.Value?.ToString(), out int preSLNGsubmited) ? preSLNGsubmited : 0;
+
+                    //nextRSultLotTargetCD = Common.GetElementOrNew(dsanhResultofLotAllCdoan, indexcurrentCD + 1);
+
+                    // Asign target MaquanlyLot
+                    var targetLot = dsachMaQLyLots.FirstOrDefault(lot => lot.MaQuanLyLot.Value?.ToString()?.Trim() == newKetQuaGC.MaQuanLyLot.Value?.ToString()?.Trim());
+
+                    _ = int.TryParse(targetLot?.SLLOT.Value?.ToString(), out int slperlotBase) ? slperlotBase : 0;
+
+                    if (!string.IsNullOrEmpty(preRSultLotTargetCD.KHSXLOTID.Value?.ToString()))
+                    {
+                        // New pre != null --> gan slpreok cho sllimit current
+                        newKetQuaGC.SLperLOT.Value = preSLOKsubmited - (curSLOKsubmited + curSLNGsubmited); // Tru so luong da submit cua currentlot
+                    }
+                    else newKetQuaGC.SLperLOT.Value = slperlotBase - (curSLOKsubmited + curSLNGsubmited); // Tru so luong da submit cua currentlot
+
+                    //
+                }
             }
             else newKetQuaGC.NCID.Value = null;
+
+            // Update UI after change value
+            await UpdateUINewKQGCbyMQLLOTChanged(new() { KetQuaGC.KQGCDBName.KHSXID, KetQuaGC.KQGCDBName.MaQuanLyLot, KetQuaGC.KQGCDBName.SPID });
         }
         else if (propertyy.DBName == KetQuaGC.KQGCDBName.MMID)
         {
@@ -651,60 +634,60 @@
         }
         else if (propertyy.DBName == KetQuaGC.KQGCDBName.MaQuanLyLot)
         {
-            await Task.Delay(100);
-
             var targetItem = dsachMaQLyLots.FirstOrDefault(lot => lot.KHSXLOTID.Value?.ToString()?.Trim() == selectedValues.FirstOrDefault().Key);
 
-            //Asign sluong OK/NG last Result
-            KHSX_LOT preRSultLotTargetCD = new();
-            KHSX_LOT curRSultLotinTargetCD = new();
-
-            List<KHSX_LOT> dsanhResultofLotAllCdoan = dsachMaQLyLots.Where(lot => lot.MaQuanLyLot.Value?.ToString()?.Trim() == targetItem?.MaQuanLyLot.Value?.ToString()?.Trim()).ToList();
-
-            curRSultLotinTargetCD = dsanhResultofLotAllCdoan.FirstOrDefault(lot => lot.NCID.Value?.ToString()?.Trim() == newKetQuaGC.NCID.Value?.ToString()?.Trim()) ?? new();
-
-            // SL ok + ng da submit cua curRSultLotinTargetCD
-            _ = int.TryParse(curRSultLotinTargetCD.SLOKsubmited.Value?.ToString(), out int curSLOKsubmited) ? curSLOKsubmited : 0;
-            _ = int.TryParse(curRSultLotinTargetCD.SLNGsubmited.Value?.ToString(), out int curSLNGsubmited) ? curSLNGsubmited : 0;
-
-            int indexcurrentCD = dsanhResultofLotAllCdoan.IndexOf(curRSultLotinTargetCD);
-
-            preRSultLotTargetCD = Common.GetElementOrNew(dsanhResultofLotAllCdoan, indexcurrentCD - 1);
-
-            // SL ok + ng da submit cua preRSultLotTargetCD
-            _ = int.TryParse(preRSultLotTargetCD.SLOKsubmited.Value?.ToString(), out int preSLOKsubmited) ? preSLOKsubmited : 0;
-            _ = int.TryParse(preRSultLotTargetCD.SLNGsubmited.Value?.ToString(), out int preSLNGsubmited) ? preSLNGsubmited : 0;
-            _ = int.TryParse(targetItem?.SLLOT.Value?.ToString(), out int slperlotBase) ? slperlotBase : 0;
-
-            if (!string.IsNullOrEmpty(preRSultLotTargetCD.KHSXLOTID.Value?.ToString()))
+            if (targetItem == null)
             {
-                // New pre != null --> gan slpreok cho sllimit current
-                newKetQuaGC.SLperLOT.Value = preSLOKsubmited - (curSLOKsubmited + curSLNGsubmited); // Tru so luong da submit cua currentlot
+                ResetNewKQGCbyMQLLOTChanged(new());
+                await UpdateUINewKQGCbyMQLLOTChanged(new());
             }
-            else newKetQuaGC.SLperLOT.Value = slperlotBase - (curSLOKsubmited + curSLNGsubmited); // Tru so luong da submit cua currentlot
-
-            //
-
-            if (targetItem != null)
+            else
             {
+                //Asign sluong OK/NG last Result
+                KHSX_LOT preRSultLotTargetCD = new();
+                KHSX_LOT curRSultLotinTargetCD = new();
+
+                List<KHSX_LOT> dsanhResultofLotAllCdoan = dsachMaQLyLots.Where(lot => lot.MaQuanLyLot.Value?.ToString()?.Trim() == targetItem?.MaQuanLyLot.Value?.ToString()?.Trim()).ToList();
+
+                curRSultLotinTargetCD = dsanhResultofLotAllCdoan.FirstOrDefault(lot => lot.NCID.Value?.ToString()?.Trim() == newKetQuaGC.NCID.Value?.ToString()?.Trim()) ?? new();
+
+                // SL ok + ng da submit cua curRSultLotinTargetCD
+                _ = int.TryParse(curRSultLotinTargetCD.SLOKsubmited.Value?.ToString(), out int curSLOKsubmited) ? curSLOKsubmited : 0;
+                _ = int.TryParse(curRSultLotinTargetCD.SLNGsubmited.Value?.ToString(), out int curSLNGsubmited) ? curSLNGsubmited : 0;
+
+                int indexcurrentCD = dsanhResultofLotAllCdoan.IndexOf(curRSultLotinTargetCD);
+
+                preRSultLotTargetCD = Common.GetElementOrNew(dsanhResultofLotAllCdoan, indexcurrentCD - 1);
+
+                // SL ok + ng da submit cua preRSultLotTargetCD
+                _ = int.TryParse(preRSultLotTargetCD.SLOKsubmited.Value?.ToString(), out int preSLOKsubmited) ? preSLOKsubmited : 0;
+                _ = int.TryParse(preRSultLotTargetCD.SLNGsubmited.Value?.ToString(), out int preSLNGsubmited) ? preSLNGsubmited : 0;
+                _ = int.TryParse(targetItem?.SLLOT.Value?.ToString(), out int slperlotBase) ? slperlotBase : 0;
+
+                if (!string.IsNullOrEmpty(preRSultLotTargetCD.KHSXLOTID.Value?.ToString()))
+                {
+                    // New pre != null --> gan slpreok cho sllimit current
+                    newKetQuaGC.SLperLOT.Value = preSLOKsubmited - (curSLOKsubmited + curSLNGsubmited); // Tru so luong da submit cua currentlot
+                }
+                else newKetQuaGC.SLperLOT.Value = slperlotBase - (curSLOKsubmited + curSLNGsubmited); // Tru so luong da submit cua currentlot
+
+                //
+
+                // Asign dsNguyencong
+                dsNCofKHSXs = SQLServerServices.GetlistCongdoans(KHSXID);
+
                 // Asign selected value
                 ITemSelecteds[propertyy.DBName] = selectedValues.FirstOrDefault();
                 // Asign slperlot
                 //newKetQuaGC.SLperLOT.Value = targetItem.SLLOT.Value;
-                newKetQuaGC.MaQuanLyLot.Value = targetItem.MaQuanLyLot.Value;
-            }
-            else
-            {
-                newKetQuaGC.MaQuanLyLot.Value = null;
-                newKetQuaGC.SLperLOT.Value = null;
-                newKetQuaGC.SLOK.Value = null;
-                newKetQuaGC.SLNG.Value = null;
+                newKetQuaGC.MaQuanLyLot.Value = targetItem?.MaQuanLyLot.Value;
+                await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.SLOK);
+                await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.SLNG);
+                await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.SLperLOT);
+                await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.MaQuanLyLot);
             }
 
-            await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.SLOK);
-            await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.SLNG);
-            await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.SLperLOT);
-            await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.MaQuanLyLot);
+
         }
         else if (propertyy.DBName == KetQuaGC.KQGCDBName.NVIDs)
         {
@@ -823,6 +806,180 @@
             }
 
         });
+    }
+
+    private void ResetNewKQGCbyMQLLOTChanged(List<string> propertyNames)
+    {
+        if (!propertyNames.Any(name => name == KetQuaGC.KQGCDBName.KHSXID))
+        {
+            // Reset KHSXID
+            KHSXID = 0;
+            newKetQuaGC.KHSXID.Value = null;
+        }
+
+        if (!propertyNames.Any(name => name == KetQuaGC.KQGCDBName.MaQuanLyLot))
+        {
+            // Reset MQLLot
+            dsachMaQLyLots = new();
+            newKetQuaGC.MaQuanLyLot.Value = null;
+            ITemSelecteds[KetQuaGC.KQGCDBName.MaQuanLyLot] = null;
+        }
+
+        if (!propertyNames.Any(name => name == KetQuaGC.KQGCDBName.SPID))
+        {
+            // Reset SPID
+            //newKetQuaGC.SPID.IsDisable = true;
+            newKetQuaGC.SPID.Value = null;
+            ITemSelecteds[KetQuaGC.KQGCDBName.SPID] = null;
+        }
+        if (!propertyNames.Any(name => name == KetQuaGC.KQGCDBName.NCID))
+        {
+            // Reset NCong and List NCofKHSX
+            dsNCofKHSXs = new();
+            //newKetQuaGC.NCID.IsDisable = true;
+            newKetQuaGC.NCID.Value = null;
+            ITemSelecteds[KetQuaGC.KQGCDBName.NCID] = null;
+        }
+
+        if (!propertyNames.Any(name => name == KetQuaGC.KQGCDBName.SLperLOT))
+        {
+            // Reset slchuasubmit
+            newKetQuaGC.SLperLOT.IsDisable = true;
+            newKetQuaGC.SLperLOT.Value = null;
+        }
+
+        if (!propertyNames.Any(name => name == KetQuaGC.KQGCDBName.SLOK))
+        {
+            // Reset skOKsubmit
+            //newKetQuaGC.SLOK.IsDisable = true;
+            newKetQuaGC.SLOK.Value = null;
+        }
+
+        if (!propertyNames.Any(name => name == KetQuaGC.KQGCDBName.SLNG))
+        {
+            // Reset skNGsubmit
+            //newKetQuaGC.SLNG.IsDisable = true;
+            newKetQuaGC.SLNG.Value = 0;
+        }
+
+        if (!propertyNames.Any(name => name == KetQuaGC.KQGCDBName.NGIDs))
+        {
+            // Reset NG Type
+            //newKetQuaGC.NGIDs.IsDisable = true;
+            newKetQuaGC.NGIDs.Value = null;
+            NGTypesSelected = null;
+        }
+
+        if (!propertyNames.Any(name => name == KetQuaGC.KQGCDBName.MMID))
+        {
+            // Reset MMID
+            //newKetQuaGC.MMID.IsDisable = true;
+            newKetQuaGC.MMID.Value = null;
+            ITemSelecteds[KetQuaGC.KQGCDBName.MMID] = null;
+        }
+
+        if (!propertyNames.Any(name => name == KetQuaGC.KQGCDBName.CaLamViec))
+        {
+            // Reset CaLamViec
+            //newKetQuaGC.CaLamViec.IsDisable = true;
+            newKetQuaGC.CaLamViec.Value = null;
+        }
+
+        if (!propertyNames.Any(name => name == KetQuaGC.KQGCDBName.NVIDs))
+        {
+            // Reset Nhan Vien
+            //newKetQuaGC.NVIDs.IsDisable = true;
+            newKetQuaGC.NVIDs.Value = null;
+            NhanviensSelected = null;
+        }
+
+        if (!propertyNames.Any(name => name == KetQuaGC.KQGCDBName.ThoiGianGC))
+        {
+            // Reset TGGiaCong
+            //newKetQuaGC.ThoiGianGC.IsDisable = true;
+            newKetQuaGC.ThoiGianGC.Value = 0;
+        }
+
+        if (!propertyNames.Any(name => name == KetQuaGC.KQGCDBName.ThoiGianLamViec))
+        {
+            // Reset TGLamViec
+            //newKetQuaGC.ThoiGianLamViec.IsDisable = true;
+            newKetQuaGC.ThoiGianLamViec.Value = 0;
+        }
+
+        if (!propertyNames.Any(name => name == KetQuaGC.KQGCDBName.GhiChu))
+        {
+            // Reset GhiChu
+            //newKetQuaGC.GhiChu.IsDisable = true;
+            newKetQuaGC.GhiChu.Value = null;
+        }
+    }
+
+    private async Task UpdateUINewKQGCbyMQLLOTChanged(List<string> propertyNames)
+    {
+        if (!propertyNames.Any(name => name == KetQuaGC.KQGCDBName.MaQuanLyLot))
+        {
+            await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.MaQuanLyLot);
+        }
+
+        if (!propertyNames.Any(name => name == KetQuaGC.KQGCDBName.SPID))
+        {
+            await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.SPID);
+        }
+        if (!propertyNames.Any(name => name == KetQuaGC.KQGCDBName.NCID))
+        {
+            await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.NCID);
+        }
+
+        if (!propertyNames.Any(name => name == KetQuaGC.KQGCDBName.SLperLOT))
+        {
+            await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.SLperLOT);
+        }
+
+        if (!propertyNames.Any(name => name == KetQuaGC.KQGCDBName.SLOK))
+        {
+            await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.SLOK);
+        }
+
+        if (!propertyNames.Any(name => name == KetQuaGC.KQGCDBName.SLNG))
+        {
+            await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.SLNG);
+        }
+
+        if (!propertyNames.Any(name => name == KetQuaGC.KQGCDBName.NGIDs))
+        {
+            await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.NGIDs);
+        }
+
+        if (!propertyNames.Any(name => name == KetQuaGC.KQGCDBName.MMID))
+        {
+            await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.MMID);
+        }
+
+        if (!propertyNames.Any(name => name == KetQuaGC.KQGCDBName.CaLamViec))
+        {
+            await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.CaLamViec);
+        }
+
+        if (!propertyNames.Any(name => name == KetQuaGC.KQGCDBName.NVIDs))
+        {
+            await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.NVIDs);
+        }
+
+        if (!propertyNames.Any(name => name == KetQuaGC.KQGCDBName.ThoiGianGC))
+        {
+            await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.ThoiGianGC);
+        }
+
+        if (!propertyNames.Any(name => name == KetQuaGC.KQGCDBName.ThoiGianLamViec))
+        {
+            await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.ThoiGianLamViec);
+        }
+
+        if (!propertyNames.Any(name => name == KetQuaGC.KQGCDBName.GhiChu))
+        {
+            await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.GhiChu);
+        }
     }
 
 
@@ -963,4 +1120,128 @@
 
         NotificationService.Notify(notify);
     }
+
+    private async Task OnComboboxInputTextChange_old(string proName, object? args) // using for scan QR Maquanly autobinding
+    {
+        if (proName == KetQuaGC.KQGCDBName.MaQuanLyLot && args != null)
+        {
+            // Split maLOT get maKHSX
+            string targetMaKHSX = GetMaKHSXbyMaQuanLyLot(args.ToString() ?? string.Empty);
+
+            int targetKHSXID = SQLServerServices.GetKHSXIDbyMaKHSX(targetMaKHSX);
+
+            (var dsLots, string errorreturn) = SQLServerServices.GetListLOT_khsx(new Dictionary<string, object?>() { { KetQuaGC.KQGCDBName.KHSXID, targetKHSXID } }, false);
+
+            if (dsLots != null && dsLots.Count() > 0)
+            {
+                dsachMaQLyLots = dsLots;
+                KHSXID = targetKHSXID;
+            }
+
+            if (dsLots?.Count > 0 && dsLots.Any(lot => lot.MaQuanLyLot.Value?.ToString() == args.ToString()))
+            {
+                newKetQuaGC.KHSXID.Value = KHSXID;
+
+                // Asign target SPham
+                SPID = SQLServerServices.GetSPIDbyMaKHSX(targetMaKHSX);
+
+                if (SPID > 0)
+                {
+                    var targetsp = dsachSanPhams.FirstOrDefault(sp => sp.SP_SPID.Value?.ToString()?.Trim() == SPID.ToString());
+
+                    if (targetsp != null)
+                    {
+                        ITemSelecteds[KetQuaGC.KQGCDBName.SPID] = new KeyValuePair<string, string>(targetsp.SP_SPID.Value?.ToString() ?? string.Empty,
+                            $"{targetsp.SP_MaSP.Value?.ToString()?.Trim()} ({targetsp.SP_MaSP.Value?.ToString()?.Trim()})");
+
+                        newKetQuaGC.SPID.Value = SPID;
+                    }
+                    else { ITemSelecteds[KetQuaGC.KQGCDBName.SPID] = null; newKetQuaGC.SPID.Value = null; };
+                }
+
+                // Asign dsNguyencong
+                dsNCofKHSXs = SQLServerServices.GetlistCongdoans(KHSXID);
+
+                // Asign target MaquanlyLot
+                var targetLot = dsachMaQLyLots.FirstOrDefault(lot => lot.MaQuanLyLot.Value?.ToString()?.Trim() == args.ToString()?.Trim());
+
+                // Asign sluong OK/NG last Result
+                KHSX_LOT preRSultLotTargetCD = new();
+                KHSX_LOT curRSultLotinTargetCD = new();
+                KHSX_LOT nextRSultLotTargetCD = new();
+
+                List<KHSX_LOT> dsanhResultofLotAllCdoan = dsachMaQLyLots.Where(lot => lot.MaQuanLyLot.Value?.ToString()?.Trim() == args.ToString()?.Trim()).ToList();
+
+                curRSultLotinTargetCD = dsanhResultofLotAllCdoan.FirstOrDefault(lot => lot.NCID.Value?.ToString()?.Trim() == newKetQuaGC.NCID.Value?.ToString()?.Trim()) ?? new();
+
+                // SL ok + ng da submit cua curRSultLotinTargetCD
+                _ = int.TryParse(curRSultLotinTargetCD.SLOKsubmited.Value?.ToString(), out int curSLOKsubmited) ? curSLOKsubmited : 0;
+                _ = int.TryParse(curRSultLotinTargetCD.SLNGsubmited.Value?.ToString(), out int curSLNGsubmited) ? curSLNGsubmited : 0;
+
+                int indexcurrentCD = dsanhResultofLotAllCdoan.IndexOf(curRSultLotinTargetCD);
+
+                preRSultLotTargetCD = Common.GetElementOrNew(dsanhResultofLotAllCdoan, indexcurrentCD - 1);
+
+                // SL ok + ng da submit cua preRSultLotTargetCD
+                _ = int.TryParse(preRSultLotTargetCD.SLOKsubmited.Value?.ToString(), out int preSLOKsubmited) ? preSLOKsubmited : 0;
+                _ = int.TryParse(preRSultLotTargetCD.SLNGsubmited.Value?.ToString(), out int preSLNGsubmited) ? preSLNGsubmited : 0;
+
+                //nextRSultLotTargetCD = Common.GetElementOrNew(dsanhResultofLotAllCdoan, indexcurrentCD + 1);
+
+                _ = int.TryParse(targetLot?.SLLOT.Value?.ToString(), out int slperlotBase) ? slperlotBase : 0;
+
+                if (!string.IsNullOrEmpty(preRSultLotTargetCD.KHSXLOTID.Value?.ToString()))
+                {
+                    // New pre != null --> gan slpreok cho sllimit current
+                    newKetQuaGC.SLperLOT.Value = preSLOKsubmited - (curSLOKsubmited + curSLNGsubmited); // Tru so luong da submit cua currentlot
+                }
+                else newKetQuaGC.SLperLOT.Value = slperlotBase - (curSLOKsubmited + curSLNGsubmited); // Tru so luong da submit cua currentlot
+
+                //
+
+                if (targetLot != null)
+                {
+                    ITemSelecteds[proName] = new KeyValuePair<string, string>(targetLot.KHSXLOTID.Value?.ToString() ?? string.Empty, $"{targetLot.MaQuanLyLot.Value?.ToString()?.Trim()}");
+                    //ITemSelecteds[proName] = new KeyValuePair<string, string>(targetLot.KHSXLOTID.Value?.ToString() ?? string.Empty, $"{targetLot.MaQuanLyLot.Value?.ToString()?.Trim()} (số lượng: {targetLot.SLLOT.Value?.ToString()?.Trim()})");
+
+                    //newKetQuaGC.SLperLOT.Value = targetLot.SLLOT.Value;
+                    newKetQuaGC.MaQuanLyLot.Value = targetLot.MaQuanLyLot.Value;
+                    newKetQuaGC.SLOK.Value = 0; // reset SLOK
+                    newKetQuaGC.SLNG.Value = 0; // reset SLNG
+                }
+                else
+                {
+                    ITemSelecteds[proName] = null; // reset selected value
+
+                    newKetQuaGC.MaQuanLyLot.Value = null; // reset MaQuanLyLot
+                    newKetQuaGC.SLperLOT.Value = null; // reset SLperLOT
+                    newKetQuaGC.SLOK.Value = null; // reset SLOK
+                    newKetQuaGC.SLNG.Value = 0; // reset SLNG
+                }
+            }
+            else
+            {
+                dsachMaQLyLots = new();
+                KHSXID = 0;
+                newKetQuaGC.KHSXID.Value = null;
+                newKetQuaGC.MaQuanLyLot.Value = null;
+                ITemSelecteds[KetQuaGC.KQGCDBName.SPID] = null;
+                newKetQuaGC.SPID.Value = null;
+
+                ITemSelecteds[proName] = null; // reset selected value
+                newKetQuaGC.SLperLOT.Value = null; // reset SLperLOT
+                newKetQuaGC.SLOK.Value = null; // reset SLOK
+                newKetQuaGC.SLNG.Value = null; // reset SLNG
+            }
+
+
+            // Update checking value UI
+            await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.SLOK);
+            await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.SLNG);
+            await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.SLperLOT);
+            await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.MaQuanLyLot);
+            await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.SPID);
+        }
+    }
+
 }
