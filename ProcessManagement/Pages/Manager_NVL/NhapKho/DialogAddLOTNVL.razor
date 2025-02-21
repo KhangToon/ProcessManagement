@@ -1,0 +1,104 @@
+﻿@using ProcessManagement.Models
+@using ProcessManagement.Models.KHO_TPHAM
+@using ProcessManagement.Models.KHSXs
+@using ProcessManagement.Services
+@using ProcessManagement.Services.SQLServer
+@using Radzen.Blazor
+@using Radzen
+@using Microsoft.AspNetCore.Components
+
+@inject NotificationService NotificationService
+@inject DialogService DialogService
+@inject SQLServerServices SQLServerServices
+
+<RadzenCard class="rz-shadow-5" Variant="Variant.Outlined" Style="width: 100%; height: 100%; padding: 10px;">
+    <RadzenStack Style="height: 100%; width: 100%; padding: 10px;" Gap="5px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+
+        <RadzenStack Style="height: contain; width: 100%;" Gap="5px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+            <RadzenText Text="Chỉnh sửa mã quản lý LOT NVL" Style="color: black; font-weight: 600; font-size: 18px"></RadzenText>
+        </RadzenStack>
+
+        <RadzenStack Style="height: contain; width: 100%; padding: 10px;" Gap="5px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+            <RadzenTextBox Value="@newValue?.ToString()" @oninput="@(async(args) => { newValue = args.Value?.ToString() ?? string.Empty; isTextChanged = true; } )"
+                           Style="font-size: 16px; height: contain; border-width: 1px; width: 100% "></RadzenTextBox>
+
+            <RadzenStack Style="height: contain; width: 100%;" Gap="5px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                <RadzenStack Style="height: contain; width: contain;" Gap="5px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                    <RadzenButton Visible="@(isTextChanged)" Icon="autorenew" Text="Kiểm tra" Style="font-size: 16px;" Click="@(async() => await OnValueTextChanged(newValue?.ToString() ?? string.Empty))"
+                                  ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Dark" />
+                    <RadzenButton Visible="@(isExisted && !isTextChanged)" Text="Hãy nhập mã khác" Icon="warning" Style="font-size: 16px; color: red"
+                                  ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Variant="Variant.Text" Shade="Shade.Darker" />
+                    <RadzenButton Visible="@(!isExisted && !isTextChanged)" Text="Mã hợp lệ" Icon="check" Style="font-size: 16px; color: darkgreen"
+                                  ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Lighter" />
+                    <RadzenButton Visible="@(!isExisted && !isTextChanged)" Text="Lưu thay đổi" Icon="save" Click="OnSaveChange"
+                                  ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Darker" Style="padding-left: 10px; padding-right: 10px" />
+                </RadzenStack>
+                <RadzenStack Gap="10px" Style="height: contain; width: contain; padding-top: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                    <RadzenButton Style="width: contain; height: contain; padding-left: 10px; padding-right: 10px" Icon="close" Text="Hủy" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Size="ButtonSize.Small" Variant="Variant.Flat" Click="OnCancelChange" />
+                </RadzenStack>
+            </RadzenStack>
+        </RadzenStack>
+    </RadzenStack>
+</RadzenCard>
+
+
+@code {
+    [Parameter]
+    public object CurentQRIDLOT { get; set; } = string.Empty;
+
+    private object newValue = string.Empty;
+    private object oldValue = string.Empty;
+
+    private bool isExisted = false;
+    private bool isTextChanged = false;
+
+    protected override Task OnInitializedAsync()
+    {
+        if (!string.IsNullOrEmpty(CurentQRIDLOT.ToString()))
+        {
+            newValue = CurentQRIDLOT;
+            oldValue = CurentQRIDLOT;
+        }
+
+        return base.OnInitializedAsync();
+    }
+
+    private bool ischecking = false;
+    private async Task OnValueTextChanged(string newtext)
+    {
+        if (ischecking)
+        {
+            return;
+        }
+
+        await Task.Run(() =>
+        {
+            ischecking = true;
+
+            if (string.IsNullOrEmpty(newtext))
+            {
+                isExisted = true;
+            }
+            else
+            {
+                var targetLNK = SQLServerServices.GetLenhNhapKhoByQRIDLOT(newtext.Trim());
+
+                isExisted = targetLNK.LenhNKID.Value != null;
+            }
+
+            ischecking = false;
+        });
+
+        isTextChanged = false;
+    }
+
+    private void OnSaveChange()
+    {
+        DialogService.Close(newValue);
+    }
+
+    private void OnCancelChange()
+    {
+        DialogService.Close(oldValue);
+    }
+}

@@ -309,7 +309,10 @@
                                                                     <RadzenText Text="Mã quản lý:" Style="color: black; font-weight: 600; font-size: 16px"></RadzenText>
                                                                     <RadzenButton Click="@(() => CopyToClipboard(lnk.QRIDLOT.Value?.ToString()?? string.Empty))" Text="@lnk.QRIDLOT.Value?.ToString()" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Lighter" Variant="Variant.Flat"
                                                                                   Style="font-size: 18px; height: contain; min-height: contain; width: contain;" />
-                                                                    <RadzenButton Click="@(() => NavigateToPrintQRIDLOTpage(lnk))" Text="In" Icon="print" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Darker" Variant="Variant.Flat"
+                                                                    <RadzenButton Visible="@(!PNK.isPNKDoneNhapKho)" Icon="edit" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Darker" Variant="Variant.Flat"
+                                                                                  Click="(async() => { await OpenDialogAddLOTNVL(lnk); })" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Chỉnh sửa mã quản lý NVL"))"
+                                                                                  Style="font-size: 15px; height: contain; min-height: contain; width: contain;" />
+                                                                    <RadzenButton Click="@(() => NavigateToPrintQRIDLOTpage(lnk))" Icon="print" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Darker" Variant="Variant.Flat"
                                                                                   Style="font-size: 18px; height: contain; min-height: contain; width: contain;" />
                                                                 </RadzenStack>
                                                             </RadzenStack>
@@ -414,6 +417,31 @@
         Common.RaiseReloadPNK_Event();
     }
 
+    private async Task OpenDialogAddLOTNVL(LenhNhapKho? lenhNhapKho)
+    {
+        if (lenhNhapKho != null)
+        {
+            object? oldQRLOTid = lenhNhapKho.QRIDLOT.Value;
+
+            object newQRIDLOT = await DialogService.OpenAsync<DialogAddLOTNVL>(null, new Dictionary<string, object>() { { "CurentQRIDLOT", lenhNhapKho.QRIDLOT.Value ?? string.Empty } },
+            new DialogOptions() { ShowTitle = true, Width = "50%", Height = "contain", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 10px; padding: 0px" });
+
+            if (newQRIDLOT != null)
+            {
+                lenhNhapKho.QRIDLOT.Value = newQRIDLOT;
+
+                (int result, string error) = SQLServerServices.UpdateLenhNhapKho(lenhNhapKho);
+
+                if (result != 1)
+                {
+                    lenhNhapKho.QRIDLOT.Value = oldQRLOTid;
+
+                    await DialogService.Alert($"Error: {error}!", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                }
+            }
+        }
+    }
+
     // Navigate to print QRIDLOT page
     private void NavigateToPrintQRIDLOTpage(LenhNhapKho? lnk)
     {
@@ -490,5 +518,13 @@
                     });
             }
         }
+    }
+
+    // Tooltip
+    void ShowToolTip(ElementReference elementReference, TooltipPosition position, string content)
+    {
+        TooltipOptions options = new TooltipOptions() { Position = position, Delay = 500, Style = "background-color: black" };
+
+        TooltipService.Open(elementReference, content, options);
     }
 }

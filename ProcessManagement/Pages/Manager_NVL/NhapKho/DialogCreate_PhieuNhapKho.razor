@@ -371,10 +371,16 @@
                                                                     </RadzenStack>
                                                                 </RadzenStack>
                                                                 <RadzenStack Style="width: 100%; height: contain; padding-right: 10px; padding-top: 10px; border-top: var(--rz-grid-cell-border);" Gap="10px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                                                    <RadzenText Text="Mã quản lý: " Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                                                                    <RadzenStack Style="width: contain; height: contain;" Gap="10px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                        <RadzenText Text="Mã quản lý: " Style="color: black; font-weight: 600; font-size: 16px"></RadzenText>
 
-                                                                    <RadzenButton Text="@lnk?.QRIDLOT.Value?.ToString()" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Lighter" Variant="Variant.Flat"
-                                                                                  Style="font-size: 18px; height: contain; min-height: contain; width: contain;" />
+                                                                        <RadzenButton Text="@lnk?.QRIDLOT.Value?.ToString()" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Lighter" Variant="Variant.Flat"
+                                                                                      Style="font-size: 18px; height: contain; min-height: contain; width: contain;" />
+
+                                                                        <RadzenButton Icon="edit" Text="Chỉnh mã" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Darker" Variant="Variant.Flat"
+                                                                                      Click="(async() => { await OpenDialogAddLOTNVL(lnk); })"
+                                                                                      Style="font-size: 15px; height: contain; min-height: contain; width: contain;" />
+                                                                    </RadzenStack>
                                                                 </RadzenStack>
                                                             </RadzenStack>
                                                         </RadzenCard>
@@ -530,6 +536,20 @@
         else
         {
             isAddLocation = true;
+        }
+    }
+
+    private async Task OpenDialogAddLOTNVL(LenhNhapKho? lenhNhapKho)
+    {
+        if (lenhNhapKho != null)
+        {
+            object newQRIDLOT = await DialogService.OpenAsync<DialogAddLOTNVL>(null, new Dictionary<string, object>() { { "CurentQRIDLOT", lenhNhapKho.QRIDLOT.Value ?? string.Empty } },
+            new DialogOptions() { ShowTitle = true, Width = "50%", Height = "contain", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 10px; padding: 0px" });
+
+            if (newQRIDLOT != null)
+            {
+                lenhNhapKho.QRIDLOT.Value = newQRIDLOT;
+            }
         }
     }
 
