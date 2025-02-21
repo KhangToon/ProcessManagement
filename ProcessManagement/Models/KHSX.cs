@@ -1,5 +1,6 @@
 ﻿using ProcessManagement.Commons;
 using ProcessManagement.Models.KHO_NVL;
+using ProcessManagement.Models.KHO_NVL.XuatKho;
 using ProcessManagement.Models.KHSXs;
 using ProcessManagement.Models.NHANVIEN;
 using ProcessManagement.Models.SANPHAM;
@@ -37,6 +38,9 @@ namespace ProcessManagement.Models
 
         public bool isDonePXK = false; // trang thai xuat kho NVL cua PXK of KHSX
         public bool isReturnedNVL = false; // trang thai return NVL cua PXK of KHSX
+
+        public List<PhieuXuatKho> ListPXKBoSung = new(); // Dung trong PageDSachKHSXs
+        public int SoluongBoSung = 0; // Dung trong PageDSachKHSXs
 
         public bool IsDoneKHSX { get; set; } = false;
 
