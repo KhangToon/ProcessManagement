@@ -60,7 +60,7 @@
 
 </RadzenStack>
 <RadzenRow Gap="10px" Style="height: 100%; width: 100%; border-top: var(--rz-grid-cell-border); padding: 0;">
-    <RadzenColumn Size="12" SizeMD="6" Style="height: contain; width: 100%;">
+    <RadzenColumn Size="12" SizeMD="5" Style="height: contain; width: 100%;">
         <RadzenStack Gap="0px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start" Style="height: 100%; width: 100%;">
             <RadzenStack Gap="10px" Style="height: contain; width: 100%; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                 <RadzenRow Style="height: 100%; width: 100%;">
@@ -137,7 +137,7 @@
             </RadzenDataList>
         </RadzenStack>
     </RadzenColumn>
-    <RadzenColumn Size="12" SizeMD="6" Style="height: contain; width: 100%; padding-top: 10px; padding-left: 10px; border-left: var(--rz-grid-cell-border);">
+    <RadzenColumn Size="12" SizeMD="7" Style="height: contain; width: 100%; padding-top: 10px; padding-left: 10px; border-left: var(--rz-grid-cell-border);">
         <RadzenRow class="rowbackground-style" Gap="10px" Style="height: 100%; width: 100%; border-radius: 10px;">
             <RadzenColumn Size="12" SizeMD="12" Style="height: 100%; width: 100%;">
                 <RadzenCard class="rz-shadow-4" Variant="Variant.Filled" Style="width: 100%; height: 100%; padding: 5px; border-radius: 10px;">
@@ -232,8 +232,8 @@
                                 </RadzenStack>
                             </RadzenStack>
                             <RadzenStack Style="width: 100%; height: contain; padding: 0" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                <RadzenCard Variant="Variant.Outlined" Style="height: contain; width: 100%; overflow-y: scroll; padding: 10px; padding-right: 0; margin-bottom: 10px">
-                                    <RadzenStack Gap="5px" Orientation="Orientation.Vertical" Style=" height: contain; width: 100%; padding-right: 0; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                <RadzenCard Variant="Variant.Flat" Style="height: contain; width: 100%; overflow-y: scroll; padding: 10px; padding-right: 0; margin-bottom: 10px">
+                                    <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style=" height: contain; width: 100%; padding-right: 0; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                         <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: contain; padding: 5px; padding-right: 0px; background-color: rgb(58, 71, 77)">
                                             <RadzenStack Style="width: 100%; height: 100%;" Gap="5px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                                 <RadzenStack Style="width: 5%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
@@ -297,9 +297,10 @@
                                                                 </RadzenStack>
                                                                 <RadzenStack Visible="@((!string.IsNullOrEmpty(vitriofNVL.QRIDLOT.Value?.ToString())))" Style="width: 100%; height: contain; padding-right: 10px;" Gap="10px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                                                     <RadzenText Text="Mã quản lý:" Style="color: black; font-weight: 600; font-size: 16px"></RadzenText>
-                                                                    <RadzenButton Click="@(() => OnOpenQRIDLOT_ImageDialog(vitriofNVL.QRIDLOT.Value ?? string.Empty, "QR quản lý NVL"))" Text="@vitriofNVL.QRIDLOT.Value?.ToString()" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Lighter" Variant="Variant.Flat"
-                                                                                  Style="font-size: 18px; color: darkgreen; height: contain; min-width: 300px; width: contain;" />
-                                                                    <RadzenButton Click="@(() => CopyToClipboard(vitriofNVL.QRIDLOT.Value?.ToString()?? string.Empty))" Icon="content_copy" Style="--rz-icon-size: 18px;" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Light" />
+                                                                    <RadzenButton Text="@vitriofNVL.QRIDLOT.Value?.ToString()"
+                                                                                  Click="@(() => OnOpenQRIDLOT_ImageDialog(vitriofNVL.QRIDLOT.Value ?? string.Empty, "QR quản lý NVL"))" Icon="qr_code"
+                                                                                  Variant="Variant.Flat" Size="ButtonSize.Small" Shade="Shade.Lighter"
+                                                                                  Style="font-size: 16px; font-weight: 600; height: contain; color: darkgreen"></RadzenButton>
                                                                     <RadzenButton Click="@(() => NavigateToPrintQRIDLOTpage(vitriofNVL))" Icon="print" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Darker" Variant="Variant.Flat"
                                                                                   Style="font-size: 18px; height: contain; width: contain;" />
                                                                 </RadzenStack>
@@ -499,14 +500,21 @@
     }
 
     // Navigate to print QRIDLOT page
-    private void NavigateToPrintQRIDLOTpage(ViTriofNVL? viTriofNVL)
+    private async Task NavigateToPrintQRIDLOTpage(ViTriofNVL? viTriofNVL)
     {
         if (viTriofNVL != null)
         {
             //NavigationManager.NavigateTo($"khomanagement?tabindxex={3}&khsxid={khsxid}");
             int.TryParse(viTriofNVL.VTofNVLID.Value?.ToString(), out int vtofnvlid);
 
-            NavigationManager.NavigateTo($"print-qridlot?vtofnvlid={vtofnvlid}");
+            //NavigationManager.NavigateTo($"print-qridlot?vtofnvlid={vtofnvlid}");
+
+            var url = $"print-qridlot?vtofnvlid={vtofnvlid}";
+
+            // Get the absolute URL
+            var absoluteUrl = NavigationManager.ToAbsoluteUri(url).ToString();
+
+            await JSRuntime.InvokeVoidAsync("openInNewTab", absoluteUrl);
         }
     }
 

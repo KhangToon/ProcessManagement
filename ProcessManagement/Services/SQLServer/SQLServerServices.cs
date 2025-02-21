@@ -10183,6 +10183,72 @@ namespace ProcessManagement.Services.SQLServer
 
         #endregion
 
+        #region API_ViTriTPham
+        public async Task<(List<ViTriTPham> viTriTPhams, string error)> APIGetListViTriTPhamsAsync(Dictionary<string, object?> parameters, bool isgetAll = false)
+        {
+            List<ViTriTPham> listViTriTPhams = new();
+            string errorMessage = string.Empty;
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                try
+                {
+                    await connection.OpenAsync();
+
+                    var conditions = new List<string>();
+                    var command = connection.CreateCommand();
+                    command.CommandText = $"SELECT * FROM [{ViTriTPham.DBName.Table_ViTriTPham}]";
+
+                    if (!isgetAll)
+                    {
+                        // Process each parameter in the dictionary
+                        foreach (var param in parameters)
+                        {
+                            conditions.Add($"[{param.Key}] = @{param.Key}");
+                            command.Parameters.AddWithValue($"@{param.Key}", param.Value);
+                        }
+
+                        if (conditions.Any())
+                        {
+                            command.CommandText += " WHERE " + string.Join(" AND ", conditions);
+                        }
+                    }
+
+                    using var reader = await command.ExecuteReaderAsync();
+
+                    while (await reader.ReadAsync())
+                    {
+                        ViTriTPham vitrithpham = new();
+                        List<Propertyy> rowItems = vitrithpham.GetPropertiesValues();
+
+                        foreach (var item in rowItems)
+                        {
+                            string? columnName = item.DBName;
+
+                            if (!string.IsNullOrEmpty(columnName) && reader.GetOrdinal(columnName) != -1)
+                            {
+                                object columnValue = reader[columnName];
+                                item.Value = columnValue == DBNull.Value ? null : columnValue;
+                            }
+                        }
+
+                        _ = int.TryParse(vitrithpham.VTSucChua.Value?.ToString(), out int suchua) ? suchua : 0;
+
+                        vitrithpham.SLConTrong = suchua - GetViTriTPhamSoLuongTrong(vitrithpham.VTTPID.Value).soluong;
+
+                        listViTriTPhams.Add(vitrithpham);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    errorMessage = $"Error: {ex.Message}";
+                    listViTriTPhams.Clear(); // Clear the list in case of error
+                }
+            }
+            return (listViTriTPhams, errorMessage);
+        }
+        #endregion
+
         #region Table_KHO_ViTriofTPham
 
         // Insert
@@ -10664,6 +10730,8 @@ namespace ProcessManagement.Services.SQLServer
 
     }
 }
+
+
 
 
 //// Get any columns of PXK by any paramaters
