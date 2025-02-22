@@ -846,6 +846,25 @@ namespace ProcessManagement.Services.SQLServer
             return listCongdoans;
         }
 
+        private (int, int, int) GetResultsKQGCperCDoanAllLots(object? cdid, object? khsxid)
+        {
+            int sumok = 0; int sumng = 0;
+
+            Dictionary<string, object?> parameters = new()
+            {
+                { $"{KQGCDBName.NCID}", cdid },
+                { $"{KQGCDBName.KHSXID}", khsxid }
+            };
+
+            (List<KetQuaGC> DSachKetQuaGCsBase, string resultMess) = GetListKetQuaGC(parameters, false);
+
+            sumok = DSachKetQuaGCsBase.Sum(kqgc => int.TryParse(kqgc.SLOK.Value?.ToString(), out int slok) ? slok : 0);
+
+            sumng = DSachKetQuaGCsBase.Sum(kqgc => int.TryParse(kqgc.SLNG.Value?.ToString(), out int slng) ? slng : 0);
+
+            return (sumok, sumng, (sumok + sumng));
+        }
+
         // Them nvl moi cong doan
         public (int, string) InsertNVLmoiCongdoan(NVLmoiNguyenCong nvlmoicd)
         {

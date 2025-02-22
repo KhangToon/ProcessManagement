@@ -19,6 +19,11 @@ namespace ProcessManagement.Models
 
         public bool IsUsing { get; set; } = false;
 
+        public int SumOKSubmited { get; set; } = 0;
+        public int SumNGSubmited { get; set; } = 0;
+        public int SumTotalSubmited { get; set; } = 0;
+        public bool IsDoneCongDoan { get; set; } = false;
+
         public List<int> GenerateListColumnIndex(int lenght)
         {
             var list = new List<int>();

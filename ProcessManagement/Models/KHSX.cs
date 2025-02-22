@@ -29,6 +29,7 @@ namespace ProcessManagement.Models
         public Propertyy PXKID { get; set; } = new() { DBName = Common.PXKID, DisplayName = "PXKID", Type = typeof(int), AlowDatabase = true };
         public Propertyy IsAllowDisplay { get; set; } = new() { DBName = Common.IsAllowDisplay, DisplayName = "IsAllowDisplay", Type = typeof(int), AlowDatabase = true };
         public Propertyy IsCollapsed { get; set; } = new() { DBName = Common.IsCollapsed, DisplayName = "IsCollapsed", Type = typeof(int), AlowDatabase = true };
+        public Propertyy IsDoneKHSX { get; set; } = new() { DBName = Common.IsDoneKHSX, DisplayName = "IsDoneKHSX", Type = typeof(int), AlowDatabase = true };
         public SanPham? TargetSanPham { get; set; }
         public NguyenVatLieu? TargetNVL { get; set; }
         public LoaiNVL? LoaiNVL { get; set; }
@@ -41,8 +42,6 @@ namespace ProcessManagement.Models
 
         public List<PhieuXuatKho> ListPXKBoSung = new(); // Dung trong PageDSachKHSXs
         public int SoluongBoSung = 0; // Dung trong PageDSachKHSXs
-
-        public bool IsDoneKHSX { get; set; } = false;
 
         public bool isCollapsed { get; set; } = true; // Dung cho PageDSachKHSX
 
