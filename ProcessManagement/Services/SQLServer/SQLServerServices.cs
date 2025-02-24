@@ -19,6 +19,7 @@ using static ProcessManagement.Models.KHSXs.KetQuaGC;
 using ProcessManagement.Models.KHO_TPHAM;
 using ProcessManagement.Models.KHSXs.MQL_Template;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.Threading.Tasks;
 
 namespace ProcessManagement.Services.SQLServer
 {
@@ -306,7 +307,7 @@ namespace ProcessManagement.Services.SQLServer
         //};
 
         // Load ke hoach san xuat by ID
-        public KHSX GetKHSXbyID_notLoadData(object? khsxID)
+        public async Task<KHSX> GetKHSXbyID_notLoadData(object? khsxID)
         {
             KHSX khsx = new();
 
@@ -336,13 +337,14 @@ namespace ProcessManagement.Services.SQLServer
                     }
                 }
 
-                khsx.TargetSanPham = GetSanpham(int.TryParse(khsx.SPID.Value?.ToString(), out int spid) ? spid : 0);
 
-                khsx.LoaiNVL = GetLoaiNVLbyID(int.TryParse(khsx.LOAINVLID.Value?.ToString(), out int loainvlid) ? loainvlid : 0);
+                khsx.TargetSanPham = GetSanpham(int.TryParse(khsx.SPID.Value?.ToString(), out int spid) ? spid : 0, false);
+
+                //khsx.LoaiNVL = GetLoaiNVLbyID(int.TryParse(khsx.LOAINVLID.Value?.ToString(), out int loainvlid) ? loainvlid : 0);
 
                 khsx.DSachNVLofKHSXs = GetListNVLofKHSXbyID(khsx.KHSXID.Value);
 
-                khsx.DSachCongDoans = GetlistCongdoans(khsx.KHSXID.Value);
+                khsx.DSachCongDoans = await GetlistCongdoansAsync(khsx.KHSXID.Value);
 
                 var fistCDoanID = khsx.DSachCongDoans.FirstOrDefault()?.NCID.Value ?? 0;
 
@@ -417,17 +419,6 @@ namespace ProcessManagement.Services.SQLServer
                         item.Value = columnValue;
                     }
                 }
-
-                //// Use Task.WhenAll for parallel loading of dependent data
-                //var tasks = new List<Task>
-                //{
-                //    Task.Run(() => khsx.TargetSanPham = GetSanpham(int.TryParse(khsx.SPID.Value?.ToString(), out int spid) ? spid : 0)),
-                //    Task.Run(() => khsx.LoaiNVL = GetLoaiNVLbyID(int.TryParse(khsx.LOAINVLID.Value?.ToString(), out int loainvlid) ? loainvlid : 0)),
-                //    Task.Run(() => khsx.DSachNVLofKHSXs = GetListNVLofKHSXbyID(khsx.KHSXID.Value)),
-                //    Task.Run(() => khsx.DSachCongDoans = GetlistCongdoans(khsx.KHSXID.Value))
-                //};
-
-                //await Task.WhenAll(tasks);
 
                 khsx.TargetSanPham = GetSanpham(int.TryParse(khsx.SPID.Value?.ToString(), out int spid) ? spid : 0);
 
@@ -846,6 +837,48 @@ namespace ProcessManagement.Services.SQLServer
             return listCongdoans;
         }
 
+        public async Task<List<NguyenCongofKHSX>> GetlistCongdoansAsync(object? khsxID)
+        {
+            List<NguyenCongofKHSX> listCongdoans = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open(); // Synchronous Open
+
+                var command = connection.CreateCommand();
+                command.CommandText = $"SELECT * FROM [{Common.TableCongDoan}] WHERE [{Common.KHSXID}] = @khsxID";
+                command.Parameters.AddWithValue("@khsxID", khsxID);
+
+                using var reader = await command.ExecuteReaderAsync();
+
+                while (await reader.ReadAsync())
+                {
+                    NguyenCongofKHSX rowSP = new();
+                    List<Propertyy> rowSPitems = rowSP.GetPropertiesValues();
+
+                    foreach (var item in rowSPitems)
+                    {
+                        string? columnName = item.DBName;
+                        object? columnValue = await reader.IsDBNullAsync(reader.GetOrdinal(columnName)) ? null : reader[columnName];
+                        item.Value = columnValue;
+                    }
+
+                    listCongdoans.Add(rowSP);
+                }
+            }
+
+            // Create a list to hold tasks
+            var tasks = listCongdoans.Select(async congdoan =>
+            {
+                congdoan.IsUsing = true;
+                congdoan.DSachNVLCongDoans = await GetlistNVLmoiCongdoansAsync(congdoan.NCIDofKHSX.Value ?? 0, khsxID);
+            });
+
+            // Await all tasks to complete
+            await Task.WhenAll(tasks);
+
+            return listCongdoans;
+        }
         private (int, int, int) GetResultsKQGCperCDoanAllLots(object? cdid, object? khsxid)
         {
             int sumok = 0; int sumng = 0;
@@ -1039,7 +1072,50 @@ namespace ProcessManagement.Services.SQLServer
 
             return listNVLmoiCongdoans;
         }
+        public async Task<List<NVLmoiNguyenCong>> GetlistNVLmoiCongdoansAsync(object congdoanID, object? khsxID)
+        {
+            List<NVLmoiNguyenCong> listNVLmoiCongdoans = new();
 
+            using (var connection = new SqlConnection(connectionString))
+            {
+                await connection.OpenAsync();
+
+                var command = connection.CreateCommand();
+                command.CommandText = $"SELECT * FROM [{Common.TableNVLmoiCongDoan}] WHERE [{Common.KHSXID}] = @khsxID AND [{Common.NCIDofKHSX}] = @congdoanID";
+                command.Parameters.AddWithValue("@khsxID", khsxID);
+                command.Parameters.AddWithValue("@congdoanID", congdoanID);
+
+                using var reader = await command.ExecuteReaderAsync();
+
+                while (await reader.ReadAsync())
+                {
+                    NVLmoiNguyenCong rowSP = new();
+                    List<Propertyy> rowSPitems = rowSP.GetPropertiesValues();
+
+                    foreach (var item in rowSPitems)
+                    {
+                        string? columnName = item.DBName;
+                        object? columnValue = await reader.IsDBNullAsync(reader.GetOrdinal(columnName)) ? null : reader[columnName];
+                        item.Value = columnValue;
+                    }
+
+                    listNVLmoiCongdoans.Add(rowSP);
+                }
+            }
+
+            // Use Task.Run to run the following code in parallel
+            await Task.Run(() =>
+            {
+                Parallel.ForEach(listNVLmoiCongdoans, nvl =>
+                {
+                    List<CaLamViec> listCaLamviec = GetlistNVLmoiCongdoanCalamviecs(nvl.NVLMCDID.Value);
+                    nvl.CaNgay = listCaLamviec.FirstOrDefault(ca => ca.Ca?.Value?.ToString() == Common.Cangay) ?? new CaLamViec();
+                    nvl.CaDem = listCaLamviec.FirstOrDefault(ca => ca.Ca?.Value?.ToString() == Common.Cadem) ?? new CaLamViec();
+                });
+            });
+
+            return listNVLmoiCongdoans;
+        }
         // Get NVL moi cong doan by ID
         public NVLmoiNguyenCong? GetlistNVLmoiCongdoanbyID(object? nvlmcdID)
         {
@@ -7678,7 +7754,7 @@ namespace ProcessManagement.Services.SQLServer
         }
 
         // Lay san pham by sp id
-        public SanPham GetSanpham(int spid) // Lay danh sach san pham
+        public SanPham GetSanpham(int spid, bool isLoadData = true) // Lay danh sach san pham
         {
             SanPham sanpham = new();
 
@@ -7708,7 +7784,10 @@ namespace ProcessManagement.Services.SQLServer
                 }
             }
 
-            sanpham.DanhSachNVLs = GetDSachNVLwithSanPham_bySPID(sanpham.SP_SPID.Value);
+            if (isLoadData)
+            {
+                sanpham.DanhSachNVLs = GetDSachNVLwithSanPham_bySPID(sanpham.SP_SPID.Value);
+            }
 
             return sanpham;
         }

@@ -80,7 +80,7 @@
             </RadzenRow>
         </RadzenStack>
         <RadzenCard Variant="Variant.Flat" Style="height: 95%; width: 100%; padding: 10px; overflow-y: scroll">
-            <RadzenStack Visible="@(reloadpage == false)" Orientation="Orientation.Vertical" Gap="20px" Style="height: contain; width: 100%; padding: 0px;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+            <RadzenStack Orientation="Orientation.Vertical" Gap="20px" Style="height: contain; width: 100%; padding: 0px;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                 @foreach (var khsx in DSKHSXs)
                 {
                     <RadzenCard class="rz-shadow-5" Variant="Variant.Filled" Style="width: 100%; height: contain; padding: 2px;">
@@ -336,7 +336,7 @@
         var stopwatch = Stopwatch.StartNew(); // Start the timer
 
         var dskhsxs = new ConcurrentBag<KHSX>(); // using for not missing item in await task
-                                                 //var listkhsxids = SQLServerServices.GetlistKHSXid();
+        //var listkhsxids = SQLServerServices.GetlistKHSXid();
 
         List<KHSX> baseKHSXs = new(); // danh sach KHSX (chi cac truong mac dinh)
 
@@ -477,7 +477,7 @@
         var stopwatch = Stopwatch.StartNew(); // Start the timer
 
         var dskhsxs = new ConcurrentBag<KHSX>(); // using for not missing item in await task
-                                                 //var listkhsxids = SQLServerServices.GetlistKHSXid();
+        //var listkhsxids = SQLServerServices.GetlistKHSXid();
 
         List<KHSX> baseKHSXs_onlyKHSXID = new(); // danh sach KHSX (chi cac truong mac dinh)
 
@@ -683,19 +683,16 @@
     // Button Reload
     private async Task ButtonReloadPress()
     {
-        await Task.Run(async () =>
+        if (reloadpage == false)
         {
-            if (reloadpage == false)
-            {
-                reloadpage = true;
+            reloadpage = true;
 
-                //await Task.Delay(10);
+            //await Task.Delay(10);
 
-                await OnGetListKHSXs();
+            await OnGetListKHSXs();
 
-                reloadpage = false;
-            }
-        });
+            reloadpage = false;
+        }
     }
 
     private async Task OnAllowHienThiKHSXChanged(KHSX targetkhsx, bool allowhienthi)
