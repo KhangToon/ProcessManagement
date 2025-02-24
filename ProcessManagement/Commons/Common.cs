@@ -129,6 +129,10 @@ namespace ProcessManagement.Commons
         public const string Table_NguyenCong = "Table_DSNguyenCong";
         //public const string TileLoi = "Tỉ lệ lỗi";
         public const string SoluongNG = "Số lượng lỗi";
+        public const string SumOKSubmited = "SumOKSubmited";
+        public const string SumNGSubmited = "SumNGSubmited";
+        public const string SumTotalSubmited = "SumTotalSubmited";
+        public const string SLlimit = "SLlimit";
         public const string NCID = "NCID";
         public const string NguyenCong = "Nguyên công";
         public const string Ghichu = "Ghi chú";

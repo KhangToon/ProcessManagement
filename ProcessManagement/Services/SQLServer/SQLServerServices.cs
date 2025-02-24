@@ -297,99 +297,6 @@ namespace ProcessManagement.Services.SQLServer
             return khsx;
         }
 
-        //// Use Task.WhenAll for parallel loading of dependent data
-        //var tasks = new List<Task>
-        //{
-        //    Task.Run(() => khsx.TargetSanPham = GetSanpham(int.TryParse(khsx.SPID.Value?.ToString(), out int spid) ? spid : 0)),
-        //    Task.Run(() => khsx.LoaiNVL = GetLoaiNVLbyID(int.TryParse(khsx.LOAINVLID.Value?.ToString(), out int loainvlid) ? loainvlid : 0)),
-        //    Task.Run(() => khsx.DSachNVLofKHSXs = GetListNVLofKHSXbyID(khsx.KHSXID.Value)),
-        //    Task.Run(() => khsx.DSachCongDoans = GetlistCongdoans(khsx.KHSXID.Value))
-        //};
-
-        // Load ke hoach san xuat by ID
-        public async Task<KHSX> GetKHSXbyID_notLoadData(object? khsxID)
-        {
-            KHSX khsx = new();
-
-            if (khsxID == null) { return khsx; }
-
-            using (var connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-
-                var command = connection.CreateCommand();
-
-                command.CommandText = $"SELECT * FROM [{Common.TableKHSX}] WHERE [{Common.KHSXID}] = '{khsxID}'";
-
-                using var reader = command.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    List<Propertyy> rowSPitems = khsx.GetPropertiesValues();
-
-                    foreach (var item in rowSPitems)
-                    {
-                        string? columnName = item.DBName;
-
-                        object columnValue = reader[columnName];
-
-                        item.Value = columnValue;
-                    }
-                }
-
-
-                khsx.TargetSanPham = GetSanpham(int.TryParse(khsx.SPID.Value?.ToString(), out int spid) ? spid : 0, false);
-
-                //khsx.LoaiNVL = GetLoaiNVLbyID(int.TryParse(khsx.LOAINVLID.Value?.ToString(), out int loainvlid) ? loainvlid : 0);
-
-                khsx.DSachNVLofKHSXs = GetListNVLofKHSXbyID(khsx.KHSXID.Value);
-
-                khsx.DSachCongDoans = await GetlistCongdoansAsync(khsx.KHSXID.Value);
-
-                var fistCDoanID = khsx.DSachCongDoans.FirstOrDefault()?.NCID.Value ?? 0;
-
-                var resultdslots = GetListLOT_khsx(new() { { KHSX_LOT.DBName.KHSXID, khsx.KHSXID.Value }, { KHSX_LOT.DBName.NCID, fistCDoanID } }).Item1;
-
-                if (resultdslots != null && resultdslots.Any())
-                {
-                    khsx.DSLOT_KHSXs = resultdslots;
-
-                    // Get maNVL of KHSX_LOT
-                    foreach (var lotkhsx in khsx.DSLOT_KHSXs)
-                    {
-                        lotkhsx.TargetNVL = GetMaNguyenVatLieuByID(lotkhsx.NVLID.Value);
-                    }
-                }
-
-                // Get trang thai xuat kho NVL
-                var colIsDonePXK = GetPXK_AnyColValuebyAnyParameters(new Dictionary<string, object?>() { { Common.KHSXID, khsx.KHSXID.Value } }, Common.IsDonePXK).columnValues.FirstOrDefault();
-                if (int.TryParse(colIsDonePXK?.ToString(), out int ispxkdone))
-                {
-                    khsx.isDonePXK = ispxkdone == 1;
-                }
-
-                // Get PNKID
-                var colpnkid = GetPXK_AnyColValuebyAnyParameters(new Dictionary<string, object?>() { { Common.PXKID, khsx.PXKID.Value } }, Common.PNKID).columnValues.FirstOrDefault();
-                if (int.TryParse(colpnkid?.ToString(), out int pnkid))
-                {
-                    // Get trang thai tra NVL
-                    var colIsReturnedNVL = GetPNK_AnyColValuebyAnyParameters(new Dictionary<string, object?>() { { Common.PNKID, pnkid } }, Common.IsDonePNK).columnValues.FirstOrDefault();
-                    if (int.TryParse(colIsReturnedNVL?.ToString(), out int isPNKdone))
-                    {
-                        khsx.isReturnedNVL = isPNKdone == 1;
-                    }
-                }
-
-                // Get collapsed KHSX
-                if (int.TryParse(khsx.IsCollapsed.Value?.ToString(), out int isCollapsed))
-                {
-                    khsx.isCollapsed = isCollapsed == 1;
-                }
-            }
-
-            return khsx;
-        }
-
         public KHSX GetKHSXbyID(object? khsxID)
         {
             KHSX khsx = new();
@@ -472,6 +379,88 @@ namespace ProcessManagement.Services.SQLServer
             return khsx;
         }
 
+
+        public KHSX GetKHSXbyIDRuduceTime(object? khsxID)
+        {
+            KHSX khsx = new();
+
+            if (khsxID == null) { return khsx; }
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.TableKHSX}] WHERE [{Common.KHSXID}] = '{khsxID}'";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    List<Propertyy> rowSPitems = khsx.GetPropertiesValues();
+
+                    foreach (var item in rowSPitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue;
+                    }
+                }
+
+                khsx.TargetSanPham = GetSanpham(int.TryParse(khsx.SPID.Value?.ToString(), out int spid) ? spid : 0, false);
+
+                //khsx.LoaiNVL = GetLoaiNVLbyID(int.TryParse(khsx.LOAINVLID.Value?.ToString(), out int loainvlid) ? loainvlid : 0);
+
+                khsx.DSachNVLofKHSXs = GetListNVLofKHSXbyID(khsx.KHSXID.Value);
+
+                khsx.DSachCongDoans = GetlistCongdoans(khsx.KHSXID.Value, false);
+
+                var fistCDoanID = khsx.DSachCongDoans.FirstOrDefault()?.NCID.Value ?? 0;
+
+                var resultdslots = GetListLOT_khsx(new() { { KHSX_LOT.DBName.KHSXID, khsx.KHSXID.Value }, { KHSX_LOT.DBName.NCID, fistCDoanID } }).Item1;
+
+                if (resultdslots != null && resultdslots.Any())
+                {
+                    khsx.DSLOT_KHSXs = resultdslots;
+
+                    // Get maNVL of KHSX_LOT
+                    foreach (var lotkhsx in khsx.DSLOT_KHSXs)
+                    {
+                        lotkhsx.TargetNVL = GetMaNguyenVatLieuByID(lotkhsx.NVLID.Value);
+                    }
+                }
+
+                // Get trang thai xuat kho NVL
+                var colIsDonePXK = GetPXK_AnyColValuebyAnyParameters(new Dictionary<string, object?>() { { Common.KHSXID, khsx.KHSXID.Value } }, Common.IsDonePXK).columnValues.FirstOrDefault();
+                if (int.TryParse(colIsDonePXK?.ToString(), out int ispxkdone))
+                {
+                    khsx.isDonePXK = ispxkdone == 1;
+                }
+
+                // Get PNKID
+                var colpnkid = GetPXK_AnyColValuebyAnyParameters(new Dictionary<string, object?>() { { Common.PXKID, khsx.PXKID.Value } }, Common.PNKID).columnValues.FirstOrDefault();
+                if (int.TryParse(colpnkid?.ToString(), out int pnkid))
+                {
+                    // Get trang thai tra NVL
+                    var colIsReturnedNVL = GetPNK_AnyColValuebyAnyParameters(new Dictionary<string, object?>() { { Common.PNKID, pnkid } }, Common.IsDonePNK).columnValues.FirstOrDefault();
+                    if (int.TryParse(colIsReturnedNVL?.ToString(), out int isPNKdone))
+                    {
+                        khsx.isReturnedNVL = isPNKdone == 1;
+                    }
+                }
+
+                // Get collapsed KHSX
+                if (int.TryParse(khsx.IsCollapsed.Value?.ToString(), out int isCollapsed))
+                {
+                    khsx.isCollapsed = isCollapsed == 1;
+                }
+            }
+
+            return khsx;
+        }
 
         // Load danh sach ke hoach san xuat
         public List<KHSX> GetListKHSXs()
@@ -794,7 +783,7 @@ namespace ProcessManagement.Services.SQLServer
         // ------------------------------------------------------------------------------------- //
         #region Table_NguyenCongofKHSX
         // Load danh sach cong doan
-        public List<NguyenCongofKHSX> GetlistCongdoans(object? khsxID)
+        public List<NguyenCongofKHSX> GetlistCongdoans(object? khsxID, bool isloaddata = true)
         {
             List<NguyenCongofKHSX> listCongdoans = new();
 
@@ -827,12 +816,15 @@ namespace ProcessManagement.Services.SQLServer
                 }
             }
 
-            Parallel.ForEach(listCongdoans, congdoan =>
+            if (isloaddata)
             {
-                congdoan.IsUsing = true;
+                Parallel.ForEach(listCongdoans, congdoan =>
+                {
+                    congdoan.IsUsing = true;
 
-                congdoan.DSachNVLCongDoans = GetlistNVLmoiCongdoans(congdoan.NCIDofKHSX.Value ?? 0, khsxID);
-            });
+                    congdoan.DSachNVLCongDoans = GetlistNVLmoiCongdoans(congdoan.NCIDofKHSX.Value ?? 0, khsxID);
+                });
+            }
 
             return listCongdoans;
         }
@@ -1115,79 +1107,6 @@ namespace ProcessManagement.Services.SQLServer
             });
 
             return listNVLmoiCongdoans;
-        }
-        // Get NVL moi cong doan by ID
-        public NVLmoiNguyenCong? GetlistNVLmoiCongdoanbyID(object? nvlmcdID)
-        {
-            if (nvlmcdID == null) return null;
-
-            NVLmoiNguyenCong nvlmoiCongdoan = new();
-
-            using (var connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-
-                var command = connection.CreateCommand();
-
-                command.CommandText = $"SELECT * FROM [{Common.TableNVLmoiCongDoan}] WHERE [{Common.NVLMCDID}] = '{nvlmcdID}'";
-
-                using var reader = command.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    List<Propertyy> rowSPitems = nvlmoiCongdoan.GetPropertiesValues();
-
-                    foreach (var item in rowSPitems)
-                    {
-                        string? columnName = item.DBName;
-
-                        object columnValue = reader[columnName];
-
-                        item.Value = columnValue;
-                    }
-                }
-            }
-
-            List<CaLamViec> listCaLamviec = GetlistNVLmoiCongdoanCalamviecs(nvlmoiCongdoan.NVLMCDID.Value);
-
-            nvlmoiCongdoan.CaNgay = listCaLamviec.FirstOrDefault(ca => ca.Ca?.Value?.ToString() == Common.Cangay) ?? new CaLamViec();
-
-            nvlmoiCongdoan.CaDem = listCaLamviec.FirstOrDefault(ca => ca.Ca?.Value?.ToString() == Common.Cadem) ?? new CaLamViec();
-
-            return nvlmoiCongdoan;
-        }
-
-        // Update NG/OK nvlmoi cong doan
-        public (int, string) UpdateNVLmoiCongdoan(int slOK, int slNG, string maquanly, object? nvlmcdid, object? cdID, object? khsxID)
-        {
-            int result = -1; string errorMess = string.Empty;
-
-            if (slOK == 0 || maquanly == string.Empty || nvlmcdid == null || cdID == null || khsxID == null) { return (result, errorMess); }
-
-            try
-            {
-                using (var connection = new SqlConnection(connectionString))
-                {
-                    connection.Open();
-
-                    string sqlQuery = $"UPDATE {Common.TableNVLmoiCongDoan} SET [{Common.TongOK}] = '{slOK}', [{Common.TongNG}] = '{slNG}', [{Common.IsUpdated}] = '{1}' " +
-                                    $"WHERE [{Common.KHSXID}] = '{khsxID}' AND [{Common.NCIDofKHSX}] = '{cdID}' AND [{Common.MaQuanLy}] = '{maquanly}'";
-
-                    var command = new SqlCommand(sqlQuery, connection);
-
-                    result = command.ExecuteNonQuery();
-
-                    connection.Close();
-
-                    return (result, string.Empty);
-                }
-            }
-            catch (Exception ex)
-            {
-                string err = ex.Message;
-
-                return (-1, err);
-            }
         }
 
         // Update calam viec
@@ -10826,6 +10745,79 @@ namespace ProcessManagement.Services.SQLServer
         }
         #endregion
 
+        #region NguyenCongofKHSX
+        public (int, string) UpdateNguyenCongofKHSX(NguyenCongofKHSX nguyencong)
+        {
+            int result = -1;
+            string errorMess = string.Empty;
+
+            // Check for null input
+            if (nguyencong == null) return (result, "Error: is null");
+
+            List<Propertyy> properties = nguyencong.GetPropertiesValues()
+                .Where(po => po.AlowDatabase == true && po.Value != null)
+                .ToList();
+
+            // Validate properties before proceeding
+            if (properties.Count == 0)
+            {
+                return (result, "Error: No valid properties to update.");
+            }
+
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+
+            using var transaction = connection.BeginTransaction(); // Start transaction
+
+            try
+            {
+                var command = connection.CreateCommand();
+                command.Transaction = transaction; // Associate command with the transaction
+
+                string updateSet = string.Join(", ", properties.Select(p => $"[{p.DBName}] = @{Regex.Replace(p.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $@"UPDATE [{Common.TableCongDoan}] SET {updateSet} WHERE [{Common.NCIDofKHSX}] = '{nguyencong.NCIDofKHSX.Value}'";
+
+                // Add parameters
+                foreach (var prop in properties)
+                {
+                    string parameterName = $"@{Regex.Replace(prop.DBName ?? string.Empty, @"[^\w]+", "")}";
+                    object? parameterValue = prop.Value ?? DBNull.Value;
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                // Execute command
+                result = command.ExecuteNonQuery();
+
+                if (result > 0)
+                {
+                    // Successfully updated
+                    transaction.Commit(); // Commit the transaction
+                }
+                else
+                {
+                    result = -1; // Set to -1 if update was not successful
+                    errorMess = "No rows were updated. The specified may not exist.";
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMess = $"Error: {ex.Message}";
+                try
+                {
+                    transaction.Rollback(); // Rollback transaction in case of error
+                }
+                catch (Exception rollbackEx)
+                {
+                    errorMess += $" | Rollback Error: {rollbackEx.Message}";
+                }
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
+        #endregion 
     }
 }
 

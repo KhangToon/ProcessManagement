@@ -139,9 +139,10 @@
                                                 <DialogDetailKHSX TargetMQLLot="@TargetMQLLot" SelectKHSX="@khsx" IsNotDialog="true"></DialogDetailKHSX>
                                             </ChildContent>
                                         </RadzenTabsItem>
+
                                         <RadzenTabsItem>
                                             <Template>
-                                                <RadzenText Text="DANH SÁCH LOT NVL" Style="color: darkred; font-weight: 500; font-size: 15px"></RadzenText>
+                                                <RadzenText Text="@("DANH SÁCH LOT NVL")" Style="color: darkred; font-weight: 500; font-size: 15px"></RadzenText>
                                             </Template>
                                             <ChildContent>
                                                 <DanhSachLotNVL TargetKHSX="@khsx"></DanhSachLotNVL>
@@ -150,7 +151,7 @@
 
                                         <RadzenTabsItem>
                                             <Template>
-                                                <RadzenText Text="THEO DÕI SẢN XUẤT" Style="color: darkred; font-weight: 500; font-size: 15px;"></RadzenText>
+                                                <RadzenText Text="@("THEO DÕI SẢN XUẤT")" Style="color: darkred; font-weight: 500; font-size: 15px;"></RadzenText>
                                             </Template>
                                             <ChildContent>
                                                 <TheoDoiSanXuat TargetKHSX="@khsx"></TheoDoiSanXuat>
@@ -159,7 +160,7 @@
 
                                         <RadzenTabsItem>
                                             <Template>
-                                                <RadzenText Text="QUẢN LÝ CÔNG ĐOẠN" Style="color: darkred; font-weight: 500; font-size: 15px"></RadzenText>
+                                                <RadzenText Text="@("QUẢN LÝ CÔNG ĐOẠN")" Style="color: darkred; font-weight: 500; font-size: 15px"></RadzenText>
                                             </Template>
                                             <ChildContent>
                                                 <QLCongDoanPage TargetMQLLot="@TargetMQLLot" TargetKHSX="@khsx"></QLCongDoanPage>
@@ -271,9 +272,9 @@
                                                                           Style="font-weight: 600; white-space: nowrap; font-size: 16px; cursor: default; border-radius: 3px; padding: 5px 10px; width: 100%"></RadzenButton>
                                                         </RadzenStack>
                                                         <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" Style="height: contain; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                            <RadzenButton Text="@($"{cdoan.SumTotalSubmited}/{cdoan.SLlimit}")" ButtonStyle="@((cdoan.SumTotalSubmited == cdoan.SLlimit)? ButtonStyle.Success : ButtonStyle.Primary)" Shade="@((cdoan.SumTotalSubmited == cdoan.SLlimit)? Shade.Darker : Shade.Light)" Size="ButtonSize.Small" Style="font-weight: 600; font-size: 16px; cursor: default; border-radius: 3px" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, $"Tiến độ", 100))"></RadzenButton>
-                                                            <RadzenButton Text="@($"{cdoan.SumOKSubmited}")" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Small" Style="font-weight: 600; color: darkgreen; font-size: 16px; cursor: default; border-radius: 3px" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, $" OK", 100))"></RadzenButton>
-                                                            <RadzenButton Visible="@(cdoan.SumNGSubmited > 0)" Text="@($"{cdoan.SumNGSubmited}")" ButtonStyle="ButtonStyle.Danger" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Small" Style="font-weight: 600; color: darkred; font-size: 16px; cursor: default; border-radius: 3px" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, $"NG", 100))"></RadzenButton>
+                                                            <RadzenButton Text="@($"{cdoan.sumTotalSubmited}/{cdoan.sLlimit}")" ButtonStyle="@((cdoan.sumTotalSubmited == cdoan.sLlimit)? ButtonStyle.Success : ButtonStyle.Primary)" Shade="@((cdoan.sumTotalSubmited == cdoan.sLlimit)? Shade.Darker : Shade.Light)" Size="ButtonSize.Small" Style="font-weight: 600; font-size: 16px; cursor: default; border-radius: 3px" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, $"Tiến độ", 100))"></RadzenButton>
+                                                            <RadzenButton Text="@($"{cdoan.sumOKSubmited}")" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Small" Style="font-weight: 600; color: darkgreen; font-size: 16px; cursor: default; border-radius: 3px" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, $" OK", 100))"></RadzenButton>
+                                                            <RadzenButton Visible="@(cdoan.sumNGSubmited > 0)" Text="@($"{cdoan.sumNGSubmited}")" ButtonStyle="ButtonStyle.Danger" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Small" Style="font-weight: 600; color: darkred; font-size: 16px; cursor: default; border-radius: 3px" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, $"NG", 100))"></RadzenButton>
                                                         </RadzenStack>
                                                     </RadzenStack>
                                                 </RadzenCard>
@@ -407,18 +408,29 @@
                                 // Tinh so luong dasubmit moi cong doan cua KHSX
                                 (int sumok, int sumng, int totalokng) = GetResultsKQGCperCDoanAllLots(congdoan.NCID.Value, kHSX.KHSXID.Value);
 
-                                congdoan.SumOKSubmited = sumok; congdoan.SumNGSubmited = sumng; congdoan.SumTotalSubmited = totalokng;
+                                congdoan.sumOKSubmited = sumok; congdoan.sumNGSubmited = sumng; congdoan.sumTotalSubmited = totalokng;
 
                                 if (kHSX.DSachCongDoans.IndexOf(congdoan) == 0)
                                 {
-                                    congdoan.SLlimit = dinhmuc;
+                                    congdoan.sLlimit = dinhmuc;
                                 }
                                 else
                                 {
-                                    congdoan.SLlimit = preCongDoan.SLlimit - preCongDoan.SumNGSubmited;
+                                    congdoan.sLlimit = preCongDoan.sLlimit - preCongDoan.sumNGSubmited;
                                 }
 
-                                congdoan.IsDoneCongDoan = congdoan.SumTotalSubmited == congdoan.SLlimit;
+                                congdoan.IsDoneCongDoan = congdoan.sumTotalSubmited == congdoan.sLlimit;
+
+                                // // Update congdoan
+                                // congdoan.SumOKSubmited.Value = sumok; congdoan.SumNGSubmited.Value = sumng; congdoan.SumTotalSubmited.Value = totalokng;
+                                // congdoan.SLlimit.Value = congdoan.sLlimit;
+
+                                // (int updateresult, string error) = SQLServerServices.UpdateNguyenCongofKHSX(congdoan);
+
+                                // if (updateresult == -1)
+                                // {
+
+                                // }
 
                                 preCongDoan = congdoan;
                             }
@@ -471,97 +483,11 @@
         loadinngtime = stopwatch.ElapsedMilliseconds; // Get the elapsed time
     }
 
-
-    private async Task OnGetListKHSXs_()
-    {
-        var stopwatch = Stopwatch.StartNew(); // Start the timer
-
-        var dskhsxs = new ConcurrentBag<KHSX>(); // using for not missing item in await task
-        //var listkhsxids = SQLServerServices.GetlistKHSXid();
-
-        List<KHSX> baseKHSXs_onlyKHSXID = new(); // danh sach KHSX (chi cac truong mac dinh)
-
-        // Apply filtering
-
-        if (modeSearchKHSX == 0) // Tat ca
-        {
-            baseKHSXs_onlyKHSXID = SQLServerServices.GetListKHSXsByAnyParmeters_AsignColumn(new(), new() { Common.KHSXID, Common.IsDoneKHSX }, true).kHSXes;
-        }
-        else if (modeSearchKHSX == 1) // Duoc hien thi
-        {
-            baseKHSXs_onlyKHSXID = SQLServerServices.GetListKHSXsByAnyParmeters_AsignColumn(new() { { Common.IsAllowDisplay, 1 } }, new() { Common.KHSXID }, false).kHSXes;
-        }
-        else if (modeSearchKHSX == 2) // Khong duoc hien thi
-        {
-            baseKHSXs_onlyKHSXID = SQLServerServices.GetListKHSXsByAnyParmeters_AsignColumn(new() { { Common.IsAllowDisplay, 0 } }, new() { Common.KHSXID }, false).kHSXes;
-        }
-
-        var tasks = new List<Task>();
-        var semaphore = new SemaphoreSlim(100); // Increase concurrency limit
-
-        foreach (var khsx in baseKHSXs_onlyKHSXID)
-        {
-            await semaphore.WaitAsync(); // Wait for an available slot
-            tasks.Add(Task.Run(async () =>
-            {
-                try
-                {
-                    if (int.TryParse(khsx.KHSXID.Value?.ToString(), out int khsxid))
-                    {
-                        KHSX kHSX = await GetKHSX_notLoadData(khsxid);
-
-                        if (kHSX.KHSXID.Value != null)
-                        {
-                            dskhsxs.Add(kHSX);
-                        }
-                    }
-                }
-                catch (Exception)
-                {
-                    // Log or handle the exception, possibly with ex.Message
-                }
-                finally
-                {
-                    semaphore.Release(); // Release the slot
-                }
-            }));
-        }
-
-        await Task.WhenAll(tasks);
-
-        if (dskhsxs.Any())
-        {
-            DSKHSXs_base = dskhsxs
-                .OrderByDescending(khsx => int.TryParse(khsx.KHSXID.Value?.ToString(), out int index) ? index : 0)
-                .ToList();
-
-            SelectedKHSX = selectKHSXID != null
-                ? DSKHSXs.FirstOrDefault(x => object.Equals(x.KHSXID.Value, selectKHSXID)) ?? new KHSX()
-                : DSKHSXs.FirstOrDefault() ?? new KHSX();
-
-            DSKHSXs = DSKHSXs_base;
-        }
-        else { DSKHSXs = new(); }
-
-
-
-        stopwatch.Stop(); // Stop the timer
-        loadinngtime = stopwatch.ElapsedMilliseconds; // Get the elapsed time
-    }
-
     private async Task<KHSX> GetKHSX(object? khsxid)
     {
         return await Task.Run(() =>
         {
-            return SQLServerServices.GetKHSXbyID(khsxid);
-        });
-    }
-
-    private async Task<KHSX> GetKHSX_notLoadData(object? khsxid)
-    {
-        return await Task.Run(() =>
-        {
-            return SQLServerServices.GetKHSXbyID_notLoadData(khsxid);
+            return SQLServerServices.GetKHSXbyIDRuduceTime(khsxid);
         });
     }
 
