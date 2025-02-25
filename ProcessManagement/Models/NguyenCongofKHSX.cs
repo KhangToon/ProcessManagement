@@ -11,10 +11,10 @@ namespace ProcessManagement.Models
         public Propertyy TenCongDoan { get; set; } = new() { DBName = Common.NguyenCong, Type = typeof(string), AlowDatabase = true };
         public Propertyy TileNG { get; set; } = new() { DBName = Common.TileLoi, Type = typeof(double), AlowDatabase = true, Value = 0 };
         public Propertyy SoluongNG { get; set; } = new() { DBName = Common.SoluongNG, Type = typeof(int), AlowDatabase = true, Value = 0 };
-        public Propertyy SumOKSubmited { get; set; } = new() { DBName = Common.SumOKSubmited, Type = typeof(int), AlowDatabase = true, Value = 0 };
-        public Propertyy SumNGSubmited { get; set; } = new() { DBName = Common.SumNGSubmited, Type = typeof(int), AlowDatabase = true, Value = 0 };
-        public Propertyy SumTotalSubmited { get; set; } = new() { DBName = Common.SumTotalSubmited, Type = typeof(int), AlowDatabase = true, Value = 0 };
-        public Propertyy SLlimit { get; set; } = new() { DBName = Common.SLlimit, Type = typeof(int), AlowDatabase = true, Value = 0 };
+        //public Propertyy SumOKSubmited { get; set; } = new() { DBName = Common.SumOKSubmited, Type = typeof(int), AlowDatabase = true, Value = 0 };
+        //public Propertyy SumNGSubmited { get; set; } = new() { DBName = Common.SumNGSubmited, Type = typeof(int), AlowDatabase = true, Value = 0 };
+        //public Propertyy SumTotalSubmited { get; set; } = new() { DBName = Common.SumTotalSubmited, Type = typeof(int), AlowDatabase = true, Value = 0 };
+        //public Propertyy SLlimit { get; set; } = new() { DBName = Common.SLlimit, Type = typeof(int), AlowDatabase = true, Value = 0 };
         public List<NVLmoiNguyenCong> DSachNVLCongDoans { get; set; } = new();
 
         public bool isExpandColumn = false; // Using in QLCongDoanPage
@@ -22,8 +22,8 @@ namespace ProcessManagement.Models
         public bool IsUsing { get; set; } = false;
 
         public int sLlimit = 0;
-        public int sumOKSubmited  = 0;
-        public int sumNGSubmited  = 0;
+        public int sumOKSubmited = 0;
+        public int sumNGSubmited = 0;
         public int sumTotalSubmited = 0;
         public bool IsDoneCongDoan { get; set; } = false;
 
