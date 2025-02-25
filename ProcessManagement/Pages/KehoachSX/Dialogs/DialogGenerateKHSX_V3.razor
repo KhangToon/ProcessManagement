@@ -26,11 +26,11 @@
     }
 </style>
 
-<RadzenStack Gap="0" Style="width: 100%; height: contain; background-color: white" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-    <RadzenStack Style="height: contain; width: 100%; border-radius: 10px; background-color: var(--rz-primary-darker); padding: 10px; padding-bottom: 0" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+<RadzenStack Gap="0" Style="width: 100%; height: 100%; background-color: white" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+    <RadzenStack Style="height: 5%; width: 100%; border-radius: 10px; background-color: var(--rz-primary-darker); padding: 10px; padding-bottom: 0" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
         <RadzenText Text="TẠO KẾ HOẠCH SẢN XUẤT" Style="color: white; font-weight: 600; font-size: 18px"></RadzenText>
     </RadzenStack>
-    <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: contain; border-radius: 10px; padding-right: 0px;">
+    <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: 93%; padding: 5px; border-radius: 10px; padding-right: 0px;">
         <RadzenRow Style="width: 100%; height: 100%; overflow-y: scroll">
             <!--Chi dinh nguyen vat lieu / thong tin ke hoach san xuat-->
             <RadzenColumn Size="12" SizeMD="4" Style="width: 100%; height: 100%">
@@ -312,30 +312,29 @@
                                             <Tabs>
                                                 <!--Select Nguyen cong list-->
                                                 <RadzenTabsItem @onclick="@(() => selectNCongTab = 1)" Text="Chọn nguyên công" Style="font-weight: bold; font-size: 18px; color: darkred">
-                                                    <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style=" height: 100%; width: 100%; padding: 0px; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                        <RadzenCard Variant="Variant.Filled" Style="height: 100%; width: 100%; padding: 10px;">
-                                                            <RadzenPickList @bind-Source="@(generLot.DefaultListCDnames)" @bind-Target="@generLot.SelectListCDnames" Style="height: contain; width:100%;" Orientation="Orientation.Horizontal"
-                                                                            AllowFiltering="true" Multiple="false" ShowHeader="true"
-                                                                            ButtonGap="10px" ButtonJustifyContent="JustifyContent.Center" ButtonStyle="ButtonStyle.Secondary" ButtonSize="ButtonSize.Small" ButtonShade="Shade.Default" ButtonVariant="Variant.Filled">
-                                                                <SourceHeader>
-                                                                    <RadzenText Text="Danh sách nguyên công:" Style="color: black; font-weight: 600; color: black; font-size: 16px"></RadzenText>
-                                                                </SourceHeader>
-                                                                <TargetHeader>
-                                                                    <RadzenText Text="Thứ tự nguyên công đã chọn:" Style="color: black; font-weight: 600; color: black; font-size: 16px"></RadzenText>
-                                                                </TargetHeader>
-                                                                <Template>
-                                                                    <RadzenStack Style="height: contain; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                                                                        <RadzenText Text="@($"{context.TenNguyenCong.Value?.ToString()}")" Style="color: black; font-weight: 600; color: black; font-size: 16px"></RadzenText>
-                                                                        @{
-                                                                            int index = generLot.SelectListCDnames?.ToList().IndexOf(context) ?? -1;
-                                                                        }
-                                                                        <RadzenText Text="@((index == -1)? string.Empty : "["+(index + 1).ToString()+"]")" Style="color: darkblue; font-weight: 600; font-size: 16px"></RadzenText>
-                                                                    </RadzenStack>
-                                                                </Template>
-                                                            </RadzenPickList>
-                                                            <RadzenButton Click="@(() => OpenDialogThemmoiNguyenCong())" Style="width: contain; margin-top: 10px;" Icon="add" Text="Thêm nguyên công khác" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Variant="Variant.Flat" />
-                                                        </RadzenCard>
-                                                    </RadzenStack>
+                                                    <RadzenCard Variant="Variant.Filled" Style="padding: 10px;">
+                                                        <RadzenPickList @bind-Source="@(generLot.DefaultListCDnames)" @bind-Target="@generLot.SelectListCDnames" Style="height: 430px; width:100%;" Orientation="Orientation.Horizontal"
+                                                                        AllowFiltering="true" Multiple="true" ShowHeader="true"
+                                                                        ButtonGap="10px" ButtonJustifyContent="JustifyContent.Center" ButtonStyle="ButtonStyle.Secondary" ButtonSize="ButtonSize.Small" ButtonShade="Shade.Default" ButtonVariant="Variant.Filled">
+                                                            <SourceHeader>
+                                                                <RadzenText Text="Danh sách nguyên công:" Style="color: black; font-weight: 600; color: black; font-size: 16px"></RadzenText>
+                                                            </SourceHeader>
+                                                            <TargetHeader>
+                                                                <RadzenText Text="Thứ tự nguyên công đã chọn:" Style="color: black; font-weight: 600; color: black; font-size: 16px"></RadzenText>
+                                                            </TargetHeader>
+                                                            <Template>
+                                                                <RadzenStack Style="height: contain; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                                                    <RadzenText Text="@($"{context.TenNguyenCong.Value?.ToString()}")" Style="color: black; font-weight: 600; color: black; font-size: 16px"></RadzenText>
+                                                                    @{
+                                                                        int index = generLot.SelectListCDnames?.ToList().IndexOf(context) ?? -1;
+                                                                    }
+                                                                    <RadzenText Text="@((index == -1)? string.Empty : "["+(index + 1).ToString()+"]")" Style="color: darkblue; font-weight: 600; font-size: 16px"></RadzenText>
+                                                                </RadzenStack>
+                                                            </Template>
+                                                        </RadzenPickList>
+                                                        <RadzenButton Click="@(() => OpenDialogThemmoiNguyenCong())" Style="width: contain; margin-top: 10px;" Icon="add" Text="Thêm nguyên công khác" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Variant="Variant.Flat" />
+                                                    </RadzenCard>
+
                                                 </RadzenTabsItem>
                                                 <!--Select Tileloi nguyen cong-->
                                                 <RadzenTabsItem @onclick="@(() => selectNCongTab = 2)" Text="Tỉ lệ lỗi nguyên công" Style="font-weight: bold; font-size: 18px; color: darkred">
