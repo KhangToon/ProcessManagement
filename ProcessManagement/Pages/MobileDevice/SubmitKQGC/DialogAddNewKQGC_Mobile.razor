@@ -14,33 +14,33 @@
 
 <style>
     .custom-placeholder::placeholder {
-    color: #888888;
-    font-size: 10px;
-    font-weight: 600;
-    font-style: italic;
+        color: #888888;
+        font-size: 10px;
+        font-weight: 600;
+        font-style: italic;
     }
 
     /* Style for dropdown placeholder (auto apply)*/
     .rz-dropdown:not(.rz-state-filled) .rz-inputtext {
-    color: #888888 !important;
-    font-size: 10px !important;
-    font-weight: 600 !important;
-    font-style: italic !important;
+        color: #888888 !important;
+        font-size: 10px !important;
+        font-weight: 600 !important;
+        font-style: italic !important;
     }
 
     .rz-numeric.custom-numeric input {
-    font-size: 10px !important;
-    font-weight: 600 !important;
+        font-size: 10px !important;
+        font-weight: 600 !important;
     }
 
     .rz-datepicker.custom-datepicker input {
-    font-size: 10px !important;
-    font-weight: 600 !important;
+        font-size: 10px !important;
+        font-weight: 600 !important;
     }
 
     .custom-datepicker input[type="text"]::placeholder {
-    font-size: 10px;
-    font-style: italic;
+        font-size: 10px;
+        font-style: italic;
     }
 </style>
 
@@ -60,7 +60,46 @@
                             {
                                 string displayName = property.DisplayName;
 
-                                if (property.DBName == KetQuaGC.KQGCDBName.SPID || property.DBName == KetQuaGC.KQGCDBName.MMID || property.DBName == KetQuaGC.KQGCDBName.NCID || property.DBName == KetQuaGC.KQGCDBName.MaQuanLyLot)
+                                if (property.DBName == KetQuaGC.KQGCDBName.MaQuanLyLot)
+                                {
+                                    <RadzenStack Gap="5px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 5px; border-bottom: var(--rz-grid-cell-border);">
+                                        <RadzenStack Style="width: 100%;">
+                                            <RadzenLabel Text="@(displayName)" Style="color: black; font-size: 12px; font-weight: 600; height: contain;"></RadzenLabel>
+                                        </RadzenStack>
+                                        <RadzenStack Gap="5px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
+                                            <RadzenStack Style="width: 85%;">
+                                                <RadzenDropDown OpenOnFocus=true @ref=refDropdown AllowClear="true" Disabled="@((property.DBName != KetQuaGC.KQGCDBName.MaQuanLyLot && string.IsNullOrEmpty(newKetQuaGC.MaQuanLyLot.Value?.ToString()) || property.DBName == KetQuaGC.KQGCDBName.SPID) || property.IsDisable)"
+                                                                Style="width: 100%; height: contain; font-size: 12px; font-weight: 600; background-color: white"
+                                                                Placeholder="@($" * quét {displayName}")"
+                                                                AllowVirtualization="false"
+                                                                AllowFiltering="true"
+                                                                FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                                                FilterOperator="StringFilterOperator.Contains"
+                                                                AllowSelectAll="true"
+                                                                TValue="KeyValuePair<string, string>"
+                                                                Data="@(ComboboxDSachKeys(property.DBName))"
+                                                                SelectedItem="@(ITemSelecteds[property.DBName])"
+                                                                Value="@(ITemSelecteds[property.DBName])" SearchTextChanged="@((args) => OnComboboxInputTextChange(property.DBName, args))"
+                                                                ValueChanged="@((KeyValuePair<string, string> args) => OnComboboxDSachKeysSelectedChanged(new List<KeyValuePair<string, string>>{args}, property))">
+                                                    <!--Custom style off dropdownbox items-->
+                                                    <Template>
+                                                        <span style="font-size: 12px; font-weight: 500; font-style: normal; color: black">@($"{context.Value}")</span>
+                                                    </Template>
+
+                                                    <!--Custom style off dropdownbox selected value items-->
+                                                    <ValueTemplate>
+                                                        <span style="font-size: 12px; font-weight: 500; font-style: normal; color: black">@($"{context.Value}")</span>
+                                                    </ValueTemplate>
+                                                </RadzenDropDown>
+                                            </RadzenStack>
+                                            <RadzenStack Style="width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                                                <RadzenAlert Visible="@(!property.IsCheckValueOK)" Style="width: contain; height: 100%; font-size: 12px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                                                <RadzenAlert Visible="@(property.IsCheckValueOK)" Style="width: contain; height: 100%; font-size: 12px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Success" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                                            </RadzenStack>
+                                        </RadzenStack>
+                                    </RadzenStack>
+                                }
+                                else if (property.DBName == KetQuaGC.KQGCDBName.SPID || property.DBName == KetQuaGC.KQGCDBName.MMID || property.DBName == KetQuaGC.KQGCDBName.NCID || property.DBName == KetQuaGC.KQGCDBName.MaQuanLyLot)
                                 {
                                     <RadzenStack Gap="5px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 5px; border-bottom: var(--rz-grid-cell-border);">
                                         <RadzenStack Style="width: 100%;">
@@ -69,18 +108,18 @@
                                         <RadzenStack Gap="5px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
                                             <RadzenStack Style="width: 85%;">
                                                 <RadzenDropDown AllowClear="true" Disabled="@((property.DBName != KetQuaGC.KQGCDBName.MaQuanLyLot && string.IsNullOrEmpty(newKetQuaGC.MaQuanLyLot.Value?.ToString()) || property.DBName == KetQuaGC.KQGCDBName.SPID) || property.IsDisable)"
-                                                Style="width: 100%; height: contain; font-size: 12px; font-weight: 600; background-color: white"
-                                                Placeholder="@($" * chọn {displayName}")"
-                                                AllowVirtualization="false"
-                                                AllowFiltering="true"
-                                                FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
-                                                FilterOperator="StringFilterOperator.Contains"
-                                                AllowSelectAll="true"
-                                                TValue="KeyValuePair<string, string>"
-                                                Data="@(ComboboxDSachKeys(property.DBName))"
-                                                SelectedItem="@(ITemSelecteds[property.DBName])"
-                                                Value="@(ITemSelecteds[property.DBName])" SearchTextChanged="@((args) => OnComboboxInputTextChange(property.DBName, args))"
-                                                ValueChanged="@((KeyValuePair<string, string> args) => OnComboboxDSachKeysSelectedChanged(new List<KeyValuePair<string, string>>{args}, property))">
+                                                                Style="width: 100%; height: contain; font-size: 12px; font-weight: 600; background-color: white"
+                                                                Placeholder="@($" * chọn {displayName}")"
+                                                                AllowVirtualization="false"
+                                                                AllowFiltering="true"
+                                                                FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                                                FilterOperator="StringFilterOperator.Contains"
+                                                                AllowSelectAll="true"
+                                                                TValue="KeyValuePair<string, string>"
+                                                                Data="@(ComboboxDSachKeys(property.DBName))"
+                                                                SelectedItem="@(ITemSelecteds[property.DBName])"
+                                                                Value="@(ITemSelecteds[property.DBName])" SearchTextChanged="@((args) => OnComboboxInputTextChange(property.DBName, args))"
+                                                                ValueChanged="@((KeyValuePair<string, string> args) => OnComboboxDSachKeysSelectedChanged(new List<KeyValuePair<string, string>>{args}, property))">
                                                     <!--Custom style off dropdownbox items-->
                                                     <Template>
                                                         <span style="font-size: 12px; font-weight: 500; font-style: normal; color: black">@($"{context.Value}")</span>
@@ -108,18 +147,18 @@
                                         <RadzenStack Gap="5px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
                                             <RadzenStack Style="width: 85%;">
                                                 <RadzenDropDown AllowClear="true" Disabled="@property.IsDisable"
-                                                Style="width: 100%; height: contain; font-size: 12px; font-weight: 600; color: black; background-color: white"
-                                                Placeholder="@($" * chọn {displayName}")"
-                                                AllowVirtualization="true"
-                                                AllowFiltering="true"
-                                                FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
-                                                FilterOperator="StringFilterOperator.Contains"
-                                                AllowSelectAll="true" Multiple="true"
-                                                TValue="IEnumerable<KeyValuePair<string, string>>"
-                                                Data="@(ComboboxDSachKeys(property.DBName))"
-                                                SelectedItem="@((property.DBName == KetQuaGC.KQGCDBName.NVIDs)? NhanviensSelected : NGTypesSelected)"
-                                                Value="@((property.DBName == KetQuaGC.KQGCDBName.NVIDs)? NhanviensSelected : NGTypesSelected)"
-                                                ValueChanged="@((IEnumerable<KeyValuePair<string, string>> args) => OnComboboxDSachKeysSelectedChanged(args, property))">
+                                                                Style="width: 100%; height: contain; font-size: 12px; font-weight: 600; color: black; background-color: white"
+                                                                Placeholder="@($" * chọn {displayName}")"
+                                                                AllowVirtualization="true"
+                                                                AllowFiltering="true"
+                                                                FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                                                FilterOperator="StringFilterOperator.Contains"
+                                                                AllowSelectAll="true" Multiple="true"
+                                                                TValue="IEnumerable<KeyValuePair<string, string>>"
+                                                                Data="@(ComboboxDSachKeys(property.DBName))"
+                                                                SelectedItem="@((property.DBName == KetQuaGC.KQGCDBName.NVIDs)? NhanviensSelected : NGTypesSelected)"
+                                                                Value="@((property.DBName == KetQuaGC.KQGCDBName.NVIDs)? NhanviensSelected : NGTypesSelected)"
+                                                                ValueChanged="@((IEnumerable<KeyValuePair<string, string>> args) => OnComboboxDSachKeysSelectedChanged(args, property))">
 
                                                     <!--Custom style off dropdownbox items-->
                                                     <Template Context="item">
@@ -153,10 +192,10 @@
                                         <RadzenStack Gap="5px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
                                             <RadzenStack Style="width: 85%;">
                                                 <RadzenDropDown AllowClear="true" Disabled="@(string.IsNullOrEmpty(newKetQuaGC.NCID.Value?.ToString()) || property.IsDisable)"
-                                                Style="width: 100%; height: contain; font-size: 12px; font-weight: 600; color: black; background-color: white"
-                                                Placeholder="@($" * chọn {displayName}")"
-                                                TValue="string" Data="@(Common.ListCaLamViecs)" Value="@(newKetQuaGC.CaLamViec.Value?.ToString())"
-                                                ValueChanged="@(async (args) =>{newKetQuaGC.CaLamViec.Value = args;await DefaultThongTinKetQuaGC_ValueIsOK(property);})">
+                                                                Style="width: 100%; height: contain; font-size: 12px; font-weight: 600; color: black; background-color: white"
+                                                                Placeholder="@($" * chọn {displayName}")"
+                                                                TValue="string" Data="@(Common.ListCaLamViecs)" Value="@(newKetQuaGC.CaLamViec.Value?.ToString())"
+                                                                ValueChanged="@(async (args) =>{newKetQuaGC.CaLamViec.Value = args;await DefaultThongTinKetQuaGC_ValueIsOK(property);})">
                                                     <!--Custom style off dropdownbox items-->
                                                     <Template>
                                                         <span style="font-size: 12px; font-weight: 500; font-style: normal; color: black">@($"{context}")</span>
@@ -188,7 +227,7 @@
                                                 {
                                                     <RadzenStack Style="width: 85%;">
                                                         <RadzenTextBox Disabled="@property.IsDisable" class="custom-placeholder" Placeholder="@($" * nhập {displayName}")" Value="@property.Value?.ToString()" Style="font-size: 12px; height: contain; border-width: 1px; color: black; font-weight: 500"
-                                                        @oninput="@(async (args) => { property.Value = args.Value; await DefaultThongTinKetQuaGC_ValueIsOK(property);})">
+                                                                       @oninput="@(async (args) => { property.Value = args.Value; await DefaultThongTinKetQuaGC_ValueIsOK(property);})">
                                                         </RadzenTextBox>
                                                     </RadzenStack>
                                                 }
@@ -196,9 +235,9 @@
                                                 {
                                                     <RadzenStack Style="width: 85%;">
                                                         <RadzenNumeric Disabled="@property.IsDisable" class="custom-numeric" TValue="double" Placeholder="0.0" Step="0.5"
-                                                        Min="0" Max="999999"
-                                                        Value="@((double.TryParse(property.Value?.ToString(), out double num)? num : 0))"
-                                                        ValueChanged="@(async (args) =>
+                                                                       Min="0" Max="999999"
+                                                                       Value="@((double.TryParse(property.Value?.ToString(), out double num)? num : 0))"
+                                                                       ValueChanged="@(async (args) =>
                                                                                {
                                                                                     property.Value = args;
 
@@ -223,9 +262,9 @@
 
                                                     <RadzenStack Style="width: 85%;">
                                                         <RadzenNumeric Disabled="@(property.DBName == KetQuaGC.KQGCDBName.SLperLOT || property.IsDisable)" class="custom-numeric" TValue="int" Placeholder="0" Step="1"
-                                                        Min="0" Max="max"
-                                                        Value="@((int.TryParse(property.Value?.ToString(), out int num)? num : 0))"
-                                                        ValueChanged="@(async (args) =>
+                                                                       Min="0" Max="max"
+                                                                       Value="@((int.TryParse(property.Value?.ToString(), out int num)? num : 0))"
+                                                                       ValueChanged="@(async (args) =>
                                                                                {
                                                                                     property.Value = args;
 
@@ -265,9 +304,9 @@
                                                     if (ishaveValueOfday) selectday = selectday.Date.Add(DateTime.Now.TimeOfDay);
                                                     <RadzenStack Style="width: 85%;">
                                                         <RadzenDatePicker class="custom-datepicker custom-datepicker" Placeholder="@($"* nhập {displayName}")"
-                                                        ShowTime="false" HourFormat="12" DateFormat="@Common.FormatNoTime_ddMMyyyy" ParseInput="@Common.ParseDate_MMddyyyy" AllowInput="true"
-                                                        TValue="DateTime" Value="selectday" AllowClear="true"
-                                                        Change="@(async (args) =>
+                                                                          ShowTime="false" HourFormat="12" DateFormat="@Common.FormatNoTime_ddMMyyyy" ParseInput="@Common.ParseDate_MMddyyyy" AllowInput="true"
+                                                                          TValue="DateTime" Value="selectday" AllowClear="true"
+                                                                          Change="@(async (args) =>
                                                                                     {
                                                                                         if (args != null)
                                                                                         {
@@ -280,7 +319,7 @@
                                                                                         }
                                                                                         await DefaultThongTinKetQuaGC_ValueIsOK(property);
                                                                                     })"
-                                                        Style="height: contain;">
+                                                                          Style="height: contain;">
                                                         </RadzenDatePicker>
                                                     </RadzenStack>
                                                 }
@@ -336,6 +375,7 @@
 
     private RadzenButton refButton = new();
     private RadzenTextBox refTextbox = new();
+    private RadzenDropDown<KeyValuePair<string, string>> refDropdown = new();
 
 
     protected override async Task OnInitializedAsync()
@@ -347,6 +387,16 @@
         await UpdateUINewKQGCbyMQLLOTChanged(new List<string>());
 
         await base.OnInitializedAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await refDropdown.FocusAsync();
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
     }
 
     #region Combobox
