@@ -672,7 +672,8 @@
             Dictionary<string, object?> pars = new Dictionary<string, object?>() { { Common.KHSXID, SelectKHSX.KHSXID.Value } };
             pars.Add(Common.IsPhieuBoSungNVL, 1);
 
-            ExTraPhieuXKhos = SQLServerServices.GetListPhieuXuatKhos(pars).phieuxuatkhos;
+            // Chon PTraKho chua return
+            ExTraPhieuXKhos = SQLServerServices.GetListPhieuXuatKhos(pars).phieuxuatkhos.Where(pxk => pxk.isReturnedNVL == false).ToList();
 
             // if (ExTraPhieuXKhos.Any())
             // {

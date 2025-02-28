@@ -444,16 +444,25 @@
                             }
 
                             // Update IsDoneKHSX if value is null
-                            if (emptykhsx.IsDoneKHSX.Value == null || object.Equals(emptykhsx.IsDoneKHSX.Value, 0))
+                            // if (emptykhsx.IsDoneKHSX.Value == null || object.Equals(emptykhsx.IsDoneKHSX.Value, 0))
+                            // {
+                            //     bool isDoneKHSX = kHSX.DSachCongDoans.All(cd => cd.IsDoneCongDoan);
+
+                            //     (int updateresult, string error) = SQLServerServices.UpdateKHSXProperty(khsxid, Common.IsDoneKHSX, (isDoneKHSX) ? 1 : 0);
+
+                            //     if (updateresult == -1)
+                            //     {
+
+                            //     }
+                            // }
+
+                            bool isDoneKHSX = kHSX.DSachCongDoans.All(cd => cd.IsDoneCongDoan);
+
+                            (int updateresult, string error) = SQLServerServices.UpdateKHSXProperty(khsxid, Common.IsDoneKHSX, (isDoneKHSX) ? 1 : 0);
+
+                            if (updateresult == -1)
                             {
-                                bool isDoneKHSX = kHSX.DSachCongDoans.All(cd => cd.IsDoneCongDoan);
 
-                                (int updateresult, string error) = SQLServerServices.UpdateKHSXProperty(khsxid, Common.IsDoneKHSX, (isDoneKHSX) ? 1 : 0);
-
-                                if (updateresult == -1)
-                                {
-
-                                }
                             }
 
                             dskhsxs.Add(kHSX);
