@@ -17,7 +17,8 @@ using System.Net.NetworkInformation;
 using System.Diagnostics;
 
 var localIP = PortFinder.GetLocalIPAddress();
-var port = PortFinder.FindAvailablePort_CheckUsed();
+IPAddress localIPAddress = IPAddress.Parse(localIP);
+var port = PortFinder.FindAvailablePort_CheckUsed(localIPAddress);
 var url = $"http://{localIP}:{port}";
 // enable khi deploy - disable khi use local 
 
@@ -128,23 +129,26 @@ public static class PortFinder
     }
 
 
-    public static int FindAvailablePort_CheckUsed(int startingPort = 5000)
+    public static int FindAvailablePort_CheckUsed(IPAddress? targetIP = null, int startingPort = 5000)
     {
         if (startingPort < 1 || startingPort > 65535)
             throw new ArgumentOutOfRangeException(nameof(startingPort), "Port must be between 1 and 65535");
 
         for (int port = startingPort; port <= 65535; port++)
         {
-            if (IsPortAvailable(port))
+            if (IsPortAvailable(targetIP, port))
                 return port;
         }
 
         throw new InvalidOperationException("No available ports found in range.");
     }
 
-    private static bool IsPortAvailable(int port)
+    private static bool IsPortAvailable(IPAddress? targetIP, int port)
     {
-        var tcpListener = new TcpListener(IPAddress.Any, port);
+        // If targetIP is null, use IPAddress.Any
+        var ipAddress = targetIP ?? IPAddress.Any;
+
+        var tcpListener = new TcpListener(ipAddress, port);
 
         try
         {
