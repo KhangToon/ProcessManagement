@@ -1285,6 +1285,69 @@ namespace ProcessManagement.Services.SQLServer
 
             return (result, errorMess);
         }
+        // Insert
+        public (int, string) InsertNguyenCong(NguyenCong newNC)
+        {
+            int result = -1;
+            string errorMess = string.Empty;
+
+            if (newNC == null) return (result, "Error: NguyenCong is null");
+
+            List<Propertyy> properties = newNC.GetPropertiesValues()
+                .Where(po => po.AlowDatabase == true && po.Value != null)
+                .ToList();
+
+            if (properties.Count == 0)
+            {
+                return (result, "Error: No valid properties to insert.");
+            }
+
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+            using var transaction = connection.BeginTransaction();
+
+            try
+            {
+                var command = connection.CreateCommand();
+                command.Transaction = transaction;
+
+                string columns = string.Join(", ", properties.Select(p => $"[{p.DBName}]"));
+                string parameters = string.Join(", ", properties.Select(p => $"@{Regex.Replace(p.DBName ?? string.Empty, @"[^\w]+", "")}"));
+                command.CommandText = $@"INSERT INTO [{NguyenCong.DBName.Table_NguyenCong}] ({columns}) OUTPUT INSERTED.{NguyenCong.DBName.NCID} VALUES ({parameters})";
+
+                foreach (var prop in properties)
+                {
+                    string parameterName = $"@{Regex.Replace(prop.DBName ?? string.Empty, @"[^\w]+", "")}";
+                    object? parameterValue = prop.Value ?? DBNull.Value;
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                object? rs = command.ExecuteScalar();
+                if (rs != null && int.TryParse(rs.ToString(), out result) && result > 0)
+                {
+                    transaction.Commit();
+                }
+                else
+                {
+                    result = -1;
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMess = $"Error: {ex.Message}";
+                try
+                {
+                    transaction.Rollback();
+                }
+                catch (Exception rollbackEx)
+                {
+                    errorMess += $" | Rollback Error: {rollbackEx.Message}";
+                }
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
 
         // Get nguyen cong
         public NguyenCong GetNguyenCong(object ncid)
@@ -1375,6 +1438,169 @@ namespace ProcessManagement.Services.SQLServer
 
             return lisNCs;
         }
+
+        // Get
+        public (List<NguyenCong> nguyencongs, string error) GetListNguyenCongs(Dictionary<string, object?> parameters, bool isgetAll = false)
+        {
+            List<NguyenCong> listNguyenCongs = new();
+
+            string errorMessage = string.Empty;
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                try
+                {
+                    connection.Open();
+
+                    var conditions = new List<string>();
+                    var command = connection.CreateCommand();
+                    command.CommandText = $"SELECT * FROM [{NguyenCong.DBName.Table_NguyenCong}]";
+
+                    if (!isgetAll)
+                    {
+                        // Process each parameter in the dictionary
+                        foreach (var param in parameters)
+                        {
+                            conditions.Add($"[{param.Key}] = @{param.Key}");
+
+                            command.Parameters.AddWithValue($"@{param.Key}", param.Value);
+                        }
+
+                        if (conditions.Any())
+                        {
+                            command.CommandText += " WHERE " + string.Join(" AND ", conditions);
+                        }
+                    }
+
+                    using var reader = command.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        NguyenCong nguyencong = new();
+
+                        List<Propertyy> rowItems = nguyencong.GetPropertiesValues();
+
+                        foreach (var item in rowItems)
+                        {
+                            string? columnName = item.DBName;
+
+                            if (!string.IsNullOrEmpty(columnName) && reader.GetOrdinal(columnName) != -1)
+                            {
+                                object columnValue = reader[columnName];
+
+                                item.Value = columnValue == DBNull.Value ? null : columnValue;
+                            }
+                        }
+
+                        foreach (var ncid in Common.GetListNCIDs(nguyencong.NGIDs.Value))
+                        {
+                            var ngtype = GetDanhSachNGType(ncid).Item1.FirstOrDefault();
+
+                            if (ngtype != null && ngtype.NGID.Value != null)
+                            {
+                                nguyencong.DSNGTypes.Add(ngtype);
+                            }
+                        }
+
+                        listNguyenCongs.Add(nguyencong);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    errorMessage = $"Error: {ex.Message}";
+                    listNguyenCongs.Clear(); // Clear the list in case of error
+                }
+            }
+            return (listNguyenCongs, errorMessage);
+        }
+
+        // Delete
+        public (bool, string) DeleteNguyenCong(object? ncid)
+        {
+            // Check for valid ID
+            if (ncid == null)
+            {
+                return (false, "Error");
+            }
+
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+
+            string query = $"DELETE FROM [{NguyenCong.DBName.Table_NguyenCong}] WHERE [{NguyenCong.DBName.NCID}] = @NCID";
+
+            using var command = new SqlCommand(query, connection);
+            command.Parameters.AddWithValue("@NCID", ncid);
+
+            try
+            {
+                int rowsAffected = command.ExecuteNonQuery();
+                return (rowsAffected > 0, string.Empty); // Return true if a row was deleted
+            }
+            catch (Exception ex)
+            {
+                return (false, $"Error: {ex.Message}"); // Return false and the error message
+            }
+        }
+
+        // Update
+        public (int, string) UpdateNguyenCongMainDetails(NguyenCong ncid)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            if (ncid == null) return (result, errorMess);
+
+            List<Propertyy> Items = ncid.GetPropertiesValues().Where(pro => pro.AlowDatabase == true).ToList();
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                string setClause = string.Join(",", Items.Select(key => $"[{key.DBName}] = @{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $"UPDATE [{NguyenCong.DBName.Table_NguyenCong}] SET {setClause} WHERE [{NguyenCong.DBName.NCID}] = '{ncid.NCID.Value}'";
+
+                foreach (var item in Items)
+                {
+                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
+
+                    object? parameterValue = item.Value;
+
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                result = command.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
+        // Check gia tri truong thong tin
+        public bool DefaultThongTinNguyenCong_ValueIsExisting(string? proValue, string proName)
+        {
+            using var connection = new SqlConnection(connectionString);
+
+            string query = $"SELECT COUNT(*) FROM [{NguyenCong.DBName.Table_NguyenCong}] WHERE [{proName}] = N'{proValue?.Trim()}'";
+
+            using (var command = new SqlCommand(query, connection))
+            {
+                connection.Open();
+
+                int count = (int)command.ExecuteScalar();
+
+                return count > 0;
+            }
+        }
+
         #endregion Table_NguyenCong
 
         // ------------------------------------------------------------------------------------- //
@@ -9484,6 +9710,94 @@ namespace ProcessManagement.Services.SQLServer
                 }
             }
             return result;
+        }
+
+        // Delete
+        public (bool, string) DeleteNGType(object? ngid)
+        {
+            // Check for valid ID
+            if (ngid == null)
+            {
+                return (false, "Error");
+            }
+
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+
+            string query = $"DELETE FROM [{NGType.NGTypeDBName.Table_NGType}] WHERE [{NGType.NGTypeDBName.NGID}] = @NGID";
+
+            using var command = new SqlCommand(query, connection);
+            command.Parameters.AddWithValue("@NGID", ngid);
+
+            try
+            {
+                int rowsAffected = command.ExecuteNonQuery();
+                return (rowsAffected > 0, string.Empty); // Return true if a row was deleted
+            }
+            catch (Exception ex)
+            {
+                return (false, $"Error: {ex.Message}"); // Return false and the error message
+            }
+        }
+
+        // Update
+        public (int, string) UpdateNGType(NGType ngid)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            if (ngid == null) return (result, errorMess);
+
+            List<Propertyy> Items = ngid.GetPropertiesValues().Where(pro => pro.AlowDatabase == true).ToList();
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                string setClause = string.Join(",", Items.Select(key => $"[{key.DBName}] = @{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $"UPDATE [{NGType.NGTypeDBName.Table_NGType}] SET {setClause} WHERE [{NGType.NGTypeDBName.NGID}] = '{ngid.NGID.Value}'";
+
+                foreach (var item in Items)
+                {
+                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
+
+                    object? parameterValue = item.Value;
+
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                result = command.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
+        // Check Is exsting
+        public bool DefaultThongTinNGTypeValueIsExisting(string? proValue, string proName)
+        {
+            using (var connection = new SqlConnection(connectionString))
+            {
+                string query = $"SELECT COUNT(*) FROM [{NGType.NGTypeDBName.Table_NGType}] WHERE [{proName}] = N'{proValue?.Trim()}'";
+
+                using (var command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+
+                    int count = (int)command.ExecuteScalar();
+
+                    return count > 0;
+                }
+            }
         }
         #endregion
 

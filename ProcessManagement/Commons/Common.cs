@@ -136,6 +136,7 @@ namespace ProcessManagement.Commons
         public const string NCID = "NCID";
         public const string NguyenCong = "Nguyên công";
         public const string Ghichu = "Ghi chú";
+        public const string NGIDs = "NGIDs";
 
         // QUAN LY KHO NVL TABLES //
         // Table KHO_DanhMucNguyenVatLieu //
@@ -395,6 +396,8 @@ namespace ProcessManagement.Commons
 
         // KQGC management static variable
         public static object? SelectedKQGCid;
+
+        public static object? SelectedNguyenCongid;
 
         public static class Tentruyxuat
         {

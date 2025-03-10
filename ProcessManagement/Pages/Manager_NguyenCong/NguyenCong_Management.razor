@@ -1,0 +1,755 @@
+﻿@page "/nguyencong_management"
+@attribute [Authorize(Roles = "Admin, User")]
+@* this limited access into page *@
+
+@using ProcessManagement.Commons
+@using ProcessManagement.Models
+@using ProcessManagement.Models.KHSXs
+@using ProcessManagement.Pages.Manager_NguyenCong.Dialogs
+@using ProcessManagement.Services.QRCodes
+@using ProcessManagement.Services.SQLServer
+@using Radzen.Blazor
+@using Radzen
+
+@inject NotificationService NotificationService
+@inject TooltipService TooltipService
+@inject ContextMenuService ContextMenuService
+@inject DialogService DialogService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject SQLServerServices SQLServerServices
+@inject QRCodeServices QRCodeServices
+@inject IJSRuntime JSRuntime
+
+<style>
+    .custom-placeholder::placeholder {
+        color: #888888;
+        font-size: 14px;
+        font-style: italic;
+    }
+
+    .custom-datepicker input[type="text"]::placeholder {
+        color: #888888;
+        font-size: 14px;
+        font-style: italic;
+    }
+
+    .nfcnguyencong_IsSelected {
+        border-style: solid;
+        border-width: 2px;
+        border-color: green;
+    }
+
+    .rz-grid-table {
+        width: unset;
+    }
+
+    .vitriofTP_IsSelected {
+        border-style: solid;
+        border-width: 2px;
+        border-color: green;
+        padding: 2px;
+    }
+
+    .vitriofTP_UnSelected {
+        padding: 2px;
+        cursor: pointer;
+    }
+
+</style>
+
+<RadzenRow Gap="0" Style="height: 100%; width: 100%; overflow-y: auto; background-color: white; border-radius: 10px;">
+    <RadzenColumn Size="12" SizeMD="12" Style="height: 100%; width: 100%; padding-right: 0">
+        <RadzenCard Variant="Variant.Flat" Style="height: 100%; width: 100%; padding-top: 15px">
+            <RadzenStack Gap="5" Style="height: 100%; width: 100%; padding-bottom: 10px; overflow-y: scroll" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                <!--Thanh tim kiem-->
+                <RadzenStack Style="height: contain; width: 100%; padding-bottom: 5px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                    <RadzenStack Style="height: 100%; width: 20%; border-radius: 10px; background-color: var(--rz-success-lighter); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                        <RadzenText Text="QUẢN LÝ CÔNG ĐOẠN" Style="color: green; font-weight: 600; font-size: 18px"></RadzenText>
+                    </RadzenStack>
+                    <RadzenStack Gap="15px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: 100%; width: 60%;">
+                        <RadzenTextBox @oninput="@((args) => Filter(args?.Value))" Placeholder="Tìm theo mã công đoạn" Style="border-radius: 20px; padding-left: 20px; border-width: 2px; border-color: var(--rz-primary-light); width: 50% "></RadzenTextBox>
+                        <RadzenButton Icon="search" ButtonStyle="ButtonStyle.Primary" Style="border-radius: 20px;" />
+                        <RadzenButton Click="@(async() => { await LoadAllDanhsachNguyenCongBase(); await FilterDSachNguyenCongProcessing(); ReSelectCurrentNguyenCong(Common.SelectedNguyenCongid);})" IsBusy="@isLoadingDSNV" BusyText=" Loading..." Style="border-radius: 20px;" Icon="autorenew" ButtonStyle="ButtonStyle.Primary" />
+                    </RadzenStack>
+                </RadzenStack>
+
+                <!--Danh sach san pham-->
+                <RadzenRow Gap="10px" Style="height: 92%; width: 100%; border-top: var(--rz-grid-cell-border); padding: 0;">
+                    <!--Column bang danh sach san pham-->
+                    <RadzenColumn Size="12" SizeMD="7" Style="height: 100%; width: 100%; padding-top: 10px">
+                        <RadzenCard Variant="Variant.Filled" Style="height: 100%; width: 100%; padding: 10px; padding-top: 0">
+                            <RadzenStack Gap="0px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start" Style="height: 100%; width: 100%;">
+                                <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding: 5px; padding-left: 10px; border-bottom: var(--rz-grid-cell-border) " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                    <RadzenStack Gap="10px" Style="height: 100%; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                        <RadzenText Text="Danh sách công đoạn" Style="color: darkred; font-weight: 600; font-size: 17px; height: contain; width: contain; font-style: italic;"></RadzenText>
+                                        <RadzenText Text="@($"( {DSachNguyenCongs.Count} công đoạn )")" Style="color: black; font-weight: 600; font-size: 16px; height: contain; width: contain; font-style: italic;"></RadzenText>
+                                    </RadzenStack>
+                                    <!--Button enable advance filter-->
+                                    <RadzenStack Style="height: 100%; width: contain; padding-left: 10px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                        <RadzenButton Icon="@(filterActive ? "filter_alt_off" : "filter_alt")" Text="Bộ lọc nâng cao" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="@(filterActive ? Shade.Darker : Shade.Lighter)"
+                                                      Style="height: contain; width: contain; font-size: 14px;"
+                                                      Click="@( async () =>
+                                                                {
+                                                                    if (filterActive)
+                                                                    {
+                                                                        await LoadAllDanhsachNguyenCongBase(); ReSelectCurrentNguyenCong(Common.SelectedNguyenCongid);
+                                                                    }
+                                                                    filterActive = !filterActive;
+                                                                })" />
+                                        <RadzenButton Click="@(async () => {keyFilterExtraColumns = new(); keyFilterMainColumns = new(); await LoadAllDanhsachNguyenCongBase(); ReSelectCurrentNguyenCong(Common.SelectedNguyenCongid);})"
+                                                      Icon="reset_settings" Text="Reset bộ lọc" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
+                                                      Style="height: contain; width: contain; font-size: 14px;" />
+                                    </RadzenStack>
+                                    <!--Button them san pham moi-->
+                                    <RadzenStack Style="height: 100%; width: contain; padding-left: 10px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                        <RadzenButton Click="OnThemMoiNguyenCong" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Thêm công đoạn mới"))" Icon="add" Text="Thêm công đoạn mới" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
+                                                      Style="height: contain; width: contain; font-size: 14px;" />
+                                    </RadzenStack>
+                                </RadzenStack>
+
+                                <!--Datagrid danh sach san pham-->
+                                <RadzenStack Visible="@(DSachNguyenCongs?.Count > 0)" Style="height: 95%; width: 100%; padding-top: 10px; overflow: scroll" Orientation="Orientation.Vertical" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start">
+                                    <RadzenDataGrid class="rz-grid-table" Data="@(DSachNguyenCongs)" TItem="NguyenCong" IsLoading="@isLoadingDSNV"
+                                                    EmptyText="Danh sách công đoạn trống." Style="overflow: scroll; min-width: 100%; height: 100%"
+                                                    ShowColumnTitleAsTooltip="true" ShowCellDataAsTooltip="true" 
+                                                    AllowFiltering="@filterActive" FilterMode="FilterMode.Simple"
+                                                    AllowPaging="true" AllowSorting="false" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                                    ShowPagingSummary="true" PagingSummaryFormat="@pagingSummaryFormat" PagerPosition="PagerPosition.Bottom"
+                                                    GridLines="DataGridGridLines.Both" PageSize="20" Density="Density.Default" ColumnWidth="410px"
+                                                    HeaderCellRender="@(args => args.Attributes.Add("style", $"background-color: rgba(58, 71, 77); padding-left: 10px; padding-right: 10px"))"
+                                                    CellRender="@OnCellRender" Value="@DatagridSeleted" ValueChanged="@((args) => OnDatagridSelectChanged(args))">
+                                        <Columns>
+                                            @if (DSachNguyenCongs?.Count > 0)
+                                            {
+                                                List<Propertyy> columns = NguyenCong.GetClassProperties() ?? new();
+
+                                                <!--STT-->
+                                                <RadzenDataGridColumn Width="30px" Frozen="true" FrozenPosition="FrozenColumnPosition.Left" Filterable="false"
+                                                                      TItem="NguyenCong" Title="#"
+                                                                      Property="STT" TextAlign="TextAlign.Center">
+                                                    <HeaderTemplate>
+                                                        <span style="font-weight: 600; font-size: 15px; color: white">STT</span>
+                                                    </HeaderTemplate>
+                                                    <Template Context="nv">
+                                                        <span style="font-weight: bold;">@(DSachNguyenCongs.IndexOf(nv) + 1)</span>
+                                                    </Template>
+                                                </RadzenDataGridColumn>
+
+                                                foreach (var column in columns.Where(cl => cl.DispDatagrid == true).ToList())
+                                                {
+                                                    string colName = column.DBName ?? string.Empty;
+                                                    string displayName = column.DisplayName ?? string.Empty;
+
+                                                    <RadzenDataGridColumn TItem="NguyenCong" Title="@displayName" FilterMode="FilterMode.CheckBoxList"
+                                                                          Property="@colName" TextAlign="TextAlign.Center">
+                                                        <HeaderTemplate>
+                                                            <span style="font-weight: 600; font-size: 15px; color: white">@displayName</span>
+                                                        </HeaderTemplate>
+                                                        <FilterTemplate>
+                                                            <RadzenDropDown AllowClear="true"
+                                                                            Style="width: 100%; height: contain; font-size: 14px; font-weight: 600; background-color: white"
+                                                                            AllowVirtualization="true"
+                                                                            AllowFiltering="true"
+                                                                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                                                            FilterOperator="StringFilterOperator.Contains"
+                                                                            AllowSelectAll="true"
+                                                                            TValue="IEnumerable<string>"
+                                                                            Data="@(GetMainColumnKeysSearch(colName))"
+                                                                            Multiple="true"
+                                                                            SelectedItem="@(keyFilterMainColumns.ContainsKey(colName)? keyFilterMainColumns[colName] : null)"
+                                                                            Value="@(keyFilterMainColumns.ContainsKey(colName)? keyFilterMainColumns[colName] : null)"
+                                                                            ValueChanged="@((IEnumerable<string> args) => OnComboboxMainColumnSelectedChanged(args, colName))">
+                                                            </RadzenDropDown>
+                                                        </FilterTemplate>
+                                                        <Template Context="nv">
+                                                            <RadzenText Visible="@(colName == NguyenCong.DBName.TenNguyenCong)" Text="@($"{nv.GetPropertyValue(colName)}")" Style="font-size: 15px; height: contain; color: darkblue; font-weight: bold"></RadzenText>
+                                                            <RadzenText Visible="@(colName != NguyenCong.DBName.TenNguyenCong)" Text="@($"{nv.GetPropertyValue(colName)}")" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
+                                                        </Template>
+                                                    </RadzenDataGridColumn>
+                                                }
+
+                                                <!--ID-->
+                                                <RadzenDataGridColumn Width="30px" TItem="NguyenCong" Title="#ID" Frozen="true" Filterable="false"
+                                                                      Property="#ID" TextAlign="TextAlign.Center">
+                                                    <HeaderTemplate>
+                                                        <span style="font-weight: 600; font-size: 15px; color: white">#ID</span>
+                                                    </HeaderTemplate>
+                                                    <Template Context="nv">
+                                                        <RadzenText Text="@($"#{nv.GetPropertyValue(NguyenCong.DBName.NCID)}")" Style="font-size: 15px; height: contain; color: black; font-weight: 500"></RadzenText>
+                                                    </Template>
+                                                </RadzenDataGridColumn>
+                                            }
+                                        </Columns>
+                                    </RadzenDataGrid>
+                                </RadzenStack>
+                            </RadzenStack>
+                        </RadzenCard>
+                    </RadzenColumn>
+                    <!--Column danh sach thong tin san pham-->
+                    <RadzenColumn Size="12" SizeMD="5" Style="height: 100%; width: 100%; padding-top: 10px; padding-left: 10px; border-left: var(--rz-grid-cell-border);">
+                        <RadzenTabs Style="width: 100%; font-weight: 600; height: 100%; padding-right: 0">
+                            <Tabs>
+                                <RadzenTabsItem>
+                                    <Template>
+                                        <RadzenText Text="Danh sách loại lỗi công đoạn" Style="color: var(--rz-primary-dark); font-weight: 700; font-size: 15px"></RadzenText>
+                                    </Template>
+                                    <ChildContent>
+                                        <RadzenCard Variant="Variant.Outlined" Style="width: 100%; height: 100%; padding: 5px; border-radius: 10px;">
+                                            <RadzenStack Gap="0" Style="height: 100%; width: 100%; padding: 5px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                <RadzenStack Visible="@(SelectedNguyenCong.NCID.Value != null)" Style="height: 100%; width: 100%; padding: 5px; padding-top: 5px; padding-right: 0;" Gap="5px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                    <RadzenStack Gap="20px" Style="height: contain; width: 100%; padding: 5px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                                        <RadzenStack Gap="10px" Style="height: contain; width: contain; padding-left: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                            <RadzenText Text="Danh sách loại lỗi" Style="color: black; font-weight: 600; font-size: 17px; font-style: italic"></RadzenText>
+                                                            <RadzenText Text="@($"( Số lượng: {SelectedNguyenCong.DSNGTypes.Count} loại lỗi )")" Style="color: black; font-weight: 600; font-size: 17px; font-style: italic"></RadzenText>
+                                                        </RadzenStack>
+                                                        <RadzenStack Gap="10px" Style="height: contain; width: contain; padding-left: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                            <RadzenButton Click="@(() => OnOpenDialogAdNGType(SelectedNguyenCong))" Icon="add" Text="Thêm loại lỗi" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat" Shade="Shade.Lighter"
+                                                                          Style="height: contain; width: 100%; font-weight: 600; font-size: 15px;" />
+                                                        </RadzenStack>
+                                                    </RadzenStack>
+                                                    <RadzenStack Style="width: 100%; height: contain; padding: 0" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                        <RadzenCard Variant="Variant.Flat" Style="height: contain; width: 100%; padding: 10px; border-top: var(--rz-grid-cell-border); margin-bottom: 10px;">
+                                                            <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style=" height: contain; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+
+                                                                @if (SelectedNguyenCong.DSNGTypes.Count > 0)
+                                                                {
+                                                                    foreach (var NGtype in SelectedNguyenCong.DSNGTypes)
+                                                                    {
+                                                                        <RadzenStack Style="width: 100%; height: 100%; padding: 0" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                            <RadzenCard onclick="@(() => {OnNGTypeSelected(NGtype);})" class="@(((IsNGTypeSelected(NGtype))? "vitriofTP_IsSelected rz-shadow-4" : "vitriofTP_UnSelected rz-shadow-4"))" Variant="Variant.Filled" Style="height: contain; width: 100%; padding: 10px;">
+                                                                                <RadzenStack Style="height: contain; width: 100%; border-radius: 5px; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                                                                    <RadzenStack Style="height: 30px; width: contain; border-radius: 5px; padding: 10px; margin-bottom: 5px; padding-left: 0px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                                                                        <RadzenButton Text="@($"{SelectedNguyenCong.DSNGTypes.IndexOf(NGtype) + 1}. {NGtype.NoiDungNG.Value?.ToString()}")" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Darker" Variant="Variant.Text"
+                                                                                                      Style="border-radius: 5px; --rz-icon-size: 18px; font-weight: 600; font-size: 16px; color: black; height: contain; min-height: 20px; width: contain; min-width: 80px" />
+                                                                                        <RadzenText Visible="@(NGtype.NGID.Value == null)" Text="Chưa có thùng thành phẩm" Style="font-size: 16px; font-weight: 500; height: contain; color: red"></RadzenText>
+                                                                                    </RadzenStack>
+
+                                                                                    <RadzenButton Visible="@(NGtype.NGID.Value != null && IsNGTypeSelected(NGtype))" Click="@(async () => await OnRemoveNGTypeofNguyenCong(NGtype))" Icon="delete" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Variant="Variant.Flat"
+                                                                                                  Text="Xóa loại lỗi" Style="--rz-icon-size: 18px; font-weight: 600; height: contain; min-height: 20px; width: contain;" />
+                                                                                </RadzenStack>
+                                                                            </RadzenCard>
+                                                                        </RadzenStack>
+                                                                    }
+                                                                }
+                                                                else
+                                                                {
+                                                                    <RadzenStack Style="width: 100%; height: contain; " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                        <RadzenText Text="Chưa gán loại lỗi cho công đoạn này" Style="font-size: 16px; font-weight: 500; height: contain; color: red"></RadzenText>
+                                                                    </RadzenStack>
+                                                                }
+                                                            </RadzenStack>
+                                                        </RadzenCard>
+                                                    </RadzenStack>
+                                                </RadzenStack>
+
+                                            </RadzenStack>
+                                        </RadzenCard>
+                                    </ChildContent>
+                                </RadzenTabsItem>
+                                <RadzenTabsItem>
+                                    <Template>
+                                        <RadzenText Text="Thông tin công đoạn" Style="color: var(--rz-primary-dark); font-weight: 700; font-size: 15px"></RadzenText>
+                                    </Template>
+                                    <ChildContent>
+                                        <RadzenCard Variant="Variant.Filled" Style="border-radius: 10px; height: 100%; width: 100%;">
+                                            <RadzenStack Style="height: 100%; width: 100%;" Orientation="Orientation.Vertical" Gap="5px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                <RadzenCard Variant="@((isEditNguyenCongDetail)? Variant.Flat : Variant.Outlined)" Style="height: 95%; width: 100%; padding: 0px; border-radius: 10px;">
+                                                    <RadzenStack Style="height: 100%; width: 100%; padding: 5px; padding-right: 0; overflow-y: scroll" Gap="0" Orientation="Orientation.Vertical">
+                                                        <RadzenStack Style="height: contain; width: 100%; padding: 10px; padding-right: 0;" Gap="0" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                            <RadzenCard Variant="Variant.Filled" Style="height: contain; width: contain; padding: 0px; border-radius: 10px">
+                                                                @{
+                                                                    string qrBase64string = QRCodeServices.GenerateQRCode(SelectedNguyenCong.TenNguyenCong.Value?.ToString() ?? string.Empty, 150);
+                                                                    @if (!string.IsNullOrEmpty(qrBase64string))
+                                                                    {
+                                                                        <RadzenImage Style="max-width: 130px; max-height: 130px; padding: 0px; border-radius: 10px; margin: 0" Path="@($"data:image/png;base64,{qrBase64string}")"></RadzenImage>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <RadzenIcon Icon="image_not_supported" Style="font-size: 150px; color: #ccc;"></RadzenIcon>
+                                                                    }
+                                                                }
+                                                            </RadzenCard>
+                                                            <RadzenStack Style="height: contain; width: contain; padding: 0px; padding-left: 30px" Orientation="Orientation.Vertical" Gap="10px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                <RadzenStack Style="height: contain; width: 100%; padding: 0px;" Orientation="Orientation.Horizontal" Gap="30px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                                                    <RadzenText Text="@($"{SelectedNguyenCong.TenNguyenCong.Value?.ToString()}")" Style="color: black; font-size: 18px; font-weight: bold; height: contain; width: contain"></RadzenText>
+                                                                </RadzenStack>
+                                                            </RadzenStack>
+                                                        </RadzenStack>
+                                                        <RadzenStack Gap="20px" Style="height: contain; width: 100%; background-color: var(--rz-primary-darker); padding: 5px; padding-left: 10px; margin-bottom: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                                            <RadzenText Text="Thông tin chi tiết công đoạn" Style="color: white; font-weight: 500; font-size: 16px"></RadzenText>
+                                                        </RadzenStack>
+                                                        <!--Display main details--> <!--Edit mode-->
+                                                        @if (isEditNguyenCongDetail)
+                                                        {
+                                                            var nvthongtins = SelectedNguyenCong?.GetPropertiesValues().Where(nv => nv.AlowDisplay == true).ToList() ?? new();
+
+                                                            foreach (var thongtinnv in nvthongtins)
+                                                            {
+                                                                <RadzenStack Gap="0" Style="height: contain; width: 100%; padding-bottom: 5px; padding-top: 5px; padding-left: 20px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                                    <RadzenStack Style="width: 30%;">
+                                                                        <RadzenText Text="@thongtinnv.DisplayName" Style="font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
+                                                                    </RadzenStack>
+                                                                    <RadzenStack Style="width: 55%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="@((isEditNguyenCongDetail)? JustifyContent.Start : JustifyContent.Center)">
+
+                                                                        @if (thongtinnv.Type == typeof(string))
+                                                                        {
+                                                                            <RadzenTextBox Placeholder="@($"* nhập {thongtinnv.DisplayName}")" Value="@thongtinnv.Value?.ToString()" ValueChanged="@((args) => { thongtinnv.Value = args; } )"
+                                                                                           Style="font-size: 16px; height: contain; border-width: 1px; width: 100% "></RadzenTextBox>
+                                                                        }
+                                                                        else if (thongtinnv.Type == typeof(int))
+                                                                        {
+                                                                            <RadzenNumeric Placeholder="@($"* nhập {thongtinnv.DisplayName}")" TValue="int" Value="@int.Parse(thongtinnv.Value?.ToString()?? "0")" Min="0" Max="999999" ValueChanged="@((args) => { thongtinnv.Value = args; })"
+                                                                                           Style="font-size: 16px; height: contain; border-width: 1px; width: 100%" />
+                                                                        }
+                                                                        else if (thongtinnv.Type == typeof(DateTime))
+                                                                        {
+                                                                            bool ishaveValueOfday = DateTime.TryParse(thongtinnv.Value?.ToString(), out DateTime selectday);
+                                                                            if (ishaveValueOfday) selectday = selectday.Date.Add(DateTime.Now.TimeOfDay);
+
+                                                                            <RadzenDatePicker class="custom-datepicker" Placeholder="@($"* nhập {thongtinnv.DisplayName}")"
+                                                                                              TValue="DateTime" Value="selectday" AllowClear="true"
+                                                                                              Change="@((args) =>
+                                                                                                        {
+                                                                                                            if (args != null)
+                                                                                                            {
+                                                                                                                DateTime value = args.Value.Date.Add(DateTime.Now.TimeOfDay);
+                                                                                                                thongtinnv.Value = value;
+                                                                                                            }
+                                                                                                            else
+                                                                                                            {
+                                                                                                                thongtinnv.Value = string.Empty;
+                                                                                                            }
+                                                                                                        })"
+                                                                                              ShowTime="false" HourFormat="12" DateFormat="@Common.FormatNoTime_yyyMMdd" ParseInput="@Common.ParseDate_ddMMyyyy" AllowInput="true"
+                                                                                              Style="width: 100%;  font-size: 16px"></RadzenDatePicker>
+                                                                        }
+                                                                    </RadzenStack>
+                                                                </RadzenStack>
+                                                            }
+                                                        }
+                                                    </RadzenStack>
+                                                </RadzenCard>
+                                                <RadzenStack Visible="(SelectedNguyenCong.NCID.Value != null)" Gap="10px" Style="height: 5%; width: 100%; padding-top: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                                    <RadzenStack Gap="10px" Style="height: contain; width: contain; padding: 0px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                        <RadzenButton Disabled="true" Style="width: contain; min-width: 120px; height: contain;" Click="@(() => EnableEditNVDetail())"
+                                                                      Icon="@((isEditNguyenCongDetail)? "clear" : "edit")" Text="@((isEditNguyenCongDetail)? "Hủy" : "Chỉnh sửa")" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" />
+                                                    </RadzenStack>
+                                                    <RadzenStack Gap="10px" Style="height: contain; width: contain; padding: 0px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                        <RadzenButton Visible="@(isEditNguyenCongDetail)" Style="width: contain; height: contain; background-color: darkred"
+                                                                      Icon="delete" Text="Xóa công đoạn" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Size="ButtonSize.Small" Variant="Variant.Flat"
+                                                                      Click=@(() => OnDeleteNguyenCong(SelectedNguyenCong)) />
+                                                    </RadzenStack>
+                                                </RadzenStack>
+                                            </RadzenStack>
+                                        </RadzenCard>
+
+                                    </ChildContent>
+                                </RadzenTabsItem>
+                            </Tabs>
+                        </RadzenTabs>
+                    </RadzenColumn>
+                </RadzenRow>
+            </RadzenStack>
+        </RadzenCard>
+
+    </RadzenColumn>
+</RadzenRow>
+
+@code {
+    private List<NguyenCong> DSachNguyenCongsBase = new();
+    private List<NguyenCong> DSachNguyenCongs = new();
+    private NguyenCong SelectedNguyenCong = new();
+    private NGType SelectedNGType = new();
+    private IList<NguyenCong>? DatagridSeleted;
+
+    private DateTime startSearchDay = DateTime.Today;
+    private DateTime endSearchDay = DateTime.Today;
+    private string pagingSummaryFormat = "Displaying page {0} of {1} <b>(total {2} records)</b>";
+    private bool isEditNguyenCongDetail = false;
+    private bool isSavingNVdetails = false;
+
+    private Dictionary<string, List<string>> keyFilterMainColumns = new();
+    private Dictionary<string, List<string>> keyFilterExtraColumns = new();
+    private bool filterActive = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Load ds san pham base/ hien thi
+        await LoadAllDanhsachNguyenCongBase();
+
+        // Reslect san pham
+        ReSelectCurrentNguyenCong(Common.SelectedNguyenCongid); // re-selected
+
+        // Khoi tao bien luu danh sach key search
+        await CreateCurrentSelectedKeyVariable();
+
+        await base.OnInitializedAsync();
+    }
+
+    #region Main/Extra Column Filtering
+    // Khoi tao bien luu danh sach key search
+    private async Task CreateCurrentSelectedKeyVariable()
+    {
+        await Task.Run(() =>
+        {
+            // Get main key colum
+            List<Propertyy> columns = NguyenCong.GetClassProperties() ?? new();
+            foreach (var column in columns)
+            {
+                string key = column.DBName ?? string.Empty;
+                if (key != string.Empty && !keyFilterMainColumns.ContainsKey(key))
+                {
+                    keyFilterMainColumns.Add(key, new());
+                }
+            }
+        });
+    }
+
+    // Lay danh sach key search Main column
+    private List<string> GetMainColumnKeysSearch(string targetColumn)
+    {
+        List<string> keys = DSachNguyenCongsBase
+            .Select(nv => nv.GetPropertyValue(targetColumn)?.ToString() ?? string.Empty)
+            .Where(result => !string.IsNullOrEmpty(result)).Distinct()
+            .ToList();
+
+        return keys;
+    }
+
+    // Update selected Main column key
+    private async Task OnComboboxMainColumnSelectedChanged(IEnumerable<string> values, string targetColumn)
+    {
+        if (values != null)
+        {
+            keyFilterMainColumns[targetColumn] = values.ToList();
+        }
+        else
+        {
+            keyFilterMainColumns[targetColumn] = new();
+        }
+
+        await FilterDSachNguyenCongProcessing();
+    }
+
+    // Update selected Extra column key
+    private async Task OnComboboxExtraColumnSelectedChanged(IEnumerable<string> values, string targetColumn)
+    {
+        if (values != null)
+        {
+            keyFilterExtraColumns[targetColumn] = values.ToList();
+        }
+        else
+        {
+            keyFilterExtraColumns[targetColumn] = new();
+        }
+
+        await FilterDSachNguyenCongProcessing();
+    }
+
+    // Filtering processing
+    private async Task FilterDSachNguyenCongProcessing()
+    {
+        await Task.Run(() =>
+        {
+            DSachNguyenCongs = DSachNguyenCongsBase.ToList();
+
+            // Main column filtering
+            foreach (var column in keyFilterMainColumns)
+            {
+                List<string> selectedkeys = column.Value;
+
+                if (selectedkeys != null && selectedkeys.Count > 0)
+                {
+                    DSachNguyenCongs = DSachNguyenCongs
+                            .Where(nv =>
+                            {
+                                var value = nv.GetPropertyValue(column.Key);
+                                var valueString = value?.ToString();
+                                return valueString != null && selectedkeys.Contains(valueString);
+                            }).ToList();
+                }
+            }
+
+            DSachNguyenCongs.Reverse();
+        });
+    }
+    #endregion
+
+
+    // Them moi san pham
+    private async Task OnThemMoiNguyenCong()
+    {
+        NguyenCong newNguyenCong = await DialogService.OpenAsync<DialogAddNewNguyenCong_V2>(null, null,
+        new DialogOptions() { ShowTitle = false, Width = "50%", Height = "95%", Resizable = false, Draggable = false, ShowClose = false, Style = "background-color: while; border-radius: 0px; padding: 0px" });
+
+        // Reload ds san pham
+        await LoadAllDanhsachNguyenCongBase();
+
+        if (newNguyenCong != null)
+        {
+            Common.SelectedNguyenCongid = newNguyenCong.NCID.Value;
+
+            ReSelectCurrentNguyenCong(Common.SelectedNguyenCongid);
+
+            ShowNotification("Reload success!", NotificationSeverity.Success, 2000);
+        }
+    }
+
+
+    private bool isLoadingDSNV = false;
+    // Load all danh sach nfcnguyencong base
+    private async Task LoadAllDanhsachNguyenCongBase()
+    {
+        await Task.Run(async () =>
+        {
+            if (isLoadingDSNV == false)
+            {
+                isLoadingDSNV = true;
+
+                DSachNguyenCongsBase = SQLServerServices.GetListNguyenCongs(new(), true).nguyencongs; // load dach mac dinh
+
+                DSachNguyenCongs = DSachNguyenCongsBase.ToList(); // gan cho ds hien thi
+
+                DSachNguyenCongs.Reverse();
+
+                await Task.Delay(300);
+
+                isLoadingDSNV = false;
+            }
+        });
+    }
+
+    // Re-selected current san pham
+    private void ReSelectCurrentNguyenCong(object? targetID)
+    {
+        if (DSachNguyenCongs != null)
+        {
+            if (targetID == null) // get fist row
+            {
+                var fistitem = DSachNguyenCongs.FirstOrDefault();
+
+                if (fistitem != null) { DatagridSeleted = new List<NguyenCong>() { fistitem }; }
+            }
+            else
+            {
+                var selectedID = targetID;
+                // load last selected item
+                var selecteditem = DSachNguyenCongs.FirstOrDefault(nv => nv.NCID.Value?.ToString() == selectedID.ToString());
+
+                if (selecteditem != null) { DatagridSeleted = new List<NguyenCong>() { selecteditem }; }
+                else { DatagridSeleted = new List<NguyenCong>(); }
+            }
+
+            SelectedNguyenCong = DatagridSeleted?.FirstOrDefault() ?? new();
+        }
+    }
+
+    bool isSearching = false;
+    // Searching
+    private async Task Filter(object? args)
+    {
+        await Task.Run(() =>
+        {
+            if (isSearching == false)
+            {
+                isSearching = true;
+
+                SelectedNguyenCong = new();
+
+                string keysearch = args?.ToString()?.Trim() ?? string.Empty;
+
+                // Load danh sach nfcnguyencong
+
+                if (string.IsNullOrEmpty(keysearch))
+                {
+                    DSachNguyenCongs = DSachNguyenCongsBase; // Lay danh sach base
+                }
+                else
+                {
+                    List<NguyenCong>? dsnfcnguyencongFilterResult = DSachNguyenCongsBase?.FindAll(nv => nv.TenNguyenCong.Value?.ToString()?.IndexOf(keysearch, StringComparison.OrdinalIgnoreCase) >= 0);
+
+                    if (dsnfcnguyencongFilterResult?.Count == 0)
+                    {
+
+                    }
+
+                    DSachNguyenCongs = dsnfcnguyencongFilterResult ?? new();
+                }
+
+                isSearching = false;
+            }
+        });
+    }
+
+
+    // Delete san pham
+    private async Task OnDeleteNguyenCong(NguyenCong selectednfcnguyencong)
+    {
+        bool? comfirm = await DialogService.Confirm("Xóa nhân này khỏi danh sách công đoạn?", "Xác nhận", new ConfirmOptions() { OkButtonText = "OK", CancelButtonText = "Hủy", ShowClose = false });
+
+        if (comfirm.Value)
+        {
+            (bool result, string error) = SQLServerServices.DeleteNguyenCong(SelectedNguyenCong.NCID.Value);
+
+            if (result == false)
+            {
+                await DialogService.Alert($"Không thể xóa: {error}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+            }
+            else
+            {
+                await LoadAllDanhsachNguyenCongBase();
+
+                ReSelectCurrentNguyenCong(Common.SelectedNguyenCongid);
+
+                ShowNotification("Đã xóa!", NotificationSeverity.Success, 3000);
+            }
+        }
+
+        isEditNguyenCongDetail = false;
+    }
+
+    // Press button Edit/Cancel
+    private async Task EnableEditNVDetail()
+    {
+        if (isEditNguyenCongDetail)
+        {
+            // Press cancel button
+            isEditNguyenCongDetail = false;
+
+            await LoadAllDanhsachNguyenCongBase();
+
+            ReSelectCurrentNguyenCong(Common.SelectedNguyenCongid);
+        }
+        else
+        {
+            // Press edit button
+            isEditNguyenCongDetail = true;
+        }
+    }
+
+
+    // Is san pham selected
+    private string IsNguyenCongSelected(NguyenCong seletectedNhanvien)
+    {
+        if (SelectedNguyenCong.NCID.Value != null && SelectedNguyenCong.NCID.Value.Equals(seletectedNhanvien.NCID.Value))
+        {
+            return "nfcnguyencong_IsSelected";
+        }
+        else return string.Empty;
+    }
+
+    // On nfcnguyencong click
+    private void OnNguyenCongClick(NguyenCong selectNguyenCong)
+    {
+        SelectedNguyenCong = selectNguyenCong;
+
+        StateHasChanged();
+    }
+
+    private async Task OnOpenDialogAdNGType(NguyenCong selectNguyenCong)
+    {
+        if (selectNguyenCong != null && selectNguyenCong.NCID.Value != null)
+        {
+            await DialogService.OpenAsync<DialogAsignNGTypeForNguyenCong>(null, new Dictionary<string, object>() { { "NCID", selectNguyenCong.NCID.Value } },
+            new DialogOptions() { ShowTitle = false, Width = "50%", Height = "contain", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
+
+            await LoadAllDanhsachNguyenCongBase();
+
+            ReSelectCurrentNguyenCong(Common.SelectedNguyenCongid);
+        }
+    }
+
+    private bool IsNGTypeSelected(NGType selected)
+    {
+        if (SelectedNGType.NGID.Value != selected.NGID.Value)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    private void OnNGTypeSelected(NGType selected)
+    {
+        if (object.Equals(SelectedNGType.NGID.Value, selected.NGID.Value))
+        {
+            SelectedNGType = new();
+        }
+        else
+        {
+            SelectedNGType = selected;
+        }
+
+        StateHasChanged();
+    }
+
+
+    // Remove
+    private async Task OnRemoveNGTypeofNguyenCong(NGType removeNGType)
+    {
+        bool? comfirm = await DialogService.Confirm("Xóa loại lỗi này khỏi danh sách lỗi của công đoạn?", "Xác nhận", new ConfirmOptions() { OkButtonText = "OK", CancelButtonText = "Hủy", ShowClose = false });
+
+        if (comfirm.Value)
+        {
+            SelectedNguyenCong.DSNGTypes.Remove(removeNGType);
+
+            SelectedNguyenCong.NGIDs.Value = string.Join(",", SelectedNguyenCong.DSNGTypes
+                                            .Select(nv => nv.NGID.Value?.ToString()?.Trim() ?? string.Empty)
+                                            .Where(id => !string.IsNullOrEmpty(id))); ;
+
+            (int result, string error) = SQLServerServices.UpdateNguyenCongMainDetails(SelectedNguyenCong);
+
+            if (result == -1)
+            {
+                await DialogService.Alert($"{error}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+            }
+            else { ShowNotification("Removed!", NotificationSeverity.Success, 2000); }
+        }
+    }
+
+    // Notification
+    void ShowNotification(string message, NotificationSeverity notifytype, double time)
+    {
+        NotificationMessage notify = new NotificationMessage
+            {
+                Style = "position: fixed; top: 0; right: 0;",
+                Severity = notifytype,
+                Summary = message,
+                Duration = time
+            };
+
+        NotificationService.Notify(notify);
+    }
+
+    // Tooltip
+    void ShowToolTip(ElementReference elementReference, TooltipPosition position, string content)
+    {
+        TooltipOptions options = new TooltipOptions() { Position = position, Delay = 500, Style = "background-color: black" };
+
+        TooltipService.Open(elementReference, content, options);
+    }
+
+    // Datagrid selected changed event
+    private void OnDatagridSelectChanged(IList<NguyenCong> selectedNguyenCong)
+    {
+        DatagridSeleted = selectedNguyenCong;
+
+        var fistItemSelectedNguyenCong = DatagridSeleted.FirstOrDefault();
+
+        if (fistItemSelectedNguyenCong != null)
+        {
+            SelectedNguyenCong = fistItemSelectedNguyenCong;
+
+            Common.SelectedNguyenCongid = fistItemSelectedNguyenCong.NCID.Value;
+        }
+    }
+
+    // Datagrid cellrender
+    private void OnCellRender(DataGridCellRenderEventArgs<NguyenCong> args)
+    {
+        if (args.Column.Property.Contains("ID"))
+        {
+            args.Attributes.Add("style", $"font-weight: bold;");
+        }
+    }
+}
