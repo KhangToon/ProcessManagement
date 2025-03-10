@@ -7620,6 +7620,11 @@ namespace ProcessManagement.Services.SQLServer
                     sanPham.DSThongTin = GetDanhSachThongTinSanPham(sanPham.SP_SPID.Value);
                     // Load danh sach NVL of san pham
                     sanPham.DanhSachNVLs = GetDSachNVLwithSanPham_bySPID(sanPham.SP_SPID.Value);
+                    // Load danh sach NCong of san pham
+                    foreach (var ncid in Common.GetListNCIDs(sanPham.NCIDs.Value))
+                    {
+                        sanPham.DSNguyenCongs.Add(GetNguyenCong(ncid));
+                    }
 
                     danhSachSanPham.Add(sanPham);
                 }

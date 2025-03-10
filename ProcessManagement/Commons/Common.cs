@@ -282,6 +282,7 @@ namespace ProcessManagement.Commons
         public const string MM_BoPhanSuDung = "Bộ phận sử dụng";
         //public const string MM_TinhTrang = "Tình trạng";
         public const string MM_GhiChu = "Ghi chú";
+        public const string NCIDs = "NCIDs";
 
         // Table LoaiThongTinMayMoc
         public const string Table_LoaiThongTinMayMoc = "MAY_LoaiThongTinMayMoc";
@@ -553,6 +554,19 @@ namespace ProcessManagement.Commons
 
             // Return the element at the specified index
             return list[index];
+        }
+
+        public static List<string> GetListNCIDs(object? ncids)
+        {
+            string ids = ncids?.ToString()?.Trim() ?? string.Empty;
+
+            if (!string.IsNullOrEmpty(ids))
+            {
+                List<string> nvids = ids.Split(",").ToList();
+
+                return nvids;
+            }
+            else return new();
         }
     }
 }

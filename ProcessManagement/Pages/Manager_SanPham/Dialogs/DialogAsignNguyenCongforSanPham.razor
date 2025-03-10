@@ -1,0 +1,273 @@
+﻿@using ProcessManagement.Commons
+@using ProcessManagement.Models.MAYMOC
+@using ProcessManagement.Models.SANPHAM
+@using ProcessManagement.Services.SQLServer
+@using Radzen.Blazor
+@using Radzen
+@using ProcessManagement.Models
+
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject SQLServerServices SQLServerServices
+
+<RadzenCard Style="height: contain; width: 100%; border-radius: 10px" Variant="Variant.Flat">
+    <RadzenStack Gap="0" Style="height: 100%; width: 100%; margin: 0" Orientation="Orientation.Vertical" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start">
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="10px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: 5%; width: 100%; padding-bottom: 10px">
+            <RadzenText Text="@($"Quản lý danh sách nguyên công của sản phẩm")" Style="font-size: 20px; font-weight: 600; color: darkred"></RadzenText>
+            <RadzenText Text="@($"{TargetSanPham?.SP_MaSP.Value?.ToString()}")" Style="font-size: 18px; font-weight: 600; color: darkblue"></RadzenText>
+        </RadzenStack>
+        <RadzenRow Gap="10px" Style="height: contain; width: 100%; border-radius: 10px; border-top: var(--rz-grid-cell-border); border-bottom: var(--rz-grid-cell-border); padding: 0;">
+            <!--Column danh sach nguyên công da chon-->
+            <RadzenColumn Size="12" SizeMD="12" Style="height: contain; width: 100%; padding: 15px;">
+                <RadzenCard Variant="Variant.Filled" Style="border-radius: 10px; height: contain">
+                    <RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: 100%; width: 100%;">
+                        <RadzenStack Orientation="Orientation.Vertical" Gap="10px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: contain; width: 100%;">
+                            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
+                                <RadzenText Text="@($"Chỉ định nguyên công cho sản phẩm")" Style="font-size: 18px; font-weight: 500; color: black"></RadzenText>
+                                <RadzenText Text="@($"{TargetSanPham?.SP_MaSP.Value?.ToString()}")" Style="font-size: 18px; font-weight: 600; color: darkblue"></RadzenText>
+                            </RadzenStack>
+                            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
+                                <RadzenDropDown AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" AllowClear="true" Placeholder="@("* chọn nguyên công")" TValue="string" Style="width: 40%; height: contain; font-size: 14px; font-weight: 600"
+                                                Value="SelectedNguyenCong.TenNguyenCong.Value?.ToString()"
+                                                Data=@(DsachNCongs.Select(dm => dm.TenNguyenCong.Value?.ToString()) ?? Enumerable.Empty<string>())
+                                                Change="@(args =>
+                                                        {
+                                                            SelectedNguyenCong = DsachNCongs.FirstOrDefault(sp => sp.TenNguyenCong.Value?.ToString() == args?.ToString()) ?? new();
+                                                        })">
+                                </RadzenDropDown>
+                                <RadzenButton Disabled="@(string.IsNullOrEmpty(SelectedNguyenCong.NCID.Value?.ToString()))" Text="Thêm vào danh sách" Icon="add" Click="@(() => OnButtonAddNguyenCongforSanPhamPress(SelectedNguyenCong))"
+                                              ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 18px; min-height: 35px; height: contain " />
+
+                            </RadzenStack>
+                        </RadzenStack>
+
+                        <RadzenStack Orientation="Orientation.Horizontal" Gap="10px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween" Style="height: contain; width: 100%; padding: 0px; padding-top: 10px; border-top: var(--rz-grid-cell-border);">
+                            <RadzenStack Orientation="Orientation.Horizontal" Gap="10px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: 100%; width: contain; padding: 0px">
+                                <RadzenText Text="@($"Danh sách nguyên công của sản phẩm")" Style="font-size: 18px; font-weight: 500; color: black"></RadzenText>
+                                <RadzenText Text="@($"{TargetSanPham?.SP_MaSP.Value?.ToString()}")" Style="font-size: 18px; font-weight: 600; color: darkblue"></RadzenText>
+                                <RadzenText Text="@($"({TargetSanPham?.DSNguyenCongs.Count.ToString()} nguyên công)")" Style="font-size: 16px; font-weight: 600; color: black"></RadzenText>
+                            </RadzenStack>
+                            <!--Button reload-->
+                            <RadzenButton Text="Reload" Icon="autorenew" Click="(async () => { await ReloadTargetSanPham();})"
+                                          ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 18px; height: 30px; " />
+                        </RadzenStack>
+
+                        <RadzenCard Variant="Variant.Flat" Style="height: contain; width: 100%; padding: 10px;">
+                            <RadzenStack Visible="@(TargetSanPham.DSNguyenCongs.Count > 0)" Gap="5px" Orientation="Orientation.Vertical" Style=" height: contain; width: 100%; padding: 0px;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: contain; padding: 5px; padding-right: 0px; background-color: rgb(58, 71, 77)">
+                                    <RadzenStack Style="width: 100%; height: 100%; " Gap="0" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                        <RadzenStack Style="width: 5%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                            <RadzenText Text="STT" Style="color: white; font-weight: 500; font-size: 14px"></RadzenText>
+                                        </RadzenStack>
+                                        <RadzenStack Style="width: 25%; height: contain; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                            <RadzenText Text="Tên nguyên công" Style="color: white; font-weight: 500; font-size: 16px"></RadzenText>
+                                        </RadzenStack>
+                                        <RadzenStack Style="width: 15%; height: contain; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                        </RadzenStack>
+                                    </RadzenStack>
+                                </RadzenCard>
+                                <RadzenStack Gap="5px" Orientation="Orientation.Vertical" Style=" height: contain; width: 100%; max-height: 250px; overflow-y: scroll; padding-right: 0;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                    @{
+                                        foreach (var sp in TargetSanPham.DSNguyenCongs.Where(nc => nc.IsPendingRemove == false))
+                                        {
+                                            <RadzenCard Variant="Variant.Outlined" Style="width: 100%; height: contain; padding: 5px; padding-right: 0px; background-color: white">
+                                                <RadzenStack Style="width: 100%; height: 100%" Gap="0" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                    <RadzenStack Style="width: 5%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                        <RadzenText Text="@($"{(TargetSanPham.DSNguyenCongs.IndexOf(sp) + 1).ToString()}")" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                                                    </RadzenStack>
+                                                    <RadzenStack Style="width: 85%; height: contain; border-left: var(--rz-grid-cell-border); border-right: var(--rz-grid-cell-border); padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                        <RadzenStack Style="height: 35px; width: contain; border-radius: 5px; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                            <RadzenText Text="@($"{sp.TenNguyenCong.Value?.ToString()}")" Style="color: rgba(58, 71, 77); font-weight: 600; font-size: 15px"></RadzenText>
+                                                        </RadzenStack>
+                                                    </RadzenStack>
+                                                    <RadzenStack Gap="5px" Style="width: contain; height: 100%; padding-left: 10px " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                        <!--Button delete-->
+                                                        <RadzenButton Icon="delete" Click="(() => { OnRemoveSPofSanPham(sp);})"
+                                                                      ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 18px; height: 35px; width: contain" />
+                                                    </RadzenStack>
+                                                </RadzenStack>
+                                            </RadzenCard>
+                                        }
+                                    }
+                                </RadzenStack>
+                            </RadzenStack>
+                            <RadzenStack Visible="@(TargetSanPham.DSNguyenCongs.Where(nc => nc.IsPendingRemove == false).ToList().Count == 0)" Style="width: 100%; height: contain; " Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenText Text="Chưa chỉ định nguyên công của sản phẩm." Style="font-size: 16px; font-weight: 500; height: contain; color: red"></RadzenText>
+
+                                <RadzenStack Orientation="Orientation.Vertical" Gap="10px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: contain; width: 100%;">
+                                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
+                                        <RadzenText Text="@($"Sử dụng nguyên công của sản phẩm khác (sản phẩm giống nguyên công)")" Style="font-size: 18px; font-weight: 500; color: black"></RadzenText>
+                                    </RadzenStack>
+                                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
+                                        <RadzenDropDown AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" AllowClear="true" Placeholder="@("* chọn sản phẩm")" TValue="string" Style="width: 40%; height: contain; font-size: 14px; font-weight: 600"
+                                                        Value="SelectedSanPhamRef.SP_MaSP.Value?.ToString()"
+                                                        Data=@(DSSanPhams.Select(sp => sp.SP_MaSP.Value?.ToString()) ?? Enumerable.Empty<string>())
+                                                        Change="@(args =>
+                                                        {
+                                                            SelectedSanPhamRef = DSSanPhams.FirstOrDefault(sp => sp.SP_MaSP.Value?.ToString() == args?.ToString()) ?? new();
+
+                                                            TargetSanPham.DSNguyenCongs = SelectedSanPhamRef.DSNguyenCongs;
+                                                        })">
+                                        </RadzenDropDown>
+                                    </RadzenStack>
+                                </RadzenStack>
+                            </RadzenStack>
+                        </RadzenCard>
+                    </RadzenStack>
+                </RadzenCard>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding-top: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+            <!--Button comfirm-->
+            <RadzenButton Text="Lưu thay đổi" Icon="check" Click="(async() => await SaveDanhSachNgCong())"
+                          ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Dark" Style="border-radius: 5px; --rz-icon-size: 18px; height: 30px; " />
+
+            <RadzenButton Style="width: 120px; height: 80%;" Icon="close" Text="Thoát" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" Click="@(() => OnCancelAddnewSPofSanPham())" />
+        </RadzenStack>
+    </RadzenStack>
+</RadzenCard>
+
+@code {
+    [Parameter]
+    public object SPID { get; set; } = 0;
+
+    [Parameter]
+    public List<SanPham> DSSanPhams { get; set; } = new();
+
+    private SanPham TargetSanPham { get; set; } = new();
+
+    private List<NguyenCong> DsachNCongs = new();
+
+    private NguyenCong SelectedNguyenCong = new();
+    private SanPham SelectedSanPhamRef = new();
+
+    private string NCIDsOrginValue = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ReloadTargetSanPham();
+
+        await LoadDanhSachNguyenCong();
+
+        await base.OnInitializedAsync();
+    }
+
+    // Load danh sach nguyên công
+    private async Task LoadDanhSachNguyenCong()
+    {
+        await Task.Run(() =>
+        {
+            DsachNCongs = SQLServerServices.GetListNguyenCongs();
+        });
+    }
+
+    // Reload TargetSanPham
+    private async Task ReloadTargetSanPham()
+    {
+        await Task.Run(() =>
+        {
+            if (int.TryParse(SPID?.ToString(), out int spid))
+            {
+                TargetSanPham = SQLServerServices.GetSanpham(spid, false);
+
+                TargetSanPham.DSNguyenCongs = new();
+
+                NCIDsOrginValue = TargetSanPham.NCIDs.Value?.ToString()?.Trim() ?? string.Empty;
+
+                foreach (var ncid in GetListNCIDs(TargetSanPham.NCIDs.Value))
+                {
+                    var ngcong = SQLServerServices.GetNguyenCong(ncid);
+
+                    TargetSanPham.DSNguyenCongs.Add(ngcong);
+                }
+            }
+        });
+    }
+
+    private List<string> GetListNCIDs(object? ncids)
+    {
+        string ids = ncids?.ToString()?.Trim() ?? string.Empty;
+
+        if (!string.IsNullOrEmpty(ids))
+        {
+            List<string> nvids = ids.Split(",").ToList();
+
+            return nvids;
+        }
+        else return new();
+    }
+
+    // Button them nguyên công
+    private void OnButtonAddNguyenCongforSanPhamPress(NguyenCong? addingNC)
+    {
+        if (DsachNCongs != null && addingNC != null)
+        {
+            bool isalreadyexisting = TargetSanPham.DSNguyenCongs.Any(nc => nc.NCID.Value?.ToString() == addingNC.NCID.Value?.ToString());
+
+            if (!isalreadyexisting)
+            {
+                TargetSanPham.DSNguyenCongs.Add(addingNC);
+            }
+            else
+            {
+                var targetnc = TargetSanPham.DSNguyenCongs.Where(nc => nc.NCID.Value?.ToString() == addingNC.NCID.Value?.ToString()).FirstOrDefault();
+
+                if (targetnc != null)
+                {
+                    targetnc.IsPendingRemove = false;
+                }
+            }
+        }
+    }
+
+
+
+    // Save
+    private async Task SaveDanhSachNgCong()
+    {
+        bool? comfirm = await DialogService.Confirm($"Cập nhật danh sách nguyên công của SanPham <strong> {TargetSanPham.SP_MaSP.Value?.ToString()} </strong>?", "Xác nhận", new ConfirmOptions() { OkButtonText = "OK", CancelButtonText = "Hủy", ShowClose = false });
+
+        if (comfirm.Value)
+        {
+            TargetSanPham.NCIDs.Value = string.Join(",", TargetSanPham.DSNguyenCongs.Where(nc => nc.IsPendingRemove == false)
+                                            .Select(nv => nv.NCID.Value?.ToString()?.Trim() ?? string.Empty)
+                                            .Where(id => !string.IsNullOrEmpty(id))); ;
+
+            (int result, string error) = SQLServerServices.UpdateSanPhamMainDetails(TargetSanPham);
+
+            if (result == -1)
+            {
+                await DialogService.Alert($"{error}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+            }
+
+            DialogService.Close(null);
+        }
+    }
+
+    // Remove
+    private void OnRemoveSPofSanPham(NguyenCong removeNguyenCong)
+    {
+        removeNguyenCong.IsPendingRemove = true;
+
+        ShowNotification("Removed!", NotificationSeverity.Success, 1000);
+    }
+
+    private void OnCancelAddnewSPofSanPham()
+    {
+        DialogService.Close(null);
+    }
+
+    // Notification
+    void ShowNotification(string message, NotificationSeverity notifytype, double time)
+    {
+        NotificationMessage notify = new NotificationMessage
+            {
+                Style = "position: fixed; top: 0; right: 0;",
+                Severity = notifytype,
+                Summary = message,
+                Duration = time
+            };
+
+        NotificationService.Notify(notify);
+    }
+}

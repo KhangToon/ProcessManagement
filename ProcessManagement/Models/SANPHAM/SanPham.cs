@@ -8,8 +8,11 @@ namespace ProcessManagement.Models.SANPHAM
         public Propertyy SP_SPID { get; set; } = new() { DBName = Common.SP_SPID, Type = typeof(int), AlowDisplay = false, AlowDatabase = false };
         public Propertyy SP_MaSP { get; set; } = new() { DBName = Common.SP_MaSP, DisplayName = "Mã sản phẩm", Type = typeof(string), AlowDatabase = true };
         public Propertyy SP_TenSanPham { get; set; } = new() { DBName = Common.SP_TenSanPham, DisplayName = "Tên sản phẩm", Type = typeof(string), AlowDatabase = true };
+        public Propertyy NCIDs { get; set; } = new() { DBName = Common.NCIDs, DisplayName = Common.NCIDs, Type = typeof(string), AlowDatabase = true };
+
         public List<NVLwithSanPham> DanhSachNVLs { get; set; } = new();
 
+        public List<NguyenCong> DSNguyenCongs = new();
 
         // Danh sach thong tin san pham
         public List<ThongTinSanPham> DSThongTin = new();

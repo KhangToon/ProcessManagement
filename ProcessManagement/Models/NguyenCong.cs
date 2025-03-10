@@ -9,7 +9,7 @@ namespace ProcessManagement.Models
         public Propertyy TenNguyenCong { get; set; } = new() { DBName = Common.NguyenCong, Type = typeof(string), AlowDatabase = true };
         public Propertyy Ghichu { get; set; } = new() { DBName = Common.Ghichu, Type = typeof(string), AlowDatabase = true };
 
-
+        public bool IsPendingRemove { get; set; } = false; // Using for comfirm remove from list NCofMayMoc
         public List<Propertyy> GetPropertiesValues()
         {
             Type propertyType = typeof(NguyenCong);

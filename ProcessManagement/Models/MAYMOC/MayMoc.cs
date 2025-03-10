@@ -13,6 +13,7 @@ namespace ProcessManagement.Models.MAYMOC
         // Danh sach thong tin may moc
         public List<ThongTinMayMoc> DSThongTin = new();
 
+
         // Return thong tin may moc by tentruyxuat
         public ThongTinMayMoc GetThongTinMayMocByName(string tentruyxuat)
         {
