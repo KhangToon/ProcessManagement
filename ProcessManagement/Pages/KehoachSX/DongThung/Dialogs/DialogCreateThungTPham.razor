@@ -232,16 +232,17 @@
                             SPID = { Value = TargetKHSX.SPID.Value },
                             MaQuanLyLot = { Value = TargetLotResult.MaQuanLyLot },
                             NgayDongThung = { Value = DateTime.Now.ToString(Common.FormatNoTime_yyyddMM) },
-                            MaQuanLyThung = { Value = mqlthungtp }
+                            // MaQuanLyThung = { Value = mqlthungtp }
+                            MaQuanLyThung = { Value = lastestThungTPham?.MaQuanLyThung.Value ?? mqlthungtp } // Lay new mql khi la thung dau tien
                         };
 
                     newthungTPhams.Add(thungTPham);
                 }
                 else
                 {
-                    // Create mql thung TP
-                    string randomkey = Common.GenerateUppercaseChars(5);
-                    string mqlthungtp = $"TTP-{TargetKHSX.MaLSX.Value?.ToString()}-{randomkey}-{lastestThungTPham?.IDThung.Value ?? 1}";
+                    // // Create mql thung TP
+                    // string randomkey = Common.GenerateUppercaseChars(5);
+                    // string mqlthungtp = $"TTP-{TargetKHSX.MaLSX.Value?.ToString()}-{randomkey}-{lastestThungTPham?.IDThung.Value ?? 1}";
 
                     // Lay IDThung truoc
                     ThungTPham thungTPham = new()
@@ -253,7 +254,7 @@
                             SPID = { Value = TargetKHSX.SPID.Value },
                             MaQuanLyLot = { Value = TargetLotResult.MaQuanLyLot },
                             NgayDongThung = { Value = DateTime.Now.ToString(Common.FormatNoTime_yyyddMM) },
-                            MaQuanLyThung = { Value = mqlthungtp }
+                            MaQuanLyThung = { Value = lastestThungTPham?.MaQuanLyThung.Value }
                         };
 
                     newthungTPhams.Add(thungTPham);
