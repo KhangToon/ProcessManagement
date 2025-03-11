@@ -812,6 +812,11 @@ namespace ProcessManagement.Services.SQLServer
                         item.Value = columnValue;
                     }
 
+                    rowSP.TenCongDoan.Value = null;
+
+                    // Update TenCongDoan
+                    rowSP.TenCongDoan.Value = GetNguyenCongByID(rowSP.NCID.Value);
+
                     listCongdoans.Add(rowSP);
                 }
             }
@@ -828,68 +833,81 @@ namespace ProcessManagement.Services.SQLServer
 
             return listCongdoans;
         }
-
-        public async Task<List<NguyenCongofKHSX>> GetlistCongdoansAsync(object? khsxID)
+        public (int, string) UpdateNguyenCongofKHSX(NguyenCongofKHSX nguyencong)
         {
-            List<NguyenCongofKHSX> listCongdoans = new();
+            int result = -1;
+            string errorMess = string.Empty;
 
-            using (var connection = new SqlConnection(connectionString))
+            // Check for null input
+            if (nguyencong == null) return (result, "Error: is null");
+
+            List<Propertyy> properties = nguyencong.GetPropertiesValues()
+                .Where(po => po.AlowDatabase == true && po.Value != null)
+                .ToList();
+
+            // Validate properties before proceeding
+            if (properties.Count == 0)
             {
-                connection.Open(); // Synchronous Open
-
-                var command = connection.CreateCommand();
-                command.CommandText = $"SELECT * FROM [{Common.TableCongDoan}] WHERE [{Common.KHSXID}] = @khsxID";
-                command.Parameters.AddWithValue("@khsxID", khsxID);
-
-                using var reader = await command.ExecuteReaderAsync();
-
-                while (await reader.ReadAsync())
-                {
-                    NguyenCongofKHSX rowSP = new();
-                    List<Propertyy> rowSPitems = rowSP.GetPropertiesValues();
-
-                    foreach (var item in rowSPitems)
-                    {
-                        string? columnName = item.DBName;
-                        object? columnValue = await reader.IsDBNullAsync(reader.GetOrdinal(columnName)) ? null : reader[columnName];
-                        item.Value = columnValue;
-                    }
-
-                    listCongdoans.Add(rowSP);
-                }
+                return (result, "Error: No valid properties to update.");
             }
 
-            // Create a list to hold tasks
-            var tasks = listCongdoans.Select(async congdoan =>
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+
+            using var transaction = connection.BeginTransaction(); // Start transaction
+
+            try
             {
-                congdoan.IsUsing = true;
-                congdoan.DSachNVLCongDoans = await GetlistNVLmoiCongdoansAsync(congdoan.NCIDofKHSX.Value ?? 0, khsxID);
-            });
+                var command = connection.CreateCommand();
+                command.Transaction = transaction; // Associate command with the transaction
 
-            // Await all tasks to complete
-            await Task.WhenAll(tasks);
+                string updateSet = string.Join(", ", properties.Select(p => $"[{p.DBName}] = @{Regex.Replace(p.DBName ?? string.Empty, @"[^\w]+", "")}"));
 
-            return listCongdoans;
-        }
-        private (int, int, int) GetResultsKQGCperCDoanAllLots(object? cdid, object? khsxid)
-        {
-            int sumok = 0; int sumng = 0;
+                command.CommandText = $@"UPDATE [{Common.TableCongDoan}] SET {updateSet} WHERE [{Common.NCIDofKHSX}] = '{nguyencong.NCIDofKHSX.Value}'";
 
-            Dictionary<string, object?> parameters = new()
+                // Add parameters
+                foreach (var prop in properties)
+                {
+                    string parameterName = $"@{Regex.Replace(prop.DBName ?? string.Empty, @"[^\w]+", "")}";
+                    object? parameterValue = prop.Value ?? DBNull.Value;
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                // Execute command
+                result = command.ExecuteNonQuery();
+
+                if (result > 0)
+                {
+                    // Successfully updated
+                    transaction.Commit(); // Commit the transaction
+                }
+                else
+                {
+                    result = -1; // Set to -1 if update was not successful
+                    errorMess = "No rows were updated. The specified may not exist.";
+                }
+            }
+            catch (Exception ex)
             {
-                { $"{KQGCDBName.NCID}", cdid },
-                { $"{KQGCDBName.KHSXID}", khsxid }
-            };
+                errorMess = $"Error: {ex.Message}";
+                try
+                {
+                    transaction.Rollback(); // Rollback transaction in case of error
+                }
+                catch (Exception rollbackEx)
+                {
+                    errorMess += $" | Rollback Error: {rollbackEx.Message}";
+                }
+                return (-1, errorMess);
+            }
 
-            (List<KetQuaGC> DSachKetQuaGCsBase, string resultMess) = GetListKetQuaGC(parameters, false);
-
-            sumok = DSachKetQuaGCsBase.Sum(kqgc => int.TryParse(kqgc.SLOK.Value?.ToString(), out int slok) ? slok : 0);
-
-            sumng = DSachKetQuaGCsBase.Sum(kqgc => int.TryParse(kqgc.SLNG.Value?.ToString(), out int slng) ? slng : 0);
-
-            return (sumok, sumng, (sumok + sumng));
+            return (result, errorMess);
         }
 
+        #endregion Table_NguyenCongofKHSX
+
+        // ------------------------------------------------------------------------------------- //
+        #region Table_NVLmoiNguyenCong
         // Them nvl moi cong doan
         public (int, string) InsertNVLmoiCongdoan(NVLmoiNguyenCong nvlmoicd)
         {
@@ -1207,7 +1225,7 @@ namespace ProcessManagement.Services.SQLServer
             }
         }
 
-        #endregion Table_NguyenCongofKHSX
+        #endregion Table_NVLmoiNguyenCong
 
         // ------------------------------------------------------------------------------------- //
         #region Table_NguyenCong
@@ -1379,6 +1397,11 @@ namespace ProcessManagement.Services.SQLServer
                 }
             }
 
+            if (int.TryParse(nguyencong.IsHide.Value?.ToString(), out int ishiding))
+            {
+                nguyencong.isHiding = (ishiding == 1);
+            }
+
             return nguyencong;
         }
         // Get nguyen cong by ID
@@ -1430,6 +1453,11 @@ namespace ProcessManagement.Services.SQLServer
                         object columnValue = reader[columnName];
 
                         item.Value = columnValue;
+                    }
+
+                    if (int.TryParse(nguyencong.IsHide.Value?.ToString(), out int ishiding))
+                    {
+                        nguyencong.isHiding = (ishiding == 1);
                     }
 
                     lisNCs.Add(nguyencong);
@@ -1502,6 +1530,11 @@ namespace ProcessManagement.Services.SQLServer
                             }
                         }
 
+                        if (int.TryParse(nguyencong.IsHide.Value?.ToString(), out int ishiding))
+                        {
+                            nguyencong.isHiding = (ishiding == 1);
+                        }
+
                         listNguyenCongs.Add(nguyencong);
                     }
                 }
@@ -1543,13 +1576,13 @@ namespace ProcessManagement.Services.SQLServer
         }
 
         // Update
-        public (int, string) UpdateNguyenCongMainDetails(NguyenCong ncid)
+        public (int, string) UpdateNguyenCongMainDetails(NguyenCong nguyencong)
         {
             int result = -1; string errorMess = string.Empty;
 
-            if (ncid == null) return (result, errorMess);
+            if (nguyencong == null) return (result, errorMess);
 
-            List<Propertyy> Items = ncid.GetPropertiesValues().Where(pro => pro.AlowDatabase == true).ToList();
+            List<Propertyy> Items = nguyencong.GetPropertiesValues().Where(pro => pro.AlowDatabase == true).ToList();
 
             try
             {
@@ -1561,13 +1594,13 @@ namespace ProcessManagement.Services.SQLServer
 
                 string setClause = string.Join(",", Items.Select(key => $"[{key.DBName}] = @{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
 
-                command.CommandText = $"UPDATE [{NguyenCong.DBName.Table_NguyenCong}] SET {setClause} WHERE [{NguyenCong.DBName.NCID}] = '{ncid.NCID.Value}'";
+                command.CommandText = $"UPDATE [{NguyenCong.DBName.Table_NguyenCong}] SET {setClause} WHERE [{NguyenCong.DBName.NCID}] = '{nguyencong.NCID.Value}'";
 
                 foreach (var item in Items)
                 {
                     string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
 
-                    object? parameterValue = item.Value;
+                    object? parameterValue = item.Value ?? DBNull.Value;
 
                     command.Parameters.AddWithValue(parameterName, parameterValue);
                 }
@@ -11063,80 +11096,6 @@ namespace ProcessManagement.Services.SQLServer
             }
         }
         #endregion
-
-        #region NguyenCongofKHSX
-        public (int, string) UpdateNguyenCongofKHSX(NguyenCongofKHSX nguyencong)
-        {
-            int result = -1;
-            string errorMess = string.Empty;
-
-            // Check for null input
-            if (nguyencong == null) return (result, "Error: is null");
-
-            List<Propertyy> properties = nguyencong.GetPropertiesValues()
-                .Where(po => po.AlowDatabase == true && po.Value != null)
-                .ToList();
-
-            // Validate properties before proceeding
-            if (properties.Count == 0)
-            {
-                return (result, "Error: No valid properties to update.");
-            }
-
-            using var connection = new SqlConnection(connectionString);
-            connection.Open();
-
-            using var transaction = connection.BeginTransaction(); // Start transaction
-
-            try
-            {
-                var command = connection.CreateCommand();
-                command.Transaction = transaction; // Associate command with the transaction
-
-                string updateSet = string.Join(", ", properties.Select(p => $"[{p.DBName}] = @{Regex.Replace(p.DBName ?? string.Empty, @"[^\w]+", "")}"));
-
-                command.CommandText = $@"UPDATE [{Common.TableCongDoan}] SET {updateSet} WHERE [{Common.NCIDofKHSX}] = '{nguyencong.NCIDofKHSX.Value}'";
-
-                // Add parameters
-                foreach (var prop in properties)
-                {
-                    string parameterName = $"@{Regex.Replace(prop.DBName ?? string.Empty, @"[^\w]+", "")}";
-                    object? parameterValue = prop.Value ?? DBNull.Value;
-                    command.Parameters.AddWithValue(parameterName, parameterValue);
-                }
-
-                // Execute command
-                result = command.ExecuteNonQuery();
-
-                if (result > 0)
-                {
-                    // Successfully updated
-                    transaction.Commit(); // Commit the transaction
-                }
-                else
-                {
-                    result = -1; // Set to -1 if update was not successful
-                    errorMess = "No rows were updated. The specified may not exist.";
-                }
-            }
-            catch (Exception ex)
-            {
-                errorMess = $"Error: {ex.Message}";
-                try
-                {
-                    transaction.Rollback(); // Rollback transaction in case of error
-                }
-                catch (Exception rollbackEx)
-                {
-                    errorMess += $" | Rollback Error: {rollbackEx.Message}";
-                }
-                return (-1, errorMess);
-            }
-
-            return (result, errorMess);
-        }
-
-        #endregion 
     }
 }
 

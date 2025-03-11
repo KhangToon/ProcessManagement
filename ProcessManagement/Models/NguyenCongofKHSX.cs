@@ -8,7 +8,8 @@ namespace ProcessManagement.Models
         public Propertyy NCIDofKHSX { get; set; } = new() { DBName = Common.NCIDofKHSX, Type = typeof(int) };
         public Propertyy KHSXID { get; set; } = new() { DBName = Common.KHSXID, Type = typeof(int), AlowDatabase = true };
         public Propertyy NCID { get; set; } = new() { DBName = Common.NCID, Type = typeof(int), AlowDatabase = true };
-        public Propertyy TenCongDoan { get; set; } = new() { DBName = Common.NguyenCong, Type = typeof(string), AlowDatabase = true };
+        public Propertyy TenCongDoan { get; set; } = new() { DBName = Common.NguyenCong, Type = typeof(string), AlowDatabase = false };
+        // ---> TenCongDoan khong update , AlowDatabase is false
         public Propertyy TileNG { get; set; } = new() { DBName = Common.TileLoi, Type = typeof(double), AlowDatabase = true, Value = 0 };
         public Propertyy SoluongNG { get; set; } = new() { DBName = Common.SoluongNG, Type = typeof(int), AlowDatabase = true, Value = 0 };
         //public Propertyy SumOKSubmited { get; set; } = new() { DBName = Common.SumOKSubmited, Type = typeof(int), AlowDatabase = true, Value = 0 };
@@ -51,7 +52,7 @@ namespace ProcessManagement.Models
 
                 nVLmoiCongDoan.LoaiNVL.Value = nvl.LoaiNVL.Value;
 
-                nVLmoiCongDoan.TenCongDoan.Value = TenCongDoan.Value;
+                //nVLmoiCongDoan.TenCongDoan.Value = TenCongDoan.Value;
 
                 nVLmoiCongDoan.MaQuanLy.Value = nvl.MaQuanLy.Value;
 

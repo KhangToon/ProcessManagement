@@ -10,8 +10,11 @@ namespace ProcessManagement.Models
         public Propertyy TenNguyenCong { get; set; } = new() { DBName = DBName.TenNguyenCong, DisplayName = DispName.TenNguyenCong, Type = typeof(string), AlowDatabase = true };
         public Propertyy Ghichu { get; set; } = new() { DBName = DBName.Ghichu, DisplayName = DispName.Ghichu, Type = typeof(string), AlowDatabase = true };
         public Propertyy NGIDs { get; set; } = new() { DBName = DBName.NGIDs, DisplayName = DispName.NGIDs, Type = typeof(string), AlowDatabase = true, AlowDisplay = false, DispDatagrid = false };
+        public Propertyy IsHide { get; set; } = new() { DBName = DBName.IsHide, DisplayName = DispName.IsHide, Type = typeof(int), AlowDatabase = true, AlowDisplay = false, DispDatagrid = false };
 
         public List<NGType> DSNGTypes = new();
+
+        public bool isHiding { get; set; } = false;
 
         public bool IsPendingRemove { get; set; } = false;
 
@@ -22,6 +25,7 @@ namespace ProcessManagement.Models
             public const string TenNguyenCong = "Nguyên công";
             public const string Ghichu = "Ghi chú";
             public const string NGIDs = "NGIDs";
+            public const string IsHide = "IsHide";
         }
 
         private class DispName
@@ -30,6 +34,7 @@ namespace ProcessManagement.Models
             public const string TenNguyenCong = "Công đoạn";
             public const string Ghichu = "Ghi chú";
             public const string NGIDs = "NGIDs";
+            public const string IsHide = "IsHide";
         }
 
         public static List<Propertyy> GetClassProperties()
