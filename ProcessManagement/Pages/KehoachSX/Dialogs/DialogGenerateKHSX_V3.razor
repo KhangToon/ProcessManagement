@@ -332,8 +332,11 @@
                                                                 </RadzenStack>
                                                             </Template>
                                                         </RadzenPickList>
-                                                        <RadzenButton Click="@(() => OpenDialogThemmoiNguyenCong())" Style="width: contain; margin-top: 10px;" Icon="add" Text="Thêm nguyên công khác" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Variant="Variant.Flat" />
-                                                    </RadzenCard>
+                                                        <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" Style=" height: contain; width: 100%; padding: 0px; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                            <RadzenButton Click="@(() => OpenDialogThemmoiNguyenCong())" Style="width: contain; margin-top: 10px;" Icon="add" Text="Thêm nguyên công khác" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Variant="Variant.Flat" />
+                                                            <RadzenButton Click="@(() => generLot.LoadListNguyenCongForTargetSanPham(generLot.NewKHSX.TargetSanPham))" Style="width: contain; margin-top: 10px;" Icon="autorenew" Text="Reload" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Dark" Variant="Variant.Flat" />
+                                                        </RadzenStack>
+                                                            </RadzenCard>
 
                                                 </RadzenTabsItem>
                                                 <!--Select Tileloi nguyen cong-->
@@ -559,7 +562,11 @@
         List<NVLofKHSX> nVLofKHSXs = await DialogService.OpenAsync<DialogSelectSLNVLofKHSX_MultiNVL>(null, new Dictionary<string, object>() { { "generLot", generLot } },
         new DialogOptions() { Width = "80%", Height = "contain", Resizable = false, Draggable = true, ShowTitle = false, ShowClose = false, Style = "background-color: while; border-radius: 0px; padding: 0px" });
 
-
+        if (nVLofKHSXs != null)
+        {
+            // ReLoad listNVL for target SanPham
+            generLot.LoadListNguyenCongForTargetSanPham(generLot.NewKHSX.TargetSanPham);
+        }
 
         // Recalculate variable
         generLot.ReCalculate();

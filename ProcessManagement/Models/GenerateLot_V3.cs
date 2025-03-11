@@ -6,6 +6,7 @@ using ProcessManagement.Models.KHSXs.MQL_Template;
 using ProcessManagement.Models.SANPHAM;
 using ProcessManagement.Services.SQLServer;
 using System.Globalization;
+using static ProcessManagement.Services.Modbus.Regs;
 
 namespace ProcessManagement.Models
 {
@@ -95,7 +96,7 @@ namespace ProcessManagement.Models
             // Tao LSX unique id
             MaLSX = AutoGenerateLSXCode();
 
-            LoadListTenNguyenCong();
+            LoadListTenNguyenCongDefault();
         }
 
         public bool CheckSLNVLisOK()
@@ -147,12 +148,74 @@ namespace ProcessManagement.Models
             }
         }
 
-        private void LoadListTenNguyenCong()
+        private void LoadListTenNguyenCongDefault()
         {
             List<NguyenCong> nguyenCongs = SQLServerServices.GetListNguyenCongs();
 
             _defaultListCDnames = nguyenCongs.Where(nc => nc.isHiding == false).ToList();
         }
+
+        public void LoadListNguyenCongForTargetSanPham(SanPham? sanPham)
+        {
+            if (sanPham != null)
+            {
+                sanPham.DSNguyenCongs = new();
+
+                _selectListCDnames = new List<NguyenCong>();
+
+                foreach (var ncid in Common.GetListNCIDs(sanPham.NCIDs.Value))
+                {
+                    sanPham.DSNguyenCongs.Add(SQLServerServices.GetNguyenCong(ncid));
+                }
+
+                if (sanPham.DSNguyenCongs.Any())
+                {
+                    _selectListCDnames = sanPham.DSNguyenCongs.Where(nc => nc.isHiding == false).ToList();
+
+                    var _defaultListCDnames_origin = _defaultListCDnames?.ToList();
+
+                    if (_defaultListCDnames_origin != null && _defaultListCDnames_origin.Any())
+                    {
+                        foreach (var ncong in _selectListCDnames)
+                        {
+                            _defaultListCDnames_origin.RemoveAll(nc => nc.NCID.Value?.ToString() == ncong.NCID.Value?.ToString());
+                        }
+
+                        _defaultListCDnames = _defaultListCDnames_origin;
+                    }
+                }
+                else
+                {
+                    LoadListTenNguyenCongDefault();
+                }
+            }
+            else
+            {
+                LoadListTenNguyenCongDefault();
+            }
+
+
+            // Reset DSachCongDoans
+
+            NewKHSX.DSachCongDoans = new();
+
+            if (_selectListCDnames != null)
+            {
+                foreach (var nguyencong in _selectListCDnames)
+                {
+                    NguyenCongofKHSX congDoan = new();
+                    congDoan.TenCongDoan.Value = nguyencong.TenNguyenCong.Value;
+                    congDoan.NCID.Value = nguyencong.NCID.Value;
+                    congDoan.IsUsing = true;
+                    NewKHSX.DSachCongDoans.Add(congDoan);
+                }
+            }
+
+            // Recheck
+
+            CheckSoluongLoiChophep();
+        }
+
 
         public void AsignKHSXdata()
         {
