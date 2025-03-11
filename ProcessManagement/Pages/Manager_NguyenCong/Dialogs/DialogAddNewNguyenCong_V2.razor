@@ -48,7 +48,7 @@
                                     @{
                                         <RadzenStack Style="width: 50%;">
                                             <RadzenTextBox class="custom-placeholder" Placeholder="@($" * nhập { NewNguyenCong.TenNguyenCong.DisplayName}")" Value="@NewNguyenCong.TenNguyenCong.Value?.ToString()" Style="font-size: 16px; height: contain; border-width: 1px;"
-                                                           @oninput="@(async (args) => { NewNguyenCong.TenNguyenCong.Value = args.Value; await DefaultThongTinNguyenCong_ValueIsOK(NewNguyenCong.TenNguyenCong, true);})">
+                                                           @oninput="@(async (args) => { TargetExistingNC = new(); IsExistingNCisHiding = false; NewNguyenCong.TenNguyenCong.Value = args.Value; await DefaultThongTinNguyenCong_ValueIsOK(NewNguyenCong.TenNguyenCong, true);})">
                                             </RadzenTextBox>
                                         </RadzenStack>
 
@@ -75,6 +75,10 @@
 @code {
     private NguyenCong NewNguyenCong = new();
 
+    private NguyenCong TargetExistingNC = new();
+
+    private bool IsExistingNCisHiding = false;
+
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
@@ -85,7 +89,7 @@
     {
         await Task.Run(() =>
         {
-            string value = propertyy.Value?.ToString() ?? string.Empty;
+            string value = propertyy.Value?.ToString()?.Trim() ?? string.Empty;
             string? dbname = propertyy.DBName ?? string.Empty;
             string? displayName = propertyy.DisplayName ?? string.Empty;
 
@@ -97,6 +101,21 @@
 
                     if (isExisting)
                     {
+                        // Check ishiding of targetexisting nguyencong
+                        TargetExistingNC = SQLServerServices.GetListNguyenCongs(new() { { NguyenCong.DBName.TenNguyenCong, value } }, false).nguyencongs.FirstOrDefault() ?? new();
+
+                        if (TargetExistingNC != null && TargetExistingNC.NCID.Value != null)
+                        {
+                            if (TargetExistingNC.isHiding)
+                            {
+                                propertyy.IsCheckValueOK = true; propertyy.NotifyMess = $"Giá trị hợp lệ";
+
+                                IsExistingNCisHiding = true;
+
+                                return;
+                            }
+                        }
+
                         propertyy.IsCheckValueOK = false; propertyy.NotifyMess = $"{displayName} đã tồn tại";
                     }
                     else
@@ -133,20 +152,15 @@
 
         if (comfirm.Value)
         {
-            // Add new nguyencong
-            (int newNCid, string errorMess) = SQLServerServices.InsertNguyenCong(NewNguyenCong);
-
-            if (newNCid > 0)
+            if (IsExistingNCisHiding)
             {
-                // Gan id
-                NewNguyenCong.NCID.Value = newNCid;
-                int result = newNCid;
+                TargetExistingNC.IsHide.Value = 0;
 
-                // Recheck sau khi link danh sach thongtinnguyencong
-                if (result < 0)
+                (int udresult, string error) = SQLServerServices.UpdateNguyenCongMainDetails(TargetExistingNC);
+
+                if (udresult < 0)
                 {
-                    SQLServerServices.DeleteNguyenCong(newNCid);
-                    await DialogService.Alert($"{errorMess}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                    await DialogService.Alert($"{error}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
                 }
                 else
                 {
@@ -156,13 +170,43 @@
 
                     if (thoat.Value)
                     {
-                        DialogService.Close(NewNguyenCong);
+                        DialogService.Close(TargetExistingNC);
                     }
                 }
             }
             else
             {
-                await DialogService.Alert($"{errorMess}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                // Add new nguyencong
+                (int newNCid, string errorMess) = SQLServerServices.InsertNguyenCong(NewNguyenCong);
+
+                if (newNCid > 0)
+                {
+                    // Gan id
+                    NewNguyenCong.NCID.Value = newNCid;
+                    int result = newNCid;
+
+                    // Recheck sau khi link danh sach thongtinnguyencong
+                    if (result < 0)
+                    {
+                        SQLServerServices.DeleteNguyenCong(newNCid);
+                        await DialogService.Alert($"{errorMess}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                    }
+                    else
+                    {
+                        ShowNotification("Thêm nguyên công thành công!", NotificationSeverity.Success, 3000);
+
+                        bool? thoat = await DialogService.Alert($"Thêm mới nguyên công thành công", "<strong><span style='color: green'>Success!</span></strong>", new AlertOptions() { OkButtonText = "Thoát", ShowClose = true });
+
+                        if (thoat.Value)
+                        {
+                            DialogService.Close(NewNguyenCong);
+                        }
+                    }
+                }
+                else
+                {
+                    await DialogService.Alert($"{errorMess}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                }
             }
         }
     }

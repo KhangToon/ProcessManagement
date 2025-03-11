@@ -151,20 +151,7 @@ namespace ProcessManagement.Models
         {
             List<NguyenCong> nguyenCongs = SQLServerServices.GetListNguyenCongs();
 
-            //List<string> tenNClist = new();
-
-            //foreach (var nguyencong in nguyenCongs)
-            //{
-            //    var tenNC = nguyencong.TenNguyenCong.Value?.ToString();
-
-            //    if (tenNC != null)
-            //    {
-            //        tenNClist.Add(tenNC);
-            //    }
-            //}
-
-            //_defaultListCDnames = tenNClist;
-            _defaultListCDnames = nguyenCongs;
+            _defaultListCDnames = nguyenCongs.Where(nc => nc.isHiding == false).ToList();
         }
 
         public void AsignKHSXdata()

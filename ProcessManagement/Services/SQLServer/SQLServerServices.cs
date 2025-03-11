@@ -1229,80 +1229,7 @@ namespace ProcessManagement.Services.SQLServer
 
         // ------------------------------------------------------------------------------------- //
         #region Table_NguyenCong
-        // Kiem tra nguyen cong da ton tai
-        public (int, string) NguyencongDatontai(NguyenCong nguyenCong)
-        {
-            string errorMess = string.Empty;
 
-            try
-            {
-                using var connection = new SqlConnection(connectionString);
-
-                connection.Open();
-
-                var command = connection.CreateCommand();
-
-                command.CommandText = $"SELECT COUNT(*) FROM [{Common.Table_NguyenCong}] WHERE [{Common.NguyenCong}] = N'{nguyenCong.TenNguyenCong.Value}'";
-
-                int count = Convert.ToInt32(command.ExecuteScalar());
-
-                return (count, errorMess);
-            }
-            catch (Exception ex)
-            {
-                errorMess = ex.Message;
-
-                return (-1, errorMess);
-            }
-
-            // chua co return > 0
-        }
-
-        // Them moi nguyen cong
-        public (int, string) InsertNewNguyenCong(NguyenCong newNC)
-        {
-            List<Propertyy> newNCItems = newNC.GetPropertiesValues().Where(po => po.AlowDatabase == true && po.Value != null).ToList();
-
-            int result = -1; string errorMess = string.Empty;
-
-            try
-            {
-                using var connection = new SqlConnection(connectionString);
-
-                connection.Open();
-
-                var command = connection.CreateCommand();
-
-                string columnNames = string.Join(",", newNCItems.Select(key => $"[{key.DBName}]"));
-
-                string parameterNames = string.Join(",", newNCItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
-
-                command.CommandText = $"INSERT INTO [{Common.Table_NguyenCong}] ({columnNames}) OUTPUT INSERTED.{Common.NCID} VALUES ({parameterNames})";
-
-                foreach (var item in newNCItems)
-                {
-                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
-
-                    object? parameterValue = item.Value;
-
-                    command.Parameters.AddWithValue(parameterName, parameterValue);
-                }
-
-                object? rs = command.ExecuteScalar();
-
-                result = Convert.ToInt32(rs);
-
-                if (result == 0) result = -1;
-            }
-            catch (Exception ex)
-            {
-                errorMess = ex.Message;
-
-                return (-1, errorMess);
-            }
-
-            return (result, errorMess);
-        }
         // Insert
         public (int, string) InsertNguyenCong(NguyenCong newNC)
         {
@@ -1489,9 +1416,9 @@ namespace ProcessManagement.Services.SQLServer
                         // Process each parameter in the dictionary
                         foreach (var param in parameters)
                         {
-                            conditions.Add($"[{param.Key}] = @{param.Key}");
+                            conditions.Add($"[{param.Key}] = @{Common.RemoveDiacriticsAndSpaces(param.Key)}");
 
-                            command.Parameters.AddWithValue($"@{param.Key}", param.Value);
+                            command.Parameters.AddWithValue($"@{Common.RemoveDiacriticsAndSpaces(param.Key)}", param.Value);
                         }
 
                         if (conditions.Any())
