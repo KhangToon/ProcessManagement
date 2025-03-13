@@ -14,7 +14,7 @@ namespace ProcessManagement.Models
         public Propertyy TiLeLoi { get; set; } = new() { DBName = Common.TileLoi, Type = typeof(double), AlowDatabase = true };
         public Propertyy DinhMuc { get; set; } = new() { DBName = Common.DinhMuc, Type = typeof(int), AlowDatabase = true };
         public Propertyy ThoiDiem { get; set; } = new() { DBName = Common.ThoiDiem, Type = typeof(DateTime), AlowDatabase = true };
-
+        // ---> ThoiDiem la luc tao PXK, khong phai luc xuat kho
         public string TenNVL { get; set; } = string.Empty;
 
         public List<ViTriofNVL> dsVitriofNVLs { get; set; } = new(); // dung cho generate KHSX

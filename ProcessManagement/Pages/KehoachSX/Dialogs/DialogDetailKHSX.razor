@@ -232,52 +232,45 @@
                                             <RadzenColumn Size="12" SizeMD="12" Style="width: 100%; height: 100%;">
                                                 <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style="height: 100%; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                                     <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style=" height: contain; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                        <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: 100%; padding: 5px;">
-                                                            <RadzenStack Style="width: 100%; height: contain" Gap="0" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                        <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: 100%; padding: 5px; padding-right: 0">
+                                                            <RadzenStack Style="width: 100%; height: contain" Gap="10px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                                 <RadzenStack Style="width: 5%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                                     <RadzenText Text="#" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
                                                                 </RadzenStack>
                                                                 <RadzenStack Style="width: 40%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                                     <RadzenText Text="Tên vật liệu" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
                                                                 </RadzenStack>
-                                                                <RadzenStack Style="width: 35%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                    <RadzenText Text="Số lượng lấy" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                                                                <RadzenStack Style="width: 30%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                    <RadzenText Text="Số lượng" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
                                                                 </RadzenStack>
-                                                                <RadzenStack Style="width: 20%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                    <RadzenText Text="" Style="font-size: 14px; font-weight: 600; height: contain;"></RadzenText>
+                                                                <RadzenStack Style="width: 30%; height: contain; " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                    <RadzenText Text="Ngày xuất" Style="font-size: 14px; font-weight: 600; height: contain;"></RadzenText>
                                                                 </RadzenStack>
                                                             </RadzenStack>
                                                         </RadzenCard>
                                                     </RadzenStack>
 
                                                     <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style=" height: 90%; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                                        @{
-                                                            var dsachnvlofkhsx = SelectKHSX?.DSachNVLofKHSXs;
-                                                        }
-                                                        @if (dsachnvlofkhsx != null)
+                                                        @foreach (var nvlinfor in nVLInfors)
                                                         {
-                                                            @foreach (var nvlofkhsx in dsachnvlofkhsx)
-                                                            {
-                                                                var ngvatlieu = GetNguyenVatLieu(nvlofkhsx);
-
-                                                                <RadzenCard Variant="Variant.Outlined" Style="width: 100%; height: contain; padding: 5px; padding-right: 0px; background-color: white">
-                                                                    <RadzenStack Style="width: 100%; height: 100%" Gap="10px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                        <RadzenStack Style="width: 5%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                            <RadzenText Text="@((dsachnvlofkhsx.IndexOf(nvlofkhsx) + 1).ToString())" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
-                                                                        </RadzenStack>
-                                                                        <RadzenStack Style="width: 40%; height: contain; border-left: var(--rz-grid-cell-border); border-right: var(--rz-grid-cell-border); padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                            <RadzenText Text="@ngvatlieu.MaNVL.Value?.ToString()" Style="color: darkblue; font-weight: 600; font-size: 14px"></RadzenText>
-                                                                        </RadzenStack>
-                                                                        <RadzenStack Style="width: 35%; height: contain; " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                            <RadzenText Text="@($"{nvlofkhsx.DinhMuc?.Value?.ToString()} (pcs)")" Style="font-size: 16px; font-weight: 600; height: contain; color: rgba(58,71,77)"></RadzenText>
-                                                                        </RadzenStack>
-                                                                        <RadzenStack Style="width: 20%; height: contain; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                            <RadzenText Text="Chi tiết" @onclick="@(() => OnOpenDialogXemChitietNVL(ngvatlieu))" Style="font-size: 14px; font-weight: 600; height: contain; color: Highlight; font-style: italic; text-decoration: underline; cursor: pointer"></RadzenText>
-                                                                        </RadzenStack>
+                                                            <RadzenCard Variant="Variant.Outlined" Style="width: 100%; height: contain; padding: 5px; padding-right: 0px; background-color: white">
+                                                                <RadzenStack Style="width: 100%; height: 100%" Gap="10px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                    <RadzenStack Style="width: 5%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                        <RadzenText Text="@((nVLInfors.IndexOf(nvlinfor) + 1).ToString())" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
                                                                     </RadzenStack>
-                                                                </RadzenCard>
-                                                            }
+                                                                    <RadzenStack Style="width: 40%; height: contain; border-left: var(--rz-grid-cell-border); border-right: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                        <RadzenText Text="@($"{nvlinfor.NVLofPXK.TargetNgLieu.TenNVL.Value}")" Style="color: darkblue; font-weight: 600; font-size: 14px"></RadzenText>
+                                                                    </RadzenStack>
+                                                                    <RadzenStack Style="width: 30%; height: contain; " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                        <RadzenText Text="@($"{nvlinfor.NVLofPXK.NVLXKSoLuongAll.Value} (pcs)")" Style="font-size: 16px; font-weight: 600; height: contain; color: rgba(58,71,77)"></RadzenText>
+                                                                    </RadzenStack>
+                                                                    <RadzenStack Style="width: 30%; height: contain; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                        <RadzenText Text="@($"{nvlinfor.LXK.NgayXuatKho.Value}")" onclick=@(() => OnOpenDialogXemPhieuXuatKho("Thông tin xuất kho nguyên vật liệu", nvlinfor.TargetPXK)) Style="font-size: 14px; font-weight: 600; height: contain; color: Highlight; text-decoration: underline; cursor: pointer"></RadzenText>
+                                                                    </RadzenStack>
+                                                                </RadzenStack>
+                                                            </RadzenCard>
                                                         }
+
                                                     </RadzenStack>
                                                 </RadzenStack>
                                             </RadzenColumn>
@@ -558,6 +551,15 @@
 
     private int SLExTraPXKho = 0;
 
+    private class NVLInfor
+    {
+        public PhieuXuatKho TargetPXK { get; set; } = new();
+        public NVLofPhieuXuatKho NVLofPXK { get; set; } = new();
+        public LenhXuatKho LXK { get; set; } = new();
+    }
+
+    private List<NVLInfor> nVLInfors = new();
+
     protected async override Task OnInitializedAsync()
     {
         await ReloadCurrentKHSX(SelectKHSX?.KHSXID.Value);
@@ -675,11 +677,28 @@
             // Chon PTraKho chua return
             ExTraPhieuXKhos = SQLServerServices.GetListPhieuXuatKhos(pars).phieuxuatkhos.Where(pxk => pxk.isReturnedNVL == false).ToList();
 
-            // if (ExTraPhieuXKhos.Any())
-            // {
-            //     ExTraPhieuXKhos.RemoveAll(pxk => pxk.MaPhieuXK.Value?.ToString()?.Trim() == PXKofKHSX.MaPhieuXK.Value?.ToString()?.Trim());
-            // }
             // BSUNGNVL
+
+
+            // LAY THONG TIN NVL TU PHIEU XUAT KHO
+            nVLInfors = new();
+
+            foreach (var nvlofpxk in PXKofKHSX.DSNVLofPXKs)
+            {
+                NVLInfor nVLInfor = new() { TargetPXK = PXKofKHSX, NVLofPXK = nvlofpxk, LXK = nvlofpxk.DSLenhXKs.FirstOrDefault() ?? new() };
+
+                nVLInfors.Add(nVLInfor);
+            }
+
+            foreach (var pxkbsung in ExTraPhieuXKhos)
+            {
+                foreach (var nvlofpxk in pxkbsung.DSNVLofPXKs)
+                {
+                    NVLInfor nVLInfor = new() { TargetPXK = pxkbsung, NVLofPXK = nvlofpxk, LXK = nvlofpxk.DSLenhXKs.FirstOrDefault() ?? new() };
+
+                    nVLInfors.Add(nVLInfor);
+                }
+            }
         }
         else SelectKHSX = new();
     }

@@ -380,6 +380,8 @@
 
     protected override async Task OnInitializedAsync()
     {
+        (dsachNGTypes, string errorMess) = SQLServerServices.GetDanhSachNGType();
+
         newKetQuaGC.SubMitDay.Value = DateTime.Now;
         await DefaultThongTinKetQuaGC_ValueIsOK(newKetQuaGC.SubMitDay);
 
@@ -463,16 +465,6 @@
                     .Where(x => !string.IsNullOrEmpty(x.Value) && !string.IsNullOrEmpty(x.Key))
                     .Distinct();
             }
-
-            // dsachNguyenCongs = SQLServerServices.GetListNguyenCongs();
-            // results = dsachNguyenCongs
-            //         .Where(item => item.NCID.Value != null)
-            //         .Select(item => new KeyValuePair<string, string>(
-            //             item.NCID.Value?.ToString() ?? string.Empty,
-            //             item.TenNguyenCong.Value?.ToString()?.Trim() ?? string.Empty
-            //         ))
-            //         .Where(x => !string.IsNullOrEmpty(x.Value) && !string.IsNullOrEmpty(x.Key))
-            //         .Distinct();
         }
         else if (colName == KetQuaGC.KQGCDBName.MMID)
         {
@@ -515,8 +507,6 @@
         }
         else if (colName == KetQuaGC.KQGCDBName.NGIDs)
         {
-            (dsachNGTypes, string errorMess) = SQLServerServices.GetDanhSachNGType();
-
             results = dsachNGTypes
                     .Where(item => item.NGID.Value != null)
                     .Select(item => new KeyValuePair<string, string>(item.NGID.Value?.ToString() ?? string.Empty, $"{item.NoiDungNG.Value?.ToString()?.Trim()}"))
@@ -630,6 +620,15 @@
 
             if (targetItem != null)
             {
+                // Load danh sach NGType of Nguyen Cong
+
+                var targetNguyenCong = SQLServerServices.GetListNguyenCongs(new() { { NguyenCong.DBName.NCID, targetItem.NCID.Value } }, false).nguyencongs.FirstOrDefault();
+
+                if (targetNguyenCong != null && targetNguyenCong.DSNGTypes.Count > 0)
+                {
+                    dsachNGTypes = targetNguyenCong.DSNGTypes;
+                }
+
                 ITemSelecteds[propertyy.DBName] = selectedValues.FirstOrDefault();
 
                 newKetQuaGC.NCID.Value = targetItem.NCID.Value;
@@ -674,8 +673,19 @@
 
                     //
                 }
+
+
             }
-            else newKetQuaGC.NCID.Value = null;
+            else
+            {
+                newKetQuaGC.NCID.Value = null;
+            }
+
+            // Load DSNGType if it empty
+            if (!dsachNGTypes.Any())
+            {
+                dsachNGTypes = SQLServerServices.GetDanhSachNGType().Item1;
+            }
 
             // Update UI after change value
             await UpdateUINewKQGCbyMQLLOTChanged(new() { KetQuaGC.KQGCDBName.KHSXID, KetQuaGC.KQGCDBName.MaQuanLyLot, KetQuaGC.KQGCDBName.SPID });
