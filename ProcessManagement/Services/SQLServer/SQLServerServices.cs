@@ -1901,7 +1901,7 @@ namespace ProcessManagement.Services.SQLServer
 
                         object columnValue = reader[columnName];
 
-                        item.Value = columnValue.ToString()?.Trim();
+                        item.Value = columnValue == DBNull.Value ? null : columnValue;
                     }
 
                 }
@@ -1968,7 +1968,7 @@ namespace ProcessManagement.Services.SQLServer
 
                         object columnValue = reader[columnName];
 
-                        item.Value = columnValue.ToString()?.Trim();
+                        item.Value = columnValue == DBNull.Value ? null : columnValue;
                     }
 
                 }
@@ -2015,7 +2015,7 @@ namespace ProcessManagement.Services.SQLServer
 
                         object columnValue = reader[columnName];
 
-                        item.Value = columnValue.ToString()?.Trim();
+                        item.Value = columnValue == DBNull.Value ? null : columnValue;
                     }
                 }
             }
@@ -2050,7 +2050,7 @@ namespace ProcessManagement.Services.SQLServer
 
                         object columnValue = reader[columnName];
 
-                        item.Value = columnValue.ToString()?.Trim();
+                        item.Value = columnValue == DBNull.Value ? null : columnValue;
                     }
 
                     // Load Details NVL 
@@ -2101,7 +2101,7 @@ namespace ProcessManagement.Services.SQLServer
 
                         object columnValue = reader[columnName];
 
-                        item.Value = columnValue.ToString()?.Trim();
+                        item.Value = columnValue == DBNull.Value ? null : columnValue;
                     }
 
                     // Load Details NVL 
@@ -2463,7 +2463,7 @@ namespace ProcessManagement.Services.SQLServer
                         {
                             object columnValue = reader[columnName];
 
-                            item.Value = columnValue == DBNull.Value ? null : columnValue.ToString()?.Trim();
+                            item.Value = columnValue == DBNull.Value ? null : columnValue;
                         }
                     }
 
@@ -2554,7 +2554,7 @@ namespace ProcessManagement.Services.SQLServer
                         {
                             object columnValue = reader[columnName];
 
-                            item.Value = columnValue == DBNull.Value ? null : columnValue.ToString()?.Trim();
+                            item.Value = columnValue == DBNull.Value ? null : columnValue;
                         }
                     }
                 }
@@ -2591,7 +2591,7 @@ namespace ProcessManagement.Services.SQLServer
                         {
                             object columnValue = reader[columnName];
 
-                            item.Value = columnValue == DBNull.Value ? null : columnValue.ToString()?.Trim();
+                            item.Value = columnValue == DBNull.Value ? null : columnValue;
                         }
                     }
 
@@ -2630,7 +2630,7 @@ namespace ProcessManagement.Services.SQLServer
                         {
                             object columnValue = reader[columnName];
 
-                            item.Value = columnValue == DBNull.Value ? null : columnValue.ToString()?.Trim();
+                            item.Value = columnValue == DBNull.Value ? null : columnValue;
                         }
                     }
 
@@ -2766,7 +2766,7 @@ namespace ProcessManagement.Services.SQLServer
 
                         object columnValue = reader[columnName];
 
-                        item.Value = columnValue.ToString()?.Trim();
+                        item.Value = columnValue == DBNull.Value ? null : columnValue;
                     }
 
                     // Load ten thong tin 
@@ -3249,7 +3249,7 @@ namespace ProcessManagement.Services.SQLServer
 
                         object columnValue = reader[columnName];
 
-                        item.Value = columnValue.ToString()?.Trim();
+                        item.Value = columnValue == DBNull.Value ? null : columnValue;
                     }
 
                 }
@@ -3289,7 +3289,7 @@ namespace ProcessManagement.Services.SQLServer
 
                         object columnValue = reader[columnName];
 
-                        item.Value = columnValue.ToString()?.Trim();
+                        item.Value = columnValue == DBNull.Value ? null : columnValue;
                     }
                 }
             }
@@ -3328,7 +3328,7 @@ namespace ProcessManagement.Services.SQLServer
 
                         object columnValue = reader[columnName];
 
-                        item.Value = columnValue.ToString()?.Trim();
+                        item.Value = columnValue == DBNull.Value ? null : columnValue;
                     }
 
                     int suchua = int.TryParse(vitri.VTSucChua.Value?.ToString(), out int sc) ? sc : 0;
@@ -3434,7 +3434,7 @@ namespace ProcessManagement.Services.SQLServer
 
                         object columnValue = reader[columnName];
 
-                        item.Value = columnValue.ToString()?.Trim();
+                        item.Value = columnValue == DBNull.Value ? null : columnValue;
                     }
                 }
             }
@@ -3604,7 +3604,7 @@ namespace ProcessManagement.Services.SQLServer
 
                         object columnValue = reader[columnName];
 
-                        item.Value = columnValue.ToString()?.Trim();
+                        item.Value = columnValue == DBNull.Value ? null : columnValue;
                     }
 
                     // Get vitriluutru infor
@@ -3643,7 +3643,7 @@ namespace ProcessManagement.Services.SQLServer
 
                         object columnValue = reader[columnName];
 
-                        item.Value = columnValue.ToString()?.Trim();
+                        item.Value = columnValue == DBNull.Value ? null : columnValue;
                     }
 
                     // Get vitriluutru infor
@@ -3875,7 +3875,7 @@ namespace ProcessManagement.Services.SQLServer
 
                         object columnValue = reader[columnName];
 
-                        item.Value = columnValue.ToString()?.Trim();
+                        item.Value = columnValue == DBNull.Value ? null : columnValue;
                     }
 
                 }
@@ -3977,7 +3977,7 @@ namespace ProcessManagement.Services.SQLServer
 
                         object columnValue = reader[columnName];
 
-                        item.Value = columnValue.ToString()?.Trim();
+                        item.Value = columnValue == DBNull.Value ? null : columnValue;
                     }
 
                 }
@@ -4666,7 +4666,7 @@ namespace ProcessManagement.Services.SQLServer
 
                         object columnValue = reader[columnName];
 
-                        item.Value = columnValue.ToString()?.Trim();
+                        item.Value = columnValue == DBNull.Value ? null : columnValue;
                     }
 
                     // Get danh sach lenh nhap kho
@@ -4885,7 +4885,7 @@ namespace ProcessManagement.Services.SQLServer
 
                         object columnValue = reader[columnName];
 
-                        item.Value = columnValue.ToString()?.Trim();
+                        item.Value = columnValue == DBNull.Value ? null : columnValue;
                     }
 
                     // Get vitriluutru infor
@@ -5740,7 +5740,7 @@ namespace ProcessManagement.Services.SQLServer
 
                         object columnValue = reader[columnName];
 
-                        item.Value = columnValue.ToString()?.Trim();
+                        item.Value = columnValue == DBNull.Value ? null : columnValue;
                     }
 
                     // Get danh sach lenh xuat kho
@@ -5918,7 +5918,7 @@ namespace ProcessManagement.Services.SQLServer
 
                         object columnValue = reader[columnName];
 
-                        item.Value = columnValue.ToString()?.Trim();
+                        item.Value = columnValue == DBNull.Value ? null : columnValue;
                     }
 
                     // Get vitriluutru infor
@@ -6164,7 +6164,7 @@ namespace ProcessManagement.Services.SQLServer
 
                         object columnValue = reader[columnName];
 
-                        item.Value = columnValue.ToString()?.Trim();
+                        item.Value = columnValue == DBNull.Value ? null : columnValue;
                     }
 
                     logs.Add(log);
@@ -6207,7 +6207,7 @@ namespace ProcessManagement.Services.SQLServer
                         {
                             object columnValue = reader[columnName];
 
-                            item.Value = columnValue == DBNull.Value ? null : columnValue.ToString()?.Trim();
+                            item.Value = columnValue == DBNull.Value ? null : columnValue;
                         }
                     }
                 }
@@ -6268,7 +6268,7 @@ namespace ProcessManagement.Services.SQLServer
                         {
                             object columnValue = reader[columnName];
 
-                            item.Value = columnValue == DBNull.Value ? null : columnValue.ToString()?.Trim();
+                            item.Value = columnValue == DBNull.Value ? null : columnValue;
                         }
                     }
                 }
@@ -6406,7 +6406,7 @@ namespace ProcessManagement.Services.SQLServer
                         {
                             object columnValue = reader[columnName];
 
-                            item.Value = columnValue == DBNull.Value ? null : columnValue.ToString()?.Trim();
+                            item.Value = columnValue == DBNull.Value ? null : columnValue;
                         }
                     }
 
@@ -6449,7 +6449,7 @@ namespace ProcessManagement.Services.SQLServer
                         {
                             object columnValue = reader[columnName];
 
-                            item.Value = columnValue == DBNull.Value ? null : columnValue.ToString()?.Trim();
+                            item.Value = columnValue == DBNull.Value ? null : columnValue;
                         }
                     }
 
@@ -6539,7 +6539,7 @@ namespace ProcessManagement.Services.SQLServer
                         {
                             object columnValue = reader[columnName];
 
-                            item.Value = columnValue == DBNull.Value ? null : columnValue.ToString()?.Trim();
+                            item.Value = columnValue == DBNull.Value ? null : columnValue;
                         }
                     }
 
@@ -6582,7 +6582,7 @@ namespace ProcessManagement.Services.SQLServer
                         {
                             object columnValue = reader[columnName];
 
-                            item.Value = columnValue == DBNull.Value ? null : columnValue.ToString()?.Trim();
+                            item.Value = columnValue == DBNull.Value ? null : columnValue;
                         }
                     }
                 }
@@ -6746,7 +6746,7 @@ namespace ProcessManagement.Services.SQLServer
                         {
                             object columnValue = reader[columnName];
 
-                            item.Value = columnValue == DBNull.Value ? null : columnValue.ToString()?.Trim();
+                            item.Value = columnValue == DBNull.Value ? null : columnValue;
                         }
                     }
                 }
@@ -6785,7 +6785,7 @@ namespace ProcessManagement.Services.SQLServer
                         {
                             object columnValue = reader[columnName];
 
-                            item.Value = columnValue == DBNull.Value ? null : columnValue.ToString()?.Trim();
+                            item.Value = columnValue == DBNull.Value ? null : columnValue;
                         }
                     }
 
@@ -6825,7 +6825,7 @@ namespace ProcessManagement.Services.SQLServer
                         {
                             object columnValue = reader[columnName];
 
-                            item.Value = columnValue == DBNull.Value ? null : columnValue.ToString()?.Trim();
+                            item.Value = columnValue == DBNull.Value ? null : columnValue;
                         }
                     }
 
@@ -6991,7 +6991,7 @@ namespace ProcessManagement.Services.SQLServer
                         {
                             object columnValue = reader[columnName];
 
-                            item.Value = columnValue == DBNull.Value ? null : columnValue.ToString()?.Trim();
+                            item.Value = columnValue == DBNull.Value ? null : columnValue;
                         }
                     }
                 }
@@ -7035,7 +7035,7 @@ namespace ProcessManagement.Services.SQLServer
                         {
                             object columnValue = reader[columnName];
 
-                            item.Value = columnValue == DBNull.Value ? null : columnValue.ToString()?.Trim();
+                            item.Value = columnValue == DBNull.Value ? null : columnValue;
                         }
                     }
                 }
@@ -7195,7 +7195,7 @@ namespace ProcessManagement.Services.SQLServer
                         {
                             object columnValue = reader[columnName];
 
-                            item.Value = columnValue == DBNull.Value ? null : columnValue.ToString()?.Trim();
+                            item.Value = columnValue == DBNull.Value ? null : columnValue;
                         }
                     }
 
@@ -7285,7 +7285,7 @@ namespace ProcessManagement.Services.SQLServer
                         {
                             object columnValue = reader[columnName];
 
-                            item.Value = columnValue == DBNull.Value ? null : columnValue.ToString()?.Trim();
+                            item.Value = columnValue == DBNull.Value ? null : columnValue;
                         }
                     }
                 }
@@ -7323,7 +7323,7 @@ namespace ProcessManagement.Services.SQLServer
                         {
                             object columnValue = reader[columnName];
 
-                            item.Value = columnValue == DBNull.Value ? null : columnValue.ToString()?.Trim();
+                            item.Value = columnValue == DBNull.Value ? null : columnValue;
                         }
                     }
 
@@ -7363,7 +7363,7 @@ namespace ProcessManagement.Services.SQLServer
                         {
                             object columnValue = reader[columnName];
 
-                            item.Value = columnValue == DBNull.Value ? null : columnValue.ToString()?.Trim();
+                            item.Value = columnValue == DBNull.Value ? null : columnValue;
                         }
                     }
 
@@ -7532,7 +7532,7 @@ namespace ProcessManagement.Services.SQLServer
                         {
                             object columnValue = reader[columnName];
 
-                            item.Value = columnValue == DBNull.Value ? null : columnValue.ToString()?.Trim();
+                            item.Value = columnValue == DBNull.Value ? null : columnValue;
                         }
                     }
 
@@ -7798,7 +7798,7 @@ namespace ProcessManagement.Services.SQLServer
                         {
                             object columnValue = reader[columnName];
 
-                            item.Value = columnValue == DBNull.Value ? null : columnValue.ToString()?.Trim();
+                            item.Value = columnValue == DBNull.Value ? null : columnValue;
                         }
                     }
 
@@ -7847,7 +7847,7 @@ namespace ProcessManagement.Services.SQLServer
                         {
                             object columnValue = reader[columnName];
 
-                            item.Value = columnValue == DBNull.Value ? null : columnValue.ToString()?.Trim();
+                            item.Value = columnValue == DBNull.Value ? null : columnValue;
                         }
                     }
 
@@ -7999,7 +7999,7 @@ namespace ProcessManagement.Services.SQLServer
                         {
                             object columnValue = reader[columnName];
 
-                            item.Value = columnValue == DBNull.Value ? null : columnValue.ToString()?.Trim();
+                            item.Value = columnValue == DBNull.Value ? null : columnValue;
                         }
                     }
                 }
@@ -8037,7 +8037,7 @@ namespace ProcessManagement.Services.SQLServer
                         {
                             object columnValue = reader[columnName];
 
-                            item.Value = columnValue == DBNull.Value ? null : columnValue.ToString()?.Trim();
+                            item.Value = columnValue == DBNull.Value ? null : columnValue;
                         }
                     }
 
@@ -8077,7 +8077,7 @@ namespace ProcessManagement.Services.SQLServer
                         {
                             object columnValue = reader[columnName];
 
-                            item.Value = columnValue == DBNull.Value ? null : columnValue.ToString()?.Trim();
+                            item.Value = columnValue == DBNull.Value ? null : columnValue;
                         }
                     }
 
@@ -8245,7 +8245,7 @@ namespace ProcessManagement.Services.SQLServer
                         {
                             object columnValue = reader[columnName];
 
-                            item.Value = columnValue == DBNull.Value ? null : columnValue.ToString()?.Trim();
+                            item.Value = columnValue == DBNull.Value ? null : columnValue;
                         }
                     }
 
