@@ -142,7 +142,14 @@ namespace ProcessManagement.Services
                             {
                                 PNK.IsDonePNK.Value = 1;
                                 // Update isDonePNK
-                                SQLServerServices.UpdatePhieuNhapKhoInfor(PNK);
+                                
+
+                                (int udpnkrsult, string udpnkerror) = SQLServerServices.UpdatePhieuNhapKhoInfor(PNK);
+
+                                if (udpnkrsult != 1)
+                                {
+                                    return (-1, $"Error IsDonePNK: {udpnkerror}");
+                                }
                             }
 
                             // update status to UI
@@ -291,7 +298,12 @@ namespace ProcessManagement.Services
                     {
                         PXK.IsDonePXK.Value = 1;
                         // Update isDonePXK
-                        SQLServerServices.UpdatePhieuXuatKhoInfor(PXK);
+                        (int udpxkrsult, string udpxkerror) = SQLServerServices.UpdatePhieuXuatKhoInfor(PXK);
+
+                        if (udpxkrsult != 1)
+                        {
+                            return (-1, $"Error IsDonePXK: {udpxkerror}");
+                        }
                     }
 
                     // Update ngaynhap/xuatkho of KHSX

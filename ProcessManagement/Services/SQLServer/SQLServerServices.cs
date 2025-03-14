@@ -4263,7 +4263,7 @@ namespace ProcessManagement.Services.SQLServer
 
                         object columnValue = reader[columnName];
 
-                        item.Value = columnValue;
+                        item.Value = columnValue == DBNull.Value ? null : columnValue;
                     }
 
                 }
@@ -4344,7 +4344,7 @@ namespace ProcessManagement.Services.SQLServer
 
                         object columnValue = reader[columnName];
 
-                        item.Value = columnValue.ToString()?.Trim();
+                        item.Value = columnValue == DBNull.Value ? null : columnValue;
                     }
 
                 }
@@ -4385,7 +4385,7 @@ namespace ProcessManagement.Services.SQLServer
 
                         object columnValue = reader[columnName];
 
-                        item.Value = columnValue.ToString()?.Trim();
+                        item.Value = columnValue == DBNull.Value ? null : columnValue;
                     }
 
                     // Load danh sach nguyen vat lieu pnk
@@ -5255,7 +5255,7 @@ namespace ProcessManagement.Services.SQLServer
 
                         object columnValue = reader[columnName];
 
-                        item.Value = columnValue.ToString()?.Trim();
+                        item.Value = columnValue == DBNull.Value ? null : columnValue;
                     }
                 }
             }
@@ -5319,7 +5319,7 @@ namespace ProcessManagement.Services.SQLServer
 
                         object columnValue = reader[columnName];
 
-                        item.Value = columnValue.ToString()?.Trim();
+                        item.Value = columnValue == DBNull.Value ? null : columnValue;
                     }
                 }
             }
@@ -5387,7 +5387,7 @@ namespace ProcessManagement.Services.SQLServer
 
                         object columnValue = reader[columnName];
 
-                        item.Value = columnValue.ToString()?.Trim();
+                        item.Value = columnValue == DBNull.Value ? null : columnValue;
                     }
 
                     // Load danh sach nguyen vat lieu pxk
