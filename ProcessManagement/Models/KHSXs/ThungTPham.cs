@@ -30,9 +30,11 @@ namespace ProcessManagement.Models.KHSXs
 
         public bool IsScanned { get; set; } = false;
 
+        public const string PALLETKEY = "PALLET";
+
         public static class DBName
         {
-            public const string Table_KhoThungTPham = "KHOTP_ThungTPham";
+            public const string Table_ThungTPham = "KHSX_ThungTPham";
             public const string TTPID = "TTPID";
             public const string KHSXID = "KHSXID";
             public const string SPID = "SPID";

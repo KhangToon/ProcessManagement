@@ -2,6 +2,7 @@
 @using ProcessManagement.Models.KHO_NVL
 @using ProcessManagement.Models.KHO_TPHAM
 @using ProcessManagement.Models.KHSXs
+@using ProcessManagement.Pages.Kho_ThanhPham.NhapKho
 @using ProcessManagement.Pages.Kho_ThanhPham.ViTriLuuTru
 @using ProcessManagement.Pages.Manager_NVL.Dialogs
 @using ProcessManagement.Services.SQLServer
@@ -33,22 +34,25 @@
             <RadzenColumn Size="12" SizeMD="12" Style="height: contain; width: 100%; padding: 15px;">
                 <RadzenCard Variant="Variant.Filled" Style="border-radius: 10px; height: contain">
                     <RadzenStack Orientation="Orientation.Horizontal" Gap="10px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween" Style="height: 5%; width: 100%; padding-bottom: 10px">
-                        <RadzenText Text="@($"Danh sách thùng thành phẩm")" Style="font-size: 18px; font-weight: 600; color: darkred"></RadzenText>
+                        <RadzenStack Orientation="Orientation.Horizontal" Gap="10px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="width: contain;">
+                            <RadzenText Text="@($"Danh sách thùng thành phẩm")" Style="font-size: 18px; font-weight: 600; color: darkred"></RadzenText>
+                            <RadzenText Text="@($"Tổng: {ThungTPhamExtends.Count} (thùng)")" Style="font-size: 18px; font-weight: 600;"></RadzenText>
 
-                        <RadzenText Text="@($"Tổng: {ThungTPhamExtends.Count} (thùng)")" Style="font-size: 18px; font-weight: 600;"></RadzenText>
-
-                        @{
-                            int sumdanhapkho = ThungTPhamExtends.Sum(ttp => (ttp.DaNhapKho) ? 1 : 0);
-                            if (sumdanhapkho == ThungTPhamExtends.Count())
-                            {
-                                <RadzenText Text="@($"Đã nhập kho: {sumdanhapkho} (thùng)")" Style="font-size: 18px; font-weight: 600; color: darkgreen"></RadzenText>
+                            @{
+                                int sumdanhapkho = ThungTPhamExtends.Sum(ttp => (ttp.DaNhapKho) ? 1 : 0);
+                                if (sumdanhapkho == ThungTPhamExtends.Count())
+                                {
+                                    <RadzenText Text="@($"Đã nhập kho: {sumdanhapkho} (thùng)")" Style="font-size: 18px; font-weight: 600; color: darkgreen"></RadzenText>
+                                }
+                                else
+                                {
+                                    <RadzenText Text="@($"Đã nhập kho: {sumdanhapkho} (thùng)")" Style="font-size: 18px; font-weight: 600; color: red"></RadzenText>
+                                }
                             }
-                            else
-                            {
-                                <RadzenText Text="@($"Đã nhập kho: {sumdanhapkho} (thùng)")" Style="font-size: 18px; font-weight: 600; color: red"></RadzenText>
-                            }
-                        }
 
+                        </RadzenStack>
+                        <RadzenButton Click="OpenDialogCreatePhieuNhapKhoTP" Icon="add" Text="Tạo phiếu nhập kho" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Darker"
+                                      Style="height: contain; width: contain; font-weight: 600; font-size: 15px;" />
 
                     </RadzenStack>
                     <RadzenStack Orientation="Orientation.Vertical" Gap="10px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: contain; width: 100%;">
@@ -243,5 +247,18 @@
     {
         await DialogService.OpenAsync<DialogQR_Image>(null, new Dictionary<string, object>() { { "CONTENT", content }, { "HEADER", header } },
         new DialogOptions() { CloseDialogOnEsc = true, CloseDialogOnOverlayClick = true, ShowTitle = true, Width = "contain", Height = "contain", Resizable = true, Draggable = true, ShowClose = true, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
+    }
+
+    private async Task OpenDialogCreatePhieuNhapKhoTP()
+    {
+        List<ThungTPham> thungTPhams = new();
+
+        foreach (var ttps in ThungTPhamExtends)
+        {
+            thungTPhams.AddRange(ttps.ThungTPhams);
+        }
+
+        var result = await DialogService.OpenAsync<DialogCreatePhieuNhapKhoTP>(null, new() { { "ThungTPhams", thungTPhams } },
+        new DialogOptions() { Width = "70%", Height = "100%", Resizable = false, Draggable = true, ShowTitle = false, ShowClose = false, Style = "background-color: while; border-radius: 0px; padding: 0px" });
     }
 }

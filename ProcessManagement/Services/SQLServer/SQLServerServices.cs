@@ -11023,6 +11023,188 @@ namespace ProcessManagement.Services.SQLServer
             }
         }
         #endregion
+
+        // ------------------------------------------------------------------------------------- //
+        #region Table_PhieuNhapKhoThanPham
+        public (int, string) InsertNewPNKThanhPham(PhieuNhapKhoTPham? newpnk)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            if (newpnk == null) return (result, "Error");
+
+            List<Propertyy> pnkItems = newpnk.GetPropertiesValues().Where(po => po.AlowDatabase == true && po.Value != null).ToList();
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                string columnNames = string.Join(",", pnkItems.Select(key => $"[{key.DBName}]"));
+
+                string parameterNames = string.Join(",", pnkItems.Select(key => $"@{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $"INSERT INTO [{Common.Table_PhieuNhapKhoTPham}] ({columnNames}) OUTPUT INSERTED.{Common.PNKTPID} VALUES ({parameterNames})";
+
+                foreach (var item in pnkItems)
+                {
+                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
+
+                    object? parameterValue = item.Value;
+
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                object? rs = command.ExecuteScalar();
+
+                result = Convert.ToInt32(rs);
+
+                if (result == 0) result = -1;
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
+        public List<PhieuNhapKhoTPham> GetListPhieuNhapKhoTPham()
+        {
+            List<PhieuNhapKhoTPham> dsPNKho = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_PhieuNhapKhoTPham}]";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    PhieuNhapKhoTPham phieunhapkho = new();
+
+                    List<Propertyy> rowitems = phieunhapkho.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue.ToString()?.Trim();
+                    }
+
+                    phieunhapkho.ListKhoThungTPham = GetListThungTPhams(new() { { DBName.PNKTPID, phieunhapkho.PNKTPID.Value } }, false).thungTPhams;
+
+                    phieunhapkho.MaViTri = GetListViTriTPhams(new Dictionary<string, object?>() { { ViTriTPham.DBName.VTTPID, phieunhapkho.VTTPID.Value } }).viTriTPhams.FirstOrDefault()?.MaViTri.Value ?? string.Empty;
+
+                    foreach (var thung in phieunhapkho.ListKhoThungTPham)
+                    {
+                        if (thung.MaQuanLyThung.Value != null && int.TryParse(thung.VTofTPID.Value?.ToString(), out int vtid))
+                        {
+                            thung.DaNhapKho = vtid > 0;
+                        }
+                    }
+
+                    phieunhapkho.IsDonePNK.Value = (phieunhapkho.ListKhoThungTPham.All(ttp => ttp.DaNhapKho) && phieunhapkho.ListKhoThungTPham.Count > 0) ? 1 : 0;
+
+                    phieunhapkho.isPNKDoneNhapKho = (int.TryParse(phieunhapkho.IsDonePNK.Value?.ToString(), out int isdone) ? isdone : 0) == 1;
+
+                    dsPNKho.Add(phieunhapkho);
+                }
+            }
+
+            return dsPNKho;
+        }
+
+        public (int, string) DeletePhieuNhapKhoTPham(object? pnktpID)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            if (pnktpID == null) return (-1, errorMess);
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"DELETE FROM {Common.Table_PhieuNhapKhoTPham} WHERE [{Common.PNKTPID}] = '{pnktpID}'";
+
+                object rs = command.ExecuteScalar();
+
+                result = Convert.ToInt32(rs);
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
+        public PhieuNhapKhoTPham GetPhieuNhapKhoTPhamByID(object? pnktpid)
+        {
+            PhieuNhapKhoTPham phieunhapkho = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_PhieuNhapKhoTPham}] WHERE [{Common.PNKTPID}] = '{pnktpid}'";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    List<Propertyy> rowitems = phieunhapkho.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue;
+                    }
+
+                }
+            }
+
+            phieunhapkho.ListKhoThungTPham = GetListThungTPhams(new() { { DBName.PNKTPID, phieunhapkho.PNKTPID.Value } }, false).thungTPhams;
+
+            phieunhapkho.MaViTri = GetListViTriTPhams(new Dictionary<string, object?>() { { ViTriTPham.DBName.VTTPID, phieunhapkho.VTTPID.Value } }).viTriTPhams.FirstOrDefault()?.MaViTri.Value ?? string.Empty;
+
+            foreach (var thung in phieunhapkho.ListKhoThungTPham)
+            {
+                if (thung.MaQuanLyThung.Value != null && int.TryParse(thung.VTofTPID.Value?.ToString(), out int vtid))
+                {
+                    thung.DaNhapKho = vtid > 0;
+                }
+            }
+
+            phieunhapkho.IsDonePNK.Value = (phieunhapkho.ListKhoThungTPham.All(ttp => ttp.DaNhapKho) && phieunhapkho.ListKhoThungTPham.Count > 0) ? 1 : 0;
+
+            phieunhapkho.isPNKDoneNhapKho = (int.TryParse(phieunhapkho.IsDonePNK.Value?.ToString(), out int isdone) ? isdone : 0) == 1;
+
+            return phieunhapkho;
+        }
+
+        #endregion
     }
 }
 

@@ -8,6 +8,7 @@ namespace ProcessManagement.Commons
 {
     public static class Common
     {
+
         public static readonly List<string> ListCaLamViecs = new() { "Ngày", "Đêm", "Ca 1", "Ca 2", "Ca 3" };
 
         public const string Format_yyyyMMdd = "yyyy-MM-dd HH:mm:ss";
@@ -206,6 +207,14 @@ namespace ProcessManagement.Commons
         public const string NgayLapPNK = "Ngày lập phiếu";
         public const string GhiChuPNK = "Ghi chú";
         public const string IsDonePNK = "IsDonePNK";
+
+        // Table KHO_PhieuNhapKhoTP
+        public const string Table_PhieuNhapKhoTPham = "KHOTP_PhieuNhapKhoTP";
+        public const string PNKTPID = "PNKTPID";
+        public const string CodePallet = "CodePallet";
+        public const string VTTPID = "VTTPID";
+        public const string VTofTPID = "VTofTPID";
+
 
         // Table KHO_NVLofPhieuNhapKho
         public const string Table_NVLofPhieuNhapKho = "KHO_NVLofPhieuNhapKho";

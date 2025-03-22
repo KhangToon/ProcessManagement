@@ -16,9 +16,13 @@ namespace ProcessManagement.Models.KHO_TPHAM
 
         public KHSX_LOT TargetLot { get; set; } = new(); // chi dung khi can 
 
+        public PalletThungTPham PalletThungTPham { get; set; } = new();
+
         public ThungTPhamExtend ThungTPhamExtend { get; set; } = new();
 
         public bool IsPicked { get; set; } = false;
+
+        public object? MaviTri { get; set; }
 
         public static class DBName
         {
