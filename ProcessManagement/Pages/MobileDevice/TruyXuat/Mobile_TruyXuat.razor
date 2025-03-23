@@ -488,7 +488,7 @@
 
     private List<NVLInfor> nVLInfors = new();
     private List<ThungTPhamExtend> TargetThungTPs = new();
-    private List<ThungTPham> thungTPbyMaThungs = new();
+    private List<PartOfThungTPham> thungTPbyMaThungs = new();
     private ThungTPhamExtend TargetTTPbyMaThung = new();
     private bool isSearhbyMQL = true;
 
@@ -719,7 +719,7 @@
         {
             List<ThungTPhamExtend>? thungTPhamExtends = null;
 
-            List<ThungTPham> thungTPhams = SQLServerServices.GetListThungTPhams(new Dictionary<string, object?>() { { ThungTPham.DBName.MaQuanLyLot, maquanlylot } }).thungTPhams;
+            List<PartOfThungTPham> thungTPhams = SQLServerServices.GetListThungTPhams(new Dictionary<string, object?>() { { PartOfThungTPham.DBName.MaQuanLyLot, maquanlylot } }).thungTPhams;
 
             // Group the ThungTPham objects by IDThung
             var groupedResults = thungTPhams.Where(ttp => ttp.IDThung.Value != null)
@@ -758,7 +758,7 @@
         {
             List<ThungTPhamExtend>? thungTPhamExtends = null;
 
-            List<ThungTPham> thungTPhams = SQLServerServices.GetListThungTPhams(new Dictionary<string, object?>() { { ThungTPham.DBName.MaQuanLyThung, maquanlythung } }).thungTPhams;
+            List<PartOfThungTPham> thungTPhams = SQLServerServices.GetListThungTPhams(new Dictionary<string, object?>() { { PartOfThungTPham.DBName.MaQuanLyThung, maquanlythung } }).thungTPhams;
 
             // Group the ThungTPham objects by IDThung
             var groupedResults = thungTPhams.Where(ttp => ttp.IDThung.Value != null)
@@ -796,7 +796,7 @@
         {
             List<ThungTPhamExtend>? thungTPhamExtends = null;
 
-            List<ThungTPham> thungTPhams = SQLServerServices.GetListThungTPhams(new Dictionary<string, object?>() { { KHSX_LOT.DBName.KHSXID, khsxid }, { ThungTPham.DBName.IDThung, idThung } }).thungTPhams;
+            List<PartOfThungTPham> thungTPhams = SQLServerServices.GetListThungTPhams(new Dictionary<string, object?>() { { KHSX_LOT.DBName.KHSXID, khsxid }, { PartOfThungTPham.DBName.IDThung, idThung } }).thungTPhams;
 
             // Group the ThungTPham objects by IDThung
             var groupedResults = thungTPhams.Where(ttp => ttp.IDThung.Value != null)
@@ -828,7 +828,7 @@
         });
     }
 
-    private async Task<List<ThungTPham>> LoadDSachThungTPhams(object? khsxid, object? maquanlylot)
+    private async Task<List<PartOfThungTPham>> LoadDSachThungTPhams(object? khsxid, object? maquanlylot)
     {
         return await Task.Run(() =>
         {
@@ -838,11 +838,11 @@
         });
     }
 
-    private async Task<List<ThungTPham>> LoadDSachThungTPhamsByIDthung_(object? khsxid, object? idthung)
+    private async Task<List<PartOfThungTPham>> LoadDSachThungTPhamsByIDthung_(object? khsxid, object? idthung)
     {
         return await Task.Run(() =>
         {
-            var thungTPhams = SQLServerServices.GetListThungTPhams(new Dictionary<string, object?>() { { KHSX_LOT.DBName.KHSXID, khsxid }, { ThungTPham.DBName.IDThung, idthung } }).thungTPhams;
+            var thungTPhams = SQLServerServices.GetListThungTPhams(new Dictionary<string, object?>() { { KHSX_LOT.DBName.KHSXID, khsxid }, { PartOfThungTPham.DBName.IDThung, idthung } }).thungTPhams;
 
             return thungTPhams;
         });

@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace ProcessManagement.Models.KHSXs
 {
-    public class ThungTPham
+    public class PartOfThungTPham
     {
         public Propertyy TTPID { get; set; } = new() { DBName = DBName.TTPID, DisplayName = DispName.TTPID, Type = typeof(int), AlowDatabase = false, AlowDisplay = false, DispDatagrid = false }; // Identity ID
         public Propertyy KHSXID { get; set; } = new() { DBName = DBName.KHSXID, DisplayName = DispName.KHSXID, Type = typeof(int), AlowDatabase = true };
@@ -34,7 +34,7 @@ namespace ProcessManagement.Models.KHSXs
 
         public static class DBName
         {
-            public const string Table_ThungTPham = "KHSX_ThungTPham";
+            public const string Table_PartOfThungTP = "KHSX_PartOfThungTP";
             public const string TTPID = "TTPID";
             public const string KHSXID = "KHSXID";
             public const string SPID = "SPID";
@@ -78,9 +78,9 @@ namespace ProcessManagement.Models.KHSXs
         // Get all property of this class
         public static List<Propertyy> GetClassProperties()
         {
-            Type propertyType = typeof(ThungTPham);
+            Type propertyType = typeof(PartOfThungTPham);
 
-            ThungTPham instance = new();
+            PartOfThungTPham instance = new();
 
             FieldInfo[] fields = propertyType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
@@ -106,7 +106,7 @@ namespace ProcessManagement.Models.KHSXs
 
         public List<Propertyy> GetPropertiesValues()
         {
-            Type propertyType = typeof(ThungTPham);
+            Type propertyType = typeof(PartOfThungTPham);
 
             FieldInfo[] fields = propertyType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 

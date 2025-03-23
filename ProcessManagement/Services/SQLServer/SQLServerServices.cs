@@ -14,7 +14,7 @@ using ProcessManagement.Models.SANPHAM;
 using ProcessManagement.Models.TienDoGCs;
 using System.Data;
 using System.Text.RegularExpressions;
-using static ProcessManagement.Models.KHSXs.ThungTPham;
+using static ProcessManagement.Models.KHSXs.PartOfThungTPham;
 using static ProcessManagement.Models.KHSXs.KetQuaGC;
 using ProcessManagement.Models.KHO_TPHAM;
 using ProcessManagement.Models.KHSXs.MQL_Template;
@@ -8714,7 +8714,7 @@ namespace ProcessManagement.Services.SQLServer
         // ------------------------------------------------------------------------------------- //
         #region KHSX_ThungTPham
         // Insert 
-        public (int, string) InsertThungTPham(ThungTPham thungtpham)
+        public (int, string) InsertThungTPham(PartOfThungTPham thungtpham)
         {
             int result = -1;
             string errorMess = string.Empty;
@@ -8745,7 +8745,7 @@ namespace ProcessManagement.Services.SQLServer
                 string columns = string.Join(", ", properties.Select(p => $"[{p.DBName}]"));
                 string parameters = string.Join(", ", properties.Select(p => $"@{Regex.Replace(p.DBName ?? string.Empty, @"[^\w]+", "")}"));
 
-                command.CommandText = $@"INSERT INTO [{DBName.Table_ThungTPham}] ({columns}) OUTPUT INSERTED.{DBName.TTPID} VALUES ({parameters})";
+                command.CommandText = $@"INSERT INTO [{DBName.Table_PartOfThungTP}] ({columns}) OUTPUT INSERTED.{DBName.TTPID} VALUES ({parameters})";
 
                 // Add parameters
                 foreach (var prop in properties)
@@ -8786,7 +8786,7 @@ namespace ProcessManagement.Services.SQLServer
         }
 
         // Update 
-        public (int, string) UpdateThungTPham(ThungTPham thungtpham)
+        public (int, string) UpdateThungTPham(PartOfThungTPham thungtpham)
         {
             int result = -1;
             string errorMess = string.Empty;
@@ -8816,7 +8816,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 string updateSet = string.Join(", ", properties.Select(p => $"[{p.DBName}] = @{Regex.Replace(p.DBName ?? string.Empty, @"[^\w]+", "")}"));
 
-                command.CommandText = $@"UPDATE [{DBName.Table_ThungTPham}] SET {updateSet} WHERE [{DBName.TTPID}] = '{thungtpham.TTPID.Value}'";
+                command.CommandText = $@"UPDATE [{DBName.Table_PartOfThungTP}] SET {updateSet} WHERE [{DBName.TTPID}] = '{thungtpham.TTPID.Value}'";
 
                 // Add parameters
                 foreach (var prop in properties)
@@ -8858,9 +8858,9 @@ namespace ProcessManagement.Services.SQLServer
         }
 
         // Get
-        public (List<ThungTPham> thungTPhams, string error) GetListThungTPhams(Dictionary<string, object?> parameters, bool isgetAll = false)
+        public (List<PartOfThungTPham> thungTPhams, string error) GetListThungTPhams(Dictionary<string, object?> parameters, bool isgetAll = false)
         {
-            List<ThungTPham> listThungTPhams = new();
+            List<PartOfThungTPham> listThungTPhams = new();
 
             string errorMessage = string.Empty;
 
@@ -8872,7 +8872,7 @@ namespace ProcessManagement.Services.SQLServer
 
                     var conditions = new List<string>();
                     var command = connection.CreateCommand();
-                    command.CommandText = $"SELECT * FROM [{DBName.Table_ThungTPham}]";
+                    command.CommandText = $"SELECT * FROM [{DBName.Table_PartOfThungTP}]";
 
                     if (!isgetAll)
                     {
@@ -8894,7 +8894,7 @@ namespace ProcessManagement.Services.SQLServer
 
                     while (reader.Read())
                     {
-                        ThungTPham thungtpham = new();
+                        PartOfThungTPham thungtpham = new();
 
                         List<Propertyy> rowItems = thungtpham.GetPropertiesValues();
 
@@ -8934,7 +8934,7 @@ namespace ProcessManagement.Services.SQLServer
             using var connection = new SqlConnection(connectionString);
             connection.Open();
 
-            string query = $"DELETE FROM [{DBName.Table_ThungTPham}] WHERE [{DBName.TTPID}] = @TTPID";
+            string query = $"DELETE FROM [{DBName.Table_PartOfThungTP}] WHERE [{DBName.TTPID}] = @TTPID";
 
             using var command = new SqlCommand(query, connection);
             command.Parameters.AddWithValue("@TTPID", ttpid);

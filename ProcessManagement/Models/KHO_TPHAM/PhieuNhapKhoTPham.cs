@@ -18,7 +18,7 @@ namespace ProcessManagement.Models.KHO_TPHAM
 
         public bool isPNKDoneNhapKho = false;
 
-        public List<ThungTPham> ListKhoThungTPham { get; set; } = new();
+        public List<PartOfThungTPham> ListKhoThungTPham { get; set; } = new();
 
         public object MaViTri { get; set; } = new();
 

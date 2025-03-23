@@ -162,7 +162,7 @@
 @code {
 
     [Parameter]
-    public List<ThungTPham> ThungTPhams { get; set; } = new();
+    public List<PartOfThungTPham> ThungTPhams { get; set; } = new();
 
     private string CodePallet = string.Empty;
     private bool IsUniqueCodePallet = false;
@@ -173,7 +173,7 @@
         await base.OnInitializedAsync();
     }
 
-    private async Task OnEditSoluongXuatKho(ThungTPham thungTPham)
+    private async Task OnEditSoluongXuatKho(PartOfThungTPham thungTPham)
     {
         object newValue = await DialogService.OpenAsync<DialogChangeSLXuatKho>(null, new() { { "CurrentValue", thungTPham.SoLuong.Value } },
         new DialogOptions() { ShowTitle = false, Width = "contain", Height = "contain", Resizable = false, Draggable = false, ShowClose = false, Style = "background-color: while; border-radius: 0px; padding: 0px; margin: 0px" });
@@ -190,7 +190,7 @@
         {
             var dsthungTP = SQLServerServices.GetListThungTPhams(new(), true).thungTPhams;
 
-            var listThungIndexs = dsthungTP.Select(thung => int.Parse(thung.PalletKey.Value?.ToString()?.Replace(ThungTPham.PALLETKEY, "") ?? "0"));
+            var listThungIndexs = dsthungTP.Select(thung => int.Parse(thung.PalletKey.Value?.ToString()?.Replace(PartOfThungTPham.PALLETKEY, "") ?? "0"));
 
             int maxIndex = (listThungIndexs.Count() > 0) ? listThungIndexs.Max() : 0;
 
@@ -212,7 +212,7 @@
 
             if (newIndex != 0)
             {
-                return $"{ThungTPham.PALLETKEY}{newIndex.ToString("D5")}";
+                return $"{PartOfThungTPham.PALLETKEY}{newIndex.ToString("D5")}";
             }
             else { return string.Empty; }
         });
@@ -227,7 +227,7 @@
 
         return await Task.Run(() =>
         {
-            var dsthungTP = SQLServerServices.GetListThungTPhams(new() { { ThungTPham.DBName.PalletKey, newcodepallet } }, false).thungTPhams;
+            var dsthungTP = SQLServerServices.GetListThungTPhams(new() { { PartOfThungTPham.DBName.PalletKey, newcodepallet } }, false).thungTPhams;
 
             return dsthungTP.Count == 0;
         });

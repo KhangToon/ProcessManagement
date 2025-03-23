@@ -8,6 +8,6 @@ namespace ProcessManagement.Models.KHO_TPHAM
         public int Total { get; set; }
         public string MaSanPham { get; set; } = string.Empty;
         public bool DaNhapKho { get; set; } = false;
-        public List<ThungTPham> ThungTPhams { get; set; } = new();
+        public List<PartOfThungTPham> ThungTPhams { get; set; } = new();
     }
 }

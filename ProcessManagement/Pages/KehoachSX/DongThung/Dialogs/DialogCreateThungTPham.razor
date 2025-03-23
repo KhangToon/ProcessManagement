@@ -79,7 +79,7 @@
 
                             <RadzenCard Variant="Variant.Flat" Style="height: 350px; width: 100%; padding: 10px; padding-right: 0; overflow-y: scroll">
                                 <RadzenStack Gap="10px" Style="height: contain; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                    <RadzenDataList Style="height: contain; width: 100%;" PagerPosition="PagerPosition.Top" WrapItems="true" AllowPaging="false" Data="@DSachNewThungTPhams" TItem="ThungTPham">
+                                    <RadzenDataList Style="height: contain; width: 100%;" PagerPosition="PagerPosition.Top" WrapItems="true" AllowPaging="false" Data="@DSachNewThungTPhams" TItem="PartOfThungTPham">
                                         <Template Context="thungtpham">
                                             <RadzenCard Style="width: contain; height: contain; padding: 0" Variant="Variant.Flat">
                                                 <RadzenCard Style="width: 100%; height: contain;" Variant="Variant.Filled">
@@ -166,8 +166,8 @@
 
     public bool isCreatedThungTP = false;
 
-    private List<ThungTPham> DSachOriginThungTPhams = new(); // from Database of KHSX
-    private List<ThungTPham> DSachNewThungTPhams = new();
+    private List<PartOfThungTPham> DSachOriginThungTPhams = new(); // from Database of KHSX
+    private List<PartOfThungTPham> DSachNewThungTPhams = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -195,7 +195,7 @@
         {
             int SLOKofLOT = TargetLotResult.GetTotalNGOKlastCDoan().sumOK; // so luong OK con lai cua LOT (cong doan cuoi)
 
-            List<ThungTPham> newthungTPhams = new();
+            List<PartOfThungTPham> newthungTPhams = new();
 
             var lastestThungTPham = DSachOriginThungTPhams.LastOrDefault();
 
@@ -223,7 +223,7 @@
                     string randomkey = Common.GenerateUppercaseChars(5);
                     string mqlthungtp = $"TTP-{TargetKHSX.MaLSX.Value?.ToString()}-{randomkey}-{lastestThungTPham?.IDThung.Value ?? 1}";
                     // Lay IDThung truoc
-                    ThungTPham thungTPham = new()
+                    PartOfThungTPham thungTPham = new()
                         {
                             SoLuong = { Value = SLOKofLOT },
                             SLRequired = { Value = lastestSLrequired },
@@ -245,7 +245,7 @@
                     // string mqlthungtp = $"TTP-{TargetKHSX.MaLSX.Value?.ToString()}-{randomkey}-{lastestThungTPham?.IDThung.Value ?? 1}";
 
                     // Lay IDThung truoc
-                    ThungTPham thungTPham = new()
+                    PartOfThungTPham thungTPham = new()
                         {
                             SoLuong = { Value = soluongBosung },
                             SLRequired = { Value = lastestSLrequired },
@@ -265,7 +265,7 @@
 
                     while (soluongConlai > 0)
                     {
-                        (ThungTPham newthung, soluongConlai) = AddNewThungTPham(soluongConlai, idthung);
+                        (PartOfThungTPham newthung, soluongConlai) = AddNewThungTPham(soluongConlai, idthung);
 
                         idthung = int.TryParse(newthung.IDThung.Value?.ToString(), out int newid) ? newid : 1;
 
@@ -281,7 +281,7 @@
 
                 while (soluongConlai > 0)
                 {
-                    (ThungTPham newthung, soluongConlai) = AddNewThungTPham(soluongConlai, idthung);
+                    (PartOfThungTPham newthung, soluongConlai) = AddNewThungTPham(soluongConlai, idthung);
 
                     idthung = int.TryParse(newthung.IDThung.Value?.ToString(), out int newid) ? newid : 1;
 
@@ -297,13 +297,13 @@
         ShowNotification("Created!", NotificationSeverity.Success, 2000);
     }
 
-    private (ThungTPham, int) AddNewThungTPham(int soluongTake, int lastIDthung)
+    private (PartOfThungTPham, int) AddNewThungTPham(int soluongTake, int lastIDthung)
     {
         // Create mql thung TP
         string randomkey = Common.GenerateUppercaseChars(5);
         string mqlthungtp = $"TTP-{TargetKHSX.MaLSX.Value?.ToString()}-{randomkey}-{lastIDthung + 1}";
 
-        ThungTPham newThungTP = new();
+        PartOfThungTPham newThungTP = new();
 
         newThungTP.KHSXID.Value = TargetKHSX.KHSXID.Value?.ToString();
 
@@ -366,7 +366,7 @@
         }
     }
 
-    private async Task OnDeleteThungThanhPham(List<ThungTPham> thungTPhams)
+    private async Task OnDeleteThungThanhPham(List<PartOfThungTPham> thungTPhams)
     {
         bool? confirm = await DialogService.Confirm($"Xóa thùng thành phẩm của mã LOT: <strong><span>{TargetLotResult.MaQuanLyLot}</span></strong>?", "Xác nhận", new ConfirmOptions() { OkButtonText = "OK", CancelButtonText = "Hủy", ShowClose = false });
 

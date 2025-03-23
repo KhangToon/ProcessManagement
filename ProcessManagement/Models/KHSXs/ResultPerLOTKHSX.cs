@@ -13,7 +13,7 @@ namespace ProcessManagement.Models.KHSXs
 
         public List<KQGCperCDOANofLOTKHSX> DsachKQGCperCDOAN { get; set; } = new(); // KQGC of current LOT per cong doan
 
-        public List<ThungTPham> ThungTPhams { get; set; } = new(); // danh sach thung thanh pham cua moi LOT
+        public List<PartOfThungTPham> ThungTPhams { get; set; } = new(); // danh sach thung thanh pham cua moi LOT
 
         // public int GetMaxColumnIndex() // get max column of lot result in dsachKQGCperCDOAN
         // {
