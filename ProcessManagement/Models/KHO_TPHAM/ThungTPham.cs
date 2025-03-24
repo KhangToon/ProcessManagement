@@ -29,6 +29,8 @@ namespace ProcessManagement.Models.KHO_TPHAM
 
         public List<PartOfThungTPham> PartOfThungTPhams { get; set; } = new();
 
+        public const string PALLETKEY = "PALLET";
+
         public static class DBName
         {
             public const string Table_ThungTPham = "KHOTP_ThungTPham";

@@ -19,6 +19,7 @@ namespace ProcessManagement.Models.KHO_TPHAM
         public PalletThungTPham PalletThungTPham { get; set; } = new();
 
         public ThungTPhamExtend ThungTPhamExtend { get; set; } = new();
+        public ThungTPham ThungTPham { get; set; } = new();
 
         public bool IsPicked { get; set; } = false;
 

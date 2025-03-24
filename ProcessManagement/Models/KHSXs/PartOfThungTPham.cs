@@ -30,8 +30,6 @@ namespace ProcessManagement.Models.KHSXs
 
         public bool IsScanned { get; set; } = false;
 
-        public const string PALLETKEY = "PALLET";
-
         public static class DBName
         {
             public const string Table_PartOfThungTP = "KHSX_PartOfThungTP";

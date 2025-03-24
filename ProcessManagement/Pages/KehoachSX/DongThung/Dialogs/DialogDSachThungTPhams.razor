@@ -36,11 +36,11 @@
                     <RadzenStack Orientation="Orientation.Horizontal" Gap="10px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween" Style="height: 5%; width: 100%; padding-bottom: 10px">
                         <RadzenStack Orientation="Orientation.Horizontal" Gap="10px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="width: contain;">
                             <RadzenText Text="@($"Danh sách thùng thành phẩm")" Style="font-size: 18px; font-weight: 600; color: darkred"></RadzenText>
-                            <RadzenText Text="@($"Tổng: {ThungTPhamExtends.Count} (thùng)")" Style="font-size: 18px; font-weight: 600;"></RadzenText>
+                            <RadzenText Text="@($"Tổng: {ThungTPhams.Count} (thùng)")" Style="font-size: 18px; font-weight: 600;"></RadzenText>
 
                             @{
-                                int sumdanhapkho = ThungTPhamExtends.Sum(ttp => (ttp.DaNhapKho) ? 1 : 0);
-                                if (sumdanhapkho == ThungTPhamExtends.Count())
+                                int sumdanhapkho = ThungTPhams.Sum(ttp => (ttp.DaNhapKho) ? 1 : 0);
+                                if (sumdanhapkho == ThungTPhams.Count())
                                 {
                                     <RadzenText Text="@($"Đã nhập kho: {sumdanhapkho} (thùng)")" Style="font-size: 18px; font-weight: 600; color: darkgreen"></RadzenText>
                                 }
@@ -52,31 +52,31 @@
 
                         </RadzenStack>
                         <RadzenButton Click="OpenDialogCreatePhieuNhapKhoTP" Icon="add" Text="Tạo phiếu nhập kho" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Darker"
-                        Style="height: contain; width: contain; font-weight: 600; font-size: 15px;" />
+                                      Style="height: contain; width: contain; font-weight: 600; font-size: 15px;" />
 
                     </RadzenStack>
                     <RadzenStack Orientation="Orientation.Vertical" Gap="10px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: contain; width: 100%;">
                         <RadzenCard Variant="Variant.Flat" Style="height: contain; max-height: 500px; width: 100%; padding: 10px; padding-right: 0; overflow-y: scroll">
                             <RadzenStack Gap="10px" Style="height: contain; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                <RadzenDataList Style="height: contain; width: 100%;" PagerPosition="PagerPosition.Top" WrapItems="true" AllowPaging="false" Data="@ThungTPhamExtends" TItem="ThungTPhamExtend">
+                                <RadzenDataList Style="height: contain; width: 100%;" PagerPosition="PagerPosition.Top" WrapItems="true" AllowPaging="false" Data="@ThungTPhams" TItem="ThungTPham">
                                     <Template Context="thungtpham">
                                         <RadzenCard Style="width: contain; height: contain; padding: 0;" Variant="Variant.Filled">
                                             <RadzenStack Style="width: 100%; height: contain; padding: 10px; padding-right: 20px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                                                 <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                                    <RadzenText Text="@($"Thùng {ThungTPhamExtends.IndexOf(thungtpham) + 1}")" Style="font-size: 16px; font-weight: 600; height: contain; color: rgba(58,71,77)"></RadzenText>
+                                                    <RadzenText Text="@($"Thùng {ThungTPhams.IndexOf(thungtpham) + 1}")" Style="font-size: 16px; font-weight: 600; height: contain; color: rgba(58,71,77)"></RadzenText>
                                                     <RadzenButton Visible="@(!thungtpham.DaNhapKho)" Text="Nhập kho thành phẩm" Icon="download" Click="@(async() => await OnSelectViTriLuuKho(thungtpham))"
-                                                    ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Light" Style="border-radius: 5px; --rz-icon-size: 16px;" />
+                                                                  ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Light" Style="border-radius: 5px; --rz-icon-size: 16px;" />
                                                     <RadzenButton Visible="@(thungtpham.DaNhapKho)" Text="Đã nhập kho" Icon="check" Click="@(async() => await OnSelectViTriLuuKho(thungtpham))"
-                                                    MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Nhấn để xem", 100, 1000))"
-                                                    ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Dark" Style="border-radius: 5px; --rz-icon-size: 16px;" />
+                                                                  MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Nhấn để xem", 100, 1000))"
+                                                                  ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Dark" Style="border-radius: 5px; --rz-icon-size: 16px;" />
                                                 </RadzenStack>
                                                 @{
-                                                    DateTime? ngaynk = DateTime.TryParse(thungtpham.ThungTPhams.FirstOrDefault()?.NgayNhapKho.Value?.ToString(), out DateTime nnk) ? nnk : null;
+                                                    DateTime? ngaynk = DateTime.TryParse(thungtpham.NgayNhapKho.Value?.ToString(), out DateTime nnk) ? nnk : null;
 
                                                     string _ngaynk = ngaynk?.ToString("dd/MM/yyyy") ?? "---";
                                                 }
                                                 <RadzenText MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Ngày nhập kho", 100, 1000))"
-                                                Text="@($"{_ngaynk}")" Style="font-weight: 600; font-size: 16px;"></RadzenText>
+                                                            Text="@($"{_ngaynk}")" Style="font-weight: 600; font-size: 16px;"></RadzenText>
                                             </RadzenStack>
                                             <RadzenCard Style="width: 100%; height: contain; min-height: 210px; padding-top: 0; padding-bottom: 10px" Variant="Variant.Text">
                                                 <RadzenStack Style="width: 100%; height: contain; padding: 0" Orientation=Orientation.Vertical AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
@@ -87,8 +87,8 @@
                                                                     <RadzenText Text="ID thùng" Style="font-size: 16px; font-weight: 500; height: contain; color: rgba(58,71,77)"></RadzenText>
                                                                 </RadzenStack>
                                                                 <RadzenStack Style="width: auto; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
-                                                                    <RadzenButton Text="@($"{thungtpham.IDThung?.ToString()}")" Style="color: darkblue; font-weight: 700; font-size: 18px; min-width: 100px"
-                                                                    ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Lighter"></RadzenButton>
+                                                                    <RadzenButton Text="@($"{thungtpham.IDThung.Value?.ToString()}")" Style="color: darkblue; font-weight: 700; font-size: 18px; min-width: 100px"
+                                                                                  ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Lighter"></RadzenButton>
                                                                 </RadzenStack>
                                                             </RadzenStack>
 
@@ -97,7 +97,7 @@
                                                                     <RadzenText Text="Số lượng/thùng" Style="font-size: 16px; font-weight: 500; height: contain; color: rgba(58,71,77)"></RadzenText>
                                                                 </RadzenStack>
                                                                 <RadzenStack Style="width: 40%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
-                                                                    <RadzenText Text="@($"{thungtpham.ThungTPhams.Sum(ttp => int.TryParse(ttp.SoLuong.Value?.ToString(), out int sl)? sl: 0).ToString()} (PCS)")" Style="font-size: 17px; font-weight: 600; height: contain; color: darkred"></RadzenText>
+                                                                    <RadzenText Text="@($"{thungtpham.SoLuong.Value} (PCS)")" Style="font-size: 17px; font-weight: 600; height: contain; color: darkred"></RadzenText>
                                                                 </RadzenStack>
                                                             </RadzenStack>
 
@@ -116,17 +116,17 @@
                                                                 </RadzenStack>
 
                                                                 <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style=" height: 90%; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                                                    @foreach (var thung in thungtpham.ThungTPhams)
+                                                                    @foreach (var lotnvl in thungtpham.PartOfThungTPhams)
                                                                     {
                                                                         <RadzenCard Variant="Variant.Outlined" Style="width: 100%; height: contain; padding: 5px; padding-right: 0px; background-color: white">
                                                                             <RadzenStack Style="width: 100%; height: 100%" Gap="10px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                                                 <RadzenStack Style="width: 70%; height: contain; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                                    <RadzenText Text="@thung.MaQuanLyLot.Value?.ToString()" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Mã quản lý Lot NVL", 100, 1000))"
-                                                                                    Style="color: darkblue; font-weight: 600; font-size: 14px"></RadzenText>
+                                                                                    <RadzenText Text="@lotnvl.MaQuanLyLot.Value?.ToString()" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Mã quản lý Lot NVL", 100, 1000))"
+                                                                                                Style="color: darkblue; font-weight: 600; font-size: 14px"></RadzenText>
                                                                                 </RadzenStack>
                                                                                 <RadzenStack Gap="10px" Style="width: 30%; height: contain; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                                    <RadzenText Text="@($"{thung.SoLuong.Value?.ToString()} PCS")" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Số lượng/Lot NVL", 100, 1000))"
-                                                                                    Style="font-size: 14px; font-weight: 600; height: contain; color: rgba(58,71,77)"></RadzenText>
+                                                                                    <RadzenText Text="@($"{lotnvl.SoLuong.Value?.ToString()} PCS")" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Số lượng/Lot NVL", 100, 1000))"
+                                                                                                Style="font-size: 14px; font-weight: 600; height: contain; color: rgba(58,71,77)"></RadzenText>
                                                                                 </RadzenStack>
                                                                             </RadzenStack>
                                                                         </RadzenCard>
@@ -134,17 +134,16 @@
                                                                 </RadzenStack>
                                                             </RadzenStack>
 
-
                                                         </RadzenStack>
                                                     </RadzenCard>
                                                     <RadzenStack Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                                         <RadzenText Text="Vị trí lưu kho" Style="font-size: 16px; font-weight: 600; height: contain;"></RadzenText>
-                                                        <RadzenButton Visible="@(thungtpham.DaNhapKho)" Text="@(SQLServerServices.GetViTriTPhamByVTofTPID(thungtpham.ThungTPhams.FirstOrDefault()?.VTofTPID.Value).MaViTri.Value?.ToString())" Click="@(async() => await OnSelectViTriLuuKho(thungtpham))"
-                                                        MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Mã vị trí", 100, 1000))"
-                                                        ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Variant="Variant.Text" Shade="Shade.Darker" Style="border-radius: 5px; --rz-icon-size: 16px; font-size: 16px; font-weight: 600" />
+                                                        <RadzenButton Visible="@(thungtpham.DaNhapKho)" Text="@(SQLServerServices.GetViTriTPhamByVTofTPID(thungtpham.VTofTPID.Value).MaViTri.Value?.ToString())" Click="@(async() => await OnSelectViTriLuuKho(thungtpham))"
+                                                                      MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Mã vị trí", 100, 1000))"
+                                                                      ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Variant="Variant.Text" Shade="Shade.Darker" Style="border-radius: 5px; --rz-icon-size: 16px; font-size: 16px; font-weight: 600" />
                                                         <RadzenButton Visible="@(thungtpham.DaNhapKho)" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "LOT vị trí", 100, 1000))"
-                                                        Text="@(SQLServerServices.GetListViTriofTPhams(new Dictionary<string, object?>(){{ViTriofTPham.DBName.VTofTPID, thungtpham.ThungTPhams.FirstOrDefault()?.VTofTPID.Value}}).viTriofTPhams.FirstOrDefault()?.LotVitri.Value?.ToString())"
-                                                        ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Variant="Variant.Text" Shade="Shade.Darker" Style="border-radius: 5px; --rz-icon-size: 16px; cursor: default; font-size: 16px; font-weight: 600" />
+                                                                      Text="@(SQLServerServices.GetListViTriofTPhams(new Dictionary<string, object?>(){{ViTriofTPham.DBName.VTofTPID, thungtpham.VTofTPID.Value}}).viTriofTPhams.FirstOrDefault()?.LotVitri.Value?.ToString())"
+                                                                      ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Variant="Variant.Text" Shade="Shade.Darker" Style="border-radius: 5px; --rz-icon-size: 16px; cursor: default; font-size: 16px; font-weight: 600" />
                                                     </RadzenStack>
 
                                                     <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
@@ -152,11 +151,11 @@
                                                             <RadzenText Text="Mã thùng" Style="font-size: 16px; font-weight: 600; height: contain; color: rgba(58,71,77)"></RadzenText>
                                                         </RadzenStack>
                                                         <RadzenStack Style="width: 60%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
-                                                            <RadzenButton Text="@($"{thungtpham.ThungTPhams.FirstOrDefault()?.MaQuanLyThung.Value?.ToString()}")"
-                                                            MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Mã quản lý thùng", 100, 1000))"
-                                                            Click="@(() => OnOpenQR_ImageDialog(thungtpham.ThungTPhams.FirstOrDefault()?.MaQuanLyThung.Value?.ToString() ?? string.Empty, "Mã quản lý thùng thành phẩm"))" Icon="qr_code"
-                                                            ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat" Size="ButtonSize.Small" Shade="Shade.Lighter"
-                                                            Style="font-size: 16px; font-weight: 600; height: contain; color: darkgreen"></RadzenButton>
+                                                            <RadzenButton Text="@($"{thungtpham.MaQuanLyThung.Value?.ToString()}")"
+                                                                          MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Mã quản lý thùng", 100, 1000))"
+                                                                          Click="@(() => OnOpenQR_ImageDialog(thungtpham.MaQuanLyThung.Value?.ToString() ?? string.Empty, "Mã quản lý thùng thành phẩm"))" Icon="qr_code"
+                                                                          ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat" Size="ButtonSize.Small" Shade="Shade.Lighter"
+                                                                          Style="font-size: 16px; font-weight: 600; height: contain; color: darkgreen"></RadzenButton>
                                                         </RadzenStack>
                                                     </RadzenStack>
 
@@ -183,8 +182,6 @@
     [Parameter]
     public KHSX TargetKHSX { get; set; } = new();
 
-    private List<ThungTPhamExtend> ThungTPhamExtends = new();
-
     private List<ThungTPham> ThungTPhams = new();
 
     protected override async Task OnInitializedAsync()
@@ -194,43 +191,27 @@
         await base.OnInitializedAsync();
     }
 
+
     private async Task LoadDSachThungTPhams(object? khsxid)
     {
-        await Task.Run(() =>
+        List<ThungTPham> thungTPhams = SQLServerServices.GetListThungTPs(new Dictionary<string, object?>() { { KHSX_LOT.DBName.KHSXID, khsxid } }).thungTPhams;
+
+        foreach (var thungtp in thungTPhams)
         {
-            List<PartOfThungTPham> thungTPhams = SQLServerServices.GetListPartOfThungTPs(new Dictionary<string, object?>() { { KHSX_LOT.DBName.KHSXID, khsxid } }).thungTPhams;
-
-            // Group the ThungTPham objects by IDThung
-            var groupedResults = thungTPhams.Where(ttp => ttp.IDThung.Value != null)
-                                            .GroupBy(ttp => ttp.IDThung.Value)
-                                            .Select(group => new ThungTPhamExtend
-                                                {
-                                                    IDThung = group.Key,
-                                                    ThungTPhams = group.ToList(),
-                                                    Total = group.ToList().Sum(ttp => int.TryParse(ttp.SoLuong.Value?.ToString(), out int sl) ? sl : 0),
-                                                    MaSanPham = SQLServerServices.GetMaSanphamByID(group.ToList().FirstOrDefault()?.SPID.Value),
-                                                }).ToList();
-            if (groupedResults != null)
+            if (int.TryParse(thungtp.VTofTPID.Value?.ToString(), out int vtid))
             {
-                foreach (var thung in groupedResults)
-                {
-                    foreach (var ttp in thung.ThungTPhams)
-                    {
-                        if (int.TryParse(ttp.VTofTPID.Value?.ToString(), out int vtid))
-                        {
-                            thung.DaNhapKho = vtid > 0;
-                        }
-                    }
-                }
-
-                ThungTPhamExtends = groupedResults;
+                thungtp.DaNhapKho = vtid > 0;
             }
-        });
+        }
+
+        ThungTPhams = thungTPhams;
+
+        await Task.Delay(1);
     }
 
-    private async Task OnSelectViTriLuuKho(ThungTPhamExtend thungTPhamExtend)
+    private async Task OnSelectViTriLuuKho(ThungTPham thungTPham)
     {
-        var results = await DialogService.OpenAsync<DialogChonViTriKhoTPham>(null, new Dictionary<string, object>() { { "TarGetThungTPhamEx", thungTPhamExtend }, { "TargetKHSX", TargetKHSX } },
+        var results = await DialogService.OpenAsync<DialogChonViTriKhoTPham>(null, new Dictionary<string, object>() { { "TarGetThungTPham", thungTPham }, { "TargetKHSX", TargetKHSX } },
         new DialogOptions() { ShowTitle = true, Width = "90%", Height = "90%", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 10px; padding: 0px" });
 
         await LoadDSachThungTPhams(TargetKHSX.KHSXID.Value);
@@ -253,14 +234,7 @@
 
     private async Task OpenDialogCreatePhieuNhapKhoTP()
     {
-        List<PartOfThungTPham> thungTPhams = new();
-
-        foreach (var ttps in ThungTPhamExtends)
-        {
-            thungTPhams.AddRange(ttps.ThungTPhams);
-        }
-
-        var result = await DialogService.OpenAsync<DialogCreatePhieuNhapKhoTP>(null, new() { { "ThungTPhams", thungTPhams } },
+        var result = await DialogService.OpenAsync<DialogCreatePhieuNhapKhoTP>(null, new() { { "ThungTPhams", ThungTPhams } },
         new DialogOptions() { Width = "70%", Height = "100%", Resizable = false, Draggable = true, ShowTitle = false, ShowClose = false, Style = "background-color: while; border-radius: 0px; padding: 0px" });
     }
 }
