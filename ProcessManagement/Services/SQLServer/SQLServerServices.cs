@@ -9151,6 +9151,9 @@ namespace ProcessManagement.Services.SQLServer
                             }
                         }
 
+                        // Load partofthungTPs
+                        thungtpham.PartOfThungTPhams = GetListPartOfThungTPs(new() { { PartOfThungTPham.DBName.MaQuanLyThung, thungtpham.MaQuanLyThung.Value } }).thungTPhams;
+
                         listThungTPhams.Add(thungtpham);
                     }
                 }
