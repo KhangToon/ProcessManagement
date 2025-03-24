@@ -9,11 +9,11 @@ namespace ProcessManagement.Models.KHSXs
         public object? MaQuanLyLot { get; set; }
         public object? SLperLOT { get; set; }
         public bool IsLastCDoanDone { get; set; }
-        public bool IsCreatedThungTP { get; set; } = false;
+        public bool IsCreatedPartOfThungTP { get; set; } = false;
 
         public List<KQGCperCDOANofLOTKHSX> DsachKQGCperCDOAN { get; set; } = new(); // KQGC of current LOT per cong doan
 
-        public List<PartOfThungTPham> ThungTPhams { get; set; } = new(); // danh sach thung thanh pham cua moi LOT
+        public List<PartOfThungTPham> PartOfThungTPhams { get; set; } = new(); // danh sach thung thanh pham cua moi LOT
 
         // public int GetMaxColumnIndex() // get max column of lot result in dsachKQGCperCDOAN
         // {

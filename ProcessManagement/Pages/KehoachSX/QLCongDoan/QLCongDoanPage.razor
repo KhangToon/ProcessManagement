@@ -362,7 +362,7 @@
                                     <span style="font-weight: 700; font-size: 15px; color: black; padding-left: 10px; padding-right: 10px">ID thùng</span>
                                 </HeaderTemplate>
                                 <Template Context="lotrow">
-                                    <RadzenText Text="@(lotrow.ThungTPhams.ElementAtOrDefault(index)?.IDThung.Value?.ToString())" Style="font-size: 16px; color: darkblue; height: contain; font-weight: 600"></RadzenText>
+                                    <RadzenText Text="@(lotrow.PartOfThungTPhams.ElementAtOrDefault(index)?.IDThung.Value?.ToString())" Style="font-size: 16px; color: darkblue; height: contain; font-weight: 600"></RadzenText>
                                 </Template>
                                 <FooterTemplate>
 
@@ -375,7 +375,7 @@
                                     <span style="font-weight: 700; font-size: 15px; color: black; padding-left: 10px; padding-right: 10px">Số lượng</span>
                                 </HeaderTemplate>
                                 <Template Context="lotrow">
-                                    <RadzenText Text="@(lotrow.ThungTPhams.ElementAtOrDefault(index)?.SoLuong.Value?.ToString())" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
+                                    <RadzenText Text="@(lotrow.PartOfThungTPhams.ElementAtOrDefault(index)?.SoLuong.Value?.ToString())" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
                                 </Template>
                                 <FooterTemplate>
                                 </FooterTemplate>
@@ -392,10 +392,10 @@
                         </RadzenStack>
                     </HeaderTemplate>
                     <Template Context="lotrow">
-                        <RadzenButton Disabled="@(!lotrow.IsLastCDoanDone)" Visible="@(!lotrow.IsCreatedThungTP)" Text="Đóng thùng"
+                        <RadzenButton Disabled="@(!lotrow.IsLastCDoanDone)" Visible="@(!lotrow.IsCreatedPartOfThungTP)" Text="Đóng thùng"
                                       MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Tạo thùng thành phẩm", 100, 1000))"
                                       Click="@(async () => await OpenDialogAsignSPforNVL(lotrow))" ButtonStyle="ButtonStyle.Secondary" Icon="add" Shade="Shade.Light" Size="ButtonSize.Small" Variant="Variant.Flat" Style="font-size: 15px; width: 100%; font-weight: 500; background-color: Highlight"></RadzenButton>
-                        <RadzenButton Disabled="@((!lotrow.IsLastCDoanDone && !lotrow.ThungTPhams.Any()))" Visible="@(lotrow.IsCreatedThungTP)" Text="Đã đóng thùng"
+                        <RadzenButton Disabled="@((!lotrow.IsLastCDoanDone && !lotrow.PartOfThungTPhams.Any()))" Visible="@(lotrow.IsCreatedPartOfThungTP)" Text="Đã đóng thùng"
                                       MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Nhấn để xem", 100, 1000))"
                                       Click="@(async () => await OpenDialogAsignSPforNVL(lotrow))" ButtonStyle="ButtonStyle.Success" Icon="check" Shade="Shade.Light" Size="ButtonSize.Small" Variant="Variant.Flat" Style="font-size: 15px; width: 100%; font-weight: 500;"></RadzenButton>
                     </Template>
@@ -451,8 +451,8 @@
                             </RadzenStack>
                         </HeaderTemplate>
                         <Template Context="lotrow">
-                            <RadzenButton Visible="@(!(lotrow.IsLastCDoanDone && lotrow.IsCreatedThungTP))" ButtonStyle="ButtonStyle.Warning" Size="ButtonSize.Small" Shade="Shade.Darker" Variant="Variant.Text" Text="Processing" Style="font-size: 16px; height: contain; font-weight: 500"></RadzenButton>
-                            <RadzenButton Visible="@(lotrow.IsLastCDoanDone && lotrow.IsCreatedThungTP)" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Default" Variant="Variant.Flat" Icon="check" Text="Completed" Style="font-size: 16px; height: contain; font-weight: 500; cursor: pointer"></RadzenButton>
+                            <RadzenButton Visible="@(!(lotrow.IsLastCDoanDone && lotrow.IsCreatedPartOfThungTP))" ButtonStyle="ButtonStyle.Warning" Size="ButtonSize.Small" Shade="Shade.Darker" Variant="Variant.Text" Text="Processing" Style="font-size: 16px; height: contain; font-weight: 500"></RadzenButton>
+                            <RadzenButton Visible="@(lotrow.IsLastCDoanDone && lotrow.IsCreatedPartOfThungTP)" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Default" Variant="Variant.Flat" Icon="check" Text="Completed" Style="font-size: 16px; height: contain; font-weight: 500; cursor: pointer"></RadzenButton>
                         </Template>
                     </RadzenDataGridColumn>
                 }
@@ -509,7 +509,7 @@
     {
         int defaultmaxindex = 2;
 
-        var maxindex = DSachResultPerLOTKHSX.Max(rs => rs.ThungTPhams.Count());
+        var maxindex = DSachResultPerLOTKHSX.Max(rs => rs.PartOfThungTPhams.Count());
 
         return (maxindex > defaultmaxindex) ? maxindex : defaultmaxindex;
     }
@@ -657,9 +657,9 @@
                 // Asign IsDoneLastCDoan
                 resultPerLOTKHSX.IsLastCDoanDone = resultPerLOTKHSX.DsachKQGCperCDOAN.LastOrDefault()?.DanhGia == 1;
 
-                resultPerLOTKHSX.ThungTPhams = await LoadDSachThungTPhams(TargetKHSX.KHSXID.Value, resultPerLOTKHSX.MaQuanLyLot);
+                resultPerLOTKHSX.PartOfThungTPhams = await LoadDSachThungTPhams(TargetKHSX.KHSXID.Value, resultPerLOTKHSX.MaQuanLyLot);
 
-                int numofThungTP = resultPerLOTKHSX.ThungTPhams.Count();
+                int numofThungTP = resultPerLOTKHSX.PartOfThungTPhams.Count();
 
                 if (numofThungTP > orginMaxThungTP)
                 {
@@ -667,7 +667,7 @@
                 }
 
                 // Asign IsCreatedThungTP
-                resultPerLOTKHSX.IsCreatedThungTP = resultPerLOTKHSX.ThungTPhams.Any();
+                resultPerLOTKHSX.IsCreatedPartOfThungTP = resultPerLOTKHSX.PartOfThungTPhams.Any();
 
                 resultPerLOTKHSXs.Add(resultPerLOTKHSX);
             }
