@@ -209,7 +209,7 @@
             _ = int.TryParse(lastestThungTPham?.SLRequired.Value?.ToString(), out int lastestSLrequired) ? lastestSLrequired : 0;
 
             // Bo sung so luong cho thung thanh pham truoc do (chi khi thieu)
-            if (lastestSLrequired == 0)
+            if (lastestSLrequired == 0 && lastestThungTPham != null)
             {
                 lastestSLrequired = SLrequiredPerThung_currentLOT;
             }
@@ -232,7 +232,7 @@
                             SPID = { Value = TargetKHSX.SPID.Value },
                             MaQuanLyLot = { Value = TargetLotResult.MaQuanLyLot },
                             NgayDongThung = { Value = DateTime.Now.ToString(Common.FormatNoTime_yyyddMM) },
-                            // MaQuanLyThung = { Value = mqlthungtp }
+                        // MaQuanLyThung = { Value = mqlthungtp }
                             MaQuanLyThung = { Value = lastestThungTPham?.MaQuanLyThung.Value ?? mqlthungtp } // Lay new mql khi la thung dau tien
                         };
 
@@ -240,9 +240,9 @@
                 }
                 else
                 {
-                    // // Create mql thung TP
-                    // string randomkey = Common.GenerateUppercaseChars(5);
-                    // string mqlthungtp = $"TTP-{TargetKHSX.MaLSX.Value?.ToString()}-{randomkey}-{lastestThungTPham?.IDThung.Value ?? 1}";
+                    // Create mql thung TP
+                    string randomkey = Common.GenerateUppercaseChars(5);
+                    string mqlthungtp = $"TTP-{TargetKHSX.MaLSX.Value?.ToString()}-{randomkey}-{lastestThungTPham?.IDThung.Value ?? 1}";
 
                     // Lay IDThung truoc
                     PartOfThungTPham thungTPham = new()
