@@ -437,6 +437,26 @@
                 {
                     break;
                 }
+                else
+                {
+                    var targetThungTP = SQLServerServices.GetListThungTPs(new() { { ThungTPham.DBName.MaQuanLyThung, partthungtp.MaQuanLyThung.Value } }).thungTPhams.FirstOrDefault();
+
+                    if (targetThungTP != null)
+                    {
+                        int sumslthung = targetThungTP.PartOfThungTPhams.Sum(pot => int.TryParse(pot.SoLuong.Value?.ToString(), out int sl) ? sl : 0);
+
+                        if (sumslthung == 0)
+                        {
+                            SQLServerServices.DeleteThungTP(targetThungTP.TTPID.Value);
+                        }
+                        else
+                        {
+                            targetThungTP.SoLuong.Value = sumslthung;
+
+                            SQLServerServices.UpdateThungTPham(targetThungTP);
+                        }
+                    }
+                }
             }
 
             if (isOK)

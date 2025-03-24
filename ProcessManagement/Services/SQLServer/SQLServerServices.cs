@@ -9194,6 +9194,33 @@ namespace ProcessManagement.Services.SQLServer
             }
         }
 
+        public (bool, string) DeleteThungTPbyMQLThung(object? mqlthung)
+        {
+            // Check for valid ID
+            if (mqlthung == null)
+            {
+                return (false, "Error");
+            }
+
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+
+            string query = $"DELETE FROM [{ThungTPham.DBName.Table_ThungTPham}] WHERE [{ThungTPham.DBName.MaQuanLyThung}] = @MQLT";
+
+            using var command = new SqlCommand(query, connection);
+            command.Parameters.AddWithValue("@MQLT", mqlthung);
+
+            try
+            {
+                int rowsAffected = command.ExecuteNonQuery();
+                return (rowsAffected > 0, string.Empty); // Return true if a row was deleted
+            }
+            catch (Exception ex)
+            {
+                return (false, $"Error: {ex.Message}"); // Return false and the error message
+            }
+        }
+
         #endregion
 
         // ------------------------------------------------------------------------------------- //
