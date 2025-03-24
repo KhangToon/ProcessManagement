@@ -14,7 +14,6 @@ using ProcessManagement.Models.SANPHAM;
 using ProcessManagement.Models.TienDoGCs;
 using System.Data;
 using System.Text.RegularExpressions;
-using static ProcessManagement.Models.KHSXs.PartOfThungTPham;
 using static ProcessManagement.Models.KHSXs.KetQuaGC;
 using ProcessManagement.Models.KHO_TPHAM;
 using ProcessManagement.Models.KHSXs.MQL_Template;
@@ -8712,15 +8711,15 @@ namespace ProcessManagement.Services.SQLServer
         #endregion
 
         // ------------------------------------------------------------------------------------- //
-        #region KHSX_ThungTPham
+        #region KHSX_PartOfThungTPham
         // Insert 
-        public (int, string) InsertThungTPham(PartOfThungTPham thungtpham)
+        public (int, string) InsertPartOfThungTPham(PartOfThungTPham thungtpham)
         {
             int result = -1;
             string errorMess = string.Empty;
 
             // Check for null input
-            if (thungtpham == null) return (result, "Error: ThungTPham is null");
+            if (thungtpham == null) return (result, "Error: PartOfThungTPham is null");
 
             List<Propertyy> properties = thungtpham.GetPropertiesValues()
                 .Where(po => po.AlowDatabase == true && po.Value != null)
@@ -8745,7 +8744,7 @@ namespace ProcessManagement.Services.SQLServer
                 string columns = string.Join(", ", properties.Select(p => $"[{p.DBName}]"));
                 string parameters = string.Join(", ", properties.Select(p => $"@{Regex.Replace(p.DBName ?? string.Empty, @"[^\w]+", "")}"));
 
-                command.CommandText = $@"INSERT INTO [{DBName.Table_PartOfThungTP}] ({columns}) OUTPUT INSERTED.{DBName.TTPID} VALUES ({parameters})";
+                command.CommandText = $@"INSERT INTO [{PartOfThungTPham.DBName.Table_PartOfThungTP}] ({columns}) OUTPUT INSERTED.{PartOfThungTPham.DBName.POTTPID} VALUES ({parameters})";
 
                 // Add parameters
                 foreach (var prop in properties)
@@ -8786,7 +8785,7 @@ namespace ProcessManagement.Services.SQLServer
         }
 
         // Update 
-        public (int, string) UpdateThungTPham(PartOfThungTPham thungtpham)
+        public (int, string) UpdatePartOfThungTPham(PartOfThungTPham thungtpham)
         {
             int result = -1;
             string errorMess = string.Empty;
@@ -8816,7 +8815,7 @@ namespace ProcessManagement.Services.SQLServer
 
                 string updateSet = string.Join(", ", properties.Select(p => $"[{p.DBName}] = @{Regex.Replace(p.DBName ?? string.Empty, @"[^\w]+", "")}"));
 
-                command.CommandText = $@"UPDATE [{DBName.Table_PartOfThungTP}] SET {updateSet} WHERE [{DBName.TTPID}] = '{thungtpham.TTPID.Value}'";
+                command.CommandText = $@"UPDATE [{PartOfThungTPham.DBName.Table_PartOfThungTP}] SET {updateSet} WHERE [{PartOfThungTPham.DBName.POTTPID}] = '{thungtpham.POTTPID.Value}'";
 
                 // Add parameters
                 foreach (var prop in properties)
@@ -8858,7 +8857,7 @@ namespace ProcessManagement.Services.SQLServer
         }
 
         // Get
-        public (List<PartOfThungTPham> thungTPhams, string error) GetListThungTPhams(Dictionary<string, object?> parameters, bool isgetAll = false)
+        public (List<PartOfThungTPham> thungTPhams, string error) GetListPartOfThungTPs(Dictionary<string, object?> parameters, bool isgetAll = false)
         {
             List<PartOfThungTPham> listThungTPhams = new();
 
@@ -8872,7 +8871,7 @@ namespace ProcessManagement.Services.SQLServer
 
                     var conditions = new List<string>();
                     var command = connection.CreateCommand();
-                    command.CommandText = $"SELECT * FROM [{DBName.Table_PartOfThungTP}]";
+                    command.CommandText = $"SELECT * FROM [{PartOfThungTPham.DBName.Table_PartOfThungTP}]";
 
                     if (!isgetAll)
                     {
@@ -8923,7 +8922,7 @@ namespace ProcessManagement.Services.SQLServer
         }
 
         // Delete
-        public (bool, string) DeleteThungTP(object? ttpid)
+        public (bool, string) DeletePartOfThungTPham(object? ttpid)
         {
             // Check for valid ID
             if (ttpid == null)
@@ -8934,7 +8933,7 @@ namespace ProcessManagement.Services.SQLServer
             using var connection = new SqlConnection(connectionString);
             connection.Open();
 
-            string query = $"DELETE FROM [{DBName.Table_PartOfThungTP}] WHERE [{DBName.TTPID}] = @TTPID";
+            string query = $"DELETE FROM [{PartOfThungTPham.DBName.Table_PartOfThungTP}] WHERE [{PartOfThungTPham.DBName.POTTPID}] = @TTPID";
 
             using var command = new SqlCommand(query, connection);
             command.Parameters.AddWithValue("@TTPID", ttpid);
@@ -8950,6 +8949,247 @@ namespace ProcessManagement.Services.SQLServer
             }
         }
 
+
+        #endregion
+
+        // ------------------------------------------------------------------------------------- //
+        #region KHSX_ThungTPham
+        // Insert 
+        public (int, string) InsertThungTPham(ThungTPham thungtpham)
+        {
+            int result = -1;
+            string errorMess = string.Empty;
+
+            // Check for null input
+            if (thungtpham == null) return (result, "Error: ThungTPham is null");
+
+            List<Propertyy> properties = thungtpham.GetPropertiesValues()
+                .Where(po => po.AlowDatabase == true && po.Value != null)
+                .ToList();
+
+            // Validate properties before proceeding
+            if (properties.Count == 0)
+            {
+                return (result, "Error: No valid properties to insert.");
+            }
+
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+
+            using var transaction = connection.BeginTransaction(); // Start transaction 
+
+            try
+            {
+                var command = connection.CreateCommand();
+                command.Transaction = transaction; // Associate command with the transaction
+
+                string columns = string.Join(", ", properties.Select(p => $"[{p.DBName}]"));
+                string parameters = string.Join(", ", properties.Select(p => $"@{Regex.Replace(p.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $@"INSERT INTO [{ThungTPham.DBName.Table_ThungTPham}] ({columns}) OUTPUT INSERTED.{ThungTPham.DBName.TTPID} VALUES ({parameters})";
+
+                // Add parameters
+                foreach (var prop in properties)
+                {
+                    string parameterName = $"@{Regex.Replace(prop.DBName ?? string.Empty, @"[^\w]+", "")}";
+                    object? parameterValue = prop.Value ?? DBNull.Value;
+
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                // Execute command
+                object? rs = command.ExecuteScalar();
+                if (rs != null && int.TryParse(rs.ToString(), out result) && result > 0)
+                {
+                    // Successfully inserted
+                    transaction.Commit(); // Commit the transaction
+                }
+                else
+                {
+                    result = -1; // Set to -1 if insertion was not successful
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMess = $"Error: {ex.Message}";
+                try
+                {
+                    transaction.Rollback(); // Rollback transaction in case of error
+                }
+                catch (Exception rollbackEx)
+                {
+                    errorMess += $" | Rollback Error: {rollbackEx.Message}";
+                }
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
+        // Update 
+        public (int, string) UpdateThungTPham(ThungTPham thungtpham)
+        {
+            int result = -1;
+            string errorMess = string.Empty;
+
+            // Check for null input
+            if (thungtpham == null) return (result, "Error: ThungTPham is null");
+
+            List<Propertyy> properties = thungtpham.GetPropertiesValues()
+                .Where(po => po.AlowDatabase == true && po.Value != null)
+                .ToList();
+
+            // Validate properties before proceeding
+            if (properties.Count == 0)
+            {
+                return (result, "Error: No valid properties to update.");
+            }
+
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+
+            using var transaction = connection.BeginTransaction(); // Start transaction
+
+            try
+            {
+                var command = connection.CreateCommand();
+                command.Transaction = transaction; // Associate command with the transaction
+
+                string updateSet = string.Join(", ", properties.Select(p => $"[{p.DBName}] = @{Regex.Replace(p.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $@"UPDATE [{ThungTPham.DBName.Table_ThungTPham}] SET {updateSet} WHERE [{ThungTPham.DBName.TTPID}] = '{thungtpham.TTPID.Value}'";
+
+                // Add parameters
+                foreach (var prop in properties)
+                {
+                    string parameterName = $"@{Regex.Replace(prop.DBName ?? string.Empty, @"[^\w]+", "")}";
+                    object? parameterValue = prop.Value ?? DBNull.Value;
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                // Execute command
+                result = command.ExecuteNonQuery();
+
+                if (result > 0)
+                {
+                    // Successfully updated
+                    transaction.Commit(); // Commit the transaction
+                }
+                else
+                {
+                    result = -1; // Set to -1 if update was not successful
+                    errorMess = "No rows were updated. The specified may not exist.";
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMess = $"Error: {ex.Message}";
+                try
+                {
+                    transaction.Rollback(); // Rollback transaction in case of error
+                }
+                catch (Exception rollbackEx)
+                {
+                    errorMess += $" | Rollback Error: {rollbackEx.Message}";
+                }
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
+        // Get
+        public (List<ThungTPham> thungTPhams, string error) GetListThungTPs(Dictionary<string, object?> parameters, bool isgetAll = false)
+        {
+            List<ThungTPham> listThungTPhams = new();
+
+            string errorMessage = string.Empty;
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                try
+                {
+                    connection.Open();
+
+                    var conditions = new List<string>();
+                    var command = connection.CreateCommand();
+                    command.CommandText = $"SELECT * FROM [{ThungTPham.DBName.Table_ThungTPham}]";
+
+                    if (!isgetAll)
+                    {
+                        // Process each parameter in the dictionary
+                        foreach (var param in parameters)
+                        {
+                            conditions.Add($"[{param.Key}] = @{param.Key}");
+
+                            command.Parameters.AddWithValue($"@{param.Key}", param.Value);
+                        }
+
+                        if (conditions.Any())
+                        {
+                            command.CommandText += " WHERE " + string.Join(" AND ", conditions);
+                        }
+                    }
+
+                    using var reader = command.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        ThungTPham thungtpham = new();
+
+                        List<Propertyy> rowItems = thungtpham.GetPropertiesValues();
+
+                        foreach (var item in rowItems)
+                        {
+                            string? columnName = item.DBName;
+
+                            if (!string.IsNullOrEmpty(columnName) && reader.GetOrdinal(columnName) != -1)
+                            {
+                                object columnValue = reader[columnName];
+
+                                item.Value = columnValue == DBNull.Value ? null : columnValue;
+                            }
+                        }
+
+                        listThungTPhams.Add(thungtpham);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    errorMessage = $"Error: {ex.Message}";
+                    listThungTPhams.Clear(); // Clear the list in case of error
+                }
+            }
+            return (listThungTPhams, errorMessage);
+        }
+
+        // Delete
+        public (bool, string) DeleteThungTP(object? ttpid)
+        {
+            // Check for valid ID
+            if (ttpid == null)
+            {
+                return (false, "Error");
+            }
+
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+
+            string query = $"DELETE FROM [{ThungTPham.DBName.Table_ThungTPham}] WHERE [{ThungTPham.DBName.TTPID}] = @TTPID";
+
+            using var command = new SqlCommand(query, connection);
+            command.Parameters.AddWithValue("@TTPID", ttpid);
+
+            try
+            {
+                int rowsAffected = command.ExecuteNonQuery();
+                return (rowsAffected > 0, string.Empty); // Return true if a row was deleted
+            }
+            catch (Exception ex)
+            {
+                return (false, $"Error: {ex.Message}"); // Return false and the error message
+            }
+        }
 
         #endregion
 
@@ -11025,7 +11265,7 @@ namespace ProcessManagement.Services.SQLServer
         #endregion
 
         // ------------------------------------------------------------------------------------- //
-        #region Table_PhieuNhapKhoThanPham
+        #region Table_PhieuNhapKhoThanhPham
         public (int, string) InsertNewPNKThanhPham(PhieuNhapKhoTPham? newpnk)
         {
             int result = -1; string errorMess = string.Empty;
@@ -11102,7 +11342,7 @@ namespace ProcessManagement.Services.SQLServer
                         item.Value = columnValue.ToString()?.Trim();
                     }
 
-                    phieunhapkho.ListKhoThungTPham = GetListThungTPhams(new() { { DBName.PNKTPID, phieunhapkho.PNKTPID.Value } }, false).thungTPhams;
+                    phieunhapkho.ListKhoThungTPham = GetListThungTPs(new() { { ThungTPham.DBName.PNKTPID, phieunhapkho.PNKTPID.Value } }, false).thungTPhams;
 
                     phieunhapkho.MaViTri = GetListViTriTPhams(new Dictionary<string, object?>() { { ViTriTPham.DBName.VTTPID, phieunhapkho.VTTPID.Value } }).viTriTPhams.FirstOrDefault()?.MaViTri.Value ?? string.Empty;
 
@@ -11185,7 +11425,7 @@ namespace ProcessManagement.Services.SQLServer
                 }
             }
 
-            phieunhapkho.ListKhoThungTPham = GetListThungTPhams(new() { { DBName.PNKTPID, phieunhapkho.PNKTPID.Value } }, false).thungTPhams;
+            phieunhapkho.ListKhoThungTPham = GetListThungTPs(new() { { ThungTPham.DBName.PNKTPID, phieunhapkho.PNKTPID.Value } }, false).thungTPhams;
 
             phieunhapkho.MaViTri = GetListViTriTPhams(new Dictionary<string, object?>() { { ViTriTPham.DBName.VTTPID, phieunhapkho.VTTPID.Value } }).viTriTPhams.FirstOrDefault()?.MaViTri.Value ?? string.Empty;
 

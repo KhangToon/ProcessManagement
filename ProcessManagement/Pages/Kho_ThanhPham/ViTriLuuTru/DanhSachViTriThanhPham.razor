@@ -501,7 +501,7 @@
         {
             List<ThungTPhamExtend> thungTPhamExtends = new();
 
-            List<PartOfThungTPham> thungTPhams = SQLServerServices.GetListThungTPhams(new Dictionary<string, object?>() { { PartOfThungTPham.DBName.VTofTPID, vtofttpID } }).thungTPhams;
+            List<PartOfThungTPham> thungTPhams = SQLServerServices.GetListPartOfThungTPs(new Dictionary<string, object?>() { { PartOfThungTPham.DBName.VTofTPID, vtofttpID } }).thungTPhams;
 
             // Group the ThungTPham objects by IDThung
             var groupedResults = thungTPhams.Where(ttp => ttp.IDThung.Value != null)
@@ -820,7 +820,7 @@
 
                     thung.NgayNhapKho.Value = DBNull.Value;
 
-                    (int udresult, string uderror) = SQLServerServices.UpdateThungTPham(thung);
+                    (int udresult, string uderror) = SQLServerServices.UpdatePartOfThungTPham(thung);
 
                     if (udresult < 0)
                     {

@@ -185,7 +185,7 @@
     {
         await Task.Run(() =>
         {
-            DSachOriginThungTPhams = SQLServerServices.GetListThungTPhams(new Dictionary<string, object?>() { { KHSX_LOT.DBName.KHSXID, khsxid } }).thungTPhams;
+            DSachOriginThungTPhams = SQLServerServices.GetListPartOfThungTPs(new Dictionary<string, object?>() { { KHSX_LOT.DBName.KHSXID, khsxid } }).thungTPhams;
         });
     }
 
@@ -342,7 +342,7 @@
         // Insert new list ThungTP to Database
         foreach (var thungtp in DSachNewThungTPhams)
         {
-            (result, error) = SQLServerServices.InsertThungTPham(thungtp);
+            (result, error) = SQLServerServices.InsertPartOfThungTPham(thungtp);
 
             if (result <= 0)
             {
@@ -376,7 +376,7 @@
 
             foreach (var thungtp in thungTPhams)
             {
-                (isOK, error) = SQLServerServices.DeleteThungTP(thungtp.TTPID.Value);
+                (isOK, error) = SQLServerServices.DeletePartOfThungTPham(thungtp.POTTPID.Value);
 
                 if (!isOK)
                 {
