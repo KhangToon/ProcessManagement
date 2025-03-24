@@ -1,5 +1,6 @@
 ﻿@using ProcessManagement.Commons
 @using ProcessManagement.Models.KHO_NVL
+@using ProcessManagement.Models.KHO_TPHAM
 @using ProcessManagement.Models.KHSXs
 @using ProcessManagement.Services.SQLServer
 @using Radzen.Blazor
@@ -339,33 +340,85 @@
     {
         int result = 1; string error = string.Empty;
 
-        // Insert new list PartOfThungTP to Database
-        foreach (var partthungtp in DSachNewPartOfThungTPhams)
-        {   
-            // Insert 
+        var listgroupttp = DSachNewPartOfThungTPhams.Where(ttp => ttp.MaQuanLyThung.Value != null)
+                                                    .GroupBy(ttp => ttp.MaQuanLyThung.Value).ToList();
 
-            (result, error) = SQLServerServices.InsertPartOfThungTPham(partthungtp);
-
-            if (result <= 0)
+        foreach (var partofthungtps in listgroupttp)
+        {
+            // Insert new list PartOfThungTP to Database
+            foreach (var partthungtp in partofthungtps)
             {
-                break;
+                (int newpottpid, error) = SQLServerServices.InsertPartOfThungTPham(partthungtp);
+
+                if (newpottpid <= 0)
+                {
+                    result = -1;
+
+                    await PonUpNotification(result, $"{error}");
+
+                    return;
+                }
+            }
+
+            var firstPartofThungTP = partofthungtps.FirstOrDefault();
+
+            if (firstPartofThungTP != null)
+            {
+                var lastTTPwithsameMQL = SQLServerServices.GetListThungTPs(new() { { ThungTPham.DBName.MaQuanLyThung, firstPartofThungTP.MaQuanLyThung.Value } }, false).thungTPhams.FirstOrDefault();
+
+                if (lastTTPwithsameMQL != null && lastTTPwithsameMQL.TTPID.Value != null)
+                {
+                    // If existing --> Update
+                    if (int.TryParse(lastTTPwithsameMQL.SoLuong.Value?.ToString(), out int lastttpSL))
+                    {
+                        int sumsl = partofthungtps.Sum(pott => int.TryParse(pott.SoLuong.Value?.ToString(), out int sl) ? sl : 0);
+
+                        // Update new Soluong in ThungTP
+                        lastTTPwithsameMQL.SoLuong.Value = lastttpSL + sumsl;
+                        lastTTPwithsameMQL.NgayDongThung.Value = DateTime.Now.ToString(Common.FormatNoTime_yyyddMM);
+
+                        (int updateResult, error) = SQLServerServices.UpdateThungTPham(lastTTPwithsameMQL);
+
+                        if (updateResult != 1)
+                        {
+                            result = -1;
+
+                            await PonUpNotification(result, $"{error}");
+
+                            return;
+                        }
+                    }
+                    else { return; }
+                }
+                else
+                {
+                    // If not have --> Insert
+
+                    ThungTPham thungTPham = new()
+                        {
+                            KHSXID = { Value = TargetKHSX.KHSXID.Value },
+                            SoLuong = { Value = firstPartofThungTP.SoLuong.Value },
+                            IDThung = { Value = firstPartofThungTP.IDThung.Value },
+                            SPID = { Value = TargetKHSX.SPID.Value },
+                            NgayDongThung = { Value = DateTime.Now.ToString(Common.FormatNoTime_yyyddMM) },
+                            MaQuanLyThung = { Value = firstPartofThungTP.MaQuanLyThung.Value }
+                        };
+
+                    (int newttpID, error) = SQLServerServices.InsertThungTPham(thungTPham);
+
+                    if (newttpID == -1)
+                    {
+                        result = -1;
+
+                        await PonUpNotification(result, $"{error}");
+
+                        return;
+                    }
+                }
             }
         }
 
-        if (result <= 0)
-        {
-            await DialogService.Alert($"Error: {error}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
-
-            DialogService.Close(null);
-        }
-        else
-        {
-            // Update trang thai created thungTP cho targetLotResult
-
-            await DialogService.Alert($"Lưu thùng thành phẩm thành công! <strong><span>{TargetLotResult.MaQuanLyLot}</span></strong>", "<strong><span style='color: green'>Success!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
-
-            DialogService.Close(DSachNewPartOfThungTPhams);
-        }
+        await PonUpNotification(result, $"Tạo thùng thành phẩm thành công! <strong><span>{TargetLotResult.MaQuanLyLot}</span></strong>");
     }
 
     private async Task OnDeleteThungThanhPham(List<PartOfThungTPham> partofthungTPhams)
@@ -417,5 +470,23 @@
             };
 
         NotificationService.Notify(notify);
+    }
+
+    private async Task PonUpNotification(int result, string content)
+    {
+        if (result <= 0)
+        {
+            await DialogService.Alert($"Error: {content}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = false });
+
+            DialogService.Close(null);
+        }
+        else
+        {
+            // Update trang thai created thungTP cho targetLotResult
+
+            await DialogService.Alert($"{content}", "<strong><span style='color: green'>Success!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = false });
+
+            DialogService.Close(DSachNewPartOfThungTPhams);
+        }
     }
 }

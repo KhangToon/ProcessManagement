@@ -11,8 +11,8 @@ namespace ProcessManagement.Models.KHO_TPHAM
         public Propertyy VTofTPID { get; set; } = new() { DBName = DBName.VTofTPID, DisplayName = DispName.VTofTPID, Type = typeof(int), AlowDatabase = true };
         public Propertyy VTTPID { get; set; } = new() { DBName = DBName.VTTPID, DisplayName = DispName.VTTPID, Type = typeof(int), AlowDatabase = true };
         public Propertyy MaQuanLyThung { get; set; } = new() { DBName = DBName.MaQuanLyThung, DisplayName = DispName.MaQuanLyThung, Type = typeof(string), AlowDatabase = true };
+        public Propertyy IDThung { get; set; } = new() { DBName = DBName.IDThung, DisplayName = DispName.IDThung, Type = typeof(string), AlowDatabase = true };
         public Propertyy SoLuong { get; set; } = new() { DBName = DBName.SoLuong, DisplayName = DispName.SoLuong, Type = typeof(int), AlowDatabase = true };
-        public Propertyy SLRequired { get; set; } = new() { DBName = DBName.SLRequired, DisplayName = DispName.SLRequired, Type = typeof(int), AlowDatabase = true };
         public Propertyy NgayDongThung { get; set; } = new() { DBName = DBName.NgayDongThung, DisplayName = DispName.NgayDongThung, Type = typeof(DateTime), AlowDatabase = true };
         public Propertyy NgayNhapKho { get; set; } = new() { DBName = DBName.NgayNhapKho, DisplayName = DispName.NgayNhapKho, Type = typeof(DateTime), AlowDatabase = true };
         public Propertyy NgayXuatKho { get; set; } = new() { DBName = DBName.NgayXuatKho, DisplayName = DispName.NgayXuatKho, Type = typeof(DateTime), AlowDatabase = true };
@@ -39,8 +39,8 @@ namespace ProcessManagement.Models.KHO_TPHAM
             public const string VTofTPID = "VTofTPID";
             public const string VTTPID = "VTTPID";
             public const string MaQuanLyThung = "maquanlythungtp";
+            public const string IDThung = "IDThung";
             public const string SoLuong = "soluong";
-            public const string SLRequired = "slrequired";
             public const string NgayDongThung = "ngaydongthung";
             public const string NgayNhapKho = "ngaynhapkho";
             public const string NgayXuatKho = "ngayxuatkho";
@@ -58,8 +58,8 @@ namespace ProcessManagement.Models.KHO_TPHAM
             public const string VTofTPID = "VTofTPID";
             public const string VTTPID = "VTTPID";
             public const string MaQuanLyThung = "Mã quản lý thùng";
+            public const string IDThung = "IDThung";
             public const string SoLuong = "Số lượng";
-            public const string SLRequired = "Số lượng đóng thùng";
             public const string NgayDongThung = "Ngày đóng thùng";
             public const string NgayNhapKho = "Ngày nhập kho";
             public const string NgayXuatKho = "Ngày xuất kho";
