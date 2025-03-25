@@ -53,7 +53,7 @@
 <RadzenCard Style="height: 100%; width: 100%; padding: 5px" Variant="Variant.Flat">
     <RadzenStack Gap="10px" Style="height: 100%; width: 100%; margin: 0; padding: 0; padding-bottom: 10px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start">
         <RadzenStack Gap="20px" Style="height: contain; width: 100%; padding: 10px; background-color: var(--rz-primary-darker);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-            <RadzenText Text="TẠO TEMPLATE MÃ THÙNG THÀNH PHẨM" Style="color: white; font-weight: 500; font-size: 18px"></RadzenText>
+            <RadzenText Text="TẠO PHIẾU NHẬP KHO THÙNG THÀNH PHẨM" Style="color: white; font-weight: 500; font-size: 18px"></RadzenText>
         </RadzenStack>
 
         <RadzenRow Gap="10px" Style="height: contain; width: 100%; border-top: var(--rz-grid-cell-border); padding: 0;" AlignItems="AlignItems.Center">
@@ -125,12 +125,14 @@
                                                 <RadzenStack Style="width: 10%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                     <RadzenText Text="@((ThungTPhams?.IndexOf(thungTPham) + 1).ToString())" Style="color: black; font-weight: 600; font-size: 16px"></RadzenText>
                                                 </RadzenStack>
-                                                <RadzenStack Style="width: 45%; height: contain; background-color: beige" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                    <RadzenText Text="@thungTPham.MaQuanLyThung.Value?.ToString()" Style="color: black; font-weight: 600; font-size: 16px"></RadzenText>
+                                                <RadzenStack Style="width: 45%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                    <RadzenButton Text="@($"{thungTPham.MaQuanLyThung.Value}")"
+                                                                  ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat" Size="ButtonSize.Small" Shade="Shade.Lighter"
+                                                                  Style="font-size: 16px; font-weight: 600; height: contain; color: darkgreen"></RadzenButton>
                                                 </RadzenStack>
                                                 <RadzenStack Gap="10px" Style="width: 20%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                     <RadzenText Text="@($"{thungTPham.SoLuong.Value} (PCS)")" Style="color: black; font-weight: 600; font-size: 16px"></RadzenText>
-                                                    <RadzenButton Icon="edit" Click="@(async() => await OnEditSoluongXuatKho(thungTPham))"
+                                                    <RadzenButton Visible="false" Icon="edit" Click="@(async() => await OnEditSoluongXuatKho(thungTPham))"
                                                                   ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.ExtraSmall" Variant="Variant.Flat" Shade="Shade.Lighter" />
                                                 </RadzenStack>
                                             </RadzenStack>
@@ -301,7 +303,7 @@
             {
                 await DialogService.Alert($"Tạo phiếu nhập kho thành công!", "<strong><span style='color: green'>Success!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
 
-                DialogService.Close();
+                DialogService.Close(newpnkID);
             }
         }
     }

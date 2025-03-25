@@ -11555,6 +11555,55 @@ namespace ProcessManagement.Services.SQLServer
             return phieunhapkho;
         }
 
+        public PhieuNhapKhoTPham GetPhieuNhapKhoTPhamByPalletKey(object? palletkey)
+        {
+            PhieuNhapKhoTPham phieunhapkho = new();
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.Table_PhieuNhapKhoTPham}] WHERE [{Common.CodePallet}] = '{palletkey}'";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    List<Propertyy> rowitems = phieunhapkho.GetPropertiesValues();
+
+                    foreach (var item in rowitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue;
+                    }
+
+                }
+            }
+
+            phieunhapkho.ListKhoThungTPham = GetListThungTPs(new() { { ThungTPham.DBName.PNKTPID, phieunhapkho.PNKTPID.Value } }, false).thungTPhams;
+
+            phieunhapkho.MaViTri = GetListViTriTPhams(new Dictionary<string, object?>() { { ViTriTPham.DBName.VTTPID, phieunhapkho.VTTPID.Value } }).viTriTPhams.FirstOrDefault()?.MaViTri.Value ?? string.Empty;
+
+            foreach (var thung in phieunhapkho.ListKhoThungTPham)
+            {
+                if (thung.MaQuanLyThung.Value != null && int.TryParse(thung.VTofTPID.Value?.ToString(), out int vtid))
+                {
+                    thung.DaNhapKho = vtid > 0;
+                }
+            }
+
+            phieunhapkho.IsDonePNK.Value = (phieunhapkho.ListKhoThungTPham.All(ttp => ttp.DaNhapKho) && phieunhapkho.ListKhoThungTPham.Count > 0) ? 1 : 0;
+
+            phieunhapkho.isPNKDoneNhapKho = (int.TryParse(phieunhapkho.IsDonePNK.Value?.ToString(), out int isdone) ? isdone : 0) == 1;
+
+            return phieunhapkho;
+        }
+
         #endregion
     }
 }

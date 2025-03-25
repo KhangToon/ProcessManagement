@@ -51,8 +51,11 @@
                             }
 
                         </RadzenStack>
-                        <RadzenButton Disabled=@(ThungTPhams.Count == 0) Click="OpenDialogCreatePhieuNhapKhoTP" Icon="add" Text="Tạo phiếu nhập kho" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Darker"
-                                      Style="height: contain; width: contain; font-weight: 600; font-size: 15px;" />
+                        <RadzenButton Visible="@(!IsCreatedPNK)" Disabled=@(ThungTPhams.Count == 0 || ThungTPhams.Any(ttp => ttp.DaNhapKho)) Click="OpenDialogCreatePhieuNhapKhoTP" Icon="add" Text="Tạo phiếu nhập kho" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Darker"
+                        Style="height: contain; width: contain; font-weight: 600; font-size: 15px;" />
+
+                        <RadzenButton Visible="@(IsCreatedPNK)" Text="Đã tạo phiếu nhập kho" Icon="check"
+                        ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Variant="Variant.Filled" Shade="Shade.Dark" Style="border-radius: 5px; --rz-icon-size: 16px;" />
 
                     </RadzenStack>
                     <RadzenStack Orientation="Orientation.Vertical" Gap="10px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: contain; width: 100%;">
@@ -64,11 +67,11 @@
                                             <RadzenStack Style="width: 100%; height: contain; padding: 10px; padding-right: 20px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                                                 <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                                     <RadzenText Text="@($"Thùng {ThungTPhams.IndexOf(thungtpham) + 1}")" Style="font-size: 16px; font-weight: 600; height: contain; color: rgba(58,71,77)"></RadzenText>
-                                                    <RadzenButton Visible="@(!thungtpham.DaNhapKho)" Text="Nhập kho thành phẩm" Icon="download" Click="@(async() => await OnSelectViTriLuuKho(thungtpham))"
-                                                                  ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Light" Style="border-radius: 5px; --rz-icon-size: 16px;" />
+                                                    <RadzenButton Visible="@(!thungtpham.DaNhapKho)" Text="Chưa nhập kho" Icon="warning"
+                                                    ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Variant="Variant.Text" Shade="Shade.Darker" Style="border-radius: 5px; --rz-icon-size: 16px; color: red; font-weight: 600" />
                                                     <RadzenButton Visible="@(thungtpham.DaNhapKho)" Text="Đã nhập kho" Icon="check" Click="@(async() => await OnSelectViTriLuuKho(thungtpham))"
-                                                                  MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Nhấn để xem", 100, 1000))"
-                                                                  ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Dark" Style="border-radius: 5px; --rz-icon-size: 16px;" />
+                                                    MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Nhấn để xem", 100, 1000))"
+                                                    ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Variant="Variant.Filled" Shade="Shade.Dark" Style="border-radius: 5px; --rz-icon-size: 16px;" />
                                                 </RadzenStack>
                                                 @{
                                                     DateTime? ngaynk = DateTime.TryParse(thungtpham.NgayNhapKho.Value?.ToString(), out DateTime nnk) ? nnk : null;
@@ -76,7 +79,7 @@
                                                     string _ngaynk = ngaynk?.ToString("dd/MM/yyyy") ?? "---";
                                                 }
                                                 <RadzenText MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Ngày nhập kho", 100, 1000))"
-                                                            Text="@($"{_ngaynk}")" Style="font-weight: 600; font-size: 16px;"></RadzenText>
+                                                Text="@($"{_ngaynk}")" Style="font-weight: 600; font-size: 16px;"></RadzenText>
                                             </RadzenStack>
                                             <RadzenCard Style="width: 100%; height: contain; min-height: 210px; padding-top: 0; padding-bottom: 10px" Variant="Variant.Text">
                                                 <RadzenStack Style="width: 100%; height: contain; padding: 0" Orientation=Orientation.Vertical AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
@@ -88,7 +91,7 @@
                                                                 </RadzenStack>
                                                                 <RadzenStack Style="width: auto; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
                                                                     <RadzenButton Text="@($"{thungtpham.IDThung.Value?.ToString()}")" Style="color: darkblue; font-weight: 700; font-size: 18px; min-width: 100px"
-                                                                                  ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Lighter"></RadzenButton>
+                                                                    ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Lighter"></RadzenButton>
                                                                 </RadzenStack>
                                                             </RadzenStack>
 
@@ -122,11 +125,11 @@
                                                                             <RadzenStack Style="width: 100%; height: 100%" Gap="10px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                                                 <RadzenStack Style="width: 70%; height: contain; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                                                     <RadzenText Text="@lotnvl.MaQuanLyLot.Value?.ToString()" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Mã quản lý Lot NVL", 100, 1000))"
-                                                                                                Style="color: darkblue; font-weight: 600; font-size: 14px"></RadzenText>
+                                                                                    Style="color: darkblue; font-weight: 600; font-size: 14px"></RadzenText>
                                                                                 </RadzenStack>
                                                                                 <RadzenStack Gap="10px" Style="width: 30%; height: contain; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                                                     <RadzenText Text="@($"{lotnvl.SoLuong.Value?.ToString()} PCS")" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Số lượng/Lot NVL", 100, 1000))"
-                                                                                                Style="font-size: 14px; font-weight: 600; height: contain; color: rgba(58,71,77)"></RadzenText>
+                                                                                    Style="font-size: 14px; font-weight: 600; height: contain; color: rgba(58,71,77)"></RadzenText>
                                                                                 </RadzenStack>
                                                                             </RadzenStack>
                                                                         </RadzenCard>
@@ -136,14 +139,21 @@
 
                                                         </RadzenStack>
                                                     </RadzenCard>
-                                                    <RadzenStack Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                    <RadzenStack Visible="@(thungtpham.DaNhapKho)" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                                                         <RadzenText Text="Vị trí lưu kho" Style="font-size: 16px; font-weight: 600; height: contain;"></RadzenText>
-                                                        <RadzenButton Visible="@(thungtpham.DaNhapKho)" Text="@(SQLServerServices.GetViTriTPhamByVTofTPID(thungtpham.VTofTPID.Value).MaViTri.Value?.ToString())" Click="@(async() => await OnSelectViTriLuuKho(thungtpham))"
-                                                                      MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Mã vị trí", 100, 1000))"
-                                                                      ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Variant="Variant.Text" Shade="Shade.Darker" Style="border-radius: 5px; --rz-icon-size: 16px; font-size: 16px; font-weight: 600" />
-                                                        <RadzenButton Visible="@(thungtpham.DaNhapKho)" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "LOT vị trí", 100, 1000))"
-                                                                      Text="@(SQLServerServices.GetListViTriofTPhams(new Dictionary<string, object?>(){{ViTriofTPham.DBName.VTofTPID, thungtpham.VTofTPID.Value}}).viTriofTPhams.FirstOrDefault()?.LotVitri.Value?.ToString())"
-                                                                      ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Variant="Variant.Text" Shade="Shade.Darker" Style="border-radius: 5px; --rz-icon-size: 16px; cursor: default; font-size: 16px; font-weight: 600" />
+                                                        <RadzenStack Style="width: contain; height: contain;" Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                            <RadzenButton Text="@(SQLServerServices.GetViTriTPhamByVTofTPID(thungtpham.VTofTPID.Value).MaViTri.Value?.ToString())" Click="@(async() => await OnSelectViTriLuuKho(thungtpham))"
+                                                            MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Mã vị trí", 100, 1000))"
+                                                            ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Variant="Variant.Text" Shade="Shade.Darker" Style="border-radius: 5px; --rz-icon-size: 16px; font-size: 16px; font-weight: 600" />
+                                                            <RadzenButton MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "LOT vị trí", 100, 1000))"
+                                                            Text="@(SQLServerServices.GetListViTriofTPhams(new Dictionary<string, object?>(){{ViTriofTPham.DBName.VTofTPID, thungtpham.VTofTPID.Value}}).viTriofTPhams.FirstOrDefault()?.LotVitri.Value?.ToString())"
+                                                            ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Variant="Variant.Text" Shade="Shade.Darker" Style="border-radius: 5px; --rz-icon-size: 16px; cursor: default; font-size: 16px; font-weight: 600" />
+                                                            <RadzenButton Text="@($"{thungtpham.PalletKey.Value}")"
+                                                            MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Mã Pallet", 100, 1000))"
+                                                            Click="@(() => OnOpenQR_ImageDialog(thungtpham.MaQuanLyThung.Value?.ToString() ?? string.Empty, "Mã Pallet"))" Icon="qr_code"
+                                                            ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat" Size="ButtonSize.Small" Shade="Shade.Lighter"
+                                                            Style="font-size: 16px; font-weight: 600; height: contain; color: darkgreen"></RadzenButton>
+                                                        </RadzenStack>
                                                     </RadzenStack>
 
                                                     <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
@@ -152,10 +162,10 @@
                                                         </RadzenStack>
                                                         <RadzenStack Style="width: 60%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
                                                             <RadzenButton Text="@($"{thungtpham.MaQuanLyThung.Value?.ToString()}")"
-                                                                          MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Mã quản lý thùng", 100, 1000))"
-                                                                          Click="@(() => OnOpenQR_ImageDialog(thungtpham.MaQuanLyThung.Value?.ToString() ?? string.Empty, "Mã quản lý thùng thành phẩm"))" Icon="qr_code"
-                                                                          ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat" Size="ButtonSize.Small" Shade="Shade.Lighter"
-                                                                          Style="font-size: 16px; font-weight: 600; height: contain; color: darkgreen"></RadzenButton>
+                                                            MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Mã quản lý thùng", 100, 1000))"
+                                                            Click="@(() => OnOpenQR_ImageDialog(thungtpham.MaQuanLyThung.Value?.ToString() ?? string.Empty, "Mã quản lý thùng thành phẩm"))" Icon="qr_code"
+                                                            ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat" Size="ButtonSize.Small" Shade="Shade.Lighter"
+                                                            Style="font-size: 16px; font-weight: 600; height: contain; color: darkgreen"></RadzenButton>
                                                         </RadzenStack>
                                                     </RadzenStack>
 
@@ -184,9 +194,17 @@
 
     private List<ThungTPham> ThungTPhams = new();
 
+    private bool IsCreatedPNK = false;
+
+    private PhieuNhapKhoTPham TargetPNKTP = new();
+
     protected override async Task OnInitializedAsync()
     {
         await LoadDSachThungTPhams(TargetKHSX.KHSXID.Value);
+
+        TargetPNKTP = SQLServerServices.GetPhieuNhapKhoTPhamByPalletKey(ThungTPhams.FirstOrDefault()?.PalletKey.Value);
+
+        IsCreatedPNK = TargetPNKTP.PNKTPID.Value != null;
 
         await base.OnInitializedAsync();
     }
@@ -236,5 +254,10 @@
     {
         var result = await DialogService.OpenAsync<DialogCreatePhieuNhapKhoTP>(null, new() { { "ThungTPhams", ThungTPhams } },
         new DialogOptions() { Width = "70%", Height = "100%", Resizable = false, Draggable = true, ShowTitle = false, ShowClose = false, Style = "background-color: while; border-radius: 0px; padding: 0px" });
+
+        if (result != null)
+        {
+            IsCreatedPNK = true;
+        }
     }
 }
