@@ -1,0 +1,221 @@
+﻿@page "/charttracking"
+@attribute [Authorize(Roles = "Admin, User")]
+@* this limited access into page *@
+
+@using ProcessManagement.Commons
+@using ProcessManagement.Models.KHO_NVL
+@using ProcessManagement.Models.KHO_NVL.XuatKho
+@using ProcessManagement.Models.KHSXs
+@using ProcessManagement.Models.KHSXs.MQL_Template
+@using ProcessManagement.Models.QLCDOAN
+@using ProcessManagement.Pages.KehoachSX.BieuDo.Models
+@using ProcessManagement.Pages.KehoachSX.MQL_Template
+@using ProcessManagement.Pages.Manager_NVL.Dialogs
+@using ProcessManagement.Pages.Manager_NguyenCong.Dialogs
+@using ProcessManagement.Pages.Manager_SanPham.Dialogs
+@using ProcessManagement.Services.SQLServer
+@using Radzen.Blazor
+@using Radzen
+@using ProcessManagement.Models
+
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject SQLServerServices SQLServerServices
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<RadzenStack Gap="0" Style="width: 100%; height: contain; background-color: white" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+    <RadzenRow Style="width: 100%; height: contain;">
+        <RadzenColumn Size="12" Style="padding: 10px">
+            <RadzenStack Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                <RadzenLabel>
+                    <strong>Tiến độ sản xuất</strong>
+                    <span>@($"(updated at: {updatedTime})")</span>
+                </RadzenLabel>
+                <RadzenLabel>
+                    <span>@($"Mã lệnh sản xuất")</span>
+                    <strong>@($"{TargetKHSX.MaLSX.Value}")</strong>
+                </RadzenLabel>
+                <RadzenLabel>
+                    <span>@($"Sản phẩm")</span>
+                    <strong>@($"{TargetKHSX.TargetSanPham?.SP_MaSP.Value}")</strong>
+                </RadzenLabel>
+                <RadzenButton Visible=@(!IsDisableViewInNewTab) Click="@(async () => { await OpenChartTracking();})" Icon="share" Text="View in new tab"
+                              Style="font-size: 16px; border-radius: 5px; width: contain;" Shade="Shade.Dark" Variant="Variant.Flat" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small"></RadzenButton>
+
+            </RadzenStack>
+            <RadzenChart Style="min-height: 500px; height: contain">
+                <RadzenColumnSeries FillRange=@OKfillRange Data="@OKdatas" CategoryProperty="Property" Title="OK" LineType="LineType.Dashed" ValueProperty="Value">
+                    <RadzenSeriesDataLabels Visible="true" />
+                </RadzenColumnSeries>
+                <RadzenColumnSeries FillRange=@NGfillRange Data="@NGdatas" CategoryProperty="Property" Title="NG" ValueProperty="Value">
+                    <RadzenSeriesDataLabels Visible="true" />
+                </RadzenColumnSeries>
+                <RadzenColumnOptions Radius="5" Width="40" />
+                <RadzenCategoryAxis Padding="20" LabelAutoRotation="15">
+                    <RadzenAxisTitle Text="Công đoạn sản xuất" />
+                </RadzenCategoryAxis>
+                <RadzenValueAxis TickDistance="100" Formatter="@FormatLable">
+                    <RadzenGridLines Visible="true" />
+                    <RadzenAxisTitle Text="Tiến độ sản xuất (OK/NG)" />
+                </RadzenValueAxis>
+                <RadzenLegend Visible=false Position="LegendPosition.Top" />
+            </RadzenChart>
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenStack>
+
+
+@code {
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "khsxid")]
+    public int KHSXID { get; set; } = 0;
+
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "disable")]
+    public bool IsDisableViewInNewTab { get; set; } = false;
+
+    [Parameter]
+    public KHSX TargetKHSX { get; set; } = new();
+
+    private List<KetQuaGC> DSachKetQuaGCs = new();
+    private bool isLoadingKQGCs = false;
+
+    public List<ChartItem> OKdatas { get; set; } = new();
+    List<SeriesColorRange> OKfillRange = new List<SeriesColorRange>()
+    {
+        new SeriesColorRange() {Min = 0, Max=999999, Color = "green"}
+    };
+
+    public List<ChartItem> NGdatas { get; set; } = new();
+    List<SeriesColorRange> NGfillRange = new List<SeriesColorRange>()
+    {
+        new SeriesColorRange() {Min = 0, Max=1000, Color = "red"}
+    };
+
+    string FormatLable(object value)
+    {
+        return $"{value} (pcs)";
+    }
+
+    private CancellationTokenSource cancellationTokenSource = new();
+
+    private DateTime updatedTime;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Registed Update chart event
+        // if (Common.IsUpdateChartRegistered())
+        // {
+        //     Common.ResetUpdateChart_Event();
+        // }
+        // Common.UpdateKHSXChart += UpdateChart_EventRasing;
+
+        if (KHSXID > 0)
+        {
+            TargetKHSX = SQLServerServices.GetKHSXbyID(KHSXID);
+        }
+
+        await GetChartDatas();
+
+        cancellationTokenSource = new CancellationTokenSource();
+
+        await LoadDataAsync(cancellationTokenSource.Token);
+
+        await base.OnInitializedAsync();
+    }
+
+    private async Task LoadDataAsync(CancellationToken cancellationToken)
+    {
+        while (!cancellationToken.IsCancellationRequested)
+        {
+            if (!isLoadingKQGCs)
+            {
+                await GetChartDatas();
+
+                updatedTime = DateTime.Now;
+
+                StateHasChanged(); // Refresh UI
+            }
+
+            await Task.Delay(1000); // Wait for 1 second
+        }
+    }
+
+    private async void UpdateChart_EventRasing(object? sender, EventArgs eventArgs)
+    {
+        await GetChartDatas();
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task GetChartDatas()
+    {
+        DSachKetQuaGCs = await LoadAllDanhsachKQGCBase();
+
+        var groupedByNCID = DSachKetQuaGCs.GroupBy(k => k.NCID.Value)
+                                           .Select(g => new
+                                           {
+                                               NCID = g.Key,
+                                               TenCongDoan = SQLServerServices.GetNguyenCongByID(g.Key),
+                                               Items = g.ToList(),
+                                               SumOK = g.Sum(rs => int.TryParse(rs.SLOK.Value?.ToString(), out int ok) ? ok : 0),
+                                               SumNG = g.Sum(rs => int.TryParse(rs.SLNG.Value?.ToString(), out int ng) ? ng : 0)
+                                           });
+
+        OKdatas = new(); NGdatas = new();
+
+        foreach (var nguyencong in groupedByNCID)
+        {
+            OKdatas.Add(new ChartItem() { Property = nguyencong.TenCongDoan, Value = nguyencong.SumOK });
+            NGdatas.Add(new ChartItem() { Property = nguyencong.TenCongDoan, Value = nguyencong.SumNG });
+        }
+    }
+
+    // Load all danh sach KQGC base
+    private async Task<List<KetQuaGC>> LoadAllDanhsachKQGCBase()
+    {
+        return await Task.Run(() =>
+        {
+            List<KetQuaGC> ketQuaGCs = new();
+
+            if (isLoadingKQGCs == false)
+            {
+                isLoadingKQGCs = true;
+
+                Dictionary<string, object?> parameters = new();
+
+                parameters.Add($"{KetQuaGC.KQGCDBName.KHSXID}", TargetKHSX.KHSXID.Value);
+
+                (var kqgcs, string resultMess) = SQLServerServices.GetListKetQuaGC(parameters, false);
+
+                foreach (var ketQuaGC in kqgcs)
+                {
+                    if (DateTime.TryParse(ketQuaGC.SubMitDay.Value?.ToString(), out DateTime submitday))
+                    {
+                        ketQuaGC.SubMitDay.Value = submitday.Date.ToShortDateString();
+                    }
+                }
+
+                ketQuaGCs = kqgcs; // gan cho ds hien thi
+
+                isLoadingKQGCs = false;
+            }
+
+            return ketQuaGCs;
+        });
+    }
+
+    private async Task OpenChartTracking()
+    {
+        if (TargetKHSX.KHSXID.Value != null)
+        {
+            var url = $"charttracking?khsxid={TargetKHSX.KHSXID.Value}&disable={true}";
+
+            // Get the absolute URL
+            var absoluteUrl = NavigationManager.ToAbsoluteUri(url).ToString();
+
+            await JSRuntime.InvokeVoidAsync("openInNewTab", absoluteUrl);
+        }
+    }
+}
