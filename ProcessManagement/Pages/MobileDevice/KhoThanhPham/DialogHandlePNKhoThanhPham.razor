@@ -536,28 +536,7 @@
 
                 vitri.DSachViTriofTPhams = RangeIncreaseLOTs(vitri.DSachViTriofTPhams);
 
-                // Load san pham infor
-                await Task.WhenAll(vitri.DSachViTriofTPhams.Select(async vitrioftp =>
-                {
-                    var results = await LoadDSachThungTPhams(null, vitrioftp.VTofTPID?.Value);
-
-                    if (results != null && results.Any())
-                    {
-                        var thung = vitrioftp.ThungTPham;
-
-                        if (thung.MaQuanLyThung.Value != null && int.TryParse(thung.VTofTPID.Value?.ToString(), out int vtid))
-                        {
-                            thung.DaNhapKho = vtid > 0;
-
-                            thung.IsSelected = true;
-                        }
-
-                        if (int.TryParse(thung.SPID.Value?.ToString(), out int spid) && spid > 0)
-                        {
-                            vitrioftp.TargetSanPham.SP_MaSP.Value = SQLServerServices.GetMaSanphamByID(spid);
-                        }
-                    }
-                }));
+                await Task.Delay(1);
             }));
 
             return dsVitris.FirstOrDefault() ?? new();
