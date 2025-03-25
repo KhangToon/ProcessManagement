@@ -190,7 +190,7 @@
     {
         return await Task.Run(() =>
         {
-            var dsthungTP = SQLServerServices.GetListPartOfThungTPs(new(), true).thungTPhams;
+            var dsthungTP = SQLServerServices.GetListThungTPs(new(), true).thungTPhams;
 
             var listThungIndexs = dsthungTP.Select(thung => int.Parse(thung.PalletKey.Value?.ToString()?.Replace(ThungTPham.PALLETKEY, "") ?? "0"));
 
@@ -229,7 +229,7 @@
 
         return await Task.Run(() =>
         {
-            var dsthungTP = SQLServerServices.GetListPartOfThungTPs(new() { { ThungTPham.DBName.PalletKey, newcodepallet } }, false).thungTPhams;
+            var dsthungTP = SQLServerServices.GetListThungTPs(new() { { ThungTPham.DBName.PalletKey, newcodepallet } }, false).thungTPhams;
 
             return dsthungTP.Count == 0;
         });
