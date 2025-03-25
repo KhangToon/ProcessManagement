@@ -461,6 +461,87 @@ namespace ProcessManagement.Services.SQLServer
             return khsx;
         }
 
+        public KHSX GetKHSXbyMaKHSXRuduceTime(object? maKHSX)
+        {
+            KHSX khsx = new();
+
+            if (maKHSX == null) { return khsx; }
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = $"SELECT * FROM [{Common.TableKHSX}] WHERE [{Common.MaLSX}] = '{maKHSX}'";
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    List<Propertyy> rowSPitems = khsx.GetPropertiesValues();
+
+                    foreach (var item in rowSPitems)
+                    {
+                        string? columnName = item.DBName;
+
+                        object columnValue = reader[columnName];
+
+                        item.Value = columnValue;
+                    }
+                }
+
+                khsx.TargetSanPham = GetSanpham(int.TryParse(khsx.SPID.Value?.ToString(), out int spid) ? spid : 0, false);
+
+                khsx.DSachNVLofKHSXs = GetListNVLofKHSXbyID(khsx.KHSXID.Value);
+
+                khsx.DSachCongDoans = GetlistCongdoans(khsx.KHSXID.Value, false);
+
+                var fistCDoanID = khsx.DSachCongDoans.FirstOrDefault()?.NCID.Value ?? 0;
+
+                var resultdslots = GetListLOT_khsx(new() { { KHSX_LOT.DBName.KHSXID, khsx.KHSXID.Value }, { KHSX_LOT.DBName.NCID, fistCDoanID } }).Item1;
+
+                if (resultdslots != null && resultdslots.Any())
+                {
+                    khsx.DSLOT_KHSXs = resultdslots;
+
+                    // Get maNVL of KHSX_LOT
+                    foreach (var lotkhsx in khsx.DSLOT_KHSXs)
+                    {
+                        lotkhsx.TargetNVL = GetMaNguyenVatLieuByID(lotkhsx.NVLID.Value);
+                    }
+                }
+
+                // Get trang thai xuat kho NVL
+                var colIsDonePXK = GetPXK_AnyColValuebyAnyParameters(new Dictionary<string, object?>() { { Common.KHSXID, khsx.KHSXID.Value } }, Common.IsDonePXK).columnValues.FirstOrDefault();
+                if (int.TryParse(colIsDonePXK?.ToString(), out int ispxkdone))
+                {
+                    khsx.isDonePXK = ispxkdone == 1;
+                }
+
+                // Get PNKID
+                var colpnkid = GetPXK_AnyColValuebyAnyParameters(new Dictionary<string, object?>() { { Common.PXKID, khsx.PXKID.Value } }, Common.PNKID).columnValues.FirstOrDefault();
+                if (int.TryParse(colpnkid?.ToString(), out int pnkid))
+                {
+                    // Get trang thai tra NVL
+                    var colIsReturnedNVL = GetPNK_AnyColValuebyAnyParameters(new Dictionary<string, object?>() { { Common.PNKID, pnkid } }, Common.IsDonePNK).columnValues.FirstOrDefault();
+                    if (int.TryParse(colIsReturnedNVL?.ToString(), out int isPNKdone))
+                    {
+                        khsx.isReturnedNVL = isPNKdone == 1;
+                    }
+                }
+
+                // Get collapsed KHSX
+                if (int.TryParse(khsx.IsCollapsed.Value?.ToString(), out int isCollapsed))
+                {
+                    khsx.isCollapsed = isCollapsed == 1;
+                }
+            }
+
+            return khsx;
+        }
+
+
         // Load danh sach ke hoach san xuat
         public List<KHSX> GetListKHSXs()
         {

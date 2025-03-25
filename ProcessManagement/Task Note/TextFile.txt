@@ -1,0 +1,15 @@
+﻿
+/// Filter list of khsx base on range of day
+            DSKHSXs_base.Where(khsx =>
+            {
+                if (khsx.NgayTao != null)
+                {
+                    // Try to convert NgayTao to DateTime
+                    if (DateTime.TryParse(khsx.NgayTao.ToString(), out DateTime resultDate))
+                    {
+                        return resultDate >= startDate && resultDate <= endDate;
+                    }
+                }
+                return false; // Skip if NgayTao is null or can't be converted
+            })
+            .ToList();

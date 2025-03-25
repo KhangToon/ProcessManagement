@@ -62,9 +62,9 @@
                 </RadzenColumn>
                 <RadzenColumn SizeMD="5" Size="12">
                     <RadzenStack Gap="15px" Style="height: 100%; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                        <RadzenText Text="@($"{DSKHSXs.Count}")" Style="font-weight: 600; font-size: 12px"></RadzenText>
                         <RadzenButton Style="border-radius: 20px;" IsBusy="@reloadpage" Click="@(async () => await ButtonReloadPress())" Icon="autorenew" ButtonStyle="ButtonStyle.Primary" />
                         <RadzenTextBox @oninput="@((args) => SearchingKHSX(args?.Value))" Placeholder="Nhập mã kế hoạch sản xuất, mã quản lý lot hoặc mã thùng để truy xuất" Style="border-radius: 20px; padding-left: 20px; border-width: 2px; border-color: var(--rz-primary-light); width: 80% "></RadzenTextBox>
-                        <RadzenButton Icon="search" ButtonStyle="ButtonStyle.Primary" Style="border-radius: 20px;" />
                     </RadzenStack>
                 </RadzenColumn>
                 <RadzenColumn SizeMD="3" Size="12">
@@ -129,7 +129,7 @@
                                 </RadzenRow>
                             </HeaderTemplate>
                             <ChildContent>
-                                <RadzenTabs Visible="@(khsxwaitloading == false)" Style="width: 100%; min-height: 100% !important; margin-top: 15px" SelectedIndex="@selectedTabIndex">
+                                <RadzenTabs Style="width: 100%; min-height: 100% !important; margin-top: 15px" SelectedIndex="@selectedTabIndex">
                                     <Tabs>
                                         <RadzenTabsItem>
                                             <Template>
@@ -517,23 +517,6 @@
         else return string.Empty;
     }
 
-    private bool khsxwaitloading = false;
-    private async Task OnKHSXClick(KHSX selectKHSX)
-    {
-        SelectedKHSX = selectKHSX;
-
-        selectKHSXID = selectKHSX.KHSXID.Value;
-
-        //Common.CurrentKHSXid = SelectedKHSX.KHSXID.Value;
-
-
-        khsxwaitloading = true;
-        StateHasChanged();
-        await Task.Delay(50);
-        khsxwaitloading = false;
-        StateHasChanged();
-    }
-
     // Open dialog chi tiet KHSX
     private async Task OnOpenChitietKHSX(KHSX seletedkhsx)
     {
@@ -544,16 +527,10 @@
     // Load danh sach ke hoach san xuat
     private async Task LoadDanhSachKHSX()
     {
-        KHSX selectKHSX = await DialogService.OpenAsync<DialogDSachKHSX>(null, null,
+        KHSX selectKHSX = await DialogService.OpenAsync<DialogDSachKHSX>(null, new() { { "DSKHSXs_base", DSKHSXs_base } },
         new DialogOptions() { Width = "90%", Height = "90%", Resizable = true, Draggable = true, ShowTitle = true, ShowClose = false, Style = "background-color: while; border-radius: 0px; padding: 0px" });
 
-        await OnGetListKHSXs();
-
-        reloadpage = true;
-        StateHasChanged();
-        await Task.Delay(10);
-        reloadpage = false;
-        StateHasChanged();
+        await ButtonReloadPress();
     }
 
     // Searching
@@ -572,9 +549,53 @@
                 if (!string.IsNullOrEmpty(keysearch))
                 {
                     // Search by ma KHSX
-                    var results = DSKHSXs_base.FindAll(nv => nv.MaLSX.Value?.ToString()?.IndexOf(keysearch, StringComparison.OrdinalIgnoreCase) >= 0);
+                    //var results = DSKHSXs_base.FindAll(nv => nv.MaLSX.Value?.ToString()?.IndexOf(keysearch, StringComparison.OrdinalIgnoreCase) >= 0);
+                    var results = new List<KHSX>() { { SQLServerServices.GetKHSXbyMaKHSXRuduceTime(keysearch) } };
 
-                    if (!results.Any())
+                    if (results.Any(khsx => khsx.KHSXID.Value != null))
+                    {
+                        foreach (var kHSX in results)
+                        {
+                            // Get PhieuXuatKho bosung
+                            Dictionary<string, object?> pars = new Dictionary<string, object?>() { { Common.KHSXID, kHSX.KHSXID.Value } };
+
+                            pars.Add(Common.IsPhieuBoSungNVL, 1);
+
+                            kHSX.ListPXKBoSung = SQLServerServices.GetListPhieuXuatKhos(pars).phieuxuatkhos;
+
+                            kHSX.SoluongBoSung = kHSX.ListPXKBoSung?.Sum(pxk => pxk.DSNVLofPXKs.Sum(nvl => int.TryParse(nvl.NVLXKSoLuongAll.Value?.ToString(), out int dm) ? dm : 0)) ?? 0;
+
+
+                            NguyenCongofKHSX preCongDoan = new();
+
+                            _ = int.TryParse(kHSX.DinhMuc.Value?.ToString(), out int dinhmuc) ? dinhmuc : 0;
+
+                            // Them SL bo sung
+                            dinhmuc += kHSX.SoluongBoSung;
+
+                            foreach (var congdoan in kHSX.DSachCongDoans)
+                            {
+                                // Tinh so luong dasubmit moi cong doan cua KHSX
+                                (int sumok, int sumng, int totalokng) = GetResultsKQGCperCDoanAllLots(congdoan.NCID.Value, kHSX.KHSXID.Value);
+
+                                congdoan.sumOKSubmited = sumok; congdoan.sumNGSubmited = sumng; congdoan.sumTotalSubmited = totalokng;
+
+                                if (kHSX.DSachCongDoans.IndexOf(congdoan) == 0)
+                                {
+                                    congdoan.sLlimit = dinhmuc;
+                                }
+                                else
+                                {
+                                    congdoan.sLlimit = preCongDoan.sLlimit - preCongDoan.sumNGSubmited;
+                                }
+
+                                congdoan.IsDoneCongDoan = congdoan.sumTotalSubmited == congdoan.sLlimit;
+
+                                preCongDoan = congdoan;
+                            }
+                        }
+                    }
+                    else
                     {
                         // Search by ma QLLot
                         results = DSKHSXs_base.FindAll(khsx => khsx.DSLOT_KHSXs.Any(lot => lot.MaQuanLyLot.Value?.ToString()?.IndexOf(keysearch, StringComparison.OrdinalIgnoreCase) >= 0));
@@ -613,7 +634,7 @@
                     DSKHSXs = DSKHSXs_base;
                 }
 
-                await Task.Delay(200);
+                await Task.Delay(50);
 
                 reloadpage = false;
 
@@ -712,7 +733,7 @@
 
         reloadpage = true;
         StateHasChanged();
-        await Task.Delay(10);
+        await Task.Delay(1);
         reloadpage = false;
         StateHasChanged();
     }
