@@ -433,7 +433,9 @@
 
                 if (result == 1)
                 {
-                    await DialogService.Alert($"Nhập kho thành công! Vị trí <strong>{TargetVTri.MaViTri.Value}</strong>", "<strong><span style='color: green'>Success!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                    ShowNotification("Nhập kho thành công!", NotificationSeverity.Success, 2000);
+
+                    PNK = SQLServerServices.GetPhieuNhapKhoTPhamByID(PNK.PNKTPID.Value);
                 }
                 else
                 {
@@ -444,11 +446,6 @@
             {
                 await DialogService.Alert($"Nhập kho không thành công!", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
             }
-
-
-            // Reload target ThungTPs
-
-            PNK = SQLServerServices.GetPhieuNhapKhoTPhamByID(PNK.PNKTPID.Value);
         }
     }
 
@@ -597,5 +594,17 @@
         });
     }
 
+    // Notification
+    private void ShowNotification(string message, NotificationSeverity notifytype, double time)
+    {
+        NotificationMessage notify = new NotificationMessage
+            {
+                Style = "position: fixed; top: 0; right: 0;",
+                Severity = notifytype,
+                Summary = message,
+                Duration = time
+            };
 
+        NotificationService.Notify(notify);
+    }
 }

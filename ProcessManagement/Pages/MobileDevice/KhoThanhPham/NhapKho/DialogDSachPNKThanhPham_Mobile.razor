@@ -24,9 +24,17 @@
 <RadzenRow Gap="10px" Style="height: 100%; width: 100%; border-top: var(--rz-grid-cell-border); padding: 0;">
     <RadzenColumn Size="12" SizeMD="12" Style="height: contain; width: 100%;">
         <RadzenStack Gap="0px" Style="height: contain; width: 100%;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start">
-            <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding: 10px; padding-left: 10px; border-bottom: var(--rz-grid-cell-border) " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                <RadzenText Text="Phiếu nhập kho thành phẩm" Style="color: darkred; font-weight: 600; font-size: 14px; height: contain; width: contain; font-style: italic;"></RadzenText>
-                <RadzenText Text="@($"( {DSPhieuNKs.Count} phiếu )")" Style="color: black; font-weight: 600; font-size: 14px; height: contain; width: contain; font-style: italic;"></RadzenText>
+            <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding: 5px; padding-left: 10px; border-bottom: var(--rz-grid-cell-border) " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                <RadzenLabel Text="Phiếu nhập kho thành phẩm" Style="color: darkred; font-weight: 600; font-size: 14px; height: contain; width: contain; font-style: italic;"></RadzenLabel>
+                <RadzenLabel Text="@($"( {DSPhieuNKs.Count} phiếu )")" Style="color: black; font-weight: 600; font-size: 14px; height: contain; width: contain; font-style: italic;"></RadzenLabel>
+            </RadzenStack>
+            <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding: 5px; padding-left: 10px; border-bottom: var(--rz-grid-cell-border) " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                <RadzenButton Text="Reload" Icon="autorenew" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Variant="Variant.Flat"
+                              Click="@(async() => {await LoadDSachPhieuNhapKhoTPham();})"
+                              Style="--rz-icon-size: 14px; cursor: default; font-size: 14px;" />
+                <RadzenButton Text="Thoát" Icon="clear" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Variant="Variant.Flat"
+                              Click="@(() => DialogService.Close())"
+                              Style="--rz-icon-size: 14px; cursor: default; font-size: 14px;" />
             </RadzenStack>
             <RadzenStack Gap="5px" Style="height: contain; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                 <RadzenDataList Style="height: contain; width: 100%;" PagerPosition="PagerPosition.Top" PageSize="3" WrapItems="true" AllowPaging="true" Data="@DSPhieuNKs" TItem="PhieuNhapKhoTPham">
