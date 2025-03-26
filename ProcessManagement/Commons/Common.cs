@@ -407,6 +407,7 @@ namespace ProcessManagement.Commons
         public static object? SelectedKQGCid;
 
         public static object? SelectedPNKTPID;
+        public static object? SelectedPXKTPID;
 
         public static class Tentruyxuat
         {

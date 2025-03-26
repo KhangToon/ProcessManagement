@@ -279,13 +279,22 @@
                                                 <RadzenStack Style="width: 100%; height: 100%; padding: 0" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                     <RadzenCard onclick="@(() => {OnVTofTPSelected(vitriofTP);})" class="@(((IsViTriofTPhamSelected(vitriofTP))? "vitriofTP_IsSelected rz-shadow-4" : "vitriofTP_UnSelected rz-shadow-4"))" Variant="Variant.Filled" Style="height: contain; width: 100%; padding: 10px;">
                                                         <RadzenStack Style="height: contain; width: 100%; border-radius: 5px; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                                                            <RadzenStack Style="height: 30px; width: contain; border-radius: 5px; padding: 10px; margin-bottom: 5px; padding-left: 0px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                                                                <RadzenButton Text="@($"{SelectedViTri.MaViTri.Value?.ToString()} - {vitriofTP.LotVitri.Value?.ToString()}")" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Variant="Variant.Flat"
-                                                                              MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Mã vị trí/lot", 100, 1000))"
-                                                                              Style="border-radius: 5px; --rz-icon-size: 18px; font-weight: 600; height: contain; min-height: 20px; width: contain; min-width: 80px" />
-                                                                <RadzenButton Visible="@(palletthungtp.ThungTPhams.Any())" Text="Đã chứa thùng thành phẩm" Icon="check"
-                                                                              ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 17px; font-size: 16px;" />
-                                                                <RadzenText Visible="@(!palletthungtp.ThungTPhams.Any())" Text="Chưa có thùng thành phẩm" Style="font-size: 16px; font-weight: 500; height: contain; color: red"></RadzenText>
+                                                            <RadzenStack Style="height: 30px; width: 100%; border-radius: 5px; padding: 10px; margin-bottom: 5px; padding-left: 0px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                                                <RadzenStack Style="height: contain; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                    <RadzenButton Text="@($"{SelectedViTri.MaViTri.Value?.ToString()} - {vitriofTP.LotVitri.Value?.ToString()}")" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Variant="Variant.Flat"
+                                                                                  MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Mã vị trí/lot", 100, 1000))"
+                                                                                  Style="border-radius: 5px; --rz-icon-size: 18px; font-weight: 600; height: contain; min-height: 20px; width: contain; min-width: 80px" />
+                                                                    <RadzenButton Visible="@(palletthungtp.ThungTPhams.Any())" Text="Đã chứa thùng thành phẩm" Icon="check"
+                                                                                  ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 17px; font-size: 16px;" />
+                                                                    <RadzenText Visible="@(!palletthungtp.ThungTPhams.Any())" Text="Chưa có thùng thành phẩm" Style="font-size: 16px; font-weight: 500; height: contain; color: red"></RadzenText>
+                                                                </RadzenStack>
+                                                                <RadzenStack Style="height: contain; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                    <RadzenButton Visible="@(IsViTriofTPhamSelected(vitriofTP) && !palletthungtp.IsCreatePXKTP())" Text="Tạo phiếu xuất kho" Icon="add"
+                                                                                  Click="@(() => OnCreatePhieuXuatKhoThanhPham(palletthungtp))"
+                                                                                  ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 17px; font-size: 16px;" />
+                                                                    <RadzenButton Visible="@(IsViTriofTPhamSelected(vitriofTP) && palletthungtp.IsCreatePXKTP())" Text="Đã tạo phiếu xuất kho"
+                                                                                  ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Dark" Style="border-radius: 5px; --rz-icon-size: 17px; font-size: 16px;" />
+                                                                </RadzenStack>
                                                             </RadzenStack>
 
                                                             <RadzenButton Visible="@(!palletthungtp.ThungTPhams.Any() && IsViTriofTPhamSelected(vitriofTP))" Click="@(async () => await RemoveViTriofTP(vitriofTP, SelectedViTri))" Icon="delete" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Darker" Variant="Variant.Flat"
@@ -801,6 +810,62 @@
             }
         }
     }
+
+    private async Task OnCreatePhieuXuatKhoThanhPham(PalletThungTPham targetPallet)
+    {
+        PhieuXuatKhoTPham PXK = new();
+
+        // Tao ma phieu random
+        string maphieu = Common.Generate5UppercaseChars();
+        PXK.MaPhieuXK.Value = $"#PXKTP{maphieu}";
+        PXK.NguoiLapPXK.Value = "Admin";
+        PXK.NgayLapPXK.Value = DateTime.Now;
+        PXK.CodePallet.Value = targetPallet.PalletKey;
+
+        // Insert in to DB new PXK
+        (int newpxkID, string newpxkerror) = SQLServerServices.InsertPhieuXuatKhoTPham(PXK);
+
+        if (newpxkID == -1)
+        {
+            await DialogService.Alert($"Lỗi: không thể tạo phiếu ({newpxkerror})", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+        }
+        else
+        {
+            // Gan PXKITPD cho PXK
+            PXK.PXKTPID.Value = newpxkID;
+
+            int result = -1; string error = string.Empty;
+
+            foreach (var thung in targetPallet.ThungTPhams)
+            {
+                if (thung != null)
+                {
+                    thung.PXKTPID.Value = newpxkID;
+
+                    (result, error) = SQLServerServices.UpdateThungTPham(thung);
+
+                    if (result <= 0)
+                    {
+                        break;
+                    }
+                }
+            }
+
+            if (result <= 0)
+            {
+                SQLServerServices.DeletePhieuXuatKhoTPham(newpxkID);
+
+                await DialogService.Alert($"Lỗi: không thể tạo phiếu ({error})", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+            }
+            else
+            {
+                await DialogService.Alert($"Tạo phiếu xuất kho thành công!", "<strong><span style='color: green'>Success!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+
+                DialogService.Close(newpxkID);
+            }
+        }
+    }
+
 
     private async Task CopyToClipboard(string content)
     {
