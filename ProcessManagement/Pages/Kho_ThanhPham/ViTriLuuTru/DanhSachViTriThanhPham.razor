@@ -114,15 +114,18 @@
                                                 <RadzenText Text="@((DSVitris.IndexOf(vitri) + 1).ToString())" Style="color: rgba(58,71,77); font-weight: 600; font-size: 15px"></RadzenText>
                                             </RadzenStack>
                                             <RadzenStack Style="height: contain; width: contain; border-radius: 5px; padding: 0px;" Gap="10" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                @if (vitri.SLConTrong > 0)
+                                                @{
+                                                    int dadung = (int.TryParse(vitri.VTSucChua.Value?.ToString(), out int sc) ? sc : 0) - vitri.SLConTrong;
+                                                }
+                                                @if (dadung > 0)
                                                 {
-                                                    <RadzenButton Text="@($"Còn trống {((vitri.SLConTrong > 0)? $"({vitri.SLConTrong})" : string.Empty)}")" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Dark" Variant="Variant.Flat"
+                                                    <RadzenButton Text="@($"Đã dùng {dadung} pcs")" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Dark" Variant="Variant.Flat"
                                                                   Style="border-radius: 5px; --rz-icon-size: 18px; height: 20px; width: 100%; cursor: default; font-weight: 600" />
                                                 }
                                                 else
                                                 {
-                                                    <RadzenButton Text="Đầy" Icon="block" ButtonStyle="ButtonStyle.Warning" Size="ButtonSize.Small" Shade="Shade.Dark" Variant="Variant.Outlined"
-                                                                  Style="border-radius: 5px; --rz-icon-size: 18px; height: 20px; width: 100%; cursor: default; background-color: rgb(254,243,220); font-weight: 600" />
+                                                    <RadzenButton Text="@($"Đã dùng {dadung} pcs")" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Variant="Variant.Outlined"
+                                                                  Style="border-radius: 5px; --rz-icon-size: 18px; height: 20px; width: 100%; cursor: default; font-weight: 600;" />
                                                 }
                                             </RadzenStack>
                                         </RadzenStack>
@@ -144,10 +147,10 @@
                                         </RadzenStack>
                                         <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                             <RadzenStack Style="width: 50%; height: contain; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                                <RadzenText Text="Đã dùng: " Style="font-size: 16px; font-weight: 500; height: contain; color: rgba(58,71,77)"></RadzenText>
+                                                <RadzenText Text="Còn trống: " Style="font-size: 16px; font-weight: 500; height: contain; color: rgba(58,71,77)"></RadzenText>
                                             </RadzenStack>
                                             <RadzenStack Style="width: 50%; height: contain; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                <RadzenText Text="@($"{(int.TryParse(vitri.VTSucChua.Value?.ToString(), out int sc)? sc : 0) - vitri.SLConTrong} (pcs)")" Style="font-size: 16px; font-weight: 600; height: contain; color: rgba(58,71,77)"></RadzenText>
+                                                <RadzenText Text="@($"{vitri.SLConTrong} (pcs)")" Style="font-size: 16px; font-weight: 600; height: contain; color: rgba(58,71,77)"></RadzenText>
                                             </RadzenStack>
                                         </RadzenStack>
                                     </RadzenStack>
@@ -292,7 +295,7 @@
                                                                     <RadzenButton Visible="@(IsViTriofTPhamSelected(vitriofTP) && !palletthungtp.IsCreatePXKTP())" Text="Tạo phiếu xuất kho" Icon="add"
                                                                                   Click="@(() => OnCreatePhieuXuatKhoThanhPham(palletthungtp))"
                                                                                   ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 17px; font-size: 16px;" />
-                                                                    <RadzenButton Visible="@(IsViTriofTPhamSelected(vitriofTP) && palletthungtp.IsCreatePXKTP())" Text="Đã tạo phiếu xuất kho"
+                                                                    <RadzenButton Visible="@(palletthungtp.Total > 0 && palletthungtp.IsCreatePXKTP())" Text="Đã tạo phiếu xuất kho"
                                                                                   ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Dark" Style="border-radius: 5px; --rz-icon-size: 17px; font-size: 16px;" />
                                                                 </RadzenStack>
                                                             </RadzenStack>

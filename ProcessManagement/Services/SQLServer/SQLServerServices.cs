@@ -11687,7 +11687,7 @@ namespace ProcessManagement.Services.SQLServer
         }
 
         // Update 
-        public (int, string) UpdatePhieuXuatKhoTPham(PhieuXuatKhoTPham phieuxuatkhotp)
+        public (int, string) UpdatePhieuXuatKhoTPhamAnyProperty(PhieuXuatKhoTPham phieuxuatkhotp, object? targetproperty = null)
         {
             int result = -1;
             string errorMess = string.Empty;
@@ -11703,6 +11703,11 @@ namespace ProcessManagement.Services.SQLServer
             if (properties.Count == 0)
             {
                 return (result, "Error: No valid properties to update.");
+            }
+
+            if (targetproperty != null)
+            {
+                properties = properties.Where(pro => pro.DBName == targetproperty?.ToString()?.Trim()).ToList();
             }
 
             using var connection = new SqlConnection(connectionString);

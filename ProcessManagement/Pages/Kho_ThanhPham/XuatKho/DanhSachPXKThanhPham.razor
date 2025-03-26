@@ -12,9 +12,9 @@
 
 <style>
     .pxkho_IsSelected {
-        border-style: solid;
-        border-width: 2px;
-        border-color: green;
+    border-style: solid;
+    border-width: 2px;
+    border-color: green;
     }
 </style>
 
@@ -57,12 +57,12 @@
                                                     @if (pxk.isPXKDoneXuatKho)
                                                     {
                                                         <RadzenButton Text="Done" Icon="check" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Dark" Variant="Variant.Flat"
-                                                                      Style="--rz-icon-size: 18px; width: 100%; cursor: default; font-weight: 600" />
+                                                        Style="--rz-icon-size: 18px; width: 100%; cursor: default; font-weight: 600" />
                                                     }
                                                     else
                                                     {
                                                         <RadzenButton Text="Not done" ButtonStyle="ButtonStyle.Warning" Size="ButtonSize.Small" Shade="Shade.Dark" Variant="Variant.Outlined"
-                                                                      Style="border-radius: 5px; --rz-icon-size: 18px; height: 20px; width: 100%; cursor: default; background-color: rgb(254,243,220); font-weight: 600" />
+                                                        Style="border-radius: 5px; --rz-icon-size: 18px; height: 20px; width: 100%; cursor: default; background-color: rgb(254,243,220); font-weight: 600" />
                                                     }
                                                 </RadzenStack>
                                             </RadzenStack>
@@ -110,7 +110,9 @@
             </RadzenStack>
             <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                 <RadzenButton Visible="@(SelectedPXK.PXKTPID.Value != null)" Style="width: contain; min-width: 120px; height: contain;" Click="@(() => OnDeleteSelectedPhieuXuatKhoTPham())" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Xóa phiếu xuất kho"))"
-                              Icon="delete" Text="Xóa phiếu" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" />
+                Icon="delete" Text="Xóa phiếu" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" />
+                <RadzenButton Visible="@(SelectedPXK.PXKTPID.Value != null)" Style="width: contain; min-width: 120px; height: contain;" Click="@(() => OnResetPhieuXuatKhoTPham())"
+                Icon="delete" Text="Reset phiếu" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" />
             </RadzenStack>
         </RadzenStack>
     </RadzenColumn>
@@ -200,10 +202,23 @@
 
                 if (result)
                 {
-                    // Xoa danh sach thung thanh pham cua phieu
                     foreach (var thung in SelectedPXK.ListKhoThungTPham)
                     {
-                        SQLServerServices.DeleteThungTP(thung.TTPID.Value);
+                        if (thung.MaQuanLyThung.Value != null)
+                        {
+                            thung.NgayXuatKho.Value = DBNull.Value;
+
+                            thung.PXKTPID.Value = DBNull.Value;
+
+                            thung.InStock.Value = 1;
+
+                            (int udresult, string uderror) = SQLServerServices.UpdateThungTPham(thung);
+
+                            if (udresult < 0)
+                            {
+                                break;
+                            }
+                        }
                     }
 
                     await LoadDSachPhieuXuatKhoTPham();
@@ -217,6 +232,60 @@
                     await DialogService.Alert($"Error: {error}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
                 }
             }
+        }
+    }
+
+    private async Task OnResetPhieuXuatKhoTPham()
+    {
+        bool? comfirm = await DialogService.Confirm($"Trả danh sách thùng về trạng thái chưa xuất kho?", "Xác nhận", new ConfirmOptions() { OkButtonText = "OK", CancelButtonText = "Hủy", ShowClose = false });
+
+        if (comfirm.Value)
+        {
+            bool resetSucess = true; string error = string.Empty;
+
+            foreach (var thung in SelectedPXK.ListKhoThungTPham)
+            {
+                if (thung.MaQuanLyThung.Value != null)
+                {
+                    thung.NgayXuatKho.Value = DBNull.Value;
+
+                    thung.InStock.Value = 1;
+
+                    (int udresult, string uderror) = SQLServerServices.UpdateThungTPham(thung);
+
+                    if (udresult < 0)
+                    {
+                        resetSucess = false; error = uderror;
+
+                        break;
+                    }
+                }
+            }
+
+            if (resetSucess)
+            {
+                SelectedPXK.IsDonePXK.Value = DBNull.Value;
+
+                (int udresult, string uderr) = SQLServerServices.UpdatePhieuXuatKhoTPhamAnyProperty(SelectedPXK, PhieuXuatKhoTPham.DBName.IsDonePXK);
+
+                if (udresult < 1)
+                {
+                    await DialogService.Alert($"Error: {uderr}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                }
+                else
+                {
+                    ShowNotification("Đã reset phiếu!", NotificationSeverity.Success, 2000);
+                }
+
+            }
+            else
+            {
+                await DialogService.Alert($"Error: {error}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+            }
+
+            await LoadDSachPhieuXuatKhoTPham();
+
+            ReSelectPhieuXuatKhoTPham();
         }
     }
 
