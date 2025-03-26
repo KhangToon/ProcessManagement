@@ -109,7 +109,7 @@
                 <PhieuNhapKhoThanhPhamDetails PNK="SelectedPNK"></PhieuNhapKhoThanhPhamDetails>
             </RadzenStack>
             <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                <RadzenButton Visible="@(SelectedPNK.PNKTPID.Value != null)" Style="width: contain; min-width: 120px; height: contain;" Click="@(() => OnDeleteSelectedPhieuNhapKhoTPham())" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Xóa phiếu nhập kho"))"
+                <RadzenButton Disabled=@(SelectedPNK.ListKhoThungTPham.Any(ttp => ttp.DaXuatKho)) Visible="@(SelectedPNK.PNKTPID.Value != null)" Style="width: contain; min-width: 120px; height: contain;" Click="@(() => OnDeleteSelectedPhieuNhapKhoTPham())" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Xóa phiếu nhập kho"))"
                               Icon="delete" Text="Xóa phiếu" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" />
             </RadzenStack>
         </RadzenStack>
@@ -203,7 +203,10 @@
                     // Xoa danh sach thung thanh pham cua phieu
                     foreach (var thung in SelectedPNK.ListKhoThungTPham)
                     {
-                        SQLServerServices.DeleteThungTP(thung.TTPID.Value);
+                        if (thung.DaXuatKho == false)
+                        {
+                            SQLServerServices.DeleteThungTP(thung.TTPID.Value);
+                        }
                     }
 
                     await LoadDSachPhieuNhapKhoTPham();

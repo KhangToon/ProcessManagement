@@ -17,8 +17,6 @@ namespace ProcessManagement.Models.KHO_TPHAM
 
         public List<ThungTPham> ListKhoThungTPham { get; set; } = new();
 
-        public object MaViTri { get; set; } = new();
-
         public static class DBName
         {
             public const string Table_PhieuXuatKhoTPham = "KHOTP_PhieuXuatKhoTP";

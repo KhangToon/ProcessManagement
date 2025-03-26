@@ -105,14 +105,6 @@
                         </RadzenStack>
 
                         <RadzenStack Gap="20px" Style="height: contain; width: 100%; border-radius: 5px; background-color: var(--rz-secondary-lighter); padding: 5px; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                            <RadzenText Text="@($"Vị trí lưu kho")" Style="font-weight: 600; font-size: 16px; color: black;"></RadzenText>
-                            <RadzenStack Gap="10" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                <RadzenText Text="@($"{PXK.MaViTri}")" Style="font-weight: 600; font-size: 18px; color: darkblue;"></RadzenText>
-                                <RadzenButton Click="@(() => OnOpenQRIDLOT_ImageDialog(PXK.MaViTri?.ToString() ?? string.Empty, "Mã vị trí"))" Icon="qr_code_scanner" Style="--rz-icon-size: 18px;" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Light" />
-                            </RadzenStack>
-                        </RadzenStack>
-
-                        <RadzenStack Gap="20px" Style="height: contain; width: 100%; border-radius: 5px; background-color: var(--rz-secondary-lighter); padding: 5px; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                             <RadzenText Text="@($"Mã pallet")" Style="font-weight: 600; font-size: 16px; color: black;"></RadzenText>
                             <RadzenStack Gap="10" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                 <RadzenText Text="@($"{PXK.CodePallet.Value}")" Style="font-weight: 600; font-size: 18px; color: darkblue;"></RadzenText>
@@ -132,15 +124,6 @@
                                 <RadzenButton Text="@($"{PXK.ListKhoThungTPham.Count} (thùng) - {PXK.ListKhoThungTPham.Sum(ttp => int.TryParse(ttp.SoLuong.Value?.ToString(), out int slttp)? slttp : 0)} (pcs)")"
                                               ButtonStyle="ButtonStyle.Success" Size="ButtonSize.ExtraSmall" Shade="Shade.Darker" Variant="Variant.Text"
                                               Style="border-radius: 5px; --rz-icon-size: 14px; font-size: 14px; font-weight: 700; height: contain; width: contain; color: darkgreen" />
-                            </RadzenStack>
-                            <RadzenStack Visible="@(PXK.ListKhoThungTPham.Count > 0 && PXK.isPXKDoneXuatKho == false)" Gap="5px" Style="width: contain; height: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                <RadzenButton Text="@($"Chọn tất cả")" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.ExtraSmall" Shade="Shade.Darker" Variant="Variant.Text"
-                                              Click="@(() => OnChangeSelectAll(!isSelectAll))"
-                                              Style="border-radius: 5px; --rz-icon-size: 14px; font-size: 13px; font-weight: 600; height: contain; width: contain;" />
-                                <RadzenButton Visible="@(isSelectAll)" Icon="check" Click="@(() => OnChangeSelectAll(false))"
-                                              ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.ExtraSmall" Variant="Variant.Filled" Shade="Shade.Dark" Style="border-radius: 5px;" />
-                                <RadzenButton Visible="@(!isSelectAll)" Click="@(() => OnChangeSelectAll(true))"
-                                              ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.ExtraSmall" Variant="Variant.Outlined" Shade="Shade.Dark" Style="border-radius: 5px;" />
                             </RadzenStack>
                         </RadzenStack>
                         <RadzenCard Variant="Variant.Flat" Style="height:contain; max-height: 600px; width: 100%; padding: 5px">
@@ -170,12 +153,6 @@
                                                                 <RadzenText Visible="@(thungtpham.DaXuatKho)" Text="@($"{thungtpham.SoLuong.Value} (pcs)")" Style="font-size: 14px; font-weight: 600; height: contain; color: darkgreen"></RadzenText>
                                                             </RadzenStack>
                                                         </RadzenStack>
-                                                    </RadzenStack>
-                                                    <RadzenStack Style="height: contain; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                        <RadzenButton Visible="@(!thungtpham.DaXuatKho && thungtpham.IsSelected)" Icon="check" Click="@(() => thungtpham.IsSelected = false)"
-                                                                      ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.ExtraSmall" Variant="Variant.Filled" Shade="Shade.Dark" Style="border-radius: 5px;" />
-                                                        <RadzenButton Visible="@(!thungtpham.DaXuatKho && !thungtpham.IsSelected)" Click="@(() => thungtpham.IsSelected = true)"
-                                                                      ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.ExtraSmall" Variant="Variant.Outlined" Shade="Shade.Dark" Style="border-radius: 5px;" />
                                                     </RadzenStack>
                                                 </RadzenStack>
                                             </RadzenStack>

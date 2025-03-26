@@ -1,6 +1,8 @@
 ﻿@page "/mobile_khothanhpham"
 @attribute [Authorize(Roles = "User")]
 
+@using ProcessManagement.Pages.MobileDevice.KhoThanhPham.NhapKho
+@using ProcessManagement.Pages.MobileDevice.KhoThanhPham.XuatKho
 @using ProcessManagement.Pages.MobileDevice.SubmitKQGC
 @using Radzen.Blazor
 @using Radzen
@@ -28,6 +30,7 @@
 
     private async Task NavigateTo_Mobile_PhieuXuatHangTPham()
     {
-        await DialogService.Alert($"The function has not been completed!", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+        object newKetQuaGCid = await DialogService.OpenAsync<DialogDSachPXKThanhPham_Mobile>(null, null,
+        new DialogOptions() { ShowTitle = false, Width = "100%", Height = "100%", Resizable = false, Draggable = false, ShowClose = false, Style = "background-color: while; border-radius: 0px; padding: 0px; margin: 0px" });
     }
 }

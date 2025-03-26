@@ -1,0 +1,601 @@
+﻿@using ProcessManagement.Models
+@using ProcessManagement.Models.KHO_NVL
+@using ProcessManagement.Models.KHO_NVL.NhapKho
+@using ProcessManagement.Models.KHO_NVL.XuatKho
+@using ProcessManagement.Models.KHO_TPHAM
+@using ProcessManagement.Models.KHSXs
+@using ProcessManagement.Pages.Manager_NVL.NhapKho
+@using ProcessManagement.Services
+@using ProcessManagement.Services.SQLServer
+@using Radzen.Blazor
+@using Radzen
+@using Microsoft.AspNetCore.Components
+
+@inject NotificationService NotificationService
+@inject DialogService DialogService
+@inject NavigationManager NavigationManager
+@inject SQLServerServices SQLServerServices
+
+<style>
+    .IsThungScanned {
+        background-color: green;
+    }
+
+</style>
+
+<RadzenStack Gap="0px" Style="height: 100%; width: 100%; margin: 0; padding: 0;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+    <RadzenStack Gap="5px" Style="height: contain; width: 100%; padding-top: 0px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+        <RadzenStack Gap="5px" Style="height: contain; width: 100%; padding-top: 0px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+            <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding: 0px; padding-top: 0;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                <RadzenLabel Text="PHIẾU NHẬP KHO THÀNH PHẨM" Style="color: darkred; font-size: 13px; font-weight: 700; height: contain; width: contain "></RadzenLabel>
+                <RadzenLabel Text="@($"{PNK.MaPhieuNK.Value?.ToString()}")" Style="color: darkblue; font-size: 12px; font-weight: 700; height: contain; width: contain "></RadzenLabel>
+            </RadzenStack>
+            <RadzenStack Visible=false Gap="10px" Style="height: contain; width: 100%; padding: 0px; padding-top: 0;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                <RadzenRadioButtonList @bind-Value="ScanMode">
+                    <Items>
+                        <RadzenRadioButtonListItem Text="QR" Value="1" />
+                        <RadzenRadioButtonListItem Text="RFID" Value="2" />
+                    </Items>
+                </RadzenRadioButtonList>
+            </RadzenStack>
+        </RadzenStack>
+        <RadzenStack Gap="0" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: contain; width: 100%; padding: 0px; padding-left: 0; padding-right: 0;">
+            <RadzenStack Gap="5px" Style="height: contain; width: 100%; padding: 0px; padding-bottom: 5px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                <RadzenStack Gap="20px" Style="height: contain; width: 100%; border-radius: 5px; background-color: var(--rz-secondary-lighter); padding: 3px; padding-left: 5px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                    <RadzenLabel Text="@($"Xác nhận vị trí lưu kho")" Style="font-weight: 600; font-size: 13px; color: black;"></RadzenLabel>
+                    @if (TargetVTri.VTTPID.Value != null && IsCorrectViTri && !string.IsNullOrEmpty(ScanCodeLocation))
+                    {
+                        <RadzenButton Text="@($"{PNK.MaViTri}")" ButtonStyle="ButtonStyle.Success" Icon="check" Size="ButtonSize.ExtraSmall" Variant="Variant.Text" Shade="Shade.Darker" Style="color: darkgreen; font-weight: 700" />
+                    }
+                    else
+                    {
+                        <RadzenLabel Text="@($"{PNK.MaViTri}")" Style="font-weight: 600; font-size: 14px; color: darkblue;"></RadzenLabel>
+                    }
+                </RadzenStack>
+
+                <RadzenStack Gap="5px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px; margin-bottom: 5px">
+                    @{
+                        <RadzenStack Gap="5px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: contain; width: 100%; padding: 0px">
+                            <RadzenStack Style="width: 100%">
+                                <RadzenTextBox class="custom-placeholder" Placeholder="@($" * quét mã vị trí")" @bind-Value="@ScanCodeLocation" Style="font-size: 12px; height: 30px; border-width: 1px; color: black; font-weight: 500"
+                                               @ref="reftxtScanLocationInput"
+                                               @oninput="@(async(args) => { await OnScanQRLocationTextChanged(args.Value); })">
+                                </RadzenTextBox>
+                            </RadzenStack>
+
+                            <RadzenStack Style="width: contain; height: 100%" Orientation="Orientation.Horizontal">
+                                <RadzenButton Click="(async() => { ScanCodeLocation = string.Empty; LastScanCodeLocation = string.Empty; TargetVTri = new(); await reftxtScanLocationInput.FocusAsync();})" Style="padding: 5px; width: contain; height: 100%; font-size: 12px" Icon="clear" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.ExtraSmall" Variant="Variant.Filled" />
+                            </RadzenStack>
+                        </RadzenStack>
+                    }
+                </RadzenStack>
+
+                <RadzenStack Gap="20px" Style="height: contain; width: 100%; border-radius: 5px; background-color: var(--rz-secondary-lighter); padding: 3px; padding-left: 5px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                    <RadzenLabel Text="@($"Xác nhận mã pallet")" Style="font-weight: 600; font-size: 13px; color: black;"></RadzenLabel>
+                    @if (IsCorrectCodePallet && !string.IsNullOrEmpty(ScanCodePallet))
+                    {
+                        <RadzenButton Text="@($"{PNK.CodePallet.Value}")" ButtonStyle="ButtonStyle.Success" Icon="check" Size="ButtonSize.ExtraSmall" Variant="Variant.Text" Shade="Shade.Darker" Style="color: darkgreen; font-weight: 700" />
+                    }
+                    else
+                    {
+                        <RadzenLabel Text="@($"{PNK.CodePallet.Value}")" Style="font-weight: 600; font-size: 14px; color: darkblue;"></RadzenLabel>
+                    }
+                </RadzenStack>
+
+                <RadzenStack Gap="5px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: contain; width: 100%; padding: 0px;">
+                    @{
+                        <RadzenStack Gap="5px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: contain; width: 100%; padding: 0px">
+                            <RadzenStack Style="width: 100%;">
+                                <RadzenTextBox class="custom-placeholder" Placeholder="@($" * quét mã pallet")" @bind-Value="@ScanCodePallet" Style="font-size: 12px; height: 30px; border-width: 1px; color: black; font-weight: 500"
+                                               @ref="reftxtScanPalletInput"
+                                               @oninput="@(async(args) => { await OnScanQRPalletTextChanged(args.Value); })">
+                                </RadzenTextBox>
+                            </RadzenStack>
+
+                            <RadzenStack Style="width: contain; height: 100%" Orientation="Orientation.Horizontal">
+                                <RadzenButton Click="(async() => { ScanCodePallet = string.Empty; await reftxtScanPalletInput.FocusAsync();})" Style="padding: 5px; width: contain; height: 100%; font-size: 12px" Icon="clear" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.ExtraSmall" Variant="Variant.Filled" />
+                            </RadzenStack>
+                        </RadzenStack>
+                    }
+                </RadzenStack>
+            </RadzenStack>
+
+        </RadzenStack>
+    </RadzenStack>
+
+    <RadzenRow Gap="10px" Style="height: contain; width: 100%; margin-top: 5px; border-top: var(--rz-grid-cell-border); border-bottom: var(--rz-grid-cell-border); padding: 0;">
+        <RadzenColumn Size="12" SizeMD="12" Style="height: 100%; width: 100%; padding: 0">
+            <RadzenCard Variant="Variant.Flat" Style="height: contain; width: 100%; padding: 5px">
+                <RadzenStack Style="height: contain; width: 100%; padding: 0;" Gap="5px" Orientation="Orientation.Vertical">
+
+                    <RadzenStack Style="height: contain; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                        <RadzenButton Text="@($"Danh sách thùng cần nhập kho")"
+                                      ButtonStyle="ButtonStyle.Success" Size="ButtonSize.ExtraSmall" Shade="Shade.Darker" Variant="Variant.Text"
+                                      Style="border-radius: 5px; --rz-icon-size: 14px; font-size: 13px; font-weight: 700; height: contain; width: contain; color: black" />
+                        @{
+                            int scannedcount = PNK.ListKhoThungTPham.Where(thung => thung.IsScanned).Count();
+                            int total = PNK.ListKhoThungTPham.Count();
+                        }
+                        <RadzenLabel Visible=@(scannedcount < total) Text="@($"({scannedcount}/{total})")" Style="color: darkblue; font-size: 12px; font-weight: 700; height: contain; width: contain "></RadzenLabel>
+                        <RadzenButton Visible=@(scannedcount == total) Text="@($"({scannedcount}/{total})")" ButtonStyle="ButtonStyle.Success" Icon="check" Size="ButtonSize.ExtraSmall" Variant="Variant.Text" Shade="Shade.Darker" Style="color: darkgreen; font-weight: 700; font-size: 12px;" />
+                    </RadzenStack>
+
+                    <RadzenStack Gap="5px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: contain; width: 100%; padding: 0px;">
+                        @{
+                            <RadzenStack Gap="5px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: contain; width: 100%; padding: 0px">
+                                <RadzenStack Style="width: 100%;">
+                                    <RadzenTextBox class="custom-placeholder" Placeholder="@($" * quét mã thùng")" @bind-Value="@ScanCodeThungs" Style="font-size: 12px; height: 30px; border-width: 1px; color: black; font-weight: 500"
+                                                   @ref="reftxtScanThungsInput"
+                                                   @oninput="@(async(args) => { await OnScanQRThungsTextChanged(args.Value); })">
+                                    </RadzenTextBox>
+                                </RadzenStack>
+                                <RadzenStack Style="width: contain; height: 100%" Orientation="Orientation.Horizontal">
+                                    <RadzenButton Click="(async() => { ScanCodeThungs = string.Empty; PreScanCodeThungs = string.Empty; await reftxtScanThungsInput.FocusAsync();})" Style="padding: 5px; width: contain; height: 100%; font-size: 12px" Icon="clear" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.ExtraSmall" Variant="Variant.Filled" />
+                                </RadzenStack>
+                            </RadzenStack>
+                        }
+                    </RadzenStack>
+
+                    <RadzenStack Style="height: contain; width: 100%; padding: 0;" Gap="5px" Orientation="Orientation.Vertical">
+                        @foreach (var thungtpham in PNK.ListKhoThungTPham)
+                        {
+                            <RadzenCard @onclick="() => { thungtpham.IsExpand = !thungtpham.IsExpand;}" class="rz-shadow-5" Variant="Variant.Outlined" Style="width: 100%; height: contain; padding: 5px;">
+                                <RadzenStack Style="height: contain; width: 100%; padding: 0;" Gap="5px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                    <RadzenStack Gap="0" Style="height: contain; width: 100%;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                        <RadzenStack Style="height: contain; width: 100%; border-radius: 5px; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                            <RadzenStack Style="height: contain; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                <RadzenButton Text="@($"Thùng {PNK.ListKhoThungTPham.IndexOf(thungtpham) + 1}. {thungtpham.MaQuanLyThung.Value}")" ButtonStyle=@(thungtpham.IsScanned? ButtonStyle.Primary : ButtonStyle.Primary) Size="ButtonSize.ExtraSmall" Shade=@(thungtpham.IsScanned? Shade.Dark : Shade.Lighter) Variant="Variant.Flat"
+                                                              Style="--rz-icon-size: 14px; font-size: 14px; font-weight: 600; height: contain; width: contain;" />
+                                            </RadzenStack>
+                                            <RadzenStack Visible="false" Style="height: contain; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                <RadzenButton Visible="@(thungtpham.DaNhapKho && thungtpham.IsSelected)" Icon="check" Click="@(() => thungtpham.IsSelected = false)"
+                                                              ButtonStyle="ButtonStyle.Info" Size="ButtonSize.ExtraSmall" Variant="Variant.Filled" Shade="Shade.Dark" Style="border-radius: 5px; background-color: dodgerblue" />
+                                                <RadzenButton Visible="@(thungtpham.DaNhapKho && !thungtpham.IsSelected)" Click="@(() => thungtpham.IsSelected = true)"
+                                                              ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.ExtraSmall" Variant="Variant.Outlined" Shade="Shade.Dark" Style="border-radius: 5px;" />
+                                            </RadzenStack>
+                                        </RadzenStack>
+                                        <RadzenStack Style="height: contain; width: 100%; padding-top: 3px; padding-bottom: 3px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                            <RadzenStack Style="height: contain; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                <RadzenButton Visible="@(thungtpham.DaNhapKho)" Text="Đã nhập kho" Icon="check"
+                                                              ButtonStyle="ButtonStyle.Success" Size="ButtonSize.ExtraSmall" Variant="Variant.Text" Shade="Shade.Dark" Style="border-radius: 5px; --rz-icon-size: 14px;" />
+                                                <RadzenButton Visible="@(!thungtpham.DaNhapKho)" Text="Chưa nhập kho"
+                                                              ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.ExtraSmall" Variant="Variant.Text" Shade="Shade.Darker" Style="border-radius: 5px; --rz-icon-size: 14px;" />
+                                            </RadzenStack>
+                                            <RadzenStack Gap="10px" Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                <RadzenText Text="@($"{thungtpham.SoLuong.Value} (pcs)")" Style="font-size: 14px; font-weight: 600; height: contain; color: darkred"></RadzenText>
+                                            </RadzenStack>
+                                        </RadzenStack>
+                                    </RadzenStack>
+                                </RadzenStack>
+                                <RadzenCard Style="width: 100%; height: contain; padding: 0px;" Variant="Variant.Text">
+                                    <RadzenStack Style="width: 100%; height: contain; padding: 0" Orientation=Orientation.Vertical AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                        <RadzenCard Visible="@(thungtpham.DaNhapKho)" Variant="@(Variant.Outlined)" Style="height: 100%; width: 100%; padding: 5px;">
+                                            <RadzenStack Style="width: 100%; height: 100%;" Gap="3px" Orientation=Orientation.Vertical AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+
+                                                <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                                    <RadzenStack Style="width: 60%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                        <RadzenText Text="Ngày nhập" Style="font-size: 13px; font-weight: 500; height: contain; color: rgba(58,71,77)"></RadzenText>
+                                                    </RadzenStack>
+                                                    <RadzenStack Style="width: 40%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                                                        @{
+                                                            DateTime? ngaynk = DateTime.TryParse(thungtpham.NgayNhapKho.Value?.ToString(), out DateTime nnk) ? nnk : null;
+
+                                                            string _ngaynk = ngaynk?.ToString("dd/MM/yyyy") ?? "---";
+                                                        }
+                                                        <RadzenText Text="@($"{_ngaynk}")" Style="font-size: 14px; font-weight: 600; height: contain; color: rgba(58,71,77)"></RadzenText>
+                                                    </RadzenStack>
+                                                </RadzenStack>
+
+                                                <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                                    <RadzenStack Style="width: 60%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                        <RadzenText Text="Vị trí" Style="font-size: 13px; font-weight: 500; height: contain; color: rgba(58,71,77)"></RadzenText>
+                                                    </RadzenStack>
+                                                    <RadzenStack Style="width: 40%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                                                        <RadzenText Text="@(SQLServerServices.GetViTriTPhamByVTofTPID(thungtpham.VTofTPID.Value).MaViTri.Value?.ToString())"
+                                                                    Style="font-size: 14px; font-weight: 600; height: contain; color: darkgreen"></RadzenText>
+                                                    </RadzenStack>
+                                                </RadzenStack>
+
+                                                <RadzenStack Visible=@(thungtpham.DaXuatKho) Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                                    <RadzenStack Style="width: 60%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                        <RadzenText Text="Đã xuất kho" Style="font-size: 13px; font-weight: 500; height: contain; color: red"></RadzenText>
+                                                    </RadzenStack>
+                                                    <RadzenStack Style="width: 40%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                                                        @{
+                                                            DateTime? ngayxk = DateTime.TryParse(thungtpham.NgayXuatKho.Value?.ToString(), out DateTime nnk) ? nnk : null;
+
+                                                            string _ngayxk = ngayxk?.ToString("dd/MM/yyyy") ?? "---";
+                                                        }
+                                                        <RadzenText Text="@($"{_ngayxk}")" Style="font-size: 14px; font-weight: 600; height: contain; color: rgba(58,71,77)"></RadzenText>
+                                                    </RadzenStack>
+                                                </RadzenStack>
+
+                                            </RadzenStack>
+                                        </RadzenCard>
+                                        <RadzenStack Visible="@(thungtpham.DaNhapKho && 1>2)" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                            <RadzenText Text="Vị trí lưu kho" Style="font-size: 14px; font-weight: 600; height: contain;"></RadzenText>
+                                            <RadzenButton Visible="@(thungtpham.DaNhapKho)"
+                                                          Text="@(SQLServerServices.GetListViTriofTPhams(new Dictionary<string, object?>(){{ViTriofTPham.DBName.VTofTPID, thungtpham.VTofTPID.Value}}).viTriofTPhams.FirstOrDefault()?.LotVitri.Value?.ToString())"
+                                                          ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Variant="Variant.Text" Shade="Shade.Darker" Style="border-radius: 5px; --rz-icon-size: 14px; cursor: default; font-size: 14px; font-weight: 600" />
+                                        </RadzenStack>
+
+                                    </RadzenStack>
+                                </RadzenCard>
+                            </RadzenCard>
+                        }
+                    </RadzenStack>
+                </RadzenStack>
+            </RadzenCard>
+        </RadzenColumn>
+    </RadzenRow>
+
+    <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding-top: 15px; padding-bottom: 15px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+        <RadzenStack Gap="5px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: contain; width: contain; padding: 0px">
+            <RadzenButton @ref=refComfirmButton Disabled=@((PNK.ListKhoThungTPham.Count == 0 || (PNK.ListKhoThungTPham.Any(ttp => ttp.IsScanned == false)) || PNK.isPNKDoneNhapKho)) Text="Nhập kho thành phẩm"
+                          Click="(async() => { await OnPushListTTPtoTargetLocation();})"
+                          Icon="download" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Darker" />
+        </RadzenStack>
+        <RadzenButton Style="width: contain; height: contain; font-size: 12px; padding: 5px; padding-left: 10px; padding-right: 10px" Icon="close" Text="Thoát" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Size="ButtonSize.ExtraSmall" Variant="Variant.Flat" Click="@(() => DialogService.Close())" />
+    </RadzenStack>
+</RadzenStack>
+
+@code {
+    [Parameter]
+    public PhieuNhapKhoTPham PNK { get; set; } = new();
+
+    private RadzenTextBox reftxtScanLocationInput = new();
+    private RadzenTextBox reftxtScanPalletInput = new();
+    private RadzenTextBox reftxtScanThungsInput = new();
+    private string ScanCodeLocation = string.Empty;
+    private string ScanCodePallet = string.Empty;
+    private string ScanCodeThungs = string.Empty;
+    private List<string> ListScanResults = new();
+    private ViTriTPham TargetVTri = new();
+
+    private bool IsCorrectViTri = false;
+    private bool IsCorrectCodePallet = false;
+    private int ScanMode = 1; // 1 is QR, 2 is RFID
+
+    private bool loadingCode = false;
+
+    private RadzenButton refComfirmButton = new();
+
+    protected override Task OnInitializedAsync()
+    {
+        return base.OnInitializedAsync();
+    }
+
+    private string LastScanCodeLocation = string.Empty;
+    private async Task OnScanQRLocationTextChanged(object? qrlocation)
+    {
+        if (loadingCode)
+        {
+            return;
+        }
+
+        await Task.Run(async () =>
+        {
+            loadingCode = true;
+
+            ListScanResults = new();
+
+            string newTextChange = qrlocation?.ToString() ?? string.Empty;
+
+            // Dung khi khong dung voi dau "," (dung cho Auto)
+            // if (newTextChange.Length > LastScanCodeLocation.Length)
+            // {
+            //     string newCode = newTextChange.Substring(LastScanCodeLocation.Length);
+
+            //     ScanCodeLocation = newCode;
+            // }
+            // else
+            // {
+            //     ScanCodeLocation = newTextChange;
+            // }
+
+            // LastScanCodeLocation = newTextChange;
+
+            ScanCodeLocation = newTextChange;
+
+            if (!string.IsNullOrEmpty(ScanCodeLocation))
+            {
+                ListScanResults = ScanCodeLocation.Split(",")
+                    .Where(item => !string.IsNullOrEmpty(item))  // Remove empty strings
+                    .Distinct()  // Remove duplicates
+                    .ToList();
+            }
+
+            TargetVTri = await LoadDSachViTriTPham(ListScanResults.FirstOrDefault());
+
+            IsCorrectViTri = TargetVTri.MaViTri.Value?.ToString() == PNK.MaViTri.ToString();
+
+            if (IsCorrectViTri)
+            {
+                await reftxtScanPalletInput.FocusAsync();
+            }
+
+            await Task.Delay(100);
+
+            loadingCode = false;
+        });
+    }
+
+    private async Task OnScanQRPalletTextChanged(object? qrpallet)
+    {
+        if (loadingCode)
+        {
+            return;
+        }
+
+        await Task.Run(async () =>
+        {
+            loadingCode = true;
+
+            List<string> listScanResults = new();
+
+            ScanCodePallet = qrpallet?.ToString() ?? string.Empty;
+
+            if (!string.IsNullOrEmpty(ScanCodePallet))
+            {
+                listScanResults = ScanCodePallet.Split(",")
+                    .Where(item => !string.IsNullOrEmpty(item))  // Remove empty strings
+                    .Distinct()  // Remove duplicates
+                    .ToList();
+            }
+
+            IsCorrectCodePallet = PNK.CodePallet.Value?.ToString() == ScanCodePallet;
+
+            if (IsCorrectCodePallet)
+            {
+                await reftxtScanThungsInput.FocusAsync();
+            }
+
+            await Task.Delay(100);
+
+            loadingCode = false;
+        });
+    }
+
+    private string PreScanCodeThungs = string.Empty;
+    private async Task OnScanQRThungsTextChanged(object? changedText)
+    {
+        if (loadingCode)
+        {
+            return;
+        }
+
+        await Task.Run(async () =>
+        {
+            loadingCode = true;
+
+            List<string> listScanCodeThungs = new();
+
+            ScanCodeThungs = changedText?.ToString()?.ToUpper() ?? string.Empty;
+
+            // if (!string.IsNullOrEmpty(ScanCodeThungs))
+            // {
+            //     listScanResults = ScanCodeThungs.Split(",")
+            //         .Where(item => !string.IsNullOrEmpty(item))  // Remove empty strings
+            //         .Distinct()  // Remove duplicates
+            //         .ToList();
+            // }
+
+            //Dung khi khong dung voi dau "," (dung cho Auto)
+            if (ScanCodeThungs.Length > PreScanCodeThungs.Length)
+            {
+                string newCode = ScanCodeThungs.Substring(PreScanCodeThungs.Length);
+
+                listScanCodeThungs.Add(newCode);
+            }
+
+            PreScanCodeThungs = ScanCodeThungs;
+
+            foreach (var thung in PNK.ListKhoThungTPham)
+            {
+                if (thung.IsScanned == false)
+                {
+                    if (listScanCodeThungs.Any(codeThung => codeThung.Trim() == thung.MaQuanLyThung.Value?.ToString()))
+                    {
+                        thung.IsScanned = true;
+                    }
+                }
+            }
+
+            await Task.Delay(100);
+
+            loadingCode = false;
+
+            if (PNK.ListKhoThungTPham.All(ttp => ttp.IsScanned) && IsCorrectCodePallet && IsCorrectViTri)
+            {
+                await refComfirmButton.Element.FocusAsync();
+            }
+        });
+    }
+
+    private async Task OnPushListTTPtoTargetLocation()
+    {
+        if (IsCorrectViTri == false || IsCorrectCodePallet == false)
+        {
+            return;
+        }
+
+        bool? comfirm = await DialogService.Confirm($"Nhập {PNK.ListKhoThungTPham.Count} thùng này vào kho?", "Xác nhận", new ConfirmOptions() { OkButtonText = "OK", CancelButtonText = "Hủy", ShowClose = false });
+
+        if (comfirm.Value)
+        {
+            int result = -1;
+
+            var targetLotViTri = TargetVTri.DSachViTriofTPhams.FirstOrDefault(lot => lot.VTofTPID.Value?.ToString() == PNK.VTofTPID.Value?.ToString());
+
+            if (targetLotViTri != null)
+            {
+                result = await OnSaveViTriofTPham(targetLotViTri, PNK.ListKhoThungTPham, PNK.CodePallet.Value);
+
+                if (result == 1)
+                {
+                    await DialogService.Alert($"Nhập kho thành công! Vị trí <strong>{TargetVTri.MaViTri.Value}</strong>", "<strong><span style='color: green'>Success!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                }
+                else
+                {
+                    await DialogService.Alert($"Nhập kho không thành công!", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                }
+            }
+            else
+            {
+                await DialogService.Alert($"Nhập kho không thành công!", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+            }
+
+
+            // Reload target ThungTPs
+
+            PNK = SQLServerServices.GetPhieuNhapKhoTPhamByID(PNK.PNKTPID.Value);
+        }
+    }
+
+    private async Task<int> OnSaveViTriofTPham(ViTriofTPham targetLot, List<ThungTPham> thungTPhams, object? currentPalleKey)
+    {
+        return await Task.Run(() =>
+        {
+            int result = -1;
+
+            foreach (var thung in thungTPhams)
+            {
+                if (thung.MaQuanLyThung.Value != null && (thung.VTofTPID.Value == null || object.Equals(thung.VTofTPID.Value, 0)))
+                {
+                    thung.VTofTPID.Value = targetLot.VTofTPID.Value;
+
+                    thung.VTTPID.Value = TargetVTri.VTTPID.Value;
+
+                    thung.NgayNhapKho.Value = DateTime.Now;
+
+                    thung.InStock.Value = 1;
+
+                    (int udresult, string uderror) = SQLServerServices.UpdateThungTPham(thung);
+
+                    if (udresult < 0)
+                    {
+                        result = -1;
+                    }
+                    else result = 1;
+                }
+                else result = -1;
+            }
+
+            return result;
+        });
+    }
+
+    private async Task OnAddNewLotForViTriLuuTru(ViTriTPham selectedViTri)
+    {
+        await Task.Run(() =>
+        {
+            var dsachLots = SQLServerServices.GetListViTriofTPhams(new() { { ViTriTPham.DBName.VTTPID, selectedViTri.VTTPID.Value } }, false).viTriofTPhams;
+
+            var listLotIndexs = dsachLots.Select(lot => int.Parse(lot.LotVitri.Value?.ToString()?.Replace("LOT", "") ?? "-1"));
+
+            int maxIndex = (listLotIndexs.Count() > 0) ? listLotIndexs.Max() : 0;
+
+            int newIndex = -1;
+
+            for (int i = 1; i < maxIndex; i++)
+            {
+                if (!listLotIndexs.Contains(i))
+                {
+                    newIndex = i;
+                    break;
+                }
+            }
+
+            if (newIndex == -1)
+            {
+                newIndex = maxIndex + 1;
+            }
+
+            if (newIndex != -1)
+            {
+                ViTriofTPham newviTriofTP = new()
+                    {
+                        VTTPID = { Value = selectedViTri.VTTPID.Value },
+                        VTTPSoLuong = { Value = 0 },
+                        LotVitri = { Value = $"LOT{newIndex}" },
+                    };
+
+                (int newvitriID, string error) = SQLServerServices.InsertViTriofTPham(newviTriofTP);
+
+                if (newvitriID == -1)
+                {
+
+                }
+                else
+                {
+
+                }
+            }
+        });
+    }
+
+
+
+
+    private async Task<ViTriTPham> LoadDSachViTriTPham(object? scanCode = null)
+    {
+        return await Task.Run(async () =>
+        {
+            var dsVitris = SQLServerServices.GetListViTriTPhams(new() { { ViTriTPham.DBName.MaViTri, scanCode } }).viTriTPhams;
+
+            if (dsVitris.Count == 0)
+            {
+                // Load vitri by maquanlythung
+
+                var thungtps = SQLServerServices.GetListThungTPs(new() { { ThungTPham.DBName.MaQuanLyThung, scanCode } }, false).thungTPhams;
+
+                var targetvitri = SQLServerServices.GetViTriTPhamByVTofTPID(thungtps.FirstOrDefault()?.VTofTPID.Value);
+
+                dsVitris.Add(targetvitri);
+            }
+
+            await Task.WhenAll(dsVitris.Select(async vitri =>
+            {
+                Dictionary<string, object?> parameters = new() { { ViTriofTPham.DBName.VTTPID, vitri.VTTPID.Value } };
+
+                vitri.DSachViTriofTPhams = SQLServerServices.GetListViTriofTPhams(parameters, false).viTriofTPhams;
+
+                vitri.DSachViTriofTPhams = RangeIncreaseLOTs(vitri.DSachViTriofTPhams);
+
+                await Task.Delay(1);
+            }));
+
+            return dsVitris.FirstOrDefault() ?? new();
+        });
+    }
+
+    private List<ViTriofTPham> RangeIncreaseLOTs(List<ViTriofTPham> inputList)
+    {
+        // Sort the list based on extracting the numeric part of the Lot property
+        return inputList.OrderBy(item =>
+        int.TryParse(
+        item.LotVitri.Value?.ToString()?.Replace("LOT", ""),
+        out int lotNumber
+        ) ? lotNumber : int.MaxValue
+        ).ToList();
+    }
+
+    private async Task<List<ThungTPham>> LoadDSachThungTPhams(object? khsxid, object? vtofttpID)
+    {
+        return await Task.Run(() =>
+        {
+            Dictionary<string, object?> pars = new Dictionary<string, object?>() { { ThungTPham.DBName.VTofTPID, vtofttpID } };
+
+            if (khsxid != null)
+            {
+                pars.Add(ThungTPham.DBName.KHSXID, khsxid);
+            }
+
+            List<ThungTPham> thungTPhams = SQLServerServices.GetListThungTPs(pars).thungTPhams;
+
+            return thungTPhams;
+        });
+    }
+
+
+}

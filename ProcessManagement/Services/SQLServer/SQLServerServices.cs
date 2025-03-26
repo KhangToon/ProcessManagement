@@ -9234,8 +9234,16 @@ namespace ProcessManagement.Services.SQLServer
 
                         if (int.TryParse(thungtpham.InStock.Value?.ToString(), out int instock))
                         {
-                            thungtpham.DaNhapKho = thungtpham.VTofTPID.Value != null && thungtpham.PNKTPID.Value != null && instock == 1;
                             thungtpham.DaXuatKho = thungtpham.PXKTPID.Value != null && instock == 0;
+
+                            if (thungtpham.DaXuatKho)
+                            {
+                                thungtpham.DaNhapKho = true;
+                            }
+                            else
+                            {
+                                thungtpham.DaNhapKho = thungtpham.VTofTPID.Value != null && thungtpham.PNKTPID.Value != null && instock == 1;
+                            }
                         }
 
                         // Load partofthungTPs

@@ -133,15 +133,6 @@
                                               ButtonStyle="ButtonStyle.Success" Size="ButtonSize.ExtraSmall" Shade="Shade.Darker" Variant="Variant.Text"
                                               Style="border-radius: 5px; --rz-icon-size: 14px; font-size: 14px; font-weight: 700; height: contain; width: contain; color: darkgreen" />
                             </RadzenStack>
-                            <RadzenStack Visible="@(PNK.ListKhoThungTPham.Count > 0 && PNK.isPNKDoneNhapKho == false)" Gap="5px" Style="width: contain; height: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                <RadzenButton Text="@($"Chọn tất cả")" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.ExtraSmall" Shade="Shade.Darker" Variant="Variant.Text"
-                                              Click="@(() => OnChangeSelectAll(!isSelectAll))"
-                                              Style="border-radius: 5px; --rz-icon-size: 14px; font-size: 13px; font-weight: 600; height: contain; width: contain;" />
-                                <RadzenButton Visible="@(isSelectAll)" Icon="check" Click="@(() => OnChangeSelectAll(false))"
-                                              ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.ExtraSmall" Variant="Variant.Filled" Shade="Shade.Dark" Style="border-radius: 5px;" />
-                                <RadzenButton Visible="@(!isSelectAll)" Click="@(() => OnChangeSelectAll(true))"
-                                              ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.ExtraSmall" Variant="Variant.Outlined" Shade="Shade.Dark" Style="border-radius: 5px;" />
-                            </RadzenStack>
                         </RadzenStack>
                         <RadzenCard Variant="Variant.Flat" Style="height:contain; max-height: 600px; width: 100%; padding: 5px">
                             <RadzenStack Style="height: contain; width: 100%; padding: 0;" Gap="5px" Orientation="Orientation.Vertical">
@@ -162,7 +153,8 @@
                                                             <RadzenStack Style="height: contain; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                                 <RadzenButton Visible="@(thungtpham.DaNhapKho)" Text="Đã nhập kho" Icon="check"
                                                                               ButtonStyle="ButtonStyle.Success" Size="ButtonSize.ExtraSmall" Variant="Variant.Text" Shade="Shade.Dark" Style="border-radius: 5px; --rz-icon-size: 14px; color: darkgreen" />
-                                                                <RadzenButton Visible="@(!thungtpham.DaNhapKho)" Text="Chưa nhập kho"
+
+                                                                <RadzenButton Visible="@(!thungtpham.DaNhapKho && !thungtpham.DaXuatKho)" Text="Chưa nhập kho"
                                                                               ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.ExtraSmall" Variant="Variant.Text" Shade="Shade.Dark" Style="border-radius: 5px; --rz-icon-size: 14px;" />
                                                             </RadzenStack>
                                                             <RadzenStack Gap="10px" Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
@@ -170,12 +162,6 @@
                                                                 <RadzenText Visible="@(thungtpham.DaNhapKho)" Text="@($"{thungtpham.SoLuong.Value} (pcs)")" Style="font-size: 14px; font-weight: 600; height: contain; color: darkgreen"></RadzenText>
                                                             </RadzenStack>
                                                         </RadzenStack>
-                                                    </RadzenStack>
-                                                    <RadzenStack Style="height: contain; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                        <RadzenButton Visible="@(!thungtpham.DaNhapKho && thungtpham.IsSelected)" Icon="check" Click="@(() => thungtpham.IsSelected = false)"
-                                                                      ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.ExtraSmall" Variant="Variant.Filled" Shade="Shade.Dark" Style="border-radius: 5px;" />
-                                                        <RadzenButton Visible="@(!thungtpham.DaNhapKho && !thungtpham.IsSelected)" Click="@(() => thungtpham.IsSelected = true)"
-                                                                      ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.ExtraSmall" Variant="Variant.Outlined" Shade="Shade.Dark" Style="border-radius: 5px;" />
                                                     </RadzenStack>
                                                 </RadzenStack>
                                             </RadzenStack>
@@ -196,6 +182,20 @@
                                                                     string _ngaynk = ngaynk?.ToString("dd/MM/yyyy") ?? "---";
                                                                 }
                                                                 <RadzenText Text="@($"{_ngaynk}")" Style="font-size: 14px; font-weight: 600; height: contain; color: rgba(58,71,77)"></RadzenText>
+                                                            </RadzenStack>
+                                                        </RadzenStack>
+
+                                                        <RadzenStack Visible=@(thungtpham.DaXuatKho) Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                                            <RadzenStack Style="width: 60%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                                <RadzenText Text="Đã xuất kho" Style="font-size: 13px; font-weight: 500; height: contain; color: red"></RadzenText>
+                                                            </RadzenStack>
+                                                            <RadzenStack Style="width: 40%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                                                                @{
+                                                                    DateTime? ngayxk = DateTime.TryParse(thungtpham.NgayXuatKho.Value?.ToString(), out DateTime nnk) ? nnk : null;
+
+                                                                    string _ngayxk = ngayxk?.ToString("dd/MM/yyyy") ?? "---";
+                                                                }
+                                                                <RadzenText Text="@($"{_ngayxk}")" Style="font-size: 14px; font-weight: 600; height: contain; color: rgba(58,71,77)"></RadzenText>
                                                             </RadzenStack>
                                                         </RadzenStack>
 
