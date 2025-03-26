@@ -23,6 +23,7 @@ namespace ProcessManagement.Models.KHO_TPHAM
         public Propertyy InStock { get; set; } = new() { DBName = DBName.InStock, DisplayName = DispName.InStock, Type = typeof(int), AlowDatabase = true };
 
         public bool DaNhapKho { get; set; } = false;
+        public bool DaXuatKho { get; set; } = false;
         public bool IsExpand { get; set; } = false;
         public bool IsSelected { get; set; } = false;
         public bool IsScanned { get; set; } = false;
