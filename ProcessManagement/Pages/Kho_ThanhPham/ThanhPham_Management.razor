@@ -47,7 +47,7 @@
                     <ChildContent>
                         <RadzenCard Variant="Variant.Flat" Style="height: 100%; width: 100%; padding: 10px;">
                             <RadzenStack Gap="5" Style="height: 100%; width: 100%;">
-                                <DanhSachPNKThanhPham></DanhSachPNKThanhPham>
+                                <DanhSachPNKThanhPham PNKTPID="@PNKTPID"></DanhSachPNKThanhPham>
                             </RadzenStack>
                         </RadzenCard>
                     </ChildContent>
@@ -73,4 +73,18 @@
 @code {
     public static int SelectedTabIndex { get; set; } = 1;
 
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "tabindex")]
+    public int TabIndex { get; set; } = 1;
+
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "pnktpid")]
+    public int PNKTPID { get; set; } = 0;
+
+    protected async override Task OnInitializedAsync()
+    {
+        SelectedTabIndex = TabIndex;
+
+        await base.OnInitializedAsync();
+    }
 }

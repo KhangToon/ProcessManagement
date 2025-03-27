@@ -118,12 +118,20 @@
 
 
 @code {
+    [Parameter]
+    public object? PNKTPID { get; set; }
+
     private List<PhieuNhapKhoTPham> DSPhieuNKs = new();
     private PhieuNhapKhoTPham SelectedPNK = new();
     private bool isSearching = false;
 
     protected override async Task OnInitializedAsync()
     {
+        if (PNKTPID != null && !object.Equals(PNKTPID, 0))
+        {
+            Common.SelectedPNKTPID = PNKTPID;
+        }
+
         await LoadDSachPhieuNhapKhoTPham();
 
         ReSelectPhieuNhapKhoTPham();
