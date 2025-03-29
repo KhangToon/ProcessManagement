@@ -116,11 +116,16 @@
             TargetKHSX = SQLServerServices.GetKHSXbyID(KHSXID);
         }
 
-        await GetChartDatas();
 
-        cancellationTokenSource = new CancellationTokenSource();
+        if (TargetKHSX.KHSXID.Value != null && TargetKHSX.isCollapsed == false)
+        {
+            await GetChartDatas();
 
-        await LoadDataAsync(cancellationTokenSource.Token);
+            cancellationTokenSource = new CancellationTokenSource();
+
+            await LoadDataAsync(cancellationTokenSource.Token);
+
+        }
 
         await base.OnInitializedAsync();
     }

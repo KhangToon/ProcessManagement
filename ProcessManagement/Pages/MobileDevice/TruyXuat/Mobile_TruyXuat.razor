@@ -192,7 +192,7 @@
                                     <RadzenText Text="Mã quản lý thùng" Style="font-size: 12px; font-weight: 600; height: contain; color: var(--rz-primary-darker)"></RadzenText>
                                 </RadzenStack>
                                 <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
-                                    <RadzenText Text="@($"{thungtp.ThungTPhams.FirstOrDefault()?.MaQuanLyThung.Value?.ToString()}")" Style="font-size: 13px; font-weight: 700; height: contain; color: darkgreen"></RadzenText>
+                                    <RadzenText Text="@($"{thungtp.MaQuanLyThung.Value?.ToString()}")" Style="font-size: 13px; font-weight: 700; height: contain; color: darkgreen"></RadzenText>
                                 </RadzenStack>
                             </RadzenStack>
 
@@ -201,7 +201,7 @@
                                     <RadzenText Text="Số lượng/thùng" Style="font-size: 12px; font-weight: 600; height: contain; color: var(--rz-primary-darker)"></RadzenText>
                                 </RadzenStack>
                                 <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
-                                    <RadzenText Text="@($"{thungtp.ThungTPhams.Sum(ttp => int.TryParse(ttp.SoLuong.Value?.ToString(), out int sl)? sl: 0).ToString()} (PCS)")" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                                    <RadzenText Text="@($"{thungtp.SoLuong.Value} (PCS)")" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
                                 </RadzenStack>
                             </RadzenStack>
 
@@ -211,7 +211,7 @@
                                 </RadzenStack>
                                 <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
                                     @{
-                                        DateTime? ngaynk = DateTime.TryParse(thungtp.ThungTPhams.FirstOrDefault()?.NgayNhapKho.Value?.ToString(), out DateTime nnk) ? nnk : null;
+                                        DateTime? ngaynk = DateTime.TryParse(thungtp.NgayNhapKho.Value?.ToString(), out DateTime nnk) ? nnk : null;
 
                                         string _ngaynk = ngaynk?.ToString(Commons.Common.FormatNoTime_ddMMyyyy) ?? "---";
                                     }
@@ -227,7 +227,7 @@
                                     <RadzenButton Text="Đã nhập kho" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.ExtraSmall" Variant="Variant.Text" Icon="check" Style="font-size: 12px; font-weight: 600; height: contain;"></RadzenButton>
                                 </RadzenStack>
                                 <RadzenStack Visible="@thungtp.DaNhapKho" Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
-                                    <RadzenText Text="@($"Vị trí: {SQLServerServices.GetViTriTPhamByVTofTPID(thungtp.ThungTPhams.FirstOrDefault()?.VTofTPID.Value?.ToString()).MaViTri.Value}")" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                                    <RadzenText Text="@($"Vị trí: {SQLServerServices.GetViTriTPhamByVTofTPID(thungtp.VTofTPID.Value?.ToString()).MaViTri.Value}")" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
                                 </RadzenStack>
                             </RadzenStack>
                         </RadzenStack>
@@ -243,7 +243,7 @@
                                 <RadzenText Text="Mã quản lý thùng" Style="font-size: 12px; font-weight: 600; height: contain; color: var(--rz-primary-darker)"></RadzenText>
                             </RadzenStack>
                             <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
-                                <RadzenText Text="@($"{TargetTTPbyMaThung.ThungTPhams.FirstOrDefault()?.MaQuanLyThung.Value?.ToString()}")" Style="font-size: 13px; font-weight: 700; height: contain; color: darkgreen"></RadzenText>
+                                <RadzenText Text="@($"{TargetTTPbyMaThung.MaQuanLyThung.Value?.ToString()}")" Style="font-size: 13px; font-weight: 700; height: contain; color: darkgreen"></RadzenText>
                             </RadzenStack>
                         </RadzenStack>
 
@@ -252,7 +252,7 @@
                                 <RadzenText Text="Số lượng/thùng" Style="font-size: 12px; font-weight: 600; height: contain; color: var(--rz-primary-darker)"></RadzenText>
                             </RadzenStack>
                             <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
-                                <RadzenText Text="@($"{TargetTTPbyMaThung.ThungTPhams.Sum(ttp => int.TryParse(ttp.SoLuong.Value?.ToString(), out int sl)? sl: 0).ToString()} (PCS)")" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                                <RadzenText Text="@($"{TargetTTPbyMaThung.SoLuong.Value} (PCS)")" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
                             </RadzenStack>
                         </RadzenStack>
 
@@ -264,7 +264,7 @@
                                 <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
                                 </RadzenStack>
                             </RadzenStack>
-                            @foreach (var thung in TargetTTPbyMaThung.ThungTPhams)
+                            @foreach (var thung in TargetTTPbyMaThung.PartOfThungTPhams)
                             {
                                 <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                                     <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
@@ -284,7 +284,7 @@
                             </RadzenStack>
                             <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
                                 @{
-                                    DateTime? ngaynk = DateTime.TryParse(TargetTTPbyMaThung.ThungTPhams.FirstOrDefault()?.NgayNhapKho.Value?.ToString(), out DateTime nnk) ? nnk : null;
+                                    DateTime? ngaynk = DateTime.TryParse(TargetTTPbyMaThung.NgayNhapKho.Value?.ToString(), out DateTime nnk) ? nnk : null;
 
                                     string _ngaynk = ngaynk?.ToString(Commons.Common.FormatNoTime_ddMMyyyy) ?? "---";
                                 }
@@ -300,7 +300,7 @@
                                 <RadzenButton Text="Đã nhập kho" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.ExtraSmall" Variant="Variant.Text" Icon="check" Style="font-size: 12px; font-weight: 600; height: contain;"></RadzenButton>
                             </RadzenStack>
                             <RadzenStack Visible="@TargetTTPbyMaThung.DaNhapKho" Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
-                                <RadzenText Text="@($"Vị trí: {SQLServerServices.GetViTriTPhamByVTofTPID(TargetTTPbyMaThung.ThungTPhams.FirstOrDefault()?.VTofTPID.Value?.ToString()).MaViTri.Value}")" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
+                                <RadzenText Text="@($"Vị trí: {SQLServerServices.GetViTriTPhamByVTofTPID(TargetTTPbyMaThung.VTofTPID.Value?.ToString()).MaViTri.Value}")" Style="color: black; font-weight: 600; font-size: 14px"></RadzenText>
                             </RadzenStack>
                         </RadzenStack>
                     </RadzenStack>
@@ -321,7 +321,7 @@
                         </RadzenStack>
                         <RadzenStack Gap="15px" Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                             <RadzenText Text="@($"{TargetMQLLotSearchByMQL?.MaQuanLyLot.Value?.ToString()}")" Style="font-size: 13px; font-weight: 700; height: contain; color: darkgreen"></RadzenText>
-                            <RadzenText Text="@($"(Số lượng: {TargetMQLLotSearchByMQL?.SLLOT.Value} PCS)")" Style="font-size: 12px; font-weight: 700; height: contain; color: black"></RadzenText>
+                            <RadzenText Text="@($"(Số lượng: {TargetMQLLotSearchByMQL?.SLOKsubmited.Value} PCS)")" Style="font-size: 12px; font-weight: 700; height: contain; color: black"></RadzenText>
                         </RadzenStack>
                     </RadzenStack>
                 </RadzenStack>
@@ -487,9 +487,8 @@
     private RadzenButton refdefault = new();
 
     private List<NVLInfor> nVLInfors = new();
-    private List<ThungTPhamExtend> TargetThungTPs = new();
-    private List<PartOfThungTPham> thungTPbyMaThungs = new();
-    private ThungTPhamExtend TargetTTPbyMaThung = new();
+    private List<ThungTPham> TargetThungTPs = new();
+    private ThungTPham TargetTTPbyMaThung = new();
     private bool isSearhbyMQL = true;
 
     private List<List<ResultPerLOTKHSX>> ListResultPerLOTKHSXes = new();
@@ -609,26 +608,34 @@
                         {
                             isSearhbyMQL = true;
 
-                            TargetMQLLotSearchByMQL = results.FirstOrDefault()?.DSLOT_KHSXs.FirstOrDefault(lot => lot.MaQuanLyLot.Value?.ToString()?.Trim() == keysearch);
+                            var dskqgcOftargetMQLs = results.FirstOrDefault()?.DSLOT_KHSXs.Where(lot => lot.MaQuanLyLot.Value?.ToString()?.Trim() == keysearch).ToList();
+
+                            TargetMQLLotSearchByMQL = dskqgcOftargetMQLs?.FirstOrDefault() ?? new();
 
                             TargetKHSX = results.FirstOrDefault() ?? new();
 
                             // Load KQGC
-                            var resultPerLOTKHSXes = await LoadKQGCperLOTofKHSX(new List<KHSX_LOT>() { TargetMQLLotSearchByMQL ?? new() }, TargetKHSX.KHSXID.Value);
+                            var resultPerLOTKHSXes = await LoadKQGCperLOTofKHSX(new List<KHSX_LOT>() { TargetMQLLotSearchByMQL }, TargetKHSX.KHSXID.Value);
+
+                            int sumslNGsubmited = resultPerLOTKHSXes.FirstOrDefault()?.GetTotalNGAllCDoan() ?? 0;
+
+                            int sltotal = int.TryParse(TargetMQLLotSearchByMQL.SLLOT.Value?.ToString(), out int total) ? total : 0;
+
+                            TargetMQLLotSearchByMQL.SLOKsubmited.Value = ((sltotal - sumslNGsubmited) > 0) ? (sltotal - sumslNGsubmited) : 0;
 
                             ListResultPerLOTKHSXes.Add(resultPerLOTKHSXes);
 
                             // Get thung TP
-                            TargetThungTPs = await LoadDSachThungTPhamsByMQLLot(TargetMQLLotSearchByMQL?.MaQuanLyLot.Value) ?? new();
+                            TargetThungTPs = await LoadDSachThungTPhams_byMQLLOT(TargetMQLLotSearchByMQL.KHSXID.Value, TargetMQLLotSearchByMQL.MaQuanLyLot.Value);
                         }
                         else
                         {
                             // Search by ma ThungTP
-                            var resutThungEx = await LoadDSachThungTPhamsByMQLThung(keysearch);
+                            var resutThungs = await LoadDSachThungTPhams(keysearch);
 
-                            if (resutThungEx != null && resutThungEx.Any())
+                            if (resutThungs != null && resutThungs.Any())
                             {
-                                var targetThung = resutThungEx.FirstOrDefault()?.ThungTPhams.FirstOrDefault();
+                                var targetThung = resutThungs.FirstOrDefault();
 
                                 var khsxid = targetThung?.KHSXID.Value;
 
@@ -641,13 +648,13 @@
                                     TargetKHSX = results.FirstOrDefault() ?? new();
 
                                     // Asign thung TP search by mathung
-                                    var thungTPbyMaThungs = await LoadDSachThungTPhamsByIDthung(TargetKHSX.KHSXID.Value, targetThung.IDThung.Value) ?? new();
+                                    var thungTPbyMaThungs = await LoadDSachThungTPhams_byIDThung(TargetKHSX.KHSXID.Value, targetThung.IDThung.Value) ?? new();
 
                                     TargetTTPbyMaThung = thungTPbyMaThungs.FirstOrDefault() ?? new();
 
                                     // Load KQGC
 
-                                    foreach (var thung in TargetTTPbyMaThung.ThungTPhams)
+                                    foreach (var thung in TargetTTPbyMaThung.PartOfThungTPhams)
                                     {
                                         var TargetMQLLotSearchByTTP = results.FirstOrDefault()?.DSLOT_KHSXs.FirstOrDefault(lot => lot.MaQuanLyLot.Value?.ToString() == thung.MaQuanLyLot.Value?.ToString());
 
@@ -751,6 +758,35 @@
         });
     }
 
+    private async Task<List<ThungTPham>> LoadDSachThungTPhams(object? maquanlythung)
+    {
+        return await Task.Run(() =>
+        {
+            List<ThungTPham> thungTPhams = SQLServerServices.GetListThungTPs(new Dictionary<string, object?>() { { ThungTPham.DBName.MaQuanLyThung, maquanlythung } }).thungTPhams;
+
+            return thungTPhams;
+        });
+    }
+
+    private async Task<List<ThungTPham>> LoadDSachThungTPhams_byIDThung(object? khsxid, object? idThung)
+    {
+        return await Task.Run(() =>
+        {
+            List<ThungTPham> thungTPhams = SQLServerServices.GetListThungTPs(new Dictionary<string, object?>() { { ThungTPham.DBName.KHSXID, khsxid }, { ThungTPham.DBName.IDThung, idThung } }).thungTPhams;
+
+            return thungTPhams;
+        });
+    }
+
+    private async Task<List<ThungTPham>> LoadDSachThungTPhams_byMQLLOT(object? khsxid, object? maquanlylot)
+    {
+        return await Task.Run(() =>
+        {
+            List<ThungTPham> thungTPhams = SQLServerServices.GetListThungTPs(new Dictionary<string, object?>() { { ThungTPham.DBName.KHSXID, khsxid } }).thungTPhams;
+
+            return thungTPhams.Where(ttp => ttp.PartOfThungTPhams.Any(pot => pot.MaQuanLyLot.Value?.ToString()?.Trim() == maquanlylot?.ToString())).ToList();
+        });
+    }
 
     private async Task<List<ThungTPhamExtend>?> LoadDSachThungTPhamsByMQLThung(object? maquanlythung)
     {
@@ -828,26 +864,6 @@
         });
     }
 
-    private async Task<List<PartOfThungTPham>> LoadDSachThungTPhams(object? khsxid, object? maquanlylot)
-    {
-        return await Task.Run(() =>
-        {
-            var thungTPhams = SQLServerServices.GetListPartOfThungTPs(new Dictionary<string, object?>() { { KHSX_LOT.DBName.KHSXID, khsxid }, { KHSX_LOT.DBName.MaQuanLyLot, maquanlylot } }).thungTPhams;
-
-            return thungTPhams;
-        });
-    }
-
-    private async Task<List<PartOfThungTPham>> LoadDSachThungTPhamsByIDthung_(object? khsxid, object? idthung)
-    {
-        return await Task.Run(() =>
-        {
-            var thungTPhams = SQLServerServices.GetListPartOfThungTPs(new Dictionary<string, object?>() { { KHSX_LOT.DBName.KHSXID, khsxid }, { PartOfThungTPham.DBName.IDThung, idthung } }).thungTPhams;
-
-            return thungTPhams;
-        });
-    }
-
     int MaxThungTP = 2;
     // Load kqgc per CDoan for dsachLOTKHSX
     private async Task<List<ResultPerLOTKHSX>> LoadKQGCperLOTofKHSX(List<KHSX_LOT> lOTs, object? khsxid)
@@ -883,26 +899,28 @@
             // Asign dsachKQGCperCDOAN for resultPerLOTKHSX
             resultPerLOTKHSX.DsachKQGCperCDOAN = dsachKQGCperCDOAN;
 
-            // Asign IsDoneLastCDoan
-            resultPerLOTKHSX.IsLastCDoanDone = resultPerLOTKHSX.DsachKQGCperCDOAN.LastOrDefault()?.DanhGia == 1;
+            // // Asign IsDoneLastCDoan
+            // resultPerLOTKHSX.IsLastCDoanDone = resultPerLOTKHSX.DsachKQGCperCDOAN.LastOrDefault()?.DanhGia == 1;
 
-            resultPerLOTKHSX.PartOfThungTPhams = await LoadDSachThungTPhams(TargetKHSX?.KHSXID.Value, resultPerLOTKHSX.MaQuanLyLot);
+            // resultPerLOTKHSX.PartOfThungTPhams = await LoadDSachThungTPhams(TargetKHSX?.KHSXID.Value, resultPerLOTKHSX.MaQuanLyLot);
 
-            int numofThungTP = resultPerLOTKHSX.PartOfThungTPhams.Count();
+            // int numofThungTP = resultPerLOTKHSX.PartOfThungTPhams.Count();
 
-            if (numofThungTP > orginMaxThungTP)
-            {
-                orginMaxThungTP = numofThungTP;
-            }
+            // if (numofThungTP > orginMaxThungTP)
+            // {
+            //     orginMaxThungTP = numofThungTP;
+            // }
 
-            // Asign IsCreatedThungTP
-            resultPerLOTKHSX.IsCreatedPartOfThungTP = resultPerLOTKHSX.PartOfThungTPhams.Any();
+            // // Asign IsCreatedThungTP
+            // resultPerLOTKHSX.IsCreatedPartOfThungTP = resultPerLOTKHSX.PartOfThungTPhams.Any();
 
             resultPerLOTKHSXs.Add(resultPerLOTKHSX);
         }
 
         // Gan max thung TP
         MaxThungTP = orginMaxThungTP;
+
+        await Task.Delay(1);
 
         return resultPerLOTKHSXs;
     }

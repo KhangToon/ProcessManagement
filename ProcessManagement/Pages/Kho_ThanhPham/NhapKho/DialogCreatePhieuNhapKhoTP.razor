@@ -81,9 +81,9 @@
                                 </RadzenStack>
 
                                 <RadzenStack Style="width: contain">
-                                    <RadzenButton Disabled="@(ThungTPhams.Count == 0)" Visible="@(string.IsNullOrEmpty(CodePallet))" Icon="autorenew" Text="Tạo mã" Click="@(async () => { CodePallet = await OnCreateUniqueMaPallet(); IsUniqueCodePallet = await IsNewPalletCodeIsUnique(CodePallet); })"
+                                    <RadzenButton Disabled="@(ThungTPhams.Count == 0)" Visible="@(string.IsNullOrEmpty(CodePallet) || !IsUniqueCodePallet)" Icon="autorenew" Text="Tạo mã" Click="@(async () => { CodePallet = await OnCreateUniqueMaPallet(); IsUniqueCodePallet = await IsNewPalletCodeIsUnique(CodePallet); })"
                                                   ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Darker" Style="border-radius: 5px; --rz-icon-size: 18px; width: 100%; height: contain; min-height: 35px" />
-                                    <RadzenButton Disabled="@(ThungTPhams.Count == 0)" Visible="@(!string.IsNullOrEmpty(CodePallet))" Icon="check" Text="Tạo mã" Click="@(async () => { CodePallet = await OnCreateUniqueMaPallet(); IsUniqueCodePallet = await IsNewPalletCodeIsUnique(CodePallet); })"
+                                    <RadzenButton Disabled="@(ThungTPhams.Count == 0)" Visible="@(!string.IsNullOrEmpty(CodePallet) && IsUniqueCodePallet)" Icon="check" Text="Tạo mã" Click="@(async () => { CodePallet = await OnCreateUniqueMaPallet(); IsUniqueCodePallet = await IsNewPalletCodeIsUnique(CodePallet); })"
                                                   ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Dark" Style="border-radius: 5px; --rz-icon-size: 18px; width: 100%; height: contain; min-height: 35px" />
                                 </RadzenStack>
                                 <RadzenStack Style="width: contain; height: 100%" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
@@ -98,9 +98,9 @@
 
                     <!--List Thung-->
                     <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: contain; padding: 5px; background-color: white">
-                        <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style=" height: contain; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                        <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style=" height: contain; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                             <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style=" height: 8%; width: 100%; padding-right: 10px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: 100%; padding: 5px;">
+                                <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: contain; padding: 5px;">
                                     <RadzenStack Style="width: 100%; height: contain" Gap="0" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                         <RadzenStack Style="width: 10%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                             <RadzenText Text="#" Style="color: black; font-weight: 600; font-size: 16px"></RadzenText>
@@ -120,7 +120,7 @@
                                 {
                                     @foreach (var thungTPham in ThungTPhams)
                                     {
-                                        <RadzenCard Variant="Variant.Outlined" Style="width: 100%; height: 100%; padding: 5px; background-color: white">
+                                        <RadzenCard Variant="Variant.Outlined" Style="width: 100%; height: contain; padding: 5px; background-color: white">
                                             <RadzenStack Style="width: 100%; height: contain" Gap="10px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                 <RadzenStack Style="width: 10%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                     <RadzenText Text="@((ThungTPhams?.IndexOf(thungTPham) + 1).ToString())" Style="color: black; font-weight: 600; font-size: 16px"></RadzenText>
@@ -145,9 +145,9 @@
 
                     <RadzenStack Gap="10px" Style="height: contain; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                         <RadzenStack Gap="10px" Style="height: contain; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                            <RadzenButton Disabled="@(ThungTPhams.Count == 0 || string.IsNullOrEmpty(CodePallet))" Visible="@(TargetViTriLuu.MaviTri == null)" Style="width: contain; height: contain; font-weight: 600" Icon="add" Text="Chọn vị trí lưu kho" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Dark" Size="ButtonSize.Small" Variant="Variant.Flat"
+                            <RadzenButton Disabled="@(ThungTPhams.Count == 0 || string.IsNullOrEmpty(CodePallet) || !IsUniqueCodePallet)" Visible="@(TargetViTriLuu.MaviTri == null)" Style="width: contain; height: contain; font-weight: 600" Icon="add" Text="Chọn vị trí lưu kho" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Dark" Size="ButtonSize.Small" Variant="Variant.Flat"
                                           Click="@(async() => await OnSelectViTriLuuKho())" />
-                            <RadzenButton Disabled="@(ThungTPhams.Count == 0 || string.IsNullOrEmpty(CodePallet))" Visible="@(TargetViTriLuu.MaviTri != null)" Icon="check" Style="width: contain; height: contain; font-weight: 600" Text="@($"Mã vị trí: {TargetViTriLuu.MaviTri}")" ButtonStyle="ButtonStyle.Success" Shade="Shade.Dark" Size="ButtonSize.Small" Variant="Variant.Flat"
+                            <RadzenButton Disabled="@(ThungTPhams.Count == 0 || string.IsNullOrEmpty(CodePallet) || !IsUniqueCodePallet)" Visible="@(TargetViTriLuu.MaviTri != null)" Icon="check" Style="width: contain; height: contain; font-weight: 600" Text="@($"Mã vị trí: {TargetViTriLuu.MaviTri}")" ButtonStyle="ButtonStyle.Success" Shade="Shade.Dark" Size="ButtonSize.Small" Variant="Variant.Flat"
                                           Click="@(async() => await OnSelectViTriLuuKho())" />
                             <RadzenButton Disabled="@(TargetViTriLuu.MaviTri == null)" Icon="add" Style="width: contain; height: contain; font-weight: 600" Text="Tạo phiếu nhập kho" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Size="ButtonSize.Small" Variant="Variant.Flat"
                                           Click="@(() => OnCreatePhieuNhapKhoThanhPham())" />
@@ -192,7 +192,7 @@
         {
             var dsthungTP = SQLServerServices.GetListThungTPs(new(), true).thungTPhams;
 
-            var listThungIndexs = dsthungTP.Select(thung => int.Parse(thung.PalletKey.Value?.ToString()?.Replace(ThungTPham.PALLETKEY, "") ?? "0"));
+            var listThungIndexs = dsthungTP.Select(thung => int.TryParse(thung.PalletKey.Value?.ToString()?.Replace(ThungTPham.PALLETKEY, ""), out int index) ? index : 0);
 
             int maxIndex = (listThungIndexs.Count() > 0) ? listThungIndexs.Max() : 0;
 
