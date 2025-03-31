@@ -42,6 +42,9 @@ builder.Services.AddDefaultIdentity<AppUser>(options => options.SignIn.RequireCo
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 
+// Blazor bootrstap
+builder.Services.AddBlazorBootstrap();
+
 // Radzen services
 builder.Services.AddScoped<DialogService>();
 builder.Services.AddScoped<NotificationService>();
