@@ -1,4 +1,4 @@
-﻿@page "/charttracking"
+﻿@page "/charttracking_"
 @attribute [Authorize(Roles = "Admin, User")]
 @* this limited access into page *@
 
@@ -27,40 +27,93 @@
 <RadzenStack Gap="0" Style="width: 100%; height: contain; background-color: white" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
     <RadzenRow Style="width: 100%; height: contain;">
         <RadzenColumn Size="12" Style="padding: 10px">
-            <RadzenStack Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                <RadzenLabel>
-                    <strong>Tiến độ sản xuất</strong>
-                    <span>@($"(updated at: {updatedTime})")</span>
-                </RadzenLabel>
-                <RadzenLabel>
-                    <span>@($"Mã lệnh sản xuất")</span>
-                    <strong>@($"{TargetKHSX.MaLSX.Value}")</strong>
-                </RadzenLabel>
-                <RadzenLabel>
-                    <span>@($"Sản phẩm")</span>
-                    <strong>@($"{TargetKHSX.TargetSanPham?.SP_MaSP.Value}")</strong>
-                </RadzenLabel>
-                <RadzenButton Visible=@(!IsDisableViewInNewTab) Click="@(async () => { await OpenChartTracking();})" Icon="share" Text="View in new tab"
-                              Style="font-size: 16px; border-radius: 5px; width: contain;" Shade="Shade.Dark" Variant="Variant.Flat" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small"></RadzenButton>
+            <RadzenStack Gap="20px" Style="width: 100%; height: contain;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                <RadzenStack Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                    <RadzenLabel>
+                        <strong>Tiến độ sản xuất</strong>
+                        <span>@($"(updated at: {updatedTime})")</span>
+                    </RadzenLabel>
+                    <RadzenLabel>
+                        <span>@($"Mã lệnh sản xuất")</span>
+                        <strong>@($"{TargetKHSX.MaLSX.Value}")</strong>
+                    </RadzenLabel>
+                    <RadzenLabel>
+                        <span>@($"Sản phẩm")</span>
+                        <strong>@($"{TargetKHSX.TargetSanPham?.SP_MaSP.Value}")</strong>
+                    </RadzenLabel>
+                    <RadzenButton Visible=@(!IsDisableViewInNewTab) Click="@(async () => { await OpenChartTracking();})" Icon="share" Text="View in new tab"
+                                  Style="font-size: 16px; border-radius: 5px; width: contain;" Shade="Shade.Dark" Variant="Variant.Flat" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small"></RadzenButton>
 
+                </RadzenStack>
+                <RadzenStack Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                    <RadzenChart Style="min-height: 500px; width: 100%">
+                        <RadzenColumnSeries Fill="green"  Data="@OKdatas" CategoryProperty="Property" Title="OK" LineType="LineType.Dashed" ValueProperty="Value">
+                            
+                            <TooltipTemplate Context="data">
+                                <RadzenStack Gap="5px" Style="height: contain" Orientation="Orientation.Vertical" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
+                                    <RadzenLabel Text="OK" Style="font-weight: 600; color: darkgreen"></RadzenLabel>
+                                    <RadzenStack Gap="10px" Style="width: 100%" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                        <RadzenLabel Text="Công đoạn: "></RadzenLabel>
+                                        <RadzenLabel Text="@data.Property" Style="font-weight: 600; color: black"></RadzenLabel>
+                                    </RadzenStack>
+                                    <RadzenStack Gap="10px" Style="width: 100%" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                        <RadzenLabel Text="Tiến độ: "></RadzenLabel>
+                                        <RadzenLabel Text="@($"{data.Value} (pcs)")" Style="font-weight: 600; color: darkgreen"></RadzenLabel>
+                                    </RadzenStack>
+                                </RadzenStack>
+                            </TooltipTemplate>
+                            <ChildContent>
+                                <RadzenSeriesDataLabels Visible="true" />
+                                <RadzenChartTooltip></RadzenChartTooltip>
+                            </ChildContent>
+                        </RadzenColumnSeries>
+
+                        <RadzenColumnOptions Radius="5" Width="30" />
+
+                        <RadzenCategoryAxis Padding="20" LabelAutoRotation="15">
+                            <RadzenAxisTitle Text="Công đoạn sản xuất" />
+                        </RadzenCategoryAxis>
+
+                        <RadzenValueAxis TickDistance="100" Min="0" Max=@((int.TryParse(TargetKHSX.DinhMuc.Value?.ToString(), out int max) ? max : 1000) + 200) Step="@((max/5))" Formatter="@FormatLable">
+                            <RadzenGridLines Visible="true" />
+                            <RadzenAxisTitle Text="Tiến độ sản xuất (OK/NG)" />
+                        </RadzenValueAxis>
+
+                        <RadzenLegend Visible=true Position="LegendPosition.Right" />
+@*                 <RadzenChartTooltipOptions Style="border: 1px solid rgb(236,72,127); background: #eee; color: #000;" />
+ *@            </RadzenChart>
+                </RadzenStack>
+                <RadzenStack Style="width: 100%; height: contain; padding-left: 5px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                    <RadzenChart Style="min-height: 100px; width: 100%">
+                        <RadzenColumnSeries Fill="red" Data="@NGdatas" CategoryProperty="Property" Title="NG" ValueProperty="Value">
+                            <TooltipTemplate Context="data">
+                                <RadzenStack Gap="5px" Style="height: contain" Orientation="Orientation.Vertical" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
+                                    <RadzenLabel Text="NG" Style="font-weight: 600; color: red"></RadzenLabel>
+                                    <RadzenStack Gap="10px" Style="width: 100%" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                        <RadzenLabel Text="Công đoạn: "></RadzenLabel>
+                                        <RadzenLabel Text="@data.Property" Style="font-weight: 600; color: black"></RadzenLabel>
+                                    </RadzenStack>
+                                    <RadzenStack Gap="10px" Style="width: 100%" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                        <RadzenLabel Text="Số lượng lỗi: "></RadzenLabel>
+                                        <RadzenLabel Text="@($"{data.Value} (pcs)")" Style="font-weight: 600; color: red"></RadzenLabel>
+                                    </RadzenStack>
+                                </RadzenStack>
+                            </TooltipTemplate>
+                            <ChildContent>
+                                <RadzenSeriesDataLabels Visible="true" />
+                                <RadzenChartTooltip></RadzenChartTooltip>
+                            </ChildContent>
+                        </RadzenColumnSeries>
+                        <RadzenColumnOptions Radius="5" Width="30" />
+                        <RadzenCategoryAxis Padding="20" LabelAutoRotation="15">
+                        </RadzenCategoryAxis>
+                        <RadzenValueAxis TickDistance="10" Min="0" Max="20" Step="5" Formatter="@FormatLable">
+                            <RadzenGridLines Visible="true" />
+                            <RadzenAxisTitle Text="Số lượng sản phẩm lỗi (NG)" />
+                        </RadzenValueAxis>
+                    </RadzenChart>
+                </RadzenStack>
             </RadzenStack>
-            <RadzenChart Style="min-height: 500px; height: contain">
-                <RadzenColumnSeries FillRange=@OKfillRange Data="@OKdatas" CategoryProperty="Property" Title="OK" LineType="LineType.Dashed" ValueProperty="Value">
-                    <RadzenSeriesDataLabels Visible="true" />
-                </RadzenColumnSeries>
-                <RadzenColumnSeries FillRange=@NGfillRange Data="@NGdatas" CategoryProperty="Property" Title="NG" ValueProperty="Value">
-                    <RadzenSeriesDataLabels Visible="true" />
-                </RadzenColumnSeries>
-                <RadzenColumnOptions Radius="5" Width="40" />
-                <RadzenCategoryAxis Padding="20" LabelAutoRotation="15">
-                    <RadzenAxisTitle Text="Công đoạn sản xuất" />
-                </RadzenCategoryAxis>
-                <RadzenValueAxis TickDistance="100" Formatter="@FormatLable">
-                    <RadzenGridLines Visible="true" />
-                    <RadzenAxisTitle Text="Tiến độ sản xuất (OK/NG)" />
-                </RadzenValueAxis>
-                <RadzenLegend Visible=false Position="LegendPosition.Top" />
-            </RadzenChart>
         </RadzenColumn>
     </RadzenRow>
 </RadzenStack>
@@ -104,30 +157,29 @@
 
     protected override async Task OnInitializedAsync()
     {
-        // Registed Update chart event
-        // if (Common.IsUpdateChartRegistered())
-        // {
-        //     Common.ResetUpdateChart_Event();
-        // }
-        // Common.UpdateKHSXChart += UpdateChart_EventRasing;
-
         if (KHSXID > 0)
         {
-            TargetKHSX = SQLServerServices.GetKHSXbyID(KHSXID);
-        }
-
-
-        if (TargetKHSX.KHSXID.Value != null && TargetKHSX.isCollapsed == false)
-        {
-            await GetChartDatas();
-
-            cancellationTokenSource = new CancellationTokenSource();
-
-            await LoadDataAsync(cancellationTokenSource.Token);
-
+            TargetKHSX = SQLServerServices.GetKHSXbyID(KHSXID); TargetKHSX.isCollapsed = false;
         }
 
         await base.OnInitializedAsync();
+    }
+
+    protected async override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            if (TargetKHSX.KHSXID.Value != null && TargetKHSX.isCollapsed == false)
+            {
+                await GetChartDatas(TargetKHSX.KHSXID.Value);
+
+                cancellationTokenSource = new CancellationTokenSource();
+
+                await LoadDataAsync(cancellationTokenSource.Token);
+            }
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
     }
 
     private async Task LoadDataAsync(CancellationToken cancellationToken)
@@ -136,7 +188,7 @@
         {
             if (!isLoadingKQGCs)
             {
-                await GetChartDatas();
+                await GetChartDatas(TargetKHSX.KHSXID.Value);
 
                 updatedTime = DateTime.Now;
 
@@ -149,13 +201,20 @@
 
     private async void UpdateChart_EventRasing(object? sender, EventArgs eventArgs)
     {
-        await GetChartDatas();
+        await GetChartDatas(TargetKHSX.KHSXID.Value);
 
         await InvokeAsync(StateHasChanged);
     }
 
-    private async Task GetChartDatas()
+    private async Task GetChartDatas(object? khsxid = null)
     {
+        List<NguyenCongofKHSX> nguyencongs = new();
+
+        if (khsxid != null && !object.Equals(khsxid, 0))
+        {
+            nguyencongs = SQLServerServices.GetlistCongdoans(khsxid, false);
+        }
+
         DSachKetQuaGCs = await LoadAllDanhsachKQGCBase();
 
         var groupedByNCID = DSachKetQuaGCs.GroupBy(k => k.NCID.Value)
@@ -170,10 +229,25 @@
 
         OKdatas = new(); NGdatas = new();
 
-        foreach (var nguyencong in groupedByNCID)
+        foreach (var ncong in nguyencongs)
         {
-            OKdatas.Add(new ChartItem() { Property = nguyencong.TenCongDoan, Value = nguyencong.SumOK });
-            NGdatas.Add(new ChartItem() { Property = nguyencong.TenCongDoan, Value = nguyencong.SumNG });
+            string tennc = ncong.TenCongDoan.Value?.ToString()?.Trim() ?? string.Empty;
+
+            if (!string.IsNullOrEmpty(tennc))
+            {
+                var targetcdoan = groupedByNCID.FirstOrDefault(nc => nc.TenCongDoan.Trim() == tennc);
+
+                if (targetcdoan != null)
+                {
+                    OKdatas.Add(new ChartItem() { Property = targetcdoan.TenCongDoan, Value = targetcdoan.SumOK });
+                    NGdatas.Add(new ChartItem() { Property = targetcdoan.TenCongDoan, Value = targetcdoan.SumNG });
+                }
+                else
+                {
+                    OKdatas.Add(new ChartItem() { Property = tennc, Value = 0 });
+                    NGdatas.Add(new ChartItem() { Property = tennc, Value = 0 });
+                }
+            }
         }
     }
 
@@ -215,7 +289,7 @@
     {
         if (TargetKHSX.KHSXID.Value != null)
         {
-            var url = $"charttracking?khsxid={TargetKHSX.KHSXID.Value}&disable={true}";
+            var url = $"charttracking_?khsxid={TargetKHSX.KHSXID.Value}&disable={true}";
 
             // Get the absolute URL
             var absoluteUrl = NavigationManager.ToAbsoluteUri(url).ToString();

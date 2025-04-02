@@ -1,0 +1,355 @@
+﻿@page "/charttracking"
+@attribute [Authorize(Roles = "Admin, User")]
+
+@using Radzen.Blazor
+@using Radzen
+@using ProcessManagement.Commons
+@using ProcessManagement.Models
+@using ProcessManagement.Models.KHSXs
+@using ProcessManagement.Services.SQLServer
+@using System.Drawing
+
+@inject SQLServerServices SQLServerServices
+
+<RadzenStack Gap="0" Style="width: 100%; height: contain; background-color: white" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+    <RadzenRow Style="width: 100%; height: contain;">
+        <RadzenColumn Size="12" Style="padding: 10px">
+            <RadzenStack Style="width: 100%; height: contain;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                <RadzenStack Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                    <RadzenLabel>
+                        <strong>Tiến độ sản xuất</strong>
+                        <span>@($"(updated at: {updatedTime})")</span>
+                    </RadzenLabel>
+                    <RadzenLabel>
+                        <span>@($"Mã lệnh sản xuất")</span>
+                        <strong>@($"{TargetKHSX.MaLSX.Value}")</strong>
+                    </RadzenLabel>
+                    <RadzenLabel>
+                        <span>@($"Sản phẩm")</span>
+                        <strong>@($"{TargetKHSX.TargetSanPham?.SP_MaSP.Value}")</strong>
+                    </RadzenLabel>
+                </RadzenStack>
+                <RadzenStack Style="width: 100%; height: contain; padding-top: 20px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                    <BlazorBootstrap.BarChart @ref="BarChart" Width="800" Class="mb-4" />
+                </RadzenStack>
+            </RadzenStack>
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenStack>
+
+
+@code {
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "khsxid")]
+    public int KHSXID { get; set; } = 0;
+
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "disable")]
+    public bool IsDisableViewInNewTab { get; set; } = false;
+
+    [Parameter]
+    public KHSX TargetKHSX { get; set; } = new();
+
+    private List<KetQuaGC> DSachKetQuaGCs = new();
+    private bool isLoadingKQGCs = false;
+
+    private BBStrap.BarChart BarChart = default!;
+    private BBStrap.BarChartOptions BarChartOptions = default!;
+    private BBStrap.ChartData ChartData = default!;
+
+    private DateTime? updatedTime = null;
+
+    CancellationToken CancellationToken = new();
+    protected async override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            if (TargetKHSX.KHSXID.Value != null && TargetKHSX.isCollapsed == false)
+            {
+                CancellationToken = new();
+
+                var firstkqgcs = await LoadAllDanhsachKQGCBase();
+
+                var initialdatas = await InitialFirstGetChartDatas(firstkqgcs);
+
+                ChartData = new BBStrap.ChartData { Labels = initialdatas.chartlabels, Datasets = initialdatas.chartdatasets };
+
+                BarChartOptions = new BBStrap.BarChartOptions
+                    {
+                        Responsive = true,
+                        Interaction = new BBStrap.Interaction { Mode = BBStrap.InteractionMode.Index },
+                        IndexAxis = "x",
+                        Plugins = new BBStrap.BarChartPlugins
+                        {
+                            Title = new BBStrap.ChartPluginsTitle
+                            {
+                                Text = $"Biểu đồ theo dõi tiến độ sản xuất sản phẩm {TargetKHSX.TargetSanPham?.SP_MaSP.Value}",
+                                Display = true
+                            },
+                            Legend = new BBStrap.ChartPluginsLegend
+                            {
+                                Position = "top"
+                            },
+                            Tooltip = new BBStrap.ChartPluginsTooltip
+                            {
+                                Enabled = true
+                            },
+                            Datalabels = new BBStrap.BarChartDataLabels
+                            {
+                                Color = "black",
+                                Font = new BBStrap.BarChartDataLabelsFont() { Weight = "500" }
+                            }
+                        },
+
+                    };
+
+                BarChartOptions.Scales.X!.Title = new BBStrap.ChartAxesTitle { Text = $"Công đoạn sản xuất sản phẩm {TargetKHSX.TargetSanPham?.SP_MaSP.Value}", Display = true };
+                BarChartOptions.Scales.Y!.Title = new BBStrap.ChartAxesTitle { Text = $"Tiến độ sản xuất (OK-NG)", Display = true };
+
+                // Initial chart
+                await BarChart.InitializeAsync(chartData: ChartData, chartOptions: BarChartOptions, plugins: new string[] { "ChartDataLabels" });
+                //await BarChart.InitializeAsync(chartData: ChartData, chartOptions: BarChartOptions);
+
+                // Start loop update data per second
+                while (!CancellationToken.IsCancellationRequested)
+                {
+                    if (!isLoadingKQGCs)
+                    {
+                        var updatedkqgcs = await LoadAllDanhsachKQGCBase();
+
+                        var newchartDatasets = await GetNewChartDatasetsAsync(updatedkqgcs);
+
+                        //ChartData.Datasets = newchartDatasets;
+
+                        //await BarChart.UpdateAsync(ChartData, BarChartOptions);
+
+                        updatedTime = DateTime.Now;
+
+                        StateHasChanged();
+                    }
+
+                    await Task.Delay(1000); // Wait for 1 second
+                }
+            }
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    private async Task ShowHorizontalBarChartAsync()
+    {
+        BarChartOptions.IndexAxis = "y";
+        await BarChart.UpdateAsync(ChartData, BarChartOptions);
+    }
+
+    private async Task ShowVerticalBarChartAsync()
+    {
+        BarChartOptions.IndexAxis = "x";
+        await BarChart.UpdateAsync(ChartData, BarChartOptions);
+    }
+
+    // Load all danh sach KQGC base
+    private async Task<List<KetQuaGC>> LoadAllDanhsachKQGCBase()
+    {
+        return await Task.Run(() =>
+        {
+            List<KetQuaGC> ketQuaGCs = new();
+
+            if (isLoadingKQGCs == false)
+            {
+                isLoadingKQGCs = true;
+
+                Dictionary<string, object?> parameters = new();
+
+                parameters.Add($"{KetQuaGC.KQGCDBName.KHSXID}", TargetKHSX.KHSXID.Value);
+
+                (var kqgcs, string resultMess) = SQLServerServices.GetListKetQuaGC(parameters, false);
+
+                foreach (var ketQuaGC in kqgcs)
+                {
+                    if (DateTime.TryParse(ketQuaGC.SubMitDay.Value?.ToString(), out DateTime submitday))
+                    {
+                        ketQuaGC.SubMitDay.Value = submitday.Date.ToShortDateString();
+                    }
+                }
+
+                ketQuaGCs = kqgcs; // gan cho ds hien thi
+
+                isLoadingKQGCs = false;
+            }
+
+            return ketQuaGCs;
+        });
+    }
+
+    private List<string> ChartLabels = new();
+    private List<BBStrap.IChartDataset> ChartDatasets = new();
+
+    private List<string> GetDSCongDoan(object? khsxid)
+    {
+        var dscongdoan = SQLServerServices.GetlistCongdoans(khsxid, false);
+
+        List<string> dstencd = new();
+
+        foreach (var cd in dscongdoan)
+        {
+            string ten = cd.TenCongDoan.Value?.ToString() ?? string.Empty;
+
+            if (!string.IsNullOrEmpty(ten))
+            {
+                dstencd.Add(ten);
+            }
+        }
+
+        return dstencd;
+    }
+
+    private async Task<(List<BBStrap.IChartDataset>? chartdatasets, List<string> chartlabels)> InitialFirstGetChartDatas(List<KetQuaGC> ketQuaGCs)
+    {
+        var groupedByNCID = ketQuaGCs.GroupBy(k => k.NCID.Value)
+                                           .Select(g => new
+                                           {
+                                               NCID = g.Key,
+                                               TenCongDoan = SQLServerServices.GetNguyenCongByID(g.Key),
+                                               Items = g.ToList(),
+                                               SumOK = g.Sum(rs => int.TryParse(rs.SLOK.Value?.ToString(), out int ok) ? ok : 0),
+                                               SumNG = g.Sum(rs => int.TryParse(rs.SLNG.Value?.ToString(), out int ng) ? ng : 0)
+                                           });
+        // Add labels
+        var chartLabels = GetDSCongDoan(TargetKHSX.KHSXID.Value);
+
+        // OK datas
+        var okcolor = ColorBuilder.ToColor(Color.Green);
+        BBStrap.BarChartDataset okdataset = new()
+            {
+                Label = $"OK (pcs)",
+                Data = groupedByNCID.Select(cd => (double?)cd.SumOK).ToList(),
+                BackgroundColor = new List<string> { okcolor.ToRgbString() },
+                BorderColor = new List<string> { okcolor.ToRgbString() },
+                BorderWidth = new List<double> { 0 },
+                BorderRadius = new List<double> { 5 },
+                BarPercentage = 1,
+                Datalabels = new BBStrap.BarChartDatasetDataLabels
+                {
+                    Alignment = BBStrap.Alignment.Center,
+                    Anchor = BBStrap.Anchor.Center
+                },
+
+            };
+
+        // NG datas
+        var ngcolor = ColorBuilder.ToColor(Color.Red);
+        BBStrap.BarChartDataset ngdataset = new()
+            {
+                Label = $"NG (pcs)",
+                Data = groupedByNCID.Select(cd => (double?)cd.SumNG).ToList(),
+                BackgroundColor = new List<string> { ngcolor.ToRgbString() },
+                BorderColor = new List<string> { ngcolor.ToRgbString() },
+                BorderWidth = new List<double> { 0 },
+                Datalabels = new BBStrap.BarChartDatasetDataLabels
+                {
+                    Alignment = BBStrap.Alignment.Center,
+                    Anchor = BBStrap.Anchor.Center
+                },
+                BorderRadius = new List<double> { 5 }
+            };
+
+        // Load datas
+        List<BBStrap.IChartDataset>? newchartdatasets = new();
+        newchartdatasets.Add(okdataset);
+        newchartdatasets.Add(ngdataset);
+
+        await Task.Delay(1);
+
+        return (newchartdatasets, chartLabels);
+    }
+
+    private async Task<List<BBStrap.IChartDataset>?> GetNewChartDatasetsAsync(List<KetQuaGC> ketQuaGCs)
+    {
+        var groupedByNCID = ketQuaGCs.GroupBy(k => k.NCID.Value)
+                                           .Select(g => new
+                                           {
+                                               NCID = g.Key,
+                                               TenCongDoan = SQLServerServices.GetNguyenCongByID(g.Key),
+                                               Items = g.ToList(),
+                                               SumOK = g.Sum(rs => int.TryParse(rs.SLOK.Value?.ToString(), out int ok) ? ok : 0),
+                                               SumNG = g.Sum(rs => int.TryParse(rs.SLNG.Value?.ToString(), out int ng) ? ng : 0)
+                                           }).ToList();
+
+        if (ChartData is null || ChartData.Datasets is null || !ChartData.Datasets.Any()) return null;
+
+        var newDatasets = new List<BBStrap.IChartDataset>();
+
+        // Update datasetculumn per congdoan (ChartDat.Labels == list Congdoan)
+        if (ChartData.Labels != null && ChartData.Labels.Any())
+        {
+            foreach (var dataset in ChartData.Datasets)
+            {
+                int datasetType = ChartData.Datasets.IndexOf(dataset);
+
+                if (datasetType == 0) // OKType
+                {
+                    var newData_OK = new List<double?>();
+
+                    foreach (var congdoan in ChartData.Labels)
+                    {
+                        int indexcdoan = ChartData.Labels.IndexOf(congdoan);
+
+                        if (groupedByNCID.Any(cd => cd.TenCongDoan.Trim() == congdoan.Trim()))
+                        {
+                            // Add dataset OK
+                            var columndataOK = (double?)groupedByNCID[indexcdoan].SumOK;
+                            newData_OK.Add(columndataOK);
+                        }
+                    }
+
+                    // OK datas
+                    var okcolor = ColorBuilder.ToColor(Color.Green);
+                    BBStrap.BarChartDataset okdataset = new()
+                        {
+                            Label = $"OK (pcs)",
+                            Data = newData_OK,
+                            BackgroundColor = new List<string> { okcolor.ToRgbString() },
+                            BorderColor = new List<string> { okcolor.ToRgbString() },
+                            BorderWidth = new List<double> { 0 },
+                        };
+
+                    newDatasets.Add(okdataset);
+                }
+                else if (datasetType == 1) // NGType
+                {
+                    var newData_NG = new List<double?>();
+
+                    foreach (var congdoan in ChartData.Labels)
+                    {
+                        int indexcdoan = ChartData.Labels.IndexOf(congdoan);
+
+                        if (groupedByNCID.Any(cd => cd.TenCongDoan.Trim() == congdoan.Trim()))
+                        {
+                            // Add dataset MG
+                            var columndataNG = (double?)groupedByNCID[indexcdoan].SumNG;
+                            newData_NG.Add(columndataNG);
+                        }
+                    }
+
+                    // NG datas
+                    var ngcolor = ColorBuilder.ToColor(Color.Red);
+                    BBStrap.BarChartDataset ngdataset = new()
+                        {
+                            Label = $"NG (pcs)",
+                            Data = newData_NG,
+                            BackgroundColor = new List<string> { ngcolor.ToRgbString() },
+                            BorderColor = new List<string> { ngcolor.ToRgbString() },
+                            BorderWidth = new List<double> { 0 },
+                        };
+
+                    newDatasets.Add(ngdataset);
+                }
+            }
+        }
+
+        await Task.Delay(1);
+
+        return newDatasets;
+    }
+}
