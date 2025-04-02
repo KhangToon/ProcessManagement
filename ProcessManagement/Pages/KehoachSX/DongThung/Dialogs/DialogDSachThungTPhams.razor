@@ -6,6 +6,7 @@
 @using ProcessManagement.Pages.Kho_ThanhPham.ViTriLuuTru
 @using ProcessManagement.Pages.Manager_NVL.Dialogs
 @using ProcessManagement.Pages.Manager_SanPham.KhoThanhPham
+@using ProcessManagement.Pages.QRImage.Pallet
 @using ProcessManagement.Services.SQLServer
 @using Radzen.Blazor
 @using Radzen
@@ -172,7 +173,7 @@
                                                                           ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Variant="Variant.Text" Shade="Shade.Darker" Style="border-radius: 5px; --rz-icon-size: 16px; cursor: default; font-size: 16px; font-weight: 600" />
                                                             <RadzenButton Text="@($"{thungtpham.PalletKey.Value}")"
                                                                           MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Mã Pallet", 100, 1000))"
-                                                                          Click="@(() => OnOpenQR_ImageDialog(thungtpham.MaQuanLyThung.Value?.ToString() ?? string.Empty, "Mã Pallet"))" Icon="qr_code"
+                                                                          Click="@(() => OnOpenQR_ImageDialog(thungtpham.PalletKey.Value?.ToString() ?? string.Empty, "Mã Pallet"))" Icon="qr_code"
                                                                           ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat" Size="ButtonSize.Small" Shade="Shade.Lighter"
                                                                           Style="font-size: 16px; font-weight: 600; height: contain; color: darkgreen"></RadzenButton>
                                                         </RadzenStack>
@@ -252,8 +253,8 @@
     // Open QRIDLOT Image dialog
     private async Task OnOpenQR_ImageDialog(object content, string header)
     {
-        await DialogService.OpenAsync<DialogQR_Image>(null, new Dictionary<string, object>() { { "CONTENT", content }, { "HEADER", header } },
-        new DialogOptions() { CloseDialogOnEsc = true, CloseDialogOnOverlayClick = true, ShowTitle = true, Width = "contain", Height = "contain", Resizable = true, Draggable = true, ShowClose = true, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
+        await DialogService.OpenAsync<DialogQRPallet_Image>(null, new Dictionary<string, object>() { { "CONTENT", content }, { "HEADER", header } },
+        new DialogOptions() { CloseDialogOnEsc = true, CloseDialogOnOverlayClick = true, ShowTitle = true, Width = "70%", Height = "90%", Resizable = true, Draggable = true, ShowClose = true, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
     }
 
     private async Task OpenDialogCreatePhieuNhapKhoTP()

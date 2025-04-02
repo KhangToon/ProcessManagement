@@ -1,0 +1,154 @@
+﻿@page "/print-pallet-code-template"
+
+@using ProcessManagement.Commons
+@using ProcessManagement.Models
+@using ProcessManagement.Services.QRCodes
+@using Radzen.Blazor
+@using Radzen
+
+@inject IJSRuntime JSRuntime
+
+<RadzenStack Gap="10px" Style="width: 100%; height: 100%; padding: 20px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+    <RadzenStack Gap="0px" Style="width: 100%; height: contain;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+        <div id="printing-component">
+            <RadzenCard Variant="Variant.Outlined" Style="width: 100%; height: contain;">
+                <RadzenStack Gap="10px" Style="width: 100%; height: contain;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                    <!--PO No-->
+                    <RadzenStack Gap="15px" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                        <RadzenRow Style="width: 100%; height: 100%">
+                            <RadzenColumn Size="4">
+                                <RadzenStack Style="width: 100%; height: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start">
+                                    <RadzenText Text="PO No: " Style="font-size: 22px; font-weight: 700; height: contain; color: black"></RadzenText>
+                                </RadzenStack>
+                            </RadzenColumn>
+                            <RadzenColumn Size="8">
+                                <RadzenStack Style="width: 100%; height: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.End">
+                                    <RadzenText Text="@($"{PalletQR.PO_No}")" Style="font-weight: 600;  color: black; font-size: 22px"></RadzenText>
+                                </RadzenStack>
+                            </RadzenColumn>
+                        </RadzenRow>
+                    </RadzenStack>
+
+                    <!--Name-->
+                    <RadzenStack Gap="15px" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                        <RadzenRow Style="width: 100%; height: 100%">
+                            <RadzenColumn Size="4">
+                                <RadzenStack Style="width: 100%; height: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start">
+                                    <RadzenText Text="NAME: " Style="font-size: 22px; font-weight: 700; height: contain; color: black"></RadzenText>
+                                </RadzenStack>
+                            </RadzenColumn>
+                            <RadzenColumn Size="8">
+                                <RadzenStack Style="width: 100%; height: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.End">
+                                    <RadzenText Text="@($"{PalletQR.NAME}")" Style="font-weight: 600;  color: black; font-size: 22px"></RadzenText>
+                                </RadzenStack>
+                            </RadzenColumn>
+                        </RadzenRow>
+                    </RadzenStack>
+
+                    <!--PART No-->
+                    <RadzenStack Gap="15px" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                        <RadzenRow Style="width: 100%; height: 100%">
+                            <RadzenColumn Size="4">
+                                <RadzenStack Style="width: 100%; height: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start">
+                                    <RadzenText Text="PART No: " Style="font-size: 22px; font-weight: 700; height: contain; color: black"></RadzenText>
+                                </RadzenStack>
+                            </RadzenColumn>
+                            <RadzenColumn Size="8">
+                                <RadzenStack Style="width: 100%; height: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.End">
+                                    <RadzenText Text="@($"{PalletQR.PART_No}")" Style="font-weight: 600;  color: black; font-size: 22px"></RadzenText>
+                                </RadzenStack>
+                            </RadzenColumn>
+                        </RadzenRow>
+                    </RadzenStack>
+
+                    <!--QUANTITY-->
+                    <RadzenStack Gap="15px" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                        <RadzenRow Style="width: 100%; height: 100%">
+                            <RadzenColumn Size="4">
+                                <RadzenStack Style="width: 100%; height: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start">
+                                    <RadzenText Text="QUANTITY: " Style="font-size: 22px; font-weight: 700; height: contain; color: black"></RadzenText>
+                                </RadzenStack>
+                            </RadzenColumn>
+                            <RadzenColumn Size="8">
+                                <RadzenStack Style="width: 100%; height: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.End">
+                                    <RadzenText Text="@($"{PalletQR.QUANTITY}")" Style="font-weight: 600;  color: black; font-size: 22px"></RadzenText>
+                                </RadzenStack>
+                            </RadzenColumn>
+                        </RadzenRow>
+                    </RadzenStack>
+
+                    <!--PLT No-->
+                    <RadzenStack Gap="15px" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                        <RadzenRow Style="width: 100%; height: 100%">
+                            <RadzenColumn Size="4">
+                                <RadzenStack Style="width: 100%; height: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start">
+                                    <RadzenText Text="PLT No: " Style="font-size: 22px; font-weight: 700; height: contain; color: black"></RadzenText>
+                                </RadzenStack>
+                            </RadzenColumn>
+                            <RadzenColumn Size="8">
+                                <RadzenStack Style="width: 100%; height: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.End">
+                                    <RadzenText Text="@($"{PalletQR.PLT_No}")" Style="font-weight: 600;  color: black; font-size: 22px"></RadzenText>
+                                </RadzenStack>
+                            </RadzenColumn>
+                        </RadzenRow>
+                    </RadzenStack>
+
+                    <!--MADE IN VIETNAM-->
+                    <RadzenStack Gap="15px" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                        <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                            <RadzenText Text="MADE IN VIETNAM" Style="font-size: 26px; font-weight: 700; height: contain; color: black"></RadzenText>
+                        </RadzenStack>
+                    </RadzenStack>
+
+                    <!--LOT-->
+                    <RadzenStack Gap="15px" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                        <RadzenRow Style="width: 100%; height: 100%">
+                            <RadzenColumn Size="4">
+                                <RadzenStack Style="width: 100%; height: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start">
+                                    <RadzenText Text="SỐ LOT: " Style="font-size: 22px; font-weight: 700; height: contain; color: black"></RadzenText>
+                                </RadzenStack>
+                            </RadzenColumn>
+                            <RadzenColumn Size="8">
+                                <RadzenStack Style="width: 100%; height: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.End">
+                                    <RadzenText Text="@($"{PalletQR.LOT_Number}")" Style="font-weight: 600;  color: black; font-size: 22px; white-space: pre-line"></RadzenText>
+                                </RadzenStack>
+                            </RadzenColumn>
+                        </RadzenRow>
+                    </RadzenStack>
+                </RadzenStack>
+            </RadzenCard>
+        </div>
+    </RadzenStack>
+    <RadzenStack Style="width: 100%; height: contain; padding-top: 20px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+        <RadzenButton Click="@(() => PrintComponent())" Icon="print" Text="Print" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Size="ButtonSize.Small" Variant="Variant.Filled"
+                      Style="height: contain; width: contain; font-size: 13px;" />
+    </RadzenStack>
+</RadzenStack>
+
+@code {
+    [Parameter]
+    public PalletQR PalletQR { get; set; } = new();
+
+    protected override Task OnInitializedAsync()
+    {
+        if (Common.TargetPalletQR != null)
+        {
+            PalletQR = Common.TargetPalletQR;
+        }
+
+        return base.OnInitializedAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("import", "/js/printBlazorComponent.js");
+        }
+    }
+
+    private async Task PrintComponent()
+    {
+        await JSRuntime.InvokeVoidAsync("printBlazorComponent", "printing-component");
+    }
+}

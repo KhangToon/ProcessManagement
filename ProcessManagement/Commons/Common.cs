@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 using ProcessManagement.Models;
+using ProcessManagement.Pages.QRImage.Pallet;
 using Radzen;
 using System.Globalization;
 using System.Text;
@@ -408,6 +409,8 @@ namespace ProcessManagement.Commons
 
         public static object? SelectedPNKTPID;
         public static object? SelectedPXKTPID;
+
+        public static PalletQR? TargetPalletQR;
 
         public static class Tentruyxuat
         {
