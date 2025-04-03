@@ -139,7 +139,7 @@
                                             <ChildContent>
                                                 <RadzenStack Visible="@(khsx.isCollapsed == false)">
                                                     @*<BootstrapChart TargetKHSX="@khsx"></BootstrapChart>*@                                                
-                                                     <ChartTracking TargetKHSX="@khsx"></ChartTracking>
+                                                                 <ChartTracking TargetKHSX="@khsx"></ChartTracking>
                                                 </RadzenStack>
                                             </ChildContent>
                                         </RadzenTabsItem>
@@ -684,6 +684,13 @@
         targetkhsx.IsCollapsed.Value = targetkhsx.isCollapsed ? 1 : 0;
 
         (int udresult, string uderror) = SQLServerServices.UpdateKHSXProperty(targetkhsx.KHSXID.Value, Common.IsCollapsed, targetkhsx.IsCollapsed.Value);
+
+
+        // Set stop while load chart KHSX
+        if (targetkhsx.isCollapsed)
+        {
+            (int updatesuccess, string error) = SQLServerServices.UpdateKHSXProperty(targetkhsx.KHSXID.Value, Common.IsChartRunning, 0);
+        }
     }
 
     private async Task<List<ThungTPhamExtend>?> LoadDSachThungTPhams(object? maquanlythung)

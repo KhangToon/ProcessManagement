@@ -33,6 +33,13 @@
                         <strong>Tiến độ sản xuất</strong>
                         <span>@($"(updated at: {updatedTime})")</span>
                     </RadzenLabel>
+
+                    <RadzenButton Visible=@(!chartIsrunning) Icon="warning" Text="Stopped"
+                                  Style="font-size: 15px; border-radius: 5px; width: contain; color: red" Shade="Shade.Light" Variant="Variant.Text" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small"></RadzenButton>
+
+                    <RadzenButton Visible=@(chartIsrunning) Icon="check_circle" Text="Running"
+                                  Style="font-size: 15px; border-radius: 5px; width: contain;" Shade="Shade.Light" Variant="Variant.Flat" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small"></RadzenButton>
+
                     <RadzenLabel>
                         <span>@($"Mã lệnh sản xuất")</span>
                         <strong>@($"{TargetKHSX.MaLSX.Value}")</strong>
@@ -41,14 +48,15 @@
                         <span>@($"Sản phẩm")</span>
                         <strong>@($"{TargetKHSX.TargetSanPham?.SP_MaSP.Value}")</strong>
                     </RadzenLabel>
+
                     <RadzenButton Visible=@(!IsDisableViewInNewTab) Click="@(async () => { await OpenChartTracking();})" Icon="share" Text="View in new tab"
                                   Style="font-size: 16px; border-radius: 5px; width: contain;" Shade="Shade.Dark" Variant="Variant.Flat" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small"></RadzenButton>
 
                 </RadzenStack>
                 <RadzenStack Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                     <RadzenChart Style="min-height: 500px; width: 100%">
-                        <RadzenColumnSeries Fill="green"  Data="@OKdatas" CategoryProperty="Property" Title="OK" LineType="LineType.Dashed" ValueProperty="Value">
-                            
+                        <RadzenColumnSeries Fill="green" Data="@OKdatas" CategoryProperty="Property" Title="OK" LineType="LineType.Dashed" ValueProperty="Value">
+
                             <TooltipTemplate Context="data">
                                 <RadzenStack Gap="5px" Style="height: contain" Orientation="Orientation.Vertical" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
                                     <RadzenLabel Text="OK" Style="font-weight: 600; color: darkgreen"></RadzenLabel>
@@ -151,9 +159,9 @@
         return $"{value} (pcs)";
     }
 
-    private CancellationTokenSource cancellationTokenSource = new();
-
     private DateTime updatedTime;
+
+    private bool chartIsrunning = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -165,37 +173,145 @@
         await base.OnInitializedAsync();
     }
 
+    private bool isFirtLoad_ofchart = false;
+
     protected async override void OnAfterRender(bool firstRender)
     {
+        // Stop when is collapsed
         if (firstRender)
         {
+            isFirtLoad_ofchart = true;
+
             if (TargetKHSX.KHSXID.Value != null && TargetKHSX.isCollapsed == false)
             {
-                await GetChartDatas(TargetKHSX.KHSXID.Value);
+                // Reset all running chart of this KHSX
+                (int updatesuccess, string error) = SQLServerServices.UpdateKHSXProperty(TargetKHSX.KHSXID.Value, Common.IsChartRunning, 0);
 
-                cancellationTokenSource = new CancellationTokenSource();
+                chartIsrunning = false;
 
-                await LoadDataAsync(cancellationTokenSource.Token);
+                await Task.Delay(1500);
+
+                if (updatesuccess == 1)
+                {
+                    var isKHSXchartRunning = SQLServerServices.GetAnyColValuebyAnyParameters_KHSX(new Dictionary<string, object?>() { { Common.KHSXID, TargetKHSX.KHSXID.Value } }, Common.IsChartRunning).columnValues.FirstOrDefault();
+
+                    if (object.Equals(isKHSXchartRunning, 0))
+                    {
+                        // Restart
+                        (updatesuccess, error) = SQLServerServices.UpdateKHSXProperty(TargetKHSX.KHSXID.Value, Common.IsChartRunning, 1);
+
+                        if (updatesuccess == 1)
+                        {
+                            chartIsrunning = true;
+
+                            isFirtLoad_ofchart = false;
+
+                            await StartRecordChart();
+                        }
+                    }
+                }
             }
         }
 
         await base.OnAfterRenderAsync(firstRender);
     }
 
-    private async Task LoadDataAsync(CancellationToken cancellationToken)
+    private async Task StartRecordChart()
     {
-        while (!cancellationToken.IsCancellationRequested)
+        Common.IndexOFwhile++;
+
+        int index = Common.IndexOFwhile;
+
+        // ShowNotification($"Chart is running {index}", NotificationSeverity.Success, 1000);
+
+        while (true)
         {
+            var isKHSXchartRunning = SQLServerServices.GetAnyColValuebyAnyParameters_KHSX(new Dictionary<string, object?>() { { Common.KHSXID, TargetKHSX.KHSXID.Value } }, Common.IsChartRunning).columnValues.FirstOrDefault();
+
+            if (object.Equals(isKHSXchartRunning, 0))
+            {
+                // ShowNotification($"Chart has stopped {index}", NotificationSeverity.Error, 1000);
+
+                chartIsrunning = false;
+
+                StateHasChanged();
+
+                break;
+            }
+            else
+            {
+                chartIsrunning = true;
+            }
+
             if (!isLoadingKQGCs)
             {
                 await GetChartDatas(TargetKHSX.KHSXID.Value);
 
                 updatedTime = DateTime.Now;
 
-                StateHasChanged(); // Refresh UI
+                StateHasChanged();
             }
 
-            await Task.Delay(1000); // Wait for 1 second
+            await Task.Delay(1000);
+        }
+    }
+
+    private async Task UpdateChartRunningStatus(object value)
+    {
+        (int updatesuccess, string error) = SQLServerServices.UpdateKHSXProperty(TargetKHSX.KHSXID.Value, Common.IsChartRunning, value);
+
+        if (updatesuccess == 1)
+        {
+            chartIsrunning = object.Equals(value, 1);
+
+            if (object.Equals(value, 1))
+            {
+                await StartRecordChart();
+            }
+        }
+    }
+
+    private async Task LoadDataAsync(CancellationToken cancellationToken)
+    {
+        var isKHSXchartRunning = SQLServerServices.GetAnyColValuebyAnyParameters_KHSX(new Dictionary<string, object?>() { { Common.KHSXID, TargetKHSX.KHSXID.Value } }, Common.IsChartRunning).columnValues.FirstOrDefault();
+
+        if (object.Equals(isKHSXchartRunning, 1))
+        {
+            return;
+        }
+        else
+        {
+            Common.IndexOFwhile++;
+
+            int index = Common.IndexOFwhile;
+
+            ShowNotification($"Start while {index}", NotificationSeverity.Success, 1000);
+
+            // Start new loop chart
+            (int updatesuccess, string error) = SQLServerServices.UpdateKHSXProperty(TargetKHSX.KHSXID.Value, Common.IsChartRunning, 1);
+
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                if (!isLoadingKQGCs)
+                {
+                    await GetChartDatas(TargetKHSX.KHSXID.Value);
+
+                    updatedTime = DateTime.Now;
+
+                    StateHasChanged(); // Refresh UI
+                }
+
+                isKHSXchartRunning = SQLServerServices.GetAnyColValuebyAnyParameters_KHSX(new Dictionary<string, object?>() { { Common.KHSXID, TargetKHSX.KHSXID.Value } }, Common.IsChartRunning).columnValues.FirstOrDefault();
+
+                if (object.Equals(isKHSXchartRunning, 0))
+                {
+                    break;
+                }
+
+                await Task.Delay(1000); // Wait for 1 second
+
+                ShowNotification($"From while {index}", NotificationSeverity.Error, 1000);
+            }
         }
     }
 
@@ -296,5 +412,19 @@
 
             await JSRuntime.InvokeVoidAsync("openInNewTab", absoluteUrl);
         }
+    }
+
+    // Notification
+    void ShowNotification(string message, NotificationSeverity notifytype, double time)
+    {
+        NotificationMessage notify = new NotificationMessage
+            {
+                Style = "position: fixed; top: 0; right: 0;",
+                Severity = notifytype,
+                Summary = message,
+                Duration = time
+            };
+
+        NotificationService.Notify(notify);
     }
 }

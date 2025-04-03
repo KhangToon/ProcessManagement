@@ -9,6 +9,7 @@ namespace ProcessManagement.Commons
 {
     public static class Common
     {
+        public static int IndexOFwhile = 0;
 
         public static readonly List<string> ListCaLamViecs = new() { "Ngày", "Đêm", "Ca 1", "Ca 2", "Ca 3" };
 
@@ -103,6 +104,7 @@ namespace ProcessManagement.Commons
         public const string TableKHSX = "Table_KHSX";
         public const string KHSXID = "KHSXID";
         public const string IsDoneKHSX = "IsDoneKHSX";
+        public const string IsChartRunning = "IsChartRunning";
         public const string IsAllowDisplay = "IsAllowDisplay";
         public const string IsCollapsed = "IsCollapsed";
         public const string MaLSX = "Mã lệnh SX";

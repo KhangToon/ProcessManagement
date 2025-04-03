@@ -30,6 +30,7 @@ namespace ProcessManagement.Models
         public Propertyy IsAllowDisplay { get; set; } = new() { DBName = Common.IsAllowDisplay, DisplayName = "IsAllowDisplay", Type = typeof(int), AlowDatabase = true };
         public Propertyy IsCollapsed { get; set; } = new() { DBName = Common.IsCollapsed, DisplayName = "IsCollapsed", Type = typeof(int), AlowDatabase = true };
         public Propertyy IsDoneKHSX { get; set; } = new() { DBName = Common.IsDoneKHSX, DisplayName = "IsDoneKHSX", Type = typeof(int), AlowDatabase = true };
+        public Propertyy IsChartRunning { get; set; } = new() { DBName = Common.IsChartRunning, DisplayName = "IsChartRunning", Type = typeof(int), AlowDatabase = true };
         public SanPham? TargetSanPham { get; set; }
         public NguyenVatLieu? TargetNVL { get; set; }
         public LoaiNVL? LoaiNVL { get; set; }
@@ -44,6 +45,7 @@ namespace ProcessManagement.Models
         public int SoluongBoSung = 0; // Dung trong PageDSachKHSXs
 
         public bool isCollapsed { get; set; } = true; // Dung cho PageDSachKHSX
+        public bool isChartRunning { get; set; } = false;
 
         public KHSX()
         {

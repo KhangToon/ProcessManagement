@@ -373,11 +373,16 @@ namespace ProcessManagement.Services.SQLServer
                 {
                     khsx.isCollapsed = isCollapsed == 1;
                 }
+
+                // Get ischartrunning KHSX
+                if (int.TryParse(khsx.IsChartRunning.Value?.ToString(), out int isChartRunning))
+                {
+                    khsx.isChartRunning = isChartRunning == 1;
+                }
             }
 
             return khsx;
         }
-
 
         public KHSX GetKHSXbyIDRuduceTime(object? khsxID)
         {
@@ -455,6 +460,12 @@ namespace ProcessManagement.Services.SQLServer
                 if (int.TryParse(khsx.IsCollapsed.Value?.ToString(), out int isCollapsed))
                 {
                     khsx.isCollapsed = isCollapsed == 1;
+                }
+
+                // Get ischartrunning KHSX
+                if (int.TryParse(khsx.IsChartRunning.Value?.ToString(), out int isChartRunning))
+                {
+                    khsx.isChartRunning = isChartRunning == 1;
                 }
             }
 
@@ -536,168 +547,15 @@ namespace ProcessManagement.Services.SQLServer
                 {
                     khsx.isCollapsed = isCollapsed == 1;
                 }
+
+                // Get ischartrunning KHSX
+                if (int.TryParse(khsx.IsChartRunning.Value?.ToString(), out int isChartRunning))
+                {
+                    khsx.isChartRunning = isChartRunning == 1;
+                }
             }
 
             return khsx;
-        }
-
-
-        // Load danh sach ke hoach san xuat
-        public List<KHSX> GetListKHSXs()
-        {
-            List<KHSX> listKHSXs = new();
-
-            using (var connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-
-                var command = connection.CreateCommand();
-
-                command.CommandText = $"SELECT * FROM [{Common.TableKHSX}]";
-
-                using var reader = command.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    KHSX khsx = new();
-
-                    List<Propertyy> rowSPitems = khsx.GetPropertiesValues();
-
-                    foreach (var item in rowSPitems)
-                    {
-                        string? columnName = item.DBName;
-
-                        object columnValue = reader[columnName];
-
-                        item.Value = columnValue;
-                    }
-
-                    khsx.TargetSanPham = GetSanpham(int.Parse(khsx.SPID.Value?.ToString() ?? "0"));
-
-                    khsx.LoaiNVL = GetLoaiNVLbyID(int.TryParse(khsx.LOAINVLID.Value?.ToString(), out int loainvlid) ? loainvlid : 0);
-
-                    khsx.DSachNVLofKHSXs = GetListNVLofKHSXbyID(khsx.KHSXID.Value);
-
-                    khsx.DSachCongDoans = GetlistCongdoans(khsx.KHSXID.Value);
-
-                    var fistCDoanID = khsx.DSachCongDoans.FirstOrDefault()?.NCID.Value ?? 0;
-
-                    var resultdslots = GetListLOT_khsx(new() { { KHSX_LOT.DBName.KHSXID, khsx.KHSXID.Value }, { KHSX_LOT.DBName.NCID, fistCDoanID } }).Item1;
-
-                    if (resultdslots != null && resultdslots.Any())
-                    {
-                        khsx.DSLOT_KHSXs = resultdslots;
-
-                        // Get maNVL of KHSX_LOT
-                        foreach (var lotkhsx in khsx.DSLOT_KHSXs)
-                        {
-                            lotkhsx.TargetNVL = GetMaNguyenVatLieuByID(lotkhsx.NVLID.Value);
-                        }
-                    }
-
-                    // Get trang thai xuat kho NVL
-                    var colIsDonePXK = GetPXK_AnyColValuebyAnyParameters(new Dictionary<string, object?>() { { Common.KHSXID, khsx.KHSXID.Value } }, Common.IsDonePXK).columnValues.FirstOrDefault();
-                    if (int.TryParse(colIsDonePXK?.ToString(), out int ispxkdone))
-                    {
-                        khsx.isDonePXK = ispxkdone == 1;
-                    }
-
-                    // Get PNKID
-                    var colpnkid = GetPXK_AnyColValuebyAnyParameters(new Dictionary<string, object?>() { { Common.PXKID, khsx.PXKID.Value } }, Common.PNKID).columnValues.FirstOrDefault();
-                    if (int.TryParse(colpnkid?.ToString(), out int pnkid))
-                    {
-                        // Get trang thai tra NVL
-                        var colIsReturnedNVL = GetPNK_AnyColValuebyAnyParameters(new Dictionary<string, object?>() { { Common.PNKID, pnkid } }, Common.IsDonePNK).columnValues.FirstOrDefault();
-                        if (int.TryParse(colIsReturnedNVL?.ToString(), out int isPNKdone))
-                        {
-                            khsx.isReturnedNVL = isPNKdone == 1;
-                        }
-                    }
-
-                    listKHSXs.Add(khsx);
-                }
-            }
-
-            return listKHSXs;
-        }
-
-        // Load danh sach ke hoach san xuat theo ngay
-        public List<KHSX> GetListKHSXs(DateTime startDay, DateTime endDay)
-        {
-            List<KHSX> listKHSXs = new();
-
-            using (var connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-
-                var command = connection.CreateCommand();
-
-                command.CommandText = $"SELECT * FROM [{Common.TableKHSX}] WHERE [{Common.NgayTao}] >= '{startDay}' AND [{Common.NgayTao}] < '{endDay}'";
-
-                using var reader = command.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    KHSX khsx = new();
-
-                    List<Propertyy> rowSPitems = khsx.GetPropertiesValues();
-
-                    foreach (var item in rowSPitems)
-                    {
-                        string? columnName = item.DBName;
-
-                        object columnValue = reader[columnName];
-
-                        item.Value = columnValue;
-                    }
-
-                    khsx.TargetSanPham = GetSanpham(int.Parse(khsx.SPID.Value?.ToString() ?? "0"));
-
-                    khsx.LoaiNVL = GetLoaiNVLbyID(int.TryParse(khsx.LOAINVLID.Value?.ToString(), out int loainvlid) ? loainvlid : 0);
-
-                    khsx.DSachNVLofKHSXs = GetListNVLofKHSXbyID(khsx.KHSXID.Value);
-
-                    khsx.DSachCongDoans = GetlistCongdoans(khsx.KHSXID.Value);
-
-                    var fistCDoanID = khsx.DSachCongDoans.FirstOrDefault()?.NCID.Value ?? 0;
-
-                    var resultdslots = GetListLOT_khsx(new() { { KHSX_LOT.DBName.KHSXID, khsx.KHSXID.Value }, { KHSX_LOT.DBName.NCID, fistCDoanID } }).Item1;
-
-                    if (resultdslots != null && resultdslots.Any())
-                    {
-                        khsx.DSLOT_KHSXs = resultdslots;
-
-                        // Get maNVL of KHSX_LOT
-                        foreach (var lotkhsx in khsx.DSLOT_KHSXs)
-                        {
-                            lotkhsx.TargetNVL = GetMaNguyenVatLieuByID(lotkhsx.NVLID.Value);
-                        }
-                    }
-
-                    // Get trang thai xuat kho NVL
-                    var colIsDonePXK = GetPXK_AnyColValuebyAnyParameters(new Dictionary<string, object?>() { { Common.KHSXID, khsx.KHSXID.Value } }, Common.IsDonePXK).columnValues.FirstOrDefault();
-                    if (int.TryParse(colIsDonePXK?.ToString(), out int ispxkdone))
-                    {
-                        khsx.isDonePXK = ispxkdone == 1;
-                    }
-
-                    // Get PNKID
-                    var colpnkid = GetPXK_AnyColValuebyAnyParameters(new Dictionary<string, object?>() { { Common.PXKID, khsx.PXKID.Value } }, Common.PNKID).columnValues.FirstOrDefault();
-                    if (int.TryParse(colpnkid?.ToString(), out int pnkid))
-                    {
-                        // Get trang thai tra NVL
-                        var colIsReturnedNVL = GetPNK_AnyColValuebyAnyParameters(new Dictionary<string, object?>() { { Common.PNKID, pnkid } }, Common.IsDonePNK).columnValues.FirstOrDefault();
-                        if (int.TryParse(colIsReturnedNVL?.ToString(), out int isPNKdone))
-                        {
-                            khsx.isReturnedNVL = isPNKdone == 1;
-                        }
-                    }
-
-                    listKHSXs.Add(khsx);
-                }
-            }
-
-            return listKHSXs;
         }
 
         // Get KHSXID by maKHSX
@@ -752,6 +610,78 @@ namespace ProcessManagement.Services.SQLServer
 
             return spid;
         }
+
+        // Get any columns of KHSX by any paramaters
+        public (List<object?> columnValues, string errorMessage) GetAnyColValuebyAnyParameters_KHSX(Dictionary<string, object?> parameters, string? returnColumnName = null, bool isGetAll = false)
+        {
+            List<object?> columnValues = new();
+            string errorMessage = string.Empty;
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                try
+                {
+                    connection.Open();
+                    var conditions = new List<string>();
+                    var command = connection.CreateCommand();
+
+                    // If a specific column is requested, select only that column
+                    string selectClause = returnColumnName != null
+                        ? $"SELECT [{returnColumnName}]"
+                        : "SELECT *";
+
+                    command.CommandText = $"{selectClause} FROM [{Common.TableKHSX}]";
+
+                    if (!isGetAll)
+                    {
+                        // Process each parameter in the dictionary
+                        foreach (var param in parameters)
+                        {
+                            conditions.Add($"[{param.Key}] = @{param.Key}");
+                            command.Parameters.AddWithValue($"@{param.Key}", param.Value);
+                        }
+                        if (conditions.Any())
+                        {
+                            command.CommandText += " WHERE " + string.Join(" AND ", conditions);
+                        }
+                    }
+
+                    using var reader = command.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        // If no specific column is requested, read entire object
+                        if (returnColumnName == null)
+                        {
+                            KHSX khsx = new();
+                            List<Propertyy> rowItems = khsx.GetPropertiesValues();
+                            foreach (var item in rowItems)
+                            {
+                                string? columnName = item.DBName;
+                                if (!string.IsNullOrEmpty(columnName) && reader.GetOrdinal(columnName) != -1)
+                                {
+                                    object columnValue = reader[columnName];
+                                    item.Value = columnValue == DBNull.Value ? null : columnValue;
+                                }
+                                columnValues.Add(khsx);
+                            }
+                        }
+                        else
+                        {
+                            // If a specific column is requested, read only that column
+                            object columnValue = reader[returnColumnName];
+                            columnValues.Add(columnValue == DBNull.Value ? null : columnValue);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    errorMessage = $"Error: {ex.Message}";
+                    columnValues.Clear(); // Clear the list in case of error
+                }
+            }
+            return (columnValues, errorMessage);
+        }
+
 
         // Delete Ke hoach san xuat
         public (int, string) DeleteKehoachSanxuat(KHSX? removeKHSX)
