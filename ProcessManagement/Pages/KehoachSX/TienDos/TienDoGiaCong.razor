@@ -263,22 +263,25 @@
 
                         <HeaderTemplate>
                             <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                @{
+                                    int numTDRow = TargetTienDoGC.DSachTienDoRows.Count;
+                                }
                                 <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                     <!--Button them tiendogcrow-->
                                     <RadzenButton Disabled="@(TargetKHSX.isDonePXK == false || TargetKHSX.isReturnedNVL || TargetTienDoGC.TDGCID.Value == null)" Click="OnThemMoiTienDoGCRow" Icon="add" Text="Thêm nội dung theo dõi" Size="ButtonSize.Small"
                                                   ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat"
                                                   Style="min-width: 100px; font-size: 14px; border-radius: 20px;" />
 
-                                    <RadzenButton Text="Tự động tạo" Style="border-radius: 20px; min-width: 100px;" Disabled="@(TargetTienDoGC.TDGCID.Value == null)"
+                                    <RadzenButton Text="@((numTDRow == 0)? "Tự động tạo" : "Tạo lại danh sách")" Style="border-radius: 20px; min-width: 100px;" Disabled="@(TargetTienDoGC.TDGCID.Value == null)"
                                                   Click="@(async() => { await ButtonAutoCreateTiendoGCRows(); })"
                                                   IsBusy="@autoCreating" BusyText=" Creating..." Icon="docs_add_on" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />
 
-                                    <RadzenButton Text="Delete all" Style="border-radius: 20px; min-width: 100px;" Disabled="@(TargetTienDoGC.TDGCID.Value == null)"
+                                    <RadzenButton Visible=@(numTDRow >0) Text="Delete all" Style="border-radius: 20px; min-width: 100px;" Disabled="@(TargetTienDoGC.TDGCID.Value == null)"
                                                   Click="@(async() => { await DeleteAllTienDoRow(); })"
                                                   Icon="delete" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />
 
                                     <!--Button Reload-->
-                                    <RadzenButton Text="Reload" Style="border-radius: 20px; min-width: 100px;" Disabled="@(TargetTienDoGC.TDGCID.Value == null)"
+                                    <RadzenButton Visible=@(numTDRow >0) Text="Reload" Style="border-radius: 20px; min-width: 100px;" Disabled="@(TargetTienDoGC.TDGCID.Value == null)"
                                                   Click="@(async() => { await ReLoadTienDoGCPage(null, NCID, TargetKHSX.KHSXID.Value); })"
                                                   IsBusy="@isLoading" BusyText=" Loading..." Icon="autorenew" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />
 
@@ -394,7 +397,10 @@
                                         <span style="font-weight: 600; font-size: 15px; color: white;"></span>
                                     </HeaderTemplate>
                                     <Template Context="tdgcrow">
-                                        <RadzenButton Click="@(() => OnDeleteTienDoGCRow(tdgcrow))" Icon="delete" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat" Shade="Shade.Light"></RadzenButton>
+                                        <RadzenStack Gap="10px" Style="width: contain" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                            <RadzenButton Click="@(() => OpenEditTienDoGCRow(tdgcrow))" Icon="edit" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat" Shade="Shade.Light"></RadzenButton>
+                                            <RadzenButton Click="@(() => OnDeleteTienDoGCRow(tdgcrow))" Icon="delete" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Secondary" Variant="Variant.Flat" Shade="Shade.Darker"></RadzenButton>
+                                        </RadzenStack>
                                     </Template>
                                 </RadzenDataGridColumn>
                             }
@@ -753,6 +759,23 @@
         }
     }
 
+    private async Task OpenEditTienDoGCRow(TienDoGCRow editTDGCrow)
+    {
+        var result = await DialogService.OpenAsync<DialogEditTienDoGCRow>(null, new Dictionary<string, object>() { { "TargetTDGCRow", editTDGCrow } },
+        new DialogOptions() { ShowTitle = true, Width = "50%", Height = "95%", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 0px; padding: 0px" });
+
+        if (result != null)
+        {
+            ShowNotification("Saved!", NotificationSeverity.Success, 2000);
+
+            await ReLoadTienDoGCPage(editTDGCrow.TDGCID.Value, editTDGCrow.NCID.Value, TargetKHSX.KHSXID.Value);
+        }
+        else
+        {
+            ShowNotification("Cancelled!", NotificationSeverity.Error, 2000);
+        }
+    }
+
     private async Task OnDeleteTienDoGC(TienDoGC removeTienDoGC)
     {
         bool? confirm = await DialogService.Confirm($"Xóa (đặt lại) trang tiến độ gia công (<strong>{TargetTienDoGC.TenCongDoan}</strong>) này?", "Xác nhận", new ConfirmOptions() { OkButtonText = "OK", CancelButtonText = "Hủy", ShowClose = false });
@@ -868,7 +891,10 @@
                     NCID = { Value = item.Key.NCID },
                     NVIDs = { Value = item.Key.NVIDs },
                     SPID = { Value = item.Items.FirstOrDefault()?.SPID.Value },
-                    KeHoach = { Value = item.Items.Sum(kqgc => (int.TryParse(kqgc.SLOK.Value?.ToString(), out int slok) ? slok : 0) + (int.TryParse(kqgc.SLNG.Value?.ToString(), out int slng) ? slng : 0)) }
+                    KeHoach = { Value = item.Items.Sum(kqgc => (int.TryParse(kqgc.SLOK.Value?.ToString(), out int slok) ? slok : 0) + (int.TryParse(kqgc.SLNG.Value?.ToString(), out int slng) ? slng : 0)) },
+                    ThoiGianGiaCong = { Value = item.Items.LastOrDefault()?.ThoiGianGC.Value },
+                    ThoiGianLamViec = { Value = item.Items.LastOrDefault()?.ThoiGianLamViec.Value },
+                    GhiChu = { Value = item.Items.LastOrDefault()?.GhiChu.Value }
                 };
 
             tienDoGCRows.Add(newTDGCRow);

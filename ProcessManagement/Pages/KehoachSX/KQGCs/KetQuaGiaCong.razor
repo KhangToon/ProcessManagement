@@ -91,19 +91,20 @@
                             </RadzenStack>
                         </HeaderTemplate>
                         <Columns>
-                            @if (DSachKetQuaGCs?.Count > 0)
-                            {
+                            @{
+                                int countdskqgcs = DSachKetQuaGCs.Count;
+
                                 List<Propertyy> columns = KetQuaGC.GetClassProperties() ?? new();
 
                                 <!--STT-->
-                                <RadzenDataGridColumn Width="50px" Frozen="true" FrozenPosition="FrozenColumnPosition.Left" Filterable="false"
+                                <RadzenDataGridColumn Width="60px" Frozen="true" FrozenPosition="FrozenColumnPosition.Left" Filterable="false"
                                                       TItem="KetQuaGC" Title="#"
                                                       Property="STT" TextAlign="TextAlign.Center">
                                     <HeaderTemplate>
                                         <span style="font-weight: 600; font-size: 15px; color: white">STT</span>
                                     </HeaderTemplate>
                                     <Template Context="kqgc">
-                                        <span style="font-weight: bold;">@(DSachKetQuaGCs.IndexOf(kqgc) + 1)</span>
+                                        <span style="font-weight: bold;">@($"{DSachKetQuaGCs.IndexOf(kqgc) + 1}/{countdskqgcs}")</span>
                                     </Template>
                                 </RadzenDataGridColumn>
 

@@ -9705,38 +9705,39 @@ namespace ProcessManagement.Services.SQLServer
             return (result, errorMess);
         }
         // Update
-        public (int, string) UpdateTienDoGCRow(SqlConnection connection, SqlTransaction transaction, object? tiendogcID, TienDoGCRow tiendogcRow)
+        public (int, string) UpdateTienDoGCRow(TienDoGCRow tiendoGCrow)
         {
             int result = -1;
             string errorMess = string.Empty;
 
-            // Check for null input
-            if (tiendogcRow == null) return (result, "Error: TienDoGCRow is null");
+            if (tiendoGCrow == null) return (result, "Error: TienDoGCRow is null");
 
-            List<Propertyy> properties = tiendogcRow.GetPropertiesValues()
+            List<Propertyy> properties = tiendoGCrow.GetPropertiesValues()
                 .Where(po => po.AlowDatabase == true && po.Value != null)
                 .ToList();
 
-            // Validate properties before proceeding
             if (properties.Count == 0)
             {
                 return (result, "Error: No valid properties to update.");
             }
 
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+            using var transaction = connection.BeginTransaction();
+
             try
             {
                 var command = connection.CreateCommand();
-                command.Transaction = transaction; // Use the transaction passed from parent
+                command.Transaction = transaction;
 
+                // Update main TienDoGCRow record
                 string updateSet = string.Join(", ", properties.Select(p =>
                     $"[{p.DBName}] = @{Regex.Replace(p.DBName ?? string.Empty, @"[^\w]+", "")}"));
 
                 command.CommandText = $@"UPDATE [{TienDoGCRow.DBName.Table_TienDoGCRow}] 
                                         SET {updateSet} 
-                                        WHERE [{TienDoGCRow.DBName.TDGCRowID}] = '{tiendogcRow.TDGCRowID.Value}' 
-                                        AND [{TienDoGCRow.DBName.TDGCID}] = @TDGCID";
+                                        WHERE [{TienDoGCRow.DBName.TDGCRowID}] = @TDGCRowID";
 
-                // Add parameters
                 foreach (var prop in properties)
                 {
                     string parameterName = $"@{Regex.Replace(prop.DBName ?? string.Empty, @"[^\w]+", "")}";
@@ -9744,25 +9745,37 @@ namespace ProcessManagement.Services.SQLServer
                     command.Parameters.AddWithValue(parameterName, parameterValue);
                 }
 
-                // Add TDGCID parameter
-                command.Parameters.AddWithValue("@TDGCID", tiendogcID);
+                command.Parameters.AddWithValue("@TDGCRowID", tiendoGCrow.TDGCRowID.Value);
 
-                // Execute command
                 result = command.ExecuteNonQuery();
-                if (result <= 0)
+                if (result > 0)
+                {
+                    transaction.Commit();
+                }
+                else
                 {
                     result = -1;
                     errorMess = "No rows were updated. The specified TienDoGCRow may not exist.";
+                    transaction.Rollback();
                 }
             }
             catch (Exception ex)
             {
                 errorMess = $"Error: {ex.Message}";
+                try
+                {
+                    transaction.Rollback();
+                }
+                catch (Exception rollbackEx)
+                {
+                    errorMess += $" | Rollback Error: {rollbackEx.Message}";
+                }
                 return (-1, errorMess);
             }
 
             return (result, errorMess);
         }
+
         // Get 
         private List<TienDoGCRow> GetListTienDoGCRow(object tdgcID)
         {
