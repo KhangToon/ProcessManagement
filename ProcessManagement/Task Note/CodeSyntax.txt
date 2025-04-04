@@ -1,0 +1,34 @@
+﻿
+/// Filter list of khsx base on range of day
+            DSKHSXs_base.Where(khsx =>
+            {
+                if (khsx.NgayTao != null)
+                {
+                    // Try to convert NgayTao to DateTime
+                    if (DateTime.TryParse(khsx.NgayTao.ToString(), out DateTime resultDate))
+                    {
+                        return resultDate >= startDate && resultDate <= endDate;
+                    }
+                }
+                return false; // Skip if NgayTao is null or can't be converted
+            })
+            .ToList();
+
+/// Grouping
+        var groupedKQGC = dsKQGCs
+            .GroupBy(k =>
+            {
+                return new
+                {
+                    NgayGC = DateTime.TryParse(k.SubMitDay.Value?.ToString(), out DateTime submitday) ? submitday.Date.ToShortDateString() : string.Empty,
+                    Ca = k.CaLamViec.Value,
+                    MMID = k.MMID.Value,
+                    NCID = k.NCID.Value,
+                    NVIDs = k.NVIDs.Value
+                };
+            })
+            .Select(g => new
+            {
+                Key = g.Key,
+                Items = g.ToList()
+            });
