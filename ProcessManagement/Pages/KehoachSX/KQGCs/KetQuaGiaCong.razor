@@ -6,7 +6,6 @@
 @using ProcessManagement.Models
 @using ProcessManagement.Models.KHSXs
 @using ProcessManagement.Models.SANPHAM
-@using ProcessManagement.Models.TienDoGCs
 @using ProcessManagement.Pages.KehoachSX.Dialogs
 @using ProcessManagement.Pages.KehoachSX.KQGCs.Dialogs
 @using ProcessManagement.Services.SQLServer
@@ -56,22 +55,19 @@
                                     ShowPagingSummary="true" PagingSummaryFormat="@pagingSummaryFormat" PagerPosition="PagerPosition.Bottom"
                                     GridLines="DataGridGridLines.Both" Density="Density.Default" ColumnWidth="150px"
                                     HeaderCellRender="@(args => args.Attributes.Add("style", $"background-color: rgba(58, 71, 77); padding-left: 10px; padding-right: 10px"))"
-                                    CellRender="@OnCellRender" Value="@DatagridSeleted" ValueChanged="@((args) => OnDatagridSelectChanged(args))">
+                                    CellRender="@OnCellRender" FooterCellRender="@HeaderFooterCellRender" Value="@DatagridSeleted" ValueChanged="@((args) => OnDatagridSelectChanged(args))">
                         <HeaderTemplate>
                             <!--Button enable advance filter-->
-                            <RadzenStack Gap="10px" Style="height: contain; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                <!--Button them ket qua gia cong-->
-                                <RadzenButton Disabled="@(TargetKHSX.isDonePXK == false || TargetKHSX.isReturnedNVL)" Click="OnThemMoiKetQuaGC" Icon="add" Text="Thêm kết quả gia công" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Success" Variant="Variant.Filled" Shade="Shade.Darker"
-                                              Style="height: contain; width: contain; font-size: 14px;" />
+                            <RadzenStack Gap="10px" Style="height: contain; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                <RadzenStack Gap="10px" Style="height: contain; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                    <!--Button them ket qua gia cong-->
+                                    <RadzenButton Disabled="@(TargetKHSX.isDonePXK == false || TargetKHSX.isReturnedNVL)" Click="OnThemMoiKetQuaGC" Icon="add" Text="Thêm kết quả gia công" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Success" Variant="Variant.Filled" Shade="Shade.Darker"
+                                                  Style="height: contain; width: contain; font-size: 14px;" />
 
-                                <!--Button xem tien do gia cong-->
-                                <RadzenButton Visible="false" Click="OnNavigateToTienDoGCPage" Icon="visibility" Text="Tiến độ gia công" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Success" Variant="Variant.Filled" Shade="Shade.Darker"
-                                              Style="height: contain; width: contain; font-size: 14px;" />
-
-                                <!--Button Enable Filter-->
-                                <RadzenButton Icon="@(filterActive ? "filter_alt" : "filter_alt_off")" Text="Bộ lọc nâng cao" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="@(filterActive ? Shade.Darker : Shade.Lighter)"
-                                              Style="height: contain; width: contain; font-size: 14px;"
-                                              Click="@( async () =>
+                                    <!--Button Enable Filter-->
+                                    <RadzenButton Icon="@(filterActive ? "filter_alt" : "filter_alt_off")" Text="Bộ lọc nâng cao" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="@(filterActive ? Shade.Darker : Shade.Lighter)"
+                                                  Style="height: contain; width: contain; font-size: 14px;"
+                                                  Click="@( async () =>
                                                                 {
                                                                     if (filterActive)
                                                                     {
@@ -79,15 +75,29 @@
                                                                     }
                                                                     filterActive = !filterActive;
                                                                 })" />
-                                <!--Button Reset Filter-->
-                                <RadzenButton Click="@(async () => {keyFilterExtraColumns = new(); keyFilterMainColumns = new(); await LoadAllDanhsachKQGCBase(0);})"
-                                              Icon="reset_settings" Text="Reset bộ lọc" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
-                                              Style="height: contain; width: contain; font-size: 14px;" />
+                                    <!--Button Reset Filter-->
+                                    <RadzenButton Click="@(async () => {keyFilterExtraColumns = new(); keyFilterMainColumns = new(); await LoadAllDanhsachKQGCBase(0);})"
+                                                  Icon="reset_settings" Text="Reset bộ lọc" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
+                                                  Style="height: contain; width: contain; font-size: 14px;" />
 
-                                <!--Button Reload-->
-                                <RadzenButton Text="Reload" Click="@(async() => { await LoadAllDanhsachKQGCBase(300); await FilterDSachKetQuaGCProcessing(); })" IsBusy="@isLoadingKQGCs" BusyText=" Loading..." Style="border-radius: 20px;" Icon="autorenew" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />
+                                    <!--Button Reload-->
+                                    <RadzenButton Text="Reload" Click="@(async() => { await LoadAllDanhsachKQGCBase(300); await FilterDSachKetQuaGCProcessing(); })" IsBusy="@isLoadingKQGCs" BusyText=" Loading..." Style="border-radius: 20px;" Icon="autorenew" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />
 
-
+                                </RadzenStack>
+                                <RadzenStack Style="height: contain; width: contain; padding-left: 100px" Gap="20px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                    <RadzenStack Gap="10px" Style="width: contain; padding-left: 20px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                        <RadzenText Text="Tổng cộng" Style="font-size: 16px; height: contain; width: contain;"></RadzenText>
+                                        <RadzenText Text="@($"{FooterSumAll}")" Style="color: black; font-weight: 600; font-size: 16px; height: contain; width: contain;"></RadzenText>
+                                    </RadzenStack>
+                                    <RadzenStack Gap="10px" Style="width: contain; padding-left: 20px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                        <RadzenText Text="OK" Style="font-size: 16px; height: contain; width: contain;"></RadzenText>
+                                        <RadzenText Text="@($"{FooterSumOK}")" Style="color: darkgreen; font-weight: 600; font-size: 16px; height: contain; width: contain;"></RadzenText>
+                                    </RadzenStack>
+                                    <RadzenStack Gap="10px" Style="width: contain; padding-left: 20px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                        <RadzenText Text="NG" Style="font-size: 16px; height: contain; width: contain;"></RadzenText>
+                                        <RadzenText Text="@($"{FooterSumNG}")" Style="color: darkred; font-weight: 600; font-size: 16px; height: contain; width: contain;"></RadzenText>
+                                    </RadzenStack>
+                                </RadzenStack>
                             </RadzenStack>
                         </HeaderTemplate>
                         <Columns>
@@ -182,14 +192,15 @@
                                                 }
                                             }
                                         </Template>
-                                        @*                                         <FooterTemplate>
-                                <RadzenText Visible="@(colName == KetQuaGC.KQGCDBName.SLperLOT)" Text="@(((DSachKetQuaGCs.Sum(kqgc => int.TryParse(kqgc.SLperLOT.Value?.ToString(), out int sumslperlot)? sumslperlot : 0)).ToString()))"
-                                Style="color: black; font-size: 18px; height: contain; min-width: 50px; font-weight: 600;"></RadzenText>
-                                <RadzenText Visible="@(colName == KetQuaGC.KQGCDBName.SLOK)" Text="@(((DSachKetQuaGCs.Sum(kqgc => int.TryParse(kqgc.SLOK.Value?.ToString(), out int sumok)? sumok : 0)).ToString()))"
-                                Style="color: darkgreen; font-size: 18px; height: contain; min-width: 50px; font-weight: 600;"></RadzenText>
-                                <RadzenText Visible="@(colName == KetQuaGC.KQGCDBName.SLNG)" Text="@(((DSachKetQuaGCs.Sum(kqgc => int.TryParse(kqgc.SLNG.Value?.ToString(), out int sumng)? sumng : 0)).ToString()))"
-                                Style="color: red; font-size: 18px; height: contain; min-width: 50px; font-weight: 600;"></RadzenText>
-                                </FooterTemplate> *@
+                                        <FooterTemplate>
+                                            <RadzenText Visible="@(colName == KetQuaGC.KQGCDBName.SPID)" Text="TỔNG CỘNG" Style="color: black; font-size: 16px; height: contain; font-weight: 600;"></RadzenText>
+                                            <RadzenText Visible="@(colName == KetQuaGC.KQGCDBName.SLperLOT)" Text="@($"{FooterSumAll}")"
+                                                        Style="color: black; font-size: 18px; height: contain; min-width: 50px; font-weight: 600;"></RadzenText>
+                                            <RadzenText Visible="@(colName == KetQuaGC.KQGCDBName.SLOK)" Text="@($"{FooterSumOK}")"
+                                                        Style="color: darkgreen; font-size: 18px; height: contain; min-width: 50px; font-weight: 600;"></RadzenText>
+                                            <RadzenText Visible="@(colName == KetQuaGC.KQGCDBName.SLNG)" Text="@($"{FooterSumNG}")"
+                                                        Style="color: red; font-size: 18px; height: contain; min-width: 50px; font-weight: 600;"></RadzenText>
+                                        </FooterTemplate>
                                     </RadzenDataGridColumn>
                                 }
                                 <RadzenDataGridColumn TItem="KetQuaGC" Title="Delete" Frozen="true" FrozenPosition="FrozenColumnPosition.Right"
@@ -235,6 +246,10 @@
 
     private bool isLoadingKQGCs = false;
 
+    private int FooterSumOK { get; set; }
+    private int FooterSumNG { get; set; }
+    private int FooterSumAll { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
         // Load ds KetQuaGC base/ hien thi
@@ -257,6 +272,34 @@
     private async Task NavigateTienDoGCPage(Dictionary<string, object?> value)
     {
         await NavigateEvent.InvokeAsync(value);
+    }
+
+    private void CalculaFooterSummary()
+    {
+        // Calculate tong so luong OK thuc te
+        int sumOK = DSachKetQuaGCs.Sum(kqgc =>
+        {
+            if (int.TryParse(kqgc.SLOK.Value?.ToString(), out int slok))
+            {
+                return slok;
+            }
+            else return 0;
+        });
+
+        // Calculate tong so luong NG
+        int sumNG = DSachKetQuaGCs.Sum(kqgc =>
+        {
+            if (int.TryParse(kqgc.SLNG.Value?.ToString(), out int slng))
+            {
+                return slng;
+            }
+            else return 0;
+        });
+
+        // Calculate all results
+        FooterSumOK = sumOK;
+        FooterSumNG = sumNG;
+        FooterSumAll = sumOK + sumNG;
     }
 
     // Convert ID to stringValue
@@ -403,6 +446,11 @@
                     }
                 }
             }
+
+            if (filterActive)
+            {
+                CalculaFooterSummary();
+            }
         });
     }
     #endregion
@@ -432,6 +480,8 @@
                 }
 
                 DSachKetQuaGCs = DSachKetQuaGCsBase.ToList(); // gan cho ds hien thi
+
+                CalculaFooterSummary();
 
                 await Task.Delay(delay);
 
@@ -521,26 +571,6 @@
         }
     }
 
-    // Xem tien do gia cong
-    private async Task OnNavigateToTienDoGCPage()
-    {
-        // int spid = 56;
-        // int ncid = 2;
-        // int khsxid = 1;
-
-        // NavigationManager.NavigateTo($"tiendogiacong?spid={spid}&ncid={ncid}&khsxid={khsxid}");
-
-        Dictionary<string, object?> keyValues = new();
-
-
-        keyValues.Add(TienDoGC.DBName.KHSXID, 1);
-        keyValues.Add(TienDoGC.DBName.SPID, 56);
-        keyValues.Add(TienDoGC.DBName.NCID, 2);
-        keyValues.Add("selectedTabIndex", 2); // put in last
-
-        await NavigateTienDoGCPage(keyValues);
-    }
-
     // Notification
     void ShowNotification(string message, NotificationSeverity notifytype, double time)
     {
@@ -576,6 +606,14 @@
         if (args.Column.Property.Contains("ID"))
         {
             args.Attributes.Add("style", $"font-weight: bold;");
+        }
+    }
+
+    void HeaderFooterCellRender(DataGridCellRenderEventArgs<KetQuaGC> args)
+    {
+        if (args.Column.Property == "STT")
+        {
+            args.Attributes.Add("colspan", 3);
         }
     }
 }
