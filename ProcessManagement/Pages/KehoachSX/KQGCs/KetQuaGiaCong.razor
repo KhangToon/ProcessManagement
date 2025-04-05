@@ -242,7 +242,7 @@
 
     private static Dictionary<string, List<string>> keyFilterMainColumns = new();
     private Dictionary<string, List<string>> keyFilterExtraColumns = new();
-    private static bool filterActive = false;
+    private static bool filterActive = true;
 
     private bool isLoadingKQGCs = false;
 
@@ -413,7 +413,9 @@
     private async Task FilterDSachKetQuaGCProcessing()
     {
         await Task.Run(() =>
-        {
+        {   
+            isLoadingKQGCs = true;
+
             DSachKetQuaGCs = DSachKetQuaGCsBase.ToList();
 
             // Main column filtering
@@ -451,6 +453,8 @@
             {
                 CalculaFooterSummary();
             }
+
+            isLoadingKQGCs = false;
         });
     }
     #endregion
