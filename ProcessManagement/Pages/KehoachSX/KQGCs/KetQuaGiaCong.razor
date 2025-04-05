@@ -192,13 +192,16 @@
                                 </FooterTemplate> *@
                                     </RadzenDataGridColumn>
                                 }
-                                <RadzenDataGridColumn TItem="KetQuaGC" Title="Delete"
+                                <RadzenDataGridColumn TItem="KetQuaGC" Title="Delete" Frozen="true" FrozenPosition="FrozenColumnPosition.Right"
                                                       Property="delete" TextAlign="TextAlign.Center">
                                     <HeaderTemplate>
                                         <span style="font-weight: 600; font-size: 15px; color: white;"></span>
                                     </HeaderTemplate>
                                     <Template Context="kqgc">
-                                        <RadzenButton Click="@(() => OnDeleteKQGC(kqgc))" Icon="delete" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat" Shade="Shade.Light"></RadzenButton>
+                                        <RadzenStack Gap="10px" Style="width: contain" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                            <RadzenButton Click="@(() => OpenEditKQGC(kqgc))" Icon="edit" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat" Shade="Shade.Light"></RadzenButton>
+                                            <RadzenButton Click="@(() => OnDeleteKQGC(kqgc))" Icon="delete" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat" Shade="Shade.Darker"></RadzenButton>
+                                        </RadzenStack>
                                     </Template>
                                 </RadzenDataGridColumn>
                             }
@@ -502,6 +505,19 @@
             {
                 await DialogService.Alert($"Error: Không tìm thấy LOTNVL", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
             }
+        }
+    }
+
+    private async Task OpenEditKQGC(KetQuaGC editKQGC)
+    {
+        var result = await DialogService.OpenAsync<DialogEditKetQuaGC>(null, new Dictionary<string, object>() { { "TargetKetQuaGC", editKQGC }, { "KHSXID", TargetKHSX.KHSXID.Value ?? 0 }, { "SPID", TargetKHSX.SPID.Value ?? 0 } },
+        new DialogOptions() { ShowTitle = true, Width = "50%", Height = "95%", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 0px; padding: 0px" });
+
+        await LoadAllDanhsachKQGCBase(0);
+
+        if (result != null)
+        {
+            ShowNotification("Saved!", NotificationSeverity.Success, 2000);
         }
     }
 

@@ -1,0 +1,955 @@
+﻿@using ProcessManagement.Commons
+@using ProcessManagement.Models
+@using ProcessManagement.Models.MAYMOC
+@using ProcessManagement.Models.NHANVIEN
+@using ProcessManagement.Models.SANPHAM
+@using ProcessManagement.Services.SQLServer
+@using Radzen.Blazor
+@using Radzen
+@using ProcessManagement.Models.KHSXs
+
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject SQLServerServices SQLServerServices
+
+<style>
+    .custom-placeholder::placeholder {
+        color: #888888;
+        font-size: 14px;
+        font-weight: 600;
+        font-style: italic;
+    }
+
+    /* Style for dropdown placeholder (auto apply)*/
+    .rz-dropdown:not(.rz-state-filled) .rz-inputtext {
+        color: #888888 !important;
+        font-size: 14px !important;
+        font-weight: 600 !important;
+        font-style: italic !important;
+    }
+
+    .rz-numeric.custom-numeric input {
+        font-size: 14px !important;
+        font-weight: 600 !important;
+    }
+
+    .rz-datepicker.custom-datepicker input {
+        font-size: 14px !important;
+        font-weight: 600 !important;
+    }
+
+    .custom-datepicker input[type="text"]::placeholder {
+        font-size: 14px;
+        font-style: italic;
+    }
+</style>
+
+<RadzenCard Style="height: 100%; width: 100%; padding: 5px" Variant="Variant.Flat">
+    <RadzenStack Gap="0" Style="height: 100%; width: 100%; margin: 0; padding: 0; padding-bottom: 10px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start">
+        <RadzenStack Gap="20px" Style="height: contain; width: 100%; padding: 10px; background-color: var(--rz-primary-darker);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+            <RadzenText Text="CHỈNH SỬA KẾT QUẢ GIA CÔNG" Style="color: white; font-weight: 500; font-size: 18px"></RadzenText>
+        </RadzenStack>
+        @{
+            List<Propertyy> properties = updatedKetQuaGC.GetPropertiesValues().Where(pro => pro.AlowDisplay == true).ToList();
+
+            <RadzenRow Gap="10px" Style="height: contain; width: 100%; border-top: var(--rz-grid-cell-border); padding: 0; overflow-y: scroll">
+                <RadzenColumn Size="12" SizeMD="12" Style="height: 100%; width: 100%; padding: 15px; padding-right: 0">
+                    <RadzenStack Gap="10px" Style="height: contain; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                        <RadzenText Text="Thông tin kết quả gia công" Style="color: var(--rz-primary-darker); font-size: 18px; font-weight: 600; height: contain; width: contain"></RadzenText>
+                    </RadzenStack>
+                    <RadzenCard Variant="Variant.Flat" Style="min-height: 300px; width: 100%; padding: 0px; margin-top: 10px; background-color: white">
+                        <RadzenStack Style="height: 100%; width: 100%; padding: 10px;" Gap="0" Orientation="Orientation.Vertical">
+                            @{
+                                foreach (var property in properties)
+                                {
+                                    string displayName = property.DisplayName;
+
+                                    if (property.DBName == KetQuaGC.KQGCDBName.SPID || property.DBName == KetQuaGC.KQGCDBName.MMID || property.DBName == KetQuaGC.KQGCDBName.NCID || property.DBName == KetQuaGC.KQGCDBName.MaQuanLyLot)
+                                    {
+                                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 5px; border-bottom: var(--rz-grid-cell-border);">
+                                            <RadzenStack Style="width: 20%;">
+                                                <RadzenText Text="@(displayName)" Style="color: var(--rz-primary-darker); font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
+                                            </RadzenStack>
+                                            <RadzenStack Style="width: 80%; padding-left: 10px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
+                                                    <RadzenStack Style="width: 50%;">
+                                                        <RadzenDropDown AllowClear="true" Disabled="@((property.DBName == KetQuaGC.KQGCDBName.SPID || property.DBName == KetQuaGC.KQGCDBName.NCID || property.DBName == KetQuaGC.KQGCDBName.MaQuanLyLot))"
+                                                                        Style="width: 100%; height: contain; font-size: 14px; font-weight: 600; background-color: white"
+                                                                        Placeholder="@($" * chọn {displayName}")"
+                                                                        AllowVirtualization="true"
+                                                                        AllowFiltering="true"
+                                                                        FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                                                        FilterOperator="StringFilterOperator.Contains"
+                                                                        AllowSelectAll="true"
+                                                                        TValue="KeyValuePair<string, string>"
+                                                                        Data="@(ComboboxDSachKeys(property.DBName))"
+                                                                        SelectedItem="@(ITemSelecteds[property.DBName])"
+                                                                        Value="@(ITemSelecteds[property.DBName])" SearchTextChanged="@(async (args) => await OnComboboxInputTextChange(property.DBName, args))"
+                                                                        ValueChanged="@((KeyValuePair<string, string> args) => OnComboboxDSachKeysSelectedChanged(new List<KeyValuePair<string, string>>{args}, property))">
+                                                            <!--Custom style off dropdownbox items-->
+                                                            <Template>
+                                                                <span style="font-size: 14px; font-weight: 500; font-style: normal; color: black">@($"{context.Value}")</span>
+                                                            </Template>
+
+                                                            <!--Custom style off dropdownbox selected value items-->
+                                                            <ValueTemplate>
+                                                                <span style="font-size: 14px; font-weight: 500; font-style: normal; color: black">@($"{context.Value}")</span>
+                                                            </ValueTemplate>
+                                                        </RadzenDropDown>
+                                                    </RadzenStack>
+                                                    <RadzenStack Style="width: 50%;">
+                                                        <RadzenAlert Visible="@(!property.IsCheckValueOK)" Text="@property.NotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                                                        <RadzenAlert Visible="@(property.IsCheckValueOK)" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Success" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                                                    </RadzenStack>
+                                                </RadzenStack>
+                                            </RadzenStack>
+                                        </RadzenStack>
+                                    }
+                                    else if (property.DBName == KetQuaGC.KQGCDBName.NVIDs || property.DBName == KetQuaGC.KQGCDBName.NGIDs) // Danh sach Nhan vien thuc hien // Danh sach NGType
+                                    {
+                                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 5px; border-bottom: var(--rz-grid-cell-border);">
+                                            <RadzenStack Style="width: 20%;">
+                                                <RadzenText Text="@(displayName)" Style="color: var(--rz-primary-darker); font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
+                                            </RadzenStack>
+                                            <RadzenStack Style="width: 80%; padding-left: 10px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
+                                                    <RadzenStack Style="width: 50%;">
+                                                        <RadzenDropDown AllowClear="true" Disabled="@property.IsDisable"
+                                                                        Style="width: 100%; height: contain; font-size: 14px; font-weight: 600; color: black; background-color: white"
+                                                                        Placeholder="@($" * chọn {displayName}")"
+                                                                        AllowVirtualization="true"
+                                                                        AllowFiltering="true"
+                                                                        FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                                                        FilterOperator="StringFilterOperator.Contains"
+                                                                        AllowSelectAll="true" Multiple="true"
+                                                                        TValue="IEnumerable<KeyValuePair<string, string>>"
+                                                                        Data="@(ComboboxDSachKeys(property.DBName))"
+                                                                        SelectedItem="@((property.DBName == KetQuaGC.KQGCDBName.NVIDs)? NhanviensSelected : NGTypesSelected)"
+                                                                        Value="@((property.DBName == KetQuaGC.KQGCDBName.NVIDs)? NhanviensSelected : NGTypesSelected)"
+                                                                        ValueChanged="@((IEnumerable<KeyValuePair<string, string>> args) => OnComboboxDSachKeysSelectedChanged(args, property))">
+
+                                                            <!--Custom style off dropdownbox items-->
+                                                            <Template Context="item">
+                                                                <span style="color: black; font-size: 14px; font-weight: 500">
+                                                                    @item.Value
+                                                                </span>
+                                                            </Template>
+
+                                                            <!--Custom style off dropdownbox selected value items-->
+                                                            <ValueTemplate>
+                                                                <span style="font-size: 14px; font-weight: 500; font-style: normal; color: black">
+                                                                    @($"{string.Join(", ", ((IEnumerable<KeyValuePair<string, string>>)context).Select(item => item.Value))}")
+                                                                </span>
+                                                            </ValueTemplate>
+
+                                                        </RadzenDropDown>
+                                                    </RadzenStack>
+                                                    <RadzenStack Visible="@(!property.IsDisable)" Style="width: 50%;">
+                                                        <RadzenAlert Visible="@(!property.IsCheckValueOK)" Text="@property.NotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                                                        <RadzenAlert Visible="@(property.IsCheckValueOK)" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Success" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                                                    </RadzenStack>
+                                                </RadzenStack>
+                                            </RadzenStack>
+                                        </RadzenStack>
+                                    }
+                                    else if (property.DBName == KetQuaGC.KQGCDBName.CaLamViec)
+                                    {
+                                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 5px; border-bottom: var(--rz-grid-cell-border);">
+                                            <RadzenStack Style="width: 20%;">
+                                                <RadzenText Text="@(displayName)" Style="color: var(--rz-primary-darker); font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
+                                            </RadzenStack>
+                                            <RadzenStack Style="width: 80%; padding-left: 10px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
+                                                    <RadzenStack Style="width: 50%;">
+                                                        <RadzenDropDown AllowClear="true" Disabled="@(string.IsNullOrEmpty(updatedKetQuaGC.NCID.Value?.ToString()))"
+                                                                        Style="width: 100%; height: contain; font-size: 14px; font-weight: 600; color: black; background-color: white"
+                                                                        Placeholder="@($" * chọn {displayName}")"
+                                                                        TValue="string" Data="@(Common.ListCaLamViecs)" Value="@(property.Value?.ToString()?.Trim())"
+                                                                        ValueChanged="@(async (args) =>{updatedKetQuaGC.CaLamViec.Value = args;await DefaultThongTinKetQuaGC_ValueIsOK(property);})">
+                                                            <!--Custom style off dropdownbox items-->
+                                                            <Template>
+                                                                <span style="font-size: 14px; font-weight: 500; font-style: normal; color: black">@($"{context}")</span>
+                                                            </Template>
+
+                                                            <!--Custom style off dropdownbox selected value items-->
+                                                            <ValueTemplate>
+                                                                <span style="font-size: 14px; font-weight: 500; font-style: normal; color: black">@($"{context}")</span>
+                                                            </ValueTemplate>
+                                                        </RadzenDropDown>
+                                                    </RadzenStack>
+                                                    <RadzenStack Style="width: 50%;">
+                                                        <RadzenAlert Visible="@(!property.IsCheckValueOK)" Text="@property.NotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                                                        <RadzenAlert Visible="@(property.IsCheckValueOK)" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Success" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                                                    </RadzenStack>
+                                                </RadzenStack>
+                                            </RadzenStack>
+                                        </RadzenStack>
+                                    }
+                                    else
+                                    {
+                                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 5px; border-bottom: var(--rz-grid-cell-border);">
+                                            <RadzenStack Style="width: 20%;">
+                                                <RadzenText Text="@(displayName)" Style="color: var(--rz-primary-darker); font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
+                                            </RadzenStack>
+                                            <RadzenStack Style="width: 80%; padding-left: 10px; border-left: var(--rz-grid-cell-border);" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%; padding: 0px;">
+                                                    @{
+                                                        if (property.Type == typeof(string)) // kieu ky tu
+                                                        {
+                                                            <RadzenStack Style="width: 50%;">
+                                                                <RadzenTextBox class="custom-placeholder" Placeholder="@($" * nhập {displayName}")" Value="@property.Value?.ToString()" Style="font-size: 14px; height: contain; border-width: 1px; color: black; font-weight: 500"
+                                                                               @oninput="@(async (args) => { property.Value = args.Value; await DefaultThongTinKetQuaGC_ValueIsOK(property);})">
+                                                                </RadzenTextBox>
+                                                            </RadzenStack>
+                                                        }
+                                                        else if (property.Type == typeof(double)) // Kieu double
+                                                        {
+                                                            <RadzenStack Style="width: 50%;">
+                                                                <RadzenNumeric class="custom-numeric" TValue="double" Placeholder="0.0" Step="0.5"
+                                                                               Min="0" Max="999999" Value="@((double.TryParse(property.Value?.ToString(), out double vl)? vl : 0))"
+                                                                               ValueChanged="@(async (args) =>
+                                                                               {
+                                                                                    property.Value = args;
+
+                                                                                    await DefaultThongTinKetQuaGC_ValueIsOK(property);
+                                                                               })" />
+                                                            </RadzenStack>
+                                                        }
+                                                        else if (property.Type == typeof(int)) // Kieu int
+                                                        {
+                                                            int max = 999999;
+
+                                                            if (property.DBName == KetQuaGC.KQGCDBName.SLOK || property.DBName == KetQuaGC.KQGCDBName.SLperLOT)
+                                                            {
+                                                                max = (int.TryParse(updatedKetQuaGC.SLperLOT.Value?.ToString(), out int num) ? num : 999999);
+                                                            }
+                                                            else if (property.DBName == KetQuaGC.KQGCDBName.SLNG)
+                                                            {
+                                                                _ = int.TryParse(updatedKetQuaGC.SLperLOT.Value?.ToString(), out int sllot) ? sllot : 0;
+                                                                _ = int.TryParse(updatedKetQuaGC.SLOK.Value?.ToString(), out int slok) ? slok : 0;
+                                                                max = sllot - slok;
+                                                            }
+
+                                                            <RadzenStack Style="width: 50%;">
+                                                                <RadzenNumeric Disabled="@(property.DBName == KetQuaGC.KQGCDBName.SLperLOT)" class="custom-numeric" TValue="int" Placeholder="0" Step="1"
+                                                                               Min="0" Max="max"
+                                                                               Value="@((int.TryParse(property.Value?.ToString(), out int num)? num : 0))"
+                                                                               ValueChanged="@(async (args) =>
+                                                                               {
+                                                                                    property.Value = args;
+
+                                                                                    if (property.DBName == KetQuaGC.KQGCDBName.SLOK)
+                                                                                        {
+                                                                                        _ = int.TryParse(updatedKetQuaGC.SLperLOT.Value?.ToString(), out int total) ? total : 0;
+                                                                                        _ = int.TryParse(updatedKetQuaGC.SLOK.Value?.ToString(), out int slok) ? slok : 0;
+                                                                                        int slng = total - slok;
+
+                                                                                        int maxng = (slng > 0 && slok > 0) ? slng : 0;
+
+                                                                                        updatedKetQuaGC.SLNG.Value = maxng;
+
+                                                                                        updatedKetQuaGC.NGIDs.IsDisable = (maxng == 0);
+                                                                                        updatedKetQuaGC.NGIDs.Value = null;
+                                                                                        NGTypesSelected = null;
+
+                                                                                        await DefaultThongTinKetQuaGC_ValueIsOK(updatedKetQuaGC.SLNG);
+                                                                                        await DefaultThongTinKetQuaGC_ValueIsOK(updatedKetQuaGC.NGIDs);
+                                                                                    }
+                                                                                    else if (property.DBName == KetQuaGC.KQGCDBName.SLNG)
+                                                                                    {
+                                                                                        updatedKetQuaGC.NGIDs.IsDisable = property.Value.Equals(0);
+                                                                                        updatedKetQuaGC.NGIDs.Value = null;
+                                                                                        NGTypesSelected = null;
+
+                                                                                        await DefaultThongTinKetQuaGC_ValueIsOK(updatedKetQuaGC.NGIDs);
+                                                                                    }
+
+                                                                                    await DefaultThongTinKetQuaGC_ValueIsOK(property);
+                                                                               })" />
+                                                            </RadzenStack>
+                                                        }
+                                                        else if (property.Type == typeof(DateTime)) // kieu ngay thang
+                                                        {
+                                                            bool ishaveValueOfday = DateTime.TryParse(property.Value?.ToString(), out DateTime selectday);
+                                                            if (ishaveValueOfday) selectday = selectday.Date.Add(DateTime.Now.TimeOfDay);
+                                                            <RadzenStack Style="width: 50%;">
+                                                                <RadzenDatePicker class="custom-datepicker custom-datepicker" Placeholder="@($"* nhập {displayName}")"
+                                                                                  ShowTime="false" HourFormat="12" DateFormat="@Common.FormatNoTime_ddMMyyyy" ParseInput="@Common.ParseDate_MMddyyyy" AllowInput="true"
+                                                                                  TValue="DateTime" Value="selectday" AllowClear="true"
+                                                                                  Change="@(async (args) =>
+                                                                                    {
+                                                                                        if (args != null)
+                                                                                        {
+                                                                                            DateTime value = args.Value.Date.Add(DateTime.Now.TimeOfDay);
+                                                                                            property.Value = value;
+                                                                                        }
+                                                                                        else
+                                                                                        {
+                                                                                            property.Value = string.Empty;
+                                                                                        }
+                                                                                        await DefaultThongTinKetQuaGC_ValueIsOK(property);
+                                                                                    })"
+                                                                                  Style="height: contain;">
+                                                                </RadzenDatePicker>
+                                                            </RadzenStack>
+                                                        }
+
+                                                        <RadzenStack Style="width: 50%;">
+                                                            <RadzenAlert Visible="@(!property.IsCheckValueOK)" Text="@property.NotifyMess" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                                                            <RadzenAlert Visible="@(property.IsCheckValueOK)" Style="width: contain; height: 100%; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Success" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
+                                                        </RadzenStack>
+                                                    }
+                                                </RadzenStack>
+                                            </RadzenStack>
+                                        </RadzenStack>
+                                    }
+                                }
+                            }
+                        </RadzenStack>
+                    </RadzenCard>
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding-right: 15px; padding-top: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                <RadzenButton Disabled="@(!IsAllValueThongTinOK(properties))" Click="@(() => OnSaveChangedTargetKQGC())" Style="width: contain; height: 80%;" Icon="check" Text="Lưu thay đổi" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Default" Size="ButtonSize.Small" Variant="Variant.Filled" />
+                <RadzenButton Style="width: contain; height: 80%;" Icon="close" Text="Hủy" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" Click="@(() => OnCancelAddupdatedKetQuaGC())" />
+            </RadzenStack>
+        }
+    </RadzenStack>
+</RadzenCard>
+
+@code {
+    [Parameter]
+    public int KHSXID { get; set; } // KHSXID
+    [Parameter]
+    public int SPID { get; set; }// ID San pham
+    [Parameter]
+    public KetQuaGC TargetKetQuaGC { get; set; } = new();
+
+    private KetQuaGC updatedKetQuaGC = new();
+    private List<SanPham> dsachSanPhams = new();
+    private List<NguyenCongofKHSX> dsNCofKHSXs = new();
+    private List<MayMoc> dsachMayMocs = new();
+    private List<NhanVien> dsachNhanViens = new();
+    private List<NGType> dsachNGTypes = new();
+    private List<KHSX_LOT> dsachMaQLyLots = new();
+
+    // Selected item changed
+    private IEnumerable<KeyValuePair<string, string>>? NhanviensSelected;
+    private IEnumerable<KeyValuePair<string, string>>? NGTypesSelected;
+    private Dictionary<string, KeyValuePair<string, string>?> ITemSelecteds = new Dictionary<string, KeyValuePair<string, string>?>()
+    {{KetQuaGC.KQGCDBName.SPID, null}, {KetQuaGC.KQGCDBName.MMID, null}, {KetQuaGC.KQGCDBName.NCID, null}, {KetQuaGC.KQGCDBName.MaQuanLyLot, null } };
+
+    protected override async Task OnInitializedAsync()
+    {
+        dsNCofKHSXs = SQLServerServices.GetlistCongdoans(KHSXID);
+
+        Dictionary<string, object?> par = new Dictionary<string, object?>() { { KHSX_LOT.DBName.KHSXID, KHSXID } };
+        (dsachMaQLyLots, string errorLot) = SQLServerServices.GetListLOT_khsx(par, false);
+
+        (dsachNGTypes, string errorMess) = SQLServerServices.GetDanhSachNGType();
+
+        dsachNhanViens = SQLServerServices.GetDanhSachNhanVien();
+
+        dsachMayMocs = SQLServerServices.GetDanhSachMayMoc();
+
+        dsachSanPhams = SQLServerServices.GetDanhSachSanPham_ID_Name();
+
+
+        updatedKetQuaGC = new();
+
+        var targetProperties = TargetKetQuaGC.GetPropertiesValues();
+
+        foreach (var pro in targetProperties)
+        {
+            if (!string.IsNullOrEmpty(pro.DBName) && pro.Value != null)
+            {
+                updatedKetQuaGC.SetPropertyValue(pro.DBName, pro.Value);
+
+                InitialTargetValue(pro);
+            }
+        }
+
+
+
+        await DefaultThongTinKetQuaGC_ValueIsOK(updatedKetQuaGC.MaQuanLyLot);
+        await DefaultThongTinKetQuaGC_ValueIsOK(updatedKetQuaGC.NCID);
+        await DefaultThongTinKetQuaGC_ValueIsOK(updatedKetQuaGC.SPID);
+        await DefaultThongTinKetQuaGC_ValueIsOK(updatedKetQuaGC.SLperLOT);
+        await DefaultThongTinKetQuaGC_ValueIsOK(updatedKetQuaGC.SLOK);
+        await DefaultThongTinKetQuaGC_ValueIsOK(updatedKetQuaGC.SLNG);
+        if (!string.IsNullOrEmpty(updatedKetQuaGC.NGIDs.Value?.ToString()?.Trim()))
+        {
+            await DefaultThongTinKetQuaGC_ValueIsOK(updatedKetQuaGC.NGIDs);
+        }
+        else
+        {
+            updatedKetQuaGC.NGIDs.IsCheckValueOK = true;
+            updatedKetQuaGC.NGIDs.IsDisable = true;
+        }
+        await DefaultThongTinKetQuaGC_ValueIsOK(updatedKetQuaGC.MMID);
+        await DefaultThongTinKetQuaGC_ValueIsOK(updatedKetQuaGC.CaLamViec);
+        await DefaultThongTinKetQuaGC_ValueIsOK(updatedKetQuaGC.NVIDs);
+        await DefaultThongTinKetQuaGC_ValueIsOK(updatedKetQuaGC.ThoiGianGC);
+        await DefaultThongTinKetQuaGC_ValueIsOK(updatedKetQuaGC.ThoiGianLamViec);
+        await DefaultThongTinKetQuaGC_ValueIsOK(updatedKetQuaGC.GhiChu);
+        await DefaultThongTinKetQuaGC_ValueIsOK(updatedKetQuaGC.SubMitDay);
+
+        await base.OnInitializedAsync();
+    }
+
+    #region Combobox
+
+    // Count element of dynamic data
+    private int CountElements(dynamic data)
+    {
+        if (data is string str)
+        {
+            return str.Length; // Count characters in a string
+        }
+        else if (data is ICollection<NhanVien> collection)
+        {
+            return collection.Count; // Count elements in a collection
+        }
+        else
+        {
+            return 0;
+        }
+    }
+
+
+    private IEnumerable<KeyValuePair<string, string>> InitialTargetValue(Propertyy propertyy)
+    {
+        string colName = propertyy.DBName ?? string.Empty;
+
+        IEnumerable<KeyValuePair<string, string>> results = new List<KeyValuePair<string, string>>();
+
+        if (colName == KetQuaGC.KQGCDBName.SPID)
+        {
+            results = dsachSanPhams
+                    .Where(item => item.SP_SPID.Value != null && item.SP_SPID.Value?.ToString()?.Trim() == propertyy?.Value?.ToString()?.Trim())
+                    .Select(item => new KeyValuePair<string, string>(
+                        item.SP_SPID.Value?.ToString() ?? string.Empty,
+                        $"{item.SP_MaSP.Value?.ToString()?.Trim()} ({item.SP_MaSP.Value?.ToString()?.Trim()})"
+                    ))
+                    .Where(x => !string.IsNullOrEmpty(x.Value) && !string.IsNullOrEmpty(x.Key))
+                    .Distinct();
+
+            // Gan target SPID cho selected SPID
+
+            ITemSelecteds[colName] = results.FirstOrDefault();
+        }
+        else if (colName == KetQuaGC.KQGCDBName.NCID)
+        {
+            results = dsNCofKHSXs
+                    .Where(item => item.NCIDofKHSX.Value != null && item.NCID.Value?.ToString()?.Trim() == propertyy?.Value?.ToString()?.Trim())
+                    .Select(item => new KeyValuePair<string, string>(
+                        item.NCID.Value?.ToString() ?? string.Empty,
+                        item.TenCongDoan.Value?.ToString()?.Trim() ?? string.Empty
+                    ))
+                    .Where(x => !string.IsNullOrEmpty(x.Value) && !string.IsNullOrEmpty(x.Key))
+                    .Distinct();
+
+            ITemSelecteds[colName] = results.FirstOrDefault();
+
+            return results;
+        }
+        else if (colName == KetQuaGC.KQGCDBName.MMID)
+        {
+            results = dsachMayMocs
+                    .Where(item => item.MMID.Value != null && item.MMID.Value?.ToString()?.Trim() == propertyy?.Value?.ToString()?.Trim())
+                    .Select(item => new KeyValuePair<string, string>(
+                        item.MMID.Value?.ToString() ?? string.Empty,
+                        $"{item.MaMay.Value?.ToString()?.Trim()} ({item.TenMay.Value?.ToString()?.Trim()})"
+                    ))
+                    .Where(x => !string.IsNullOrEmpty(x.Value) && !string.IsNullOrEmpty(x.Key))
+                    .Distinct();
+
+            ITemSelecteds[colName] = results.FirstOrDefault();
+
+            return results;
+        }
+        else if (colName == KetQuaGC.KQGCDBName.MaQuanLyLot)
+        {
+            results = dsachMaQLyLots
+                    .Where(item => item.KHSXLOTID.Value != null && item.MaQuanLyLot.Value?.ToString()?.Trim() == propertyy?.Value?.ToString()?.Trim())
+                    .Select(item => new KeyValuePair<string, string>(
+                        item.KHSXLOTID.Value?.ToString() ?? string.Empty,
+                        $"{item.MaQuanLyLot.Value?.ToString()?.Trim()} (số lượng: {item.SLLOT.Value?.ToString()?.Trim()})"
+                    ))
+                    .Where(x => !string.IsNullOrEmpty(x.Value) && !string.IsNullOrEmpty(x.Key))
+                    .DistinctBy(x => x.Value);
+
+            ITemSelecteds[colName] = results.FirstOrDefault();
+
+            return results;
+        }
+        else if (colName == KetQuaGC.KQGCDBName.NVIDs)
+        {
+            var splitValues = propertyy?.Value?.ToString()?.Trim().Split(",");
+
+            results = dsachNhanViens
+                    .Where(item => item.NVID.Value != null && splitValues != null && splitValues.Contains(item.NVID.Value?.ToString()?.Trim()))
+                    .Select(item => new KeyValuePair<string, string>(
+                        item.NVID.Value?.ToString() ?? string.Empty,
+                        $"{item.MaNhanVien.Value?.ToString()?.Trim()} ({item.GetThongTinNhanVienByName("Tên nhân viên").GiaTri.Value?.ToString()?.Trim()})"
+                    ))
+                    .Where(x => !string.IsNullOrEmpty(x.Value) && !string.IsNullOrEmpty(x.Key))
+                    .Distinct();
+
+            NhanviensSelected = results;
+
+            return results;
+        }
+        else if (colName == KetQuaGC.KQGCDBName.NGIDs)
+        {
+            var splitValues = propertyy?.Value?.ToString()?.Trim().Split(",");
+
+            results = dsachNGTypes
+                    .Where(item => item.NGID.Value != null && splitValues != null && splitValues.Contains(item.NGID.Value?.ToString()?.Trim()))
+                    .Select(item => new KeyValuePair<string, string>(item.NGID.Value?.ToString() ?? string.Empty, $"{item.NoiDungNG.Value?.ToString()?.Trim()}"))
+                    .Where(x => !string.IsNullOrEmpty(x.Value) && !string.IsNullOrEmpty(x.Key))
+                    .Distinct();
+
+            NGTypesSelected = results;
+
+            return results;
+        }
+
+        return results;
+    }
+
+    // Get list Keys
+    private IEnumerable<KeyValuePair<string, string>> ComboboxDSachKeys(string? colName)
+    {
+        IEnumerable<KeyValuePair<string, string>> results = new List<KeyValuePair<string, string>>();
+
+        if (colName == KetQuaGC.KQGCDBName.SPID)
+        {
+            results = dsachSanPhams
+                    .Where(item => item.SP_SPID.Value != null)
+                    .Select(item => new KeyValuePair<string, string>(
+                        item.SP_SPID.Value?.ToString() ?? string.Empty,
+                        $"{item.SP_MaSP.Value?.ToString()?.Trim()} ({item.SP_MaSP.Value?.ToString()?.Trim()})"
+                    ))
+                    .Where(x => !string.IsNullOrEmpty(x.Value) && !string.IsNullOrEmpty(x.Key))
+                    .Distinct();
+
+            if (updatedKetQuaGC.SPID.Value != null)
+            {
+                // Gan target SPID cho selected SPID
+                KeyValuePair<string, string> targetrs = results.FirstOrDefault(rs => rs.Key == updatedKetQuaGC.SPID.Value.ToString());
+
+                if (!string.IsNullOrEmpty(targetrs.Value))
+                {
+                    ITemSelecteds[colName] = targetrs;
+                }
+                else updatedKetQuaGC.SPID.Value = null;
+            }
+        }
+        else if (colName == KetQuaGC.KQGCDBName.NCID)
+        {
+            if (dsNCofKHSXs != null)
+            {
+                results = dsNCofKHSXs
+                    .Where(item => item.NCIDofKHSX.Value != null)
+                    .Select(item => new KeyValuePair<string, string>(
+                        item.NCID.Value?.ToString() ?? string.Empty,
+                        item.TenCongDoan.Value?.ToString()?.Trim() ?? string.Empty
+                    ))
+                    .Where(x => !string.IsNullOrEmpty(x.Value) && !string.IsNullOrEmpty(x.Key))
+                    .Distinct();
+            }
+        }
+        else if (colName == KetQuaGC.KQGCDBName.MMID)
+        {
+            results = dsachMayMocs
+                    .Where(item => item.MMID.Value != null)
+                    .Select(item => new KeyValuePair<string, string>(
+                        item.MMID.Value?.ToString() ?? string.Empty,
+                        $"{item.MaMay.Value?.ToString()?.Trim()} ({item.TenMay.Value?.ToString()?.Trim()})"
+                    ))
+                    .Where(x => !string.IsNullOrEmpty(x.Value) && !string.IsNullOrEmpty(x.Key))
+                    .Distinct();
+        }
+        else if (colName == KetQuaGC.KQGCDBName.MaQuanLyLot)
+        {
+            results = dsachMaQLyLots
+                    .Where(item => item.KHSXLOTID.Value != null)
+                    .Select(item => new KeyValuePair<string, string>(
+                        item.KHSXLOTID.Value?.ToString() ?? string.Empty,
+                        $"{item.MaQuanLyLot.Value?.ToString()?.Trim()} (số lượng: {item.SLLOT.Value?.ToString()?.Trim()})"
+                    ))
+                    .Where(x => !string.IsNullOrEmpty(x.Value) && !string.IsNullOrEmpty(x.Key))
+                    .DistinctBy(x => x.Value);
+        }
+        else if (colName == KetQuaGC.KQGCDBName.NVIDs)
+        {
+            results = dsachNhanViens
+                    .Where(item => item.NVID.Value != null)
+                    .Select(item => new KeyValuePair<string, string>(
+                        item.NVID.Value?.ToString() ?? string.Empty,
+                        $"{item.MaNhanVien.Value?.ToString()?.Trim()} ({item.GetThongTinNhanVienByName("Tên nhân viên").GiaTri.Value?.ToString()?.Trim()})"
+                    ))
+                    .Where(x => !string.IsNullOrEmpty(x.Value) && !string.IsNullOrEmpty(x.Key))
+                    .Distinct();
+        }
+        else if (colName == KetQuaGC.KQGCDBName.NGIDs)
+        {
+            results = dsachNGTypes
+                    .Where(item => item.NGID.Value != null)
+                    .Select(item => new KeyValuePair<string, string>(item.NGID.Value?.ToString() ?? string.Empty, $"{item.NoiDungNG.Value?.ToString()?.Trim()}"))
+                    .Where(x => !string.IsNullOrEmpty(x.Value) && !string.IsNullOrEmpty(x.Key))
+                    .Distinct();
+        }
+        return results;
+    }
+
+    private async Task OnComboboxInputTextChange(string proName, object? args) // using for scan QR Maquanly autobinding
+    {
+        if (proName == KetQuaGC.KQGCDBName.MaQuanLyLot && args != null)
+        {
+            var targetItem = dsachMaQLyLots.FirstOrDefault(lot => lot.MaQuanLyLot.Value?.ToString()?.Trim() == args.ToString()?.Trim());
+
+            if (targetItem != null)
+            {
+                //
+                KHSX_LOT preRSultLotTargetCD = new();
+                KHSX_LOT curRSultLotinTargetCD = new();
+
+                List<KHSX_LOT> dsanhResultofLotAllCdoan = dsachMaQLyLots.Where(lot => lot.MaQuanLyLot.Value?.ToString()?.Trim() == args.ToString()?.Trim()).ToList();
+
+                curRSultLotinTargetCD = dsanhResultofLotAllCdoan.FirstOrDefault(lot => lot.NCID.Value?.ToString()?.Trim() == updatedKetQuaGC.NCID.Value?.ToString()?.Trim()) ?? new();
+
+                // SL ok + ng da submit cua curRSultLotinTargetCD
+                _ = int.TryParse(curRSultLotinTargetCD.SLOKsubmited.Value?.ToString(), out int curSLOKsubmited) ? curSLOKsubmited : 0;
+                _ = int.TryParse(curRSultLotinTargetCD.SLNGsubmited.Value?.ToString(), out int curSLNGsubmited) ? curSLNGsubmited : 0;
+
+                int indexcurrentCD = dsanhResultofLotAllCdoan.IndexOf(curRSultLotinTargetCD);
+
+                preRSultLotTargetCD = Common.GetElementOrNew(dsanhResultofLotAllCdoan, indexcurrentCD - 1);
+
+                // SL ok + ng da submit cua preRSultLotTargetCD
+                _ = int.TryParse(preRSultLotTargetCD.SLOKsubmited.Value?.ToString(), out int preSLOKsubmited) ? preSLOKsubmited : 0;
+                _ = int.TryParse(preRSultLotTargetCD.SLNGsubmited.Value?.ToString(), out int preSLNGsubmited) ? preSLNGsubmited : 0;
+                _ = int.TryParse(targetItem?.SLLOT.Value?.ToString(), out int slperlotBase) ? slperlotBase : 0;
+
+                if (!string.IsNullOrEmpty(preRSultLotTargetCD.KHSXLOTID.Value?.ToString()))
+                {
+                    // New pre != null --> gan slpreok cho sllimit current
+                    updatedKetQuaGC.SLperLOT.Value = preSLOKsubmited - (curSLOKsubmited + curSLNGsubmited); // Tru so luong da submit cua currentlot
+                }
+                else updatedKetQuaGC.SLperLOT.Value = slperlotBase - (curSLOKsubmited + curSLNGsubmited); // Tru so luong da submit cua currentlot
+
+                //
+            }
+
+            if (targetItem != null)
+            {
+                ITemSelecteds[proName] = new KeyValuePair<string, string>(targetItem.KHSXLOTID.Value?.ToString() ?? string.Empty, $"{targetItem.MaQuanLyLot.Value?.ToString()?.Trim()} (số lượng: {targetItem.SLLOT.Value?.ToString()?.Trim()})");
+
+                // Asign slperlot
+                //updatedKetQuaGC.SLperLOT.Value = targetItem.SLLOT.Value;
+                updatedKetQuaGC.MaQuanLyLot.Value = targetItem.MaQuanLyLot.Value;
+            }
+            else
+            {
+                ITemSelecteds[proName] = null; // reset selected value
+
+                updatedKetQuaGC.MaQuanLyLot.Value = null; // reset MaQuanLyLot
+                updatedKetQuaGC.SLperLOT.Value = null; // reset SLperLOT
+                updatedKetQuaGC.SLOK.Value = null; // reset SLOK
+                updatedKetQuaGC.SLNG.Value = 0; // reset SLNG
+            }
+
+            await DefaultThongTinKetQuaGC_ValueIsOK(updatedKetQuaGC.SLOK);
+            await DefaultThongTinKetQuaGC_ValueIsOK(updatedKetQuaGC.SLNG);
+            await DefaultThongTinKetQuaGC_ValueIsOK(updatedKetQuaGC.SLperLOT);
+            await DefaultThongTinKetQuaGC_ValueIsOK(updatedKetQuaGC.MaQuanLyLot);
+        }
+    }
+
+    private async Task OnComboboxDSachKeysSelectedChanged(IEnumerable<KeyValuePair<string, string>> selectedValues, Propertyy propertyy)
+    {
+        if (propertyy.DBName == KetQuaGC.KQGCDBName.SPID)
+        {
+            var targetItem = dsachSanPhams.FirstOrDefault(sp => sp.SP_SPID.Value?.ToString()?.Trim() == selectedValues.FirstOrDefault().Key);
+
+            if (targetItem != null)
+            {
+                ITemSelecteds[propertyy.DBName] = selectedValues.FirstOrDefault();
+
+                updatedKetQuaGC.SPID.Value = targetItem.SP_SPID.Value;
+            }
+            else updatedKetQuaGC.SPID.Value = null;
+        }
+        else if (propertyy.DBName == KetQuaGC.KQGCDBName.NCID)
+        {
+            var targetItem = dsNCofKHSXs.FirstOrDefault(sp => sp.NCID.Value?.ToString()?.Trim() == selectedValues.FirstOrDefault().Key);
+
+            if (targetItem != null)
+            {
+                ITemSelecteds[propertyy.DBName] = selectedValues.FirstOrDefault();
+
+                updatedKetQuaGC.NCID.Value = targetItem.NCID.Value;
+            }
+            else updatedKetQuaGC.NCID.Value = null;
+        }
+        else if (propertyy.DBName == KetQuaGC.KQGCDBName.MMID)
+        {
+            var targetItem = dsachMayMocs.FirstOrDefault(sp => sp.MMID.Value?.ToString()?.Trim() == selectedValues.FirstOrDefault().Key);
+
+            if (targetItem != null)
+            {
+                ITemSelecteds[propertyy.DBName] = selectedValues.FirstOrDefault();
+
+                updatedKetQuaGC.MMID.Value = targetItem.MMID.Value;
+            }
+            else updatedKetQuaGC.MMID.Value = null;
+        }
+        else if (propertyy.DBName == KetQuaGC.KQGCDBName.MaQuanLyLot)
+        {
+            await Task.Delay(100);
+
+            var targetItem = dsachMaQLyLots.FirstOrDefault(lot => lot.KHSXLOTID.Value?.ToString()?.Trim() == selectedValues.FirstOrDefault().Key);
+
+            //Asign sluong OK/NG last Result
+
+            KHSX_LOT preRSultLotTargetCD = new();
+            KHSX_LOT curRSultLotinTargetCD = new();
+
+            List<KHSX_LOT> dsanhResultofLotAllCdoan = dsachMaQLyLots.Where(lot => lot.MaQuanLyLot.Value?.ToString()?.Trim() == targetItem?.MaQuanLyLot.Value?.ToString()?.Trim()).ToList();
+
+            curRSultLotinTargetCD = dsanhResultofLotAllCdoan.FirstOrDefault(lot => lot.NCID.Value?.ToString()?.Trim() == updatedKetQuaGC.NCID.Value?.ToString()?.Trim()) ?? new();
+
+            // SL ok + ng da submit cua curRSultLotinTargetCD
+            _ = int.TryParse(curRSultLotinTargetCD.SLOKsubmited.Value?.ToString(), out int curSLOKsubmited) ? curSLOKsubmited : 0;
+            _ = int.TryParse(curRSultLotinTargetCD.SLNGsubmited.Value?.ToString(), out int curSLNGsubmited) ? curSLNGsubmited : 0;
+
+            int indexcurrentCD = dsanhResultofLotAllCdoan.IndexOf(curRSultLotinTargetCD);
+
+            preRSultLotTargetCD = Common.GetElementOrNew(dsanhResultofLotAllCdoan, indexcurrentCD - 1);
+
+            // SL ok + ng da submit cua preRSultLotTargetCD
+            _ = int.TryParse(preRSultLotTargetCD.SLOKsubmited.Value?.ToString(), out int preSLOKsubmited) ? preSLOKsubmited : 0;
+            _ = int.TryParse(preRSultLotTargetCD.SLNGsubmited.Value?.ToString(), out int preSLNGsubmited) ? preSLNGsubmited : 0;
+            _ = int.TryParse(targetItem?.SLLOT.Value?.ToString(), out int slperlotBase) ? slperlotBase : 0;
+
+            if (!string.IsNullOrEmpty(preRSultLotTargetCD.KHSXLOTID.Value?.ToString()))
+            {
+                // New pre != null --> gan slpreok cho sllimit current
+                updatedKetQuaGC.SLperLOT.Value = preSLOKsubmited - (curSLOKsubmited + curSLNGsubmited); // Tru so luong da submit cua currentlot
+            }
+            else updatedKetQuaGC.SLperLOT.Value = slperlotBase - (curSLOKsubmited + curSLNGsubmited); // Tru so luong da submit cua currentlot
+
+            //
+
+
+            if (targetItem != null)
+            {
+                // Asign selected value
+                ITemSelecteds[propertyy.DBName] = selectedValues.FirstOrDefault();
+                // Asign slperlot
+                //updatedKetQuaGC.SLperLOT.Value = targetItem.SLLOT.Value;
+                updatedKetQuaGC.MaQuanLyLot.Value = targetItem.MaQuanLyLot.Value;
+            }
+            else
+            {
+                updatedKetQuaGC.MaQuanLyLot.Value = null;
+                updatedKetQuaGC.SLperLOT.Value = null;
+                updatedKetQuaGC.SLOK.Value = null;
+                updatedKetQuaGC.SLNG.Value = 0;
+            }
+
+            await DefaultThongTinKetQuaGC_ValueIsOK(updatedKetQuaGC.SLOK);
+            await DefaultThongTinKetQuaGC_ValueIsOK(updatedKetQuaGC.SLNG);
+            await DefaultThongTinKetQuaGC_ValueIsOK(updatedKetQuaGC.SLperLOT);
+            await DefaultThongTinKetQuaGC_ValueIsOK(updatedKetQuaGC.MaQuanLyLot);
+        }
+        else if (propertyy.DBName == KetQuaGC.KQGCDBName.NVIDs)
+        {
+            if (selectedValues != null && selectedValues.Any())
+            {
+                var selectedNvids = selectedValues.Select(vl => vl.Key).ToHashSet();
+
+                var targetItems = dsachNhanViens.Where(nv =>
+                {
+                    var nvid = nv.NVID.Value?.ToString() ?? string.Empty;
+                    return selectedNvids.Contains(nvid);
+                });
+
+                if (targetItems.Any())
+                {
+                    NhanviensSelected = selectedValues.ToList();
+
+                    updatedKetQuaGC.DSNhanVien.AddRange(targetItems);
+
+                    updatedKetQuaGC.NVIDs.Value = string.Join(",", targetItems
+                                            .Select(nv => nv.NVID.Value?.ToString()?.Trim() ?? string.Empty)
+                                            .Where(id => !string.IsNullOrEmpty(id)));
+                }
+                else updatedKetQuaGC.NVIDs.Value = null;
+            }
+            else
+            {
+                NhanviensSelected = null;
+
+                updatedKetQuaGC.DSNhanVien = new();
+                updatedKetQuaGC.NVIDs.Value = null;
+            }
+        }
+        else if (propertyy.DBName == KetQuaGC.KQGCDBName.NGIDs)
+        {
+            if (selectedValues != null && selectedValues.Any())
+            {
+                var selectedNGTypeids = selectedValues.Select(vl => vl.Key).ToHashSet();
+
+                var targetItems = dsachNGTypes.Where(ng =>
+                {
+                    var ngid = ng.NGID.Value?.ToString() ?? string.Empty;
+                    return selectedNGTypeids.Contains(ngid);
+                });
+
+                if (targetItems.Any())
+                {
+                    NGTypesSelected = selectedValues.ToList();
+
+                    updatedKetQuaGC.DSNGType.AddRange(targetItems);
+
+                    updatedKetQuaGC.NGIDs.Value = string.Join(",", targetItems
+                                            .Select(ng => ng.NGID.Value?.ToString()?.Trim() ?? string.Empty)
+                                            .Where(id => !string.IsNullOrEmpty(id)));
+                }
+                else updatedKetQuaGC.NGIDs.Value = null;
+            }
+            else
+            {
+                NGTypesSelected = null;
+
+                updatedKetQuaGC.DSNGType = new();
+                updatedKetQuaGC.NGIDs.Value = null;
+            }
+        }
+
+        await DefaultThongTinKetQuaGC_ValueIsOK(propertyy);
+    }
+
+    #endregion
+
+    // Kiem tra thong tin mac dinh
+    private async Task DefaultThongTinKetQuaGC_ValueIsOK(Propertyy propertyy)
+    {
+        await Task.Run(() =>
+        {
+            string value = propertyy.Value?.ToString() ?? string.Empty;
+            string? dbname = propertyy.DBName ?? string.Empty;
+            string? displayName = propertyy.DisplayName ?? string.Empty;
+
+            propertyy.IsCheckValueOK = true;
+            propertyy.NotifyMess = $"Giá trị hợp lệ";
+
+            foreach (var erorrtype in propertyy.CheckErrors)
+            {
+                if (erorrtype == Propertyy.ErrType.NotEmptyValue)
+                {
+                    if (string.IsNullOrEmpty(value.Trim()))
+                    {
+                        propertyy.IsCheckValueOK = false;
+                        propertyy.NotifyMess = $"{displayName} không được để trống";
+                        return;
+                    }
+                }
+                else if (erorrtype == Propertyy.ErrType.NotAllowEqualsZero)
+                {
+                    if (propertyy.Type == typeof(int))
+                    {
+                        if ((int.TryParse(value, out int sl) ? sl : -1) <= 0)
+                        {
+                            propertyy.IsCheckValueOK = false;
+                            propertyy.NotifyMess = $"{displayName} phải lớn hơn 0";
+                            return;
+                        }
+                    }
+                    else if (propertyy.Type == typeof(double))
+                    {
+                        if ((double.TryParse(value, out double sl) ? sl : -1) <= 0)
+                        {
+                            propertyy.IsCheckValueOK = false;
+                            propertyy.NotifyMess = $"{displayName} phải lớn hơn 0";
+                            return;
+                        }
+                    }
+                }
+            }
+
+        });
+    }
+
+
+    // Update target KetQuaGC to database
+    private async Task OnSaveChangedTargetKQGC()
+    {
+        bool? confirm = await DialogService.Confirm($"Lưu thay đổi kết quả gia công này?", "Xác nhận", new ConfirmOptions() { OkButtonText = "Đồng ý", CancelButtonText = "Hủy" });
+
+        if (confirm.Value)
+        {
+            (int udsuccess, string uderr) = SQLServerServices.UpdateKetQuaGC(updatedKetQuaGC);
+
+            if (udsuccess == 1)
+            {
+                ShowNotification("Update success!", NotificationSeverity.Success, 2000);
+
+                DialogService.Close(updatedKetQuaGC);
+            }
+            else
+            {
+                ShowNotification($"Updated error {uderr}", NotificationSeverity.Error, 4000);
+            }
+        }
+    }
+
+    // Check trang thai gia tri cua tat ca truong thong tin isOK
+    private bool IsAllValueThongTinOK(List<Propertyy> propertyys)
+    {
+        bool isOK = true;
+
+        foreach (var property in propertyys.Where(pro => pro.IsDisable == false))
+        {
+            if (property.IsCheckValueOK == false)
+            {
+                isOK = false;
+            }
+        }
+
+        // Check total of NG and OK is more than 0
+        _ = int.TryParse(updatedKetQuaGC.SLOK.Value?.ToString(), out int slok) ? slok : 0;
+        _ = int.TryParse(updatedKetQuaGC.SLNG.Value?.ToString(), out int slng) ? slng : 0;
+
+        if ((slok + slng == 0))
+        {
+            isOK = false;
+        }
+
+        return isOK;
+    }
+
+    // Cancel add new
+    private void OnCancelAddupdatedKetQuaGC()
+    {
+        DialogService.Close(null);
+    }
+
+
+    // Notification
+    void ShowNotification(string message, NotificationSeverity notifytype, double time)
+    {
+        NotificationMessage notify = new NotificationMessage
+            {
+                Style = "position: fixed; top: 0; right: 0;",
+                Severity = notifytype,
+                Summary = message,
+                Duration = time
+            };
+
+        NotificationService.Notify(notify);
+    }
+}

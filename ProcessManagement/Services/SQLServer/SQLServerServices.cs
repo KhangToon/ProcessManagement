@@ -8503,7 +8503,7 @@ namespace ProcessManagement.Services.SQLServer
             }
         }
         // Update 
-        public (int, string) UpdateKetQuaGC(KetQuaGC ketquaGC, int ketquaGCId)
+        public (int, string) UpdateKetQuaGC(KetQuaGC ketquaGC)
         {
             int result = -1;
             string errorMess = string.Empty;
@@ -8512,7 +8512,7 @@ namespace ProcessManagement.Services.SQLServer
             if (ketquaGC == null) return (result, "Error: KetQuaGC is null");
 
             List<Propertyy> properties = ketquaGC.GetPropertiesValues()
-                .Where(po => po.AlowDatabase == true && po.Value != null)
+                .Where(po => po.AlowDatabase == true)
                 .ToList();
 
             // Validate properties before proceeding
@@ -8539,28 +8539,13 @@ namespace ProcessManagement.Services.SQLServer
                     object? parameterValue = prop.Value ?? DBNull.Value;
                     command.Parameters.AddWithValue(parameterName, parameterValue);
                 }
-                command.Parameters.AddWithValue("@KetQuaGCId", ketquaGCId);
+                command.Parameters.AddWithValue("@KetQuaGCId", ketquaGC.KQGCID.Value);
 
                 // Execute update command
                 result = command.ExecuteNonQuery();
 
                 if (result > 0)
                 {
-                    // Successfully updated; proceed with DongThung update if necessary
-                    //if (ketquaGC.DSDongThung != null && ketquaGC.DSDongThung.Any())
-                    //{
-                    //    foreach (var dongThung in ketquaGC.DSDongThung)
-                    //    {
-                    //        var (dongThungResult, dongThungError) = UpdateDongThung(connection, ketquaGCId, dongThung);
-                    //        if (dongThungResult == -1)
-                    //        {
-                    //            // If there's an error updating DongThung, rollback and return the error
-                    //            transaction.Rollback();
-                    //            return (-1, $"Error updating DongThung: {dongThungError}");
-                    //        }
-                    //    }
-                    //}
-                    // Commit transaction if all operations were successful
                     transaction.Commit();
                 }
                 else
@@ -9713,7 +9698,7 @@ namespace ProcessManagement.Services.SQLServer
             if (tiendoGCrow == null) return (result, "Error: TienDoGCRow is null");
 
             List<Propertyy> properties = tiendoGCrow.GetPropertiesValues()
-                .Where(po => po.AlowDatabase == true && po.Value != null)
+                .Where(po => po.AlowDatabase == true)
                 .ToList();
 
             if (properties.Count == 0)
