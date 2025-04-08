@@ -55,6 +55,10 @@
                         </FooterTemplate>
                     </RadzenDatePicker>
                 </RadzenStack>
+                <RadzenStack Gap="10px" Style="width: contain; padding-left: 20px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                    <RadzenText Text="Total results" Style="font-size: 16px; height: contain; width: contain;"></RadzenText>
+                    <RadzenText Text="@($"{DSKHSXs.Count}")" Style="color: black; font-weight: 600; font-size: 16px; height: contain; width: contain;"></RadzenText>
+                </RadzenStack>
             </RadzenStack>
         </RadzenCard>
     </RadzenStack>
@@ -164,7 +168,7 @@
 
 @code {
 
-    private DateTime endSearchDay = DateTime.Today;
+    private DateTime endSearchDay = DateTime.Today.AddDays(1);
     private DateTime startSearchDay = DateTime.MinValue;
     private bool displaybyDay = true;
     private KHSX SelectKHSX = new();
@@ -194,7 +198,7 @@
                 {
                     if (DateTime.TryParse(khsx.NgayTao.Value.ToString(), out DateTime resultDate))
                     {
-                        return resultDate >= startSearchDay && resultDate <= endSearchDay;
+                        return resultDate.Date >= startSearchDay.Date && resultDate < offsetendDay.Date;
                     }
                 }
                 return false; // Skip if NgayTao is null or can't be converted

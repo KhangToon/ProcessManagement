@@ -6,6 +6,8 @@
 @using ProcessManagement.Commons
 @using ProcessManagement.Models
 @using ProcessManagement.Models.KHSXs
+@using ProcessManagement.Models.MAYMOC
+@using ProcessManagement.Models.NHANVIEN
 @using ProcessManagement.Models.SANPHAM
 @using ProcessManagement.Models.TienDoGCs
 @using ProcessManagement.Pages.KehoachSX.Dialogs
@@ -35,7 +37,7 @@
         <RadzenText Text="@($"Công đoạn:")" Style="color: green; font-weight: 600; font-size: 20px"></RadzenText>
         <RadzenText Text="@($"{TargetTienDoGC.TenCongDoan.ToUpper()}")" Style="color: black; font-weight: 600; font-size: 22px"></RadzenText>
     </RadzenStack>
-    <RadzenCard Style="width: 100%; height: contain" Variant="Variant.Outlined">
+    <RadzenCard Style="width: 100%; height: contain; padding-top: 5px; padding-bottom: 5px" Variant="Variant.Outlined">
         <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding: 10px; overflow: auto" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
             <RadzenRow Style="width: contain; height: contain;">
                 <RadzenColumn Size="12" SizeMD="12">
@@ -133,6 +135,30 @@
                                 </RadzenDatePicker>
                             </RadzenStack>
                         </RadzenStack>
+
+                        <!--Nang luc may-->
+                        <RadzenStack Gap="5px" Style="height: 100%; width: contain; padding: 0px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                            <RadzenStack Style="width: 100%;">
+                                <RadzenText Text="@($"Năng lực máy")" Style="font-weight: 600; font-size: 15px; font-style: italic;"></RadzenText>
+                            </RadzenStack>
+                            <RadzenStack Style="width: 100%; height: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                                <RadzenNumeric Disabled="@(!isEditing)" ShowUpDown="false" TValue="int" Value="@int.Parse(TargetTienDoGC.NangLucMay.Value?.ToString()?? "0")" Min="0" Max="999999"
+                                               ValueChanged="@((args) => { TargetTienDoGC.NangLucMay.Value = args; })"
+                                               Style="font-size: 16px; height: 35px; border-width: 1px; width: 200px" />
+                            </RadzenStack>
+                        </RadzenStack>
+
+                        <!--Nhan cong-->
+                        <RadzenStack Gap="5px" Style="height: 100%; width: contain; padding: 0px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                            <RadzenStack Style="width: 100%;">
+                                <RadzenText Text="@($"Nhân công")" Style="font-weight: 600; font-size: 15px; font-style: italic;"></RadzenText>
+                            </RadzenStack>
+                            <RadzenStack Style="width: 100%; height: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                                <RadzenNumeric Disabled="@(!isEditing)" ShowUpDown="false" TValue="int" Value="@int.Parse(TargetTienDoGC.NhanCong.Value?.ToString()?? "0")" Min="0" Max="999999"
+                                               ValueChanged="@((args) => { TargetTienDoGC.NhanCong.Value = args; })"
+                                               Style="font-size: 16px; height: 35px; border-width: 1px; width: 200px" />
+                            </RadzenStack>
+                        </RadzenStack>
                     </RadzenStack>
                 </RadzenColumn>
 
@@ -173,34 +199,6 @@
                                                Style="font-size: 15px; height: 35px; border-width: 1px; width: 200px" />
                             </RadzenStack>
                         </RadzenStack>
-                    </RadzenStack>
-                </RadzenColumn>
-
-                <RadzenColumn Size="12" SizeMD="12">
-                    <RadzenStack Gap="10px" Style="height: 100%; width: 100%; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                        <!--Nang luc may-->
-                        <RadzenStack Gap="5px" Style="height: 100%; width: contain; padding: 0px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                            <RadzenStack Style="width: 100%;">
-                                <RadzenText Text="@($"Năng lực máy")" Style="font-weight: 600; font-size: 15px; font-style: italic;"></RadzenText>
-                            </RadzenStack>
-                            <RadzenStack Style="width: 100%; height: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
-                                <RadzenNumeric Disabled="@(!isEditing)" ShowUpDown="false" TValue="int" Value="@int.Parse(TargetTienDoGC.NangLucMay.Value?.ToString()?? "0")" Min="0" Max="999999"
-                                               ValueChanged="@((args) => { TargetTienDoGC.NangLucMay.Value = args; })"
-                                               Style="font-size: 16px; height: 35px; border-width: 1px; width: 200px" />
-                            </RadzenStack>
-                        </RadzenStack>
-
-                        <!--Nhan cong-->
-                        <RadzenStack Gap="5px" Style="height: 100%; width: contain; padding: 0px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                            <RadzenStack Style="width: 100%;">
-                                <RadzenText Text="@($"Nhân công")" Style="font-weight: 600; font-size: 15px; font-style: italic;"></RadzenText>
-                            </RadzenStack>
-                            <RadzenStack Style="width: 100%; height: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
-                                <RadzenNumeric Disabled="@(!isEditing)" ShowUpDown="false" TValue="int" Value="@int.Parse(TargetTienDoGC.NhanCong.Value?.ToString()?? "0")" Min="0" Max="999999"
-                                               ValueChanged="@((args) => { TargetTienDoGC.NhanCong.Value = args; })"
-                                               Style="font-size: 16px; height: 35px; border-width: 1px; width: 200px" />
-                            </RadzenStack>
-                        </RadzenStack>
 
                         <!--Thoi gian hanh chinh-->
                         <RadzenStack Gap="5px" Style="height: 100%; width: contain; padding: 0px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
@@ -225,19 +223,21 @@
                                                Style="font-size: 16px; height: 35px; border-width: 1px; width: 200px" />
                             </RadzenStack>
                         </RadzenStack>
+
                     </RadzenStack>
                 </RadzenColumn>
+
             </RadzenRow>
             <!--Reset tiendo-->
             <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding: 0px; padding-top: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                 <RadzenButton Visible="@(TargetTienDoGC.TDGCID.Value == null && !isEditing)" Style="width: contain;" Text="Tạo kế hoạch theo dõi" Click="@(() => isEditing = true)" Icon="add" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Base" Variant="Variant.Flat" Shade="Shade.Lighter"></RadzenButton>
-                <RadzenButton Visible="@(TargetTienDoGC.TDGCID.Value != null && !isEditing)" Style="width: contain;" Text="Xóa kế hoạch theo dõi" Click="@(() => OnDeleteTienDoGC(TargetTienDoGC))" Icon="reply" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Base" Variant="Variant.Flat" Shade="Shade.Lighter"></RadzenButton>
+                <RadzenButton Visible="@(TargetTienDoGC.TDGCID.Value != null && !isEditing)" Style="width: contain; color: red" Text="Xóa kế hoạch theo dõi" Click="@(() => OnDeleteTienDoGC(TargetTienDoGC))" Icon="remove" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Base" Variant="Variant.Flat" Shade="Shade.Lighter"></RadzenButton>
 
                 <!--Button them tiendogcrow-->
                 <RadzenButton Visible="@(TargetTienDoGC.TDGCID.Value == null && isEditing)" Click="OnSaveNewTienDoGC" Icon="check" Text="Lưu kế hoạch" Size="ButtonSize.Small"
                               ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Shade="Shade.Dark" Style="min-width: 100px; font-size: 14px; border-radius: 20px;" />
 
-                <RadzenButton Visible="@(TargetTienDoGC.TDGCID.Value != null && !isEditing)" Style="width: contain;" Text="Chỉnh sửa thông tin" Click="@(() => isEditing = true)" Icon="edit" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Base" Variant="Variant.Flat" Shade="Shade.Lighter"></RadzenButton>
+                <RadzenButton Visible="@(TargetTienDoGC.TDGCID.Value != null && !isEditing)" Style="width: contain; color: black" Text="Chỉnh sửa thông tin" Click="@(() => isEditing = true)" Icon="edit" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Base" Variant="Variant.Flat" Shade="Shade.Lighter"></RadzenButton>
                 <RadzenButton Visible="@(TargetTienDoGC.TDGCID.Value != null && isEditing)" Style="width: contain;" Text="Lưu thay đổi" Click="@(() => OnEditTienDoGC(TargetTienDoGC))" Icon="check" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat" Shade="Shade.Dark"></RadzenButton>
                 <RadzenButton Visible="@(isEditing)" Style="width: contain;" Text="Hủy" Click="@(() => OnCancelUpdateTienDoGC())" Icon="cancel" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Base" Variant="Variant.Flat" Shade="Shade.Lighter"></RadzenButton>
             </RadzenStack>
@@ -252,19 +252,63 @@
                 @{
                     int numTDRow = TargetTienDoGC.DSachTienDoRows.Count;
                 }
-                <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: contain; width: 100%;">
-                    <!--Button them tiendogcrow-->
-                    <RadzenButton Disabled="@(TargetKHSX.isDonePXK == false || TargetKHSX.isReturnedNVL || TargetTienDoGC.TDGCID.Value == null)" Click="OnThemMoiTienDoGCRow" Icon="add" Text="Thêm nội dung theo dõi" Size="ButtonSize.Small"
-                                  ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Variant="Variant.Flat"
-                                  Style="min-width: 100px; font-size: 15px; font-weight: 600; border-radius: 20px;" />
+                <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween" Style="height: contain; width: 100%;">
+                    <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: contain; width: contain;">
+                        <!--Button them tiendogcrow-->
+                        <RadzenButton Disabled="@(TargetKHSX.isDonePXK == false || TargetKHSX.isReturnedNVL || TargetTienDoGC.TDGCID.Value == null)" Click="OnThemMoiTienDoGCRow" Icon="add" Text="Thêm từng dòng" Size="ButtonSize.Small"
+                                      ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Variant="Variant.Flat"
+                                      Style="min-width: 100px; font-size: 15px; font-weight: 600; border-radius: 20px;" />
 
-                    <RadzenButton Text="@((numTDRow == 0)? "Tự động tạo" : "Tạo lại danh sách")" Style="border-radius: 20px; min-width: 100px; font-size: 15px; font-weight: 600;" Disabled="@(TargetTienDoGC.TDGCID.Value == null)"
-                                  Click="@(async() => { await ButtonAutoCreateTiendoGCRows(); })" Shade="Shade.Lighter" Variant="Variant.Flat"
-                                  IsBusy="@autoCreating" BusyText=" Creating..." Icon="docs_add_on" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />
+                        <RadzenButton Visible=false Text="@((numTDRow == 0)? "Tự động tạo" : "Tạo lại danh sách")" Style="border-radius: 20px; min-width: 100px; font-size: 15px; font-weight: 600;" Disabled="@(TargetTienDoGC.TDGCID.Value == null)"
+                                      Click="@(async() => { await ButtonAutoCreateTiendoGCRows(); })" Shade="Shade.Lighter" Variant="Variant.Flat"
+                                      IsBusy="@autoCreating" BusyText=" Creating..." Icon="docs_add_on" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />
 
-                    <RadzenButton Visible=@(numTDRow >0) Text="Delete all" Style="border-radius: 20px; min-width: 100px; font-size: 15px; font-weight: 600;" Disabled="@(TargetTienDoGC.TDGCID.Value == null)"
-                                  Click="@(async() => { await DeleteAllTienDoRow(); })" Shade="Shade.Lighter" Variant="Variant.Flat"
-                                  Icon="delete" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />
+                        <RadzenButton Visible=@(numTDRow >0) Text="Delete all" Style="border-radius: 20px; min-width: 100px; font-size: 15px; font-weight: 600;" Disabled="@(TargetTienDoGC.TDGCID.Value == null)"
+                                      Click="@(async() => { await DeleteAllTienDoRow(); })" Shade="Shade.Lighter" Variant="Variant.Flat"
+                                      Icon="delete" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />
+
+                        <!--Button Reload-->
+                        <RadzenButton Text="Reload" Style="border-radius: 20px; min-width: 100px;" Disabled="@(TargetTienDoGC.TDGCID.Value == null)"
+                                      Click="@(async() => { keyFilterExtraColumns = new(); keyFilterMainColumns = new(); await ReLoadTienDoGCPage(null, NCID, TargetKHSX.KHSXID.Value); })"
+                                      IsBusy="@isLoading" BusyText=" Loading..." Icon="autorenew" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />
+                    </RadzenStack>
+
+                    <RadzenStack Gap="20px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                        <RadzenStack Gap="10px" Style="width: contain; padding-left: 20px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                            <RadzenText Text="Total results" Style="font-size: 16px; height: contain; width: contain;"></RadzenText>
+                            <RadzenText Text="@($"{TargetTienDoGC.DSachTienDoRows.Count}")" Style="color: black; font-weight: 600; font-size: 16px; height: contain; width: contain;"></RadzenText>
+                        </RadzenStack>
+                        <RadzenStack Gap="10px" Style="width: contain; padding-left: 20px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                            <RadzenText Text="Kế hoạch" Style="font-size: 16px; height: contain; width: contain;"></RadzenText>
+                            <RadzenText Text="@($"{TargetTienDoGC.FooterSumKeHoach}")" Style="color: black; font-weight: 600; font-size: 16px; height: contain; width: contain;"></RadzenText>
+                        </RadzenStack>
+                        <RadzenStack Gap="10px" Style="width: contain; padding-left: 20px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                            <RadzenText Text="Thực tế" Style="font-size: 16px; height: contain; width: contain;"></RadzenText>
+                            <RadzenText Text="@($"{TargetTienDoGC.FooterSumThucTe}")" Style="color: darkgreen; font-weight: 600; font-size: 16px; height: contain; width: contain;"></RadzenText>
+                        </RadzenStack>
+                        <RadzenStack Gap="10px" Style="width: contain; padding-left: 20px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                            <RadzenText Text="NG" Style="font-size: 16px; height: contain; width: contain;"></RadzenText>
+                            <RadzenText Text="@($"{TargetTienDoGC.FooterSumNG}")" Style="color: darkred; font-weight: 600; font-size: 16px; height: contain; width: contain;"></RadzenText>
+                        </RadzenStack>
+                    </RadzenStack>
+
+                    <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                        <!--Button Enable Filter-->
+                        <RadzenButton Icon="@(filterActive ? "filter_alt" : "filter_alt_off")" Text="Bộ lọc nâng cao" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="@(filterActive ? Shade.Darker : Shade.Lighter)"
+                                      Style="height: contain; width: contain; font-size: 14px;"
+                                      Click="@( async () =>
+                                                                {
+                                                                    if (filterActive)
+                                                                    {
+                                                                        await ReLoadTienDoGCPage(TargetTienDoGC.TDGCID.Value, NCID, TargetKHSX.KHSXID.Value);
+                                                                    }
+                                                                    filterActive = !filterActive;
+                                                                })" />
+                        <!--Button Reset Filter-->
+                        <RadzenButton Click="@(async () => { keyFilterExtraColumns = new(); keyFilterMainColumns = new(); await ReLoadTienDoGCPage(TargetTienDoGC.TDGCID.Value, NCID, TargetKHSX.KHSXID.Value);})"
+                                      Icon="reset_settings" Text="Reset bộ lọc" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
+                                      Style="height: contain; width: contain; font-size: 14px;" />
+                    </RadzenStack>
                 </RadzenStack>
                 <!--Datagrid-->
                 <RadzenStack Style="height: contain; width: 100%; padding-top: 10px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start">
@@ -279,46 +323,168 @@
                                     CellRender="@OnCellRender" FooterCellRender="@HeaderFooterCellRender" Value="@DatagridSeleted" ValueChanged="@((args) => OnDatagridSelectChanged(args))">
 
                         <HeaderTemplate>
-                            <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                                <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                    <!--Button Enable Filter-->
-                                    <RadzenButton Icon="@(filterActive ? "filter_alt" : "filter_alt_off")" Text="Bộ lọc nâng cao" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="@(filterActive ? Shade.Darker : Shade.Lighter)"
-                                                  Style="height: contain; width: contain; font-size: 14px;"
-                                                  Click="@( async () =>
-                                                                {
-                                                                    if (filterActive)
-                                                                    {
-                                                                        await ReLoadTienDoGCPage(TargetTienDoGC.TDGCID.Value, NCID, TargetKHSX.KHSXID.Value);
-                                                                    }
-                                                                    filterActive = !filterActive;
-                                                                })" />
-                                    <!--Button Reset Filter-->
-                                    <RadzenButton Click="@(async () => { keyFilterExtraColumns = new(); keyFilterMainColumns = new(); await ReLoadTienDoGCPage(TargetTienDoGC.TDGCID.Value, NCID, TargetKHSX.KHSXID.Value);})"
-                                                  Icon="reset_settings" Text="Reset bộ lọc" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
-                                                  Style="height: contain; width: contain; font-size: 14px;" />
+                            <RadzenStack Gap="10px" Style="height: 100%; width: 100%" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                <RadzenStack Gap="10px" Style="height: 100%; width: contain; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
 
-                                    <!--Button Reload-->
-                                    <RadzenButton Visible=@(numTDRow >0) Text="Reload" Style="border-radius: 20px; min-width: 100px;" Disabled="@(TargetTienDoGC.TDGCID.Value == null)"
-                                                  Click="@(async() => { keyFilterExtraColumns = new(); keyFilterMainColumns = new(); await ReLoadTienDoGCPage(null, NCID, TargetKHSX.KHSXID.Value); })"
-                                                  IsBusy="@isLoading" BusyText=" Loading..." Icon="autorenew" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />
+                                    <!--Select ngay lam viec-->
+                                    <RadzenStack Gap="5px" Style="height: 100%; width: contain; padding: 0px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                        <RadzenStack Style="width: 100%; height: 50%">
+                                            <RadzenText Text="@($"Chọn ngày")" Style="font-weight: 600; font-size: 15px; font-style: italic;"></RadzenText>
+                                        </RadzenStack>
+                                        <RadzenStack Style="width: 100%; height: 50%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                                            <RadzenDropDown AllowClear="true"
+                                                            Style="width: contain; min-width: 50px; height: 35px; font-size: 14px; border-width: 1px; background-color: white"
+                                                            AllowVirtualization="true"
+                                                            AllowFiltering="true"
+                                                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                                            FilterOperator="StringFilterOperator.Contains"
+                                                            AllowSelectAll="true" Multiple="true"
+                                                            TValue="IEnumerable<KeyValuePair<string, string>>"
+                                                            Data="@(ComboboxTDGC_DSachKeys(TienDoGC.DBName.Ngays))"
+                                                            SelectedItem="TemTienDoGC.NgaysSelected"
+                                                            Value="TemTienDoGC.NgaysSelected"
+                                                            ValueChanged="@((IEnumerable<KeyValuePair<string, string>> args) => OnComboboxTDGC_DSachKeysSelectedChanged(args, TienDoGC.DBName.Ngays))">
+                                                <!--Custom style off dropdownbox items-->
+                                                <Template Context="item">
+                                                    <span style="font-size: 14px; font-weight: 500">
+                                                        @item.Value
+                                                    </span>
+                                                </Template>
 
-                                    <RadzenStack Gap="10px" Style="width: contain; padding-left: 20px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                        <RadzenText Text="Total records" Style="font-size: 16px; height: contain; width: contain;"></RadzenText>
-                                        <RadzenText Text="@($"{TargetTienDoGC.DSachTienDoRows.Count}")" Style="color: black; font-weight: 600; font-size: 16px; height: contain; width: contain;"></RadzenText>
+                                                <!--Custom style off dropdownbox selected value items-->
+                                                <ValueTemplate>
+                                                    <span style="font-size: 14px; font-weight: 500; font-style: normal;">
+                                                        @($"{string.Join(", ", ((IEnumerable<KeyValuePair<string, string>>)context).Select(item => item.Value))}")
+                                                    </span>
+                                                </ValueTemplate>
+                                            </RadzenDropDown>
+                                        </RadzenStack>
                                     </RadzenStack>
-                                </RadzenStack>
-                                <RadzenStack Style="padding-left: 100px" Gap="20px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                    <RadzenStack Gap="10px" Style="width: contain; padding-left: 20px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                        <RadzenText Text="Kế hoạch" Style="font-size: 16px; height: contain; width: contain;"></RadzenText>
-                                        <RadzenText Text="@($"{TargetTienDoGC.FooterSumKeHoach}")" Style="color: black; font-weight: 600; font-size: 16px; height: contain; width: contain;"></RadzenText>
+
+                                    <!--Select may-->
+                                    <RadzenStack Gap="5px" Style="height: 100%; width: contain; padding: 0px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                        @{
+                                            string colName = TemTienDoGC.MMIDs.DBName ?? string.Empty;
+                                        }
+                                        <RadzenStack Style="width: 100%; height: 50%">
+                                            <RadzenText Text="@($"Chọn máy")" Style="font-weight: 600; font-size: 15px; font-style: italic;"></RadzenText>
+                                        </RadzenStack>
+                                        <RadzenStack Style="width: 100%; height: 50%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                                            <RadzenDropDown AllowClear="true"
+                                                            Style="width: contain; min-width: 50px; height: 35px; font-size: 14px; border-width: 1px; background-color: white"
+                                                            AllowVirtualization="true"
+                                                            AllowFiltering="true"
+                                                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                                            FilterOperator="StringFilterOperator.Contains"
+                                                            AllowSelectAll="true" Multiple="true"
+                                                            TValue="IEnumerable<KeyValuePair<string, string>>"
+                                                            Data="@(ComboboxTDGC_DSachKeys(colName))"
+                                                            SelectedItem="TemTienDoGC.MayMocsSelected"
+                                                            Value="TemTienDoGC.MayMocsSelected"
+                                                            ValueChanged="@((IEnumerable<KeyValuePair<string, string>> args) => OnComboboxTDGC_DSachKeysSelectedChanged(args, colName))">
+                                                <!--Custom style off dropdownbox items-->
+                                                <Template Context="item">
+                                                    <span style="font-size: 14px; font-weight: 500">
+                                                        @item.Value
+                                                    </span>
+                                                </Template>
+
+                                                <!--Custom style off dropdownbox selected value items-->
+                                                <ValueTemplate>
+                                                    <span style="font-size: 14px; font-weight: 500; font-style: normal;">
+                                                        @($"{string.Join(", ", ((IEnumerable<KeyValuePair<string, string>>)context).Select(item => item.Value))}")
+                                                    </span>
+                                                </ValueTemplate>
+                                            </RadzenDropDown>
+                                        </RadzenStack>
                                     </RadzenStack>
-                                    <RadzenStack Gap="10px" Style="width: contain; padding-left: 20px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                        <RadzenText Text="Thực tế" Style="font-size: 16px; height: contain; width: contain;"></RadzenText>
-                                        <RadzenText Text="@($"{TargetTienDoGC.FooterSumThucTe}")" Style="color: darkgreen; font-weight: 600; font-size: 16px; height: contain; width: contain;"></RadzenText>
+
+                                    <!--Select nhan vien-->
+                                    <RadzenStack Gap="5px" Style="height: 100%; width: contain; padding: 0px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                        @{
+                                            string colName = TemTienDoGC.NVIDs.DBName ?? string.Empty;
+                                        }
+                                        <RadzenStack Style="width: 100%; height: 50%">
+                                            <RadzenText Text="@($"Chọn nhân viên")" Style="font-weight: 600; font-size: 15px; font-style: italic;"></RadzenText>
+                                        </RadzenStack>
+                                        <RadzenStack Style="width: 100%; height: 50%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                                            <RadzenDropDown AllowClear="true"
+                                                            Style="width: contain; min-width: 50px; max-width: 500px; height: 35px; font-size: 14px; border-width: 1px; background-color: white"
+                                                            AllowVirtualization="true"
+                                                            AllowFiltering="true"
+                                                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                                            FilterOperator="StringFilterOperator.Contains"
+                                                            AllowSelectAll="true" Multiple="true"
+                                                            TValue="IEnumerable<KeyValuePair<string, string>>"
+                                                            Data="@(ComboboxTDGC_DSachKeys(colName))"
+                                                            SelectedItem="TemTienDoGC.NhanviensSelected"
+                                                            Value="TemTienDoGC.NhanviensSelected"
+                                                            ValueChanged="@((IEnumerable<KeyValuePair<string, string>> args) => OnComboboxTDGC_DSachKeysSelectedChanged(args, colName))">
+                                                <!--Custom style off dropdownbox items-->
+                                                <Template Context="item">
+                                                    <span style="font-size: 14px; font-weight: 500">
+                                                        @item.Value
+                                                    </span>
+                                                </Template>
+
+                                                <!--Custom style off dropdownbox selected value items-->
+                                                <ValueTemplate>
+                                                    <span style="font-size: 14px; font-weight: 500; font-style: normal;">
+                                                        @($"{string.Join(", ", ((IEnumerable<KeyValuePair<string, string>>)context).Select(item => item.Value))}")
+                                                    </span>
+                                                </ValueTemplate>
+                                            </RadzenDropDown>
+                                        </RadzenStack>
                                     </RadzenStack>
-                                    <RadzenStack Gap="10px" Style="width: contain; padding-left: 20px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                        <RadzenText Text="NG" Style="font-size: 16px; height: contain; width: contain;"></RadzenText>
-                                        <RadzenText Text="@($"{TargetTienDoGC.FooterSumNG}")" Style="color: darkred; font-weight: 600; font-size: 16px; height: contain; width: contain;"></RadzenText>
+
+                                    <!--Select ca lam viec-->
+                                    <RadzenStack Gap="5px" Style="height: 100%; width: contain; padding: 0px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                        @{
+                                            string colName = TemTienDoGC.CaLamViecs.DBName ?? string.Empty;
+                                        }
+                                        <RadzenStack Style="width: 100%; height: 50%">
+                                            <RadzenText Text="@($"Chọn ca làm việc")" Style="font-weight: 600; font-size: 15px; font-style: italic;"></RadzenText>
+                                        </RadzenStack>
+                                        <RadzenStack Style="width: 100%; height: 50%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                                            <RadzenDropDown AllowClear="true"
+                                                            Style="width: contain; min-width: 50px; height: 35px; font-size: 14px; border-width: 1px; background-color: white"
+                                                            AllowVirtualization="true"
+                                                            AllowFiltering="true"
+                                                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                                            FilterOperator="StringFilterOperator.Contains"
+                                                            AllowSelectAll="true" Multiple="true"
+                                                            TValue="IEnumerable<KeyValuePair<string, string>>"
+                                                            Data="@(ComboboxTDGC_DSachKeys(colName))"
+                                                            SelectedItem="TemTienDoGC.CalamviecsSelected"
+                                                            Value="TemTienDoGC.CalamviecsSelected"
+                                                            ValueChanged="@((IEnumerable<KeyValuePair<string, string>> args) => OnComboboxTDGC_DSachKeysSelectedChanged(args, colName))">
+                                                <!--Custom style off dropdownbox items-->
+                                                <Template Context="item">
+                                                    <span style="font-size: 14px; font-weight: 500">
+                                                        @item.Value
+                                                    </span>
+                                                </Template>
+
+                                                <!--Custom style off dropdownbox selected value items-->
+                                                <ValueTemplate>
+                                                    <span style="font-size: 14px; font-weight: 500; font-style: normal;">
+                                                        @($"{string.Join(", ", ((IEnumerable<KeyValuePair<string, string>>)context).Select(item => item.Value))}")
+                                                    </span>
+                                                </ValueTemplate>
+                                            </RadzenDropDown>
+                                        </RadzenStack>
+                                    </RadzenStack>
+
+                                    <RadzenStack Gap="5px" Style="height: 100%; width: contain; padding: 0px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                        <RadzenStack Style="width: 100%; height: 50%" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                            <RadzenText Text="Thêm vào danh sách" Style="font-weight: 600; font-size: 15px; font-style: italic;"></RadzenText>
+                                        </RadzenStack>
+                                        <RadzenStack Style="width: 100%; height: 50%; height: 35px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                            <RadzenButton Disabled="@(TemTienDoGC.MayMocsSelected == null || TemTienDoGC.NhanviensSelected == null || TemTienDoGC.CalamviecsSelected == null)" Icon="playlist_add" Text="Thêm" Size="ButtonSize.Small"
+                                                          Click="@(async() => await OnButtonThemAutoPress())"
+                                                          ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Variant="Variant.Flat"
+                                                          Style="min-width: 100px; font-size: 15px; font-weight: 600; border-radius: 20px;" />
+                                        </RadzenStack>
                                     </RadzenStack>
                                 </RadzenStack>
                             </RadzenStack>
@@ -491,24 +657,418 @@
     private Dictionary<string, List<string>> keyFilterExtraColumns = new();
     private bool filterActive = false;
 
+    ////
+    // MMIDs/MMIDs
+    private List<MayMoc> dsachMayMocs = new();
+    private List<NhanVien> dsachNhanViens = new();
+
+
     protected async override Task OnInitializedAsync()
     {
+        dsachMayMocs = SQLServerServices.GetDanhSachMayMoc();
+        dsachNhanViens = SQLServerServices.GetDanhSachNhanVien();
+
         // Load tien do gia cong by khsxid/ncid/spid
         await ReLoadTienDoGCPage(ncid: NCID, khsxid: TargetKHSX.KHSXID.Value);
 
         await base.OnInitializedAsync();
     }
 
+    #region Auto Generate TienDoGCRow - V2
+
+    private TienDoGC TemTienDoGC = new();
+
+    // Get list Keys
+    private IEnumerable<KeyValuePair<string, string>> ComboboxTDGC_DSachKeys(string? colName)
+    {
+        IEnumerable<KeyValuePair<string, string>> results = new List<KeyValuePair<string, string>>();
+
+        if (colName == TienDoGC.DBName.MMIDs)
+        {
+            results = dsachMayMocs
+                    .Where(item => item.MMID.Value != null)
+                    .Select(item => new KeyValuePair<string, string>(
+                        item.MMID.Value?.ToString() ?? string.Empty,
+                        $"{item.MaMay.Value?.ToString()?.Trim()}"
+                    ))
+                    .Where(x => !string.IsNullOrEmpty(x.Value) && !string.IsNullOrEmpty(x.Key))
+                    .Distinct();
+        }
+        else if (colName == TienDoGC.DBName.NVIDs)
+        {
+            results = dsachNhanViens
+                    .Where(item => item.NVID.Value != null)
+                    .Select(item => new KeyValuePair<string, string>(
+                        item.NVID.Value?.ToString() ?? string.Empty,
+                        $"{item.MaNhanVien.Value?.ToString()?.Trim()} ({item.GetThongTinNhanVienByName("Tên nhân viên").GiaTri.Value?.ToString()?.Trim()})"
+                    ))
+                    .Where(x => !string.IsNullOrEmpty(x.Value) && !string.IsNullOrEmpty(x.Key))
+                    .Distinct();
+        }
+        else if (colName == TienDoGC.DBName.CaLamViecs)
+        {
+            results = Common.ListCaLamViecs
+                    .Where(item => !string.IsNullOrEmpty(item))
+                    .Select(item => new KeyValuePair<string, string>(item, item))
+                    .Where(x => !string.IsNullOrEmpty(x.Value) && !string.IsNullOrEmpty(x.Key))
+                    .Distinct();
+        }
+        else if (colName == TienDoGC.DBName.Ngays)
+        {
+            bool startdayok = DateTime.TryParse(TargetTienDoGC.NgayBatDau.Value?.ToString(), out DateTime ngaybatdau);
+            bool enddayok = DateTime.TryParse(TargetTienDoGC.NgayKetThuc.Value?.ToString(), out DateTime ngayketthuc);
+
+            // GenerateList Day
+            List<string> rangedates = new();
+
+            for (DateTime date = ngaybatdau; date <= ngayketthuc; date = date.AddDays(1))
+            {
+                rangedates.Add(date.ToString());
+            }
+
+            results = rangedates
+                    .Where(item => !string.IsNullOrEmpty(item))
+                    .Select(item => new KeyValuePair<string, string>(item, DateTime.Parse(item.ToString()).ToString(Common.FormatNoTime_ddMMyyyy)))
+                    .Where(x => !string.IsNullOrEmpty(x.Value) && !string.IsNullOrEmpty(x.Key))
+                    .Distinct();
+        }
+        return results;
+    }
+
+    // Select Keys changed
+    private async Task OnComboboxTDGC_DSachKeysSelectedChanged(IEnumerable<KeyValuePair<string, string>> selectedValues, string propertyName)
+    {
+        if (propertyName == TienDoGC.DBName.MMIDs)
+        {
+            if (selectedValues != null && selectedValues.Any())
+            {
+                var selectedMMids = selectedValues.Select(vl => vl.Key).ToHashSet();
+
+                var targetItems = dsachMayMocs.Where(mm =>
+                {
+                    var nvid = mm.MMID.Value?.ToString()?.Trim() ?? string.Empty;
+                    return selectedMMids.Contains(nvid);
+                });
+
+                if (targetItems.Any())
+                {
+                    TemTienDoGC.MayMocsSelected = selectedValues.ToList();
+
+                    // TemTienDoGC.SelectedMayMocs.AddRange(targetItems);
+
+                    TemTienDoGC.MMIDs.Value = string.Join(",", targetItems
+                                            .Select(nv => nv.MMID.Value?.ToString()?.Trim() ?? string.Empty)
+                                            .Where(id => !string.IsNullOrEmpty(id)));
+                }
+                else TemTienDoGC.MMIDs.Value = null;
+            }
+            else
+            {
+                TemTienDoGC.MayMocsSelected = null;
+
+                // TemTienDoGC.SelectedMayMocs = new();
+
+                TemTienDoGC.MMIDs.Value = null;
+            }
+        }
+        else if (propertyName == TienDoGC.DBName.NVIDs)
+        {
+            if (selectedValues != null && selectedValues.Any())
+            {
+                var selectedNvids = selectedValues.Select(vl => vl.Key).ToHashSet();
+
+                var targetItems = dsachNhanViens.Where(nv =>
+                {
+                    var nvid = nv.NVID.Value?.ToString()?.Trim() ?? string.Empty;
+                    return selectedNvids.Contains(nvid);
+                });
+
+                if (targetItems.Any())
+                {
+                    TemTienDoGC.NhanviensSelected = selectedValues.ToList();
+
+                    // TemTienDoGC.SelectedNhanViens.AddRange(targetItems);
+
+                    TemTienDoGC.NVIDs.Value = string.Join(",", targetItems
+                                            .Select(nv => nv.NVID.Value?.ToString()?.Trim() ?? string.Empty)
+                                            .Where(id => !string.IsNullOrEmpty(id)));
+                }
+                else TemTienDoGC.NVIDs.Value = null;
+            }
+            else
+            {
+                TemTienDoGC.NhanviensSelected = null;
+
+                // TemTienDoGC.SelectedNhanViens = new();
+
+                TemTienDoGC.NVIDs.Value = null;
+            }
+        }
+        else if (propertyName == TienDoGC.DBName.CaLamViecs)
+        {
+            if (selectedValues != null && selectedValues.Any())
+            {
+                var selected_ids = selectedValues.Select(vl => vl.Key).ToHashSet();
+
+                var targetItems = Common.ListCaLamViecs.Where(ca =>
+                {
+                    return selected_ids.Contains(ca);
+                });
+
+                if (targetItems.Any())
+                {
+                    TemTienDoGC.CalamviecsSelected = selectedValues.ToList();
+
+                    // TemTienDoGC.SelectedCaLamViecs.AddRange(targetItems);
+
+                    TemTienDoGC.CaLamViecs.Value = string.Join(",", targetItems
+                                            .Select(ca => ca ?? string.Empty)
+                                            .Where(ca => !string.IsNullOrEmpty(ca)));
+                }
+                else TemTienDoGC.CaLamViecs.Value = null;
+            }
+            else
+            {
+                TemTienDoGC.CalamviecsSelected = null;
+
+                // TemTienDoGC.SelectedCaLamViecs = new();
+
+                TemTienDoGC.CaLamViecs.Value = null;
+            }
+        }
+        else if (propertyName == TienDoGC.DBName.Ngays)
+        {
+            if (selectedValues != null && selectedValues.Any())
+            {
+                bool startdayok = DateTime.TryParse(TargetTienDoGC.NgayBatDau.Value?.ToString(), out DateTime ngaybatdau);
+                bool enddayok = DateTime.TryParse(TargetTienDoGC.NgayKetThuc.Value?.ToString(), out DateTime ngayketthuc);
+
+                // GenerateList Day
+                List<string> rangedates = new();
+
+                for (DateTime date = ngaybatdau; date <= ngayketthuc; date = date.AddDays(1))
+                {
+                    rangedates.Add(date.ToString(Common.FormatNoTime_ddMMyyyy));
+                }
+
+                var selected_days = selectedValues.Select(vl => vl.Value).ToHashSet();
+
+                var targetItems = rangedates.Where(ngay =>
+                {
+                    return selected_days.Contains(ngay);
+                });
+
+                if (targetItems.Any())
+                {
+                    TemTienDoGC.NgaysSelected = selectedValues.ToList();
+                }
+            }
+            else
+            {
+                TemTienDoGC.NgaysSelected = null;
+            }
+        }
+        await Task.Delay(1);
+    }
+
+    // Extract from List [',']
+    private IEnumerable<KeyValuePair<string, string>> GetKeyValuePairsForPropertyValue(Propertyy propertyy)
+    {
+        IEnumerable<KeyValuePair<string, string>> results = new List<KeyValuePair<string, string>>();
+
+        string colName = propertyy.DBName ?? string.Empty;
+
+        if (colName == TienDoGC.DBName.MMIDs)
+        {
+            var mmids = propertyy.Value?.ToString()?.Trim().Split(",");
+
+            if (mmids != null)
+            {
+                results = dsachMayMocs
+                    .Where(item => item.MMID.Value != null && mmids.Contains(item.MMID.Value?.ToString()?.Trim()))
+                    .Select(item => new KeyValuePair<string, string>(
+                        item.MMID.Value?.ToString() ?? string.Empty,
+                        $"{item.MaMay.Value?.ToString()?.Trim()}"
+                    ))
+                    .Where(x => !string.IsNullOrEmpty(x.Value) && !string.IsNullOrEmpty(x.Key))
+                    .Distinct();
+            }
+        }
+        else if (colName == TienDoGC.DBName.NVIDs)
+        {
+            var nvids = propertyy.Value?.ToString()?.Trim().Split(",");
+
+            if (nvids != null)
+            {
+                results = dsachNhanViens
+                        .Where(item => item.NVID.Value != null && nvids.Contains(item.NVID.Value?.ToString()?.Trim()))
+                        .Select(item => new KeyValuePair<string, string>(
+                            item.NVID.Value?.ToString() ?? string.Empty,
+                            $"{item.MaNhanVien.Value?.ToString()?.Trim()} ({item.GetThongTinNhanVienByName("Tên nhân viên").GiaTri.Value?.ToString()?.Trim()})"
+                        ))
+                        .Where(x => !string.IsNullOrEmpty(x.Value) && !string.IsNullOrEmpty(x.Key))
+                        .Distinct();
+            }
+        }
+        else if (colName == TienDoGC.DBName.CaLamViecs)
+        {
+            var calamviecs = propertyy.Value?.ToString()?.Trim().Split(",");
+
+            if (calamviecs != null)
+            {
+                results = Common.ListCaLamViecs
+                        .Where(item => !string.IsNullOrEmpty(item) && calamviecs.Contains(item.Trim()))
+                        .Select(item => new KeyValuePair<string, string>(item, item))
+                        .Where(x => !string.IsNullOrEmpty(x.Value) && !string.IsNullOrEmpty(x.Key))
+                        .Distinct();
+            }
+        }
+
+        return results;
+    }
+
+    // Save TienDoGC - and generate TienDoGCRow - auto
+    private async Task OnSaveNewTienDoGC()
+    {
+        bool startdayok = DateTime.TryParse(TargetTienDoGC.NgayBatDau.Value?.ToString(), out DateTime ngaybatdau);
+        bool enddayok = DateTime.TryParse(TargetTienDoGC.NgayKetThuc.Value?.ToString(), out DateTime ngayketthuc);
+
+        if (startdayok == false || enddayok == false)
+        {
+            await DialogService.Alert($"Hãy nhập ngày bắt đầu/ngày kết thúc", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+            return;
+        }
+
+        bool? confirm = await DialogService.Confirm("Lưu kế hoạch theo dõi tiến độ?", "Xác nhận", new ConfirmOptions() { OkButtonText = "OK", CancelButtonText = "Hủy", ShowClose = false });
+
+        if (confirm.Value)
+        {
+            // Check required fields of TienDoGC
+
+            // Insert into DB
+            (int tdgcid, string error) = SQLServerServices.InsertTienDoGC(TargetTienDoGC);
+
+            if (tdgcid > 0)
+            {
+                isEditing = false;
+
+                TargetTienDoGC.TDGCID.Value = tdgcid;
+
+                ShowNotification("Success!", NotificationSeverity.Success, 2000);
+
+                await ReLoadTienDoGCPage(tdgcid, NCID, TargetKHSX.KHSXID.Value);
+            }
+            else
+            {
+                await DialogService.Alert($"{error}", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+            }
+        }
+    }
+
+    private async Task OnButtonThemAutoPress()
+    {
+        TemTienDoGC.TDGCID.Value = TargetTienDoGC.TDGCID.Value;
+        TemTienDoGC.NCID.Value = TargetTienDoGC.NCID.Value;
+        TemTienDoGC.SPID.Value = TargetTienDoGC.SPID.Value;
+
+        await HandleAutoCreateTiendoGCRows_V2(TemTienDoGC);
+    }
+
+    private async Task HandleAutoCreateTiendoGCRows_V2(TienDoGC tienDoGC)
+    {
+        List<TienDoGCRow> tienDoGCRows = new();
+
+        tienDoGCRows =
+              (from day in tienDoGC.NgaysSelected?.Select(n => n.Key).ToList() ?? new()
+               from may in tienDoGC.MMIDs.Value?.ToString()?.Trim().Split(",").ToList() ?? new()
+               from nhanvien in tienDoGC.NVIDs.Value?.ToString()?.Trim().Split(",").ToList() ?? new()
+               from ca in tienDoGC.CaLamViecs.Value?.ToString()?.Trim().Split(",").ToList() ?? new()
+               select new TienDoGCRow
+                   {
+                       TDGCID = { Value = tienDoGC.TDGCID.Value },
+                       NgayGC = { Value = day },
+                       CaLamViec = { Value = ca },
+                       MMID = { Value = may },
+                       NCID = { Value = tienDoGC.NCID.Value },
+                       NVIDs = { Value = nhanvien },
+                       SPID = { Value = tienDoGC.SPID.Value },
+                       KeHoach = { Value = 0 },
+                       ThoiGianGiaCong = { Value = 0 },
+                       ThoiGianLamViec = { Value = 0 },
+                       GhiChu = { Value = DBNull.Value }
+                   }).ToList();
+
+        // Insert newTDGCRow for tienDoGC into DB
+        foreach (var tiendorow in tienDoGCRows)
+        {
+            if (int.TryParse(tiendorow.TDGCID.Value?.ToString(), out int _tdgcid))
+            {
+                if (_tdgcid > 0)
+                {
+                    // Check existing TienDGCRow
+
+                    Dictionary<string, object?> pars = new();
+                    pars.Add(TienDoGCRow.DBName.TDGCID, tiendorow.TDGCID.Value);
+                    pars.Add(TienDoGCRow.DBName.NCID, tiendorow.NCID.Value);
+                    pars.Add(TienDoGCRow.DBName.NgayGC, tiendorow.NgayGC.Value);
+                    pars.Add(TienDoGCRow.DBName.MMID, tiendorow.MMID.Value);
+                    pars.Add(TienDoGCRow.DBName.NVIDs, tiendorow.NVIDs.Value);
+                    pars.Add(TienDoGCRow.DBName.CaLamViec, tiendorow.CaLamViec.Value);
+
+                    List<TienDoGCRow> tdgcrows = SQLServerServices.GetListTienDoGCRow(pars).Item1;
+
+                    if (tdgcrows.Any() == false)
+                    {
+                        (int newtdgcrowID, string error) = SQLServerServices.InsertSingleTienDoGCRow(_tdgcid, tiendorow);
+
+                        if (newtdgcrowID > 0)
+                        {
+
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                    else
+                    {
+
+                    }
+                }
+            }
+        }
+
+        await ReLoadTienDoGCPage(tienDoGC.TDGCID.Value, NCID, TargetKHSX.KHSXID.Value);
+
+        ShowNotification("Thêm thành công!", NotificationSeverity.Success, 1000);
+    }
+
+
+    #endregion
+
     // Lay danh sach key search Main column
-    private List<string> GetMainColumnKeysSearch(string targetColumn)
+    private List<string> GetMainColumnKeysSearch(string? targetColumn)
     {
         List<string> keys = new();
+
+        if (string.IsNullOrEmpty(targetColumn?.Trim()))
+        {
+            return keys;
+        }
 
         if (targetColumn == TienDoGCRow.DBName.SPID || targetColumn == TienDoGCRow.DBName.MMID || targetColumn == TienDoGCRow.DBName.NCID || targetColumn == TienDoGCRow.DBName.NVIDs)
         {
             // Convert ID to stringValue
             keys = DSachTienDoGCRowsBase
             .Select(nv => GetColumnValueByID(nv.GetPropertyValue(targetColumn), targetColumn) ?? string.Empty)
+            .Where(result => !string.IsNullOrEmpty(result)).Distinct()
+            .ToList();
+        }
+        else if (targetColumn == TienDoGCRow.DBName.NgayGC)
+        {
+            keys = DSachTienDoGCRowsBase
+            .Select(nv => nv.GetPropertyValue(targetColumn)?.ToString() ?? string.Empty)
+            .Select(rs => (DateTime.TryParse(rs, out DateTime smd) ? smd.ToString(Common.FormatNoTime_ddMMyyyy) : string.Empty))
             .Where(result => !string.IsNullOrEmpty(result)).Distinct()
             .ToList();
         }
@@ -562,6 +1122,16 @@
                             {
                                 var value = nv.GetPropertyValue(column.Key);
                                 var valueString = GetColumnValueByID(value, column.Key);
+                                return valueString != null && selectedkeys.Contains(valueString);
+                            }).ToList();
+                    }
+                    else if (column.Key == TienDoGCRow.DBName.NgayGC)
+                    {
+                        TargetTienDoGC.DSachTienDoRows = TargetTienDoGC.DSachTienDoRows
+                            .Where(nv =>
+                            {
+                                var value = nv.GetPropertyValue(column.Key);
+                                string valueString = (DateTime.TryParse(value?.ToString(), out DateTime ngaygc) ? ngaygc.ToString(Common.FormatNoTime_ddMMyyyy) : string.Empty);
                                 return valueString != null && selectedkeys.Contains(valueString);
                             }).ToList();
                     }
@@ -754,7 +1324,7 @@
         }
     }
 
-    private async Task OnSaveNewTienDoGC()
+    private async Task OnSaveNewTienDoGCForAllCongDoan()
     {
         bool startdayok = DateTime.TryParse(TargetTienDoGC.NgayBatDau.Value?.ToString(), out DateTime ngaybatdau);
         bool enddayok = DateTime.TryParse(TargetTienDoGC.NgayKetThuc.Value?.ToString(), out DateTime ngayketthuc);
@@ -848,6 +1418,10 @@
                     if (firtResult != null)
                     {
                         TargetTienDoGC = firtResult;
+
+                        TargetTienDoGC.NhanviensSelected = GetKeyValuePairsForPropertyValue(TargetTienDoGC.NVIDs);
+                        TargetTienDoGC.MayMocsSelected = GetKeyValuePairsForPropertyValue(TargetTienDoGC.MMIDs);
+                        TargetTienDoGC.CalamviecsSelected = GetKeyValuePairsForPropertyValue(TargetTienDoGC.CaLamViecs);
 
                         if (TargetTienDoGC.DSachTienDoRows.Any())
                         {
@@ -980,7 +1554,7 @@
 
             if (isOK)
             {
-                await DialogService.Alert($"Xóa thành công!", "<strong><span style='color: green'>Success!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+                ShowNotification("Xóa thành công!", NotificationSeverity.Success, 2000);
 
                 await ReLoadTienDoGCPage(ncid: NCID, khsxid: TargetKHSX.KHSXID.Value);
             }
@@ -1168,6 +1742,8 @@
             ShowNotification("Deleted!", NotificationSeverity.Success, 2000);
         }
     }
+
+
 
     // Notification
     void ShowNotification(string message, NotificationSeverity notifytype, double time)

@@ -9804,11 +9804,77 @@ namespace ProcessManagement.Services.SQLServer
                 catch (Exception ex)
                 {
                     // Log the exception or handle it as appropriate
-                    Console.WriteLine($"Error in GetListDongThung: {ex.Message}");
+                    Console.WriteLine($"Error: {ex.Message}");
                 }
             }
             return listTienDoGCRow;
         }
+
+        public (List<TienDoGCRow>, string) GetListTienDoGCRow(Dictionary<string, object?> parameters, bool isgetAll = false)
+        {
+            List<TienDoGCRow> listTienDoGCRow = new();
+
+            string errorMessage = string.Empty;
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                try
+                {
+                    connection.Open();
+
+                    var conditions = new List<string>();
+                    var command = connection.CreateCommand();
+                    command.CommandText = $"SELECT * FROM [{TienDoGCRow.DBName.Table_TienDoGCRow}]";
+
+                    if (!isgetAll)
+                    {
+                        // Process each parameter in the dictionary
+                        foreach (var param in parameters)
+                        {
+                            conditions.Add($"[{param.Key}] = @{param.Key}");
+
+                            command.Parameters.AddWithValue($"@{param.Key}", param.Value);
+                        }
+
+                        if (conditions.Any())
+                        {
+                            command.CommandText += " WHERE " + string.Join(" AND ", conditions);
+                        }
+                    }
+
+                    using var reader = command.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        TienDoGCRow tiendoGCrow = new();
+
+                        List<Propertyy> rowItems = tiendoGCrow.GetPropertiesValues();
+
+                        foreach (var item in rowItems)
+                        {
+                            string? columnName = item.DBName;
+
+                            if (!string.IsNullOrEmpty(columnName) && reader.GetOrdinal(columnName) != -1)
+                            {
+                                object columnValue = reader[columnName];
+
+                                item.Value = columnValue == DBNull.Value ? null : columnValue;
+                            }
+                        }
+                        
+                        listTienDoGCRow.Add(tiendoGCrow);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    errorMessage = $"Error: {ex.Message}";
+                    listTienDoGCRow.Clear(); // Clear the list in case of error
+                }
+            }
+            return (listTienDoGCRow, errorMessage);
+        }
+
+
         #endregion
 
         // ------------------------------------------------------------------------------------- //

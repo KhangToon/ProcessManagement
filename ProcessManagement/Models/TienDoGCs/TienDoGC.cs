@@ -1,4 +1,6 @@
 ﻿using ProcessManagement.Commons;
+using ProcessManagement.Models.MAYMOC;
+using ProcessManagement.Models.NHANVIEN;
 using System.Reflection;
 
 namespace ProcessManagement.Models.TienDoGCs
@@ -22,6 +24,16 @@ namespace ProcessManagement.Models.TienDoGCs
         public Propertyy ThoiGianTangCa { get; set; } = new() { DBName = DBName.ThoiGianTangCa, DisplayName = DispName.ThoiGianTangCa, Type = typeof(double), AlowDatabase = true, AlowDisplay = true };
         public Propertyy TiLeNG_CD { get; set; } = new() { DBName = DBName.TiLeNG_CD, DisplayName = DispName.TiLeNG_CD, Type = typeof(double), AlowDatabase = true };
         public Propertyy TiLeNG_TT { get; set; } = new() { DBName = DBName.TiLeNG_TT, DisplayName = DispName.TiLeNG_TT, Type = typeof(double), AlowDatabase = true };
+
+        public Propertyy MMIDs { get; set; } = new() { DBName = DBName.MMIDs, DisplayName = DispName.MMIDs, Type = typeof(string), AlowDatabase = true, CheckErrors = new() { Propertyy.ErrType.NotEmptyValue } };
+        public Propertyy NVIDs { get; set; } = new() { DBName = DBName.NVIDs, DisplayName = DispName.NVIDs, Type = typeof(string), AlowDatabase = true, CheckErrors = new() { Propertyy.ErrType.NotEmptyValue } };
+        public Propertyy CaLamViecs { get; set; } = new() { DBName = DBName.CaLamViecs, DisplayName = DispName.CaLamViecs, Type = typeof(string), AlowDatabase = true };
+
+        // Selected item changed
+        public IEnumerable<KeyValuePair<string, string>>? MayMocsSelected;
+        public IEnumerable<KeyValuePair<string, string>>? NhanviensSelected;
+        public IEnumerable<KeyValuePair<string, string>>? CalamviecsSelected;
+        public IEnumerable<KeyValuePair<string, string>>? NgaysSelected;
 
         public List<TienDoGCRow> DSachTienDoRows { get; set; } = new();
 
@@ -128,6 +140,10 @@ namespace ProcessManagement.Models.TienDoGCs
             public const string ThoiGianTangCa = "thoigiantangca";
             public const string TiLeNG_CD = "tile_ngcd";
             public const string TiLeNG_TT = "tile_ngtt";
+            public const string MMIDs = "MMIDs";
+            public const string NVIDs = "NVIDs";
+            public const string CaLamViecs = "calamviecs";
+            public const string Ngays = "ngays";
         }
 
         public static class DispName
@@ -150,6 +166,10 @@ namespace ProcessManagement.Models.TienDoGCs
             public const string ThoiGianTangCa = "Thời gian tăng ca";
             public const string TiLeNG_CD = "% NG CĐ";
             public const string TiLeNG_TT = "% NG TT";
+            public const string MMIDs = "MMIDs";
+            public const string NVIDs = "NVIDs";
+            public const string CaLamViecs = "Ca làm việc";
+            public const string Ngays = "ngays";
         }
     }
 }
