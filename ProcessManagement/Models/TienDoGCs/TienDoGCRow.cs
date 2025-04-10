@@ -14,15 +14,15 @@ namespace ProcessManagement.Models.TienDoGCs
         public Propertyy NCID { get; set; } = new() { DBName = DBName.NCID, DisplayName = DispName.NCID, Type = typeof(int), AlowDatabase = true };
         public Propertyy MMID { get; set; } = new() { DBName = DBName.MMID, DisplayName = DispName.MMID, Type = typeof(int), AlowDatabase = true };
         public Propertyy CaLamViec { get; set; } = new() { DBName = DBName.CaLamViec, DisplayName = DispName.CaLamViec, Type = typeof(string), AlowDatabase = true };
-        public Propertyy ThoiGianGiaCong { get; set; } = new() { DBName = DBName.ThoiGianGiaCong, DisplayName = DispName.ThoiGianGiaCong, Type = typeof(int), AlowDatabase = true };
-        public Propertyy ThoiGianLamViec { get; set; } = new() { DBName = DBName.ThoiGianLamViec, DisplayName = DispName.ThoiGianLamViec, Type = typeof(double), AlowDatabase = true };
         public Propertyy NVIDs { get; set; } = new() { DBName = DBName.NVIDs, DisplayName = DispName.DSTenNV, Type = typeof(string), AlowDatabase = true, CheckErrors = new() { Propertyy.ErrType.NotEmptyValue } };
         public Propertyy KeHoach { get; set; } = new() { DBName = DBName.KeHoach, DisplayName = DispName.KeHoach, Type = typeof(int), AlowDatabase = true };
         public Propertyy ThucTe { get; set; } = new() { DBName = DBName.ThucTe, DisplayName = DispName.ThucTe, Type = typeof(int), AlowDatabase = true, AlowDisplay = false };
         public Propertyy SLNG { get; set; } = new() { DBName = DBName.SLNG, DisplayName = DispName.SLNG, Type = typeof(int), AlowDatabase = true, AlowDisplay = false };
         public Propertyy TienDo { get; set; } = new() { DBName = DBName.TienDo, DisplayName = DispName.TienDo, Type = typeof(int), AlowDatabase = true, AlowDisplay = false };
-        public Propertyy TiLeNG_CD { get; set; } = new() { DBName = DBName.TiLeNG_CD, DisplayName = DispName.TiLeNG_CD, Type = typeof(double), AlowDatabase = true, AlowDisplay = false };
-        public Propertyy TiLeNG_TT { get; set; } = new() { DBName = DBName.TiLeNG_TT, DisplayName = DispName.TiLeNG_TT, Type = typeof(double), AlowDatabase = true, AlowDisplay = false };
+        public Propertyy ThoiGianGiaCong { get; set; } = new() { DBName = DBName.ThoiGianGiaCong, DisplayName = DispName.ThoiGianGiaCong, Type = typeof(int), AlowDatabase = true };
+        public Propertyy ThoiGianLamViec { get; set; } = new() { DBName = DBName.ThoiGianLamViec, DisplayName = DispName.ThoiGianLamViec, Type = typeof(double), AlowDatabase = true };
+        //public Propertyy TiLeNG_CD { get; set; } = new() { DBName = DBName.TiLeNG_CD, DisplayName = DispName.TiLeNG_CD, Type = typeof(double), AlowDatabase = true, AlowDisplay = false };
+        //public Propertyy TiLeNG_TT { get; set; } = new() { DBName = DBName.TiLeNG_TT, DisplayName = DispName.TiLeNG_TT, Type = typeof(double), AlowDatabase = true, AlowDisplay = false };
         public Propertyy GhiChu { get; set; } = new() { DBName = DBName.GhiChu, DisplayName = DispName.GhiChu, Type = typeof(string), AlowDatabase = true, CheckErrors = new() { } };
 
         public List<NhanVien> DSNhanVien { get; set; } = new();

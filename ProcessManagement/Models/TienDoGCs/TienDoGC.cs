@@ -34,6 +34,8 @@ namespace ProcessManagement.Models.TienDoGCs
         public IEnumerable<KeyValuePair<string, string>>? NhanviensSelected;
         public IEnumerable<KeyValuePair<string, string>>? CalamviecsSelected;
         public IEnumerable<KeyValuePair<string, string>>? NgaysSelected;
+        public object? ThoiGianGiaCong { get; set; } // Dung cho add-multi auto TienDoRow
+        public object? ThoiGianLamViec { get; set; } // Dung cho add-multi auto TienDoRow
 
         public List<TienDoGCRow> DSachTienDoRows { get; set; } = new();
 

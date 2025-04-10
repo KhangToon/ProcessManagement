@@ -16,7 +16,7 @@
 @inject SQLServerServices SQLServerServices
 @inject NavigationManager NavigationManager
 
-<RadzenSelectBar Value="@selectBarIndex" ValueChanged="@( async (args) => {await OnSelectBarValueChanged(args);})" TValue="int" Style="margin-bottom: 15px">
+<RadzenSelectBar Value="@selectBarIndex" ValueChanged="@( async (args) => {await OnSelectBarValueChanged(args);})" TValue="int" Style="padding: 0; margin-bottom: 0">
     <Items>
         <RadzenSelectBarItem Text="PHIẾU THEO DÕI GIA CÔNG" Style="font-weight: 600; font-size: 16px;" Value="-1"></RadzenSelectBarItem>
 
@@ -27,21 +27,14 @@
     </Items>
 </RadzenSelectBar>
 
-<RadzenStack Visible="@(selectBarIndex == -1)">
+<RadzenStack Visible="@(selectBarIndex == -1)" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
     <KetQuaGiaCong TargetKHSX="@TargetKHSX"></KetQuaGiaCong>
 </RadzenStack>
 
-@* @foreach (var item in SelectBarItems)
-{
-    <RadzenStack Visible="@(selectBarIndex == item.Key)">
-        <TienDoGiaCong TargetKHSX="@TargetKHSX" NCID="@SelectBarItems[selectBarIndex].NCID.Value" SPID="@TargetKHSX.SPID.Value"></TienDoGiaCong>
-    </RadzenStack>
-} *@
-
-@if (selectBarIndex != -1 && isloading == false)
-{
+<RadzenStack Visible="@(selectBarIndex != -1 && isloading == false)" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
     <TienDoGiaCong TargetKHSX="@TargetKHSX" NCID="@SelectBarItems[selectBarIndex].NCID.Value" SPID="@TargetKHSX.SPID.Value"></TienDoGiaCong>
-}
+</RadzenStack>
+
 
 @code {
 

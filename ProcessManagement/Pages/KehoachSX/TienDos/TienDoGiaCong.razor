@@ -32,10 +32,12 @@
 
 <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style=" height: 100%; width: 100%; padding: 0px; padding-bottom: 10px " AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
     <!--Header-->
-    <RadzenStack Gap="30px" Style="height: contain; width: 100%; background-color: var(--rz-success-lighter); padding: 10px; padding-top: 15px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-        <RadzenText Text="@($"THEO DÕI TIẾN ĐỘ KẾ HOẠCH SẢN XUẤT {TargetTienDoGC.MaSanPham}")" Style="color: green; font-weight: 600; font-size: 20px"></RadzenText>
-        <RadzenText Text="@($"Công đoạn:")" Style="color: green; font-weight: 600; font-size: 20px"></RadzenText>
-        <RadzenText Text="@($"{TargetTienDoGC.TenCongDoan.ToUpper()}")" Style="color: black; font-weight: 600; font-size: 22px"></RadzenText>
+    <RadzenStack Gap="10px" Style="height: contain; width: 100%; background-color: var(--rz-success-lighter); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+        <RadzenText Text="@($"THEO DÕI TIẾN ĐỘ KẾ HOẠCH SẢN XUẤT")" Style="color: black; font-weight: 600; font-size: 20px;"></RadzenText>
+        <RadzenText Text="@($"Sản phẩm:")" Style="color: gray; font-weight: 600; font-size: 18px; padding-left: 30px"></RadzenText>
+        <RadzenText Text="@($"{TargetTienDoGC.MaSanPham}")" Style="color: black; font-weight: 600; font-size: 22px; padding-left: 10px"></RadzenText>
+        <RadzenText Text="@($"Công đoạn:")" Style="color: gray; font-weight: 600; font-size: 18px; padding-left: 40px"></RadzenText>
+        <RadzenText Text="@($"{TargetTienDoGC.TenCongDoan.ToUpper()}")" Style="color: black; font-weight: 600; font-size: 22px; padding-left: 10px"></RadzenText>
     </RadzenStack>
     <RadzenCard Style="width: 100%; height: contain; padding-top: 5px; padding-bottom: 5px" Variant="Variant.Outlined">
         <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding: 10px; overflow: auto" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
@@ -230,7 +232,7 @@
             </RadzenRow>
             <!--Reset tiendo-->
             <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding: 0px; padding-top: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                <RadzenButton Visible="@(TargetTienDoGC.TDGCID.Value == null && !isEditing)" Style="width: contain;" Text="Tạo kế hoạch theo dõi" Click="@(() => isEditing = true)" Icon="add" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Base" Variant="Variant.Flat" Shade="Shade.Lighter"></RadzenButton>
+                <RadzenButton Visible="@(TargetTienDoGC.TDGCID.Value == null && !isEditing)" Style="width: contain; color: darkgreen; font-weight: 600; font-size: 16px" Text="Tạo kế hoạch theo dõi" Click="@(() => isEditing = true)" Icon="add" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Base" Variant="Variant.Flat" Shade="Shade.Lighter"></RadzenButton>
                 <RadzenButton Visible="@(TargetTienDoGC.TDGCID.Value != null && !isEditing)" Style="width: contain; color: red" Text="Xóa kế hoạch theo dõi" Click="@(() => OnDeleteTienDoGC(TargetTienDoGC))" Icon="remove" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Base" Variant="Variant.Flat" Shade="Shade.Lighter"></RadzenButton>
 
                 <!--Button them tiendogcrow-->
@@ -245,7 +247,7 @@
     </RadzenCard>
 
     <!--Body-->
-    <RadzenRow Gap="10px" Style=" width: 100%; border-top: var(--rz-grid-cell-border); padding: 10px;">
+    <RadzenRow Gap="10px" Style="width: 100%;">
         <!--Theo doi tien do gia cong-->
         <RadzenColumn Size="12" SizeMD="12" Style="height: contain; width: 100%;">
             <RadzenStack Gap="0px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start" Style="height: 100%; width: 100%;">
@@ -254,42 +256,28 @@
                 }
                 <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween" Style="height: contain; width: 100%;">
                     <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: contain; width: contain;">
-                        <!--Button them tiendogcrow-->
-                        <RadzenButton Disabled="@(TargetKHSX.isDonePXK == false || TargetKHSX.isReturnedNVL || TargetTienDoGC.TDGCID.Value == null)" Click="OnThemMoiTienDoGCRow" Icon="add" Text="Thêm từng dòng" Size="ButtonSize.Small"
-                                      ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Variant="Variant.Flat"
-                                      Style="min-width: 100px; font-size: 15px; font-weight: 600; border-radius: 20px;" />
 
                         <RadzenButton Visible=false Text="@((numTDRow == 0)? "Tự động tạo" : "Tạo lại danh sách")" Style="border-radius: 20px; min-width: 100px; font-size: 15px; font-weight: 600;" Disabled="@(TargetTienDoGC.TDGCID.Value == null)"
                                       Click="@(async() => { await ButtonAutoCreateTiendoGCRows(); })" Shade="Shade.Lighter" Variant="Variant.Flat"
                                       IsBusy="@autoCreating" BusyText=" Creating..." Icon="docs_add_on" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />
 
-                        <RadzenButton Visible=@(numTDRow >0) Text="Delete all" Style="border-radius: 20px; min-width: 100px; font-size: 15px; font-weight: 600;" Disabled="@(TargetTienDoGC.TDGCID.Value == null)"
-                                      Click="@(async() => { await DeleteAllTienDoRow(); })" Shade="Shade.Lighter" Variant="Variant.Flat"
-                                      Icon="delete" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />
-
                         <!--Button Reload-->
                         <RadzenButton Text="Reload" Style="border-radius: 20px; min-width: 100px;" Disabled="@(TargetTienDoGC.TDGCID.Value == null)"
                                       Click="@(async() => { keyFilterExtraColumns = new(); keyFilterMainColumns = new(); await ReLoadTienDoGCPage(null, NCID, TargetKHSX.KHSXID.Value); })"
                                       IsBusy="@isLoading" BusyText=" Loading..." Icon="autorenew" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />
-                    </RadzenStack>
 
-                    <RadzenStack Gap="20px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                        <RadzenStack Gap="10px" Style="width: contain; padding-left: 20px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                            <RadzenText Text="Total results" Style="font-size: 16px; height: contain; width: contain;"></RadzenText>
-                            <RadzenText Text="@($"{TargetTienDoGC.DSachTienDoRows.Count}")" Style="color: black; font-weight: 600; font-size: 16px; height: contain; width: contain;"></RadzenText>
-                        </RadzenStack>
-                        <RadzenStack Gap="10px" Style="width: contain; padding-left: 20px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                            <RadzenText Text="Kế hoạch" Style="font-size: 16px; height: contain; width: contain;"></RadzenText>
-                            <RadzenText Text="@($"{TargetTienDoGC.FooterSumKeHoach}")" Style="color: black; font-weight: 600; font-size: 16px; height: contain; width: contain;"></RadzenText>
-                        </RadzenStack>
-                        <RadzenStack Gap="10px" Style="width: contain; padding-left: 20px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                            <RadzenText Text="Thực tế" Style="font-size: 16px; height: contain; width: contain;"></RadzenText>
-                            <RadzenText Text="@($"{TargetTienDoGC.FooterSumThucTe}")" Style="color: darkgreen; font-weight: 600; font-size: 16px; height: contain; width: contain;"></RadzenText>
-                        </RadzenStack>
-                        <RadzenStack Gap="10px" Style="width: contain; padding-left: 20px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                            <RadzenText Text="NG" Style="font-size: 16px; height: contain; width: contain;"></RadzenText>
-                            <RadzenText Text="@($"{TargetTienDoGC.FooterSumNG}")" Style="color: darkred; font-weight: 600; font-size: 16px; height: contain; width: contain;"></RadzenText>
-                        </RadzenStack>
+                        <RadzenButton Visible=@(numTDRow >0) Text="Xóa tất cả" Style="border-radius: 20px; min-width: 100px; font-size: 15px; font-weight: 600;" Disabled="@(TargetTienDoGC.TDGCID.Value == null)"
+                                      Click="@(async() => { await DeleteAllTienDoRow(); })" Shade="Shade.Lighter" Variant="Variant.Flat"
+                                      Icon="delete" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />
+
+                        <RadzenButton Visible=@(numTDRow >0) Text="Xóa dòng không dùng" Style="border-radius: 20px; min-width: 100px; font-size: 15px; font-weight: 600;" Disabled="@(TargetTienDoGC.TDGCID.Value == null)"
+                                      Click="@(async() => { await DeleteNotUseAllTienDoRow(); })" Shade="Shade.Lighter" Variant="Variant.Flat"
+                                      Icon="delete" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />
+
+                        <!--Button them le tiendogcrow-->
+                        <RadzenButton Disabled="@(TargetKHSX.isDonePXK == false || TargetKHSX.isReturnedNVL || TargetTienDoGC.TDGCID.Value == null)" Click="OnThemMoiTienDoGCRow" Icon="add" Text="Thêm lẻ từng dòng" Size="ButtonSize.Small"
+                                      ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Variant="Variant.Flat"
+                                      Style="min-width: 100px; font-size: 15px; font-weight: 600; border-radius: 20px;" />
                     </RadzenStack>
 
                     <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
@@ -323,17 +311,16 @@
                                     CellRender="@OnCellRender" FooterCellRender="@HeaderFooterCellRender" Value="@DatagridSeleted" ValueChanged="@((args) => OnDatagridSelectChanged(args))">
 
                         <HeaderTemplate>
-                            <RadzenStack Gap="10px" Style="height: 100%; width: 100%" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                                <RadzenStack Gap="10px" Style="height: 100%; width: contain; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-
+                            <RadzenStack Gap="10px" Style="height: contain; width: 100%;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                <RadzenStack Gap="10px" Style="height: contain; width: contain; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                     <!--Select ngay lam viec-->
                                     <RadzenStack Gap="5px" Style="height: 100%; width: contain; padding: 0px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                                         <RadzenStack Style="width: 100%; height: 50%">
                                             <RadzenText Text="@($"Chọn ngày")" Style="font-weight: 600; font-size: 15px; font-style: italic;"></RadzenText>
                                         </RadzenStack>
                                         <RadzenStack Style="width: 100%; height: 50%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
-                                            <RadzenDropDown AllowClear="true"
-                                                            Style="width: contain; min-width: 50px; height: 35px; font-size: 14px; border-width: 1px; background-color: white"
+                                            <RadzenDropDown AllowClear="true" Disabled="@(TargetTienDoGC.TDGCID.Value == null)"
+                                                            Style="width: contain; min-width: 50px; max-width: 200px; height: 35px; font-size: 14px; border-width: 1px; background-color: white"
                                                             AllowVirtualization="true"
                                                             AllowFiltering="true"
                                                             FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
@@ -370,7 +357,7 @@
                                             <RadzenText Text="@($"Chọn máy")" Style="font-weight: 600; font-size: 15px; font-style: italic;"></RadzenText>
                                         </RadzenStack>
                                         <RadzenStack Style="width: 100%; height: 50%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
-                                            <RadzenDropDown AllowClear="true"
+                                            <RadzenDropDown AllowClear="true" Disabled="@(TargetTienDoGC.TDGCID.Value == null)"
                                                             Style="width: contain; min-width: 50px; height: 35px; font-size: 14px; border-width: 1px; background-color: white"
                                                             AllowVirtualization="true"
                                                             AllowFiltering="true"
@@ -408,8 +395,8 @@
                                             <RadzenText Text="@($"Chọn nhân viên")" Style="font-weight: 600; font-size: 15px; font-style: italic;"></RadzenText>
                                         </RadzenStack>
                                         <RadzenStack Style="width: 100%; height: 50%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
-                                            <RadzenDropDown AllowClear="true"
-                                                            Style="width: contain; min-width: 50px; max-width: 500px; height: 35px; font-size: 14px; border-width: 1px; background-color: white"
+                                            <RadzenDropDown AllowClear="true" Disabled="@(TargetTienDoGC.TDGCID.Value == null)"
+                                                            Style="width: contain; min-width: 50px; max-width: 300px; height: 35px; font-size: 14px; border-width: 1px; background-color: white"
                                                             AllowVirtualization="true"
                                                             AllowFiltering="true"
                                                             FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
@@ -446,7 +433,7 @@
                                             <RadzenText Text="@($"Chọn ca làm việc")" Style="font-weight: 600; font-size: 15px; font-style: italic;"></RadzenText>
                                         </RadzenStack>
                                         <RadzenStack Style="width: 100%; height: 50%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
-                                            <RadzenDropDown AllowClear="true"
+                                            <RadzenDropDown AllowClear="true" Disabled="@(TargetTienDoGC.TDGCID.Value == null)"
                                                             Style="width: contain; min-width: 50px; height: 35px; font-size: 14px; border-width: 1px; background-color: white"
                                                             AllowVirtualization="true"
                                                             AllowFiltering="true"
@@ -475,15 +462,67 @@
                                         </RadzenStack>
                                     </RadzenStack>
 
+                                    <!--Select TGGC-->
+                                    <RadzenStack Gap="5px" Style="height: 100%; width: contain; padding: 0px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                        <RadzenStack Style="width: 100%; height: 50%">
+                                            <RadzenText Text="@($"Thời gian gia công")" Style="font-weight: 600; font-size: 15px; font-style: italic;"></RadzenText>
+                                        </RadzenStack>
+                                        <RadzenStack Style="width: 100%; height: 50%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                                            <RadzenNumeric Disabled="@(TargetTienDoGC.TDGCID.Value == null)" class="custom-numeric" TValue="double" Placeholder="0.0" Step="0.5" Style="width: 130px"
+                                                           Min="0" Max="999999" Value="@((double.TryParse(TemTienDoGC.ThoiGianGiaCong?.ToString(), out double vl)? vl : 0))"
+                                                           ValueChanged="@(async (args) =>
+                                                                               {
+                                                                                    TemTienDoGC.ThoiGianGiaCong = args;
+                                                                               })" />
+                                        </RadzenStack>
+                                    </RadzenStack>
+
+                                    <!--Select TGLV-->
+                                    <RadzenStack Gap="5px" Style="height: 100%; width: contain; padding: 0px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                        <RadzenStack Style="width: 100%; height: 50%">
+                                            <RadzenText Text="@($"Thời gian làm việc")" Style="font-weight: 600; font-size: 15px; font-style: italic;"></RadzenText>
+                                        </RadzenStack>
+                                        <RadzenStack Style="width: 100%; height: 50%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                                            <RadzenNumeric Disabled="@(TargetTienDoGC.TDGCID.Value == null)" class="custom-numeric" TValue="double" Placeholder="0.0" Step="0.5" Style="width: 130px"
+                                                           Min="0" Max="999999" Value="@((double.TryParse(TemTienDoGC.ThoiGianLamViec?.ToString(), out double vl)? vl : 0))"
+                                                           ValueChanged="@(async (args) =>
+                                                                               {
+                                                                                    TemTienDoGC.ThoiGianLamViec = args;
+                                                                               })" />
+                                        </RadzenStack>
+                                    </RadzenStack>
+
                                     <RadzenStack Gap="5px" Style="height: 100%; width: contain; padding: 0px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                                         <RadzenStack Style="width: 100%; height: 50%" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                             <RadzenText Text="Thêm vào danh sách" Style="font-weight: 600; font-size: 15px; font-style: italic;"></RadzenText>
                                         </RadzenStack>
                                         <RadzenStack Style="width: 100%; height: 50%; height: 35px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                            <RadzenButton Disabled="@(TemTienDoGC.MayMocsSelected == null || TemTienDoGC.NhanviensSelected == null || TemTienDoGC.CalamviecsSelected == null)" Icon="playlist_add" Text="Thêm" Size="ButtonSize.Small"
+                                            <RadzenButton Disabled="@(TemTienDoGC.NgaysSelected == null || TemTienDoGC.MayMocsSelected == null || TemTienDoGC.NhanviensSelected == null || TemTienDoGC.CalamviecsSelected == null)" Icon="playlist_add" Text="Thêm" Size="ButtonSize.Small"
                                                           Click="@(async() => await OnButtonThemAutoPress())"
-                                                          ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Variant="Variant.Flat"
+                                                          ButtonStyle="ButtonStyle.Primary" Shade="Shade.Dark" Variant="Variant.Flat"
                                                           Style="min-width: 100px; font-size: 15px; font-weight: 600; border-radius: 20px;" />
+                                        </RadzenStack>
+                                    </RadzenStack>
+                                </RadzenStack>
+                                <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding: 0px; padding-top: 10px; border-top: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                    <RadzenLabel Style="font-size: 16px; color: black; font-weight: 600" Text="Bảng danh sách theo dõi tiến độ gia công"></RadzenLabel>
+
+                                    <RadzenStack Gap="20px" Style="padding-left: 100px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                        <RadzenStack Gap="10px" Style="width: contain; padding-left: 20px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                            <RadzenText Text="Total results" Style="font-size: 16px; height: contain; width: contain;"></RadzenText>
+                                            <RadzenText Text="@($"{TargetTienDoGC.DSachTienDoRows.Count}")" Style="color: black; font-weight: 600; font-size: 16px; height: contain; width: contain;"></RadzenText>
+                                        </RadzenStack>
+                                        <RadzenStack Gap="10px" Style="width: contain; padding-left: 20px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                            <RadzenText Text="Kế hoạch" Style="font-size: 16px; height: contain; width: contain;"></RadzenText>
+                                            <RadzenText Text="@($"{TargetTienDoGC.FooterSumKeHoach}")" Style="color: black; font-weight: 600; font-size: 16px; height: contain; width: contain;"></RadzenText>
+                                        </RadzenStack>
+                                        <RadzenStack Gap="10px" Style="width: contain; padding-left: 20px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                            <RadzenText Text="Thực tế" Style="font-size: 16px; height: contain; width: contain;"></RadzenText>
+                                            <RadzenText Text="@($"{TargetTienDoGC.FooterSumThucTe}")" Style="color: darkgreen; font-weight: 600; font-size: 16px; height: contain; width: contain;"></RadzenText>
+                                        </RadzenStack>
+                                        <RadzenStack Gap="10px" Style="width: contain; padding-left: 20px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                            <RadzenText Text="NG" Style="font-size: 16px; height: contain; width: contain;"></RadzenText>
+                                            <RadzenText Text="@($"{TargetTienDoGC.FooterSumNG}")" Style="color: darkred; font-weight: 600; font-size: 16px; height: contain; width: contain;"></RadzenText>
                                         </RadzenStack>
                                     </RadzenStack>
                                 </RadzenStack>
@@ -585,7 +624,7 @@
                                             }
                                         </Template>
                                         <FooterTemplate>
-                                            <RadzenText Visible="@(colName == TienDoGCRow.DBName.NgayGC)" Text="TỔNG CỘNG" Style="color: black; font-size: 16px; height: contain; font-weight: 600;"></RadzenText>
+                                            <RadzenText Visible="@(colName == TienDoGCRow.DBName.MMID)" Text="TỔNG CỘNG" Style="color: black; font-size: 16px; height: contain; font-weight: 600;"></RadzenText>
                                             <RadzenText Visible="@(colName == TienDoGCRow.DBName.KeHoach)" Text="@($"{TargetTienDoGC.FooterSumKeHoach}")" Style="color: black; font-size: 16px; height: contain; font-weight: 600;"></RadzenText>
                                             <RadzenText Visible="@(colName == TienDoGCRow.DBName.ThucTe)" Text="@($"{TargetTienDoGC.FooterSumThucTe}")" Style="color: black; font-size: 16px; height: contain; font-weight: 600"></RadzenText>
                                             <RadzenText Visible="@(colName == TienDoGCRow.DBName.SLNG)" Text="@($"{TargetTienDoGC.FooterSumNG}")" Style="color: darkred; font-size: 16px; height: contain; font-weight: 600"></RadzenText>
@@ -971,7 +1010,16 @@
         TemTienDoGC.NCID.Value = TargetTienDoGC.NCID.Value;
         TemTienDoGC.SPID.Value = TargetTienDoGC.SPID.Value;
 
-        await HandleAutoCreateTiendoGCRows_V2(TemTienDoGC);
+        int totaladdcount = (TemTienDoGC.NgaysSelected?.Count() * TemTienDoGC.MayMocsSelected?.Count() * TemTienDoGC.NhanviensSelected?.Count() * TemTienDoGC.CalamviecsSelected?.Count()) ?? 0;
+
+        if (totaladdcount < 300)
+        {
+            await HandleAutoCreateTiendoGCRows_V2(TemTienDoGC);
+        }
+        else
+        {
+            await DialogService.Alert($"Số lượng thêm ({totaladdcount}) không được quá 300 dòng!", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
+        }
     }
 
     private async Task HandleAutoCreateTiendoGCRows_V2(TienDoGC tienDoGC)
@@ -993,8 +1041,8 @@
                        NVIDs = { Value = nhanvien },
                        SPID = { Value = tienDoGC.SPID.Value },
                        KeHoach = { Value = 0 },
-                       ThoiGianGiaCong = { Value = 0 },
-                       ThoiGianLamViec = { Value = 0 },
+                       ThoiGianGiaCong = { Value = tienDoGC.ThoiGianGiaCong },
+                       ThoiGianLamViec = { Value = tienDoGC.ThoiGianLamViec },
                        GhiChu = { Value = DBNull.Value }
                    }).ToList();
 
@@ -1743,6 +1791,42 @@
         }
     }
 
+    private async Task DeleteNotUseAllTienDoRow()
+    {
+        bool? confirm = await DialogService.Confirm("Xóa tất cả những dòng không dùng tới?", "Xác nhận", new ConfirmOptions() { OkButtonText = "OK", CancelButtonText = "Hủy", ShowClose = false });
+
+        if (confirm.Value)
+        {
+            int deletedcount = 0;
+
+            foreach (var tdrow in TargetTienDoGC.DSachTienDoRows)
+            {
+                if (int.TryParse(tdrow.ThucTe.Value?.ToString(), out int sltt))
+                {
+                    if (sltt == 0)
+                    {
+                        SQLServerServices.DeleteTienDoGCRow(tdrow.TDGCRowID.Value);
+
+                        deletedcount++;
+                    }
+                    else
+                    {
+                        if (int.TryParse(tdrow.KeHoach.Value?.ToString(), out int kehoach) && kehoach == 0)
+                        {
+                            tdrow.KeHoach.Value = tdrow.ThucTe.Value;
+
+                            SQLServerServices.UpdateTienDoGCRow(tdrow);
+                        }
+                    }
+                }
+            }
+
+            await ReLoadTienDoGCPage(null, NCID, TargetKHSX.KHSXID.Value);
+
+            ShowNotification($"Đã xóa {deletedcount} dòng!", NotificationSeverity.Success, 2000);
+        }
+    }
+
 
 
     // Notification
@@ -1783,9 +1867,9 @@
 
     void HeaderFooterCellRender(DataGridCellRenderEventArgs<TienDoGCRow> args)
     {
-        if (args.Column.Property == TienDoGCRow.DBName.NgayGC)
+        if (args.Column.Property == TienDoGCRow.DBName.MMID)
         {
-            args.Attributes.Add("colspan", 8);
+            args.Attributes.Add("colspan", 3);
         }
     }
 
