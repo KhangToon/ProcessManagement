@@ -1,5 +1,8 @@
-﻿using ProcessManagement.Commons;
+﻿using NPOI.SS.Formula.Functions;
+using ProcessManagement.Commons;
 using ProcessManagement.Models.NHANVIEN;
+using ProcessManagement.Models.TienDoGCs;
+using ProcessManagement.Services.Excels;
 using System.Reflection;
 using static ProcessManagement.Models.KHSXs.KetQuaGC;
 
@@ -29,7 +32,8 @@ namespace ProcessManagement.Models.TienDoGCs
         public string MaSanPham { get; set; } = string.Empty;
         public string TenCongDoan { get; set; } = string.Empty;
 
-        public bool IsEditing { get; set; } = false;
+        public List<ExcelService.ExcelCell> ExcelCellsData { get; set; } = new();
+
         // Get all property of this class
         public static List<Propertyy> GetClassProperties()
         {
@@ -143,6 +147,31 @@ namespace ProcessManagement.Models.TienDoGCs
             public const string DSTenNV = "Nhân viên";
             public const string TiLeNG_CD = "% NG CĐ";
             public const string TiLeNG_TT = "% NG TT";
+        }
+
+        public static class ExcellAddress
+        {
+            public const int HeaderRow = 8;
+            public const int RowJumStep = 1;
+            public const string ExportPath = "wwwroot/ExportTemplate/TDGCExcelForm.xlsx";
+            public const string ExportLocation = "wwwroot/ExportLocation/TDGCExcelForm.xlsx";
+
+            public static Dictionary<string, string> ColumnAddress = new()
+            {
+                { DBName.NgayGC, "B" },
+                { DBName.SPID, "C" },
+                { DBName.NCID, "D" },  
+                { DBName.MMID, "E" },
+                { DBName.CaLamViec, "F" },
+                { DBName.ThoiGianLamViec, "H" },
+                { DBName.ThoiGianGiaCong, "G" },
+                { DBName.NVIDs, "I" },
+                { DBName.KeHoach, "J" },
+                { DBName.ThucTe, "K" },
+                { DBName.SLNG, "L" },
+                { DBName.TienDo, "M" },
+                { DBName.GhiChu, "N" }
+            };
         }
     }
 }

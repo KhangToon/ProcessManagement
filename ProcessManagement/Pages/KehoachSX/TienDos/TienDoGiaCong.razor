@@ -12,6 +12,7 @@
 @using ProcessManagement.Models.TienDoGCs
 @using ProcessManagement.Pages.KehoachSX.Dialogs
 @using ProcessManagement.Pages.KehoachSX.TienDos.Dialogs
+@using ProcessManagement.Services.Excels
 @using ProcessManagement.Services.SQLServer
 @using Radzen.Blazor
 @using Radzen
@@ -23,6 +24,7 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject SQLServerServices SQLServerServices
 @inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
 
 <style>
     .rz-grid-table {
@@ -278,12 +280,16 @@
                         <RadzenButton Disabled="@(TargetKHSX.isDonePXK == false || TargetKHSX.isReturnedNVL || TargetTienDoGC.TDGCID.Value == null)" Click="OnThemMoiTienDoGCRow" Icon="add" Text="Thêm lẻ từng dòng" Size="ButtonSize.Small"
                                       ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Variant="Variant.Flat"
                                       Style="min-width: 100px; font-size: 15px; font-weight: 600; border-radius: 20px;" />
+
+                        <RadzenButton Visible=@(numTDRow >0) Click="OnPrintPhieuTheoDoiGiaCong" Icon="print" Text="In phiếu theo dõi" Size="ButtonSize.Small"
+                                      ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Variant="Variant.Flat"
+                                      Style="min-width: 100px; font-size: 15px; font-weight: 600; border-radius: 20px;" />
                     </RadzenStack>
 
                     <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                         <!--Button Enable Filter-->
                         <RadzenButton Icon="@(filterActive ? "filter_alt" : "filter_alt_off")" Text="Bộ lọc nâng cao" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="@(filterActive ? Shade.Darker : Shade.Lighter)"
-                                      Style="height: contain; width: contain; font-size: 14px;"
+                                      Style="height: contain; width: contain; font-size: 15px; font-weight: 600;"
                                       Click="@( async () =>
                                                                 {
                                                                     if (filterActive)
@@ -295,7 +301,7 @@
                         <!--Button Reset Filter-->
                         <RadzenButton Click="@(async () => { keyFilterExtraColumns = new(); keyFilterMainColumns = new(); await ReLoadTienDoGCPage(TargetTienDoGC.TDGCID.Value, NCID, TargetKHSX.KHSXID.Value);})"
                                       Icon="reset_settings" Text="Reset bộ lọc" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
-                                      Style="height: contain; width: contain; font-size: 14px;" />
+                                      Style="height: contain; width: contain; font-size: 15px; font-weight: 600;" />
                     </RadzenStack>
                 </RadzenStack>
                 <!--Datagrid-->
@@ -462,14 +468,29 @@
                                         </RadzenStack>
                                     </RadzenStack>
 
-                                    <!--Select TGGC-->
+                                    <!--Select Ke hoach-->
                                     <RadzenStack Gap="5px" Style="height: 100%; width: contain; padding: 0px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                                         <RadzenStack Style="width: 100%; height: 50%">
-                                            <RadzenText Text="@($"Thời gian gia công")" Style="font-weight: 600; font-size: 15px; font-style: italic; white-space: nowrap;"></RadzenText>
+                                            <RadzenText Text="@($"Kế hoạch")" Style="font-weight: 600; font-size: 15px; font-style: italic; white-space: nowrap;"></RadzenText>
                                         </RadzenStack>
                                         <RadzenStack Style="width: 100%; height: 50%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
                                             <RadzenNumeric Disabled="@(TargetTienDoGC.TDGCID.Value == null)" class="custom-numeric" TValue="double" Placeholder="0.0" Step="0.5" Style="width: 130px"
-                                                           Min="0" Max="999999" Value="@((double.TryParse(TemTienDoGC.ThoiGianGiaCong?.ToString(), out double vl)? vl : 0))"
+                                                           Min="0" Max="999999" Value="@((double.TryParse(TemTienDoGC.Kehoach?.ToString(), out double vl)? vl : 0))"
+                                                           ValueChanged="@(async (args) =>
+                                                                               {
+                                                                                    TemTienDoGC.Kehoach = args;
+                                                                               })" />
+                                        </RadzenStack>
+                                    </RadzenStack>
+
+                                    <!--Select TGGC-->
+                                    <RadzenStack Gap="5px" Style="height: 100%; width: contain; padding: 0px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                        <RadzenStack Style="width: 100%; height: 50%">
+                                            <RadzenText Text="@($"TG gia công")" Style="font-weight: 600; font-size: 15px; font-style: italic; white-space: nowrap;"></RadzenText>
+                                        </RadzenStack>
+                                        <RadzenStack Style="width: 100%; height: 50%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                                            <RadzenNumeric Disabled="@(TargetTienDoGC.TDGCID.Value == null)" class="custom-numeric" TValue="int" Placeholder="0" Step="1" Style="width: 130px"
+                                                           Min="0" Max="999999" Value="@((int.TryParse(TemTienDoGC.ThoiGianGiaCong?.ToString(), out int vl)? vl : 0))"
                                                            ValueChanged="@(async (args) =>
                                                                                {
                                                                                     TemTienDoGC.ThoiGianGiaCong = args;
@@ -480,7 +501,7 @@
                                     <!--Select TGLV-->
                                     <RadzenStack Gap="5px" Style="height: 100%; width: contain; padding: 0px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                                         <RadzenStack Style="width: 100%; height: 50%">
-                                            <RadzenText Text="@($"Thời gian làm việc")" Style="font-weight: 600; font-size: 15px; font-style: italic;"></RadzenText>
+                                            <RadzenText Text="@($"TG làm việc")" Style="font-weight: 600; font-size: 15px; font-style: italic;"></RadzenText>
                                         </RadzenStack>
                                         <RadzenStack Style="width: 100%; height: 50%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
                                             <RadzenNumeric Disabled="@(TargetTienDoGC.TDGCID.Value == null)" class="custom-numeric" TValue="double" Placeholder="0.0" Step="0.5" Style="width: 130px"
@@ -729,7 +750,7 @@
 
             keyFilterExtraColumns = new();
 
-            TargetTienDoGC = new(); TemTienDoGC = new(); DatagridSeleted = null; SelectedTDGCRow = new(); 
+            TargetTienDoGC = new(); TemTienDoGC = new(); DatagridSeleted = null; SelectedTDGCRow = new();
 
             // Load tien do gia cong by khsxid/ncid/spid
             await ReLoadTienDoGCPage(ncid: NCID, khsxid: TargetKHSX.KHSXID.Value);
@@ -1065,7 +1086,7 @@
                    NCID = { Value = tienDoGC.NCID.Value },
                    NVIDs = { Value = nhanvien },
                    SPID = { Value = tienDoGC.SPID.Value },
-                   KeHoach = { Value = 0 },
+                   KeHoach = { Value = tienDoGC.Kehoach },
                    ThoiGianGiaCong = { Value = tienDoGC.ThoiGianGiaCong },
                    ThoiGianLamViec = { Value = tienDoGC.ThoiGianLamViec },
                    GhiChu = { Value = DBNull.Value }
@@ -1395,6 +1416,17 @@
         {
             await DialogService.Alert($"Hãy nhập ngày bắt đầu/ngày kết thúc", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });
         }
+    }
+
+    private async Task OnPrintPhieuTheoDoiGiaCong()
+    {
+        var file = await ExcelService.GenerateExcelData_TienDoGC(TargetTienDoGC);
+
+        if (file != null)
+        {
+            await JSRuntime.InvokeVoidAsync("saveAsFile", file.FileDownloadName, Convert.ToBase64String(file.FileContents));
+        }
+        else ShowNotification("Print error!", NotificationSeverity.Error, 2000);
     }
 
     private async Task OnSaveNewTienDoGCForAllCongDoan()

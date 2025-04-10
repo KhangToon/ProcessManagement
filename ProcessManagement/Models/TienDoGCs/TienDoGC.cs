@@ -36,6 +36,7 @@ namespace ProcessManagement.Models.TienDoGCs
         public IEnumerable<KeyValuePair<string, string>>? NgaysSelected;
         public object? ThoiGianGiaCong { get; set; } // Dung cho add-multi auto TienDoRow
         public object? ThoiGianLamViec { get; set; } // Dung cho add-multi auto TienDoRow
+        public object? Kehoach { get; set; } // Dung cho add-multi auto TienDoRow
 
         public List<TienDoGCRow> DSachTienDoRows { get; set; } = new();
 
@@ -146,6 +147,7 @@ namespace ProcessManagement.Models.TienDoGCs
             public const string NVIDs = "NVIDs";
             public const string CaLamViecs = "calamviecs";
             public const string Ngays = "ngays";
+            public const string ExcellTitle = "exceltitile";
         }
 
         public static class DispName
@@ -172,6 +174,27 @@ namespace ProcessManagement.Models.TienDoGCs
             public const string NVIDs = "NVIDs";
             public const string CaLamViecs = "Ca làm việc";
             public const string Ngays = "ngays";
+        }
+
+        public static class ExcellAddress
+        {
+            public static Dictionary<string, string> ColumnAddress = new()
+            {
+                { DBName.ExcellTitle, "B" },
+                { DBName.NgayXuatHang, "D" },
+                { DBName.NgayBatDau, "D" },
+                { DBName.NgayKetThuc, "D" },
+                { DBName.NgayLap, "N" }
+            };
+
+            public static Dictionary<string, string> RowAddress = new()
+            {
+                { DBName.ExcellTitle, "1" },
+                { DBName.NgayXuatHang, "3" },
+                { DBName.NgayBatDau, "4" },
+                { DBName.NgayKetThuc, "5" },
+                { DBName.NgayLap, "3" }
+            };
         }
     }
 }

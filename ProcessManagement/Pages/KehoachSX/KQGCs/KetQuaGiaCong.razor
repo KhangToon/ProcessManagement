@@ -66,7 +66,7 @@
 
                                     <!--Button Enable Filter-->
                                     <RadzenButton Icon="@(filterActive ? "filter_alt" : "filter_alt_off")" Text="Bộ lọc nâng cao" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="@(filterActive ? Shade.Darker : Shade.Lighter)"
-                                                  Style="height: contain; width: contain; font-size: 14px;"
+                                                  Style="height: contain; width: contain; font-size: 15px; font-weight: 600;"
                                                   Click="@( async () =>
                                                                 {
                                                                     if (filterActive)
@@ -78,7 +78,7 @@
                                     <!--Button Reset Filter-->
                                     <RadzenButton Click="@(async () => {keyFilterExtraColumns = new(); keyFilterMainColumns = new(); await LoadAllDanhsachKQGCBase(0);})"
                                                   Icon="reset_settings" Text="Reset bộ lọc" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
-                                                  Style="height: contain; width: contain; font-size: 14px;" />
+                                                  Style="height: contain; width: contain; font-size: 15px; font-weight: 600;" />
 
                                     <!--Button Reload-->
                                     <RadzenButton Text="Reload" Click="@(async() => { await LoadAllDanhsachKQGCBase(300); await FilterDSachKetQuaGCProcessing(); })" IsBusy="@isLoadingKQGCs" BusyText=" Loading..." Style="border-radius: 20px;" Icon="autorenew" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" />
@@ -107,12 +107,16 @@
                                 List<Propertyy> columns = KetQuaGC.GetClassProperties() ?? new();
 
                                 <!--STT-->
-                                <RadzenDataGridColumn Width="60px" Frozen="true" FrozenPosition="FrozenColumnPosition.Left" Filterable="false"
+                                <RadzenDataGridColumn Width="60px" Frozen="true" FrozenPosition="FrozenColumnPosition.Left" Filterable="true"
                                                       TItem="KetQuaGC" Title="#"
                                                       Property="STT" TextAlign="TextAlign.Center">
                                     <HeaderTemplate>
                                         <span style="font-weight: 600; font-size: 15px; color: white">STT</span>
                                     </HeaderTemplate>
+                                    <FilterTemplate>
+                                        <RadzenButton Icon="filter_alt" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Darker"
+                                                      Style="height: contain; width: contain; font-size: 14px;" />
+                                    </FilterTemplate>
                                     <Template Context="kqgc">
                                         <span style="font-weight: bold;">@($"{DSachKetQuaGCs.IndexOf(kqgc) + 1}/{countdskqgcs}")</span>
                                     </Template>
@@ -204,7 +208,7 @@
                                     </RadzenDataGridColumn>
                                 }
                                 <RadzenDataGridColumn TItem="KetQuaGC" Title="Delete" Frozen="true" FrozenPosition="FrozenColumnPosition.Right"
-                                                      Property="delete" TextAlign="TextAlign.Center">
+                                                      Filterable="false" Property="delete" TextAlign="TextAlign.Center">
                                     <HeaderTemplate>
                                         <span style="font-weight: 600; font-size: 15px; color: white;"></span>
                                     </HeaderTemplate>
