@@ -83,35 +83,35 @@
                         </RadzenCategoryAxis>
 
                         @{
-                            int max = (int.TryParse(TargetKHSX.DinhMuc.Value?.ToString(), out int dm) ? dm : 1000);
+                            int max_OK = (int.TryParse(TargetKHSX.DinhMuc.Value?.ToString(), out int dm) ? dm : 1000);
 
-                            max += TargetKHSX.SoluongBoSung;
+                            max_OK += TargetKHSX.SoluongBoSung;
 
-                            int step = 2;
+                            int step_OK = 2;
 
-                            if (max < 10)
+                            if (max_OK < 10)
                             {
-                                max += 1;
-                                step = 1;
+                                max_OK += 1;
+                                step_OK = 1;
                             }
-                            else if (max < 100)
+                            else if (max_OK < 100)
                             {
-                                max += 30;
-                                step = 20;
+                                max_OK += 30;
+                                step_OK = 20;
                             }
-                            else if (max <= 1000)
+                            else if (max_OK <= 1000)
                             {
-                                max += 100;
-                                step = 100;
+                                max_OK += 100;
+                                step_OK = 100;
                             }
-                            else if (max > 1000)
+                            else if (max_OK > 1000)
                             {
-                                max += 500;
-                                step = 500;
+                                max_OK += 500;
+                                step_OK = 500;
                             }
                         }
 
-                        <RadzenValueAxis TickDistance="100" Min="0" Max=@(max) Step="@(step)" Formatter="@FormatLable">
+                        <RadzenValueAxis TickDistance="100" Min="0" Max=@(max_OK) Step="@(step_OK)" Formatter="@FormatLable">
                             <RadzenGridLines Visible="true" />
                             <RadzenAxisTitle Text="Tiến độ sản xuất (OK/NG)" />
                         </RadzenValueAxis>
@@ -144,7 +144,40 @@
                         <RadzenColumnOptions Radius="5" Width="30" />
                         <RadzenCategoryAxis Padding="20" LabelAutoRotation="15">
                         </RadzenCategoryAxis>
-                        <RadzenValueAxis TickDistance="10" Min="0" Max="20" Step="5" Formatter="@FormatLable">
+
+                        @{
+                            int max_NG = (NGdatas.Count > 0) ? NGdatas.Max(ng => ng.Value) : 1;
+
+                            int step_NG = 1;
+
+                            int tick_NG = 1;
+
+                            if (max_NG < 10)
+                            {
+                                max_NG += 2;
+                                step_NG = 1;
+                                tick_NG = 1;
+                            }
+                            else if (max_NG < 100)
+                            {
+                                max_NG += 10;
+                                step_NG = 20;
+                                tick_NG = 5;
+                            }
+                            else if (max_NG <= 1000)
+                            {
+                                max_NG += 100;
+                                step_NG = 100;
+                                tick_NG = 50;
+                            }
+                            else if (max_NG > 1000)
+                            {
+                                max_NG += 500;
+                                step_NG = 500;
+                                tick_NG = 100;
+                            }
+                        }
+                        <RadzenValueAxis TickDistance="tick_NG" Min="0" Max="max_NG" Step="step_NG" Formatter="@FormatLable">
                             <RadzenGridLines Visible="true" />
                             <RadzenAxisTitle Text="Số lượng sản phẩm lỗi (NG)" />
                         </RadzenValueAxis>

@@ -31,7 +31,7 @@
     <KetQuaGiaCong TargetKHSX="@TargetKHSX"></KetQuaGiaCong>
 </RadzenStack>
 
-<RadzenStack Visible="@(selectBarIndex != -1 && isloading == false)" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+<RadzenStack Visible="@(selectBarIndex != -1)" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
     <TienDoGiaCong TargetKHSX="@TargetKHSX" NCID="@SelectBarItems[selectBarIndex].NCID.Value" SPID="@TargetKHSX.SPID.Value"></TienDoGiaCong>
 </RadzenStack>
 
@@ -57,18 +57,11 @@
     {
         selectBarIndex = selectIndex;
 
-        isloading = true;
-        StateHasChanged();
         await Task.Delay(10);
-        StateHasChanged();
-        isloading = false;
     }
 
 
-    private async Task ParameterChanged()
-    {
-        await InvokeAsync(StateHasChanged);
-    }
+
 
 
     private void LoadKHSXDatas()
