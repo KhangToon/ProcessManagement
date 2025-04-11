@@ -7,6 +7,7 @@
 @using ProcessManagement.Pages.Manager_SanPham.KhoThanhPham
 @using ProcessManagement.Pages.QRImage.Pallet
 @using ProcessManagement.Pages.Manager_NVL.Dialogs
+@using ProcessManagement.Services.Excels
 @using ProcessManagement.Services.SQLServer
 @using Radzen.Blazor
 @using Radzen
@@ -85,6 +86,9 @@
                                                                           Style="font-size: 16px; font-weight: 600; height: contain; color: darkgreen"></RadzenButton>
                                                         </RadzenStack>
                                                     </RadzenStack>
+                                                    <RadzenButton Visible=@(thungtpham.MaQuanLyThung.Value != null) Click="@(async() => await OnPrintMaQuanLyThung(thungtpham))" Icon="print" Text="In mã thùng" Size="ButtonSize.Small"
+                                                                  ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Variant="Variant.Flat"
+                                                                  Style="min-width: 100px; font-size: 15px; font-weight: 600; border-radius: 20px;" />
                                                 </RadzenStack>
 
                                                 <RadzenStack Gap="10px" Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
@@ -255,6 +259,17 @@
     {
         await DialogService.OpenAsync<DialogQR_Image>(null, new Dictionary<string, object>() { { "CONTENT", content }, { "HEADER", header } },
         new DialogOptions() { CloseDialogOnEsc = true, CloseDialogOnOverlayClick = true, ShowTitle = true, Width = "contain", Height = "contain", Resizable = true, Draggable = true, ShowClose = true, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
+    }
+
+    // Print MQLThungTP
+    private async Task OnPrintMaQuanLyThung(ThungTPham thungTPham)
+    {
+        var file = await ExcelService.GenerateExcelData_MQLThungTP(thungTPham);
+
+        if (file != null)
+        {
+            await JSRuntime.InvokeVoidAsync("saveAsFile", file.FileDownloadName, Convert.ToBase64String(file.FileContents));
+        }
     }
 
     private async Task OpenDialogCreatePhieuNhapKhoTP()

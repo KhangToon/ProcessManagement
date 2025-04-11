@@ -71,6 +71,33 @@ namespace ProcessManagement.Models.KHO_TPHAM
             public const string InStock = "In Stock";
         }
 
+        public static class ExcellAddress
+        {
+            public const string ExportPath = "wwwroot/ExportTemplate/MQLThungTPExcelForm.xlsx";
+            public const string ExportLocation = "wwwroot/ExportLocation/MQLThungTPExcelForm.xlsx";
+
+            public const string TENSP = "TENSP";
+            public const string MASP = "MASP";
+            public const string SOLUONG = "SOLUONG";
+            public const string MQLTHUNG = "MQLTHUNG";
+
+            public static Dictionary<string, string> ColumnAddress = new()
+            {
+                { TENSP, "C" },
+                { MASP, "C" },
+                { SOLUONG, "C" },
+                { MQLTHUNG, "E" }
+            };
+
+            public static Dictionary<string, string> RowAddress = new()
+            {
+                { TENSP, "3" },
+                { MASP, "5" },
+                { SOLUONG, "7" },
+                { MQLTHUNG, "14" }
+            };
+        }
+
         // Get all property of this class
         public static List<Propertyy> GetClassProperties()
         {

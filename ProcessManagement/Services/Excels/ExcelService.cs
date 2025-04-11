@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
+using ProcessManagement.Models.KHO_TPHAM;
 using ProcessManagement.Models.TienDoGCs;
 using ProcessManagement.Services.SQLServer;
 using System.ComponentModel;
@@ -237,6 +238,7 @@ namespace ProcessManagement.Services.Excels
             return result;
         }
 
+        #region TienDoGC Excell Services
         public static async Task<FileContentResult?> GenerateExcelData_TienDoGC(TienDoGC tienDoGC)
         {
             if (tienDoGC.DSachTienDoRows.Count == 0) return null;
@@ -456,5 +458,155 @@ namespace ProcessManagement.Services.Excels
 
             return value;
         }
+        #endregion
+
+        #region MQLThungTP Excell Services
+        public static async Task<FileContentResult?> GenerateExcelData_MQLThungTP(ThungTPham thungTPham)
+        {
+            if (thungTPham.MaQuanLyThung.Value == null) return null;
+
+            List<ExcelCell> excelDatas = new();
+
+            // Generate data ThungTPham
+
+            var targetSP = SQLServerServices.GetSanpham(int.TryParse(thungTPham.SPID.Value?.ToString(), out int spid) ? spid : 0, false);
+
+            // TenSP
+            ExcelCell tenspCell = new()
+            {
+                CellName = ThungTPham.ExcellAddress.TENSP,
+                Col = ThungTPham.ExcellAddress.ColumnAddress[ThungTPham.ExcellAddress.TENSP],
+                Row = ThungTPham.ExcellAddress.RowAddress[ThungTPham.ExcellAddress.TENSP],
+                ValueType = typeof(string),
+                CellValue = $"{targetSP.SP_TenSanPham.Value}"
+            };
+            excelDatas.Add(tenspCell);
+
+            // MaSP
+            ExcelCell maspCell = new()
+            {
+                CellName = ThungTPham.ExcellAddress.MASP,
+                Col = ThungTPham.ExcellAddress.ColumnAddress[ThungTPham.ExcellAddress.MASP],
+                Row = ThungTPham.ExcellAddress.RowAddress[ThungTPham.ExcellAddress.MASP],
+                ValueType = typeof(string),
+                CellValue = $"{targetSP.SP_MaSP.Value}"
+            };
+            excelDatas.Add(maspCell);
+
+            // Soluong
+            ExcelCell soluongCell = new()
+            {
+                CellName = ThungTPham.ExcellAddress.SOLUONG,
+                Col = ThungTPham.ExcellAddress.ColumnAddress[ThungTPham.ExcellAddress.SOLUONG],
+                Row = ThungTPham.ExcellAddress.RowAddress[ThungTPham.ExcellAddress.SOLUONG],
+                ValueType = typeof(string),
+                CellValue = $"{thungTPham.SoLuong.Value} (PCS)"
+            };
+            excelDatas.Add(soluongCell);
+
+            // Soluong
+            ExcelCell MQLCell = new()
+            {
+                CellName = ThungTPham.ExcellAddress.MQLTHUNG,
+                Col = ThungTPham.ExcellAddress.ColumnAddress[ThungTPham.ExcellAddress.MQLTHUNG],
+                Row = ThungTPham.ExcellAddress.RowAddress[ThungTPham.ExcellAddress.MQLTHUNG],
+                ValueType = typeof(string),
+                CellValue = $"{thungTPham.MaQuanLyThung.Value}"
+            };
+            excelDatas.Add(MQLCell);
+
+            // Excell file
+            string excelPath = ThungTPham.ExcellAddress.ExportPath;
+
+            string excelWritePath = ThungTPham.ExcellAddress.ExportLocation;
+
+            string excelSheetName = $"{thungTPham.MaQuanLyThung.Value}";
+
+            // Create a new workbook for writing
+            IWorkbook workbook;
+
+            string extension = Path.GetExtension(excelPath);
+
+            using (FileStream fileStream = new FileStream(excelPath, FileMode.Open, FileAccess.Read))
+            {
+                if (extension == ".xls")
+                {
+                    workbook = new HSSFWorkbook(fileStream);
+                }
+                else if (extension == ".xlsx")
+                {
+                    workbook = new XSSFWorkbook(fileStream);
+                }
+                else
+                {
+                    throw new ArgumentException("Unsupported file extension");
+                }
+            }
+
+            ISheet worksheet = workbook.GetSheetAt(0); // FirstSheet
+
+            if (worksheet == null) { return null; }
+
+            worksheet.Workbook.SetSheetName(0, excelSheetName); // Asign SheetName
+
+            foreach (var location in excelDatas)
+            {
+                int columnIndex = ColumnLetterToIndex(location.Col);
+
+                IRow row = worksheet.GetRow(int.Parse(location.Row) - 1) ?? worksheet.CreateRow(int.Parse(location.Row) - 1);
+
+                ICell worksheetCell = row.GetCell(columnIndex - 1) ?? row.CreateCell(columnIndex - 1);
+
+                if (location != null)
+                {
+                    if (location.ValueType == typeof(string))
+                    {
+                        string value = location.CellValue;
+                        worksheetCell.SetCellType(CellType.String);
+                        worksheetCell.SetCellValue(value);
+                    }
+                    else if (location.ValueType == typeof(int) || location.ValueType == typeof(double))
+                    {
+                        if (int.TryParse(location.CellValue, out int vl))
+                        {
+                            worksheetCell.SetCellType(CellType.Numeric);
+                            worksheetCell.SetCellValue(vl);
+                        }
+                        else
+                        {
+                            string value = location.CellValue;
+                            worksheetCell.SetCellType(CellType.String);
+                            worksheetCell.SetCellValue(value);
+                        }
+                    }
+                    else if (location.ValueType == typeof(DateTime))
+                    {
+                        if (DateTime.TryParse(location.CellValue, out DateTime dt))
+                        {
+                            worksheetCell.SetCellType(CellType.Numeric);
+                            worksheetCell.SetCellValue(dt);
+                        }
+                    }
+                }
+            }
+
+            using (FileStream writeStream = new FileStream(excelWritePath, FileMode.Create, FileAccess.Write))
+            {
+                workbook.Write(writeStream);
+            }
+
+            using (FileStream readStream = new FileStream(excelWritePath, FileMode.Open, FileAccess.Read))
+            {
+                byte[] bytes = await File.ReadAllBytesAsync(excelWritePath);
+
+                var file = new FileContentResult(bytes, ContentType);
+
+                file.FileDownloadName = $"MQLThung_[{thungTPham.MaQuanLyThung.Value}]{extension}";
+
+                return file;
+            }
+
+        }
+        #endregion
     }
 }
