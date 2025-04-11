@@ -357,7 +357,7 @@ namespace ProcessManagement.Services.Excels
                             worksheetCell.SetCellType(CellType.String);
                             worksheetCell.SetCellValue(value);
                         }
-                    }                    
+                    }
                     else if (location.ValueType == typeof(DateTime))
                     {
                         if (DateTime.TryParse(location.CellValue, out DateTime dt))
