@@ -6,8 +6,8 @@ namespace ProcessManagement.Services.QRCodes
 {
     public class QRCodeServices
     {
-        private byte[] qrcodeimage = null;
-        public byte[] QRCodeImage
+        private byte[]? qrcodeimage = null;
+        public byte[]? QRCodeImage
         {
             get { return qrcodeimage; }
             set
@@ -35,6 +35,19 @@ namespace ProcessManagement.Services.QRCodes
             {
                 return string.Empty;
             }
+        }
+
+        public byte[] GenerateQRCodeImage(string content)
+        {   
+            // Create QR code generator
+            QRCodeGenerator qrGenerator = new QRCodeGenerator();
+            QRCodeData qrCodeData = qrGenerator.CreateQrCode(content, QRCodeGenerator.ECCLevel.Q);
+
+            // Create bitmap QR code
+            BitmapByteQRCode qrCode = new BitmapByteQRCode(qrCodeData);
+            byte[] qrBytes = qrCode.GetGraphic(10);
+
+            return qrBytes;
         }
     }
 }

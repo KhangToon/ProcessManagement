@@ -7,7 +7,13 @@ using ProcessManagement.Models.KHO_TPHAM;
 using ProcessManagement.Models.TienDoGCs;
 using ProcessManagement.Services.SQLServer;
 using System.ComponentModel;
+using System.Drawing.Imaging;
+using System.Drawing;
 using System.Reflection;
+using ProcessManagement.Services.QRCodes;
+using System.IO;
+using Microsoft.CodeAnalysis;
+using System.Collections.Generic;
 
 namespace ProcessManagement.Services.Excels
 {
@@ -589,6 +595,32 @@ namespace ProcessManagement.Services.Excels
                     }
                 }
             }
+
+            //// Insert Image for QR
+            QRCodeServices qrCodeServices = new();
+
+            byte[] imageBytes = qrCodeServices.GenerateQRCodeImage($"{thungTPham.MaQuanLyThung.Value}");
+
+            // Create an Excel picture
+            int pictureIndex = workbook.AddPicture(imageBytes, PictureType.PNG);
+
+            IDrawing drawing = worksheet.CreateDrawingPatriarch();
+
+            // Parameters for CreateAnchor: dx1, dy1, dx2, dy2, col1, row1, col2, row2
+            IClientAnchor anchor = drawing.CreateAnchor(0, 0, 0, 0, 1, 1, 2, 2);
+
+            //dx1: Horizontal offset within the first cell(0 - 1023)
+            //dy1: Vertical offset within the first cell(0 - 255)
+            //dx2: Horizontal offset within the last cell(0 - 1023)
+            //dy2: Vertical offset within the last cell(0 - 255)
+            //col1: First column(0 - based, B = 1)
+            //row1: First row(0 - based, 2 = 1)
+            //col2: Last column
+            //row2: Last row
+
+            // Create the picture
+            drawing.CreatePicture(anchor, pictureIndex);
+            ////
 
             using (FileStream writeStream = new FileStream(excelWritePath, FileMode.Create, FileAccess.Write))
             {
