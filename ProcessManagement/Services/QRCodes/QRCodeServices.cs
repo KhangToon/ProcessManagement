@@ -45,7 +45,7 @@ namespace ProcessManagement.Services.QRCodes
 
             // Create bitmap QR code
             BitmapByteQRCode qrCode = new BitmapByteQRCode(qrCodeData);
-            byte[] qrBytes = qrCode.GetGraphic(10);
+            byte[] qrBytes = qrCode.GetGraphic(30);
 
             return qrBytes;
         }

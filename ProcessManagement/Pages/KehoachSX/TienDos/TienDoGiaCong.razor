@@ -518,7 +518,7 @@
                                             <RadzenText Text="Thêm vào danh sách" Style="font-weight: 600; font-size: 15px; font-style: italic; white-space: nowrap; "></RadzenText>
                                         </RadzenStack>
                                         <RadzenStack Style="width: 100%; height: 50%; height: 35px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                            <RadzenButton Disabled="@(TemTienDoGC.NgaysSelected == null || TemTienDoGC.MayMocsSelected == null || TemTienDoGC.NhanviensSelected == null || TemTienDoGC.CalamviecsSelected == null)" Icon="playlist_add" Text="Thêm" Size="ButtonSize.Small"
+                                            <RadzenButton Disabled="@(TemTienDoGC.NgaysSelected == null || TemTienDoGC.MayMocsSelected == null || TemTienDoGC.CalamviecsSelected == null)" Icon="playlist_add" Text="Thêm" Size="ButtonSize.Small"
                                                           Click="@(async() => await OnButtonThemAutoPress())"
                                                           ButtonStyle="ButtonStyle.Primary" Shade="Shade.Dark" Variant="Variant.Flat"
                                                           Style="min-width: 100px; font-size: 15px; font-weight: 600; border-radius: 20px;" />
@@ -1075,7 +1075,7 @@
         tienDoGCRows =
           (from day in tienDoGC.NgaysSelected?.Select(n => n.Key).ToList() ?? new()
            from may in tienDoGC.MMIDs.Value?.ToString()?.Trim().Split(",").ToList() ?? new()
-           from nhanvien in tienDoGC.NVIDs.Value?.ToString()?.Trim().Split(",").ToList() ?? new()
+           // from nhanvien in tienDoGC.NVIDs.Value?.ToString()?.Trim().Split(",").ToList() ?? new()
            from ca in tienDoGC.CaLamViecs.Value?.ToString()?.Trim().Split(",").ToList() ?? new()
            select new TienDoGCRow
                {
@@ -1084,7 +1084,7 @@
                    CaLamViec = { Value = ca },
                    MMID = { Value = may },
                    NCID = { Value = tienDoGC.NCID.Value },
-                   NVIDs = { Value = nhanvien },
+                   // NVIDs = { Value = nhanvien },
                    SPID = { Value = tienDoGC.SPID.Value },
                    KeHoach = { Value = tienDoGC.Kehoach },
                    ThoiGianGiaCong = { Value = tienDoGC.ThoiGianGiaCong },

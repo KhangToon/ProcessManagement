@@ -617,9 +617,9 @@ namespace ProcessManagement.Services.Excels
             //row1: First row(0 - based, 2 = 1)
             //col2: Last column
             //row2: Last row
-
+            anchor.AnchorType = AnchorType.MoveAndResize;
             // Create the picture
-            drawing.CreatePicture(anchor, pictureIndex);
+            IPicture picture = drawing.CreatePicture(anchor, pictureIndex);
             ////
 
             using (FileStream writeStream = new FileStream(excelWritePath, FileMode.Create, FileAccess.Write))
