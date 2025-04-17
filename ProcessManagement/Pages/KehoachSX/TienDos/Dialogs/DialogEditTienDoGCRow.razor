@@ -335,6 +335,10 @@
 
         NhanviensSelected = GetKeyValuePairsForPropertyValue(updatedTDGCRow.NVIDs);
 
+        // Allow empty NVIDs
+        updatedTDGCRow.NVIDs.IsCheckValueOK = true;
+        updatedTDGCRow.NVIDs.NotifyMess = $"Giá trị hợp lệ";
+
         await DefaultThongTinTienDoGCRow_ValueIsOK(updatedTDGCRow.NgayGC);
         await DefaultThongTinTienDoGCRow_ValueIsOK(updatedTDGCRow.MMID);
         await DefaultThongTinTienDoGCRow_ValueIsOK(updatedTDGCRow.CaLamViec);
@@ -504,7 +508,7 @@
 
             foreach (var erorrtype in propertyy.CheckErrors)
             {
-                if (dbname == TienDoGCRow.DBName.GhiChu || dbname == TienDoGCRow.DBName.ThoiGianGiaCong || dbname == TienDoGCRow.DBName.ThoiGianLamViec)
+                if (dbname == TienDoGCRow.DBName.GhiChu || dbname == TienDoGCRow.DBName.ThoiGianGiaCong || dbname == TienDoGCRow.DBName.ThoiGianLamViec || dbname == TienDoGCRow.DBName.NVIDs)
                 {
                     return;
                 }
