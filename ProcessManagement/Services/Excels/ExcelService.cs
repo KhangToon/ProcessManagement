@@ -244,6 +244,39 @@ namespace ProcessManagement.Services.Excels
             return result;
         }
 
+        private static string SanitizeSheetName(string sheetName)
+        {
+            // Replace invalid characters with an underscore
+            char[] invalidChars = { '\\', '/', '*', '[', ']', ':', '?' };
+            foreach (var invalidChar in invalidChars)
+            {
+                sheetName = sheetName.Replace(invalidChar, '_');
+            }
+
+            // Trim the sheet name to a maximum of 31 characters
+            if (sheetName.Length > 31)
+            {
+                sheetName = sheetName.Substring(0, 31);
+            }
+
+            return sheetName;
+        }
+
+        private static void RemoveNamedRanges(IWorkbook workbook)
+        {
+            var allNames = workbook.GetAllNames();
+            foreach (var name in allNames)
+            {
+                // Optional: Validate the named range before removing
+                if (!string.IsNullOrWhiteSpace(name.RefersToFormula))
+                {
+                    workbook.RemoveName(name.NameName);
+                }
+            }
+        }
+
+
+
         #region TienDoGC Excell Services
         public static async Task<FileContentResult?> GenerateExcelData_TienDoGC(TienDoGC tienDoGC)
         {
@@ -334,7 +367,9 @@ namespace ProcessManagement.Services.Excels
 
             if (worksheet == null) { return null; }
 
-            worksheet.Workbook.SetSheetName(0, excelSheetName); // Asign SheetName
+            // Sanitize the sheet name to remove invalid characters
+            string sanitizedSheetName = SanitizeSheetName(excelSheetName);
+            worksheet.Workbook.SetSheetName(0, sanitizedSheetName); // Assign sanitized sheet name
 
             foreach (var location in excelDatas)
             {
@@ -374,8 +409,17 @@ namespace ProcessManagement.Services.Excels
                             worksheetCell.SetCellValue(dt);
                         }
                     }
+
+                    // Resize column width and row height to fit content  
+                    // worksheet.AutoSizeColumn(columnIndex); // Auto-adjust column width
+
+                    row.Height = -1; // Auto-adjust row height  
+
                 }
             }
+
+            // Remove all named ranges to avoid invalid references
+            //RemoveNamedRanges(workbook);
 
             using (FileStream writeStream = new FileStream(excelWritePath, FileMode.Create, FileAccess.Write))
             {
@@ -553,7 +597,9 @@ namespace ProcessManagement.Services.Excels
 
             if (worksheet == null) { return null; }
 
-            worksheet.Workbook.SetSheetName(0, excelSheetName); // Asign SheetName
+            // Sanitize the sheet name to remove invalid characters
+            string sanitizedSheetName = SanitizeSheetName(excelSheetName);
+            worksheet.Workbook.SetSheetName(0, sanitizedSheetName); // Assign sanitized sheet name
 
             foreach (var location in excelDatas)
             {
