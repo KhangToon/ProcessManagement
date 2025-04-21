@@ -188,6 +188,12 @@
                                                         {
                                                             <RadzenText Text="@($"{kqgc.GetPropertyValue(colName)}")" Style="font-size: 15px; height: contain; font-weight: 600"></RadzenText>
                                                         }
+                                                        else if (colName == KetQuaGC.KQGCDBName.ThoiGianGC)
+                                                        {
+                                                            string colValue = kqgc.GetPropertyValue(colName)?.ToString() ?? string.Empty;
+
+                                                            <RadzenText Text="@($"{(string.IsNullOrEmpty(colValue)? colValue : $"{colValue}s")}")" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
+                                                        }
                                                         else
                                                         {
                                                             <RadzenText Text="@($"{kqgc.GetPropertyValue(colName)}")" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
@@ -417,7 +423,7 @@
     private async Task FilterDSachKetQuaGCProcessing()
     {
         await Task.Run(() =>
-        {   
+        {
             isLoadingKQGCs = true;
 
             DSachKetQuaGCs = DSachKetQuaGCsBase.ToList();

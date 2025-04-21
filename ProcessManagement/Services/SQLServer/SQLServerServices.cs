@@ -9554,6 +9554,8 @@ namespace ProcessManagement.Services.SQLServer
                             tiendoGC.TenCongDoan = GetNguyenCongByID(tiendoGC.NCID.Value);
 
                             tiendoGC.DSachTienDoRows = GetListTienDoGCRow(tiendoGC.TDGCID.Value);
+
+                            // oderDSTDGCRows by day
                         }
                         listTienDoGC.Add(tiendoGC);
                     }
@@ -9671,7 +9673,7 @@ namespace ProcessManagement.Services.SQLServer
                 }
 
                 transaction.Commit();
-                result = tdgcid;
+                result = tdgcrowID;
             }
             catch (Exception ex)
             {
@@ -9774,7 +9776,8 @@ namespace ProcessManagement.Services.SQLServer
 
                     using var command = connection.CreateCommand();
 
-                    command.CommandText = $"SELECT * FROM [{TienDoGCRow.DBName.Table_TienDoGCRow}] WHERE [{TienDoGCRow.DBName.TDGCID}] = @TDGCID";
+                    command.CommandText = $"SELECT * FROM [{TienDoGCRow.DBName.Table_TienDoGCRow}] WHERE [{TienDoGCRow.DBName.TDGCID}] = @TDGCID" +
+                        $" ORDER BY [{TienDoGCRow.DBName.NgayGC}] ASC";
 
                     command.Parameters.AddWithValue("@TDGCID", tdgcID);
 
@@ -9842,6 +9845,10 @@ namespace ProcessManagement.Services.SQLServer
                         }
                     }
 
+                    // Add ORDER BY clause
+                    command.CommandText += $" ORDER BY [{TienDoGCRow.DBName.NgayGC}] ASC";
+
+
                     using var reader = command.ExecuteReader();
 
                     while (reader.Read())
@@ -9861,7 +9868,7 @@ namespace ProcessManagement.Services.SQLServer
                                 item.Value = columnValue == DBNull.Value ? null : columnValue;
                             }
                         }
-                        
+
                         listTienDoGCRow.Add(tiendoGCrow);
                     }
                 }
@@ -9873,7 +9880,6 @@ namespace ProcessManagement.Services.SQLServer
             }
             return (listTienDoGCRow, errorMessage);
         }
-
 
         #endregion
 
