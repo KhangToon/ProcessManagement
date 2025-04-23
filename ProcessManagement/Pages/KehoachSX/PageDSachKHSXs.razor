@@ -82,231 +82,257 @@
         </RadzenStack>
         <RadzenCard Variant="Variant.Flat" Style="height: 95%; width: 100%; padding: 10px; overflow-y: scroll">
             <RadzenStack Orientation="Orientation.Vertical" Gap="20px" Style="height: contain; width: 100%; padding: 0px;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                @foreach (var khsx in DSKHSXs)
-                {
-                    <RadzenCard class="rz-shadow-5" Variant="Variant.Filled" Style="width: 100%; height: contain; padding: 2px;">
-                        <RadzenPanel AllowCollapse="true" Style="width: 100%; padding-bottom: 0px;" Collapsed="@(khsx.isCollapsed == true)" Collapse="@(() => {khsx.isCollapsed = true;})">
-                            <HeaderTemplate>
-                                <RadzenRow Gap="0" Style="width: 100%; padding-right: 10px">
-                                    <RadzenColumn @onclick="() => {khsx.isCollapsed = !khsx.isCollapsed; OnCollapsedKHSXDetails(khsx);}">
-                                        <RadzenStack Style="cursor: pointer; width: 100%;" Gap="0" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                                            <RadzenStack Style="width: contain; padding-left: 5px; padding-right: 5px" Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                                <RadzenText TextStyle="TextStyle.H6" class="rz-display-flex rz-align-items-center rz-m-0">
-                                                    <RadzenIcon Icon="edit_note" class="rz-me-1" />
-                                                </RadzenText>
-                                                <RadzenText Text="Kế hoạch sản xuất: " Style="font-size: 18px; color: black"></RadzenText>
-                                                <RadzenText TextStyle="TextStyle.H6" class="rz-display-flex rz-align-items-center rz-m-0">
-                                                    <b>@khsx.MaLSX.Value?.ToString()</b>
-                                                </RadzenText>
+                @{
+                    var khsxcount = DSKHSXs.Count;
 
-                                                <RadzenStack Style="width: contain; margin-left: 40px" Gap="0" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
-                                                    <RadzenButton Visible="@(object.Equals(khsx.IsDoneKHSX.Value, 1))" Icon="check" Text="Đã hoàn thành" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Small" Style="font-weight: 600; color: darkgreen; font-size: 16px; cursor: default;"></RadzenButton>
-                                                    <RadzenButton Visible="@(object.Equals(khsx.IsDoneKHSX.Value, 0))" Text="Đang sản xuất" ButtonStyle="ButtonStyle.Warning" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Small" Style="font-weight: 600; color: goldenrod; font-size: 16px; cursor: default;"></RadzenButton>
-                                                </RadzenStack>
-                                            </RadzenStack>
+                    var takeDSKHSXs = DSKHSXs.Take(NumberOfDisplayKHSXs).ToList();
 
-                                            <RadzenStack Style="width: contain; padding-left: 5px; padding-right: 5px" Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                                <RadzenText Text="Mã sản phẩm: " Style="font-size: 18px; color: black; margin-left: 30px"></RadzenText>
-                                                <RadzenText TextStyle="TextStyle.H6" class="rz-display-flex rz-align-items-center rz-m-0">
-                                                    <b>@khsx.TargetSanPham?.SP_MaSP.Value?.ToString()</b>
-                                                </RadzenText>
-                                            </RadzenStack>
-                                        </RadzenStack>
-                                    </RadzenColumn>
-                                    <RadzenColumn Size="3" @onclick="() => {khsx.isCollapsed = !khsx.isCollapsed; OnCollapsedKHSXDetails(khsx);}" Style="cursor: pointer;">
+                    var takeDSKHSXcount = takeDSKHSXs.Count;
 
-                                    </RadzenColumn>
-                                    <RadzenColumn Size="2">
-                                        <RadzenStack Style="width: 100%;" Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
-                                            @{
-                                                _ = int.TryParse(khsx.IsAllowDisplay.Value?.ToString(), out int allowdisplay) ? allowdisplay : 0;
-                                            }
-                                            <RadzenCheckBox TValue="bool" Value="@(allowdisplay == 1)" Change="@(async(args) => await OnAllowHienThiKHSXChanged(khsx, args))" Name="@($"isallowdisplayproperty_{khsx.KHSXID.Value}")" />
-                                            <RadzenLabel Visible="@(allowdisplay == 1)" Text="Hiển thị" Style="color: darkgreen; font-size: 14px; font-weight: 500; cursor: pointer" Component="@($"isallowdisplayproperty_{khsx.KHSXID.Value}")" />
-                                            <RadzenLabel Visible="@(allowdisplay == 0)" Text="Hiển thị" Style="color: red; font-size: 14px; font-weight: 500; cursor: pointer" Component="@($"isallowdisplayproperty_{khsx.KHSXID.Value}")" />
-                                            <RadzenButton Click="@(() => {khsx.isCollapsed = !khsx.isCollapsed; OnCollapsedKHSXDetails(khsx);})" Text="@($"{(khsx.isCollapsed? "Mở rộng" : "Thu gọn")}")" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Variant="Variant.Flat" Size="ButtonSize.ExtraSmall" Style="font-weight: 500; font-size: 14px; padding-left: 15px; padding-right: 15px; cursor: default"></RadzenButton>
-                                        </RadzenStack>
-                                    </RadzenColumn>
-                                </RadzenRow>
-                            </HeaderTemplate>
-                            <ChildContent>
-                                <RadzenTabs Style="width: 100%; min-height: 100% !important; margin-top: 15px" SelectedIndex="@selectedTabIndex">
-                                    <Tabs>
-                                        <RadzenTabsItem>
-                                            <Template>
-                                                <RadzenText Text="@("BIỂU ĐỒ TIẾN ĐỘ")" Style="color: darkred; font-weight: 500; font-size: 15px"></RadzenText>
-                                            </Template>
-                                            <ChildContent>
-                                                <RadzenStack Visible="@(khsx.isCollapsed == false)">
-                                                    @*<BootstrapChart TargetKHSX="@khsx"></BootstrapChart>*@                                                
-                                                                 <ChartTracking TargetKHSX="@khsx"></ChartTracking>
-                                                </RadzenStack>
-                                            </ChildContent>
-                                        </RadzenTabsItem>
+                    foreach (var khsx in takeDSKHSXs)
+                    {
+                        <RadzenCard class="rz-shadow-5" Variant="Variant.Filled" Style="width: 100%; height: contain; padding: 2px;">
+                            <RadzenPanel AllowCollapse="true" Style="width: 100%; padding-bottom: 0px;" Collapsed="@(khsx.isCollapsed == true)" Collapse="@(() => {khsx.isCollapsed = true;})">
+                                <HeaderTemplate>
+                                    <RadzenRow Gap="0" Style="width: 100%; padding-right: 10px">
+                                        <RadzenColumn @onclick="() => {khsx.isCollapsed = !khsx.isCollapsed; OnCollapsedKHSXDetails(khsx);}">
+                                            <RadzenStack Style="cursor: pointer; width: 100%;" Gap="0" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                                <RadzenStack Style="width: contain; padding-left: 5px; padding-right: 5px" Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                    <RadzenText Text="@($"{takeDSKHSXs.IndexOf(khsx) + 1}/{((takeDSKHSXcount < khsxcount) ? takeDSKHSXcount : khsxcount)}")" Style="font-size: 14px;"></RadzenText>
+                                                    <RadzenText TextStyle="TextStyle.H6" class="rz-display-flex rz-align-items-center rz-m-0">
+                                                        <RadzenIcon Icon="edit_note" class="rz-me-1" />
+                                                    </RadzenText>
+                                                    <RadzenText Text="Kế hoạch sản xuất: " Style="font-size: 18px; color: black"></RadzenText>
+                                                    <RadzenText TextStyle="TextStyle.H6" class="rz-display-flex rz-align-items-center rz-m-0">
+                                                        <b>@khsx.MaLSX.Value?.ToString()</b>
+                                                    </RadzenText>
 
-                                        <RadzenTabsItem>
-                                            <Template>
-                                                <RadzenText Text="@($"THÔNG TIN KHSX - {khsx.MaLSX.Value?.ToString()}")" Style="color: darkred; font-weight: 500; font-size: 15px"></RadzenText>
-                                            </Template>
-                                            <ChildContent>
-                                                <RadzenStack Visible="@(khsx.isCollapsed == false)">
-                                                    <DialogDetailKHSX TargetMQLLot="@TargetMQLLot" SelectKHSX="@khsx" IsNotDialog="true"></DialogDetailKHSX>
-                                                </RadzenStack>
-                                            </ChildContent>
-                                        </RadzenTabsItem>
-
-                                        <RadzenTabsItem>
-                                            <Template>
-                                                <RadzenText Text="@("DANH SÁCH LOT NVL")" Style="color: darkred; font-weight: 500; font-size: 15px"></RadzenText>
-                                            </Template>
-                                            <ChildContent>
-                                                <RadzenStack Visible="@(khsx.isCollapsed == false)">
-                                                    <DanhSachLotNVL TargetKHSX="@khsx"></DanhSachLotNVL>
-                                                </RadzenStack>
-                                            </ChildContent>
-                                        </RadzenTabsItem>
-
-                                        <RadzenTabsItem>
-                                            <Template>
-                                                <RadzenText Text="@("THEO DÕI SẢN XUẤT")" Style="color: darkred; font-weight: 500; font-size: 15px;"></RadzenText>
-                                            </Template>
-                                            <ChildContent>
-                                                <RadzenStack Visible="@(khsx.isCollapsed == false)">
-                                                    <TheoDoiSanXuat TargetKHSX="@khsx"></TheoDoiSanXuat>
-                                                </RadzenStack>
-                                            </ChildContent>
-                                        </RadzenTabsItem>
-
-                                        <RadzenTabsItem>
-                                            <Template>
-                                                <RadzenText Text="@("QUẢN LÝ CÔNG ĐOẠN")" Style="color: darkred; font-weight: 500; font-size: 15px"></RadzenText>
-                                            </Template>
-                                            <ChildContent>
-                                                <RadzenStack Visible="@(khsx.isCollapsed == false)">
-                                                    <QLCongDoanPage TargetMQLLot="@TargetMQLLot" TargetKHSX="@khsx"></QLCongDoanPage>
-                                                </RadzenStack>
-                                            </ChildContent>
-                                        </RadzenTabsItem>
-                                    </Tabs>
-                                </RadzenTabs>
-                            </ChildContent>
-                            <SummaryTemplate>
-                                <!--LSX infor-->
-                                <!--Tien do gia cong-->
-                                <RadzenRow Gap="0" Style="width: 100%; height: contain;">
-                                    <RadzenColumn Size="12" SizeMD="12">
-                                        <RadzenStack Style="width: 100%; height: contain; padding: 20px; padding-top: 10px; padding-bottom: 0" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                            <RadzenCard @onclick="() => {khsx.isCollapsed = false;}" Visible=@(khsx.KHSXID.Value != null) Variant="Variant.Outlined" Style="cursor: pointer; width: 100%; height: contain; padding: 0px; border-radius: 10px; border-width: 2px">
-                                                <RadzenStack Orientation="Orientation.Vertical" Gap="0" Style="height: 100%; width: 100%; padding: 10px; padding-top: 0; padding-bottom: 0" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                                    <RadzenStack Gap="15px" Orientation="Orientation.Horizontal" Style="height: 100%; width: 100%; padding: 10px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                                                        <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style="height: 50%; width: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                            <RadzenText Text="Mã KHSX" Style="font-size: 16px; font-weight: 500; color: darkgray "></RadzenText>
-                                                            <RadzenText Visible="@(khsx?.MaLSX.Value != null)" Text="@khsx?.MaLSX.Value?.ToString()" Style="font-size: 16px; font-weight: bold; color: red"></RadzenText>
-                                                        </RadzenStack>
-
-                                                        <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style="height: 50%; width: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                            <RadzenText Text="@Common.SP_MaSP" Style="font-size: 16px; font-weight: 500; color: darkgray "></RadzenText>
-                                                            <RadzenText Visible="@(khsx?.TargetSanPham != null)" Text="@(khsx?.TargetSanPham?.SP_MaSP.Value?.ToString())" Style="font-size: 16px; font-weight: bold; color: darkblue "></RadzenText>
-                                                        </RadzenStack>
-
-                                                        <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style="height: 50%; width: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                            <RadzenText Text="@Common.SP_TenSanPham" Style="font-size: 16px; font-weight: 500; color: darkgray "></RadzenText>
-                                                            <RadzenText Visible="@(khsx?.TargetSanPham != null)" Text="@(khsx?.TargetSanPham?.SP_TenSanPham.Value?.ToString())" Style="font-size: 16px; font-weight: bold; color: darkblue "></RadzenText>
-                                                        </RadzenStack>
-
-                                                        <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style="height: 50%; width: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                            <RadzenText Text="Nguyên vật liệu" Style="font-size: 16px; font-weight: 500; color: darkgray "></RadzenText>
-                                                            <RadzenText Visible="@(khsx?.DSachNVLofKHSXs.Count > 0)" Text="@(khsx?.DSachNVLofKHSXs is { Count: > 0 } ? string.Join(", ", khsx.DSachNVLofKHSXs.Select(nvl => nvl.TenNVL)) : string.Empty)"
-                                                                        Style="font-size: 16px; font-weight: bold; color: darkblue "></RadzenText>
-                                                        </RadzenStack>
-
-                                                        <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style="height: 50%; width: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                            <RadzenText Text="Số lượng PO" Style="font-size: 16px; font-weight: 500; color: darkgray "></RadzenText>
-                                                            @{
-                                                                int.TryParse(khsx?.SLSanPhamPO.Value?.ToString(), out int slsp);
-                                                            }
-                                                            <RadzenText Visible="@(khsx?.SLSanPhamPO.Value != null)" Text="@($"{slsp + khsx?.SoluongBoSung}")" Style="font-size: 16px; font-weight: bold; color: black "></RadzenText>
-                                                        </RadzenStack>
-
-                                                        <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style="height: 50%; width: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                            <RadzenText Text="Tỉ lệ lỗi cho phép" Style="font-size: 16px; font-weight: 500; color: darkgray "></RadzenText>
-                                                            @{
-                                                                int slloichophep = (int.TryParse(khsx.SLSanPhamSX.Value?.ToString(), out int slsx) ? slsx : 0) - (int.TryParse(khsx.SLSanPhamPO.Value?.ToString(), out int slpo) ? slpo : 0);
-                                                            }
-                                                            <RadzenText Text="@($"{khsx?.TileLoi.Value?.ToString()?? "0"} (%) ({slloichophep} pcs)")" Style="font-size: 16px; font-weight: bold; color: darkred "></RadzenText>
-                                                        </RadzenStack>
-
-                                                        <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style="height: 50%; width: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                            <RadzenText Text="Số lượng NVL" Style="font-size: 16px; font-weight: 500; color: darkgray "></RadzenText>
-
-                                                            @{
-                                                                int.TryParse(khsx?.DinhMuc.Value?.ToString(), out int dm);
-                                                            }
-                                                            <RadzenText Visible="@(khsx?.DinhMuc.Value != null)" Text="@($"{dm + khsx?.SoluongBoSung} (pcs)")" Style="font-size: 16px; font-weight: bold; color: black "></RadzenText>
-                                                        </RadzenStack>
-
-                                                        <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style="height: 50%; width: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                            <RadzenText Text="Số lượng LOT" Style="font-size: 16px; font-weight: 500; color: darkgray "></RadzenText>
-                                                            <RadzenText Visible="@(khsx.DSLOT_KHSXs.Count > 0)" Text="@($"{khsx.DSLOT_KHSXs.Count} (lot)")" Style="font-size: 16px; font-weight: bold; color: black "></RadzenText>
-                                                        </RadzenStack>
-
-                                                        <RadzenStack Visible="false" Gap="0" Orientation="Orientation.Vertical" Style="height: 50%; width: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                            <RadzenText Text="Mã quản lý LOT" Style="font-size: 16px; font-weight: 500; color: darkgray "></RadzenText>
-                                                            @{
-                                                                NguyenCongofKHSX? fistCongdoan = khsx?.DSachCongDoans.FirstOrDefault();
-                                                            }
-                                                            <RadzenText Visible="@(fistCongdoan!= null)" Text="@($"{fistCongdoan?.DSachNVLCongDoans.FirstOrDefault()?.MaQuanLy.Value?.ToString()?? "_"} --> {fistCongdoan?.DSachNVLCongDoans.LastOrDefault()?.MaQuanLy.Value?? "_"}")"
-                                                                        Style="font-size: 16px; font-weight: bold; color: black "></RadzenText>
-                                                        </RadzenStack>
-
-                                                        <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style="height: 50%; width: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                            <RadzenText Text="@Common.NgayTao" Style="font-size: 16px; font-weight: 500; color: darkgray "></RadzenText>
-                                                            @if (khsx?.NgayTao.Value != null)
-                                                            {
-                                                                DateTime ngaytao = Convert.ToDateTime(khsx?.NgayTao.Value?.ToString());
-                                                                <RadzenText Text="@ngaytao.ToString(Common.FormatNoTime_ddMMyyyy)" Style="font-size: 16px; font-weight: bold; color: black "></RadzenText>
-                                                            }
-                                                            else
-                                                            {
-                                                                <RadzenText Text="----" Style="font-size: 16px; font-weight: bold; color: black "></RadzenText>
-                                                            }
-                                                        </RadzenStack>
-                                                    </RadzenStack>
-                                                    <RadzenStack Visible="false" Orientation="Orientation.Horizontal" Style="height: contain; width: 100%; padding: 10px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                                                        @{
-                                                            <RadzenText Text="Xem chi tiết KHSX" @onclick="@(() => OnOpenChitietKHSX(khsx))" TextAlign="TextAlign.Center" Style="font-size: 16px; font-weight: 500; color: Highlight; cursor: pointer "></RadzenText>
-                                                        }
+                                                    <RadzenStack Style="width: contain; margin-left: 40px" Gap="0" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                                                        <RadzenButton Visible="@(object.Equals(khsx.IsDoneKHSX.Value, 1))" Icon="check" Text="Đã hoàn thành" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Small" Style="font-weight: 600; color: darkgreen; font-size: 16px; cursor: default;"></RadzenButton>
+                                                        <RadzenButton Visible="@(object.Equals(khsx.IsDoneKHSX.Value, 0))" Text="Đang sản xuất" ButtonStyle="ButtonStyle.Warning" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Small" Style="font-weight: 600; color: goldenrod; font-size: 16px; cursor: default;"></RadzenButton>
                                                     </RadzenStack>
                                                 </RadzenStack>
-                                            </RadzenCard>
-                                        </RadzenStack>
-                                    </RadzenColumn>
 
-                                    <RadzenColumn Size="12" SizeMD="12">
-                                        <RadzenStack Gap="10px" Style="width: 100%; padding: 20px; padding-top: 0px; padding-bottom: 10px; overflow-x: scroll" Orientation=Orientation.Horizontal AlignItems="AlignItems.End" JustifyContent="JustifyContent.Start">
-                                            @foreach (var (index, cdoan) in khsx.DSachCongDoans.Select((item, idx) => (idx, item)))
-                                            {
-                                                <RadzenCard class="rz-shadow-5" Variant="Variant.Flat" Style="height: contain; padding: 2px;">
-                                                    <RadzenStack Gap="5px" Orientation="Orientation.Vertical" Style="height: contain; width: contain; min-width: 160px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                                                        <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" Style="height: contain; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                                                            <RadzenButton Text="@($"{index + 1}.  {cdoan.TenCongDoan.Value?.ToString()}")" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Variant="Variant.Flat" Size="ButtonSize.Small"
-                                                                          Style="font-weight: 600; white-space: nowrap; font-size: 16px; cursor: default; border-radius: 3px; padding: 5px 10px; width: 100%"></RadzenButton>
+                                                <RadzenStack Style="width: contain; padding-left: 5px; padding-right: 5px" Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                    <RadzenText Text="Mã sản phẩm: " Style="font-size: 18px; color: black; margin-left: 30px"></RadzenText>
+                                                    <RadzenText TextStyle="TextStyle.H6" class="rz-display-flex rz-align-items-center rz-m-0">
+                                                        <b>@khsx.TargetSanPham?.SP_MaSP.Value?.ToString()</b>
+                                                    </RadzenText>
+                                                </RadzenStack>
+                                            </RadzenStack>
+                                        </RadzenColumn>
+                                        <RadzenColumn Size="3" @onclick="() => {khsx.isCollapsed = !khsx.isCollapsed; OnCollapsedKHSXDetails(khsx);}" Style="cursor: pointer;">
+
+                                        </RadzenColumn>
+                                        <RadzenColumn Size="2">
+                                            <RadzenStack Style="width: 100%;" Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                                                @{
+                                                    _ = int.TryParse(khsx.IsAllowDisplay.Value?.ToString(), out int allowdisplay) ? allowdisplay : 0;
+                                                }
+                                                <RadzenCheckBox TValue="bool" Value="@(allowdisplay == 1)" Change="@(async(args) => await OnAllowHienThiKHSXChanged(khsx, args))" Name="@($"isallowdisplayproperty_{khsx.KHSXID.Value}")" />
+                                                <RadzenLabel Visible="@(allowdisplay == 1)" Text="Hiển thị" Style="color: darkgreen; font-size: 14px; font-weight: 500; cursor: pointer" Component="@($"isallowdisplayproperty_{khsx.KHSXID.Value}")" />
+                                                <RadzenLabel Visible="@(allowdisplay == 0)" Text="Hiển thị" Style="color: red; font-size: 14px; font-weight: 500; cursor: pointer" Component="@($"isallowdisplayproperty_{khsx.KHSXID.Value}")" />
+                                                <RadzenButton Click="@(() => {khsx.isCollapsed = !khsx.isCollapsed; OnCollapsedKHSXDetails(khsx);})" Text="@($"{(khsx.isCollapsed? "Mở rộng" : "Thu gọn")}")" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Variant="Variant.Flat" Size="ButtonSize.ExtraSmall" Style="font-weight: 500; font-size: 14px; padding-left: 15px; padding-right: 15px; cursor: default"></RadzenButton>
+                                            </RadzenStack>
+                                        </RadzenColumn>
+                                    </RadzenRow>
+                                </HeaderTemplate>
+                                <ChildContent>
+                                    <RadzenTabs Style="width: 100%; min-height: 100% !important; margin-top: 15px" SelectedIndex="@selectedTabIndex">
+                                        <Tabs>
+                                            <RadzenTabsItem>
+                                                <Template>
+                                                    <RadzenText Text="@("BIỂU ĐỒ TIẾN ĐỘ")" Style="color: darkred; font-weight: 500; font-size: 15px"></RadzenText>
+                                                </Template>
+                                                <ChildContent>
+                                                    <RadzenStack Visible="@(khsx.isCollapsed == false)">
+                                                        @*<BootstrapChart TargetKHSX="@khsx"></BootstrapChart>*@                                                
+                                                                <ChartTracking TargetKHSX="@khsx"></ChartTracking>
+                                                    </RadzenStack>
+                                                </ChildContent>
+                                            </RadzenTabsItem>
+
+                                            <RadzenTabsItem>
+                                                <Template>
+                                                    <RadzenText Text="@($"THÔNG TIN KHSX - {khsx.MaLSX.Value?.ToString()}")" Style="color: darkred; font-weight: 500; font-size: 15px"></RadzenText>
+                                                </Template>
+                                                <ChildContent>
+                                                    <RadzenStack Visible="@(khsx.isCollapsed == false)">
+                                                        <DialogDetailKHSX TargetMQLLot="@TargetMQLLot" SelectKHSX="@khsx" IsNotDialog="true"></DialogDetailKHSX>
+                                                    </RadzenStack>
+                                                </ChildContent>
+                                            </RadzenTabsItem>
+
+                                            <RadzenTabsItem>
+                                                <Template>
+                                                    <RadzenText Text="@("DANH SÁCH LOT NVL")" Style="color: darkred; font-weight: 500; font-size: 15px"></RadzenText>
+                                                </Template>
+                                                <ChildContent>
+                                                    <RadzenStack Visible="@(khsx.isCollapsed == false)">
+                                                        <DanhSachLotNVL TargetKHSX="@khsx"></DanhSachLotNVL>
+                                                    </RadzenStack>
+                                                </ChildContent>
+                                            </RadzenTabsItem>
+
+                                            <RadzenTabsItem>
+                                                <Template>
+                                                    <RadzenText Text="@("THEO DÕI SẢN XUẤT")" Style="color: darkred; font-weight: 500; font-size: 15px;"></RadzenText>
+                                                </Template>
+                                                <ChildContent>
+                                                    <RadzenStack Visible="@(khsx.isCollapsed == false)">
+                                                        <TheoDoiSanXuat TargetKHSX="@khsx"></TheoDoiSanXuat>
+                                                    </RadzenStack>
+                                                </ChildContent>
+                                            </RadzenTabsItem>
+
+                                            <RadzenTabsItem>
+                                                <Template>
+                                                    <RadzenText Text="@("QUẢN LÝ CÔNG ĐOẠN")" Style="color: darkred; font-weight: 500; font-size: 15px"></RadzenText>
+                                                </Template>
+                                                <ChildContent>
+                                                    <RadzenStack Visible="@(khsx.isCollapsed == false)">
+                                                        <QLCongDoanPage TargetMQLLot="@TargetMQLLot" TargetKHSX="@khsx"></QLCongDoanPage>
+                                                    </RadzenStack>
+                                                </ChildContent>
+                                            </RadzenTabsItem>
+                                        </Tabs>
+                                    </RadzenTabs>
+                                </ChildContent>
+                                <SummaryTemplate>
+                                    <!--LSX infor-->
+                                    <!--Tien do gia cong-->
+                                    <RadzenRow Gap="0" Style="width: 100%; height: contain;">
+                                        <RadzenColumn Size="12" SizeMD="12">
+                                            <RadzenStack Style="width: 100%; height: contain; padding: 20px; padding-top: 10px; padding-bottom: 0" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                <RadzenCard @onclick="() => {khsx.isCollapsed = false;}" Visible=@(khsx.KHSXID.Value != null) Variant="Variant.Outlined" Style="cursor: pointer; width: 100%; height: contain; padding: 0px; border-radius: 10px; border-width: 2px">
+                                                    <RadzenStack Orientation="Orientation.Vertical" Gap="0" Style="height: 100%; width: 100%; padding: 10px; padding-top: 0; padding-bottom: 0" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                        <RadzenStack Gap="15px" Orientation="Orientation.Horizontal" Style="height: 100%; width: 100%; padding: 10px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                                            <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style="height: 50%; width: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                <RadzenText Text="Mã KHSX" Style="font-size: 16px; font-weight: 500; color: darkgray "></RadzenText>
+                                                                <RadzenText Visible="@(khsx?.MaLSX.Value != null)" Text="@khsx?.MaLSX.Value?.ToString()" Style="font-size: 16px; font-weight: bold; color: red"></RadzenText>
+                                                            </RadzenStack>
+
+                                                            <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style="height: 50%; width: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                <RadzenText Text="@Common.SP_MaSP" Style="font-size: 16px; font-weight: 500; color: darkgray "></RadzenText>
+                                                                <RadzenText Visible="@(khsx?.TargetSanPham != null)" Text="@(khsx?.TargetSanPham?.SP_MaSP.Value?.ToString())" Style="font-size: 16px; font-weight: bold; color: darkblue "></RadzenText>
+                                                            </RadzenStack>
+
+                                                            <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style="height: 50%; width: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                <RadzenText Text="@Common.SP_TenSanPham" Style="font-size: 16px; font-weight: 500; color: darkgray "></RadzenText>
+                                                                <RadzenText Visible="@(khsx?.TargetSanPham != null)" Text="@(khsx?.TargetSanPham?.SP_TenSanPham.Value?.ToString())" Style="font-size: 16px; font-weight: bold; color: darkblue "></RadzenText>
+                                                            </RadzenStack>
+
+                                                            <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style="height: 50%; width: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                <RadzenText Text="Nguyên vật liệu" Style="font-size: 16px; font-weight: 500; color: darkgray "></RadzenText>
+                                                                <RadzenText Visible="@(khsx?.DSachNVLofKHSXs.Count > 0)" Text="@(khsx?.DSachNVLofKHSXs is { Count: > 0 } ? string.Join(", ", khsx.DSachNVLofKHSXs.Select(nvl => nvl.TenNVL)) : string.Empty)"
+                                                                            Style="font-size: 16px; font-weight: bold; color: darkblue "></RadzenText>
+                                                            </RadzenStack>
+
+                                                            <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style="height: 50%; width: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                <RadzenText Text="Số lượng PO" Style="font-size: 16px; font-weight: 500; color: darkgray "></RadzenText>
+                                                                @{
+                                                                    int.TryParse(khsx?.SLSanPhamPO.Value?.ToString(), out int slsp);
+                                                                }
+                                                                <RadzenText Visible="@(khsx?.SLSanPhamPO.Value != null)" Text="@($"{slsp + khsx?.SoluongBoSung}")" Style="font-size: 16px; font-weight: bold; color: black "></RadzenText>
+                                                            </RadzenStack>
+
+                                                            <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style="height: 50%; width: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                <RadzenText Text="Tỉ lệ lỗi cho phép" Style="font-size: 16px; font-weight: 500; color: darkgray "></RadzenText>
+                                                                @{
+                                                                    int slloichophep = (int.TryParse(khsx.SLSanPhamSX.Value?.ToString(), out int slsx) ? slsx : 0) - (int.TryParse(khsx.SLSanPhamPO.Value?.ToString(), out int slpo) ? slpo : 0);
+                                                                }
+                                                                <RadzenText Text="@($"{khsx?.TileLoi.Value?.ToString()?? "0"} (%) ({slloichophep} pcs)")" Style="font-size: 16px; font-weight: bold; color: darkred "></RadzenText>
+                                                            </RadzenStack>
+
+                                                            <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style="height: 50%; width: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                <RadzenText Text="Số lượng NVL" Style="font-size: 16px; font-weight: 500; color: darkgray "></RadzenText>
+
+                                                                @{
+                                                                    int.TryParse(khsx?.DinhMuc.Value?.ToString(), out int dm);
+                                                                }
+                                                                <RadzenText Visible="@(khsx?.DinhMuc.Value != null)" Text="@($"{dm + khsx?.SoluongBoSung} (pcs)")" Style="font-size: 16px; font-weight: bold; color: black "></RadzenText>
+                                                            </RadzenStack>
+
+                                                            <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style="height: 50%; width: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                <RadzenText Text="Số lượng LOT" Style="font-size: 16px; font-weight: 500; color: darkgray "></RadzenText>
+                                                                <RadzenText Visible="@(khsx.DSLOT_KHSXs.Count > 0)" Text="@($"{khsx.DSLOT_KHSXs.Count} (lot)")" Style="font-size: 16px; font-weight: bold; color: black "></RadzenText>
+                                                            </RadzenStack>
+
+                                                            <RadzenStack Visible="false" Gap="0" Orientation="Orientation.Vertical" Style="height: 50%; width: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                <RadzenText Text="Mã quản lý LOT" Style="font-size: 16px; font-weight: 500; color: darkgray "></RadzenText>
+                                                                @{
+                                                                    NguyenCongofKHSX? fistCongdoan = khsx?.DSachCongDoans.FirstOrDefault();
+                                                                }
+                                                                <RadzenText Visible="@(fistCongdoan!= null)" Text="@($"{fistCongdoan?.DSachNVLCongDoans.FirstOrDefault()?.MaQuanLy.Value?.ToString()?? "_"} --> {fistCongdoan?.DSachNVLCongDoans.LastOrDefault()?.MaQuanLy.Value?? "_"}")"
+                                                                            Style="font-size: 16px; font-weight: bold; color: black "></RadzenText>
+                                                            </RadzenStack>
+
+                                                            <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style="height: 50%; width: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                <RadzenText Text="@Common.NgayTao" Style="font-size: 16px; font-weight: 500; color: darkgray "></RadzenText>
+                                                                @if (khsx?.NgayTao.Value != null)
+                                                                {
+                                                                    DateTime ngaytao = Convert.ToDateTime(khsx?.NgayTao.Value?.ToString());
+                                                                    <RadzenText Text="@ngaytao.ToString(Common.FormatNoTime_ddMMyyyy)" Style="font-size: 16px; font-weight: bold; color: black "></RadzenText>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <RadzenText Text="----" Style="font-size: 16px; font-weight: bold; color: black "></RadzenText>
+                                                                }
+                                                            </RadzenStack>
                                                         </RadzenStack>
-                                                        <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" Style="height: contain; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                            <RadzenButton Text="@($"{cdoan.sumTotalSubmited}/{cdoan.sLlimit}")" ButtonStyle="@((cdoan.sumTotalSubmited == cdoan.sLlimit)? ButtonStyle.Success : ButtonStyle.Primary)" Shade="@((cdoan.sumTotalSubmited == cdoan.sLlimit)? Shade.Darker : Shade.Light)" Size="ButtonSize.Small" Style="font-weight: 600; font-size: 16px; cursor: default; border-radius: 3px" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, $"Tiến độ", 100))"></RadzenButton>
-                                                            <RadzenButton Text="@($"{cdoan.sumOKSubmited}")" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Small" Style="font-weight: 600; color: darkgreen; font-size: 16px; cursor: default; border-radius: 3px" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, $" OK", 100))"></RadzenButton>
-                                                            <RadzenButton Visible="@(cdoan.sumNGSubmited > 0)" Text="@($"{cdoan.sumNGSubmited}")" ButtonStyle="ButtonStyle.Danger" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Small" Style="font-weight: 600; color: darkred; font-size: 16px; cursor: default; border-radius: 3px" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, $"NG", 100))"></RadzenButton>
+                                                        <RadzenStack Visible="false" Orientation="Orientation.Horizontal" Style="height: contain; width: 100%; padding: 10px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                                            @{
+                                                                <RadzenText Text="Xem chi tiết KHSX" @onclick="@(() => OnOpenChitietKHSX(khsx))" TextAlign="TextAlign.Center" Style="font-size: 16px; font-weight: 500; color: Highlight; cursor: pointer "></RadzenText>
+                                                            }
                                                         </RadzenStack>
                                                     </RadzenStack>
                                                 </RadzenCard>
-                                            }
-                                        </RadzenStack>
-                                    </RadzenColumn>
-                                </RadzenRow>
-                            </SummaryTemplate>
-                        </RadzenPanel>
-                    </RadzenCard>
+                                            </RadzenStack>
+                                        </RadzenColumn>
+
+                                        <RadzenColumn Size="12" SizeMD="12">
+                                            <RadzenStack Gap="10px" Style="width: 100%; padding: 20px; padding-top: 0px; padding-bottom: 10px; overflow-x: scroll" Orientation=Orientation.Horizontal AlignItems="AlignItems.End" JustifyContent="JustifyContent.Start">
+                                                @foreach (var (index, cdoan) in khsx.DSachCongDoans.Select((item, idx) => (idx, item)))
+                                                {
+                                                    <RadzenCard class="rz-shadow-5" Variant="Variant.Flat" Style="height: contain; padding: 2px;">
+                                                        <RadzenStack Gap="5px" Orientation="Orientation.Vertical" Style="height: contain; width: contain; min-width: 160px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                                            <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" Style="height: contain; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                                                <RadzenButton Text="@($"{index + 1}.  {cdoan.TenCongDoan.Value?.ToString()}")" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Variant="Variant.Flat" Size="ButtonSize.Small"
+                                                                              Style="font-weight: 600; white-space: nowrap; font-size: 16px; cursor: default; border-radius: 3px; padding: 5px 10px; width: 100%"></RadzenButton>
+                                                            </RadzenStack>
+                                                            <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" Style="height: contain; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                <RadzenButton Text="@($"{cdoan.sumTotalSubmited}/{cdoan.sLlimit}")" ButtonStyle="@((cdoan.sumTotalSubmited == cdoan.sLlimit)? ButtonStyle.Success : ButtonStyle.Primary)" Shade="@((cdoan.sumTotalSubmited == cdoan.sLlimit)? Shade.Darker : Shade.Light)" Size="ButtonSize.Small" Style="font-weight: 600; font-size: 16px; cursor: default; border-radius: 3px" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, $"Tiến độ", 100))"></RadzenButton>
+                                                                <RadzenButton Text="@($"{cdoan.sumOKSubmited}")" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Small" Style="font-weight: 600; color: darkgreen; font-size: 16px; cursor: default; border-radius: 3px" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, $" OK", 100))"></RadzenButton>
+                                                                <RadzenButton Visible="@(cdoan.sumNGSubmited > 0)" Text="@($"{cdoan.sumNGSubmited}")" ButtonStyle="ButtonStyle.Danger" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Small" Style="font-weight: 600; color: darkred; font-size: 16px; cursor: default; border-radius: 3px" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, $"NG", 100))"></RadzenButton>
+                                                            </RadzenStack>
+                                                        </RadzenStack>
+                                                    </RadzenCard>
+                                                }
+                                            </RadzenStack>
+                                        </RadzenColumn>
+                                    </RadzenRow>
+                                </SummaryTemplate>
+                            </RadzenPanel>
+                        </RadzenCard>
+                    }
+
+                    <RadzenRow Style="height: contain; width: 100%;">
+                        <RadzenColumn Size="4" SizeSM="4">
+                            <RadzenStack Orientation="Orientation.Horizontal" Gap="20px" Style="height: contain; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                <RadzenLabel Style="font-size: 15px; font-weight: 600; padding-left: 20px" Text="@($"Hiển thị {((NumberOfDisplayKHSXs < khsxcount)? NumberOfDisplayKHSXs : khsxcount)}/{khsxcount} KHSX")"></RadzenLabel>
+                            </RadzenStack>
+                        </RadzenColumn>
+                        <RadzenColumn Size="4" SizeSM="4">
+                            <RadzenStack Orientation="Orientation.Horizontal" Gap="20px" Style="height: contain; width: 100%; padding: 0px;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenButton Visible=@(NumberOfDisplayKHSXs < khsxcount) Click="@(() => NumberOfDisplayKHSXs += 20)" Text="Xem thêm" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
+                                              Style="height: contain; width: contain; font-size: 15px; font-weight: 600;" />
+                            </RadzenStack>
+                        </RadzenColumn>
+                        <RadzenColumn Size="4" SizeSM="4">
+                        </RadzenColumn>
+                    </RadzenRow>
                 }
+
             </RadzenStack>
         </RadzenCard>
     </RadzenStack>
@@ -325,6 +351,8 @@
 
     private Dictionary<int, string> DSachModeSearchKHSX = new() { { 0, "Tất cả" }, { 1, "Được hiển thị" }, { 2, "Đã ẩn" }, { 3, "Đã hoàn thành" }, { 4, "Chưa hoàn thành" } };
     private static int modeSearchKHSX = 1;
+
+    private int NumberOfDisplayKHSXs = 20;
 
     protected override async Task OnInitializedAsync()
     {
