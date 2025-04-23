@@ -735,7 +735,30 @@
         // Load tien do gia cong by khsxid/ncid/spid
         await ReLoadTienDoGCPage(ncid: NCID, khsxid: TargetKHSX.KHSXID.Value);
 
+        keyFilterMainColumns = CreateKeyPairsForDatagrid(DSachTienDoGCRowsBase);
+
         await base.OnInitializedAsync();
+    }
+
+    private Dictionary<string, List<string>> CreateKeyPairsForDatagrid(List<TienDoGCRow> tienDoGCRows)
+    {
+        Dictionary<string, List<string>> keyValuePairs = new();
+
+        foreach (var column in TienDoGCRow.GetClassProperties().Where(prop => prop.DispDatagrid))
+        {
+            string columnName = column.DBName ?? string.Empty;
+
+            List<string> uniqueValues = new();
+
+            uniqueValues = GetMainColumnKeysSearch(columnName);
+
+            if (!keyValuePairs.ContainsKey(columnName))
+            {
+                keyValuePairs[columnName] = uniqueValues;
+            }
+        }
+
+        return keyValuePairs;
     }
 
     protected async override Task OnParametersSetAsync()
@@ -754,6 +777,8 @@
 
             // Load tien do gia cong by khsxid/ncid/spid
             await ReLoadTienDoGCPage(ncid: NCID, khsxid: TargetKHSX.KHSXID.Value);
+
+            keyFilterMainColumns = CreateKeyPairsForDatagrid(DSachTienDoGCRowsBase);
         }
 
         await InvokeAsync(StateHasChanged);
@@ -1264,7 +1289,7 @@
                         }
                     }
                     else
-                    {   
+                    {
                         Dictionary<string, object?> pars = new();
                         pars.Add(TienDoGCRow.DBName.TDGCID, tiendorow.TDGCID.Value);
                         pars.Add(TienDoGCRow.DBName.NCID, tiendorow.NCID.Value);

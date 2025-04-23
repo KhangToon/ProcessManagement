@@ -76,7 +76,7 @@
                                                                     filterActive = !filterActive;
                                                                 })" />
                                     <!--Button Reset Filter-->
-                                    <RadzenButton Click="@(async () => {keyFilterExtraColumns = new(); keyFilterMainColumns = new(); await LoadAllDanhsachKQGCBase(0);})"
+                                    <RadzenButton Click="@(async () => {keyFilterMainColumnsSeleted = new(); await LoadAllDanhsachKQGCBase(0);})"
                                                   Icon="reset_settings" Text="Reset bộ lọc" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
                                                   Style="height: contain; width: contain; font-size: 15px; font-weight: 600;" />
 
@@ -149,10 +149,10 @@
                                                             FilterOperator="StringFilterOperator.Contains"
                                                             AllowSelectAll="true"
                                                             TValue="IEnumerable<string>"
-                                                            Data="@(GetMainColumnKeysSearch(colName))"
+                                                            Data="@(GetMainColumnKeysSearch(colName, DSachKetQuaGCsBase))"
                                                             Multiple="true"
-                                                            SelectedItem="@(keyFilterMainColumns.ContainsKey(colName)? keyFilterMainColumns[colName] : null)"
-                                                            Value="@(keyFilterMainColumns.ContainsKey(colName)? keyFilterMainColumns[colName] : null)"
+                                                            SelectedItem="@(GetMainColumnKeysSearch(colName, DSachKetQuaGCs))"
+                                                            Value="@(GetMainColumnKeysSearch(colName, DSachKetQuaGCs))"
                                                             ValueChanged="@((IEnumerable<string> args) => OnComboboxMainColumnSelectedChanged(args, colName))">
                                             </RadzenDropDown>
                                         </FilterTemplate>
@@ -250,8 +250,9 @@
     private DateTime endSearchDay = DateTime.Today;
     private string pagingSummaryFormat = "Displaying page {0} of {1} <b>(total {2} records)</b>";
 
-    private static Dictionary<string, List<string>> keyFilterMainColumns = new();
-    private Dictionary<string, List<string>> keyFilterExtraColumns = new();
+    private static Dictionary<string, List<string>> keyFilterMainColumnsBase = new();
+    private static Dictionary<string, List<string>> keyFilterMainColumnsSeleted = new();
+
     private static bool filterActive = true;
 
     private bool isLoadingKQGCs = false;
@@ -265,11 +266,13 @@
         // Load ds KetQuaGC base/ hien thi
         await LoadAllDanhsachKQGCBase(0);
 
-        // Khoi tao bien luu danh sach key search
-        await CreateCurrentSelectedKeyVariable();
+        // Create filter key
+        keyFilterMainColumnsBase = CreateFilterBaseKeyVariable(DSachKetQuaGCsBase);
+
+        keyFilterMainColumnsSeleted = keyFilterMainColumnsBase;
 
         // Load preFiltering value
-        await FilterDSachKetQuaGCProcessing();
+        //await FilterDSachKetQuaGCProcessing();
 
         await base.OnInitializedAsync();
     }
@@ -363,41 +366,44 @@
 
     #region Main Column Filtering
     // Khoi tao bien luu danh sach key search
-    private async Task CreateCurrentSelectedKeyVariable()
+    private Dictionary<string, List<string>> CreateFilterBaseKeyVariable(List<KetQuaGC> ketquagiacongs)
     {
-        await Task.Run(() =>
+        Dictionary<string, List<string>> keyValuePairs = new();
+
+        var properties = KetQuaGC.GetClassProperties().Where(prop => prop.DispDatagrid);
+
+        foreach (var column in properties)
         {
-            // Get main key colum
-            List<Propertyy> columns = KetQuaGC.GetClassProperties() ?? new();
-            foreach (var column in columns)
-            {
-                string key = column.DBName ?? string.Empty;
-                if (key != string.Empty && !keyFilterMainColumns.ContainsKey(key))
-                {
-                    keyFilterMainColumns.Add(key, new());
-                }
-            }
-        });
+            string columnName = column.DBName ?? string.Empty;
+
+            List<string> uniqueValues = new();
+
+            uniqueValues = GetMainColumnKeysSearch(columnName, ketquagiacongs);
+
+            keyValuePairs[columnName] = uniqueValues;
+        }
+
+        return keyValuePairs;
     }
 
     // Lay danh sach key search Main column
-    private List<string> GetMainColumnKeysSearch(string targetColumn)
+    private List<string> GetMainColumnKeysSearch(string targetColumn, List<KetQuaGC> ketQuaGCsbase)
     {
         List<string> keys = new();
 
         if (targetColumn == KetQuaGC.KQGCDBName.SPID || targetColumn == KetQuaGC.KQGCDBName.MMID || targetColumn == KetQuaGC.KQGCDBName.NCID || targetColumn == KetQuaGC.KQGCDBName.NVIDs || targetColumn == KetQuaGC.KQGCDBName.NGIDs)
         {
             // Convert ID to stringValue
-            keys = DSachKetQuaGCsBase
+            keys = ketQuaGCsbase
             .Select(nv => GetColumnValueByID(nv.GetPropertyValue(targetColumn), targetColumn) ?? string.Empty)
-            .Where(result => !string.IsNullOrEmpty(result)).Distinct()
+            .Where(result => result != null).Distinct()
             .ToList();
         }
         else
         {
-            keys = DSachKetQuaGCsBase
+            keys = ketQuaGCsbase
             .Select(nv => nv.GetPropertyValue(targetColumn)?.ToString() ?? string.Empty)
-            .Where(result => !string.IsNullOrEmpty(result)).Distinct()
+            .Where(result => result != null).Distinct()
             .ToList();
         }
 
@@ -407,17 +413,27 @@
     // Update selected Main column key
     private async Task OnComboboxMainColumnSelectedChanged(IEnumerable<string> values, string targetColumn)
     {
-        if (values != null)
+        if (values != null && values.Any())
         {
-            keyFilterMainColumns[targetColumn] = values.ToList();
+            keyFilterMainColumnsSeleted[targetColumn] = values.ToList();
         }
         else
         {
-            keyFilterMainColumns[targetColumn] = new();
+            keyFilterMainColumnsSeleted[targetColumn] = new();
         }
 
         await FilterDSachKetQuaGCProcessing();
+
+        // Get columnKey selectchanged for another columns
+        // foreach (var key in keyFilterMainColumnsSeleted)
+        // {
+        //     if (key.Key != targetColumn)
+        //     {
+        //         keyFilterMainColumnsSeleted[key.Key] = GetMainColumnKeysSearch(key.Key, DSachKetQuaGCs);
+        //     }
+        // }
     }
+
 
     // Filtering processing
     private async Task FilterDSachKetQuaGCProcessing()
@@ -429,32 +445,32 @@
             DSachKetQuaGCs = DSachKetQuaGCsBase.ToList();
 
             // Main column filtering
-            foreach (var column in keyFilterMainColumns)
+            foreach (var column in keyFilterMainColumnsSeleted)
             {
                 List<string> selectedkeys = column.Value;
 
-                if (selectedkeys != null && selectedkeys.Count > 0)
+                if (selectedkeys != null && selectedkeys.Count >= 0)
                 {
                     if (column.Key == KetQuaGC.KQGCDBName.SPID || column.Key == KetQuaGC.KQGCDBName.MMID || column.Key == KetQuaGC.KQGCDBName.NCID || column.Key == KetQuaGC.KQGCDBName.NVIDs || column.Key == KetQuaGC.KQGCDBName.NGIDs)
                     {
                         // Convert ID to stringValue
                         DSachKetQuaGCs = DSachKetQuaGCs
-                            .Where(nv =>
-                            {
-                                var value = nv.GetPropertyValue(column.Key);
-                                var valueString = GetColumnValueByID(value, column.Key);
-                                return valueString != null && selectedkeys.Contains(valueString);
-                            }).ToList();
+                        .Where(kqgc =>
+                        {
+                            var value = kqgc.GetPropertyValue(column.Key);
+                            var valueString = GetColumnValueByID(value, column.Key);
+                            return valueString != null && selectedkeys.Contains(valueString);
+                        }).ToList();
                     }
                     else
                     {
                         DSachKetQuaGCs = DSachKetQuaGCs
-                            .Where(nv =>
-                            {
-                                var value = nv.GetPropertyValue(column.Key);
-                                var valueString = value?.ToString();
-                                return valueString != null && selectedkeys.Contains(valueString);
-                            }).ToList();
+                        .Where(nv =>
+                        {
+                            var value = nv.GetPropertyValue(column.Key);
+                            var valueString = value?.ToString();
+                            return valueString != null && selectedkeys.Contains(valueString);
+                        }).ToList();
                     }
                 }
             }
@@ -507,8 +523,10 @@
     // Them ket qua gia cong
     private async Task OnThemMoiKetQuaGC()
     {
-        object newKetQuaGCid = await DialogService.OpenAsync<DialogAddNewKetQuaGC>(null, new Dictionary<string, object?>() { { "KHSXID", TargetKHSX.KHSXID.Value }, { "SPID", TargetKHSX.SPID.Value } },
-        new DialogOptions() { ShowTitle = true, Width = "50%", Height = "95%", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 0px; padding: 0px" });
+        object newKetQuaGCid = await DialogService.OpenAsync<DialogAddNewKetQuaGC>
+            (null, new Dictionary<string, object?>
+                () { { "KHSXID", TargetKHSX.KHSXID.Value }, { "SPID", TargetKHSX.SPID.Value } },
+                new DialogOptions() { ShowTitle = true, Width = "50%", Height = "95%", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 0px; padding: 0px" });
 
         await LoadAllDanhsachKQGCBase(300);
 
@@ -527,10 +545,12 @@
         if (confirm.Value)
         {
             // Get target LOT-KHSX
-            Dictionary<string, object?> parameters = new Dictionary<string, object?>(){
-                { KHSX_LOT.DBName.KHSXID, TargetKHSX.KHSXID.Value },
-                { KHSX_LOT.DBName.NCID, removeKQGC.NCID.Value },
-                { KHSX_LOT.DBName.MaQuanLyLot, removeKQGC.MaQuanLyLot.Value } };
+            Dictionary<string, object?>
+                parameters = new Dictionary<string, object?>
+                    (){
+                        { KHSX_LOT.DBName.KHSXID, TargetKHSX.KHSXID.Value },
+                        { KHSX_LOT.DBName.NCID, removeKQGC.NCID.Value },
+                        { KHSX_LOT.DBName.MaQuanLyLot, removeKQGC.MaQuanLyLot.Value } };
 
             var targetlotKHSX = SQLServerServices.GetListLOT_khsx(parameters).Item1.FirstOrDefault();
 
@@ -574,8 +594,10 @@
 
     private async Task OpenEditKQGC(KetQuaGC editKQGC)
     {
-        var result = await DialogService.OpenAsync<DialogEditKetQuaGC>(null, new Dictionary<string, object>() { { "TargetKetQuaGC", editKQGC }, { "KHSXID", TargetKHSX.KHSXID.Value ?? 0 }, { "SPID", TargetKHSX.SPID.Value ?? 0 } },
-        new DialogOptions() { ShowTitle = true, Width = "50%", Height = "95%", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 0px; padding: 0px" });
+        var result = await DialogService.OpenAsync<DialogEditKetQuaGC>
+            (null, new Dictionary<string, object>
+                () { { "TargetKetQuaGC", editKQGC }, { "KHSXID", TargetKHSX.KHSXID.Value ?? 0 }, { "SPID", TargetKHSX.SPID.Value ?? 0 } },
+                new DialogOptions() { ShowTitle = true, Width = "50%", Height = "95%", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 0px; padding: 0px" });
 
         await LoadAllDanhsachKQGCBase(0);
 
@@ -600,7 +622,8 @@
     }
 
     // Datagrid selected changed event
-    private void OnDatagridSelectChanged(IList<KetQuaGC> selectedKQGC)
+    private void OnDatagridSelectChanged(IList<KetQuaGC>
+        selectedKQGC)
     {
         DatagridSeleted = selectedKQGC;
 
@@ -615,7 +638,8 @@
     }
 
     // Datagrid cellrender
-    private void OnCellRender(DataGridCellRenderEventArgs<KetQuaGC> args)
+    private void OnCellRender(DataGridCellRenderEventArgs<KetQuaGC>
+        args)
     {
         if (args.Column.Property.Contains("ID"))
         {
@@ -623,7 +647,8 @@
         }
     }
 
-    void HeaderFooterCellRender(DataGridCellRenderEventArgs<KetQuaGC> args)
+    void HeaderFooterCellRender(DataGridCellRenderEventArgs<KetQuaGC>
+        args)
     {
         if (args.Column.Property == "STT")
         {
