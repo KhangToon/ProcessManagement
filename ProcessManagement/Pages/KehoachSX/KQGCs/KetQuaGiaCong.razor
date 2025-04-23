@@ -269,7 +269,8 @@
         // Create filter key
         keyFilterMainColumnsBase = CreateFilterBaseKeyVariable(DSachKetQuaGCsBase);
 
-        keyFilterMainColumnsSeleted = keyFilterMainColumnsBase;
+        // Initialize keyFilterMainColumnsSeleted with the same values as keyFilterMainColumnsBase
+        keyFilterMainColumnsSeleted = new Dictionary<string, List<string>>(keyFilterMainColumnsBase);
 
         // Load preFiltering value
         //await FilterDSachKetQuaGCProcessing();
@@ -415,7 +416,16 @@
     {
         if (values != null && values.Any())
         {
-            keyFilterMainColumnsSeleted[targetColumn] = values.ToList();
+            bool isDeselectAll = values.Count() == keyFilterMainColumnsBase[targetColumn].Count();
+
+            if (isDeselectAll && keyFilterMainColumnsSeleted[targetColumn].Count() == values.Count())
+            {
+                keyFilterMainColumnsSeleted[targetColumn] = new();
+            }
+            else
+            {
+                keyFilterMainColumnsSeleted[targetColumn] = values.ToList();
+            }
         }
         else
         {
@@ -423,17 +433,7 @@
         }
 
         await FilterDSachKetQuaGCProcessing();
-
-        // Get columnKey selectchanged for another columns
-        // foreach (var key in keyFilterMainColumnsSeleted)
-        // {
-        //     if (key.Key != targetColumn)
-        //     {
-        //         keyFilterMainColumnsSeleted[key.Key] = GetMainColumnKeysSearch(key.Key, DSachKetQuaGCs);
-        //     }
-        // }
     }
-
 
     // Filtering processing
     private async Task FilterDSachKetQuaGCProcessing()
