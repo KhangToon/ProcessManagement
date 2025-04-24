@@ -80,13 +80,15 @@ namespace ProcessManagement.Models.KHO_TPHAM
             public const string MASP = "MASP";
             public const string SOLUONG = "SOLUONG";
             public const string MQLTHUNG = "MQLTHUNG";
+            public const string IDThung = "IDThung";
 
             public static Dictionary<string, string> ColumnAddress = new()
             {
                 { TENSP, "C" },
                 { MASP, "C" },
                 { SOLUONG, "C" },
-                { MQLTHUNG, "E" }
+                { MQLTHUNG, "E" },
+                { IDThung, "C" }
             };
 
             public static Dictionary<string, string> RowAddress = new()
@@ -94,7 +96,8 @@ namespace ProcessManagement.Models.KHO_TPHAM
                 { TENSP, "3" },
                 { MASP, "5" },
                 { SOLUONG, "7" },
-                { MQLTHUNG, "14" }
+                { MQLTHUNG, "14" },
+                { IDThung, "2" }
             };
         }
 

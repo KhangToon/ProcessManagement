@@ -275,7 +275,19 @@ namespace ProcessManagement.Services.Excels
             }
         }
 
-
+        private static string ConvertToCircleNumber(string number)
+        {
+            // Unicode for circled numbers starts at 9312 (0x2460) for "1"  
+            // For numbers greater than 20, use circled numbers in the Enclosed Alphanumeric Supplement block  
+            if (int.TryParse(number, out int numericValue))
+            {
+                if (numericValue >= 1 && numericValue <= 20)
+                {
+                    return char.ConvertFromUtf32(9311 + numericValue);
+                }
+            }
+            return number; // Return the original number if it's invalid or out of range  
+        }
 
         #region TienDoGC Excell Services
         public static async Task<FileContentResult?> GenerateExcelData_TienDoGC(TienDoGC tienDoGC)
@@ -564,6 +576,17 @@ namespace ProcessManagement.Services.Excels
                 CellValue = $"{thungTPham.MaQuanLyThung.Value}"
             };
             excelDatas.Add(MQLCell);
+
+            // IDThung
+            ExcelCell IDCell = new()
+            {
+                CellName = ThungTPham.ExcellAddress.IDThung,
+                Col = ThungTPham.ExcellAddress.ColumnAddress[ThungTPham.ExcellAddress.IDThung],
+                Row = ThungTPham.ExcellAddress.RowAddress[ThungTPham.ExcellAddress.IDThung],
+                ValueType = typeof(string),
+                CellValue = ConvertToCircleNumber($"{thungTPham.IDThung.Value}")
+            };
+            excelDatas.Add(IDCell);
 
             // Excell file
             string excelPath = ThungTPham.ExcellAddress.ExportPath;
