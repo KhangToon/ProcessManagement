@@ -16,6 +16,7 @@ namespace ProcessManagement.Models
         //public Propertyy SumNGSubmited { get; set; } = new() { DBName = Common.SumNGSubmited, Type = typeof(int), AlowDatabase = true, Value = 0 };
         //public Propertyy SumTotalSubmited { get; set; } = new() { DBName = Common.SumTotalSubmited, Type = typeof(int), AlowDatabase = true, Value = 0 };
         //public Propertyy SLlimit { get; set; } = new() { DBName = Common.SLlimit, Type = typeof(int), AlowDatabase = true, Value = 0 };
+        public Propertyy STTNguyencong { get; set; } = new() { DBName = Common.STTNguyencong, Type = typeof(int), AlowDatabase = true, Value = 0 };
         public List<NVLmoiNguyenCong> DSachNVLCongDoans { get; set; } = new();
 
         public bool isExpandColumn = false; // Using in QLCongDoanPage
