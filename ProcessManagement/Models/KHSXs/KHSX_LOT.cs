@@ -21,6 +21,8 @@ namespace ProcessManagement.Models.KHSXs
 
         public NguyenVatLieu TargetNVL { get; set; } = new(); // not load when load list KHSX_LOT in GetList method
 
+        public object? STTNguyenCong { get; set; } // Load in get ListKHSX_Lot
+
         public static class DBName
         {
             public const string Table_KHSXLOT = "KHSX_LOT";

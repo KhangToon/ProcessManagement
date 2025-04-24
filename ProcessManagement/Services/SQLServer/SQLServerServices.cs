@@ -788,10 +788,6 @@ namespace ProcessManagement.Services.SQLServer
                 return (-1, err);
             }
         }
-        #endregion
-
-        // ------------------------------------------------------------------------------------- //
-        #region Table_NguyenCongofKHSX
         // Load danh sach cong doan
         public List<NguyenCongofKHSX> GetlistCongdoans(object? khsxID, bool isloaddata = true)
         {
@@ -829,6 +825,14 @@ namespace ProcessManagement.Services.SQLServer
 
                     listCongdoans.Add(rowSP);
                 }
+            }
+
+            if (listCongdoans.All(cd => string.IsNullOrEmpty(cd.STTNguyencong.Value?.ToString()?.Trim()) == false))
+            {
+                // Sort listCongdoans by STTNguyencong
+                listCongdoans = listCongdoans
+                    .OrderBy(congdoan => congdoan.STTNguyencong?.Value ?? default(int))
+                    .ToList();
             }
 
             if (isloaddata)
@@ -10249,6 +10253,20 @@ namespace ProcessManagement.Services.SQLServer
 
                         listLOT_khsx.Add(lotkhsx);
                     }
+
+                    foreach (var lot in listLOT_khsx)
+                    {
+                        lot.STTNguyenCong = GetSTTNGuyenCongofKHSX(lot.KHSXID.Value, lot.NCID.Value).stt;
+                    }
+
+                    // 
+                    if (listLOT_khsx.All(lot => string.IsNullOrEmpty(lot.STTNguyenCong?.ToString()?.Trim()) == false))
+                    {
+                        // Sort listCongdoans by STTNguyencong
+                        listLOT_khsx = listLOT_khsx
+                            .OrderBy(congdoan => congdoan.STTNguyenCong ?? default(int))
+                            .ToList();
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -10400,6 +10418,43 @@ namespace ProcessManagement.Services.SQLServer
 
             return (result, errorMess);
         }
+
+        public (object? stt, string) GetSTTNGuyenCongofKHSX(object? khsxid, object? ncid)
+        {
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+
+                    var command = connection.CreateCommand();
+
+                    command.CommandText = $"SELECT [{Common.STTNguyencong}] FROM [{Common.TableCongDoan}] WHERE [{Common.KHSXID}] = '{khsxid}' AND [{Common.NCID}] = '{ncid}'";
+
+                    object result = command.ExecuteScalar();
+
+                    if (result != null && result != DBNull.Value)
+                    {
+                        int sttnguyencong = Convert.ToInt32(result);
+
+                        return (sttnguyencong, string.Empty);
+                    }
+                    else
+                    {
+                        return (null, "Null value");
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                return (null, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return (null, ex.Message);
+            }
+        }
+
         #endregion
 
         // ------------------------------------------------------------------------------------- //
