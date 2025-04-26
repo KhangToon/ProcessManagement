@@ -9,6 +9,8 @@ namespace ProcessManagement.Commons
 {
     public static class Common
     {
+        public const string ServerAPI = "ServerAPI";
+
         public static int IndexOFwhile = 0;
 
         public static readonly List<string> ListCaLamViecs = new() { "Ngày", "Đêm", "Ca 1", "Ca 2", "Ca 3" };

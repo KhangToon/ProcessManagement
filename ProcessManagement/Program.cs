@@ -15,6 +15,7 @@ using ProcessManagement.Services.Modbus;
 using System.Net.Sockets;
 using System.Net.NetworkInformation;
 using System.Diagnostics;
+using ProcessManagement.Commons;
 
 var localIP = PortFinder.GetLocalIPAddress();
 IPAddress localIPAddress = IPAddress.Parse(localIP);
@@ -38,13 +39,26 @@ builder.Services.AddDefaultIdentity<AppUser>(options => options.SignIn.RequireCo
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<AppDbContext>();
 
+
+// For API 
+builder.Services.AddControllers();
+// For API 
+builder.Services.AddHttpClient(Common.ServerAPI, client =>
+{
+    client.BaseAddress = new Uri($"{url}/"); // Replace with your API URL
+});
+// For API 
+builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>()
+    .CreateClient(Common.ServerAPI));
+
+
+// Add Radzen components
+builder.Services.AddRadzenComponents();
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
-
 // Blazor bootrstap
 builder.Services.AddBlazorBootstrap();
-
 // Radzen services
 builder.Services.AddScoped<DialogService>();
 builder.Services.AddScoped<NotificationService>();
@@ -89,7 +103,8 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllers();
+// For API 
+app.MapControllers(); // Map API controllers
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 

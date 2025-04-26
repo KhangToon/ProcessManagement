@@ -1,0 +1,44 @@
+﻿@using Radzen
+@using Radzen.Blazor
+
+@inject DialogService DialogService
+
+<div class="container">
+    <div class="row mb-4">
+        <div class="col">
+            <RadzenTemplateForm TItem="string" Data="@roleName">
+                <div class="row mb-3">
+                    <div class="col">
+                        <RadzenLabel Text="Role Name" />
+                        <RadzenTextBox @bind-Value="@roleName" class="w-100" />
+                        <RadzenRequiredValidator Text="Role name is required" Component="roleName" />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col d-flex justify-content-end gap-2">
+                        <RadzenButton Text="Cancel" ButtonStyle="ButtonStyle.Light" Click="@Cancel" />
+                        <RadzenButton Text="Create" ButtonStyle="ButtonStyle.Primary" Click="@CreateRole" />
+                    </div>
+                </div>
+            </RadzenTemplateForm>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string roleName = string.Empty;
+
+    void Cancel()
+    {
+        DialogService.Close();
+    }
+
+    void CreateRole()
+    {
+        if (!string.IsNullOrWhiteSpace(roleName))
+        {
+            DialogService.Close(roleName);
+        }
+    }
+}
