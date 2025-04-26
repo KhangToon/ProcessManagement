@@ -16,6 +16,7 @@ using System.Net.Sockets;
 using System.Net.NetworkInformation;
 using System.Diagnostics;
 using ProcessManagement.Commons;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 var localIP = PortFinder.GetLocalIPAddress();
 IPAddress localIPAddress = IPAddress.Parse(localIP);

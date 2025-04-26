@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProcessManagement.Models;
+using ProcessManagement.Pages.Account_Management.Role_Management.Models;
 
 namespace ProcessManagement.Controllers
 {
@@ -108,17 +109,5 @@ namespace ProcessManagement.Controllers
 
             return BadRequest(result.Errors);
         }
-    }
-
-    public class AssignRoleRequest
-    {
-        public string UserId { get; set; } = string.Empty;
-        public string RoleName { get; set; } = string.Empty;
-    }
-
-    public class AssignRoleByUsernameRequest
-    {
-        public string Username { get; set; } = string.Empty;
-        public string RoleName { get; set; } = string.Empty;
     }
 }

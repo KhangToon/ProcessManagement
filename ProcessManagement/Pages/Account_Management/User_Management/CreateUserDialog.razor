@@ -1,0 +1,79 @@
+﻿@using ProcessManagement.Commons
+@using ProcessManagement.Pages.Account_Management.User_Management.Models
+@using Radzen
+@using Radzen.Blazor
+
+@inject IHttpClientFactory HttpClientFactory
+@inject NotificationService NotificationService
+@inject DialogService DialogService
+
+<RadzenTemplateForm TItem="CreateUserRequest" Data="@newUser" Submit="@CreateUser">
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <RadzenLabel Text="Username" />
+            <RadzenTextBox @bind-Value="newUser.Username" Name="Username" class="w-100" />
+            <RadzenRequiredValidator Component="Username" Text="Username is required" />
+        </div>
+        <div class="col-md-6">
+            <RadzenLabel Text="Email" />
+            <RadzenTextBox @bind-Value="newUser.Email" Name="Email" class="w-100" />
+            <RadzenRequiredValidator Component="Email" Text="Email is required" />
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <RadzenLabel Text="First Name" />
+            <RadzenTextBox @bind-Value="newUser.FirstName" Name="FirstName" class="w-100" />
+        </div>
+        <div class="col-md-6">
+            <RadzenLabel Text="Last Name" />
+            <RadzenTextBox @bind-Value="newUser.LastName" Name="LastName" class="w-100" />
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <RadzenLabel Text="Password" />
+            <RadzenPassword @bind-Value="newUser.Password" Name="Password" class="w-100" />
+            <RadzenRequiredValidator Component="Password" Text="Password is required" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <RadzenButton ButtonType="ButtonType.Submit" Text="Create" Icon="save" ButtonStyle="ButtonStyle.Primary" />
+            <RadzenButton Text="Cancel" Icon="cancel" ButtonStyle="ButtonStyle.Secondary" Click="@CloseDialog" />
+        </div>
+    </div>
+</RadzenTemplateForm>
+
+@code {  
+   private CreateUserRequest newUser = new();  
+
+   private async Task CreateUser()  
+   {  
+       try  
+       {  
+           var client = HttpClientFactory.CreateClient(Common.ServerAPI);  
+           var response = await client.PostAsJsonAsync("api/user", newUser);  
+
+           if (response.IsSuccessStatusCode)  
+           {  
+               await DialogService.Alert($"<strong>User created successfully</strong>", "<strong><span style='color: green'>Success!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });  
+               DialogService.Close(true);  
+           }  
+           else  
+           {  
+               var error = await response.Content.ReadAsStringAsync();  
+               await DialogService.Alert($"<strong>Failed to create user: {error}</strong>", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });  
+           }  
+       }  
+       catch (Exception ex)  
+       {  
+           await DialogService.Alert($"<strong>Failed to create user: {ex.Message}</strong>", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });  
+       }  
+   }  
+
+   private void CloseDialog()  
+   {  
+       DialogService.Close(false);  
+   }  
+}
