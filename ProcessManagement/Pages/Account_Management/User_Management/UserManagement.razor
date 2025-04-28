@@ -22,17 +22,28 @@
                     AllowSorting="true" AllowFiltering="false" AllowPaging="true" PageSize="10"
                     IsLoading="@isLoading">
         <Columns>
-            <RadzenDataGridColumn TItem="UserResponse" Property="Id" Title="ID" TextAlign="TextAlign.Center" />
+            <RadzenDataGridColumn TItem="UserResponse" Property="Id" Title="STT" Width="150px" TextAlign="TextAlign.Center">
+                <Template Context="user">
+                    @(users.IndexOf(user) + 1)
+                </Template>
+            </RadzenDataGridColumn>
             <RadzenDataGridColumn TItem="UserResponse" Property="Username" Title="Username" TextAlign="TextAlign.Center" />
             <RadzenDataGridColumn TItem="UserResponse" Property="Email" Title="Email" TextAlign="TextAlign.Center" />
             <RadzenDataGridColumn TItem="UserResponse" Property="FirstName" Title="First Name" TextAlign="TextAlign.Center" />
             <RadzenDataGridColumn TItem="UserResponse" Property="LastName" Title="Last Name" TextAlign="TextAlign.Center" />
-            <RadzenDataGridColumn TItem="UserResponse" Title="Actions" TextAlign="TextAlign.Center">
+            <RadzenDataGridColumn TItem="UserResponse" Property="Roles" Title="Roles" TextAlign="TextAlign.Center">
                 <Template Context="user">
-                    <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small"
-                                  Click="@(() => OpenEditUserDialog(user))" />
-                    <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small"
-                                  Click="@(() => DeleteUser(user.Id))" />
+                    @string.Join(", ", user.Roles)
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="UserResponse" Title="Actions" Width="200px" TextAlign="TextAlign.Center">
+                <Template Context="user">
+                    <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                        <RadzenButton Style="font-weight: 600px" Icon="edit" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade=Shade.Lighter
+                                      Click="@(() => OpenEditUserDialog(user))" />
+                        <RadzenButton Style="font-weight: 600px" Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Shade=Shade.Lighter
+                                      Click="@(() => DeleteUser(user.Id))" />
+                    </RadzenStack>
                 </Template>
             </RadzenDataGridColumn>
         </Columns>

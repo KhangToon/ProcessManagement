@@ -1,4 +1,6 @@
-﻿@using ProcessManagement.Commons
+﻿@using Microsoft.AspNetCore.Identity
+@using ProcessManagement.Commons
+@using ProcessManagement.Pages.Account_Management.Role_Management.Models
 @using ProcessManagement.Pages.Account_Management.User_Management.Models
 @using Radzen
 @using Radzen.Blazor
@@ -28,6 +30,13 @@
             <RadzenTextBox @bind-Value="user.LastName" Name="LastName" class="w-100" />
         </div>
     </div>
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <RadzenLabel Text="Roles" />
+            <RadzenDropDown @bind-Value="selectedRoles" Data="@availableRoles" Multiple="true"
+                            Name="Roles" class="w-100" />
+        </div>
+    </div>
     <div class="row">
         <div class="col">
             <RadzenButton ButtonType="ButtonType.Submit" Text="Update" Icon="save" ButtonStyle="ButtonStyle.Primary" />
@@ -39,8 +48,10 @@
 @code {
     [Parameter] public UserResponse User { get; set; } = new();
     private UserResponse user = new();
+    private List<string> availableRoles = new();
+    private List<string> selectedRoles = new();
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         user = new UserResponse
             {
@@ -48,8 +59,18 @@
                 Username = User.Username,
                 Email = User.Email,
                 FirstName = User.FirstName,
-                LastName = User.LastName
+                LastName = User.LastName,
+                Roles = User.Roles
             };
+
+        selectedRoles = user.Roles;
+
+        // Fetch available roles from the API
+        var client = HttpClientFactory.CreateClient(Common.ServerAPI);
+
+        var rolesResponse = await client.GetFromJsonAsync<List<IdentityRole>>("api/roles") ?? new();
+
+        availableRoles = rolesResponse.Select(role => role.Name).Where(name => name != null).Cast<string>().ToList();
     }
 
     private async Task UpdateUser()
@@ -57,22 +78,38 @@
         try
         {
             var client = HttpClientFactory.CreateClient(Common.ServerAPI);
-            var response = await client.PutAsJsonAsync($"api/user/{user.Id}", user);
 
-            if (response.IsSuccessStatusCode)
+            // Update user details
+            var userUpdateResponse = await client.PutAsJsonAsync($"api/user/{user.Id}", user);
+
+            if (!userUpdateResponse.IsSuccessStatusCode)
             {
-                NotificationService.Notify(NotificationSeverity.Success, "Success", "User updated successfully");
+                var error = await userUpdateResponse.Content.ReadAsStringAsync();
+                await DialogService.Alert($"<strong>Failed to update user: {error}</strong>", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true, Width = "contain" });
+                return;
+            }
+
+            // Update user roles
+            var roleUpdateResponse = await client.PostAsJsonAsync($"api/roles/assign-list", new AssignRolesRequest
+                {
+                    UserId = user.Id,
+                    RoleNames = selectedRoles
+                });
+
+            if (roleUpdateResponse.IsSuccessStatusCode)
+            {
+                await DialogService.Alert("<strong>User updated successfully</strong>", "<strong><span style='color: green'>Success!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true, Width = "contain" });
                 DialogService.Close(true);
             }
             else
             {
-                var error = await response.Content.ReadAsStringAsync();
-                NotificationService.Notify(NotificationSeverity.Error, "Error", $"Failed to update user: {error}");
+                var error = await roleUpdateResponse.Content.ReadAsStringAsync();
+                await DialogService.Alert($"<strong>Failed to update roles: {error}</strong>", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true, Width = "contain" });
             }
         }
         catch (Exception ex)
         {
-            NotificationService.Notify(NotificationSeverity.Error, "Error", $"Failed to update user: {ex.Message}");
+            await DialogService.Alert($"<strong>Failed to update user: {ex.Message}</strong>", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true, Width = "contain" });
         }
     }
 

@@ -91,6 +91,58 @@ namespace ProcessManagement.Controllers
             return BadRequest(result.Errors);
         }
 
+        // POST: api/roles/assign-list
+        [HttpPost("assign-list")]
+        public async Task<ActionResult> AssignRolesToUser([FromBody] AssignRolesRequest request)
+        {
+            var user = await _userManager.FindByIdAsync(request.UserId);
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            if (request.RoleNames == null || !request.RoleNames.Any())
+            {
+                // Remove all roles for the user if RoleNames is empty
+                var currentRoles = await _userManager.GetRolesAsync(user);
+                var removeResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
+
+                if (!removeResult.Succeeded)
+                {
+                    return BadRequest(removeResult.Errors);
+                }
+
+                return Ok("All roles removed successfully.");
+            }
+
+            foreach (var roleName in request.RoleNames)
+            {
+                var roleExists = await _roleManager.RoleExistsAsync(roleName);
+                if (!roleExists)
+                {
+                    return BadRequest($"Role '{roleName}' does not exist.");
+                }
+
+                // Check if the user is already in the role
+                if (await _userManager.IsInRoleAsync(user, roleName))
+                {
+                    // Skip if the user is already in the role
+                    continue;
+                }
+                else
+                {
+                    var result = await _userManager.AddToRoleAsync(user, roleName);
+                    if (!result.Succeeded)
+                    {
+                        return BadRequest(result.Errors);
+                    }
+                }
+            }
+
+            return Ok("Roles assigned successfully.");
+        }
+
+
         // POST: api/roles/assign-by-username
         [HttpPost("assign-by-username")]
         public async Task<ActionResult> AssignRoleByUsername([FromBody] AssignRoleByUsernameRequest request)

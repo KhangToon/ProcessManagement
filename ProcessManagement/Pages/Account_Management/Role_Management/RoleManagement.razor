@@ -8,6 +8,7 @@
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.Authorization
 @using ProcessManagement.Commons
+@using ProcessManagement.Pages.Account_Management.Role_Management.Models
 @using Radzen
 @using Radzen.Blazor
 
@@ -50,13 +51,17 @@
                             FilterMode="FilterMode.Advanced" Count="@count"
                             IsLoading="@isLoading">
                 <Columns>
-                    <RadzenDataGridColumn TItem="IdentityRole" Property="Id" Title="ID" TextAlign="TextAlign.Center" />
+                    <RadzenDataGridColumn TItem="IdentityRole" Property="Id" Title="STT" Width="150px" TextAlign="TextAlign.Center">
+                        <Template Context="role">
+                            @(roles.IndexOf(role) + 1)
+                        </Template>
+                    </RadzenDataGridColumn>
                     <RadzenDataGridColumn TItem="IdentityRole" Property="Name" Title="Role Name" TextAlign="TextAlign.Center" />
                     <RadzenDataGridColumn TItem="IdentityRole" Property="NormalizedName" Title="Normalized Name" TextAlign="TextAlign.Center" />
-                    <RadzenDataGridColumn TItem="IdentityRole" Title="Actions" TextAlign="TextAlign.Center">
-                        <Template Context="role">
-                            <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small"
-                                          Click="@(() => DeleteRole(role.Name ?? string.Empty))" />
+                    <RadzenDataGridColumn TItem="IdentityRole" Width="150px" Title="Actions" TextAlign="TextAlign.Center">
+                        <Template Context="user">
+                            <RadzenButton Style="font-weight: 600px" Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Shade=Shade.Lighter
+                                          Click="@(() => DeleteRole(user.Name ?? string.Empty))" />
                         </Template>
                     </RadzenDataGridColumn>
                 </Columns>
@@ -72,7 +77,7 @@
                 <h3 class="m-0">Assign Role to User</h3>
             </div>
 
-            <RadzenTemplateForm TItem="AssignRoleModel" Data="@assignRoleModel" Submit="@(async() => await AssignRole())">
+            <RadzenTemplateForm TItem="AssignRoleRequest" Data="@assignRoleModel" Submit="@(async() => await AssignRole())">
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <RadzenLabel Text="User ID" />
@@ -103,7 +108,7 @@
     private bool isLoading = false;
     private bool apiError = false;
     private int count = 0;
-    private AssignRoleModel assignRoleModel = new AssignRoleModel();
+    private AssignRoleRequest assignRoleModel = new AssignRoleRequest();
     private string lastErrorMessage = string.Empty;
     private string lastResponsePreview = string.Empty;
 
@@ -345,7 +350,7 @@
                 NotificationService.Notify(NotificationSeverity.Success, "Success",
                     "Role assigned successfully");
 
-                assignRoleModel = new AssignRoleModel(); // Clear the form
+                assignRoleModel = new AssignRoleRequest(); // Clear the form
             }
             else
             {
@@ -364,9 +369,5 @@
         }
     }
 
-    public class AssignRoleModel
-    {
-        public string UserId { get; set; } = string.Empty;
-        public string RoleName { get; set; } = string.Empty;
-    }
+
 }

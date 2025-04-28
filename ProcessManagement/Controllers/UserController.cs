@@ -24,19 +24,31 @@ namespace ProcessManagement.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserResponse>>> GetUsers()
         {
+            // Fetch all users first
             var users = await _userManager.Users
                 .Select(u => new UserResponse
                 {
                     Id = u.Id,
-                    Username = u.UserName,
-                    Email = u.Email,
+                    Username = u.UserName ?? string.Empty, // Handle possible null values
+                    Email = u.Email ?? string.Empty,      // Handle possible null values
                     FirstName = u.FirstName,
                     LastName = u.LastName
                 })
                 .ToListAsync();
 
+            // Fetch roles for each user
+            foreach (var user in users)
+            {
+                var appUser = await _userManager.FindByIdAsync(user.Id);
+                if (appUser != null)
+                {
+                    user.Roles = (await _userManager.GetRolesAsync(appUser)).ToList();
+                }
+            }
+
             return Ok(users);
         }
+
 
         // POST: api/user
         [HttpPost]
