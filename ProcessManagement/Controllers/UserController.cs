@@ -117,7 +117,31 @@ namespace ProcessManagement.Controllers
 
             return BadRequest(result.Errors);
         }
-    }
 
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+        {
+            var user = await _userManager.FindByEmailAsync(request.Email);
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            var result = await _userManager.ResetPasswordAsync(user, request.Token, request.NewPassword);
+            if (result.Succeeded)
+            {
+                return Ok("Password reset successful.");
+            }
+
+            return BadRequest(result.Errors);
+        }
+
+        public class ResetPasswordRequest
+        {
+            public string Email { get; set; } = string.Empty;
+            public string Token { get; set; } = string.Empty;
+            public string NewPassword { get; set; } = string.Empty;
+        }
+    }
     // This API using Models.UserResponse for the response data
 }

@@ -4,6 +4,7 @@
 @using System.Net.Http.Json
 @using Microsoft.AspNetCore.Components
 @using ProcessManagement.Commons
+@using ProcessManagement.Pages.Account_Management.Password_Management
 @using ProcessManagement.Pages.Account_Management.User_Management.Models
 @using Radzen
 @using Radzen.Blazor
@@ -15,7 +16,11 @@
 <RadzenCard>
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h3 class="m-0">Users</h3>
-        <RadzenButton Text="Add User" Icon="add" ButtonStyle="ButtonStyle.Primary" Click="@OpenCreateUserDialog" />
+        <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
+            <RadzenButton Text="Reset Password" Icon="lock" ButtonStyle="ButtonStyle.Primary" Click="@OpenResetPasswordDialog" />
+
+            <RadzenButton Text="Add User" Icon="add" ButtonStyle="ButtonStyle.Primary" Click="@OpenCreateUserDialog" />
+        </RadzenStack>
     </div>
 
     <RadzenDataGrid @ref="usersGrid" Data="@users" TItem="UserResponse"
@@ -39,7 +44,7 @@
             <RadzenDataGridColumn TItem="UserResponse" Title="Actions" Width="200px" TextAlign="TextAlign.Center">
                 <Template Context="user">
                     <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                        <RadzenButton Style="font-weight: 600px" Icon="edit" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade=Shade.Lighter
+                        <RadzenButton Style="font-weight: 600px" Icon="edit" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small"
                                       Click="@(() => OpenEditUserDialog(user))" />
                         <RadzenButton Style="font-weight: 600px" Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Shade=Shade.Lighter
                                       Click="@(() => DeleteUser(user.Id))" />
@@ -128,6 +133,18 @@
             {
                 NotificationService.Notify(NotificationSeverity.Error, "Error", $"Failed to delete user: {ex.Message}");
             }
+        }
+    }
+
+    private async Task OpenResetPasswordDialog()
+    {
+        var result = await DialogService.OpenAsync<ManualResetPasswordDialog>("Manual Password Reset",
+            new Dictionary<string, object>(),
+            new DialogOptions { Width = "500px", Height = "contain" });
+
+        if (result != null)
+        {
+            await LoadUsers();
         }
     }
 }
