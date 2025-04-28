@@ -72,6 +72,43 @@ namespace ProcessManagement.Controllers
             return BadRequest(result.Errors);
         }
 
+        // POST: api/roles/remove-list
+        [HttpPost("remove-list")]
+        public async Task<ActionResult> RemoveRolesFromUser([FromBody] AssignRolesRequest request)
+        {
+            var user = await _userManager.FindByIdAsync(request.UserId);
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            if (request.RoleNames == null || !request.RoleNames.Any())
+            {
+                return BadRequest("RoleNames cannot be empty.");
+            }
+
+            foreach (var roleName in request.RoleNames)
+            {
+                var roleExists = await _roleManager.RoleExistsAsync(roleName);
+                if (!roleExists)
+                {
+                    return BadRequest($"Role '{roleName}' does not exist.");
+                }
+
+                // Check if the user is in the role
+                if (await _userManager.IsInRoleAsync(user, roleName))
+                {
+                    var result = await _userManager.RemoveFromRoleAsync(user, roleName);
+                    if (!result.Succeeded)
+                    {
+                        return BadRequest(result.Errors);
+                    }
+                }
+            }
+
+            return Ok("Roles removed successfully.");
+        }
+
         // POST: api/roles/assign
         [HttpPost("assign")]
         public async Task<ActionResult> AssignRole([FromBody] AssignRoleRequest request)
@@ -126,11 +163,11 @@ namespace ProcessManagement.Controllers
                 // Check if the user is already in the role
                 if (await _userManager.IsInRoleAsync(user, roleName))
                 {
-                    // Skip if the user is already in the role
                     continue;
                 }
                 else
                 {
+                    // Add the role if it doesn't exist
                     var result = await _userManager.AddToRoleAsync(user, roleName);
                     if (!result.Succeeded)
                     {

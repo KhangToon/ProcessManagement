@@ -50,18 +50,19 @@
     private UserResponse user = new();
     private List<string> availableRoles = new();
     private List<string> selectedRoles = new();
+    private List<string> rolesToRemove = new();
 
     protected override async Task OnInitializedAsync()
     {
         user = new UserResponse
-            {
-                Id = User.Id,
-                Username = User.Username,
-                Email = User.Email,
-                FirstName = User.FirstName,
-                LastName = User.LastName,
-                Roles = User.Roles
-            };
+        {
+            Id = User.Id,
+            Username = User.Username,
+            Email = User.Email,
+            FirstName = User.FirstName,
+            LastName = User.LastName,
+            Roles = User.Roles
+        };
 
         selectedRoles = user.Roles;
 
@@ -79,6 +80,9 @@
         {
             var client = HttpClientFactory.CreateClient(Common.ServerAPI);
 
+            // Determine roles to remove
+            rolesToRemove = user.Roles.Except(selectedRoles).ToList();
+
             // Update user details
             var userUpdateResponse = await client.PutAsJsonAsync($"api/user/{user.Id}", user);
 
@@ -91,21 +95,37 @@
 
             // Update user roles
             var roleUpdateResponse = await client.PostAsJsonAsync($"api/roles/assign-list", new AssignRolesRequest
-                {
-                    UserId = user.Id,
-                    RoleNames = selectedRoles
-                });
-
-            if (roleUpdateResponse.IsSuccessStatusCode)
             {
-                await DialogService.Alert("<strong>User updated successfully</strong>", "<strong><span style='color: green'>Success!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true, Width = "contain" });
-                DialogService.Close(true);
-            }
-            else
+                UserId = user.Id,
+                RoleNames = selectedRoles
+            });
+
+            if (!roleUpdateResponse.IsSuccessStatusCode)
             {
                 var error = await roleUpdateResponse.Content.ReadAsStringAsync();
                 await DialogService.Alert($"<strong>Failed to update roles: {error}</strong>", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true, Width = "contain" });
+                return;
             }
+
+            // Remove unselected roles
+            if (rolesToRemove.Any())
+            {
+                var removeRolesResponse = await client.PostAsJsonAsync($"api/roles/remove-list", new AssignRolesRequest
+                {
+                    UserId = user.Id,
+                    RoleNames = rolesToRemove
+                });
+
+                if (!removeRolesResponse.IsSuccessStatusCode)
+                {
+                    var error = await removeRolesResponse.Content.ReadAsStringAsync();
+                    await DialogService.Alert($"<strong>Failed to remove roles: {error}</strong>", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true, Width = "contain" });
+                    return;
+                }
+            }
+
+            await DialogService.Alert("<strong>User updated successfully</strong>", "<strong><span style='color: green'>Success!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true, Width = "contain" });
+            DialogService.Close(true);
         }
         catch (Exception ex)
         {
