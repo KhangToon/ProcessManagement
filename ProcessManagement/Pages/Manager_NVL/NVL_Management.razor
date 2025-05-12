@@ -16,6 +16,7 @@
 @using ProcessManagement.Pages.Manager_NVL.Dialogs
 @using Radzen.Blazor
 @using Radzen
+@using System.Security.Claims
 
 @inject NotificationService NotificationService
 @inject TooltipService TooltipService
@@ -773,7 +774,13 @@
 
         if (user != null && user.Identity?.IsAuthenticated == true)
         {
-            UserRoles = user.Claims.Where(c => c.Type == "role").Select(c => c.Value).ToList();
+            //UserRoles = user.Claims.Where(c => c.Type == "role").Select(c => c.Value).ToList();
+
+            // Check for claims with type "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+            UserRoles = user.Claims
+                .Where(c => c.Type == ClaimTypes.Role)
+                .Select(c => c.Value)
+                .ToList();
         }
 
         LoadList_DanhMuc();

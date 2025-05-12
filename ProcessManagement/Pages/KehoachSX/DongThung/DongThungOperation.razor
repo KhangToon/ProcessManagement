@@ -1,0 +1,442 @@
+﻿@page "/khsx-dongthung"
+@attribute [Authorize(Roles = $"Admin, {Common.UserDongThung}")]
+@* this limited access into page *@
+
+@using ProcessManagement.Commons
+@using ProcessManagement.Models
+@using ProcessManagement.Models.KHO_TPHAM
+@using ProcessManagement.Models.KHSXs
+@using ProcessManagement.Models.TienDoGCs
+@using ProcessManagement.Pages.KehoachSX.BieuDo
+@using ProcessManagement.Pages.KehoachSX.Dialogs
+@using ProcessManagement.Pages.KehoachSX.KQGCs
+@using ProcessManagement.Pages.KehoachSX.QLCongDoan
+@using ProcessManagement.Pages.KehoachSX.TienDos
+@using ProcessManagement.Services.SQLServer
+@using Radzen.Blazor
+@using Radzen
+@using System.Collections.Concurrent
+@using System.Diagnostics
+
+@inject NotificationService NotificationService
+@inject TooltipService TooltipService
+@inject ContextMenuService ContextMenuService
+@inject DialogService DialogService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject SQLServerServices SQLServerServices
+@inject IJSRuntime JSRuntime
+
+<RadzenCard Variant="Variant.Filled" Style="height: 100%; width: 100%; padding: 5px;">
+    <RadzenStack Gap="0" Style="height: 100%; width: 100%;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+        <RadzenStack Style="height: contain; width: 100%; padding-bottom: 5px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+            <RadzenRow Style="height: 100%; width: 100%;">
+                <RadzenColumn SizeMD="4" Size="12">
+                    <RadzenRow Style="height: 100%; width: 100%;">
+                        <RadzenColumn SizeMD="12" Size="12">
+                            <RadzenStack Style="height: 100%; width: 100%; border-radius: 10px; background-color: var(--rz-success-lighter); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenText Text="DANH SÁCH KẾ HOẠCH SẢN XUẤT" Style="color: green; font-weight: 600; font-size: 18px"></RadzenText>
+                            </RadzenStack>
+                        </RadzenColumn>
+                    </RadzenRow>
+                </RadzenColumn>
+                <RadzenColumn SizeMD="5" Size="12">
+                    <RadzenStack Gap="15px" Style="height: 100%; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                        <RadzenButton Style="border-radius: 20px;" IsBusy="@reloadpage" Click="@(async () => await ButtonReloadPress())" Icon="autorenew" ButtonStyle="ButtonStyle.Primary" />
+                        <RadzenTextBox @ref="txtSearchKHSX" @oninput="@((args) => SearchingKHSX(args?.Value))" Placeholder="Nhập mã kế hoạch sản xuất" Style="border-radius: 20px; padding-left: 20px; border-width: 2px; border-color: var(--rz-primary-light); width: 80% "></RadzenTextBox>
+                    </RadzenStack>
+                </RadzenColumn>
+            </RadzenRow>
+        </RadzenStack>
+        <RadzenCard Variant="Variant.Flat" Style="height: 95%; width: 100%; padding: 10px; overflow-y: scroll">
+            <RadzenStack Orientation="Orientation.Vertical" Gap="20px" Style="height: contain; width: 100%; padding: 0px;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                @{
+                    var khsxcount = DSKHSXs.Count;
+
+                    var takeDSKHSXs = DSKHSXs.ToList();
+
+                    var takeDSKHSXcount = takeDSKHSXs.Count;
+
+                    foreach (var khsx in takeDSKHSXs)
+                    {
+                        <RadzenCard class="rz-shadow-5" Variant="Variant.Filled" Style="width: 100%; height: contain; padding: 2px;">
+                            <RadzenPanel AllowCollapse="true" Style="width: 100%; padding-bottom: 0px;" Collapsed="@(khsx.isCollapsed == true)" Collapse="@(() => {khsx.isCollapsed = true;})">
+                                <HeaderTemplate>
+                                    <RadzenRow Gap="0" Style="width: 100%; padding-right: 10px">
+                                        <RadzenColumn @onclick="() => {khsx.isCollapsed = !khsx.isCollapsed; OnCollapsedKHSXDetails(khsx);}">
+                                            <RadzenStack Style="cursor: pointer; width: 100%;" Gap="0" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                                <RadzenStack Style="width: contain; padding-left: 5px; padding-right: 5px" Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                    <RadzenText Text="@($"{takeDSKHSXs.IndexOf(khsx) + 1}/{((takeDSKHSXcount < khsxcount) ? takeDSKHSXcount : khsxcount)}")" Style="font-size: 14px;"></RadzenText>
+                                                    <RadzenText TextStyle="TextStyle.H6" class="rz-display-flex rz-align-items-center rz-m-0">
+                                                        <RadzenIcon Icon="edit_note" class="rz-me-1" />
+                                                    </RadzenText>
+                                                    <RadzenText Text="Kế hoạch sản xuất: " Style="font-size: 18px; color: black"></RadzenText>
+                                                    <RadzenText TextStyle="TextStyle.H6" class="rz-display-flex rz-align-items-center rz-m-0">
+                                                        <b>@khsx.MaLSX.Value?.ToString()</b>
+                                                    </RadzenText>
+
+                                                    <RadzenStack Style="width: contain; margin-left: 40px" Gap="0" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                                                        <RadzenButton Visible="@(object.Equals(khsx.IsDoneKHSX.Value, 1))" Icon="check" Text="Đã hoàn thành" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Small" Style="font-weight: 600; color: darkgreen; font-size: 16px; cursor: default;"></RadzenButton>
+                                                        <RadzenButton Visible="@(object.Equals(khsx.IsDoneKHSX.Value, 0))" Text="Đang sản xuất" ButtonStyle="ButtonStyle.Warning" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Small" Style="font-weight: 600; color: goldenrod; font-size: 16px; cursor: default;"></RadzenButton>
+                                                    </RadzenStack>
+                                                </RadzenStack>
+
+                                                <RadzenStack Style="width: contain; padding-left: 5px; padding-right: 5px" Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                    <RadzenText Text="Mã sản phẩm: " Style="font-size: 18px; color: black; margin-left: 30px"></RadzenText>
+                                                    <RadzenText TextStyle="TextStyle.H6" class="rz-display-flex rz-align-items-center rz-m-0">
+                                                        <b>@khsx.TargetSanPham?.SP_MaSP.Value?.ToString()</b>
+                                                    </RadzenText>
+                                                </RadzenStack>
+                                            </RadzenStack>
+                                        </RadzenColumn>
+                                    </RadzenRow>
+                                </HeaderTemplate>
+                                <ChildContent>
+                                    <RadzenTabs Style="width: 100%; min-height: 100% !important; margin-top: 15px">
+                                        <Tabs>
+                                            <RadzenTabsItem>
+                                                <Template>
+                                                    <RadzenText Text="@("DANH SÁCH LOT NVL")" Style="color: darkred; font-weight: 500; font-size: 15px"></RadzenText>
+                                                </Template>
+                                                <ChildContent>
+                                                    <RadzenStack Visible="@(khsx.isCollapsed == false)">
+                                                        <DanhSachLotNVL TargetKHSX="@khsx"></DanhSachLotNVL>
+                                                    </RadzenStack>
+                                                </ChildContent>
+                                            </RadzenTabsItem>
+
+                                            <RadzenTabsItem>
+                                                <Template>
+                                                    <RadzenText Text="@("QUẢN LÝ CÔNG ĐOẠN")" Style="color: darkred; font-weight: 500; font-size: 15px"></RadzenText>
+                                                </Template>
+                                                <ChildContent>
+                                                    <RadzenStack Visible="@(khsx.isCollapsed == false)">
+                                                        <QLCongDoanPage TargetMQLLot="@TargetMQLLot" TargetKHSX="@khsx"></QLCongDoanPage>
+                                                    </RadzenStack>
+                                                </ChildContent>
+                                            </RadzenTabsItem>
+                                        </Tabs>
+                                    </RadzenTabs>
+                                </ChildContent>
+                                <SummaryTemplate>
+                                    <!--LSX infor-->
+                                    <!--Tien do gia cong-->
+                                    <RadzenRow Gap="0" Style="width: 100%; height: contain;">
+                                        <RadzenColumn Size="12" SizeMD="12">
+                                            <RadzenStack Style="width: 100%; height: contain; padding: 20px; padding-top: 10px; padding-bottom: 0" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                <RadzenCard @onclick="() => {khsx.isCollapsed = false;}" Visible=@(khsx.KHSXID.Value != null) Variant="Variant.Outlined" Style="cursor: pointer; width: 100%; height: contain; padding: 0px; border-radius: 10px; border-width: 2px">
+                                                    <RadzenStack Orientation="Orientation.Vertical" Gap="0" Style="height: 100%; width: 100%; padding: 10px; padding-top: 0; padding-bottom: 0" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                        <RadzenStack Gap="15px" Orientation="Orientation.Horizontal" Style="height: 100%; width: 100%; padding: 10px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                                            <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style="height: 50%; width: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                <RadzenText Text="Mã KHSX" Style="font-size: 16px; font-weight: 500; color: darkgray "></RadzenText>
+                                                                <RadzenText Visible="@(khsx?.MaLSX.Value != null)" Text="@khsx?.MaLSX.Value?.ToString()" Style="font-size: 16px; font-weight: bold; color: red"></RadzenText>
+                                                            </RadzenStack>
+
+                                                            <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style="height: 50%; width: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                <RadzenText Text="@Common.SP_MaSP" Style="font-size: 16px; font-weight: 500; color: darkgray "></RadzenText>
+                                                                <RadzenText Visible="@(khsx?.TargetSanPham != null)" Text="@(khsx?.TargetSanPham?.SP_MaSP.Value?.ToString())" Style="font-size: 16px; font-weight: bold; color: darkblue "></RadzenText>
+                                                            </RadzenStack>
+
+                                                            <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style="height: 50%; width: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                <RadzenText Text="@Common.SP_TenSanPham" Style="font-size: 16px; font-weight: 500; color: darkgray "></RadzenText>
+                                                                <RadzenText Visible="@(khsx?.TargetSanPham != null)" Text="@(khsx?.TargetSanPham?.SP_TenSanPham.Value?.ToString())" Style="font-size: 16px; font-weight: bold; color: darkblue "></RadzenText>
+                                                            </RadzenStack>
+
+                                                            <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style="height: 50%; width: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                <RadzenText Text="Nguyên vật liệu" Style="font-size: 16px; font-weight: 500; color: darkgray "></RadzenText>
+                                                                <RadzenText Visible="@(khsx?.DSachNVLofKHSXs.Count > 0)" Text="@(khsx?.DSachNVLofKHSXs is { Count: > 0 } ? string.Join(", ", khsx.DSachNVLofKHSXs.Select(nvl => nvl.TenNVL)) : string.Empty)"
+                                                                            Style="font-size: 16px; font-weight: bold; color: darkblue "></RadzenText>
+                                                            </RadzenStack>
+
+                                                            <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style="height: 50%; width: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                <RadzenText Text="Số lượng PO" Style="font-size: 16px; font-weight: 500; color: darkgray "></RadzenText>
+                                                                @{
+                                                                    int.TryParse(khsx?.SLSanPhamPO.Value?.ToString(), out int slsp);
+                                                                }
+                                                                <RadzenText Visible="@(khsx?.SLSanPhamPO.Value != null)" Text="@($"{slsp + khsx?.SoluongBoSung}")" Style="font-size: 16px; font-weight: bold; color: black "></RadzenText>
+                                                            </RadzenStack>
+
+                                                            <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style="height: 50%; width: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                <RadzenText Text="Tỉ lệ lỗi cho phép" Style="font-size: 16px; font-weight: 500; color: darkgray "></RadzenText>
+                                                                @{
+                                                                    int slloichophep = (int.TryParse(khsx.SLSanPhamSX.Value?.ToString(), out int slsx) ? slsx : 0) - (int.TryParse(khsx.SLSanPhamPO.Value?.ToString(), out int slpo) ? slpo : 0);
+                                                                }
+                                                                <RadzenText Text="@($"{khsx?.TileLoi.Value?.ToString()?? "0"} (%) ({slloichophep} pcs)")" Style="font-size: 16px; font-weight: bold; color: darkred "></RadzenText>
+                                                            </RadzenStack>
+
+                                                            <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style="height: 50%; width: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                <RadzenText Text="Số lượng NVL" Style="font-size: 16px; font-weight: 500; color: darkgray "></RadzenText>
+
+                                                                @{
+                                                                    int.TryParse(khsx?.DinhMuc.Value?.ToString(), out int dm);
+                                                                }
+                                                                <RadzenText Visible="@(khsx?.DinhMuc.Value != null)" Text="@($"{dm + khsx?.SoluongBoSung} (pcs)")" Style="font-size: 16px; font-weight: bold; color: black "></RadzenText>
+                                                            </RadzenStack>
+
+                                                            <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style="height: 50%; width: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                <RadzenText Text="Số lượng LOT" Style="font-size: 16px; font-weight: 500; color: darkgray "></RadzenText>
+                                                                <RadzenText Visible="@(khsx.DSLOT_KHSXs.Count > 0)" Text="@($"{khsx.DSLOT_KHSXs.Count} (lot)")" Style="font-size: 16px; font-weight: bold; color: black "></RadzenText>
+                                                            </RadzenStack>
+
+                                                            <RadzenStack Visible="false" Gap="0" Orientation="Orientation.Vertical" Style="height: 50%; width: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                <RadzenText Text="Mã quản lý LOT" Style="font-size: 16px; font-weight: 500; color: darkgray "></RadzenText>
+                                                                @{
+                                                                    NguyenCongofKHSX? fistCongdoan = khsx?.DSachCongDoans.FirstOrDefault();
+                                                                }
+                                                                <RadzenText Visible="@(fistCongdoan!= null)" Text="@($"{fistCongdoan?.DSachNVLCongDoans.FirstOrDefault()?.MaQuanLy.Value?.ToString()?? "_"} --> {fistCongdoan?.DSachNVLCongDoans.LastOrDefault()?.MaQuanLy.Value?? "_"}")"
+                                                                            Style="font-size: 16px; font-weight: bold; color: black "></RadzenText>
+                                                            </RadzenStack>
+
+                                                            <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style="height: 50%; width: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                <RadzenText Text="@Common.NgayTao" Style="font-size: 16px; font-weight: 500; color: darkgray "></RadzenText>
+                                                                @if (khsx?.NgayTao.Value != null)
+                                                                {
+                                                                    DateTime ngaytao = Convert.ToDateTime(khsx?.NgayTao.Value?.ToString());
+                                                                    <RadzenText Text="@ngaytao.ToString(Common.FormatNoTime_ddMMyyyy)" Style="font-size: 16px; font-weight: bold; color: black "></RadzenText>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <RadzenText Text="----" Style="font-size: 16px; font-weight: bold; color: black "></RadzenText>
+                                                                }
+                                                            </RadzenStack>
+                                                        </RadzenStack>
+                                                    </RadzenStack>
+                                                </RadzenCard>
+                                            </RadzenStack>
+                                        </RadzenColumn>
+
+                                        <RadzenColumn Size="12" SizeMD="12">
+                                            <RadzenStack Gap="10px" Style="width: 100%; padding: 20px; padding-top: 0px; padding-bottom: 10px; overflow-x: scroll" Orientation=Orientation.Horizontal AlignItems="AlignItems.End" JustifyContent="JustifyContent.Start">
+                                                @foreach (var (index, cdoan) in khsx.DSachCongDoans.Select((item, idx) => (idx, item)))
+                                                {
+                                                    <RadzenCard class="rz-shadow-5" Variant="Variant.Flat" Style="height: contain; padding: 2px;">
+                                                        <RadzenStack Gap="5px" Orientation="Orientation.Vertical" Style="height: contain; width: contain; min-width: 160px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                                            <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" Style="height: contain; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                                                <RadzenButton Text="@($"{index + 1}.  {cdoan.TenCongDoan.Value?.ToString()}")" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Variant="Variant.Flat" Size="ButtonSize.Small"
+                                                                              Style="font-weight: 600; white-space: nowrap; font-size: 16px; cursor: default; border-radius: 3px; padding: 5px 10px; width: 100%"></RadzenButton>
+                                                            </RadzenStack>
+                                                            <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" Style="height: contain; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                <RadzenButton Text="@($"{cdoan.sumTotalSubmited}/{cdoan.sLlimit}")" ButtonStyle="@((cdoan.sumTotalSubmited == cdoan.sLlimit)? ButtonStyle.Success : ButtonStyle.Primary)" Shade="@((cdoan.sumTotalSubmited == cdoan.sLlimit)? Shade.Darker : Shade.Light)" Size="ButtonSize.Small" Style="font-weight: 600; font-size: 16px; cursor: default; border-radius: 3px"></RadzenButton>
+                                                                <RadzenButton Text="@($"{cdoan.sumOKSubmited}")" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Small" Style="font-weight: 600; color: darkgreen; font-size: 16px; cursor: default; border-radius: 3px"></RadzenButton>
+                                                                <RadzenButton Visible="@(cdoan.sumNGSubmited > 0)" Text="@($"{cdoan.sumNGSubmited}")" ButtonStyle="ButtonStyle.Danger" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Small" Style="font-weight: 600; color: darkred; font-size: 16px; cursor: default; border-radius: 3px"></RadzenButton>
+                                                            </RadzenStack>
+                                                        </RadzenStack>
+                                                    </RadzenCard>
+                                                }
+                                            </RadzenStack>
+                                        </RadzenColumn>
+                                    </RadzenRow>
+                                </SummaryTemplate>
+                            </RadzenPanel>
+                        </RadzenCard>
+                    }
+                }
+
+            </RadzenStack>
+        </RadzenCard>
+
+    </RadzenStack>
+</RadzenCard>
+
+@code {
+    private List<KHSX> DSKHSXs = new();
+    private bool reloadpage = false;
+
+    private List<KHSX> DSKHSXs_base = new();
+
+    private KHSX_LOT? TargetMQLLot;
+
+    private RadzenTextBox txtSearchKHSX = new();
+
+    // Button Reload
+    private async Task ButtonReloadPress()
+    {
+        if (reloadpage == false)
+        {
+            reloadpage = true;
+
+            await SearchingKHSX(txtSearchKHSX.Value);
+
+            await Task.Delay(50);
+
+            reloadpage = false;
+        }
+    }
+
+    // Searching
+    private async Task SearchingKHSX(object? args)
+    {
+        await Task.Run(async () =>
+        {
+            if (reloadpage == false)
+            {
+                TargetMQLLot = null; DSKHSXs = new();
+
+                reloadpage = true;
+
+                string keysearch = args?.ToString()?.Trim() ?? string.Empty;
+
+                if (!string.IsNullOrEmpty(keysearch))
+                {
+                    // Search by ma KHSX
+                    var results = new List<KHSX>() { { SQLServerServices.GetKHSXbyMaKHSXRuduceTime(keysearch) } };
+
+                    if (results.Any(khsx => khsx.KHSXID.Value != null))
+                    {
+                        foreach (var kHSX in results)
+                        {
+                            // Get PhieuXuatKho bosung
+                            Dictionary<string, object?> pars = new Dictionary<string, object?>() { { Common.KHSXID, kHSX.KHSXID.Value } };
+
+                            pars.Add(Common.IsPhieuBoSungNVL, 1);
+
+                            kHSX.ListPXKBoSung = SQLServerServices.GetListPhieuXuatKhos(pars).phieuxuatkhos;
+
+                            kHSX.SoluongBoSung = kHSX.ListPXKBoSung?.Sum(pxk => pxk.DSNVLofPXKs.Sum(nvl => int.TryParse(nvl.NVLXKSoLuongAll.Value?.ToString(), out int dm) ? dm : 0)) ?? 0;
+
+
+                            NguyenCongofKHSX preCongDoan = new();
+
+                            _ = int.TryParse(kHSX.DinhMuc.Value?.ToString(), out int dinhmuc) ? dinhmuc : 0;
+
+                            // Them SL bo sung
+                            dinhmuc += kHSX.SoluongBoSung;
+
+                            foreach (var congdoan in kHSX.DSachCongDoans)
+                            {
+                                // Tinh so luong dasubmit moi cong doan cua KHSX
+                                (int sumok, int sumng, int totalokng) = GetResultsKQGCperCDoanAllLots(congdoan.NCID.Value, kHSX.KHSXID.Value);
+
+                                congdoan.sumOKSubmited = sumok; congdoan.sumNGSubmited = sumng; congdoan.sumTotalSubmited = totalokng;
+
+                                if (kHSX.DSachCongDoans.IndexOf(congdoan) == 0)
+                                {
+                                    congdoan.sLlimit = dinhmuc;
+                                }
+                                else
+                                {
+                                    congdoan.sLlimit = preCongDoan.sLlimit - preCongDoan.sumNGSubmited;
+                                }
+
+                                congdoan.IsDoneCongDoan = congdoan.sumTotalSubmited == congdoan.sLlimit;
+
+                                preCongDoan = congdoan;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // Search by ma QLLot
+                        results = DSKHSXs_base.FindAll(khsx => khsx.DSLOT_KHSXs.Any(lot => lot.MaQuanLyLot.Value?.ToString()?.IndexOf(keysearch, StringComparison.OrdinalIgnoreCase) >= 0));
+
+                        if (results.Any())
+                        {
+                            TargetMQLLot = results.FirstOrDefault()?.DSLOT_KHSXs.FirstOrDefault(lot => lot.MaQuanLyLot.Value?.ToString()?.Trim() == keysearch);
+                        }
+                        else
+                        {
+                            // Search by ma ThungTP
+                            var resutThungEx = await LoadDSachThungTPhams(keysearch);
+
+                            if (resutThungEx != null && resutThungEx.Any())
+                            {
+                                var targetThung = resutThungEx.FirstOrDefault()?.ThungTPhams.FirstOrDefault();
+
+                                var khsxid = targetThung?.KHSXID.Value;
+
+                                results = DSKHSXs_base.Where(khsx => khsx.KHSXID.Value?.ToString() == khsxid?.ToString()).ToList();
+
+                                if (targetThung != null)
+                                {
+                                    TargetMQLLot = results.FirstOrDefault()?.DSLOT_KHSXs.FirstOrDefault(lot => lot.MaQuanLyLot.Value?.ToString() == targetThung.MaQuanLyLot.Value?.ToString());
+                                }
+                            }
+                        }
+                    }
+
+                    DSKHSXs = results;
+                }
+                else
+                {
+                    TargetMQLLot = null;
+
+                    DSKHSXs = DSKHSXs_base;
+                }
+
+                await Task.Delay(50);
+
+                reloadpage = false;
+
+            }
+        });
+    }
+
+    private (int, int, int) GetResultsKQGCperCDoanAllLots(object? cdid, object? khsxid)
+    {
+        int sumok = 0; int sumng = 0;
+
+        Dictionary<string, object?> parameters = new();
+
+        parameters.Add($"{KetQuaGC.KQGCDBName.NCID}", cdid);
+
+        parameters.Add($"{KetQuaGC.KQGCDBName.KHSXID}", khsxid);
+
+        (List<KetQuaGC> DSachKetQuaGCsBase, string resultMess) = SQLServerServices.GetListKetQuaGC(parameters, false);
+
+        sumok = DSachKetQuaGCsBase.Sum(kqgc => int.TryParse(kqgc.SLOK.Value?.ToString(), out int slok) ? slok : 0);
+        sumng = DSachKetQuaGCsBase.Sum(kqgc => int.TryParse(kqgc.SLNG.Value?.ToString(), out int slng) ? slng : 0);
+
+        return (sumok, sumng, (sumok + sumng));
+    }
+
+    private async Task<List<ThungTPhamExtend>?> LoadDSachThungTPhams(object? maquanlythung)
+    {
+        return await Task.Run(() =>
+        {
+            List<ThungTPhamExtend>? thungTPhamExtends = null;
+
+            List<PartOfThungTPham> thungTPhams = SQLServerServices.GetListPartOfThungTPs(new Dictionary<string, object?>() { { PartOfThungTPham.DBName.MaQuanLyThung, maquanlythung } }).thungTPhams;
+
+            // Group the ThungTPham objects by IDThung
+            var groupedResults = thungTPhams.Where(ttp => ttp.IDThung.Value != null)
+                                            .GroupBy(ttp => ttp.IDThung.Value)
+                                            .Select(group => new ThungTPhamExtend
+                                                {
+                                                    IDThung = group.Key,
+                                                    ThungTPhams = group.ToList(),
+                                                    Total = group.ToList().Sum(ttp => int.TryParse(ttp.SoLuong.Value?.ToString(), out int sl) ? sl : 0),
+                                                    MaSanPham = SQLServerServices.GetMaSanphamByID(group.ToList().FirstOrDefault()?.SPID.Value),
+                                                }).ToList();
+            if (groupedResults != null)
+            {
+                foreach (var thung in groupedResults)
+                {
+                    foreach (var ttp in thung.ThungTPhams)
+                    {
+                        if (int.TryParse(ttp.VTofTPID.Value?.ToString(), out int vtid))
+                        {
+                            thung.DaNhapKho = vtid > 0;
+                        }
+                    }
+                }
+
+                thungTPhamExtends = groupedResults;
+            }
+
+            return thungTPhamExtends;
+        });
+    }
+
+    private void OnCollapsedKHSXDetails(KHSX targetkhsx)
+    {
+        targetkhsx.IsCollapsed.Value = targetkhsx.isCollapsed ? 1 : 0;
+
+        (int udresult, string uderror) = SQLServerServices.UpdateKHSXProperty(targetkhsx.KHSXID.Value, Common.IsCollapsed, targetkhsx.IsCollapsed.Value);
+
+
+        // Set stop while load chart KHSX
+        if (targetkhsx.isCollapsed)
+        {
+            (int updatesuccess, string error) = SQLServerServices.UpdateKHSXProperty(targetkhsx.KHSXID.Value, Common.IsChartRunning, 0);
+        }
+    }
+}

@@ -3,8 +3,10 @@
 @inherits LayoutComponentBase
 
 @using ParamountBed_Warehouse.Services.SocketService
+@using ProcessManagement.Commons
 @using Radzen;
 @using Radzen.Blazor;
+@using System.Security.Claims
 
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject ServerSocketAsync ServerSocketAsync
@@ -55,25 +57,30 @@
 
         if (user != null && user.Identity?.IsAuthenticated == true)
         {
-            UserRoles = user.Claims.Where(c => c.Type == "role").Select(c => c.Value).ToList();
+            // UserRoles = user.Claims.Where(c => c.Type == "role").Select(c => c.Value).ToList();
+            // Check for claims with type "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+            UserRoles = user.Claims
+                .Where(c => c.Type == ClaimTypes.Role)
+                .Select(c => c.Value)
+                .ToList();
         }
 
         // Checking if is User login not Admin
         if (UserRoles != null && UserRoles.Any())
         {
-            if (UserRoles.FirstOrDefault() == "User")
+            if (UserRoles.FirstOrDefault() == "User" || UserRoles.FirstOrDefault() == Common.UserDongThung)
             {
                 visibleSideBar = false; // hide sidemenubar
             }
             else if (UserRoles.FirstOrDefault() == "Admin")
             {
-                if (!ServerSocketAsync.serverrunning) { ServerSocketAsync.StartListening(); }
+                // if (!ServerSocketAsync.serverrunning) { ServerSocketAsync.StartListening(); }
 
-                if (!ServerSocketAsync.IsIm_Ex_EventRegistered())
-                {
-                    // not use
-                    //ServerSocketAsync.Im_Ex_Event += UpdateUI_IMEX_Mode;
-                }
+                // if (!ServerSocketAsync.IsIm_Ex_EventRegistered())
+                // {
+                //     // not use
+                //     //ServerSocketAsync.Im_Ex_Event += UpdateUI_IMEX_Mode;
+                // }
             }
         }
 

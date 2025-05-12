@@ -8,7 +8,9 @@ using System.Text;
 namespace ProcessManagement.Commons
 {
     public static class Common
-    {
+    {   
+        public const string UserDongThung = "User-dongthung";
+
         public const string ServerAPI = "ServerAPI";
 
         public static int IndexOFwhile = 0;
