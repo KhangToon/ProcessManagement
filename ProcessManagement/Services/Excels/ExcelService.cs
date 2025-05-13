@@ -566,7 +566,7 @@ namespace ProcessManagement.Services.Excels
             };
             excelDatas.Add(soluongCell);
 
-            // Soluong
+            // MQLTHUNG
             ExcelCell MQLCell = new()
             {
                 CellName = ThungTPham.ExcellAddress.MQLTHUNG,
@@ -578,15 +578,15 @@ namespace ProcessManagement.Services.Excels
             excelDatas.Add(MQLCell);
 
             // IDThung
-            ExcelCell IDCell = new()
-            {
-                CellName = ThungTPham.ExcellAddress.IDThung,
-                Col = ThungTPham.ExcellAddress.ColumnAddress[ThungTPham.ExcellAddress.IDThung],
-                Row = ThungTPham.ExcellAddress.RowAddress[ThungTPham.ExcellAddress.IDThung],
-                ValueType = typeof(string),
-                CellValue = ConvertToCircleNumber($"{thungTPham.IDThung.Value}")
-            };
-            excelDatas.Add(IDCell);
+            //ExcelCell IDCell = new()
+            //{
+            //    CellName = ThungTPham.ExcellAddress.IDThung,
+            //    Col = ThungTPham.ExcellAddress.ColumnAddress[ThungTPham.ExcellAddress.IDThung],
+            //    Row = ThungTPham.ExcellAddress.RowAddress[ThungTPham.ExcellAddress.IDThung],
+            //    ValueType = typeof(string),
+            //    CellValue = ConvertToCircleNumber($"{thungTPham.IDThung.Value}")
+            //};
+            //excelDatas.Add(IDCell);
 
             // Excell file
             string excelPath = ThungTPham.ExcellAddress.ExportPath;
@@ -676,7 +676,8 @@ namespace ProcessManagement.Services.Excels
             IDrawing drawing = worksheet.CreateDrawingPatriarch();
 
             // Parameters for CreateAnchor: dx1, dy1, dx2, dy2, col1, row1, col2, row2
-            IClientAnchor anchor = drawing.CreateAnchor(0, 0, 0, 0, 1, 1, 2, 2);
+            //IClientAnchor anchor = drawing.CreateAnchor(0, 0, 0, 0, 1, 1, 2, 2); // B2
+            IClientAnchor anchor = drawing.CreateAnchor(0, 0, 0, 0, 2, 1, 3, 2); // C2
 
             //dx1: Horizontal offset within the first cell(0 - 1023)
             //dy1: Vertical offset within the first cell(0 - 255)
