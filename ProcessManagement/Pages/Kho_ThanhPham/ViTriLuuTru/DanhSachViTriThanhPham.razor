@@ -60,20 +60,20 @@
         </RadzenColumn>
         <RadzenColumn SizeMD="5" Size="12">
             <RadzenStack Gap="15px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Style="height: 100%; width: 100%;">
-                <RadzenTextBox @oninput="@((args) => GetFilterDSachViTriTPham(args?.Value?.ToString()?? string.Empty))" Placeholder="Nhập mã vị trí hoặc mã sản phẩm để tìm kiếm" Style="border-radius: 20px; padding-left: 20px; border-width: 2px; border-color: var(--rz-primary-light); width: 70% "></RadzenTextBox>
+                <RadzenTextBox @oninput="@((args) => GetFilterDSachViTriTPham(args?.Value?.ToString() ?? string.Empty))" Placeholder="Nhập mã vị trí hoặc mã sản phẩm để tìm kiếm" Style="border-radius: 20px; padding-left: 20px; border-width: 2px; border-color: var(--rz-primary-light); width: 70% "></RadzenTextBox>
                 <RadzenButton Icon="search" ButtonStyle="ButtonStyle.Primary" Style="border-radius: 20px;" />
-                <RadzenButton Style="border-radius: 20px;" Icon="autorenew" Click="@( async() => {await GetFilterDSachViTriTPham(string.Empty);})" IsBusy="@isSearching" ButtonStyle="ButtonStyle.Primary" />
+                <RadzenButton Style="border-radius: 20px;" Icon="autorenew" Click="@(async () => { await GetFilterDSachViTriTPham(string.Empty); })" IsBusy="@isSearching" ButtonStyle="ButtonStyle.Primary" />
             </RadzenStack>
         </RadzenColumn>
         <RadzenColumn SizeMD="4" Size="12">
             <RadzenStack Gap="15px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween" Style="height: 100%; width: 100%; padding-left: 10px">
                 <RadzenMenu Style="width: contain; padding: 0; margin: 0; border-radius: 10px; background-color: var(--rz-primary-lighter)">
                     <RadzenMenuItem Text="@($"Bộ lọc ( {DSachModeSearch[modeSearch]} )")" Icon="search">
-                        <RadzenMenuItem Text="@DSachModeSearch[0]" Click="@( async() => { modeSearch = 0; await LoadDSachViTriLuuTru();} )" Icon="filter_alt"></RadzenMenuItem>
+                        <RadzenMenuItem Text="@DSachModeSearch[0]" Click="@(async () => { modeSearch = 0; await LoadDSachViTriLuuTru(); })" Icon="filter_alt"></RadzenMenuItem>
                         <RadzenMenuItem Text="@DSachModeSearch[1]" Click="@(() => modeSearch = 1)" Icon="filter_alt"></RadzenMenuItem>
                         <RadzenMenuItem Text="@DSachModeSearch[2]" Click="@(() => modeSearch = 2)" Icon="filter_alt"></RadzenMenuItem>
-                        <RadzenMenuItem Text="@DSachModeSearch[3]" Click="@( async() => {modeSearch = 3; await GetFilterDSachViTriTPham(string.Empty);})" Icon="filter_alt"></RadzenMenuItem>
-                        <RadzenMenuItem Text="@DSachModeSearch[4]" Click="@( async() => {modeSearch = 4; await GetFilterDSachViTriTPham(string.Empty);})" Icon="filter_alt"></RadzenMenuItem>
+                        <RadzenMenuItem Text="@DSachModeSearch[3]" Click="@(async () => { modeSearch = 3; await GetFilterDSachViTriTPham(string.Empty); })" Icon="filter_alt"></RadzenMenuItem>
+                        <RadzenMenuItem Text="@DSachModeSearch[4]" Click="@(async () => { modeSearch = 4; await GetFilterDSachViTriTPham(string.Empty); })" Icon="filter_alt"></RadzenMenuItem>
                     </RadzenMenuItem>
                 </RadzenMenu>
             </RadzenStack>
@@ -81,332 +81,361 @@
     </RadzenRow>
 </RadzenStack>
 
-<RadzenRow Gap="10px" Style="height: 100%; width: 100%; border-top: var(--rz-grid-cell-border); padding: 0;">
-    <RadzenColumn Size="12" SizeMD="5" Style="height: contain; width: 100%;">
-        <RadzenStack Gap="0px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start" Style="height: 100%; width: 100%;">
-            <RadzenStack Gap="10px" Style="height: contain; width: 100%; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                <RadzenRow Style="height: 100%; width: 100%;">
-                    <RadzenColumn SizeMD="8" Size="12">
-                        <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding: 10px; padding-left: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                            <RadzenText Text="Danh sách vị trí kho thành phẩm" Style="color: darkred; font-weight: 600; font-size: 17px; height: contain; width: contain; font-style: italic;"></RadzenText>
-                            <RadzenText Text="@($"( {DSVitris.Count} vị trí )")" Style="color: black; font-weight: 600; font-size: 16px; height: contain; width: contain; font-style: italic;"></RadzenText>
-                        </RadzenStack>
-                    </RadzenColumn>
-                    <RadzenColumn SizeMD="4" Size="12">
-                        <RadzenStack Style="height: 100%; width: 100%; padding-left: 10px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                            <RadzenButton Click="OnAddNewViTriLuuTru" Icon="add" Text="Thêm vị trí mới" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
-                                          Style="height: contain; width: 100%; font-weight: 600; font-size: 15px;" />
-                            <RadzenButton Visible="false" Click="@(async() => await AutoAddViTriLuuTru())" Icon="add" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
-                                          Style="height: contain; width: 100%; font-size: 15px;" />
-                        </RadzenStack>
-                    </RadzenColumn>
-                </RadzenRow>
-            </RadzenStack>
-            <RadzenDataList Style="height: 100%; width: 100%" Density="Density.Default" PagerPosition="PagerPosition.Top" PageSize="9" AllowPaging="true" WrapItems="true" AllowVirtualization="false" Data="@DSVitris" TItem="ViTriTPham">
-                <Template Context="vitri">
-                    <RadzenCard Style="width: 250px; height: contain; padding: 0" Variant="Variant.Flat">
-                        <RadzenCard class="@(IsVitriSelected(vitri))" Style="width: 100%; height: 100%; padding: 5px" Variant="Variant.Flat">
-                            <RadzenStack onclick="@(async() => await OnViTriLuuTruClick(vitri))" Style="width: 100%; height: 100%; padding: 0" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                <RadzenCard class="rz-shadow-5" Variant="@((vitri.VTTPID.Value?.Equals(SelectedViTri.VTTPID.Value)?? false)? Variant.Outlined : Variant.Flat)" Style="height: 100%; width: 100%; padding: 10px; background-color: white">
-                                    <RadzenStack Style="width: 100%; height: 100%;" Gap="10px" Orientation=Orientation.Vertical AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                        <RadzenStack Gap="0" Style="width: 100%; height: contain; padding-bottom: 5px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                                            <RadzenStack Style="height: contain; width: contain; min-width: 30px; border-radius: 5px; background-color: var(--rz-primary-lighter); padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                <RadzenText Text="@((DSVitris.IndexOf(vitri) + 1).ToString())" Style="color: rgba(58,71,77); font-weight: 600; font-size: 15px"></RadzenText>
-                                            </RadzenStack>
-                                            <RadzenStack Style="height: contain; width: contain; border-radius: 5px; padding: 0px;" Gap="10" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                @{
-                                                    int dadung = (int.TryParse(vitri.VTSucChua.Value?.ToString(), out int sc) ? sc : 0) - vitri.SLConTrong;
-                                                }
-                                                @if (dadung > 0)
-                                                {
-                                                    <RadzenButton Text="@($"Đã dùng {dadung} pcs")" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Dark" Variant="Variant.Flat"
-                                                                  Style="border-radius: 5px; --rz-icon-size: 18px; height: 20px; width: 100%; cursor: default; font-weight: 600" />
-                                                }
-                                                else
-                                                {
-                                                    <RadzenButton Text="@($"Đã dùng {dadung} pcs")" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Variant="Variant.Outlined"
-                                                                  Style="border-radius: 5px; --rz-icon-size: 18px; height: 20px; width: 100%; cursor: default; font-weight: 600;" />
-                                                }
-                                            </RadzenStack>
-                                        </RadzenStack>
-                                        <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                            <RadzenStack Style="width: 50%; height: contain; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                                <RadzenText Text="Mã vị trí: " Style="font-size: 16px; font-weight: 500; height: contain; color: rgba(58,71,77)"></RadzenText>
-                                            </RadzenStack>
-                                            <RadzenStack Style="width: 50%; height: contain; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                <RadzenText Text="@($"{vitri.MaViTri.Value?.ToString()}")" Style="color: darkblue; font-weight: 700; font-size: 18px"></RadzenText>
-                                            </RadzenStack>
-                                        </RadzenStack>
-                                        <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                            <RadzenStack Style="width: 50%; height: contain; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                                <RadzenText Text="Sức chứa: " Style="font-size: 16px; font-weight: 500; height: contain; color: rgba(58,71,77)"></RadzenText>
-                                            </RadzenStack>
-                                            <RadzenStack Style="width: 50%; height: contain; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                <RadzenText Text="@($"{vitri.VTSucChua.Value?.ToString()} (pcs)")" Style="font-size: 16px; font-weight: 600; height: contain; color: rgba(58,71,77)"></RadzenText>
-                                            </RadzenStack>
-                                        </RadzenStack>
-                                        <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                            <RadzenStack Style="width: 50%; height: contain; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                                <RadzenText Text="Còn trống: " Style="font-size: 16px; font-weight: 500; height: contain; color: rgba(58,71,77)"></RadzenText>
-                                            </RadzenStack>
-                                            <RadzenStack Style="width: 50%; height: contain; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                <RadzenText Text="@($"{vitri.SLConTrong} (pcs)")" Style="font-size: 16px; font-weight: 600; height: contain; color: rgba(58,71,77)"></RadzenText>
-                                            </RadzenStack>
-                                        </RadzenStack>
-                                    </RadzenStack>
-                                </RadzenCard>
-                            </RadzenStack>
-                        </RadzenCard>
-                    </RadzenCard>
-                </Template>
-            </RadzenDataList>
-        </RadzenStack>
-    </RadzenColumn>
-    <RadzenColumn Size="12" SizeMD="7" Style="height: contain; width: 100%; padding-top: 10px; padding-left: 10px; border-left: var(--rz-grid-cell-border);">
-        <RadzenRow class="rowbackground-style" Gap="10px" Style="height: 100%; width: 100%; border-radius: 10px;">
-            <RadzenColumn Size="12" SizeMD="12" Style="height: 100%; width: 100%;">
-                <RadzenCard class="rz-shadow-4" Variant="Variant.Filled" Style="width: 100%; height: 100%; padding: 5px; border-radius: 10px;">
-                    <RadzenStack Gap="0" Style="height: 100%; width: 100%; padding: 5px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                        <RadzenRow Style="height: contain; width: 100%;">
-                            <RadzenColumn Size="12" SizeMD="5">
-                                <RadzenStack Gap="0" Style="height: contain; width: 100%; padding: 10px; padding-top: 0;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                    <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding: 10px; padding-left: 0;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                        <RadzenText Text="Thông tin chi tiết vị trí" Style="color: darkred; font-weight: 600; font-size: 17px; height: contain; width: contain; font-style: italic;"></RadzenText>
-                                        <RadzenText Visible="@(!string.IsNullOrEmpty(SelectedViTri.VTTPID.Value?.ToString()))" Text="@($"( {SelectedViTri.MaViTri.Value?.ToString()} )")" Style="color: darkblue; font-weight: 700; font-size: 18px; height: contain; width: contain; font-style: italic;"></RadzenText>
-                                        <RadzenText Visible="@(string.IsNullOrEmpty(SelectedViTri.VTTPID.Value?.ToString()))" Text="Chọn ô vị trí để hiển thị thông tin" Style="color: red; font-weight: 600; font-size: 17px; height: contain; width: contain; font-style: italic;"></RadzenText>
-                                    </RadzenStack>
-                                    <RadzenStack Visible="@(SelectedViTri.VTTPID.Value != null)" Gap="10px" Style="height: contain; width: 100%; padding: 0;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                        <RadzenStack Gap="10px" Style="height: contain; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                            <RadzenText Text="Sức chứa: " Style="font-weight: 600; font-size: 16px"></RadzenText>
-                                            <RadzenText Text="@($"{SelectedViTri.VTSucChua.Value?.ToString()} (pcs)")" Style="font-weight: 600; font-size: 16px"></RadzenText>
-                                        </RadzenStack>
-                                        <RadzenStack Gap="10px" Style="height: contain; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                            <RadzenText Text="Số lượng LOT: " Style="font-weight: 600; font-size: 16px"></RadzenText>
-                                            <RadzenText Text="@($"{SelectedViTri.DSachViTriofTPhams.Count()} (lot)")" Style="font-weight: 600; font-size: 16px"></RadzenText>
-                                        </RadzenStack>
-                                        <RadzenStack Gap="10px" Style="height: contain; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
 
-                                            @if (SelectedViTri.SLConTrong == 0)
-                                            {
-                                                <RadzenButton Text="@($"Số lượng trống: {SelectedViTri.SLConTrong}")" ButtonStyle="ButtonStyle.Warning" Size="ButtonSize.Small" Shade="Shade.Dark" Variant="Variant.Text"
-                                                              Style="border-radius: 5px; --rz-icon-size: 18px; height: 20px; width: 100%; cursor: default; background-color: rgb(254,243,220); font-weight: 600" />
-                                            }
-                                            else
-                                            {
-                                                <RadzenButton Text="@($"Số lượng trống: {SelectedViTri.SLConTrong}")" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Dark" Variant="Variant.Text"
-                                                              Style="border-radius: 5px; --rz-icon-size: 18px; height: 20px; width: contain; cursor: default; background-color: rgb(229,245,233); font-weight: 600" />
-                                            }
+<RadzenTabs Style="width: 100%; height: 100%; padding-right: 0" RenderMode="TabRenderMode.Client" SelectedIndex="@((DisplayStype))">
+    <Tabs>
+        <RadzenTabsItem @onclick="@(() => DisplayStype = 0)">
+            <Template>
+                <RadzenText Text="Danh sách" Style=@($"{((DisplayStype == 0) ? "color: black; font-weight: 600; font-size: 16px" : "color: var(--rz-primary-dark); font-weight: 600; font-size: 16px")}")></RadzenText>
+            </Template>
+            <ChildContent>
+                <RadzenCard Variant="Variant.Flat" Style="height: 100%; width: 100%; padding: 10px;">
+                    <RadzenStack Visible="@(DSVitris.Any())" Gap="5" Style="height: 100%; width: 100%;">
+                        <ListLayoutKhoThanhPham ViTriTPhams="@DSVitris"></ListLayoutKhoThanhPham>
+                    </RadzenStack>
+                </RadzenCard>
+            </ChildContent>
+        </RadzenTabsItem>
 
-                                            <RadzenButton Disabled="@(CountDSVitriofTP(SelectedViTri) > 0)" Click="@(async () => await RemoveViTriLuuTru(SelectedViTri))" Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Shade="Shade.Darker" Variant="Variant.Flat"
-                                                          Text="Xóa vị trí" Style="font-size: 15px; height: contain; width: contain;" />
-
-                                        </RadzenStack>
+        <RadzenTabsItem @onclick="@(() => DisplayStype = 1)">
+            <Template>
+                <RadzenText Text="Layout" Style=@($"{((DisplayStype == 1) ? "color: darkred; font-weight: 600; font-size: 16px" : "color: var(--rz-primary-dark); font-weight: 600; font-size: 16px")}")></RadzenText>
+            </Template>
+            <ChildContent>
+                <RadzenCard Variant="Variant.Flat" Style="height: 100%; width: 100%; padding: 10px;">
+                    <RadzenStack Gap="5" Style="height: 100%; width: 100%;">
+                        <RadzenRow Gap="10px" Style="height: 100%; width: 100%; border-top: var(--rz-grid-cell-border); padding: 0;">
+                            <RadzenColumn Size="12" SizeMD="5" Style="height: contain; width: 100%;">
+                                <RadzenStack Gap="0px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Start" Style="height: 100%; width: 100%;">
+                                    <RadzenStack Gap="10px" Style="height: contain; width: 100%; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                        <RadzenRow Style="height: 100%; width: 100%;">
+                                            <RadzenColumn SizeMD="8" Size="12">
+                                                <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding: 10px; padding-left: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                    <RadzenText Text="Danh sách vị trí kho thành phẩm" Style="color: darkred; font-weight: 600; font-size: 17px; height: contain; width: contain; font-style: italic;"></RadzenText>
+                                                    <RadzenText Text="@($"( {DSVitris.Count} vị trí )")" Style="color: black; font-weight: 600; font-size: 16px; height: contain; width: contain; font-style: italic;"></RadzenText>
+                                                </RadzenStack>
+                                            </RadzenColumn>
+                                            <RadzenColumn SizeMD="4" Size="12">
+                                                <RadzenStack Style="height: 100%; width: 100%; padding-left: 10px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                    <RadzenButton Click="OnAddNewViTriLuuTru" Icon="add" Text="Thêm vị trí mới" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
+                                                                  Style="height: contain; width: 100%; font-weight: 600; font-size: 15px;" />
+                                                    <RadzenButton Visible="false" Click="@(async () => await AutoAddViTriLuuTru())" Icon="add" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
+                                                                  Style="height: contain; width: 100%; font-size: 15px;" />
+                                                </RadzenStack>
+                                            </RadzenColumn>
+                                        </RadzenRow>
                                     </RadzenStack>
+                                    <RadzenDataList Style="height: 100%; width: 100%" Density="Density.Default" PagerPosition="PagerPosition.Top" PageSize="9" AllowPaging="true" WrapItems="true" AllowVirtualization="false" Data="@DSVitris" TItem="ViTriTPham">
+                                        <Template Context="vitri">
+                                            <RadzenCard Style="width: 250px; height: contain; padding: 0" Variant="Variant.Flat">
+                                                <RadzenCard class="@(IsVitriSelected(vitri))" Style="width: 100%; height: 100%; padding: 5px" Variant="Variant.Flat">
+                                                    <RadzenStack onclick="@(async () => await OnViTriLuuTruClick(vitri))" Style="width: 100%; height: 100%; padding: 0" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                        <RadzenCard class="rz-shadow-5" Variant="@((vitri.VTTPID.Value?.Equals(SelectedViTri.VTTPID.Value) ?? false) ? Variant.Outlined : Variant.Flat)" Style="height: 100%; width: 100%; padding: 10px; background-color: white">
+                                                            <RadzenStack Style="width: 100%; height: 100%;" Gap="10px" Orientation=Orientation.Vertical AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                                <RadzenStack Gap="0" Style="width: 100%; height: contain; padding-bottom: 5px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                                                    <RadzenStack Style="height: contain; width: contain; min-width: 30px; border-radius: 5px; background-color: var(--rz-primary-lighter); padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                        <RadzenText Text="@((DSVitris.IndexOf(vitri) + 1).ToString())" Style="color: rgba(58,71,77); font-weight: 600; font-size: 15px"></RadzenText>
+                                                                    </RadzenStack>
+                                                                    <RadzenStack Style="height: contain; width: contain; border-radius: 5px; padding: 0px;" Gap="10" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                        @{
+                                                                            int dadung = (int.TryParse(vitri.VTSucChua.Value?.ToString(), out int sc) ? sc : 0) - vitri.SLConTrong;
+                                                                        }
+                                                                        @if (dadung > 0)
+                                                                        {
+                                                                            <RadzenButton Text="@($"Đã dùng {dadung} pcs")" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Dark" Variant="Variant.Flat"
+                                                                                          Style="border-radius: 5px; --rz-icon-size: 18px; height: 20px; width: 100%; cursor: default; font-weight: 600" />
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <RadzenButton Text="@($"Đã dùng {dadung} pcs")" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Variant="Variant.Outlined"
+                                                                                          Style="border-radius: 5px; --rz-icon-size: 18px; height: 20px; width: 100%; cursor: default; font-weight: 600;" />
+                                                                        }
+                                                                    </RadzenStack>
+                                                                </RadzenStack>
+                                                                <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                    <RadzenStack Style="width: 50%; height: contain; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                                        <RadzenText Text="Mã vị trí: " Style="font-size: 16px; font-weight: 500; height: contain; color: rgba(58,71,77)"></RadzenText>
+                                                                    </RadzenStack>
+                                                                    <RadzenStack Style="width: 50%; height: contain; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                        <RadzenText Text="@($"{vitri.MaViTri.Value?.ToString()}")" Style="color: darkblue; font-weight: 700; font-size: 18px"></RadzenText>
+                                                                    </RadzenStack>
+                                                                </RadzenStack>
+                                                                <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                    <RadzenStack Style="width: 50%; height: contain; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                                        <RadzenText Text="Sức chứa: " Style="font-size: 16px; font-weight: 500; height: contain; color: rgba(58,71,77)"></RadzenText>
+                                                                    </RadzenStack>
+                                                                    <RadzenStack Style="width: 50%; height: contain; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                        <RadzenText Text="@($"{vitri.VTSucChua.Value?.ToString()} (pcs)")" Style="font-size: 16px; font-weight: 600; height: contain; color: rgba(58,71,77)"></RadzenText>
+                                                                    </RadzenStack>
+                                                                </RadzenStack>
+                                                                <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                    <RadzenStack Style="width: 50%; height: contain; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                                        <RadzenText Text="Còn trống: " Style="font-size: 16px; font-weight: 500; height: contain; color: rgba(58,71,77)"></RadzenText>
+                                                                    </RadzenStack>
+                                                                    <RadzenStack Style="width: 50%; height: contain; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                        <RadzenText Text="@($"{vitri.SLConTrong} (pcs)")" Style="font-size: 16px; font-weight: 600; height: contain; color: rgba(58,71,77)"></RadzenText>
+                                                                    </RadzenStack>
+                                                                </RadzenStack>
+                                                            </RadzenStack>
+                                                        </RadzenCard>
+                                                    </RadzenStack>
+                                                </RadzenCard>
+                                            </RadzenCard>
+                                        </Template>
+                                    </RadzenDataList>
                                 </RadzenStack>
                             </RadzenColumn>
-                            <RadzenColumn Visible="@(SelectedViTri.VTTPID.Value != null)" Size="12" SizeMD="7">
-                                <RadzenRow Style="height: contain; width: 100%;" Gap="10px">
-                                    <RadzenColumn Size="12" SizeMD="6">
-                                        <RadzenStack Gap="5px" Style="height: contain; width: 100%;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                            <RadzenStack Gap="20px" Style="height: contain; width: 100%; border-radius: 5px; background-color: var(--rz-secondary-lighter); padding: 5px; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                                                <RadzenText Text="@($"Mã vị trí: ")" Style="font-weight: 600; font-size: 16px; color: black;"></RadzenText>
-                                                <RadzenStack Gap="10" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                    <RadzenText Text="@($"{SelectedViTri.MaViTri.Value?.ToString()}")" Style="font-weight: 600; font-size: 18px; color: darkblue;"></RadzenText>
-                                                    <RadzenButton Click="@(async() => await CopyToClipboard(SelectedViTri.MaViTri.Value?.ToString()?? string.Empty))" Icon="content_copy" Style="--rz-icon-size: 18px;" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Light" />
-                                                </RadzenStack>
-                                            </RadzenStack>
-                                            <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: contain; padding: 5px; border-radius: 0">
-                                                <RadzenStack Style="height: contain; width: contain" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                    @{
-                                                        string qrBase64string = QRCodeServices.GenerateQRCode(SelectedViTri.MaViTri.Value?.ToString() ?? string.Empty, 100);
-                                                        <img style="border-radius: 10px;" src="@($"data:image/png;base64,{qrBase64string}")" alt="QR Code">
-                                                    }
-                                                </RadzenStack>
-                                            </RadzenCard>
-                                        </RadzenStack>
-                                    </RadzenColumn>
-                                    <RadzenColumn Size="12" SizeMD="6">
-                                        <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding: 5px; padding-right: 10px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                            <RadzenStack Gap="0" Style="height: contain; width: 100%; padding-bottom: 5px; padding-top: 5px; padding-left: 10px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                                <RadzenStack Style="width: 70%; padding-left: 10px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                                    <RadzenText Text="Vị trí kệ" Style="font-size: 16px; font-weight: 600;  height: contain; width: 100% "></RadzenText>
-                                                </RadzenStack>
-                                                <RadzenStack Style="width: 30%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                    <RadzenText Text="@SelectedViTri.ViTriKe.Value?.ToString()" Style="font-size: 18px; color: darkblue; font-weight: bold; height: contain;"></RadzenText>
-                                                </RadzenStack>
-                                            </RadzenStack>
-                                            <RadzenStack Gap="0" Style="height: contain; width: 100%; padding-bottom: 5px; padding-top: 5px; padding-left: 10px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                                <RadzenStack Style="width: 70%; padding-left: 10px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                                    <RadzenText Text="Vị trí hàng" Style="font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
-                                                </RadzenStack>
-                                                <RadzenStack Style="width: 30%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                    <RadzenText Text="@SelectedViTri.ViTriHang.Value?.ToString()" Style="font-size: 18px; color: darkblue; font-weight: bold; height: contain;"></RadzenText>
-                                                </RadzenStack>
-                                            </RadzenStack>
-                                            <RadzenStack Gap="0" Style="height: contain; width: 100%; padding-bottom: 5px; padding-top: 5px; padding-left: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                                <RadzenStack Style="width: 70%; padding-left: 10px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                                    <RadzenText Text="Vị trí cột" Style="font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
-                                                </RadzenStack>
-                                                <RadzenStack Style="width: 30%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                    <RadzenText Text="@SelectedViTri.ViTriCot.Value?.ToString()" Style="font-size: 18px; color: darkblue; font-weight: bold; height: contain;"></RadzenText>
-                                                </RadzenStack>
-                                            </RadzenStack>
-                                        </RadzenStack>
+                            <RadzenColumn Size="12" SizeMD="7" Style="height: contain; width: 100%; padding-top: 10px; padding-left: 10px; border-left: var(--rz-grid-cell-border);">
+                                <RadzenRow class="rowbackground-style" Gap="10px" Style="height: 100%; width: 100%; border-radius: 10px;">
+                                    <RadzenColumn Size="12" SizeMD="12" Style="height: 100%; width: 100%;">
+                                        <RadzenCard class="rz-shadow-4" Variant="Variant.Filled" Style="width: 100%; height: 100%; padding: 5px; border-radius: 10px;">
+                                            <RadzenStack Gap="0" Style="height: 100%; width: 100%; padding: 5px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                <RadzenRow Style="height: contain; width: 100%;">
+                                                    <RadzenColumn Size="12" SizeMD="5">
+                                                        <RadzenStack Gap="0" Style="height: contain; width: 100%; padding: 10px; padding-top: 0;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                            <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding: 10px; padding-left: 0;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                                <RadzenText Text="Thông tin chi tiết vị trí" Style="color: darkred; font-weight: 600; font-size: 17px; height: contain; width: contain; font-style: italic;"></RadzenText>
+                                                                <RadzenText Visible="@(!string.IsNullOrEmpty(SelectedViTri.VTTPID.Value?.ToString()))" Text="@($"( {SelectedViTri.MaViTri.Value?.ToString()} )")" Style="color: darkblue; font-weight: 700; font-size: 18px; height: contain; width: contain; font-style: italic;"></RadzenText>
+                                                                <RadzenText Visible="@(string.IsNullOrEmpty(SelectedViTri.VTTPID.Value?.ToString()))" Text="Chọn ô vị trí để hiển thị thông tin" Style="color: red; font-weight: 600; font-size: 17px; height: contain; width: contain; font-style: italic;"></RadzenText>
+                                                            </RadzenStack>
+                                                            <RadzenStack Visible="@(SelectedViTri.VTTPID.Value != null)" Gap="10px" Style="height: contain; width: 100%; padding: 0;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                                <RadzenStack Gap="10px" Style="height: contain; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                                    <RadzenText Text="Sức chứa: " Style="font-weight: 600; font-size: 16px"></RadzenText>
+                                                                    <RadzenText Text="@($"{SelectedViTri.VTSucChua.Value?.ToString()} (pcs)")" Style="font-weight: 600; font-size: 16px"></RadzenText>
+                                                                </RadzenStack>
+                                                                <RadzenStack Gap="10px" Style="height: contain; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                                    <RadzenText Text="Số lượng LOT: " Style="font-weight: 600; font-size: 16px"></RadzenText>
+                                                                    <RadzenText Text="@($"{SelectedViTri.DSachViTriofTPhams.Count()} (lot)")" Style="font-weight: 600; font-size: 16px"></RadzenText>
+                                                                </RadzenStack>
+                                                                <RadzenStack Gap="10px" Style="height: contain; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
 
+                                                                    @if (SelectedViTri.SLConTrong == 0)
+                                                                    {
+                                                                        <RadzenButton Text="@($"Số lượng trống: {SelectedViTri.SLConTrong}")" ButtonStyle="ButtonStyle.Warning" Size="ButtonSize.Small" Shade="Shade.Dark" Variant="Variant.Text"
+                                                                                      Style="border-radius: 5px; --rz-icon-size: 18px; height: 20px; width: 100%; cursor: default; background-color: rgb(254,243,220); font-weight: 600" />
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <RadzenButton Text="@($"Số lượng trống: {SelectedViTri.SLConTrong}")" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Dark" Variant="Variant.Text"
+                                                                                      Style="border-radius: 5px; --rz-icon-size: 18px; height: 20px; width: contain; cursor: default; background-color: rgb(229,245,233); font-weight: 600" />
+                                                                    }
+
+                                                                    <RadzenButton Disabled="@(CountDSVitriofTP(SelectedViTri) > 0)" Click="@(async () => await RemoveViTriLuuTru(SelectedViTri))" Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Shade="Shade.Darker" Variant="Variant.Flat"
+                                                                                  Text="Xóa vị trí" Style="font-size: 15px; height: contain; width: contain;" />
+
+                                                                </RadzenStack>
+                                                            </RadzenStack>
+                                                        </RadzenStack>
+                                                    </RadzenColumn>
+                                                    <RadzenColumn Visible="@(SelectedViTri.VTTPID.Value != null)" Size="12" SizeMD="7">
+                                                        <RadzenRow Style="height: contain; width: 100%;" Gap="10px">
+                                                            <RadzenColumn Size="12" SizeMD="6">
+                                                                <RadzenStack Gap="5px" Style="height: contain; width: 100%;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                    <RadzenStack Gap="20px" Style="height: contain; width: 100%; border-radius: 5px; background-color: var(--rz-secondary-lighter); padding: 5px; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                                                        <RadzenText Text="@($"Mã vị trí: ")" Style="font-weight: 600; font-size: 16px; color: black;"></RadzenText>
+                                                                        <RadzenStack Gap="10" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                            <RadzenText Text="@($"{SelectedViTri.MaViTri.Value?.ToString()}")" Style="font-weight: 600; font-size: 18px; color: darkblue;"></RadzenText>
+                                                                            <RadzenButton Click="@(async () => await CopyToClipboard(SelectedViTri.MaViTri.Value?.ToString() ?? string.Empty))" Icon="content_copy" Style="--rz-icon-size: 18px;" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Light" />
+                                                                        </RadzenStack>
+                                                                    </RadzenStack>
+                                                                    <RadzenCard Variant="Variant.Flat" Style="width: 100%; height: contain; padding: 5px; border-radius: 0">
+                                                                        <RadzenStack Style="height: contain; width: contain" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                            @{
+                                                                                string qrBase64string = QRCodeServices.GenerateQRCode(SelectedViTri.MaViTri.Value?.ToString() ?? string.Empty, 100);
+                                                                                <img style="border-radius: 10px;" src="@($"data:image/png;base64,{qrBase64string}")" alt="QR Code">
+                                                                            }
+                                                                        </RadzenStack>
+                                                                    </RadzenCard>
+                                                                </RadzenStack>
+                                                            </RadzenColumn>
+                                                            <RadzenColumn Size="12" SizeMD="6">
+                                                                <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding: 5px; padding-right: 10px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                                    <RadzenStack Gap="0" Style="height: contain; width: 100%; padding-bottom: 5px; padding-top: 5px; padding-left: 10px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                                        <RadzenStack Style="width: 70%; padding-left: 10px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                                            <RadzenText Text="Vị trí kệ" Style="font-size: 16px; font-weight: 600;  height: contain; width: 100% "></RadzenText>
+                                                                        </RadzenStack>
+                                                                        <RadzenStack Style="width: 30%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                            <RadzenText Text="@SelectedViTri.ViTriKe.Value?.ToString()" Style="font-size: 18px; color: darkblue; font-weight: bold; height: contain;"></RadzenText>
+                                                                        </RadzenStack>
+                                                                    </RadzenStack>
+                                                                    <RadzenStack Gap="0" Style="height: contain; width: 100%; padding-bottom: 5px; padding-top: 5px; padding-left: 10px; border-bottom: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                                        <RadzenStack Style="width: 70%; padding-left: 10px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                                            <RadzenText Text="Vị trí hàng" Style="font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
+                                                                        </RadzenStack>
+                                                                        <RadzenStack Style="width: 30%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                            <RadzenText Text="@SelectedViTri.ViTriHang.Value?.ToString()" Style="font-size: 18px; color: darkblue; font-weight: bold; height: contain;"></RadzenText>
+                                                                        </RadzenStack>
+                                                                    </RadzenStack>
+                                                                    <RadzenStack Gap="0" Style="height: contain; width: 100%; padding-bottom: 5px; padding-top: 5px; padding-left: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                                        <RadzenStack Style="width: 70%; padding-left: 10px;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                                            <RadzenText Text="Vị trí cột" Style="font-size: 16px; font-weight: 600; height: contain; width: 100% "></RadzenText>
+                                                                        </RadzenStack>
+                                                                        <RadzenStack Style="width: 30%; height: 100%; padding-left: 20px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                            <RadzenText Text="@SelectedViTri.ViTriCot.Value?.ToString()" Style="font-size: 18px; color: darkblue; font-weight: bold; height: contain;"></RadzenText>
+                                                                        </RadzenStack>
+                                                                    </RadzenStack>
+                                                                </RadzenStack>
+
+                                                            </RadzenColumn>
+                                                        </RadzenRow>
+                                                    </RadzenColumn>
+                                                </RadzenRow>
+
+                                                <RadzenStack Visible="@(!string.IsNullOrEmpty(SelectedViTri.VTTPID.Value?.ToString()))" Style="height: 100%; width: 100%; padding: 5px; padding-top: 5px; padding-right: 0;" Gap="5px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                    <RadzenStack Gap="20px" Style="height: contain; width: 100%; padding: 5px; border-top: var(--rz-grid-cell-border); padding-top: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                                        <RadzenStack Gap="10px" Style="height: contain; width: contain; padding-left: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                            <RadzenText Text="Danh sách thùng thành phẩm" Style="color: black; font-weight: 600; font-size: 17px; font-style: italic"></RadzenText>
+                                                            <RadzenText Text="@($"( Số lượng: {SelectedViTri.DSachViTriofTPhams.Sum(vt => vt.PalletThungTPham.ThungTPhams.Count)} thùng )")" Style="color: black; font-weight: 600; font-size: 17px; font-style: italic"></RadzenText>
+                                                        </RadzenStack>
+                                                        <RadzenStack Gap="10px" Style="height: contain; width: contain; padding-left: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                            <RadzenButton Click="@(() => OnAddNewLotForViTriLuuTru(SelectedViTri))" Icon="add" Text="Thêm LOT cho vị trí" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat" Shade="Shade.Lighter"
+                                                                          Style="height: contain; width: 100%; font-weight: 600; font-size: 15px;" />
+                                                        </RadzenStack>
+                                                    </RadzenStack>
+                                                    <RadzenStack Style="width: 100%; height: contain; padding: 0" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                        <RadzenCard Variant="Variant.Flat" Style="height: contain; width: 100%; padding: 10px; border-top: var(--rz-grid-cell-border); margin-bottom: 10px; max-height: 550px; overflow-y: scroll">
+                                                            <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style=" height: contain; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+
+                                                                @if (SelectedViTri.DSachViTriofTPhams.Count > 0)
+                                                                {
+                                                                    foreach (var vitriofTP in SelectedViTri.DSachViTriofTPhams)
+                                                                    {
+                                                                        var palletthungtp = vitriofTP.PalletThungTPham;
+
+                                                                        <RadzenStack Style="width: 100%; height: 100%; padding: 0" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                            <RadzenCard onclick="@(() => { OnVTofTPSelected(vitriofTP); })" class="@(((IsViTriofTPhamSelected(vitriofTP)) ? "vitriofTP_IsSelected rz-shadow-4" : "vitriofTP_UnSelected rz-shadow-4"))" Variant="Variant.Filled" Style="height: contain; width: 100%; padding: 10px;">
+                                                                                <RadzenStack Style="height: contain; width: 100%; border-radius: 5px; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                                                                    <RadzenStack Style="height: 30px; width: 100%; border-radius: 5px; padding: 10px; margin-bottom: 5px; padding-left: 0px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                                                                        <RadzenStack Style="height: contain; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                                            <RadzenButton Text="@($"{SelectedViTri.MaViTri.Value?.ToString()} - {vitriofTP.LotVitri.Value?.ToString()}")" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Variant="Variant.Flat"
+                                                                                                          MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Mã vị trí/lot", 100, 1000))"
+                                                                                                          Style="border-radius: 5px; --rz-icon-size: 18px; font-weight: 600; height: contain; min-height: 20px; width: contain; min-width: 80px" />
+                                                                                            <RadzenButton Visible="@(palletthungtp.ThungTPhams.Any())" Text="Đã chứa thùng thành phẩm" Icon="check"
+                                                                                                          ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 17px; font-size: 16px;" />
+                                                                                            <RadzenText Visible="@(!palletthungtp.ThungTPhams.Any())" Text="Chưa có thùng thành phẩm" Style="font-size: 16px; font-weight: 500; height: contain; color: red"></RadzenText>
+                                                                                        </RadzenStack>
+                                                                                        <RadzenStack Style="height: contain; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                                            <RadzenButton Visible="@(IsViTriofTPhamSelected(vitriofTP) && !palletthungtp.IsCreatePXKTP())" Text="Tạo phiếu xuất kho" Icon="add"
+                                                                                                          Click="@(() => OnCreatePhieuXuatKhoThanhPham(palletthungtp))"
+                                                                                                          ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 17px; font-size: 16px;" />
+                                                                                            <RadzenButton Visible="@(palletthungtp.Total > 0 && palletthungtp.IsCreatePXKTP())" Text="Đã tạo phiếu xuất kho"
+                                                                                                          ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Dark" Style="border-radius: 5px; --rz-icon-size: 17px; font-size: 16px;" />
+                                                                                        </RadzenStack>
+                                                                                    </RadzenStack>
+
+                                                                                    <RadzenButton Visible="@(!palletthungtp.ThungTPhams.Any() && IsViTriofTPhamSelected(vitriofTP))" Click="@(async () => await RemoveViTriofTP(vitriofTP, SelectedViTri))" Icon="delete" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Darker" Variant="Variant.Flat"
+                                                                                                  MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Xóa LOT vị trí", 100, 1000))"
+                                                                                                  Style="--rz-icon-size: 18px; font-weight: 600; height: contain; min-height: 20px; width: contain;" />
+                                                                                </RadzenStack>
+
+                                                                                <RadzenCard Visible="@(palletthungtp.ThungTPhams.Any())" Variant="Variant.Outlined" Style="height: contain; width: 100%; padding: 10px; border-width: 1px;">
+                                                                                    <RadzenRow Style="width: 100%; height: contain" Gap="10px">
+                                                                                        <RadzenColumn Size="12" SizeMD="5" Style="width: 100%; height: contain">
+                                                                                            <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style=" height: contain; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                                                                                <RadzenStack Gap="5px" Orientation="Orientation.Horizontal" Style="height: contain; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                                                                    <RadzenText Text="Pallet thành phẩm" Style="color: black; font-weight: 600; font-size: 17px; font-style: italic"></RadzenText>
+                                                                                                </RadzenStack>
+
+                                                                                                <RadzenStack Gap="50px" Orientation="Orientation.Horizontal" Style="height: contain; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                                                                    <RadzenCard Style="width: contain; min-width: 80px; height: contain; padding: 5px; " Variant="Variant.Flat">
+                                                                                                        <RadzenStack Gap="0" Style="width: contain; height: contain;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                                                                                            <RadzenStack Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                                                                <RadzenText Text="Số thùng" Style="font-size: 16px; font-weight: 500; height: contain; color: rgba(58,71,77)"></RadzenText>
+                                                                                                            </RadzenStack>
+                                                                                                            <RadzenStack Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                                                                <RadzenText Text="@($"{palletthungtp.ThungTPhams.Count} (thùng)")" Style="font-size: 17px; font-weight: 600; height: contain; color: darkred"></RadzenText>
+                                                                                                            </RadzenStack>
+                                                                                                        </RadzenStack>
+                                                                                                    </RadzenCard>
+                                                                                                    <RadzenStack Gap="0" Style="width: contain; height: contain;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                                                                                        <RadzenStack Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                                                            <RadzenText Text="Tổng số lượng" Style="font-size: 16px; font-weight: 500; height: contain; color: rgba(58,71,77)"></RadzenText>
+                                                                                                        </RadzenStack>
+                                                                                                        <RadzenStack Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                                                            <RadzenText Text="@($"{palletthungtp.Total} (pcs)")" Style="font-size: 17px; font-weight: 600; height: contain; color: darkred"></RadzenText>
+                                                                                                        </RadzenStack>
+                                                                                                    </RadzenStack>
+                                                                                                </RadzenStack>
+
+                                                                                                <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" Style="height: contain; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                                                                    <RadzenText Text="@($"Sản phẩm: ")" Style="font-weight: 500; font-size: 16px;"></RadzenText>
+                                                                                                    <RadzenText Text="@($"{palletthungtp.MaSanPham}")" Style="font-weight: 600; color: black; font-size: 16px;"></RadzenText>
+                                                                                                </RadzenStack>
+
+                                                                                                <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" Style="height: contain; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                                                                    @{
+                                                                                                        DateTime? ngaynk = DateTime.TryParse(palletthungtp.ThungTPhams.FirstOrDefault()?.NgayNhapKho.Value?.ToString(), out DateTime nnk) ? nnk : null;
+
+                                                                                                        string _ngaynk = ngaynk?.ToString("dd/MM/yyyy") ?? "---";
+                                                                                                    }
+                                                                                                    <RadzenText Text="@($"Ngày nhập kho: ")" Style="font-weight: 500; font-size: 16px;"></RadzenText>
+                                                                                                    <RadzenText Text="@($"{_ngaynk}")" Style="font-weight: 600; color: black; font-size: 16px;"></RadzenText>
+                                                                                                </RadzenStack>
+
+                                                                                                <RadzenStack Gap="5px" Style="width: 100%; height: contain;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                                                                                    <RadzenStack Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                                                                        <RadzenText Text="Mã pallet" Style="font-size: 16px; font-weight: 600; height: contain; color: rgba(58,71,77)"></RadzenText>
+                                                                                                    </RadzenStack>
+                                                                                                    <RadzenStack Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                                                                        <RadzenButton Text="@($"{palletthungtp.PalletKey}")"
+                                                                                                                      Click="@(() => OnOpenQR_ImageDialog(palletthungtp.PalletKey, "Mã quản lý pallet"))" Icon="qr_code"
+                                                                                                                      Variant="Variant.Flat" Size="ButtonSize.Small" Shade="Shade.Lighter"
+                                                                                                                      Style="font-size: 16px; font-weight: 600; height: contain; color: darkgreen"></RadzenButton>
+                                                                                                    </RadzenStack>
+                                                                                                </RadzenStack>
+                                                                                            </RadzenStack>
+                                                                                        </RadzenColumn>
+                                                                                        <RadzenColumn Size="12" SizeMD="7" Style="width: 100%; height: contain">
+                                                                                            <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style="height: contain; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                                                                                <RadzenStack Gap="10px" Style="height: contain; width: contain; padding-left: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                                                    <RadzenText Text="Danh sách mã quản lý thùng" Style="color: black; font-weight: 600; font-size: 15px; font-style: italic"></RadzenText>
+                                                                                                </RadzenStack>
+                                                                                                <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style=" height: contain; max-height: 200px; width: 100%; padding-right: 0px; overflow-y: scroll" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
+                                                                                                    @foreach (var thung in palletthungtp.ThungTPhams)
+                                                                                                    {
+                                                                                                        <RadzenCard Variant="Variant.Outlined" Style="width: 100%; height: contain; padding: 5px; padding-right: 0px; background-color: white">
+                                                                                                            <RadzenStack Style="width: 100%; height: 100%" Gap="10px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                                                                <RadzenStack Style="width: 70%; height: contain; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                                                                    <RadzenText Text="@thung.MaQuanLyThung.Value?.ToString()" Style="color: darkblue; font-weight: 600; font-size: 14px"></RadzenText>
+                                                                                                                </RadzenStack>
+                                                                                                                <RadzenStack Gap="10px" Style="width: 30%; height: contain; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                                                                    <RadzenText Text="@($"{thung.SoLuong.Value?.ToString()} PCS")" Style="font-size: 14px; font-weight: 600; height: contain; color: rgba(58,71,77)"></RadzenText>
+                                                                                                                </RadzenStack>
+                                                                                                            </RadzenStack>
+                                                                                                        </RadzenCard>
+                                                                                                    }
+                                                                                                </RadzenStack>
+                                                                                            </RadzenStack>
+                                                                                        </RadzenColumn>
+                                                                                    </RadzenRow>
+                                                                                </RadzenCard>
+                                                                            </RadzenCard>
+                                                                        </RadzenStack>
+                                                                    }
+                                                                }
+                                                                else
+                                                                {
+                                                                    <RadzenStack Style="width: 100%; height: contain; " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                                        <RadzenText Text="Chưa tạo LOT lưu trữ tại vị trí này" Style="font-size: 16px; font-weight: 500; height: contain; color: red"></RadzenText>
+                                                                    </RadzenStack>
+                                                                }
+                                                            </RadzenStack>
+                                                        </RadzenCard>
+                                                    </RadzenStack>
+                                                </RadzenStack>
+
+                                            </RadzenStack>
+                                        </RadzenCard>
                                     </RadzenColumn>
                                 </RadzenRow>
                             </RadzenColumn>
                         </RadzenRow>
-
-                        <RadzenStack Visible="@(!string.IsNullOrEmpty(SelectedViTri.VTTPID.Value?.ToString()))" Style="height: 100%; width: 100%; padding: 5px; padding-top: 5px; padding-right: 0;" Gap="5px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                            <RadzenStack Gap="20px" Style="height: contain; width: 100%; padding: 5px; border-top: var(--rz-grid-cell-border); padding-top: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                                <RadzenStack Gap="10px" Style="height: contain; width: contain; padding-left: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                    <RadzenText Text="Danh sách thùng thành phẩm" Style="color: black; font-weight: 600; font-size: 17px; font-style: italic"></RadzenText>
-                                    <RadzenText Text="@($"( Số lượng: {SelectedViTri.DSachViTriofTPhams.Sum(vt => vt.PalletThungTPham.ThungTPhams.Count)} thùng )")" Style="color: black; font-weight: 600; font-size: 17px; font-style: italic"></RadzenText>
-                                </RadzenStack>
-                                <RadzenStack Gap="10px" Style="height: contain; width: contain; padding-left: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                    <RadzenButton Click="@(() => OnAddNewLotForViTriLuuTru(SelectedViTri))" Icon="add" Text="Thêm LOT cho vị trí" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat" Shade="Shade.Lighter"
-                                                  Style="height: contain; width: 100%; font-weight: 600; font-size: 15px;" />
-                                </RadzenStack>
-                            </RadzenStack>
-                            <RadzenStack Style="width: 100%; height: contain; padding: 0" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                <RadzenCard Variant="Variant.Flat" Style="height: contain; width: 100%; padding: 10px; border-top: var(--rz-grid-cell-border); margin-bottom: 10px; max-height: 550px; overflow-y: scroll">
-                                    <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style=" height: contain; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-
-                                        @if (SelectedViTri.DSachViTriofTPhams.Count > 0)
-                                        {
-                                            foreach (var vitriofTP in SelectedViTri.DSachViTriofTPhams)
-                                            {
-                                                var palletthungtp = vitriofTP.PalletThungTPham;
-
-                                                <RadzenStack Style="width: 100%; height: 100%; padding: 0" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                    <RadzenCard onclick="@(() => {OnVTofTPSelected(vitriofTP);})" class="@(((IsViTriofTPhamSelected(vitriofTP))? "vitriofTP_IsSelected rz-shadow-4" : "vitriofTP_UnSelected rz-shadow-4"))" Variant="Variant.Filled" Style="height: contain; width: 100%; padding: 10px;">
-                                                        <RadzenStack Style="height: contain; width: 100%; border-radius: 5px; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                                                            <RadzenStack Style="height: 30px; width: 100%; border-radius: 5px; padding: 10px; margin-bottom: 5px; padding-left: 0px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                                                                <RadzenStack Style="height: contain; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                    <RadzenButton Text="@($"{SelectedViTri.MaViTri.Value?.ToString()} - {vitriofTP.LotVitri.Value?.ToString()}")" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Variant="Variant.Flat"
-                                                                                  MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Mã vị trí/lot", 100, 1000))"
-                                                                                  Style="border-radius: 5px; --rz-icon-size: 18px; font-weight: 600; height: contain; min-height: 20px; width: contain; min-width: 80px" />
-                                                                    <RadzenButton Visible="@(palletthungtp.ThungTPhams.Any())" Text="Đã chứa thùng thành phẩm" Icon="check"
-                                                                                  ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 17px; font-size: 16px;" />
-                                                                    <RadzenText Visible="@(!palletthungtp.ThungTPhams.Any())" Text="Chưa có thùng thành phẩm" Style="font-size: 16px; font-weight: 500; height: contain; color: red"></RadzenText>
-                                                                </RadzenStack>
-                                                                <RadzenStack Style="height: contain; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                    <RadzenButton Visible="@(IsViTriofTPhamSelected(vitriofTP) && !palletthungtp.IsCreatePXKTP())" Text="Tạo phiếu xuất kho" Icon="add"
-                                                                                  Click="@(() => OnCreatePhieuXuatKhoThanhPham(palletthungtp))"
-                                                                                  ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 17px; font-size: 16px;" />
-                                                                    <RadzenButton Visible="@(palletthungtp.Total > 0 && palletthungtp.IsCreatePXKTP())" Text="Đã tạo phiếu xuất kho"
-                                                                                  ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Dark" Style="border-radius: 5px; --rz-icon-size: 17px; font-size: 16px;" />
-                                                                </RadzenStack>
-                                                            </RadzenStack>
-
-                                                            <RadzenButton Visible="@(!palletthungtp.ThungTPhams.Any() && IsViTriofTPhamSelected(vitriofTP))" Click="@(async () => await RemoveViTriofTP(vitriofTP, SelectedViTri))" Icon="delete" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Darker" Variant="Variant.Flat"
-                                                                          MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Xóa LOT vị trí", 100, 1000))"
-                                                                          Style="--rz-icon-size: 18px; font-weight: 600; height: contain; min-height: 20px; width: contain;" />
-                                                        </RadzenStack>
-
-                                                        <RadzenCard Visible="@(palletthungtp.ThungTPhams.Any())" Variant="Variant.Outlined" Style="height: contain; width: 100%; padding: 10px; border-width: 1px;">
-                                                            <RadzenRow Style="width: 100%; height: contain" Gap="10px">
-                                                                <RadzenColumn Size="12" SizeMD="5" Style="width: 100%; height: contain">
-                                                                    <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style=" height: contain; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                                                                        <RadzenStack Gap="5px" Orientation="Orientation.Horizontal" Style="height: contain; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                                                            <RadzenText Text="Pallet thành phẩm" Style="color: black; font-weight: 600; font-size: 17px; font-style: italic"></RadzenText>
-                                                                        </RadzenStack>
-
-                                                                        <RadzenStack Gap="50px" Orientation="Orientation.Horizontal" Style="height: contain; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                                                            <RadzenCard Style="width: contain; min-width: 80px; height: contain; padding: 5px; " Variant="Variant.Flat">
-                                                                                <RadzenStack Gap="0" Style="width: contain; height: contain;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                                                                                    <RadzenStack Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                                        <RadzenText Text="Số thùng" Style="font-size: 16px; font-weight: 500; height: contain; color: rgba(58,71,77)"></RadzenText>
-                                                                                    </RadzenStack>
-                                                                                    <RadzenStack Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                                        <RadzenText Text="@($"{palletthungtp.ThungTPhams.Count} (thùng)")" Style="font-size: 17px; font-weight: 600; height: contain; color: darkred"></RadzenText>
-                                                                                    </RadzenStack>
-                                                                                </RadzenStack>
-                                                                            </RadzenCard>
-                                                                            <RadzenStack Gap="0" Style="width: contain; height: contain;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                                                                                <RadzenStack Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                                    <RadzenText Text="Tổng số lượng" Style="font-size: 16px; font-weight: 500; height: contain; color: rgba(58,71,77)"></RadzenText>
-                                                                                </RadzenStack>
-                                                                                <RadzenStack Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                                    <RadzenText Text="@($"{palletthungtp.Total} (pcs)")" Style="font-size: 17px; font-weight: 600; height: contain; color: darkred"></RadzenText>
-                                                                                </RadzenStack>
-                                                                            </RadzenStack>
-                                                                        </RadzenStack>
-
-                                                                        <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" Style="height: contain; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                                                            <RadzenText Text="@($"Sản phẩm: ")" Style="font-weight: 500; font-size: 16px;"></RadzenText>
-                                                                            <RadzenText Text="@($"{palletthungtp.MaSanPham}")" Style="font-weight: 600; color: black; font-size: 16px;"></RadzenText>
-                                                                        </RadzenStack>
-
-                                                                        <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" Style="height: contain; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                                                            @{
-                                                                                DateTime? ngaynk = DateTime.TryParse(palletthungtp.ThungTPhams.FirstOrDefault()?.NgayNhapKho.Value?.ToString(), out DateTime nnk) ? nnk : null;
-
-                                                                                string _ngaynk = ngaynk?.ToString("dd/MM/yyyy") ?? "---";
-                                                                            }
-                                                                            <RadzenText Text="@($"Ngày nhập kho: ")" Style="font-weight: 500; font-size: 16px;"></RadzenText>
-                                                                            <RadzenText Text="@($"{_ngaynk}")" Style="font-weight: 600; color: black; font-size: 16px;"></RadzenText>
-                                                                        </RadzenStack>
-
-                                                                        <RadzenStack Gap="5px" Style="width: 100%; height: contain;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                                                                            <RadzenStack Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                                                                <RadzenText Text="Mã pallet" Style="font-size: 16px; font-weight: 600; height: contain; color: rgba(58,71,77)"></RadzenText>
-                                                                            </RadzenStack>
-                                                                            <RadzenStack Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                                                                <RadzenButton Text="@($"{palletthungtp.PalletKey}")"
-                                                                                              Click="@(() => OnOpenQR_ImageDialog(palletthungtp.PalletKey, "Mã quản lý pallet"))" Icon="qr_code"
-                                                                                              Variant="Variant.Flat" Size="ButtonSize.Small" Shade="Shade.Lighter"
-                                                                                              Style="font-size: 16px; font-weight: 600; height: contain; color: darkgreen"></RadzenButton>
-                                                                            </RadzenStack>
-                                                                        </RadzenStack>
-                                                                    </RadzenStack>
-                                                                </RadzenColumn>
-                                                                <RadzenColumn Size="12" SizeMD="7" Style="width: 100%; height: contain">
-                                                                    <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style="height: contain; width: 100%;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                                                                        <RadzenStack Gap="10px" Style="height: contain; width: contain; padding-left: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                            <RadzenText Text="Danh sách mã quản lý thùng" Style="color: black; font-weight: 600; font-size: 15px; font-style: italic"></RadzenText>
-                                                                        </RadzenStack>
-                                                                        <RadzenStack Gap="10px" Orientation="Orientation.Vertical" Style=" height: contain; max-height: 200px; width: 100%; padding-right: 0px; overflow-y: scroll" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                                                            @foreach (var thung in palletthungtp.ThungTPhams)
-                                                                            {
-                                                                                <RadzenCard Variant="Variant.Outlined" Style="width: 100%; height: contain; padding: 5px; padding-right: 0px; background-color: white">
-                                                                                    <RadzenStack Style="width: 100%; height: 100%" Gap="10px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                                        <RadzenStack Style="width: 70%; height: contain; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                                            <RadzenText Text="@thung.MaQuanLyThung.Value?.ToString()" Style="color: darkblue; font-weight: 600; font-size: 14px"></RadzenText>
-                                                                                        </RadzenStack>
-                                                                                        <RadzenStack Gap="10px" Style="width: 30%; height: contain; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                                            <RadzenText Text="@($"{thung.SoLuong.Value?.ToString()} PCS")" Style="font-size: 14px; font-weight: 600; height: contain; color: rgba(58,71,77)"></RadzenText>
-                                                                                        </RadzenStack>
-                                                                                    </RadzenStack>
-                                                                                </RadzenCard>
-                                                                            }
-                                                                        </RadzenStack>
-                                                                    </RadzenStack>
-                                                                </RadzenColumn>
-                                                            </RadzenRow>
-                                                        </RadzenCard>
-                                                    </RadzenCard>
-                                                </RadzenStack>
-                                            }
-                                        }
-                                        else
-                                        {
-                                            <RadzenStack Style="width: 100%; height: contain; " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                <RadzenText Text="Chưa tạo LOT lưu trữ tại vị trí này" Style="font-size: 16px; font-weight: 500; height: contain; color: red"></RadzenText>
-                                            </RadzenStack>
-                                        }
-                                    </RadzenStack>
-                                </RadzenCard>
-                            </RadzenStack>
-                        </RadzenStack>
-
                     </RadzenStack>
                 </RadzenCard>
-            </RadzenColumn>
-        </RadzenRow>
-    </RadzenColumn>
-</RadzenRow>
+            </ChildContent>
+        </RadzenTabsItem>
+    </Tabs>
+</RadzenTabs>
 
 @code {
     private List<ViTriTPham> DSVitris = new();
@@ -417,6 +446,8 @@
 
     private Dictionary<int, string> DSachModeSearch = new() { { 0, "Tất cả vị trí" }, { 1, "Mã vị trí" }, { 2, "Tên thành phẩm" }, { 3, "Vị trí đầy" }, { 4, "Vị trí còn trống" } };
     private int modeSearch = 0;
+
+    private int DisplayStype = 0; // 0 is list // 1 is location
 
     protected override async Task OnInitializedAsync()
     {
@@ -444,11 +475,11 @@
         {
             tasks.Add(Task.Run(async () =>
             {
-                Dictionary<string, object?> parameters = new() { { ViTriofTPham.DBName.VTTPID, vitri.VTTPID.Value } };
+                // Dictionary<string, object?> parameters = new() { { ViTriofTPham.DBName.VTTPID, vitri.VTTPID.Value } };
 
-                vitri.DSachViTriofTPhams = SQLServerServices.GetListViTriofTPhams(parameters, false).viTriofTPhams;
+                // vitri.DSachViTriofTPhams = SQLServerServices.GetListViTriofTPhams(parameters, false).viTriofTPhams;
 
-                vitri.DSachViTriofTPhams = RangeIncreaseLOTs(vitri.DSachViTriofTPhams);
+                // vitri.DSachViTriofTPhams = RangeIncreaseLOTs(vitri.DSachViTriofTPhams);
 
                 // Load product information
                 await LoadDSachViTriofTPhams(vitri);
@@ -517,12 +548,12 @@
             var groupedResults = thungTPhams.Where(ttp => ttp.PalletKey.Value != null)
                                             .GroupBy(ttp => ttp.PalletKey.Value)
                                             .Select(group => new PalletThungTPham
-                                                {
-                                                    PalletKey = group.Key?.ToString() ?? string.Empty,
-                                                    MaSanPham = SQLServerServices.GetMaSanphamByID(group.ToList().FirstOrDefault()?.SPID.Value),
-                                                    Total = group.ToList().Sum(ttp => int.TryParse(ttp.SoLuong.Value?.ToString(), out int sl) ? sl : 0),
-                                                    ThungTPhams = group.ToList()
-                                                }).ToList();
+                                            {
+                                                PalletKey = group.Key?.ToString() ?? string.Empty,
+                                                MaSanPham = SQLServerServices.GetMaSanphamByID(group.ToList().FirstOrDefault()?.SPID.Value),
+                                                Total = group.ToList().Sum(ttp => int.TryParse(ttp.SoLuong.Value?.ToString(), out int sl) ? sl : 0),
+                                                ThungTPhams = group.ToList()
+                                            }).ToList();
 
             if (groupedResults.Any())
             {
@@ -650,11 +681,11 @@
             if (newIndex != -1)
             {
                 ViTriofTPham newviTriofTP = new()
-                    {
-                        VTTPID = { Value = selectedViTri.VTTPID.Value },
-                        VTTPSoLuong = { Value = 0 },
-                        LotVitri = { Value = $"LOT{newIndex}" },
-                    };
+                {
+                    VTTPID = { Value = selectedViTri.VTTPID.Value },
+                    VTTPSoLuong = { Value = 0 },
+                    LotVitri = { Value = $"LOT{newIndex}" },
+                };
 
                 (int newvitriID, string error) = SQLServerServices.InsertViTriofTPham(newviTriofTP);
 
@@ -686,13 +717,13 @@
                 for (int k = 1; k <= maxcot; k++)
                 {
                     ViTriTPham vitriLuuTru = new()
-                        {
-                            MaViTri = { Value = $"#{i}#{j}#{k}" },
-                            VTSucChua = { Value = succhua },
-                            ViTriKe = { Value = i },
-                            ViTriHang = { Value = j },
-                            ViTriCot = { Value = k }
-                        };
+                    {
+                        MaViTri = { Value = $"#{i}#{j}#{k}" },
+                        VTSucChua = { Value = succhua },
+                        ViTriKe = { Value = i },
+                        ViTriHang = { Value = j },
+                        ViTriCot = { Value = k }
+                    };
 
                     (int newvtid, string err) = SQLServerServices.InsertViTriTPham(vitriLuuTru);
 
@@ -878,12 +909,12 @@
             await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", content);
 
             NotificationService.Notify(new NotificationMessage
-                {
-                    Severity = NotificationSeverity.Success,
-                    Summary = "Copied!",
-                    Detail = $"{content}",
-                    Duration = 4000
-                });
+            {
+                Severity = NotificationSeverity.Success,
+                Summary = "Copied!",
+                Detail = $"{content}",
+                Duration = 4000
+            });
         }
         catch (JSException)
         {
@@ -893,22 +924,22 @@
                 await JSRuntime.InvokeVoidAsync("fallbackCopyToClipboard", content);
 
                 NotificationService.Notify(new NotificationMessage
-                    {
-                        Severity = NotificationSeverity.Success,
-                        Summary = "Fallback Copied!",
-                        Detail = $"{content}",
-                        Duration = 4000
-                    });
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = "Fallback Copied!",
+                    Detail = $"{content}",
+                    Duration = 4000
+                });
             }
             catch (Exception)
             {
                 NotificationService.Notify(new NotificationMessage
-                    {
-                        Severity = NotificationSeverity.Error,
-                        Summary = "Error",
-                        Detail = "Failed to copy text",
-                        Duration = 3000
-                    });
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "Failed to copy text",
+                    Duration = 3000
+                });
             }
         }
     }
@@ -917,12 +948,12 @@
     void ShowNotification(string message, NotificationSeverity notifytype, double time)
     {
         NotificationMessage notify = new NotificationMessage
-            {
-                Style = "position: fixed; top: 0; right: 0;",
-                Severity = notifytype,
-                Summary = message,
-                Duration = time
-            };
+        {
+            Style = "position: fixed; top: 0; right: 0;",
+            Severity = notifytype,
+            Summary = message,
+            Duration = time
+        };
 
         NotificationService.Notify(notify);
     }
