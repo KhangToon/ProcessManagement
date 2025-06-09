@@ -589,9 +589,17 @@
 
                 if (!string.IsNullOrEmpty(keysearch))
                 {
-                    // Search by ma KHSX
                     //var results = DSKHSXs_base.FindAll(nv => nv.MaLSX.Value?.ToString()?.IndexOf(keysearch, StringComparison.OrdinalIgnoreCase) >= 0);
-                    var results = new List<KHSX>() { { SQLServerServices.GetKHSXbyMaKHSXRuduceTime(keysearch) } };
+                    List<KHSX> results = new();
+                    
+                    // Search by ma KHSX
+                    results = new List<KHSX>() { { SQLServerServices.GetKHSXbyMaKHSXRuduceTime(keysearch) } };
+
+                    if (results.All(khsx => khsx.KHSXID.Value == null))
+                    {
+                        // Search by ma SanPham
+                        results = DSKHSXs_base.FindAll(khsx => khsx.TargetSanPham?.SP_MaSP.Value?.ToString()?.IndexOf(keysearch, StringComparison.OrdinalIgnoreCase) >= 0);
+                    }
 
                     if (results.Any(khsx => khsx.KHSXID.Value != null))
                     {
