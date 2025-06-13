@@ -118,6 +118,13 @@
                                                                     <RadzenButton Text="@($"{thungtpham.IDThung.Value?.ToString()}")" Style="color: darkblue; font-weight: 700; font-size: 18px; min-width: 50px"
                                                                                   ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Lighter"></RadzenButton>
                                                                 </RadzenStack>
+                                                                <RadzenStack Style="width: auto; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                                                                    <RadzenButton Visible=@(thungtpham.IsOddNumbered.Value != null) Icon="check" Text="@($"Đã đánh dấu thùng lẻ")" Style="font-weight: 600; background: rgba(229,245,233); font-size: 16px; min-width: 50px"
+                                                                                  ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Variant="Variant.Outlined" Shade="Shade.Dark"></RadzenButton>
+                                                                    
+                                                                    <RadzenButton Click="@(() => OnUpdateThungTPToOddNumbered(thungtpham))" Visible=@(thungtpham.IsOddNumbered.Value == null && (ThungTPhams.IndexOf(thungtpham) + 1) == ThungTPhams.Count) Icon="add" Text="@($"Đánh dấu thùng lẻ")" Style="font-weight: 500; color: red; font-size: 16px; min-width: 50px"
+                                                                                  ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Variant="Variant.Text" Shade="Shade.Dark"></RadzenButton>
+                                                                </RadzenStack>
                                                             </RadzenStack>
 
                                                             <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
@@ -153,6 +160,8 @@
                                                                                                   Click="@(() => OnOpenQR_ImageDialog(lotnvl.MaQuanLyLot.Value?.ToString() ?? string.Empty, "Mã quản lý Lot NVL"))" Icon="qr_code"
                                                                                                   ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat" Size="ButtonSize.Small" Shade="Shade.Lighter"
                                                                                                   Style="font-size: 15px; font-weight: 600; color: darkblue; height: contain;"></RadzenButton>
+                                                                                    <RadzenButton Visible=@(lotnvl.RefOddNumberedTTP_ID.Value != null) Text="@($"Thùng lẻ")" Style="font-weight: 500; font-size: 15px; min-width: 50px"
+                                                                                                  ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Darker"></RadzenButton>
                                                                                 </RadzenStack>
                                                                                 <RadzenStack Gap="10px" Style="width: 30%; height: contain; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                                                     <RadzenText Text="@($"{lotnvl.SoLuong.Value?.ToString()} PCS")" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Số lượng/Lot NVL", 100, 1000))"
@@ -281,6 +290,17 @@
         {
             IsCreatedPNK = true;
             Newpnkid = newpnkid;
+        }
+    }
+
+    private void OnUpdateThungTPToOddNumbered(ThungTPham thungTPham)
+    {
+        thungTPham.IsOddNumbered.Value = 1;
+        (int rs, string error) = SQLServerServices.UpdateThungTPham(thungTPham);
+
+        if (rs == 1)
+        {
+            StateHasChanged();
         }
     }
 
