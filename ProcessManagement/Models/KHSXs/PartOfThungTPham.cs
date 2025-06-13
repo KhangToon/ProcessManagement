@@ -24,7 +24,7 @@ namespace ProcessManagement.Models.KHSXs
         public Propertyy InStock { get; set; } = new() { DBName = DBName.InStock, DisplayName = DispName.InStock, Type = typeof(int), AlowDatabase = true };
 
         // ID of the orginal PartOfThungTP which is odd-numbered, and this PartOfThungTPham is reference to it
-        public Propertyy RefOddNumberedPOTTP_ID { get; set; } = new() { DBName = DBName.RefOddNumberedPOTTP_ID, DisplayName = DispName.RefOddNumberedPOTTP_ID, Type = typeof(int), AlowDatabase = true };
+        public Propertyy RefOddNumberedTTP_ID { get; set; } = new() { DBName = DBName.RefOddNumberedTTP_ID, DisplayName = DispName.RefOddNumberedTTP_ID, Type = typeof(int), AlowDatabase = true };
 
         public bool DaNhapKho { get; set; } = false;
         public bool IsExpand { get; set; } = false;
@@ -53,7 +53,7 @@ namespace ProcessManagement.Models.KHSXs
             public const string NgayNhapKho = "ngaynhapkho";
             public const string NgayXuatKho = "ngayxuatkho";
             public const string InStock = "InStock";
-            public const string RefOddNumberedPOTTP_ID = "RefOddNumberedPOTTP_ID";
+            public const string RefOddNumberedTTP_ID = "RefOddNumberedTTP_ID";
         }
 
         public static class DispName
@@ -75,7 +75,7 @@ namespace ProcessManagement.Models.KHSXs
             public const string NgayNhapKho = "Ngày nhập kho";
             public const string NgayXuatKho = "Ngày xuất kho";
             public const string InStock = "In Stock";
-            public const string RefOddNumberedPOTTP_ID = "RefOddNumberedPOTTP_ID";
+            public const string RefOddNumberedTTP_ID = "RefOddNumberedTTP_ID";
         }
 
         // Get all property of this class

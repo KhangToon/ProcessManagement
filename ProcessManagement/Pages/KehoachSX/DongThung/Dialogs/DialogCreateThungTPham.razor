@@ -181,9 +181,6 @@
 
         await LoadDSachPartOfThungTPhams(TargetKHSX.KHSXID.Value);
 
-        // Load OddNumbered ThungTP
-        ThungTPOddNumbereds = await LoadTTPhamTonKhoOfKHSX_FirstOfDefault();
-
         await base.OnInitializedAsync();
     }
 
@@ -193,39 +190,6 @@
         {
             DSachOriginPartOfThungTPhams = SQLServerServices.GetListPartOfThungTPs(new Dictionary<string, object?>() { { KHSX_LOT.DBName.KHSXID, khsxid } }).thungTPhams;
         });
-    }
-
-    // Load danh sach thung thanh pham ton kho cua KHSX (cung MaSP, thung le)
-    private async Task<ThungTPham?> LoadTTPhamTonKhoOfKHSX_FirstOfDefault()
-    {
-        // Same MaSP
-        var dsKHSX = SQLServerServices.GetListKHSXsByAnyParmeters(new() { { Common.SP_SPID, TargetKHSX.SPID.Value } }).kHSXes;
-
-        ThungTPham? first_odd_numberedTTP = null;
-
-        if (dsKHSX != null && dsKHSX.Any())
-        {
-            foreach (var khsx in dsKHSX)
-            {
-                if (khsx.KHSXID.Value != null)
-                {
-                    // Load danh sach TTP
-                    var thungTPhams = SQLServerServices.GetListThungTPs(new Dictionary<string, object?>() { { ThungTPham.DBName.KHSXID, khsx.KHSXID.Value } }).thungTPhams;
-
-                    // Load thung thanh pham is odd-numbered
-                    var oddNumberedTTPs = thungTPhams.Where(ttp => Equals(ttp.IsOddNumbered.Value, 1) && Equals(ttp.IsHandleOddNumbered.Value, 0)).ToList();
-
-                    if (oddNumberedTTPs != null && oddNumberedTTPs.Any())
-                    {
-                        return oddNumberedTTPs.FirstOrDefault(); // Return first odd-numbered TTP
-                    }
-                }
-            }
-        }
-
-        await Task.Delay(1); // Simulate async operation
-
-        return first_odd_numberedTTP;
     }
 
     private async Task CreateNewListPartOfThungTPhams()

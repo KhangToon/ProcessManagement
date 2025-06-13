@@ -748,11 +748,78 @@
         });
     }
 
+    // Load danh sach thung thanh pham ton kho cua KHSX (cung MaSP, thung le)
+    private async Task<ThungTPham?> LoadTTPhamTonKhoOfKHSX_FirstOfDefault()
+    {   
+        var parameters = new Dictionary<string, object?>() 
+        { 
+            { ThungTPham.DBName.SPID, TargetKHSX.SPID.Value },
+            { Common.IsDoneKHSX, 1 }
+        };
+        // Same MaSP
+        var dsKHSX = SQLServerServices.GetListKHSXsByAnyParmeters(parameters).kHSXes;
+
+        ThungTPham? first_odd_numberedTTP = null;
+
+        if (dsKHSX != null && dsKHSX.Any())
+        {
+            foreach (var khsx in dsKHSX)
+            {
+                if (khsx.KHSXID.Value != null)
+                {
+                    // Load danh sach TTP
+                    var thungTPhams = SQLServerServices.GetListThungTPs(new Dictionary<string, object?>() {
+                            {ThungTPham.DBName.KHSXID, khsx.KHSXID.Value },
+                            {ThungTPham.DBName.IsOddNumbered, 1 },
+                        }).thungTPhams;
+
+                    List<ThungTPham>? oddNumberedTTPs = new();
+
+                    // Load thung thanh pham is not have RefOddNumberedPOTTP_ID
+
+                    var thungTPhamsFiltered = thungTPhams.Where(ttp => (int.TryParse(ttp.RefOddNumberedTTP_ID.Value?.ToString(), out int refid) ? refid : 0) == 0);
+
+                    foreach (var ttp in thungTPhamsFiltered)
+                    {
+                        _ = int.TryParse(ttp.PartOfThungTPhams.FirstOrDefault()?.SLRequired.Value?.ToString(), out int slrquire) ? slrquire : 0;
+
+                        int sumsl = ttp.PartOfThungTPhams.Sum(pottp => int.TryParse(pottp.SoLuong.Value?.ToString(), out int sl) ? sl : 0);
+
+                        if (sumsl < slrquire)
+                        {
+                            oddNumberedTTPs.Add(ttp); // Add odd-numbered TTP if sumsl < SLRequired
+                        }
+                    }
+
+                    if (oddNumberedTTPs != null && oddNumberedTTPs.Any())
+                    {
+                        return oddNumberedTTPs.FirstOrDefault(); // Return first odd-numbered TTP
+                    }
+                }
+            }
+        }
+
+        await Task.Delay(1); // Simulate async operation
+
+        return first_odd_numberedTTP;
+    }
+
     // Open dialog DongThung
     private async Task OpenDialogAsignSPforNVL(ResultPerLOTKHSX resultPerLOTKHSX)
     {
-        var results = await DialogService.OpenAsync<DialogCreateThungTPham>(null, new Dictionary<string, object>() { { "TargetLotResult", resultPerLOTKHSX }, { "TargetKHSX", TargetKHSX } },
-            new DialogOptions() { ShowTitle = false, Width = "60%", Height = "contain", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
+        var thungTPOddNumberd = await LoadTTPhamTonKhoOfKHSX_FirstOfDefault();
+
+        if (thungTPOddNumberd != null && thungTPOddNumberd.TTPID.Value != null)
+        {
+            var results = await DialogService.OpenAsync<DialogCreateThungTPhamV2>(null, new Dictionary<string, object>() { { "TargetLotResult", resultPerLOTKHSX }, { "TargetKHSX", TargetKHSX } },
+            new DialogOptions() { ShowTitle = true, Width = "60%", Height = "contain", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
+        }
+        else
+        {
+            var results = await DialogService.OpenAsync<DialogCreateThungTPham>(null, new Dictionary<string, object>() { { "TargetLotResult", resultPerLOTKHSX }, { "TargetKHSX", TargetKHSX } },
+            new DialogOptions() { ShowTitle = true, Width = "60%", Height = "contain", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
+        }
+
 
         await LoadDSachLOTofKHSX(TargetKHSX.KHSXID.Value, 300);
     }

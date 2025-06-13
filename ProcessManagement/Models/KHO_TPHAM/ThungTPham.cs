@@ -21,10 +21,10 @@ namespace ProcessManagement.Models.KHO_TPHAM
         public Propertyy PXKTPID { get; set; } = new() { DBName = DBName.PXKTPID, DisplayName = DispName.PXKTPID, Type = typeof(int), AlowDatabase = true };
         public Propertyy PalletKey { get; set; } = new() { DBName = DBName.PalletKey, DisplayName = DispName.PalletKey, Type = typeof(string), AlowDatabase = true };
         public Propertyy InStock { get; set; } = new() { DBName = DBName.InStock, DisplayName = DispName.InStock, Type = typeof(int), AlowDatabase = true };
-        public Propertyy IsOddNumbered { get; set; } = new() { DBName = DBName.IsOddNumbered, DisplayName = DispName.IsOddNumbered, Type = typeof(int), AlowDatabase = true };
-        public Propertyy IsHandleOddNumbered { get; set; } = new() { DBName = DBName.IsHandleOddNumbered, DisplayName = DispName.IsHandleOddNumbered, Type = typeof(int), AlowDatabase = true };
+        
         // ID of the orginal PartOfThungTP which is odd-numbered, and this PartOfThungTPham is reference to it
-        public Propertyy RefOddNumberedPOTTP_ID { get; set; } = new() { DBName = DBName.RefOddNumberedPOTTP_ID, DisplayName = DispName.RefOddNumberedPOTTP_ID, Type = typeof(int), AlowDatabase = true };
+        public Propertyy RefOddNumberedTTP_ID { get; set; } = new() { DBName = DBName.RefOddNumberedTTP_ID, DisplayName = DispName.RefOddNumberedTTP_ID, Type = typeof(int), AlowDatabase = true };
+        public Propertyy IsOddNumbered { get; set; } = new() { DBName = DBName.IsOddNumbered, DisplayName = DispName.IsOddNumbered, Type = typeof(int), AlowDatabase = true };
 
         public bool DaNhapKho { get; set; } = false;
         public bool DaXuatKho { get; set; } = false;
@@ -55,8 +55,7 @@ namespace ProcessManagement.Models.KHO_TPHAM
             public const string NgayXuatKho = "ngayxuatkho";
             public const string InStock = "InStock";
             public const string IsOddNumbered = "IsOddNumbered";
-            public const string IsHandleOddNumbered = "IsHandleOddNumbered";
-            public const string RefOddNumberedPOTTP_ID = "RefOddNumberedPOTTP_ID";
+            public const string RefOddNumberedTTP_ID = "RefOddNumberedTTP_ID";
         }
 
         public static class DispName
@@ -77,8 +76,7 @@ namespace ProcessManagement.Models.KHO_TPHAM
             public const string NgayXuatKho = "Ngày xuất kho";
             public const string InStock = "In Stock";
             public const string IsOddNumbered = "IsOddNumbered";
-            public const string IsHandleOddNumbered = "IsHandleOddNumbered";
-            public const string RefOddNumberedPOTTP_ID = "RefOddNumberedPOTTP_ID";
+            public const string RefOddNumberedTTP_ID = "RefOddNumberedTTP_ID";
         }
 
         public static class ExcellAddress
