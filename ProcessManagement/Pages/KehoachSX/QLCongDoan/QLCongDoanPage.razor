@@ -482,12 +482,22 @@
                                                     <span style="font-weight: 600; font-size: 15px; color: red; padding-left: 10px; padding-right: 10px">NG</span>
                                                 </HeaderTemplate>
                                                 <Template Context="lotrow">
-                                                    <RadzenText Text="@(lotrow.GetSLNG(cdoancolumn.NCID.Value, resultIndex)?.ToString())" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
+                                                    <RadzenText Text="@(lotrow.GetSLNG(cdoancolumn.NCID.Value, resultIndex)?.ToString())" Style="font-size: 15px; color: red; height: contain; font-weight: 500"></RadzenText>
                                                 </Template>
                                                 <FooterTemplate>
                                                     <RadzenText Text="@(((DSachResultPerLOTKHSX.Sum(lot => int.TryParse(lot.GetSLNG(cdoancolumn.NCID.Value, resultIndex)?.ToString(), out int sumng)? sumng : 0)).ToString()))"
-                                                                Style="color: black; font-size: 18px; height: contain; min-width: 50px; font-weight: 600;"></RadzenText>
+                                                                Style="color: red; font-size: 18px; height: contain; min-width: 50px; font-weight: 600;"></RadzenText>
                                                 </FooterTemplate>
+                                            </RadzenDataGridColumn>
+
+                                            <RadzenDataGridColumn Resizable=true TItem="ResultPerLOTKHSX" Title="NG Types"
+                                                                  TextAlign="TextAlign.Center">
+                                                <HeaderTemplate>
+                                                    <span style="font-weight: 600; font-size: 15px; color: red; padding-left: 10px; padding-right: 10px">NG Types</span>
+                                                </HeaderTemplate>
+                                                <Template Context="lotrow">
+                                                    <RadzenText Text="@(GetColumnValueByID(lotrow.GetNGType(cdoancolumn.NCID.Value, resultIndex)?.ToString(), KetQuaGC.KQGCDBName.NGIDs))" Style="font-size: 15px; color: red; height: contain; font-weight: 500"></RadzenText>
+                                                </Template>
                                             </RadzenDataGridColumn>
                                         }
 
