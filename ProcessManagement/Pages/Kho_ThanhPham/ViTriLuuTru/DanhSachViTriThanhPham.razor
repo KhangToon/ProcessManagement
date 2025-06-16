@@ -148,7 +148,7 @@
                                                                         else
                                                                         {
                                                                             <RadzenButton Text="@($"Đã dùng {dadung} pcs")" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Variant="Variant.Outlined"
-                                                                                          Style="border-radius: 5px; --rz-icon-size: 18px; height: 20px; width: 100%; cursor: default; font-weight: 600;" />
+                                                                                          Style="border-radius: 5px; --rz-icon-size: 18px; height: 20px; background: var(--rz-primary-lighter); width: 100%; cursor: default; font-weight: 600;" />
                                                                         }
                                                                     </RadzenStack>
                                                                 </RadzenStack>
@@ -158,6 +158,9 @@
                                                                     </RadzenStack>
                                                                     <RadzenStack Style="width: 50%; height: contain; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                                         <RadzenText Text="@($"{vitri.MaViTri.Value?.ToString()}")" Style="color: darkblue; font-weight: 700; font-size: 18px"></RadzenText>
+                                                                        <RadzenButton Click="@(() => OnEditViTriLuuTru(vitri))" Icon="edit" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Dark" Variant="Variant.Text"
+                                                                                      MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Thay đổi thông tin", 100, 1000))"
+                                                                                      Style="border-radius: 5px; --rz-icon-size: 16px; height: 20px; width: 100%;" />
                                                                     </RadzenStack>
                                                                 </RadzenStack>
                                                                 <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
@@ -643,6 +646,17 @@
 
             SelectedViTri = DSVitris?.FirstOrDefault(vt => vt.VTTPID.Value?.ToString() == newVitri.VTTPID.Value?.ToString()) ?? new();
         }
+    }
+
+    private async Task OnEditViTriLuuTru(ViTriTPham targetVTri)
+    {
+        var rs = await DialogService.OpenAsync<DialogModifyViTriKhoTPham>(null, new Dictionary<string, object>() { { "TargetVTri", targetVTri } },
+        new DialogOptions() { ShowTitle = true, Width = "50%", Height = "95%", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 0px; padding: 0px" });
+
+        // Load dsvitri
+        await LoadDSachViTriLuuTru();
+
+        SelectedViTri = DSVitris?.FirstOrDefault(vt => vt.VTTPID.Value?.ToString() == targetVTri.VTTPID.Value?.ToString()) ?? new();
     }
 
     private void OnViTriofTPClick(ViTriofTPham selectedViTri)
