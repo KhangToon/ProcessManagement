@@ -3388,6 +3388,47 @@ namespace ProcessManagement.Services.SQLServer
             }
         }
 
+        public (int, string) UpdateViTriLuuTru(VitriLuuTru vitriluutru)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            if (vitriluutru == null) return (result, errorMess);
+
+            List<Propertyy> Items = vitriluutru.GetPropertiesValues().Where(pro => pro.AlowDatabase == true).ToList();
+
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+
+                connection.Open();
+
+                var command = connection.CreateCommand();
+
+                string setClause = string.Join(",", Items.Select(key => $"[{key.DBName}] = @{Regex.Replace(key.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $"UPDATE [{Common.Table_ViTriLuuTru}] SET {setClause} WHERE [{Common.VTID}] = '{vitriluutru.VTID.Value}'";
+
+                foreach (var item in Items)
+                {
+                    string parameterName = $"@{Regex.Replace(item.DBName ?? string.Empty, @"[^\w]+", "")}";
+
+                    object? parameterValue = item.Value;
+
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                result = command.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                errorMess = ex.Message;
+
+                return (-1, errorMess);
+            }
+
+            return (result, errorMess);
+        }
+
         // Delete
         public (bool, string) DeleteViTriLuuTru(object? vtid)
         {

@@ -110,6 +110,9 @@
                                             </RadzenStack>
                                             <RadzenStack Style="width: 50%; height: contain; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                 <RadzenText Text="@($"{vitri.MaViTri.Value?.ToString()}")" Style="color: darkblue; font-weight: 700; font-size: 18px"></RadzenText>
+                                                <RadzenButton Click="@(() => OnEditViTriLuuTru(vitri))" Icon="edit" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Dark" Variant="Variant.Text"
+                                                              MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Thay đổi thông tin", 100, 1000))"
+                                                              Style="border-radius: 5px; --rz-icon-size: 16px; height: 20px; width: 100%;" />
                                             </RadzenStack>
                                         </RadzenStack>
                                         <RadzenStack Gap="0" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
@@ -401,6 +404,17 @@
                 });
             });
         });
+    }
+
+    private async Task OnEditViTriLuuTru(VitriLuuTru targetVTri)
+    {
+        var rs = await DialogService.OpenAsync<DialogModifyViTriNVLInfor>(null, new Dictionary<string, object>() { { "TargetVTri", targetVTri } },
+        new DialogOptions() { ShowTitle = true, Width = "50%", Height = "95%", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 0px; padding: 0px" });
+
+        // Load dsvitri
+        await LoadDSachViTriLuuTru();
+
+        SelectedViTri = DSVitris?.FirstOrDefault(vt => vt.VTID.Value?.ToString() == targetVTri.VTID.Value?.ToString()) ?? new();
     }
 
     private async Task OnViTriLuuTruClick(VitriLuuTru selectVitri)
@@ -755,5 +769,13 @@
                 }
             }
         }
+    }
+
+    // Tooltip
+    void ShowToolTip(ElementReference elementReference, TooltipPosition position, string content, int delay, int duration = 500)
+    {
+        TooltipOptions options = new TooltipOptions() { Position = position, Delay = delay, Duration = duration, Style = "background-color: black" };
+
+        TooltipService.Open(elementReference, content, options);
     }
 }
