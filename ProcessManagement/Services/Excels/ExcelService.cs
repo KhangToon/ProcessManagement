@@ -14,6 +14,7 @@ using ProcessManagement.Services.QRCodes;
 using System.IO;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
+using ProcessManagement.Commons;
 
 namespace ProcessManagement.Services.Excels
 {
@@ -578,15 +579,15 @@ namespace ProcessManagement.Services.Excels
             excelDatas.Add(MQLCell);
 
             // IDThung
-            //ExcelCell IDCell = new()
-            //{
-            //    CellName = ThungTPham.ExcellAddress.IDThung,
-            //    Col = ThungTPham.ExcellAddress.ColumnAddress[ThungTPham.ExcellAddress.IDThung],
-            //    Row = ThungTPham.ExcellAddress.RowAddress[ThungTPham.ExcellAddress.IDThung],
-            //    ValueType = typeof(string),
-            //    CellValue = ConvertToCircleNumber($"{thungTPham.IDThung.Value}")
-            //};
-            //excelDatas.Add(IDCell);
+            ExcelCell IDCell = new()
+            {
+                CellName = ThungTPham.ExcellAddress.IDThung,
+                Col = ThungTPham.ExcellAddress.ColumnAddress[ThungTPham.ExcellAddress.IDThung],
+                Row = ThungTPham.ExcellAddress.RowAddress[ThungTPham.ExcellAddress.IDThung],
+                ValueType = typeof(string),
+                CellValue = ConvertToCircleNumber($"{thungTPham.IDThung.Value}")
+            };
+            excelDatas.Add(IDCell);
 
             // Excell file
             string excelPath = ThungTPham.ExcellAddress.ExportPath;
@@ -668,29 +669,43 @@ namespace ProcessManagement.Services.Excels
             //// Insert Image for QR
             QRCodeServices qrCodeServices = new();
 
-            byte[] imageBytes = qrCodeServices.GenerateQRCodeImage($"{thungTPham.MaQuanLyThung.Value}");
+            string lotDetails = string.Join('\n',
+                    thungTPham.PartOfThungTPhams.Select(p =>
+                    $"Lot: {p.MaQuanLyLot.Value} ({p.SoLuong.Value} PCS)").ToArray());
+
+            string qrcontent = $"Box {thungTPham.IDThung.Value}: {thungTPham.MaQuanLyThung.Value} ({thungTPham.SoLuong.Value} PCS)" +
+                               $"\n{lotDetails}";
+
+            byte[] imageBytes = qrCodeServices.GenerateQRCodeImage(qrcontent);
+
+            // Modify the QR code image insertion part:
 
             // Create an Excel picture
             int pictureIndex = workbook.AddPicture(imageBytes, PictureType.PNG);
-
             IDrawing drawing = worksheet.CreateDrawingPatriarch();
 
-            // Parameters for CreateAnchor: dx1, dy1, dx2, dy2, col1, row1, col2, row2
-            //IClientAnchor anchor = drawing.CreateAnchor(0, 0, 0, 0, 1, 1, 2, 2); // B2
-            IClientAnchor anchor = drawing.CreateAnchor(0, 0, 0, 0, 2, 1, 3, 2); // C2
+            // Create anchor with cell-based positioning
+            IClientAnchor anchor = workbook.GetCreationHelper().CreateClientAnchor();
 
-            //dx1: Horizontal offset within the first cell(0 - 1023)
-            //dy1: Vertical offset within the first cell(0 - 255)
-            //dx2: Horizontal offset within the last cell(0 - 1023)
-            //dy2: Vertical offset within the last cell(0 - 255)
-            //col1: First column(0 - based, B = 1)
-            //row1: First row(0 - based, 2 = 1)
-            //col2: Last column
-            //row2: Last row
-            anchor.AnchorType = AnchorType.MoveAndResize;
-            // Create the picture
+            // Set the anchor type to MoveAndResize to allow the picture to move and size with cells
+            //anchor.AnchorType = AnchorType.MoveDontResize;
+
+            // Specify the target cells
+            anchor.Col1 = 2; // Column C (ID = Col - 1)
+            anchor.Row1 = 2; // Row 2 (ID = Row)
+            anchor.Col2 = 3; // End column D
+            anchor.Row2 = 3; // End row 3
+
+            // Set margins within the cell (in EMUs - English Metric Units)
+            anchor.Dx1 = 0; // Left margin
+            anchor.Dy1 = 0; // Top margin
+            anchor.Dx2 = 0; // Right margin
+            anchor.Dy2 = 0; // Bottom margin
+
+            // Create and size the picture
             IPicture picture = drawing.CreatePicture(anchor, pictureIndex);
-            ////
+            
+            //picture.Resize(); // Resize the picture to fit within the cell
 
             using (FileStream writeStream = new FileStream(excelWritePath, FileMode.Create, FileAccess.Write))
             {

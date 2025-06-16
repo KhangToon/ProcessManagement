@@ -92,19 +92,19 @@ namespace ProcessManagement.Models.KHO_TPHAM
 
             public static Dictionary<string, string> ColumnAddress = new()
             {
-                { TENSP, "C" },
-                { MASP, "C" },
-                { SOLUONG, "C" },
-                { MQLTHUNG, "E" },
-                { IDThung, "C" }
+                { TENSP, "E" },
+                { MASP, "E" },
+                { SOLUONG, "E" },
+                { MQLTHUNG, "G" },
+                { IDThung, "F" }
             };
 
             public static Dictionary<string, string> RowAddress = new()
             {
-                { TENSP, "3" },
-                { MASP, "5" },
-                { SOLUONG, "7" },
-                { MQLTHUNG, "14" },
+                { TENSP, "5" },
+                { MASP, "7" },
+                { SOLUONG, "9" },
+                { MQLTHUNG, "15" },
                 { IDThung, "2" }
             };
         }
