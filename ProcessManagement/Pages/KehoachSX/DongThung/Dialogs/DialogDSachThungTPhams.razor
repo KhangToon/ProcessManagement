@@ -160,7 +160,7 @@
                                                                                                   Click="@(() => OnOpenQR_ImageDialog(lotnvl.MaQuanLyLot.Value?.ToString() ?? string.Empty, "Mã quản lý Lot NVL"))" Icon="qr_code"
                                                                                                   ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat" Size="ButtonSize.Small" Shade="Shade.Lighter"
                                                                                                   Style="font-size: 15px; font-weight: 600; color: darkblue; height: contain;"></RadzenButton>
-                                                                                    <RadzenButton Visible=@(lotnvl.RefOddNumberedTTP_ID.Value != null) Text="@($"LOT lẻ")" Style="font-weight: 600; font-size: 15px; min-width: 50px"
+                                                                                    <RadzenButton Visible=@(lotnvl.IsOddNumbered.Value != null || lotnvl.RefPOTTPID.Value != null) Text="@($"LOT lẻ")" Style="font-weight: 600; font-size: 15px; min-width: 50px"
                                                                                                   ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small" Variant="Variant.Outlined" Shade="Shade.Darker"></RadzenButton>
                                                                                 </RadzenStack>
                                                                                 <RadzenStack Gap="10px" Style="width: 30%; height: contain; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
@@ -299,7 +299,16 @@
         (int rs, string error) = SQLServerServices.UpdateThungTPham(thungTPham);
 
         if (rs == 1)
-        {
+        {   
+            foreach (var pottp in thungTPham.PartOfThungTPhams)
+            {
+                pottp.IsOddNumbered.Value = 1;
+                pottp.RefPOTTPID.Value = DBNull.Value;
+                pottp.IsHandledOddNumbered.Value = DBNull.Value;
+
+                (int udrs, string er) = SQLServerServices.UpdatePartOfThungTPham(pottp);
+            }
+
             StateHasChanged();
         }
     }

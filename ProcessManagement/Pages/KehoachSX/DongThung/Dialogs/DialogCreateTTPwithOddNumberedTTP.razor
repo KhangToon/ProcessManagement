@@ -174,7 +174,6 @@
     private List<PartOfThungTPham> DSachNewPartOfThungTPhams = new();
 
     private ThungTPham? ThungTPOddNumbered;
-    object? refTTP_ID;
 
     protected override async Task OnInitializedAsync()
     {
@@ -201,16 +200,14 @@
 
     // Load danh sach thung thanh pham ton kho cua KHSX (cung MaSP, thung le)
     private async Task<ThungTPham?> LoadTTPhamTonKhoOfKHSX_FirstOfDefault()
-    {   
-        var parameters = new Dictionary<string, object?>() 
-        { 
+    {
+        var parameters = new Dictionary<string, object?>()
+        {
             { ThungTPham.DBName.SPID, TargetKHSX.SPID.Value },
             { Common.IsDoneKHSX, 1 }
         };
         // Same MaSP
         var dsKHSX = SQLServerServices.GetListKHSXsByAnyParmeters(parameters).kHSXes;
-
-        ThungTPham? first_odd_numberedTTP = null;
 
         if (dsKHSX != null && dsKHSX.Any())
         {
@@ -226,11 +223,11 @@
 
                     List<ThungTPham>? oddNumberedTTPs = new();
 
-                    // Load thung thanh pham is not have RefOddNumberedPOTTP_ID
+                    // Load thung thanh pham odd-numbered not handled
 
-                    var thungTPhamsFiltered = thungTPhams.Where(ttp => (int.TryParse(ttp.RefOddNumberedTTP_ID.Value?.ToString(), out int refid) ? refid : 0) == 0);
+                    var thungTPnotHandled_odd = thungTPhams.Where(ttp => (int.TryParse(ttp.IsHandledOddNumbered.Value?.ToString(), out int refid) ? refid : 0) == 0);
 
-                    foreach (var ttp in thungTPhamsFiltered)
+                    foreach (var ttp in thungTPnotHandled_odd)
                     {
                         _ = int.TryParse(ttp.PartOfThungTPhams.FirstOrDefault()?.SLRequired.Value?.ToString(), out int slrquire) ? slrquire : 0;
 
@@ -252,7 +249,7 @@
 
         await Task.Delay(1); // Simulate async operation
 
-        return first_odd_numberedTTP;
+        return null; // No odd-numbered TTP found
     }
 
     private async Task CreateNewListPartOfThungTPhamOddNumbereds()
@@ -276,12 +273,12 @@
                 // Get SL con lai cua thung thanh pham odd-numbered
                 int soluongConlai = int.TryParse(pottp.SoLuong.Value?.ToString(), out int sl) ? sl : 0;
 
-                pottp.KHSXID.Value = TargetKHSX.KHSXID.Value;
-                pottp.IDThung.Value = 0;
-                pottp.SLRequired.Value = SLrequiredPerThung_currentLOT;
+                pottp.KHSXID.Value = TargetKHSX.KHSXID.Value; // Assign new KHSXID
+                pottp.IDThung.Value = 0; // Reset IDThung for new PartOfThungTPham
+                pottp.SLRequired.Value = SLrequiredPerThung_currentLOT; // Assign new SLRequired
 
                 // Update refPOttpId
-                refTTP_ID = ThungTPOddNumbered.TTPID.Value;
+                object? refPOTTP_ID = pottp.POTTPID.Value;
 
                 _ = int.TryParse(pottp?.IDThung.Value?.ToString(), out int idthung) ? idthung : 1;
 
@@ -294,13 +291,13 @@
 
                 while (soluongConlai > 0)
                 {
-                    (PartOfThungTPham newthung, soluongConlai) = AddNewPartOfThungTPham(soluongConlai, idthung, pottp?.MaQuanLyLot.Value, refTTP_ID, mqlthungtp);
+                    (PartOfThungTPham newthung, soluongConlai) = AddNewPartOfThungTPham(soluongConlai, idthung, pottp?.MaQuanLyLot.Value, refPOTTP_ID, mqlthungtp);
 
                     idthung = int.TryParse(newthung.IDThung.Value?.ToString(), out int newid) ? newid : 1;
 
                     newpartofthungTPhams.Add(newthung);
                 }
-            }   
+            }
 
             DSachNewPartOfThungTPhams = newpartofthungTPhams;
 
@@ -310,7 +307,7 @@
         ShowNotification("Created!", NotificationSeverity.Success, 2000);
     }
 
-    private (PartOfThungTPham, int) AddNewPartOfThungTPham(int soluongTake, int lastIDthung, object? maquanlyLot, object? refTTP_ID, object? mqlthungtp)
+    private (PartOfThungTPham, int) AddNewPartOfThungTPham(int soluongTake, int lastIDthung, object? maquanlyLot, object? refPOTTP_ID, object? mqlthungtp)
     {
         if (mqlthungtp == null)
         {
@@ -336,7 +333,7 @@
         newPartOfThungTP.MaQuanLyThung.Value = mqlthungtp;
 
         // Assign refPOTTP_id if provided, otherwise it will be null
-        newPartOfThungTP.RefOddNumberedTTP_ID.Value = refTTP_ID;
+        newPartOfThungTP.RefPOTTPID.Value = refPOTTP_ID;
 
         int soluongConlai = soluongTake - SLrequiredPerThung_currentLOT;
 
@@ -365,7 +362,7 @@
         {
             // Insert new list PartOfThungTP to Database
             foreach (var partthungtp in partofthungtps)
-            {   
+            {
                 (int newpottpid, error) = SQLServerServices.InsertPartOfThungTPham(partthungtp);
 
                 if (newpottpid <= 0)
@@ -376,16 +373,23 @@
 
                     return;
                 }
+                else
+                {
+                    // Update IsHandledOddNumbered = 1 of Odd-numbered PartOfThungTP (da xu ly thung le)
+                    (int upresult, error) = SQLServerServices.UpdateIsHandleOddNumberedPOTTP(1, partthungtp.RefPOTTPID.Value);
+
+                    // Update IsHandledOddNumbered = 1 of Odd-numbered ThungTP (da xu ly thung le)
+                    (int _upresult, error) = SQLServerServices.UpdateIsHandleOddNumberedThungTP(1, ThungTPOddNumbered?.TTPID.Value);
+                }
             }
 
             // Insert ThungTP corresponding with PartOfThungTP
             if (partofthungtps != null)
-            {   
-                var parameters = new Dictionary<string, object?>() 
-                { 
+            {
+                var parameters = new Dictionary<string, object?>()
+                {
                     { ThungTPham.DBName.KHSXID, TargetKHSX.KHSXID.Value },
-                    { ThungTPham.DBName.MaQuanLyThung, partofthungtps },
-                    { ThungTPham.DBName.RefOddNumberedTTP_ID, partofthungtps.FirstOrDefault()?.RefOddNumberedTTP_ID.Value }
+                    { ThungTPham.DBName.MaQuanLyThung, partofthungtps }
                 };
 
                 var lastTTPwithsameMQL = SQLServerServices.GetListThungTPs(parameters, false).thungTPhams.FirstOrDefault();
@@ -425,8 +429,7 @@
                         IDThung = { Value = partofthungtps.FirstOrDefault()?.IDThung.Value },
                         SPID = { Value = TargetKHSX.SPID.Value },
                         NgayDongThung = { Value = DateTime.Now.ToString(Common.FormatNoTime_yyyddMM) },
-                        MaQuanLyThung = { Value = partofthungtps.FirstOrDefault()?.MaQuanLyThung.Value },
-                        RefOddNumberedTTP_ID = { Value = partofthungtps.FirstOrDefault()?.RefOddNumberedTTP_ID.Value }
+                        MaQuanLyThung = { Value = partofthungtps.FirstOrDefault()?.MaQuanLyThung.Value }
                     };
 
                     (int newttpID, error) = SQLServerServices.InsertThungTPham(thungTPham);
@@ -446,15 +449,15 @@
         // Update ThungTPOddNumbered (update IsHandleOddNumbered = 1)
         if (ThungTPOddNumbered != null && ThungTPOddNumbered.TTPID.Value != null)
         {
-            ThungTPOddNumbered.RefOddNumberedTTP_ID.Value = refTTP_ID;
+            // ThungTPOddNumbered.RefOddNumberedTTP_ID.Value = refTTP_ID;
 
-            (int updateResult, error) = SQLServerServices.UpdateThungTPham(ThungTPOddNumbered);
-            if (updateResult != 1)
-            {
-                result = -1;
-                await PonUpNotification(result, $"{error}");
-                return;
-            }
+            // (int updateResult, error) = SQLServerServices.UpdateThungTPham(ThungTPOddNumbered);
+            // if (updateResult != 1)
+            // {
+            //     result = -1;
+            //     await PonUpNotification(result, $"{error}");
+            //     return;
+            // }
         }
 
         await PonUpNotification(result, $"Tạo thùng thành phẩm thành công! <strong><span>{TargetLotResult.MaQuanLyLot}</span></strong>");

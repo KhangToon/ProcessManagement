@@ -1034,18 +1034,16 @@
         });
     }
 
-    // Load danh sach thung thanh pham ton kho cua KHSX (cung MaSP, thung le)
+       // Load danh sach thung thanh pham ton kho cua KHSX (cung MaSP, thung le)
     private async Task<ThungTPham?> LoadTTPhamTonKhoOfKHSX_FirstOfDefault()
-    {   
-        var parameters = new Dictionary<string, object?>() 
-        { 
+    {
+        var parameters = new Dictionary<string, object?>()
+        {
             { ThungTPham.DBName.SPID, TargetKHSX.SPID.Value },
             { Common.IsDoneKHSX, 1 }
         };
         // Same MaSP
         var dsKHSX = SQLServerServices.GetListKHSXsByAnyParmeters(parameters).kHSXes;
-
-        ThungTPham? first_odd_numberedTTP = null;
 
         if (dsKHSX != null && dsKHSX.Any())
         {
@@ -1061,11 +1059,11 @@
 
                     List<ThungTPham>? oddNumberedTTPs = new();
 
-                    // Load thung thanh pham is not have RefOddNumberedPOTTP_ID
+                    // Load thung thanh pham odd-numbered not handled
 
-                    var thungTPhamsFiltered = thungTPhams.Where(ttp => (int.TryParse(ttp.RefOddNumberedTTP_ID.Value?.ToString(), out int refid) ? refid : 0) == 0);
+                    var thungTPnotHandled_odd = thungTPhams.Where(ttp => (int.TryParse(ttp.IsHandledOddNumbered.Value?.ToString(), out int refid) ? refid : 0) == 0);
 
-                    foreach (var ttp in thungTPhamsFiltered)
+                    foreach (var ttp in thungTPnotHandled_odd)
                     {
                         _ = int.TryParse(ttp.PartOfThungTPhams.FirstOrDefault()?.SLRequired.Value?.ToString(), out int slrquire) ? slrquire : 0;
 
@@ -1087,8 +1085,9 @@
 
         await Task.Delay(1); // Simulate async operation
 
-        return first_odd_numberedTTP;
+        return null; // No odd-numbered TTP found
     }
+
 
     // Open dialog DongThung
     private async Task OpenDialogAsignSPforNVL(ResultPerLOTKHSX resultPerLOTKHSX)
@@ -1097,7 +1096,7 @@
 
         if (thungTPOddNumberd != null && thungTPOddNumberd.TTPID.Value != null)
         {
-            var results = await DialogService.OpenAsync<DialogCreateThungTPhamV2>(null, new Dictionary<string, object>() { { "TargetLotResult", resultPerLOTKHSX }, { "TargetKHSX", TargetKHSX } , {"IsDongThungTP", IsDongThungTP} },
+            var results = await DialogService.OpenAsync<DialogCreateTTPwithOddNumberedTTP>(null, new Dictionary<string, object>() { { "TargetLotResult", resultPerLOTKHSX }, { "TargetKHSX", TargetKHSX } , {"IsDongThungTP", IsDongThungTP} },
             new DialogOptions() { ShowTitle = true, Width = "60%", Height = "contain", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
         }
         else
