@@ -379,8 +379,8 @@
             </RadzenColumn>
         </RadzenRow>
         <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding-top: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
-            <RadzenButton Disabled="@(!IsAllValueThongTinOK(properties))" Click="@(() => OnAddNewKetQuaGC())" Style="padding: 5px; width: contain; height: contain; font-size: 12px" Icon="check" Text="Xác nhận thêm" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Default" Size="ButtonSize.ExtraSmall" Variant="Variant.Filled" />
-            <RadzenButton Style="width: contain; height: contain; font-size: 12px; padding: 5px; padding-left: 10px; padding-right: 10px" Icon="close" Text="Hủy" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Size="ButtonSize.ExtraSmall" Variant="Variant.Flat" Click="@(() => OnCancelAddnewKetQuaGC())" />
+            <RadzenButton Disabled="@(!IsAllValueThongTinOK(properties))" Click="@(() => OnAddNewKetQuaGC())" Style="padding: 5px; width: contain; height: contain; font-size: 12px" Icon="check" Text="Xác nhận thêm" ButtonStyle="ButtonStyle.Success" Shade="Shade.Dark" Size="ButtonSize.ExtraSmall" Variant="Variant.Filled" />
+            <RadzenButton Style="width: contain; height: contain; font-size: 12px; padding: 5px; padding-left: 10px; padding-right: 10px" Icon="close" Text="Hủy" ButtonStyle="ButtonStyle.Danger" Shade="Shade.Darker" Size="ButtonSize.ExtraSmall" Variant="Variant.Flat" Click="@(() => OnCancelAddnewKetQuaGC())" />
         </RadzenStack>
     }
 </RadzenStack>
@@ -916,7 +916,33 @@
             foreach (var erorrtype in propertyy.CheckErrors)
             {
                 if (erorrtype == Propertyy.ErrType.NotEmptyValue)
-                {
+                {   
+                    if (dbname == KetQuaGC.KQGCDBName.NGIDs)
+                    {
+                        if (int.TryParse(newKetQuaGC.SLNG.Value?.ToString(), out int slng))
+                        {
+                            if (slng == 0)
+                            {
+                                propertyy.IsCheckValueOK = true;
+                                return;
+                            }
+                            else
+                            {
+                                if (newKetQuaGC.NGIDs.Value != null)
+                                {
+                                    propertyy.IsCheckValueOK = true;
+                                    return;
+                                }
+                                else
+                                {
+                                    propertyy.IsCheckValueOK = false;
+                                    propertyy.NotifyMess = $"{displayName} không được để trống";
+                                    return;
+                                }
+                            }
+                        }
+                    }
+
                     if (string.IsNullOrEmpty(value.Trim()))
                     {
                         propertyy.IsCheckValueOK = false;
@@ -1007,7 +1033,7 @@
         if (!propertyNames.Any(name => name == KetQuaGC.KQGCDBName.NGIDs))
         {
             // Reset NG Type
-            //newKetQuaGC.NGIDs.IsDisable = true;
+            newKetQuaGC.NGIDs.IsDisable = true;
             newKetQuaGC.NGIDs.Value = null;
             NGTypesSelected = null;
         }
