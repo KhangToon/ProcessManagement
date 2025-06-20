@@ -252,7 +252,7 @@
         return null; // No odd-numbered TTP found
     }
 
-    private async Task CreateNewListPartOfThungTPhamOddNumbereds()
+    private async Task CreateNewListPartOfThungTPhamOddNumbereds_old()
     {
         await Task.Run(async () =>
         {
@@ -306,6 +306,138 @@
 
         ShowNotification("Created!", NotificationSeverity.Success, 2000);
     }
+
+    private async Task CreateNewListPartOfThungTPhamOddNumbereds()
+    {
+        await Task.Run(async () =>
+        {
+            DSachNewPartOfThungTPhams = new();
+
+            List<PartOfThungTPham> newpartofthungTPhams = new();
+
+            // Get thung thanh pham odd-numbered of KHSX
+            ThungTPOddNumbered = await LoadTTPhamTonKhoOfKHSX_FirstOfDefault();
+
+            if (ThungTPOddNumbered == null || ThungTPOddNumbered.TTPID.Value == null)
+            {
+                return;
+            }
+
+            int idthung = 0;
+
+            foreach (var pottp in ThungTPOddNumbered.PartOfThungTPhams)
+            {   
+                var lastestPartOfThungTPham = newpartofthungTPhams.LastOrDefault();
+
+                var listLastestPartOfThungTPs = newpartofthungTPhams.Where(ttp => ttp.IDThung.Value?.ToString() == lastestPartOfThungTPham?.IDThung.Value?.ToString());
+
+                int lastestPOTTPsoluong = listLastestPartOfThungTPs.Sum(ttp => (int.TryParse(ttp?.SoLuong.Value?.ToString(), out int sl) ? sl : 0));
+
+                // Lay so luong con thieu so voi LOT required perthung
+                _ = int.TryParse(lastestPartOfThungTPham?.SLRequired.Value?.ToString(), out int lastestSLrequired) ? lastestSLrequired : 0;
+
+                // Bo sung so luong cho thung thanh pham truoc do (chi khi thieu)
+                if (lastestSLrequired == 0 || lastestPartOfThungTPham == null)
+                {
+                    idthung = 1; // Reset idthung to 0 for new PartOfThungTPham
+                    lastestSLrequired = SLrequiredPerThung_currentLOT;
+                }
+                else
+                {
+                    idthung = int.TryParse(lastestPartOfThungTPham?.IDThung.Value?.ToString(), out int id) ? id : 1;
+                }
+
+                int soluongBosung = lastestSLrequired - lastestPOTTPsoluong;
+
+                // Get SL con lai cua thung thanh pham odd-numbered
+                _ = int.TryParse(pottp.SoLuong.Value?.ToString(), out int slpartottp) ? slpartottp : 0;
+
+                // Update refPOttpId
+                object? refPOTTP_ID = pottp.POTTPID.Value;
+
+                if (soluongBosung > 0)
+                {
+                    if (slpartottp <= soluongBosung)
+                    {
+                        string randomkey = Common.GenerateUppercaseChars(5);
+                        string mqlthungtp = $"TTP-{TargetKHSX.MaLSX.Value}-{randomkey}-{idthung}";
+
+                        PartOfThungTPham newPOTTP = new()
+                        {
+                            SoLuong = { Value = slpartottp },
+                            SLRequired = { Value = lastestSLrequired },
+                            IDThung = { Value = idthung },
+                            KHSXID = { Value = TargetKHSX.KHSXID.Value },
+                            SPID = { Value = TargetKHSX.SPID.Value },
+                            MaQuanLyLot = { Value = pottp.MaQuanLyLot.Value },
+                            NgayDongThung = { Value = DateTime.Now.ToString(Common.FormatNoTime_yyyddMM) },
+                            MaQuanLyThung = { Value = lastestPartOfThungTPham?.MaQuanLyThung.Value ?? mqlthungtp },
+                            RefPOTTPID = { Value = refPOTTP_ID }
+                        };
+
+                        newpartofthungTPhams.Add(newPOTTP);
+                    }
+                    else // (slpartottp > soluongBosung)
+                    {
+                        // Create mql thung TP
+                        string randomkey = Common.GenerateUppercaseChars(5);
+                        string mqlthungtp = $"TTP-{TargetKHSX.MaLSX.Value}-{randomkey}-{idthung}";
+
+                        PartOfThungTPham partofthungTPham = new()
+                        {
+                            SoLuong = { Value = soluongBosung },
+                            SLRequired = { Value = lastestSLrequired },
+                            IDThung = { Value = idthung },
+                            KHSXID = { Value = TargetKHSX.KHSXID.Value },
+                            SPID = { Value = TargetKHSX.SPID.Value },
+                            MaQuanLyLot = { Value = pottp.MaQuanLyLot.Value },
+                            NgayDongThung = { Value = DateTime.Now.ToString(Common.FormatNoTime_yyyddMM) },
+                            MaQuanLyThung = { Value = lastestPartOfThungTPham?.MaQuanLyThung.Value ?? mqlthungtp },
+                            RefPOTTPID = { Value = refPOTTP_ID }
+                        };
+
+                        if (partofthungTPham.MaQuanLyThung.Value == null)
+                        {
+                            
+                        }
+
+                        newpartofthungTPhams.Add(partofthungTPham);
+
+                        int soluongConlai = slpartottp - soluongBosung;
+
+                        while (soluongConlai > 0)
+                        {
+                            (PartOfThungTPham newthung, soluongConlai) = AddNewPartOfThungTPham(soluongConlai, idthung, pottp?.MaQuanLyLot.Value, refPOTTP_ID, null);
+
+                            idthung = int.TryParse(newthung.IDThung.Value?.ToString(), out int newid) ? newid : 1;
+
+                            newpartofthungTPhams.Add(newthung);
+                        }
+                    }
+                }
+                else if (soluongBosung == 0)
+                {
+                    int soluongConlai = slpartottp;
+
+                    while (soluongConlai > 0)
+                    {
+                        (PartOfThungTPham newthung, soluongConlai) = AddNewPartOfThungTPham(soluongConlai, idthung, pottp?.MaQuanLyLot.Value, refPOTTP_ID, null);
+
+                        idthung = int.TryParse(newthung.IDThung.Value?.ToString(), out int newid) ? newid : 1;
+
+                        newpartofthungTPhams.Add(newthung);
+                    }
+                }
+            }
+
+            DSachNewPartOfThungTPhams = newpartofthungTPhams;
+
+            isCreatedPartOfThungTP = true;
+        });
+
+        ShowNotification("Created!", NotificationSeverity.Success, 2000);
+    }
+
 
     private (PartOfThungTPham, int) AddNewPartOfThungTPham(int soluongTake, int lastIDthung, object? maquanlyLot, object? refPOTTP_ID, object? mqlthungtp)
     {

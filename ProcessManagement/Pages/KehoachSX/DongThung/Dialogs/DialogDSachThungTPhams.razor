@@ -122,7 +122,9 @@
                                                                     <RadzenButton Visible=@(thungtpham.IsOddNumbered.Value != null) Icon="check" Text="@($"Đã đánh dấu thùng lẻ")" Style="font-weight: 600; background: rgba(229,245,233); font-size: 16px; min-width: 50px"
                                                                                   ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Variant="Variant.Outlined" Shade="Shade.Dark"></RadzenButton>
                                                                     
-                                                                    <RadzenButton Click="@(() => OnUpdateThungTPToOddNumbered(thungtpham))" Visible=@(thungtpham.IsOddNumbered.Value == null && (ThungTPhams.IndexOf(thungtpham) + 1) == ThungTPhams.Count) Icon="add" Text="@($"Đánh dấu thùng lẻ")" Style="font-weight: 500; color: red; font-size: 16px; min-width: 50px"
+                                                                    <RadzenButton Click="@(() => OnUpdateThungTPToOddNumbered(thungtpham))" 
+                                                                                  Visible=@(thungtpham.IsOddNumbered.Value == null && thungtpham.PartOfThungTPhams.All(pottp => pottp.RefPOTTPID.Value == null) && (ThungTPhams.IndexOf(thungtpham) + 1) == ThungTPhams.Count) 
+                                                                                  Icon="add" Text="@($"Đánh dấu thùng lẻ")" Style="font-weight: 500; color: red; font-size: 16px; min-width: 50px"
                                                                                   ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Variant="Variant.Text" Shade="Shade.Dark"></RadzenButton>
                                                                 </RadzenStack>
                                                             </RadzenStack>
