@@ -1034,7 +1034,7 @@
         });
     }
 
-       // Load danh sach thung thanh pham ton kho cua KHSX (cung MaSP, thung le)
+    // Load danh sach thung thanh pham ton kho cua KHSX (cung MaSP, thung le)
     private async Task<ThungTPham?> LoadTTPhamTonKhoOfKHSX_FirstOfDefault()
     {
         var parameters = new Dictionary<string, object?>()
@@ -1112,8 +1112,12 @@
     // Open dialog DanhSachThungTPham
     private async Task OpenDialogDSachThungTPham()
     {
-        var results = await DialogService.OpenAsync<DialogDSachThungTPhams>(null, new Dictionary<string, object>() { { "TargetKHSX", TargetKHSX } },
+        bool isAllcreatedTTP = DSachResultPerLOTKHSX.All(rs => rs.IsCreatedPartOfThungTP);
+
+        var results = await DialogService.OpenAsync<DialogDSachThungTPhams>(null, new Dictionary<string, object>() { { "TargetKHSX", TargetKHSX }, { "IsAllcreatedTTP", isAllcreatedTTP } },
             new DialogOptions() { ShowTitle = true, Width = "60%", Height = "contain", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
+        
+        await LoadDSachLOTofKHSX(TargetKHSX.KHSXID.Value, 300);
     }
 
     private async Task NavigateToPhieuXDCD(ResultPerLOTKHSX selectRow)
