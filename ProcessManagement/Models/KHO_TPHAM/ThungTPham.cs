@@ -25,6 +25,7 @@ namespace ProcessManagement.Models.KHO_TPHAM
         // ID of the orginal PartOfThungTP which is odd-numbered, and this PartOfThungTPham is reference to it
         public Propertyy IsOddNumbered { get; set; } = new() { DBName = DBName.IsOddNumbered, DisplayName = DispName.IsOddNumbered, Type = typeof(int), AlowDatabase = true };
         public Propertyy IsHandledOddNumbered { get; set; } = new() { DBName = DBName.IsHandledOddNumbered, DisplayName = DispName.IsHandledOddNumbered, Type = typeof(int), AlowDatabase = true };
+        public Propertyy RefTTPID { get; set; } = new() { DBName = DBName.RefTTPID, DisplayName = DispName.RefTTPID, Type = typeof(int), AlowDatabase = true };
 
         public bool DaNhapKho { get; set; } = false;
         public bool DaXuatKho { get; set; } = false;
@@ -56,6 +57,7 @@ namespace ProcessManagement.Models.KHO_TPHAM
             public const string InStock = "InStock";
             public const string IsOddNumbered = "IsOddNumbered";
             public const string IsHandledOddNumbered = "IsHandledOddNumbered";
+            public const string RefTTPID = "RefTTPID";
         }
 
         public static class DispName
@@ -77,6 +79,7 @@ namespace ProcessManagement.Models.KHO_TPHAM
             public const string InStock = "In Stock";
             public const string IsOddNumbered = "IsOddNumbered";
             public const string IsHandledOddNumbered = "IsHandledOddNumbered";
+            public const string RefTTPID = "RefTTPID";
         }
 
         public static class ExcellAddress

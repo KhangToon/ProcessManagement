@@ -74,7 +74,7 @@
                                 <RadzenStack Orientation="Orientation.Horizontal" Gap="10px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: 100%; width: contain; padding: 0px">
                                     <RadzenText Text="@($"Số lượng thùng: {DSachNewPartOfThungTPhams.Count}")" Style="font-size: 16px; font-weight: 500; color: darkgreen"></RadzenText>
                                 </RadzenStack>
-@*                                 <RadzenButton Visible="@(!IsDongThungTP && TargetLotResult.IsCreatedPartOfThungTP && DSachNewPartOfThungTPhams.Any())" Text="Xóa tất cả" Icon="delete" Click="@(async () => await OnDeleteThungThanhPham(TargetLotResult.PartOfThungTPhams))"
+                                @*                                 <RadzenButton Visible="@(!IsDongThungTP && TargetLotResult.IsCreatedPartOfThungTP && DSachNewPartOfThungTPhams.Any())" Text="Xóa tất cả" Icon="delete" Click="@(async () => await OnDeleteThungThanhPham(TargetLotResult.PartOfThungTPhams))"
                                               ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Darker" Style="border-radius: 5px; --rz-icon-size: 18px; height: contain; min-height: 30px; " />
  *@                            </RadzenStack>
 
@@ -326,7 +326,7 @@
             int idthung = 0;
 
             foreach (var pottp in ThungTPOddNumbered.PartOfThungTPhams)
-            {   
+            {
                 var lastestPartOfThungTPham = newpartofthungTPhams.LastOrDefault();
 
                 var listLastestPartOfThungTPs = newpartofthungTPhams.Where(ttp => ttp.IDThung.Value?.ToString() == lastestPartOfThungTPham?.IDThung.Value?.ToString());
@@ -398,7 +398,7 @@
 
                         if (partofthungTPham.MaQuanLyThung.Value == null)
                         {
-                            
+
                         }
 
                         newpartofthungTPhams.Add(partofthungTPham);
@@ -536,6 +536,7 @@
                         // Update new Soluong in ThungTP
                         lastTTPwithsameMQL.SoLuong.Value = lastttpSL + sumsl;
                         lastTTPwithsameMQL.NgayDongThung.Value = DateTime.Now.ToString(Common.FormatNoTime_yyyddMM);
+                        lastTTPwithsameMQL.RefTTPID.Value = ThungTPOddNumbered?.TTPID.Value;
 
                         (int updateResult, error) = SQLServerServices.UpdateThungTPham(lastTTPwithsameMQL);
 
@@ -561,7 +562,8 @@
                         IDThung = { Value = partofthungtps.FirstOrDefault()?.IDThung.Value },
                         SPID = { Value = TargetKHSX.SPID.Value },
                         NgayDongThung = { Value = DateTime.Now.ToString(Common.FormatNoTime_yyyddMM) },
-                        MaQuanLyThung = { Value = partofthungtps.FirstOrDefault()?.MaQuanLyThung.Value }
+                        MaQuanLyThung = { Value = partofthungtps.FirstOrDefault()?.MaQuanLyThung.Value },
+                        RefTTPID = { Value = ThungTPOddNumbered?.TTPID.Value }
                     };
 
                     (int newttpID, error) = SQLServerServices.InsertThungTPham(thungTPham);

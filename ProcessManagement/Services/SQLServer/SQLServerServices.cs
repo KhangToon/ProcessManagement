@@ -8901,7 +8901,7 @@ namespace ProcessManagement.Services.SQLServer
         {
             int result = -1; string errorMess = string.Empty;
 
-            if (ishandled_oddnumbered == null || pottpid == null) { return (result, errorMess); }
+            if (pottpid == null) { return (result, errorMess); }
 
             try
             {
@@ -8909,7 +8909,7 @@ namespace ProcessManagement.Services.SQLServer
                 {
                     connection.Open();
 
-                    string sqlQuery = $"UPDATE {PartOfThungTPham.DBName.Table_PartOfThungTP} SET [{PartOfThungTPham.DBName.IsHandledOddNumbered}] = '{ishandled_oddnumbered}' WHERE [{PartOfThungTPham.DBName.POTTPID}] = '{pottpid}'";
+                    string sqlQuery = $"UPDATE {PartOfThungTPham.DBName.Table_PartOfThungTP} SET [{PartOfThungTPham.DBName.IsHandledOddNumbered}] = {(ishandled_oddnumbered == null ? "NULL" : $"'{ishandled_oddnumbered}'")} WHERE [{PartOfThungTPham.DBName.POTTPID}] = '{pottpid}'";
 
                     var command = new SqlCommand(sqlQuery, connection);
 
@@ -9175,7 +9175,7 @@ namespace ProcessManagement.Services.SQLServer
         {
             int result = -1; string errorMess = string.Empty;
 
-            if (ishandled_oddnumbered == null || ttpid == null) { return (result, errorMess); }
+            if (ttpid == null) { return (result, errorMess); }
 
             try
             {
@@ -9183,7 +9183,7 @@ namespace ProcessManagement.Services.SQLServer
                 {
                     connection.Open();
 
-                    string sqlQuery = $"UPDATE {ThungTPham.DBName.Table_ThungTPham} SET [{ThungTPham.DBName.IsHandledOddNumbered}] = '{ishandled_oddnumbered}' WHERE [{ThungTPham.DBName.TTPID}] = '{ttpid}'";
+                    string sqlQuery = $"UPDATE {ThungTPham.DBName.Table_ThungTPham} SET [{ThungTPham.DBName.IsHandledOddNumbered}] = {(ishandled_oddnumbered == null ? "NULL" : $"'{ishandled_oddnumbered}'")} WHERE [{ThungTPham.DBName.TTPID}] = '{ttpid}'";
 
                     var command = new SqlCommand(sqlQuery, connection);
 

@@ -344,10 +344,10 @@
                 // Delete partofTTP
                 foreach (var pottp in thungTPham.PartOfThungTPhams)
                 {
-                    if (pottp.IsOddNumbered.Value != null && pottp.RefPOTTPID.Value != null && Equals(pottp.IsHandledOddNumbered.Value, 1))
+                    if (!Equals(pottp.RefPOTTPID.Value, 0))
                     {
-                        // Update refPOTTP
-                        SQLServerServices.UpdateIsHandleOddNumberedPOTTP(1, pottp.RefPOTTPID.Value);
+                        // Update RESET RefPOTTPID
+                        SQLServerServices.UpdateIsHandleOddNumberedPOTTP(null, pottp.RefPOTTPID.Value);
                     }
 
                     // Delete
@@ -356,10 +356,10 @@
 
                 // Delete ThungTP
 
-                if (thungTPham.IsOddNumbered.Value != null && Equals(thungTPham.IsHandledOddNumbered.Value, 1))
+                if (!Equals(thungTPham.RefTTPID.Value, 0))
                 {
-                    // Update refPOTTP
-                    SQLServerServices.UpdateIsHandleOddNumberedThungTP(1, thungTPham.PartOfThungTPhams.FirstOrDefault()?.POTTPID.Value);
+                    // Update RESET RefTTPID
+                    SQLServerServices.UpdateIsHandleOddNumberedThungTP(null, thungTPham.RefTTPID.Value);
                 }
 
                 // Delete
@@ -367,6 +367,9 @@
             }
 
             await LoadDSachThungTPhams(TargetKHSX.KHSXID.Value);
+
+            // Reset delete TTP
+            IsAllcreatedTTP = false;
         }
     }
 
