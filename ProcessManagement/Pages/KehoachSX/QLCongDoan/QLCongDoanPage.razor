@@ -34,7 +34,7 @@
     <!--Datagrid-->
     <RadzenDataGrid class="rz-grid-table" Data="@(DSachResultPerLOTKHSX)" TItem="ResultPerLOTKHSX" IsLoading="@isLoading"
                     EmptyText="Danh sách LOT NVL trống." Style="overflow: scroll; max-width: 100%; max-height: 700px"
-                    ShowColumnTitleAsTooltip="true" ShowCellDataAsTooltip="true"
+                    ShowColumnTitleAsTooltip="true" ShowCellDataAsTooltip="true" 
                     AllowFiltering="false" FilterMode="FilterMode.Simple" AllowColumnResize=true AllowVirtualization=true
                     AllowPaging="false" AllowSorting="false" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
                     ShowPagingSummary="true" PagingSummaryFormat="@pagingSummaryFormat" PagerPosition="PagerPosition.Bottom"
@@ -56,7 +56,7 @@
         </HeaderTemplate>
         <Columns>
             @if (DSachResultPerLOTKHSX.Count > 0)
-            {
+            {   
                 <!--STT-->
                 <RadzenDataGridColumn Width="40px" Frozen="true"
                                       TItem="ResultPerLOTKHSX" Title="STT"
@@ -637,8 +637,64 @@
                         </RadzenStack>
                     </HeaderTemplate>
                     <Columns>
+                        <!--Thung Gop-->
+                        <RadzenDataGridColumn Visible = "@(DSachCombinedPartOfTTPhams.Any())" Resizable=true TItem="ResultPerLOTKHSX" Title="Thùng gộp" TextAlign="TextAlign.Center">
+                            <HeaderTemplate>
+                                <RadzenStack Gap="30px" Style="width: 100%; height: 100%; padding-left: 5px; padding-right: 5px;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Orientation="Orientation.Horizontal">
+                                    <RadzenText Text="Thùng gộp" Style="font-size: 17px; height: contain; font-weight: 600; padding: 5px; color: red; cursor: pointer"></RadzenText>
+                                </RadzenStack>
+                            </HeaderTemplate>
+                            <Columns>
+                                <!--MQLLOT-->
+                                <RadzenDataGridColumn Resizable=true TItem="ResultPerLOTKHSX" Title="MQL LOT"
+                                                        TextAlign="TextAlign.Center">
+                                    <HeaderTemplate>
+                                        <span style="font-weight: 700; font-size: 15px; color: black; padding-left: 10px; padding-right: 10px">MQL LOT</span>
+                                    </HeaderTemplate>
+                                    <Template Context="lotrow">
+                                        <RadzenStack Gap="10" Style="padding-top: 5px; padding-bottom: 5px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Orientation="Orientation.Vertical">
+                                            @foreach (var combinedPottp in DSachCombinedPartOfTTPhams)
+                                            {   
+                                                <RadzenText Visible=@((DSachResultPerLOTKHSX.IndexOf(lotrow) == 0)) Text="@($"{combinedPottp.MaQuanLyLot.Value}")" Style="font-size: 15px; color: darkred; height: contain; font-weight: 500"></RadzenText>
+                                            } 
+                                        </RadzenStack>
+                                    </Template>
+                                </RadzenDataGridColumn>
+                                <!--ID thung-->
+                                <RadzenDataGridColumn Resizable=true TItem="ResultPerLOTKHSX" Title="ID"
+                                                        TextAlign="TextAlign.Center">
+                                    <HeaderTemplate>
+                                        <span style="font-weight: 700; font-size: 15px; color: black; padding-left: 10px; padding-right: 10px">ID</span>
+                                    </HeaderTemplate>
+                                    <Template Context="lotrow">
+                                        <RadzenStack Style="padding-top: 5px; padding-bottom: 5px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Orientation="Orientation.Vertical">
+                                            @foreach (var combinedPottp in DSachCombinedPartOfTTPhams)
+                                            {   
+                                                <RadzenText Visible=@((DSachResultPerLOTKHSX.IndexOf(lotrow) == 0)) Text="@($"{combinedPottp.IDThung.Value}")" Style="font-size: 16px; color: darkblue; height: contain; font-weight: 600"></RadzenText>
+                                            } 
+                                        </RadzenStack>
+                                    </Template>
+                                </RadzenDataGridColumn>
+                                <!--So luong-->
+                                <RadzenDataGridColumn Resizable=true TItem="ResultPerLOTKHSX" Title="SL"
+                                                        TextAlign="TextAlign.Center">
+                                    <HeaderTemplate>
+                                        <span style="font-weight: 700; font-size: 15px; color: black; padding-left: 10px; padding-right: 10px">SL</span>
+                                    </HeaderTemplate>
+                                    <Template Context="lotrow">
+                                        <RadzenStack Gap="10" Style="padding-top: 5px; padding-bottom: 5px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Orientation="Orientation.Vertical">
+                                            @foreach (var combinedPottp in DSachCombinedPartOfTTPhams)
+                                            {   
+                                                <RadzenText Visible=@((DSachResultPerLOTKHSX.IndexOf(lotrow) == 0)) Text="@($"{((combinedPottp.SoLuong.Value != null) ? $"{combinedPottp.SoLuong.Value} (pcs)" : "")}")" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
+                                            } 
+                                        </RadzenStack>
+                                    </Template>
+                                </RadzenDataGridColumn>
+                            </Columns>
+                        </RadzenDataGridColumn>
+
                         @foreach (var index in ResultPerLOTKHSX.GenerateListColumnIndex(MaxThungTP))
-                        {
+                        {   
                             <!--ID thung-->
                             <RadzenDataGridColumn Resizable=true TItem="ResultPerLOTKHSX" Title="ID thùng"
                                                   TextAlign="TextAlign.Center">
@@ -646,11 +702,25 @@
                                     <span style="font-weight: 700; font-size: 15px; color: black; padding-left: 10px; padding-right: 10px">ID thùng</span>
                                 </HeaderTemplate>
                                 <Template Context="lotrow">
-                                    <RadzenText Text="@(lotrow.PartOfThungTPhams.ElementAtOrDefault(index)?.IDThung.Value?.ToString())" Style="font-size: 16px; color: darkblue; height: contain; font-weight: 600"></RadzenText>
-                                </Template>
-                                <FooterTemplate>
+                                    @{
+                                    var targetPOTTP = lotrow.PartOfThungTPhams.ElementAtOrDefault(index);
 
-                                </FooterTemplate>
+                                        if (Equals(targetPOTTP?.IsOddNumbered.Value, 1))
+                                        {
+                                            bool ishandelodd = Equals(targetPOTTP?.IsHandledOddNumbered.Value, 1);
+                                            <RadzenStack Gap="10" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Orientation="Orientation.Horizontal">
+                                                <RadzenText Text="@(targetPOTTP?.IDThung.Value?.ToString())" Style="font-size: 16px; color: darkblue; height: contain; font-weight: 600"></RadzenText>
+                                                <RadzenButton Text="@("LOT lẻ")" Style="font-size: 14px; height: contain; font-weight: 500" Size="ButtonSize.ExtraSmall" ButtonStyle="ButtonStyle.Info" Shade="Shade.Default"
+                                                    MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, (ishandelodd)? "Đã được ghép thùng" : "Chưa xử lý (ghép thùng)", 100, 2000, ((ishandelodd) ? "green" : "black")))">
+                                                </RadzenButton>
+                                            </RadzenStack>
+                                        }
+                                        else
+                                        {
+                                            <RadzenText Text="@(targetPOTTP?.IDThung.Value?.ToString())" Style="font-size: 16px; color: darkblue; height: contain; font-weight: 600"></RadzenText>
+                                        }
+                                    }
+                                </Template>
                             </RadzenDataGridColumn>
                             <!--So luong-->
                             <RadzenDataGridColumn Resizable=true TItem="ResultPerLOTKHSX" Title="Số lượng"
@@ -659,10 +729,9 @@
                                     <span style="font-weight: 700; font-size: 15px; color: black; padding-left: 10px; padding-right: 10px">Số lượng</span>
                                 </HeaderTemplate>
                                 <Template Context="lotrow">
-                                    <RadzenText Text="@(lotrow.PartOfThungTPhams.ElementAtOrDefault(index)?.SoLuong.Value?.ToString())" Style="font-size: 15px; height: contain; font-weight: 500"></RadzenText>
+                                    <RadzenText Text="@((lotrow.PartOfThungTPhams.ElementAtOrDefault(index)?.SoLuong?.Value is int quantity) ? $"{quantity} (pcs)" : "")" 
+                                                Style="font-size: 15px; height: contain; font-weight: 500" />                                
                                 </Template>
-                                <FooterTemplate>
-                                </FooterTemplate>
                             </RadzenDataGridColumn>
                         }
                     </Columns>
@@ -763,6 +832,8 @@
     private List<KHSX_LOT> DSLOTKHSXs = new();
 
     private List<ResultPerLOTKHSX> DSachResultPerLOTKHSX = new();
+
+    private List<PartOfThungTPham> DSachCombinedPartOfTTPhams = new(); // DSach partOfThungTP (thung le cua KHSX truoc do)
 
     protected override async Task OnInitializedAsync()
     {
@@ -914,9 +985,23 @@
                 // Load KQGC perLOTKHSX
                 DSachResultPerLOTKHSX = await LoadKQGCperLOTofKHSX(DSLOTKHSXs, TargetKHSX.KHSXID.Value);
 
+                // Load DSThungTP-ofLastKHSX (same SPID, combine with odd-numbered TTP)
+                DSachCombinedPartOfTTPhams = await LoadDSachCombinePartOfTTPhams(TargetKHSX.KHSXID.Value);
+
                 isLoading = false;
             }
         });
+    }
+
+    private async Task<List<PartOfThungTPham>> LoadDSachCombinePartOfTTPhams(object? khsxid)
+    {
+        List<PartOfThungTPham> partOfThungTPhams = SQLServerServices.GetListPartOfThungTPs(new() { { KHSX_LOT.DBName.KHSXID, khsxid } }).thungTPhams;
+
+        var combinedPOTTPs = partOfThungTPhams.Where(pottp => int.TryParse(pottp.RefPOTTPID.Value?.ToString(), out int rfid) && rfid > 0);
+
+        await Task.Delay(1);
+
+        return combinedPOTTPs.ToList();
     }
 
     // Convert ID to stringValue
@@ -1173,9 +1258,9 @@
     }
 
     // Tooltip
-    void ShowToolTip(ElementReference elementReference, TooltipPosition position, string content, int delay, int duration = 500)
+    void ShowToolTip(ElementReference elementReference, TooltipPosition position, string content, int delay, int duration = 500, string bgcolor = "black")
     {
-        TooltipOptions options = new TooltipOptions() { Position = position, CloseTooltipOnDocumentClick = true, Delay = delay, Style = "background-color: black" };
+        TooltipOptions options = new TooltipOptions() { Position = position, CloseTooltipOnDocumentClick = true, Delay = delay, Style = $"background-color: {bgcolor}" };
 
         TooltipService.Open(elementReference, content, options);
     }
