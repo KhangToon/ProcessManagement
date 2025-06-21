@@ -76,7 +76,7 @@
 
                                 <RadzenStack Style="width: 50%;">
                                     <RadzenTextBox class="custom-placeholder" Placeholder="@($" * nhập mã pallet")" Value="@CodePallet" Style="font-size: 16px; height: contain; border-width: 1px;"
-                                                   @oninput="@( async(args) => {CodePallet = args.Value?.ToString() ?? string.Empty; IsUniqueCodePallet = await IsNewPalletCodeIsUnique(CodePallet);})">
+                                                   @oninput="@(async (args) => { CodePallet = args.Value?.ToString() ?? string.Empty; IsUniqueCodePallet = await IsNewPalletCodeIsUnique(CodePallet); })">
                                     </RadzenTextBox>
                                 </RadzenStack>
 
@@ -87,7 +87,7 @@
                                                   ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Dark" Style="border-radius: 5px; --rz-icon-size: 18px; width: 100%; height: contain; min-height: 35px" />
                                 </RadzenStack>
                                 <RadzenStack Style="width: contain; height: 100%" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                    <RadzenAlert Visible="@(string.IsNullOrEmpty(CodePallet.Trim()) || !IsUniqueCodePallet)" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, $"{((!IsUniqueCodePallet && !string.IsNullOrEmpty(CodePallet))? "Mã đã tồn tại" : "Nhập mã pallet")}", 100, 1000))"
+                                    <RadzenAlert Visible="@(string.IsNullOrEmpty(CodePallet.Trim()) || !IsUniqueCodePallet)" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, $"{((!IsUniqueCodePallet && !string.IsNullOrEmpty(CodePallet)) ? "Mã đã tồn tại" : "Nhập mã pallet")}", 100, 1000))"
                                                  Style="width: contain; height: contain; min-height: 35px; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Warning" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
                                     <RadzenAlert Visible="@(!string.IsNullOrEmpty(CodePallet.Trim()) && IsUniqueCodePallet)"
                                                  Style="width: contain; height: contain; min-height: 35px; font-size: 14px; padding: 2px; padding-left: 10px; margin: 0" AlertStyle="AlertStyle.Success" AllowClose="false" Variant="Variant.Flat" Size="AlertSize.Small" Shade="Shade.Lighter"></RadzenAlert>
@@ -132,7 +132,7 @@
                                                 </RadzenStack>
                                                 <RadzenStack Gap="10px" Style="width: 20%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                     <RadzenText Text="@($"{thungTPham.SoLuong.Value} (PCS)")" Style="color: black; font-weight: 600; font-size: 16px"></RadzenText>
-                                                    <RadzenButton Visible="false" Icon="edit" Click="@(async() => await OnEditSoluongXuatKho(thungTPham))"
+                                                    <RadzenButton Visible="false" Icon="edit" Click="@(async () => await OnEditSoluongXuatKho(thungTPham))"
                                                                   ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.ExtraSmall" Variant="Variant.Flat" Shade="Shade.Lighter" />
                                                 </RadzenStack>
                                             </RadzenStack>
@@ -152,7 +152,7 @@
                             <RadzenButton Disabled="@(TargetViTriLuu.MaviTri == null)" Icon="add" Style="width: contain; height: contain; font-weight: 600" Text="Tạo phiếu nhập kho" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Size="ButtonSize.Small" Variant="Variant.Flat"
                                           Click="@(() => OnCreatePhieuNhapKhoThanhPham())" />
                         </RadzenStack>
-                        <RadzenButton Style="width: contain; background-color: darkred" Icon="close" Text="Thoát" Click="@(() => { DialogService.Close(null);})" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Dark" Size="ButtonSize.Small" Variant="Variant.Flat" />
+                        <RadzenButton Style="width: contain; background-color: darkred" Icon="close" Text="Thoát" Click="@(() => { DialogService.Close(null); })" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Dark" Size="ButtonSize.Small" Variant="Variant.Flat" />
                     </RadzenStack>
                 </RadzenStack>
             </RadzenColumn>
@@ -230,6 +230,11 @@
         return await Task.Run(() =>
         {
             var dsthungTP = SQLServerServices.GetListThungTPs(new() { { ThungTPham.DBName.PalletKey, newcodepallet } }, false).thungTPhams;
+
+            if (dsthungTP.All(ttp => ttp.PXKTPID.Value != null && Equals(ttp.InStock.Value, 0)))
+            {
+                return true;
+            }
 
             return dsthungTP.Count == 0;
         });
