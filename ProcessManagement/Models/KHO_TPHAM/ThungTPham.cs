@@ -21,7 +21,7 @@ namespace ProcessManagement.Models.KHO_TPHAM
         public Propertyy PXKTPID { get; set; } = new() { DBName = DBName.PXKTPID, DisplayName = DispName.PXKTPID, Type = typeof(int), AlowDatabase = true };
         public Propertyy PalletKey { get; set; } = new() { DBName = DBName.PalletKey, DisplayName = DispName.PalletKey, Type = typeof(string), AlowDatabase = true };
         public Propertyy InStock { get; set; } = new() { DBName = DBName.InStock, DisplayName = DispName.InStock, Type = typeof(int), AlowDatabase = true };
-        
+
         // ID of the orginal PartOfThungTP which is odd-numbered, and this PartOfThungTPham is reference to it
         public Propertyy IsOddNumbered { get; set; } = new() { DBName = DBName.IsOddNumbered, DisplayName = DispName.IsOddNumbered, Type = typeof(int), AlowDatabase = true };
         public Propertyy IsHandledOddNumbered { get; set; } = new() { DBName = DBName.IsHandledOddNumbered, DisplayName = DispName.IsHandledOddNumbered, Type = typeof(int), AlowDatabase = true };
@@ -36,6 +36,7 @@ namespace ProcessManagement.Models.KHO_TPHAM
         public List<PartOfThungTPham> PartOfThungTPhams { get; set; } = new();
 
         public const string PALLETKEY = "PALLET";
+        public bool IsSelectToPNK { get; set; } = false; // Using in select TTP for create PNKTP
 
         public static class DBName
         {
