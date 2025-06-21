@@ -12,9 +12,9 @@
 
 <style>
     .pxkho_IsSelected {
-    border-style: solid;
-    border-width: 2px;
-    border-color: green;
+        border-style: solid;
+        border-width: 2px;
+        border-color: green;
     }
 </style>
 
@@ -27,9 +27,9 @@
         </RadzenColumn>
         <RadzenColumn SizeMD="6" Size="12">
             <RadzenStack Gap="15px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: 100%; width: 100%;">
-                <RadzenTextBox @oninput="@((args) => GetFilterDSachKHXuatKho(args?.Value?.ToString()?? string.Empty))" Placeholder="Xuất mã phiếu xuất kho để tìm kiếm" Style="border-radius: 20px; padding-left: 20px; border-width: 2px; border-color: var(--rz-primary-light); width: 50% "></RadzenTextBox>
+                <RadzenTextBox @oninput="@((args) => GetFilterDSachKHXuatKho(args?.Value?.ToString() ?? string.Empty))" Placeholder="Xuất mã phiếu xuất kho để tìm kiếm" Style="border-radius: 20px; padding-left: 20px; border-width: 2px; border-color: var(--rz-primary-light); width: 50% "></RadzenTextBox>
                 <RadzenButton Icon="search" ButtonStyle="ButtonStyle.Primary" Style="border-radius: 20px;" />
-                <RadzenButton Click="(async () => {await LoadDSachPhieuXuatKhoTPham(); ReSelectPhieuXuatKhoTPham();})" Style="border-radius: 20px;" Icon="autorenew" ButtonStyle="ButtonStyle.Primary" />
+                <RadzenButton Click="(async () => { await LoadDSachPhieuXuatKhoTPham(); ReSelectPhieuXuatKhoTPham(); })" Style="border-radius: 20px;" Icon="autorenew" ButtonStyle="ButtonStyle.Primary" />
             </RadzenStack>
         </RadzenColumn>
     </RadzenRow>
@@ -47,7 +47,7 @@
                         <RadzenCard Style="width: 100%; height: contain; padding: 0" Variant="Variant.Flat">
                             <RadzenCard class="@(IsPXKhoSelected(pxk))" Style="width: 100%; height: contain;" Variant="Variant.Filled">
                                 <RadzenStack onclick="@(() => OnPhieuXuatKhoTPhamClick(pxk))" Style="width: 100%; height: 100%; padding: 0" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                    <RadzenCard Variant="@((pxk.PXKTPID.Value?.Equals(SelectedPXK.PXKTPID.Value)?? false)? Variant.Flat : Variant.Outlined)" Style="height: 100%; width: 100%; padding: 10px;">
+                                    <RadzenCard Variant="@((pxk.PXKTPID.Value?.Equals(SelectedPXK.PXKTPID.Value) ?? false) ? Variant.Flat : Variant.Outlined)" Style="height: 100%; width: 100%; padding: 10px;">
                                         <RadzenStack Style="width: 100%; height: 100%;" Gap="10px" Orientation=Orientation.Vertical AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                             <RadzenStack Gap="0" Style="width: 100%; height: contain; padding-bottom: 5px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                                                 <RadzenStack Style="height: contain; width: contain; min-width: 30px; border-radius: 5px; background-color: var(--rz-primary-lighter); padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
@@ -57,12 +57,12 @@
                                                     @if (pxk.isPXKDoneXuatKho)
                                                     {
                                                         <RadzenButton Text="Done" Icon="check" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Dark" Variant="Variant.Flat"
-                                                        Style="--rz-icon-size: 18px; width: 100%; cursor: default; font-weight: 600" />
+                                                                      Style="--rz-icon-size: 18px; width: 100%; cursor: default; font-weight: 600" />
                                                     }
                                                     else
                                                     {
                                                         <RadzenButton Text="Not done" ButtonStyle="ButtonStyle.Warning" Size="ButtonSize.Small" Shade="Shade.Dark" Variant="Variant.Outlined"
-                                                        Style="border-radius: 5px; --rz-icon-size: 18px; height: 20px; width: 100%; cursor: default; background-color: rgb(254,243,220); font-weight: 600" />
+                                                                      Style="border-radius: 5px; --rz-icon-size: 18px; height: 20px; width: 100%; cursor: default; background-color: rgb(254,243,220); font-weight: 600" />
                                                     }
                                                 </RadzenStack>
                                             </RadzenStack>
@@ -110,9 +110,9 @@
             </RadzenStack>
             <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                 <RadzenButton Visible="@(SelectedPXK.PXKTPID.Value != null)" Style="width: contain; min-width: 120px; height: contain;" Click="@(() => OnDeleteSelectedPhieuXuatKhoTPham())" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Xóa phiếu xuất kho"))"
-                Icon="delete" Text="Xóa phiếu" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" />
+                              Icon="delete" Text="Xóa phiếu" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" />
                 <RadzenButton Visible="@(SelectedPXK.PXKTPID.Value != null)" Style="width: contain; min-width: 120px; height: contain;" Click="@(() => OnResetPhieuXuatKhoTPham())"
-                Icon="delete" Text="Reset phiếu" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" />
+                              Icon="delete" Text="Reset phiếu" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" />
             </RadzenStack>
         </RadzenStack>
     </RadzenColumn>
@@ -120,6 +120,10 @@
 
 
 @code {
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "pxktpid")]
+    public object? PXKTPID { get; set; }
+
     private List<PhieuXuatKhoTPham> DSPhieuXKs = new();
     private PhieuXuatKhoTPham SelectedPXK = new();
     private bool isSearching = false;
@@ -128,7 +132,18 @@
     {
         await LoadDSachPhieuXuatKhoTPham();
 
-        ReSelectPhieuXuatKhoTPham();
+        if (PXKTPID != null && !object.Equals(PXKTPID, 0))
+        {
+            Common.SelectedPXKTPID = PXKTPID;
+
+            DSPhieuXKs = DSPhieuXKs.Where(pxk => pxk.PXKTPID.Value?.ToString() == PXKTPID.ToString()).ToList();
+
+            SelectedPXK = DSPhieuXKs.FirstOrDefault() ?? new();
+        }
+        else
+        {
+            ReSelectPhieuXuatKhoTPham();
+        }
 
         await base.OnInitializedAsync();
     }
@@ -147,7 +162,13 @@
     {
         if (Common.SelectedPXKTPID != null)
         {
-            SelectedPXK = DSPhieuXKs.FirstOrDefault(pxkid => pxkid.PXKTPID.Value?.ToString() == Common.SelectedPXKTPID.ToString()) ?? new();
+            object v = Common.SelectedPXKTPID;
+            SelectedPXK = DSPhieuXKs.FirstOrDefault(pnk => pnk.PXKTPID.Value?.ToString() == Common.SelectedPXKTPID.ToString()) ?? new();
+
+            if (SelectedPXK.PXKTPID.Value == null)
+            {
+                SelectedPXK = DSPhieuXKs.FirstOrDefault() ?? new();
+            }
         }
         else
         {
@@ -310,12 +331,12 @@
     private void ShowNotification(string message, NotificationSeverity notifytype, double time)
     {
         NotificationMessage notify = new NotificationMessage
-            {
-                Style = "position: fixed; top: 0; right: 0;",
-                Severity = notifytype,
-                Summary = message,
-                Duration = time
-            };
+        {
+            Style = "position: fixed; top: 0; right: 0;",
+            Severity = notifytype,
+            Summary = message,
+            Duration = time
+        };
 
         NotificationService.Notify(notify);
     }

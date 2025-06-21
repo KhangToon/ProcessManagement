@@ -61,6 +61,10 @@
                     </RadzenStack>
                     <RadzenStack Orientation="Orientation.Vertical" Gap="10px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: contain; width: 100%;">
                         <RadzenCard Variant="Variant.Flat" Style="height: contain; max-height: 500px; width: 100%; padding: 10px; padding-right: 0; overflow-y: scroll">
+                            <RadzenStack Style="width: contain; padding-right: 10px" Gap="5px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                                <RadzenCheckBox TValue="bool" Name="@($"checkbox_selectAll")" Change="@((args) => { ThungTPhams.Where(ttp => ttp.PNKTPID.Value == null).ToList().ForEach(ttp => ttp.IsSelectToPNK = args); })" />
+                                <RadzenLabel Text="Chọn tất cả" Style="font-size: 15px; font-weight: 500; cursor: pointer" Component="@($"checkbox_selectAll")" />
+                            </RadzenStack>
                             <RadzenStack Gap="10px" Style="height: contain; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                 <RadzenDataList Style="height: contain; width: 100%;" PagerPosition="PagerPosition.Top" WrapItems="true" AllowPaging="false" Data="@ThungTPhams" TItem="ThungTPham">
                                     <Template Context="thungtpham">
@@ -96,9 +100,12 @@
                                                         <RadzenButton Visible="@(!thungtpham.DaNhapKho && thungtpham.PNKTPID.Value == null)" Text="Chưa nhập kho" Icon="warning"
                                                                       ButtonStyle="ButtonStyle.Warning" Size="ButtonSize.Small" Variant="Variant.Text" Shade="Shade.Light" Style="border-radius: 5px; --rz-icon-size: 16px; color: goldenrod; font-weight: 600" />
 
-                                                        <RadzenButton Visible="@(thungtpham.DaNhapKho)" Text="Đã nhập kho" Icon="check" Click="@(async () => await OnXemViTriLuuKhoThanhPham(thungtpham))"
+                                                        <RadzenButton Visible="@(thungtpham.PXKTPID.Value != null && Equals(thungtpham.InStock.Value, 0))" Text="Đã xuất kho"
+                                                                      ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 16px; color: darkred; font-weight: 600" />
+
+                                                        <RadzenButton Visible="@(thungtpham.PXKTPID.Value == null && thungtpham.DaNhapKho)" Text="Đã nhập kho" Icon="check" Click="@(async () => await OnXemViTriLuuKhoThanhPham(thungtpham))"
                                                                       MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Nhấn để xem vị trí", 100, 1000))"
-                                                                      ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Variant="Variant.Text" Shade="Shade.Darker" Style="border-radius: 5px; --rz-icon-size: 16px; font-size: 16px; font-weight: 600" />
+                                                                      ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 16px; color: darkgreen; font-weight: 600" />
                                                         @{
                                                             DateTime? ngaynk = DateTime.TryParse(thungtpham.NgayNhapKho.Value?.ToString(), out DateTime nnk) ? nnk : null;
 
@@ -204,9 +211,13 @@
                                                                 </RadzenStack>
                                                             </RadzenStack>
                                                             <RadzenStack Style="width: contain; height: contain;" Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                <RadzenButton Visible="@(thungtpham.PNKTPID.Value != null && thungtpham.DaNhapKho)" Text="Xem phiếu nhập kho" Icon="share"
+                                                                <RadzenButton Visible="@(thungtpham.PNKTPID.Value != null && thungtpham.DaNhapKho && thungtpham.PXKTPID.Value == null)" Text="Xem phiếu nhập kho" Icon="share"
                                                                               Click="@(() => OnNavigatorToPhieuNhapKhoTP(thungtpham.PNKTPID.Value))"
-                                                                              ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Variant="Variant.Text" Shade="Shade.Dark" Style="border-radius: 5px; --rz-icon-size: 16px; font-size: 16px; font-weight: 600" />
+                                                                              ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Variant="Variant.Text" Shade="Shade.Dark" Style="border-radius: 5px; --rz-icon-size: 16px; color: darkgreen; font-weight: 600" />
+
+                                                                <RadzenButton Visible="@(thungtpham.PXKTPID.Value != null && Equals(thungtpham.InStock.Value, 0))" Text="Xem phiếu xuất kho" Icon="share"
+                                                                              Click="@(() => OnNavigatorToPhieuXuatKhoTP(thungtpham.PXKTPID.Value))"
+                                                                              ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Variant="Variant.Text" Shade="Shade.Darker" Style="border-radius: 5px; --rz-icon-size: 16px; color: darkred; font-weight: 600" />
                                                             </RadzenStack>
                                                         </RadzenStack>
                                                     </RadzenStack>
@@ -415,6 +426,16 @@
 
         await JSRuntime.InvokeVoidAsync("openInNewTab", absoluteUrl);
 
+    }
+
+    private async Task OnNavigatorToPhieuXuatKhoTP(object? pxktpid = null)
+    {
+        var url = $"khotpmanagement?tabindex={3}&pxktpid={pxktpid}";
+
+        // Get the absolute URL
+        var absoluteUrl = NavigationManager.ToAbsoluteUri(url).ToString();
+
+        await JSRuntime.InvokeVoidAsync("openInNewTab", absoluteUrl);
     }
 
     private void ShowNotification(string message, NotificationSeverity notifytype, double time)
