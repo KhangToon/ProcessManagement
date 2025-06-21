@@ -555,7 +555,9 @@
                                                 PalletKey = group.Key?.ToString() ?? string.Empty,
                                                 MaSanPham = SQLServerServices.GetMaSanphamByID(group.ToList().FirstOrDefault()?.SPID.Value),
                                                 Total = group.ToList().Sum(ttp => int.TryParse(ttp.SoLuong.Value?.ToString(), out int sl) ? sl : 0),
-                                                ThungTPhams = group.ToList()
+                                                ThungTPhams = group.ToList(),
+                                                MaViTri = SQLServerServices.GetMaViTriTPham(group.FirstOrDefault()?.VTTPID.Value),
+                                                LotViTri = SQLServerServices.GetLOTViTriofTPham(group.FirstOrDefault()?.VTofTPID.Value)
                                             }).ToList();
 
             if (groupedResults.Any())

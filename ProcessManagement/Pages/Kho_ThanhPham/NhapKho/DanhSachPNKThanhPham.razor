@@ -27,9 +27,9 @@
         </RadzenColumn>
         <RadzenColumn SizeMD="6" Size="12">
             <RadzenStack Gap="15px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: 100%; width: 100%;">
-                <RadzenTextBox @oninput="@((args) => GetFilterDSachKHNhapKho(args?.Value?.ToString()?? string.Empty))" Placeholder="Nhập mã phiếu nhập kho để tìm kiếm" Style="border-radius: 20px; padding-left: 20px; border-width: 2px; border-color: var(--rz-primary-light); width: 50% "></RadzenTextBox>
+                <RadzenTextBox @oninput="@((args) => GetFilterDSachKHNhapKho(args?.Value?.ToString() ?? string.Empty))" Placeholder="Nhập mã phiếu nhập kho để tìm kiếm" Style="border-radius: 20px; padding-left: 20px; border-width: 2px; border-color: var(--rz-primary-light); width: 50% "></RadzenTextBox>
                 <RadzenButton Icon="search" ButtonStyle="ButtonStyle.Primary" Style="border-radius: 20px;" />
-                <RadzenButton Click="(async () => {await LoadDSachPhieuNhapKhoTPham(); ReSelectPhieuNhapKhoTPham();})" Style="border-radius: 20px;" Icon="autorenew" ButtonStyle="ButtonStyle.Primary" />
+                <RadzenButton Click="(async () => { await LoadDSachPhieuNhapKhoTPham(); ReSelectPhieuNhapKhoTPham(); })" Style="border-radius: 20px;" Icon="autorenew" ButtonStyle="ButtonStyle.Primary" />
             </RadzenStack>
         </RadzenColumn>
     </RadzenRow>
@@ -47,7 +47,7 @@
                         <RadzenCard Style="width: 100%; height: contain; padding: 0" Variant="Variant.Flat">
                             <RadzenCard class="@(IsPNKhoSelected(pnk))" Style="width: 100%; height: contain;" Variant="Variant.Filled">
                                 <RadzenStack onclick="@(() => OnPhieuNhapKhoTPhamClick(pnk))" Style="width: 100%; height: 100%; padding: 0" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                    <RadzenCard Variant="@((pnk.PNKTPID.Value?.Equals(SelectedPNK.PNKTPID.Value)?? false)? Variant.Flat : Variant.Outlined)" Style="height: 100%; width: 100%; padding: 10px;">
+                                    <RadzenCard Variant="@((pnk.PNKTPID.Value?.Equals(SelectedPNK.PNKTPID.Value) ?? false) ? Variant.Flat : Variant.Outlined)" Style="height: 100%; width: 100%; padding: 10px;">
                                         <RadzenStack Style="width: 100%; height: 100%;" Gap="10px" Orientation=Orientation.Vertical AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                             <RadzenStack Gap="0" Style="width: 100%; height: contain; padding-bottom: 5px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                                                 <RadzenStack Style="height: contain; width: contain; min-width: 30px; border-radius: 5px; background-color: var(--rz-primary-lighter); padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
@@ -128,14 +128,21 @@
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadDSachPhieuNhapKhoTPham();
+
         if (PNKTPID != null && !object.Equals(PNKTPID, 0))
         {
             Common.SelectedPNKTPID = PNKTPID;
+
+            DSPhieuNKs = DSPhieuNKs.Where(pnk => pnk.PNKTPID.Value?.ToString() == PNKTPID.ToString()).ToList();
+
+            SelectedPNK = DSPhieuNKs.FirstOrDefault() ?? new();
+        }
+        else
+        {
+            ReSelectPhieuNhapKhoTPham();
         }
 
-        await LoadDSachPhieuNhapKhoTPham();
-
-        ReSelectPhieuNhapKhoTPham();
 
         await base.OnInitializedAsync();
     }
@@ -154,7 +161,13 @@
     {
         if (Common.SelectedPNKTPID != null)
         {
-            SelectedPNK = DSPhieuNKs.FirstOrDefault(pnkid => pnkid.PNKTPID.Value?.ToString() == Common.SelectedPNKTPID.ToString()) ?? new();
+            object v = Common.SelectedPNKTPID;
+            SelectedPNK = DSPhieuNKs.FirstOrDefault(pnk => pnk.PNKTPID.Value?.ToString() == Common.SelectedPNKTPID.ToString()) ?? new();
+
+            if (SelectedPNK.PNKTPID.Value == null)
+            {
+                SelectedPNK = DSPhieuNKs.FirstOrDefault() ?? new();
+            }
         }
         else
         {
@@ -253,12 +266,12 @@
     private void ShowNotification(string message, NotificationSeverity notifytype, double time)
     {
         NotificationMessage notify = new NotificationMessage
-            {
-                Style = "position: fixed; top: 0; right: 0;",
-                Severity = notifytype,
-                Summary = message,
-                Duration = time
-            };
+        {
+            Style = "position: fixed; top: 0; right: 0;",
+            Severity = notifytype,
+            Summary = message,
+            Duration = time
+        };
 
         NotificationService.Notify(notify);
     }

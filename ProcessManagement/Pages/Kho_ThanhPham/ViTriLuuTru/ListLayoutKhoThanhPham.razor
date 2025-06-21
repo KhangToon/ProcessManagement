@@ -14,6 +14,8 @@
 @inject NotificationService NotificationService
 @inject TooltipService TooltipService
 @inject SQLServerServices SQLServerServices
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
 
 <style>
     .vitri_IsSelected {
@@ -205,17 +207,6 @@
                                                     <RadzenText Text="@($"Ngày nhập kho: ")" Style="font-weight: 500; font-size: 16px;"></RadzenText>
                                                     <RadzenText Text="@($"{_ngaynk}")" Style="font-weight: 600; color: black; font-size: 16px;"></RadzenText>
                                                 </RadzenStack>
-
-                                                <RadzenStack Gap="5px" Style="width: 100%; height: contain;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                                                    <RadzenStack Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                                        <RadzenText Text="Mã pallet" Style="font-size: 16px; font-weight: 600; height: contain; color: rgba(58,71,77)"></RadzenText>
-                                                    </RadzenStack>
-                                                    <RadzenStack Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                                        <RadzenButton Text="@($"{palletthungtp.PalletKey}")"
-                                                                        Variant="Variant.Flat" Size="ButtonSize.Small" Shade="Shade.Lighter"
-                                                                        Style="font-size: 16px; font-weight: 600; height: contain; color: darkgreen"></RadzenButton>
-                                                    </RadzenStack>
-                                                </RadzenStack>
                                             </RadzenStack>
                                         </RadzenColumn>
                                         <RadzenColumn Size="12" SizeMD="7" Style="width: 100%; height: contain">
@@ -240,6 +231,28 @@
                                                 </RadzenStack>
                                             </RadzenStack>
                                         </RadzenColumn>
+                                        <RadzenStack Gap="5px" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                            <RadzenStack Gap="5px" Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                <RadzenText Text="Mã pallet" Style="font-size: 16px; font-weight: 600; height: contain; color: rgba(58,71,77)"></RadzenText>
+                                                <RadzenButton Text="@($"{palletthungtp.PalletKey}")"
+                                                        Variant="Variant.Flat" Size="ButtonSize.Small" Shade="Shade.Lighter"
+                                                        Style="font-size: 16px; font-weight: 600; height: contain; color: darkgreen"/>
+                                            </RadzenStack>
+                                            <RadzenStack Style="width: contain; height: contain;" Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                <RadzenText Text="Vị trí lưu" Style="font-size: 16px; font-weight: 600; height: contain; color: rgba(58,71,77)"></RadzenText>
+                                                <RadzenButton Text="@($"{palletthungtp.MaViTri} - {palletthungtp.LotViTri}")" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Variant="Variant.Flat"
+                                                                Style="border-radius: 5px; --rz-icon-size: 18px; font-weight: 600; height: contain; min-height: 20px; width: contain; min-width: 80px" />
+                                            </RadzenStack>
+                                        </RadzenStack>
+                                        <RadzenStack Gap="5px" Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                                            <RadzenStack Style="width: contain; height: contain;" Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                <RadzenButton Text="Xem phiếu nhập kho" Icon="share"
+                                                                Click="@(() => OnNavigatorToPhieuNhapKhoTP(palletthungtp.ThungTPhams.FirstOrDefault()?.PNKTPID.Value))"
+                                                                ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Variant="Variant.Text" Shade="Shade.Dark" Style="border-radius: 5px; --rz-icon-size: 16px; font-size: 16px; font-weight: 600; width: contain; " />
+                                                <RadzenButton Text="Xem KHSX" Icon="list"
+                                                                ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Variant="Variant.Text" Shade="Shade.Dark" Style="border-radius: 5px; --rz-icon-size: 16px; font-size: 16px; font-weight: 600; width: contain;" />
+                                            </RadzenStack>
+                                        </RadzenStack>
                                     </RadzenRow>
                                 </RadzenCard>
                             </RadzenCard>
@@ -362,7 +375,7 @@
     }
 
 
-        // Filtering processing
+    // Filtering processing
     private async Task FilterDSachThanhPhamViewProcessing()
     {
         await Task.Run(() =>
@@ -388,6 +401,17 @@
 
             TPhamViews.Reverse();
         });
+    }
+
+    private async Task OnNavigatorToPhieuNhapKhoTP(object? pnktpid = null)
+    {
+        var url = $"khotpmanagement?tabindex={2}&pnktpid={pnktpid}";
+
+        // Get the absolute URL
+        var absoluteUrl = NavigationManager.ToAbsoluteUri(url).ToString();
+
+        await JSRuntime.InvokeVoidAsync("openInNewTab", absoluteUrl);
+
     }
 
     // Datagrid selected changed event

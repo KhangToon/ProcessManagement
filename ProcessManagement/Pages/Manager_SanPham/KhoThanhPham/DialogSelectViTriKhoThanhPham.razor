@@ -13,23 +13,23 @@
 
 <style>
     .vitri_IsSelected {
-    border-style: solid;
-    border-width: 2px;
-    border-color: green;
+        border-style: solid;
+        border-width: 2px;
+        border-color: green;
     }
 
     .vtofnvl_IsSelectd {
-    width: 100%;
-    height: contain;
-    padding: 2px;
-    background-color: var(--rz-success-dark) !important;
+        width: 100%;
+        height: contain;
+        padding: 2px;
+        background-color: var(--rz-success-dark) !important;
     }
 
     .vtofnvl_UnSelectd {
-    width: 100%;
-    height: contain;
-    padding: 0px;
-    cursor: pointer;
+        width: 100%;
+        height: contain;
+        padding: 0px;
+        cursor: pointer;
     }
 </style>
 
@@ -44,20 +44,20 @@
                 </RadzenColumn>
                 <RadzenColumn SizeMD="5" Size="12">
                     <RadzenStack Gap="15px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Style="height: 100%; width: 100%;">
-                        <RadzenTextBox @oninput="@((args) => GetFilterDSachViTriTPham(args?.Value?.ToString()?? string.Empty))" Placeholder="Nhập mã vị trí hoặc mã sản phẩm để tìm kiếm" Style="border-radius: 20px; padding-left: 20px; border-width: 2px; border-color: var(--rz-primary-light); width: 70% "></RadzenTextBox>
+                        <RadzenTextBox @oninput="@((args) => GetFilterDSachViTriTPham(args?.Value?.ToString() ?? string.Empty))" Placeholder="Nhập mã vị trí hoặc mã sản phẩm để tìm kiếm" Style="border-radius: 20px; padding-left: 20px; border-width: 2px; border-color: var(--rz-primary-light); width: 70% "></RadzenTextBox>
                         <RadzenButton Icon="search" ButtonStyle="ButtonStyle.Primary" Style="border-radius: 20px;" />
-                        <RadzenButton Style="border-radius: 20px;" Icon="autorenew" Click="@( async() => {await GetFilterDSachViTriTPham(string.Empty);})" IsBusy="@isSearching" ButtonStyle="ButtonStyle.Primary" />
+                        <RadzenButton Style="border-radius: 20px;" Icon="autorenew" Click="@(async () => { await GetFilterDSachViTriTPham(string.Empty); })" IsBusy="@isSearching" ButtonStyle="ButtonStyle.Primary" />
                     </RadzenStack>
                 </RadzenColumn>
                 <RadzenColumn SizeMD="3" Size="12">
                     <RadzenStack Gap="15px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Style="height: 100%; width: 100%; padding-left: 10px">
                         <RadzenMenu Style="width: 100%; padding: 0; margin: 0; border-radius: 10px; background-color: var(--rz-primary-lighter)">
                             <RadzenMenuItem Text="@($"Bộ lọc ( {DSachModeSearch[modeSearch]} )")" Icon="search">
-                                <RadzenMenuItem Text="@DSachModeSearch[0]" Click="@( async() => { modeSearch = 0; await LoadDSachViTriTPham();} )" Icon="filter_alt"></RadzenMenuItem>
+                                <RadzenMenuItem Text="@DSachModeSearch[0]" Click="@(async () => { modeSearch = 0; await LoadDSachViTriTPham(); })" Icon="filter_alt"></RadzenMenuItem>
                                 <RadzenMenuItem Text="@DSachModeSearch[1]" Click="@(() => modeSearch = 1)" Icon="filter_alt"></RadzenMenuItem>
                                 <RadzenMenuItem Text="@DSachModeSearch[2]" Click="@(() => modeSearch = 2)" Icon="filter_alt"></RadzenMenuItem>
-                                <RadzenMenuItem Text="@DSachModeSearch[3]" Click="@( async() => {modeSearch = 3; await GetFilterDSachViTriTPham(string.Empty);})" Icon="filter_alt"></RadzenMenuItem>
-                                <RadzenMenuItem Text="@DSachModeSearch[4]" Click="@( async() => {modeSearch = 4; await GetFilterDSachViTriTPham(string.Empty);})" Icon="filter_alt"></RadzenMenuItem>
+                                <RadzenMenuItem Text="@DSachModeSearch[3]" Click="@(async () => { modeSearch = 3; await GetFilterDSachViTriTPham(string.Empty); })" Icon="filter_alt"></RadzenMenuItem>
+                                <RadzenMenuItem Text="@DSachModeSearch[4]" Click="@(async () => { modeSearch = 4; await GetFilterDSachViTriTPham(string.Empty); })" Icon="filter_alt"></RadzenMenuItem>
                             </RadzenMenuItem>
                         </RadzenMenu>
                     </RadzenStack>
@@ -81,8 +81,8 @@
                                             <RadzenCard Style="width: 150px; height: contain; padding: 0; margin-right: 0" Variant="Variant.Flat">
                                                 <RadzenStack Style="height: 100%; width: 100%;" Gap="0px" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                     <RadzenCard class="@(IsVitriSelected(vitri))" Style="width: 100%; height: contain; padding: 10px;" Variant="Variant.Filled">
-                                                        <RadzenStack onclick="@(async() => await OnViTriLuuTruClick(vitri))" Style="width: contain; height: 100%; padding: 0" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                            <RadzenCard Style="height: 100%; width: 100%; padding: 10px;" Variant="@((vitri.VTTPID.Value?.Equals(SelectedViTri.VTTPID.Value)?? false)? Variant.Flat : Variant.Outlined)">
+                                                        <RadzenStack onclick="@(async () => await OnViTriLuuTruClick(vitri))" Style="width: contain; height: 100%; padding: 0" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                                            <RadzenCard Style="height: 100%; width: 100%; padding: 10px;" Variant="@((vitri.VTTPID.Value?.Equals(SelectedViTri.VTTPID.Value) ?? false) ? Variant.Flat : Variant.Outlined)">
                                                                 <RadzenStack Style="width: 100%; height: 100%; cursor: pointer" Gap="10px" Orientation=Orientation.Vertical AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                                     <RadzenStack Gap="10px" Style="width: 100%; height: contain;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                                         <RadzenStack Style="height: contain; width: contain; min-width: 30px; border-radius: 5px; background-color: var(--rz-primary-lighter); padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
@@ -97,13 +97,13 @@
                                                                         <RadzenStack Style="height: contain; width: 100%; border-radius: 5px; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                                             @if (vitri.SLConTrong > 0)
                                                                             {
-                                                                                <RadzenButton Text="@($"Trống {((vitri.SLConTrong > 0)? $"({vitri.SLConTrong})" : string.Empty)}")" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Dark" Variant="Variant.Outlined"
-                                                                                Style="border-radius: 5px; --rz-icon-size: 18px; height: contain; width: 100%; cursor: default; background-color: rgb(229,245,233); font-weight: 600" />
+                                                                                <RadzenButton Text="@($"Trống {((vitri.SLConTrong > 0) ? $"({vitri.SLConTrong})" : string.Empty)}")" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Dark" Variant="Variant.Outlined"
+                                                                                              Style="border-radius: 5px; --rz-icon-size: 18px; height: contain; width: 100%; cursor: default; background-color: rgb(229,245,233); font-weight: 600" />
                                                                             }
                                                                             else
                                                                             {
                                                                                 <RadzenButton Text="Đầy" Icon="block" ButtonStyle="ButtonStyle.Warning" Size="ButtonSize.Small" Shade="Shade.Dark" Variant="Variant.Outlined"
-                                                                                Style="border-radius: 5px; --rz-icon-size: 18px; height: contain; width: 100%; cursor: default; background-color: rgb(254,243,220); font-weight: 600" />
+                                                                                              Style="border-radius: 5px; --rz-icon-size: 18px; height: contain; width: 100%; cursor: default; background-color: rgb(254,243,220); font-weight: 600" />
                                                                             }
                                                                         </RadzenStack>
                                                                     </RadzenStack>
@@ -141,12 +141,12 @@
                                             @if (SelectedViTri.SLConTrong == 0)
                                             {
                                                 <RadzenButton Text="@($"Số lượng trống: {SelectedViTri.SLConTrong}")" ButtonStyle="ButtonStyle.Warning" Size="ButtonSize.Small" Shade="Shade.Dark" Variant="Variant.Outlined"
-                                                Style="border-radius: 5px; --rz-icon-size: 18px; height: 20px; width: contain; cursor: default; background-color: rgb(254,243,220); font-weight: 600" />
+                                                              Style="border-radius: 5px; --rz-icon-size: 18px; height: 20px; width: contain; cursor: default; background-color: rgb(254,243,220); font-weight: 600" />
                                             }
                                             else
                                             {
                                                 <RadzenButton Text="@($"Số lượng trống: {SelectedViTri.SLConTrong}")" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Light" Variant="Variant.Flat"
-                                                Style="border-radius: 5px; --rz-icon-size: 18px; height: 20px; width: contain; cursor: default; font-weight: 600" />
+                                                              Style="border-radius: 5px; --rz-icon-size: 18px; height: 20px; width: contain; cursor: default; font-weight: 600" />
                                             }
                                         </RadzenStack>
                                         <RadzenStack Gap="0" Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
@@ -154,7 +154,7 @@
                                                 <RadzenText Text="Đã dùng: " Style="font-size: 16px; font-weight: 500; height: contain;"></RadzenText>
                                             </RadzenStack>
                                             <RadzenStack Style="width: contain; height: contain; padding-left: 10px; padding-right: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                <RadzenText Text="@($"{(int.TryParse(SelectedViTri.VTSucChua.Value?.ToString(), out int sc)? sc : 0) - SelectedViTri.SLConTrong}")" Style="font-size: 16px; font-weight: 600; height: contain; color: rgba(58,71,77)"></RadzenText>
+                                                <RadzenText Text="@($"{(int.TryParse(SelectedViTri.VTSucChua.Value?.ToString(), out int sc) ? sc : 0) - SelectedViTri.SLConTrong}")" Style="font-size: 16px; font-weight: 600; height: contain; color: rgba(58,71,77)"></RadzenText>
                                             </RadzenStack>
                                         </RadzenStack>
                                     </RadzenStack>
@@ -194,7 +194,7 @@
                                         </RadzenStack>
                                         <RadzenStack Gap="10px" Style="height: contain; width: contain; padding-left: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                             <RadzenButton Text="@($"Tổng: {SelectedViTri.DSachViTriofTPhams.Count}")" Size="ButtonSize.Small" Shade="Shade.Lighter" Variant="Variant.Outlined"
-                                            Style="border-radius: 5px; --rz-icon-size: 18px; height: 20px; width: 100%; cursor: default; color: white; background-color: rgb(131,144,148); font-weight: 600" />
+                                                          Style="border-radius: 5px; --rz-icon-size: 18px; height: 20px; width: 100%; cursor: default; color: white; background-color: rgb(131,144,148); font-weight: 600" />
                                         </RadzenStack>
                                     </RadzenStack>
                                     <RadzenStack Style="width: 100%; height: contain; padding: 0" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
@@ -207,14 +207,14 @@
                                                     {
                                                         var thungtpham = vitriofTP.PalletThungTPham;
 
-                                                        <RadzenCard onclick="@(() => {OnVTofNVLSelected(vitriofTP);})" Style="@((vitriofTP.PalletThungTPham.ThungTPhams.Any())? "cursor: not-allowed;" : "")" Variant="Variant.Flat" class="@(((IsVTofNVLSelected(vitriofTP))? "vtofnvl_IsSelectd rz-shadow-4" : "vtofnvl_UnSelectd rz-shadow-4"))">
+                                                        <RadzenCard onclick="@(() => { OnVTofNVLSelected(vitriofTP); })" Style="@((vitriofTP.PalletThungTPham.ThungTPhams.Any()) ? "cursor: not-allowed;" : "")" Variant="Variant.Flat" class="@(((IsVTofNVLSelected(vitriofTP)) ? "vtofnvl_IsSelectd rz-shadow-4" : "vtofnvl_UnSelectd rz-shadow-4"))">
                                                             <RadzenStack Style="width: 100%; height: 100%; padding: 0" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                                 <RadzenCard Variant="Variant.Filled" Style="height: contain; width: 100%; padding: 10px;">
                                                                     @if (thungtpham.ThungTPhams.Any())
                                                                     {
                                                                         <RadzenStack Style="height: 30px; width: 100%; border-radius: 5px; padding: 10px; margin-bottom: 5px; padding-left: 0px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                                                                             <RadzenButton Text="@($"{SelectedViTri.MaViTri.Value?.ToString()} - {vitriofTP.LotVitri.Value?.ToString()}")" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Variant="Variant.Flat"
-                                                                            Style="border-radius: 5px; --rz-icon-size: 18px;height: contain; min-height: 20px; width: contain; min-width: 80px" />
+                                                                                          Style="border-radius: 5px; --rz-icon-size: 18px;height: contain; min-height: 20px; width: contain; min-width: 80px" />
                                                                         </RadzenStack>
                                                                         <RadzenCard Variant="Variant.Outlined" Style="height: contain; width: 100%; padding: 10px;">
                                                                             <RadzenRow Style="width: 100%; height: contain" Gap="10px">
@@ -228,8 +228,8 @@
                                                                                                     </RadzenStack>
                                                                                                     <RadzenStack Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                                                                         <RadzenButton Text="@($"{thungtpham.PalletKey}")"
-                                                                                                        ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat" Size="ButtonSize.Small" Shade="Shade.Lighter"
-                                                                                                        Style="font-size: 16px; font-weight: 600; height: contain; color: darkgreen"></RadzenButton>
+                                                                                                                      ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat" Size="ButtonSize.Small" Shade="Shade.Lighter"
+                                                                                                                      Style="font-size: 16px; font-weight: 600; height: contain; color: darkgreen"></RadzenButton>
                                                                                                     </RadzenStack>
                                                                                                 </RadzenStack>
                                                                                             </RadzenCard>
@@ -282,8 +282,8 @@
                                                                                                             }
                                                                                                             <RadzenText Visible="@(!istargetthung)" Text="@thung.MaQuanLyThung.Value?.ToString()" Style="color: darkblue; font-weight: 600; font-size: 14px"></RadzenText>
                                                                                                             <RadzenButton Visible="istargetthung" Text="@($"{thung.MaQuanLyThung.Value}")"
-                                                                                                            ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Small" Shade="Shade.Light"
-                                                                                                            Style="font-size: 14px; height: contain;"></RadzenButton>
+                                                                                                                          ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Small" Shade="Shade.Light"
+                                                                                                                          Style="font-size: 14px; height: contain;"></RadzenButton>
                                                                                                         </RadzenStack>
                                                                                                         <RadzenStack Gap="10px" Style="width: 30%; height: contain; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                                                                             <RadzenText Text="@($"{thung.SoLuong.Value?.ToString()} PCS")" Style="font-size: 14px; font-weight: 600; height: contain; color: rgba(58,71,77)"></RadzenText>
@@ -293,10 +293,10 @@
                                                                                             }
                                                                                         </RadzenStack>
 
-                                                                                        <RadzenStack Visible="@(!IsAllowReSelectViTri && vitriofTP.VTofTPID.Value?.ToString() == TargetSelectedVTofTPham.VTofTPID.Value?.ToString() )" Style="height: contain; width: 100%; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                                                                        <RadzenStack Visible="@(!IsAllowReSelectViTri && vitriofTP.VTofTPID.Value?.ToString() == TargetSelectedVTofTPham.VTofTPID.Value?.ToString())" Style="height: contain; width: 100%; padding: 0px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                                                                                             <RadzenButton Visible=false Text="Xóa vị trí đã chọn của thùng" Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Shade="Shade.Darker" Variant="Variant.Filled"
-                                                                                            Click="@(async() => await OnDeleteViTriofTPham())"
-                                                                                            Style="border-radius: 5px; --rz-icon-size: 18px; height: contain; min-height: 20px; width: 100%" />
+                                                                                                          Click="@(async() => await OnDeleteViTriofTPham())"
+                                                                                                          Style="border-radius: 5px; --rz-icon-size: 18px; height: contain; min-height: 20px; width: 100%" />
                                                                                         </RadzenStack>
                                                                                     </RadzenStack>
                                                                                 </RadzenColumn>
@@ -307,12 +307,12 @@
                                                                     {
                                                                         <RadzenStack Style="height: 30px; width: 100%; border-radius: 5px; padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                                                                             <RadzenButton Text="@vitriofTP.LotVitri.Value?.ToString()" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Variant="Variant.Flat"
-                                                                            Style="border-radius: 5px; --rz-icon-size: 18px; height: contain; min-height: 20px; width: contain; min-width: 80px" />
+                                                                                          Style="border-radius: 5px; --rz-icon-size: 18px; height: contain; min-height: 20px; width: contain; min-width: 80px" />
 
-                                                                            <RadzenButton Disabled="@(!IsAllowReSelectViTri)" Visible="@(vitriofTP.IsPicked)" Click="@(async() => await OnPickVitriLuu(vitriofTP))" Text="Đã chọn" Icon="check" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Light" Variant="Variant.Filled"
-                                                                            Style="border-radius: 5px; --rz-icon-size: 18px; height: contain; min-height: 20px; width: contain; min-width: 100px" />
-                                                                            <RadzenButton Disabled="@(!IsAllowReSelectViTri)" Visible="@(!vitriofTP.IsPicked)" Click="@(async() => await OnPickVitriLuu(vitriofTP))" Text="Chọn" Icon="add" ButtonStyle="ButtonStyle.Warning" Size="ButtonSize.Small" Shade="Shade.Dark" Variant="Variant.Filled"
-                                                                            Style="border-radius: 5px; --rz-icon-size: 18px; background-color: Highlight; height: contain; min-height: 20px; width: contain; min-width: 100px" />
+                                                                            <RadzenButton Disabled="@(!IsAllowReSelectViTri)" Visible="@(vitriofTP.IsPicked)" Click="@(async () => await OnPickVitriLuu(vitriofTP))" Text="Đã chọn" Icon="check" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Light" Variant="Variant.Filled"
+                                                                                          Style="border-radius: 5px; --rz-icon-size: 18px; height: contain; min-height: 20px; width: contain; min-width: 100px" />
+                                                                            <RadzenButton Disabled="@(!IsAllowReSelectViTri)" Visible="@(!vitriofTP.IsPicked)" Click="@(async () => await OnPickVitriLuu(vitriofTP))" Text="Chọn" Icon="add" ButtonStyle="ButtonStyle.Warning" Size="ButtonSize.Small" Shade="Shade.Dark" Variant="Variant.Filled"
+                                                                                          Style="border-radius: 5px; --rz-icon-size: 18px; background-color: Highlight; height: contain; min-height: 20px; width: contain; min-width: 100px" />
                                                                         </RadzenStack>
                                                                     }
                                                                 </RadzenCard>
@@ -355,8 +355,8 @@
                                 </RadzenStack>
                             </RadzenCard>
                             <RadzenButton Text="Xác nhận và thoát" Icon="check" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Shade="Shade.Dark" Variant="Variant.Filled"
-                            Click="@(OnSaveViTriofTPham)"
-                            Style="border-radius: 5px; --rz-icon-size: 18px; height: contain; min-height: 20px;" />
+                                          Click="@(OnSaveViTriofTPham)"
+                                          Style="border-radius: 5px; --rz-icon-size: 18px; height: contain; min-height: 20px;" />
                         </RadzenStack>
                     </RadzenStack>
                 </RadzenColumn>
@@ -364,7 +364,7 @@
         </RadzenStack>
         <RadzenStack Gap="10px" Style="height: contain; width: 100%; padding-top: 10px; padding-right: 10px; border-top: var(--rz-grid-cell-border) " Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
             <RadzenStack Gap="10px" Style="height: 100%; width: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                <RadzenButton Click="@(() => { DialogService.Close(null);})" Style="width: 120px;" Icon="close" Text="Đóng" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" />
+                <RadzenButton Click="@(() => { DialogService.Close(null); })" Style="width: 120px;" Icon="close" Text="Đóng" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" />
             </RadzenStack>
         </RadzenStack>
     </RadzenStack>
@@ -543,12 +543,14 @@
             var groupedResults = thungTPhams.Where(ttp => ttp.PalletKey.Value != null)
                                         .GroupBy(ttp => ttp.PalletKey.Value)
                                         .Select(group => new PalletThungTPham
-                                            {
-                                                PalletKey = group.Key?.ToString() ?? string.Empty,
-                                                MaSanPham = SQLServerServices.GetMaSanphamByID(group.ToList().FirstOrDefault()?.SPID.Value),
-                                                Total = group.ToList().Sum(ttp => int.TryParse(ttp.SoLuong.Value?.ToString(), out int sl) ? sl : 0),
-                                                ThungTPhams = group.ToList()
-                                            }).ToList();
+                                        {
+                                            PalletKey = group.Key?.ToString() ?? string.Empty,
+                                            MaSanPham = SQLServerServices.GetMaSanphamByID(group.ToList().FirstOrDefault()?.SPID.Value),
+                                            Total = group.ToList().Sum(ttp => int.TryParse(ttp.SoLuong.Value?.ToString(), out int sl) ? sl : 0),
+                                            ThungTPhams = group.ToList(),
+                                            MaViTri = SQLServerServices.GetMaViTriTPham(group.FirstOrDefault()?.VTTPID.Value),
+                                            LotViTri = SQLServerServices.GetLOTViTriofTPham(group.FirstOrDefault()?.VTofTPID.Value)
+                                        }).ToList();
             if (groupedResults.Any())
             {
                 thungTPhamExtends = groupedResults;

@@ -10,7 +10,8 @@ namespace ProcessManagement.Models.KHO_TPHAM
         public string PalletKey { get; set; } = string.Empty;
         public bool DaNhapKho { get; set; } = false;
         public List<ThungTPham> ThungTPhams { get; set; } = new();
-
+        public object? MaViTri { get; set; }
+        public object? LotViTri { get; set; }
         public bool IsExpand { get; set; } = false;
 
         public bool IsCreatePXKTP()

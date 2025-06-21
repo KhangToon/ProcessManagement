@@ -9170,7 +9170,7 @@ namespace ProcessManagement.Services.SQLServer
 
             return (result, errorMess);
         }
-        
+
         public (int, string) UpdateIsHandleOddNumberedThungTP(object? ishandled_oddnumbered, object? ttpid)
         {
             int result = -1; string errorMess = string.Empty;
@@ -10999,7 +10999,25 @@ namespace ProcessManagement.Services.SQLServer
             }
         }
 
+        public object? GetMaViTriTPham(object? vttpid)
+        {
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                var command = connection.CreateCommand();
+                command.CommandText = $"SELECT [{ViTriTPham.DBName.MaViTri}] FROM [{ViTriTPham.DBName.Table_ViTriTPham}] WHERE [{ViTriTPham.DBName.VTTPID}] = @VTTPID";
+                command.Parameters.AddWithValue("@VTTPID", vttpid ?? DBNull.Value);
 
+                using var reader = command.ExecuteReader();
+
+                if (reader.Read())
+                {
+                    var mavitri = reader[ViTriTPham.DBName.MaViTri];
+                    return mavitri;
+                }
+                else return null;
+            }
+        }
 
         #endregion
 
@@ -11270,6 +11288,26 @@ namespace ProcessManagement.Services.SQLServer
                 }
             }
             return (listViTriofTPhams, errorMessage);
+        }
+
+        public object? GetLOTViTriofTPham(object? vtotpID)
+        {
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                var command = connection.CreateCommand();
+                command.CommandText = $"SELECT [{ViTriofTPham.DBName.LotVitri}] FROM [{ViTriofTPham.DBName.Table_ViTriofTPham}] WHERE [{ViTriofTPham.DBName.VTofTPID}] = @VTofTPID";
+                command.Parameters.AddWithValue("@VTofTPID", vtotpID ?? DBNull.Value);
+
+                using var reader = command.ExecuteReader();
+
+                if (reader.Read())
+                {
+                    var lotvitri = reader[ViTriofTPham.DBName.LotVitri];
+                    return lotvitri;
+                }
+                else return null;
+            }
         }
 
         // Delete
