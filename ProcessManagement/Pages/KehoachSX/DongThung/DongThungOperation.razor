@@ -247,6 +247,8 @@
 
     private RadzenTextBox txtSearchKHSX = new();
 
+    private string searchingText = string.Empty;
+
     // Button Reload
     private async Task ButtonReloadPress()
     {
@@ -265,109 +267,125 @@
     // Searching
     private async Task SearchingKHSX(object? args)
     {
-        await Task.Run(async () =>
+        string keysearch = args?.ToString()?.Trim() ?? string.Empty;
+
+        searchingText = keysearch;
+
+        if (reloadpage == false)
         {
-            if (reloadpage == false)
+            reloadpage = true;
+
+            await HandleSearching(keysearch);
+
+            reloadpage = false;
+        }
+    }
+
+    private async Task HandleSearching(string? keysearch)
+    {
+        if (!string.IsNullOrEmpty(keysearch))
+        {
+            TargetMQLLot = null; DSKHSXs = new();
+
+            //var results = DSKHSXs_base.FindAll(nv => nv.MaLSX.Value?.ToString()?.IndexOf(keysearch, StringComparison.OrdinalIgnoreCase) >= 0);
+            List<KHSX> results = new();
+
+            // Search by ma KHSX
+            results = new List<KHSX>() { { SQLServerServices.GetKHSXbyMaKHSXRuduceTime(keysearch) } };
+
+            if (results.All(khsx => khsx.KHSXID.Value == null))
             {
-                TargetMQLLot = null; DSKHSXs = new();
+                // Search by ma SanPham
+                results = DSKHSXs_base.FindAll(khsx => khsx.TargetSanPham?.SP_MaSP.Value?.ToString()?.IndexOf(keysearch, StringComparison.OrdinalIgnoreCase) >= 0);
+            }
 
-                reloadpage = true;
-
-                string keysearch = args?.ToString()?.Trim() ?? string.Empty;
-
-                if (!string.IsNullOrEmpty(keysearch))
+            if (results.Any(khsx => khsx.KHSXID.Value != null))
+            {
+                foreach (var kHSX in results)
                 {
-                    // Search by ma KHSX
-                    var results = new List<KHSX>() { { SQLServerServices.GetKHSXbyMaKHSXRuduceTime(keysearch) } };
+                    // Get PhieuXuatKho bosung
+                    Dictionary<string, object?> pars = new Dictionary<string, object?>() { { Common.KHSXID, kHSX.KHSXID.Value } };
 
-                    if (results.Any(khsx => khsx.KHSXID.Value != null))
+                    pars.Add(Common.IsPhieuBoSungNVL, 1);
+
+                    kHSX.ListPXKBoSung = SQLServerServices.GetListPhieuXuatKhos(pars).phieuxuatkhos;
+
+                    kHSX.SoluongBoSung = kHSX.ListPXKBoSung?.Sum(pxk => pxk.DSNVLofPXKs.Sum(nvl => int.TryParse(nvl.NVLXKSoLuongAll.Value?.ToString(), out int dm) ? dm : 0)) ?? 0;
+
+
+                    NguyenCongofKHSX preCongDoan = new();
+
+                    _ = int.TryParse(kHSX.DinhMuc.Value?.ToString(), out int dinhmuc) ? dinhmuc : 0;
+
+                    // Them SL bo sung
+                    dinhmuc += kHSX.SoluongBoSung;
+
+                    foreach (var congdoan in kHSX.DSachCongDoans)
                     {
-                        foreach (var kHSX in results)
+                        // Tinh so luong dasubmit moi cong doan cua KHSX
+                        (int sumok, int sumng, int totalokng) = GetResultsKQGCperCDoanAllLots(congdoan.NCID.Value, kHSX.KHSXID.Value);
+
+                        congdoan.sumOKSubmited = sumok; congdoan.sumNGSubmited = sumng; congdoan.sumTotalSubmited = totalokng;
+
+                        if (kHSX.DSachCongDoans.IndexOf(congdoan) == 0)
                         {
-                            // Get PhieuXuatKho bosung
-                            Dictionary<string, object?> pars = new Dictionary<string, object?>() { { Common.KHSXID, kHSX.KHSXID.Value } };
-
-                            pars.Add(Common.IsPhieuBoSungNVL, 1);
-
-                            kHSX.ListPXKBoSung = SQLServerServices.GetListPhieuXuatKhos(pars).phieuxuatkhos;
-
-                            kHSX.SoluongBoSung = kHSX.ListPXKBoSung?.Sum(pxk => pxk.DSNVLofPXKs.Sum(nvl => int.TryParse(nvl.NVLXKSoLuongAll.Value?.ToString(), out int dm) ? dm : 0)) ?? 0;
-
-
-                            NguyenCongofKHSX preCongDoan = new();
-
-                            _ = int.TryParse(kHSX.DinhMuc.Value?.ToString(), out int dinhmuc) ? dinhmuc : 0;
-
-                            // Them SL bo sung
-                            dinhmuc += kHSX.SoluongBoSung;
-
-                            foreach (var congdoan in kHSX.DSachCongDoans)
-                            {
-                                // Tinh so luong dasubmit moi cong doan cua KHSX
-                                (int sumok, int sumng, int totalokng) = GetResultsKQGCperCDoanAllLots(congdoan.NCID.Value, kHSX.KHSXID.Value);
-
-                                congdoan.sumOKSubmited = sumok; congdoan.sumNGSubmited = sumng; congdoan.sumTotalSubmited = totalokng;
-
-                                if (kHSX.DSachCongDoans.IndexOf(congdoan) == 0)
-                                {
-                                    congdoan.sLlimit = dinhmuc;
-                                }
-                                else
-                                {
-                                    congdoan.sLlimit = preCongDoan.sLlimit - preCongDoan.sumNGSubmited;
-                                }
-
-                                congdoan.IsDoneCongDoan = congdoan.sumTotalSubmited == congdoan.sLlimit;
-
-                                preCongDoan = congdoan;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        // Search by ma QLLot
-                        results = DSKHSXs_base.FindAll(khsx => khsx.DSLOT_KHSXs.Any(lot => lot.MaQuanLyLot.Value?.ToString()?.IndexOf(keysearch, StringComparison.OrdinalIgnoreCase) >= 0));
-
-                        if (results.Any())
-                        {
-                            TargetMQLLot = results.FirstOrDefault()?.DSLOT_KHSXs.FirstOrDefault(lot => lot.MaQuanLyLot.Value?.ToString()?.Trim() == keysearch);
+                            congdoan.sLlimit = dinhmuc;
                         }
                         else
                         {
-                            // Search by ma ThungTP
-                            var resutThungEx = await LoadDSachThungTPhams(keysearch);
-
-                            if (resutThungEx != null && resutThungEx.Any())
-                            {
-                                var targetThung = resutThungEx.FirstOrDefault()?.ThungTPhams.FirstOrDefault();
-
-                                var khsxid = targetThung?.KHSXID.Value;
-
-                                results = DSKHSXs_base.Where(khsx => khsx.KHSXID.Value?.ToString() == khsxid?.ToString()).ToList();
-
-                                if (targetThung != null)
-                                {
-                                    TargetMQLLot = results.FirstOrDefault()?.DSLOT_KHSXs.FirstOrDefault(lot => lot.MaQuanLyLot.Value?.ToString() == targetThung.MaQuanLyLot.Value?.ToString());
-                                }
-                            }
+                            congdoan.sLlimit = preCongDoan.sLlimit - preCongDoan.sumNGSubmited;
                         }
-                    }
 
-                    DSKHSXs = results;
+                        congdoan.IsDoneCongDoan = congdoan.sumTotalSubmited == congdoan.sLlimit;
+
+                        preCongDoan = congdoan;
+                    }
+                }
+            }
+            else
+            {
+                // Search by ma QLLot
+                results = DSKHSXs_base.FindAll(khsx => khsx.DSLOT_KHSXs.Any(lot => lot.MaQuanLyLot.Value?.ToString()?.IndexOf(keysearch, StringComparison.OrdinalIgnoreCase) >= 0));
+
+                if (results.Any())
+                {
+                    TargetMQLLot = results.FirstOrDefault()?.DSLOT_KHSXs.FirstOrDefault(lot => lot.MaQuanLyLot.Value?.ToString()?.Trim() == keysearch);
                 }
                 else
                 {
-                    TargetMQLLot = null;
+                    // Search by ma ThungTP
+                    var resutThungEx = await LoadDSachThungTPhams(keysearch);
 
-                    DSKHSXs = DSKHSXs_base;
+                    if (resutThungEx != null && resutThungEx.Any())
+                    {
+                        var targetThung = resutThungEx.FirstOrDefault()?.ThungTPhams.FirstOrDefault();
+
+                        var khsxid = targetThung?.KHSXID.Value;
+
+                        results = DSKHSXs_base.Where(khsx => khsx.KHSXID.Value?.ToString() == khsxid?.ToString()).ToList();
+
+                        if (targetThung != null)
+                        {
+                            TargetMQLLot = results.FirstOrDefault()?.DSLOT_KHSXs.FirstOrDefault(lot => lot.MaQuanLyLot.Value?.ToString() == targetThung.MaQuanLyLot.Value?.ToString());
+                        }
+                    }
                 }
-
-                await Task.Delay(50);
-
-                reloadpage = false;
-
             }
-        });
+
+            DSKHSXs = results;
+        }
+        else
+        {
+            TargetMQLLot = null;
+
+            DSKHSXs = DSKHSXs_base;
+        }
+
+        if (searchingText.Trim() != keysearch?.Trim())
+        {
+            // research
+            await HandleSearching(searchingText);
+        }
     }
 
     private (int, int, int) GetResultsKQGCperCDoanAllLots(object? cdid, object? khsxid)

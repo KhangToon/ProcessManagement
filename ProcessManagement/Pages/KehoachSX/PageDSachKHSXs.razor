@@ -147,7 +147,7 @@
                                                 <ChildContent>
                                                     <RadzenStack Visible="@(khsx.isCollapsed == false)">
                                                         @*<BootstrapChart TargetKHSX="@khsx"></BootstrapChart>*@                                                
-                                                                                                                                                                                                                                <ChartTracking TargetKHSX="@khsx"></ChartTracking>
+                                                                                                                                                                                                                                                <ChartTracking TargetKHSX="@khsx"></ChartTracking>
                                                     </RadzenStack>
                                                 </ChildContent>
                                             </RadzenTabsItem>
@@ -711,20 +711,15 @@
     // Button Reload
     private async Task ButtonReloadPress()
     {
-        if (reloadpage == false)
+        reloadpage = true;
+        await Task.Delay(50);
+        reloadpage = false;
+
+        await OnGetListKHSXs();
+
+        if (!string.IsNullOrEmpty(searchingText))
         {
-            reloadpage = true;
-
-            if (string.IsNullOrEmpty(searchingText))
-            {
-                await OnGetListKHSXs();
-            }
-            else
-            {
-                await SearchingKHSX(searchingText);
-            }
-
-            reloadpage = false;
+            await SearchingKHSX(searchingText);
         }
     }
 
