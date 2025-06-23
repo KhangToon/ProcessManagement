@@ -8928,6 +8928,37 @@ namespace ProcessManagement.Services.SQLServer
             }
         }
 
+        public (int, string) UpdateIsOddNumberedPOTTP(object? is_oddnumbered, object? pottpid)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            if (pottpid == null) { return (result, errorMess); }
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+
+                    string sqlQuery = $"UPDATE {PartOfThungTPham.DBName.Table_PartOfThungTP} SET [{PartOfThungTPham.DBName.IsOddNumbered}] = {(is_oddnumbered == null ? "NULL" : $"'{is_oddnumbered}'")} WHERE [{PartOfThungTPham.DBName.POTTPID}] = '{pottpid}'";
+
+                    var command = new SqlCommand(sqlQuery, connection);
+
+                    result = command.ExecuteNonQuery();
+
+                    connection.Close();
+
+                    return (result, string.Empty);
+                }
+            }
+            catch (Exception ex)
+            {
+                string err = ex.Message;
+
+                return (-1, err);
+            }
+        }
+
 
         // Get
         public (List<PartOfThungTPham> thungTPhams, string error) GetListPartOfThungTPs(Dictionary<string, object?> parameters, bool isgetAll = false)
@@ -8995,10 +9026,10 @@ namespace ProcessManagement.Services.SQLServer
         }
 
         // Delete
-        public (bool, string) DeletePartOfThungTPham(object? ttpid)
+        public (bool, string) DeletePartOfThungTPham(object? pottpid)
         {
             // Check for valid ID
-            if (ttpid == null)
+            if (pottpid == null)
             {
                 return (false, "Error");
             }
@@ -9006,10 +9037,10 @@ namespace ProcessManagement.Services.SQLServer
             using var connection = new SqlConnection(connectionString);
             connection.Open();
 
-            string query = $"DELETE FROM [{PartOfThungTPham.DBName.Table_PartOfThungTP}] WHERE [{PartOfThungTPham.DBName.POTTPID}] = @TTPID";
+            string query = $"DELETE FROM [{PartOfThungTPham.DBName.Table_PartOfThungTP}] WHERE [{PartOfThungTPham.DBName.POTTPID}] = @POTTPID";
 
             using var command = new SqlCommand(query, connection);
-            command.Parameters.AddWithValue("@TTPID", ttpid);
+            command.Parameters.AddWithValue("@POTTPID", pottpid);
 
             try
             {
@@ -9184,6 +9215,36 @@ namespace ProcessManagement.Services.SQLServer
                     connection.Open();
 
                     string sqlQuery = $"UPDATE {ThungTPham.DBName.Table_ThungTPham} SET [{ThungTPham.DBName.IsHandledOddNumbered}] = {(ishandled_oddnumbered == null ? "NULL" : $"'{ishandled_oddnumbered}'")} WHERE [{ThungTPham.DBName.TTPID}] = '{ttpid}'";
+
+                    var command = new SqlCommand(sqlQuery, connection);
+
+                    result = command.ExecuteNonQuery();
+
+                    connection.Close();
+
+                    return (result, string.Empty);
+                }
+            }
+            catch (Exception ex)
+            {
+                string err = ex.Message;
+
+                return (-1, err);
+            }
+        }
+        public (int, string) UpdateIsOddNumberedThungTP(object? is_oddnumbered, object? ttpid)
+        {
+            int result = -1; string errorMess = string.Empty;
+
+            if (ttpid == null) { return (result, errorMess); }
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+
+                    string sqlQuery = $"UPDATE {ThungTPham.DBName.Table_ThungTPham} SET [{ThungTPham.DBName.IsOddNumbered}] = {(is_oddnumbered == null ? "NULL" : $"'{is_oddnumbered}'")} WHERE [{ThungTPham.DBName.TTPID}] = '{ttpid}'";
 
                     var command = new SqlCommand(sqlQuery, connection);
 

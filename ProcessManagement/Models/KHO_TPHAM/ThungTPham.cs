@@ -33,6 +33,7 @@ namespace ProcessManagement.Models.KHO_TPHAM
         public bool IsSelected { get; set; } = false;
         public bool IsScanned { get; set; } = false;
 
+        public bool IsCreateGopThung { get; set; } = false;
         public List<PartOfThungTPham> PartOfThungTPhams { get; set; } = new();
 
         public const string PALLETKEY = "PALLET";

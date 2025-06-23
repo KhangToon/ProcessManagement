@@ -667,7 +667,7 @@
                                         <span style="font-weight: 700; font-size: 15px; color: black; padding-left: 10px; padding-right: 10px">ID</span>
                                     </HeaderTemplate>
                                     <Template Context="lotrow">
-                                        <RadzenStack Style="padding-top: 5px; padding-bottom: 5px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Orientation="Orientation.Vertical">
+                                        <RadzenStack Gap="10" Style="padding-top: 5px; padding-bottom: 5px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Orientation="Orientation.Vertical">
                                             @foreach (var combinedPottp in DSachCombinedPartOfTTPhams)
                                             {   
                                                 <RadzenText Visible=@((DSachResultPerLOTKHSX.IndexOf(lotrow) == 0)) Text="@($"{combinedPottp.IDThung.Value}")" Style="font-size: 16px; color: darkblue; height: contain; font-weight: 600"></RadzenText>
@@ -749,8 +749,8 @@
                                       MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Tạo thùng thành phẩm", 100, 1000))"
                                       Click="@(async () => await OpenDialogAsignSPforNVL(lotrow))" ButtonStyle="ButtonStyle.Secondary" Icon="add" Shade="Shade.Light" Size="ButtonSize.Small" Variant="Variant.Flat" Style="font-size: 15px; width: 100%; font-weight: 500; background-color: Highlight"></RadzenButton>
                         <RadzenButton Disabled="@((!lotrow.IsLastCDoanDone && !lotrow.PartOfThungTPhams.Any()))" Visible="@(lotrow.IsCreatedPartOfThungTP)" Text="Đã đóng thùng"
-                                      MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Nhấn để xem", 100, 1000))"
-                                      Click="@(async () => await OpenDialogAsignSPforNVL(lotrow))" ButtonStyle="ButtonStyle.Success" Icon="check" Shade="Shade.Light" Size="ButtonSize.Small" Variant="Variant.Flat" Style="font-size: 15px; width: 100%; font-weight: 500;"></RadzenButton>
+                                      Click="@(async () => await OpenDialogAsignSPforNVL(lotrow))"              
+                                      ButtonStyle="ButtonStyle.Success" Icon="check" Shade="Shade.Light" Size="ButtonSize.Small" Variant="Variant.Flat" Style="font-size: 15px; width: 100%; font-weight: 500;"></RadzenButton>
                     </Template>
                 </RadzenDataGridColumn>
 
@@ -1098,6 +1098,7 @@
 
                 // Asign IsCreatedThungTP
                 resultPerLOTKHSX.IsCreatedPartOfThungTP = resultPerLOTKHSX.PartOfThungTPhams.Any();
+                // resultPerLOTKHSX.IsCreatedPartOfThungTP = (resultPerLOTKHSX.GetTotalNGAllCDoan() + resultPerLOTKHSX.GetTotalOKAllCDoan()) == resultPerLOTKHSX.PartOfThungTPhams.Sum(pottp => int.TryParse(pottp.SoLuong.Value?.ToString(), out int slp) ? slp : 0);
 
                 resultPerLOTKHSXs.Add(resultPerLOTKHSX);
             }
@@ -1176,17 +1177,49 @@
 
     // Open dialog DongThung
     private async Task OpenDialogAsignSPforNVL(ResultPerLOTKHSX resultPerLOTKHSX)
-    {
+    {   
+        // Check list POTTP not have odd-numbered and is max of ID TTP --> set IsAllowDeletePOTTP = true
+        bool isAllowDelete = false;
+
+        if (resultPerLOTKHSX.PartOfThungTPhams.Any())
+        {
+            bool ishaveOdd_numbered = resultPerLOTKHSX.PartOfThungTPhams.Any(pottp => pottp.IsOddNumbered.Value != null);
+
+            int maxIndex = resultPerLOTKHSX.PartOfThungTPhams.Max(pottp => int.TryParse(pottp.IDThung.Value?.ToString(), out int id) ? id : 0);
+
+            if (maxIndex > 0 && !ishaveOdd_numbered)
+            {
+                int maxTTPid = DSachResultPerLOTKHSX
+                                .Where(lot => lot.PartOfThungTPhams.Any()) // Filter lots with non-empty PartOfThungTPhams
+                                .Select(lot => lot.PartOfThungTPhams
+                                                .Select(pottp => int.TryParse(pottp.IDThung.Value?.ToString(), out int ttpid) ? ttpid : 0)
+                                                .Max())
+                                .DefaultIfEmpty(0) // Provide a default value if no valid max is found
+                                .Max();
+
+                if (maxIndex == maxTTPid) // Allow delete only if it is the last index
+                {
+                    isAllowDelete = true;
+                }
+            }
+        }
+
+        // Allow delete only if not have any instock TTP
+        if (resultPerLOTKHSX.PartOfThungTPhams.Any(pottp => pottp.VTTPID.Value != null))
+        {
+            isAllowDelete = false;
+        }
+
         var thungTPOddNumberd = await LoadTTPhamTonKhoOfKHSX_FirstOfDefault();
 
         if (thungTPOddNumberd != null && thungTPOddNumberd.TTPID.Value != null)
         {
-            var results = await DialogService.OpenAsync<DialogCreateTTPwithOddNumberedTTP>(null, new Dictionary<string, object>() { { "TargetLotResult", resultPerLOTKHSX }, { "TargetKHSX", TargetKHSX } , {"IsDongThungTP", IsDongThungTP} },
+            var results = await DialogService.OpenAsync<DialogCreateTTPwithOddNumberedTTP>(null, new Dictionary<string, object>() { { "TargetLotResult", resultPerLOTKHSX }, { "TargetKHSX", TargetKHSX } , {"IsDongThungTP", IsDongThungTP}, {"IsAllowDeletePOTTP", isAllowDelete} },
             new DialogOptions() { ShowTitle = true, Width = "60%", Height = "contain", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
         }
         else
         {
-            var results = await DialogService.OpenAsync<DialogCreateThungTPham>(null, new Dictionary<string, object>() { { "TargetLotResult", resultPerLOTKHSX }, { "TargetKHSX", TargetKHSX } , {"IsDongThungTP", IsDongThungTP} },
+            var results = await DialogService.OpenAsync<DialogCreateThungTPham>(null, new Dictionary<string, object>() { { "TargetLotResult", resultPerLOTKHSX }, { "TargetKHSX", TargetKHSX } , {"IsDongThungTP", IsDongThungTP}, {"IsAllowDeletePOTTP", isAllowDelete} },
             new DialogOptions() { ShowTitle = true, Width = "60%", Height = "contain", Resizable = true, Draggable = true, ShowClose = false, Style = "background-color: while; border-radius: 10px; padding: 0px;" });
         }
 

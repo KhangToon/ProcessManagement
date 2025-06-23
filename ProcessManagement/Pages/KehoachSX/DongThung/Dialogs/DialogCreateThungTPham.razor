@@ -47,15 +47,15 @@
                                     </RadzenStack>
                                     <RadzenStack Gap="5px" Style="width: contain; height: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                         <!--Button edit-->
-                                        <RadzenButton Visible="@(!isEditingSoluong)" Disabled="@(TargetLotResult.IsCreatedPartOfThungTP)" Text="Edit" Icon="edit" Click="(() => { isEditingSoluong = !(isEditingSoluong);} )"
+                                        <RadzenButton Visible="@(!isEditingSoluong)" Disabled="@(TargetLotResult.IsCreatedPartOfThungTP)" Text="Edit" Icon="edit" Click="(() => { isEditingSoluong = !(isEditingSoluong); })"
                                                       ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 18px; height: 35px; " />
                                         <!--Button save-->
-                                        <RadzenButton Visible="@(isEditingSoluong)" Disabled="@(TargetLotResult.IsCreatedPartOfThungTP)" Icon="check" Click="(() => {isEditingSoluong = false;})"
+                                        <RadzenButton Visible="@(isEditingSoluong)" Disabled="@(TargetLotResult.IsCreatedPartOfThungTP)" Icon="check" Click="(() => { isEditingSoluong = false; })"
                                                       ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 18px; height: 35px; width: 50px" />
                                     </RadzenStack>
 
                                     <!--Button tao thungTP-->
-                                    <RadzenButton Disabled="@(SLrequiredPerThung_currentLOT < 1 || isEditingSoluong || TargetLotResult.IsCreatedPartOfThungTP)" Text="Tạo thùng thành phẩm" Icon="@(isCreatedPartOfThungTP? "autorenew" : "add")"
+                                    <RadzenButton Disabled="@(SLrequiredPerThung_currentLOT < 1 || isEditingSoluong || TargetLotResult.IsCreatedPartOfThungTP)" Text="Tạo thùng thành phẩm" Icon="@(isCreatedPartOfThungTP ? "autorenew" : "add")"
                                                   Click="@(async () => await CreateNewListPartOfThungTPhams())"
                                                   ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Light" Style="border-radius: 5px; --rz-icon-size: 18px; min-height: 35px; height: contain " />
 
@@ -74,9 +74,9 @@
                                 <RadzenStack Orientation="Orientation.Horizontal" Gap="10px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: 100%; width: contain; padding: 0px">
                                     <RadzenText Text="@($"Số lượng thùng: {DSachNewPartOfThungTPhams.Count}")" Style="font-size: 16px; font-weight: 500; color: darkgreen"></RadzenText>
                                 </RadzenStack>
-@*                                 <RadzenButton Visible="@(!IsDongThungTP && TargetLotResult.IsCreatedPartOfThungTP && DSachNewPartOfThungTPhams.Any())" Text="Xóa tất cả" Icon="delete" Click="@(async () => await OnDeleteThungThanhPham(TargetLotResult.PartOfThungTPhams))"
+                                <RadzenButton Visible="@(!IsDongThungTP && TargetLotResult.IsCreatedPartOfThungTP && DSachNewPartOfThungTPhams.Any() && IsAllowDeletePOTTP)" Text="Xóa tất cả" Icon="delete" Click="@(async () => await OnDeleteThungThanhPham(TargetLotResult.PartOfThungTPhams))"
                                               ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Darker" Style="border-radius: 5px; --rz-icon-size: 18px; height: contain; min-height: 30px; " />
- *@                            </RadzenStack>
+                            </RadzenStack>
 
                             <RadzenCard Variant="Variant.Flat" Style="height: 350px; width: 100%; padding: 10px; padding-right: 0; overflow-y: scroll">
                                 <RadzenStack Gap="10px" Style="height: contain; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
@@ -156,6 +156,9 @@
 
 @code {
     [Parameter]
+    public bool IsAllowDeletePOTTP { get; set; } = true;
+
+    [Parameter]
     public ResultPerLOTKHSX TargetLotResult { get; set; } = new();
 
     [Parameter]
@@ -233,17 +236,17 @@
                     string mqlthungtp = $"TTP-{TargetKHSX.MaLSX.Value?.ToString()}-{randomkey}-{lastestPartOfThungTPham?.IDThung.Value ?? 1}";
                     // Lay IDThung truoc
                     PartOfThungTPham thungTPham = new()
-                        {
-                            SoLuong = { Value = SLOKofLOT },
-                            SLRequired = { Value = lastestSLrequired },
-                            IDThung = { Value = lastestPartOfThungTPham?.IDThung.Value ?? 1 },
-                            KHSXID = { Value = TargetKHSX.KHSXID.Value },
-                            SPID = { Value = TargetKHSX.SPID.Value },
-                            MaQuanLyLot = { Value = TargetLotResult.MaQuanLyLot },
-                            NgayDongThung = { Value = DateTime.Now.ToString(Common.FormatNoTime_yyyddMM) },
+                    {
+                        SoLuong = { Value = SLOKofLOT },
+                        SLRequired = { Value = lastestSLrequired },
+                        IDThung = { Value = lastestPartOfThungTPham?.IDThung.Value ?? 1 },
+                        KHSXID = { Value = TargetKHSX.KHSXID.Value },
+                        SPID = { Value = TargetKHSX.SPID.Value },
+                        MaQuanLyLot = { Value = TargetLotResult.MaQuanLyLot },
+                        NgayDongThung = { Value = DateTime.Now.ToString(Common.FormatNoTime_yyyddMM) },
                         // MaQuanLyThung = { Value = mqlthungtp }
-                            MaQuanLyThung = { Value = lastestPartOfThungTPham?.MaQuanLyThung.Value ?? mqlthungtp } // Lay new mql khi la thung dau tien
-                        };
+                        MaQuanLyThung = { Value = lastestPartOfThungTPham?.MaQuanLyThung.Value ?? mqlthungtp } // Lay new mql khi la thung dau tien
+                    };
 
                     newpartofthungTPhams.Add(thungTPham);
                 }
@@ -255,16 +258,16 @@
 
                     // Lay IDThung truoc
                     PartOfThungTPham partofthungTPham = new()
-                        {
-                            SoLuong = { Value = soluongBosung },
-                            SLRequired = { Value = lastestSLrequired },
-                            IDThung = { Value = lastestPartOfThungTPham?.IDThung.Value ?? 1 },
-                            KHSXID = { Value = TargetKHSX.KHSXID.Value },
-                            SPID = { Value = TargetKHSX.SPID.Value },
-                            MaQuanLyLot = { Value = TargetLotResult.MaQuanLyLot },
-                            NgayDongThung = { Value = DateTime.Now.ToString(Common.FormatNoTime_yyyddMM) },
-                            MaQuanLyThung = { Value = lastestPartOfThungTPham?.MaQuanLyThung.Value }
-                        };
+                    {
+                        SoLuong = { Value = soluongBosung },
+                        SLRequired = { Value = lastestSLrequired },
+                        IDThung = { Value = lastestPartOfThungTPham?.IDThung.Value ?? 1 },
+                        KHSXID = { Value = TargetKHSX.KHSXID.Value },
+                        SPID = { Value = TargetKHSX.SPID.Value },
+                        MaQuanLyLot = { Value = TargetLotResult.MaQuanLyLot },
+                        NgayDongThung = { Value = DateTime.Now.ToString(Common.FormatNoTime_yyyddMM) },
+                        MaQuanLyThung = { Value = lastestPartOfThungTPham?.MaQuanLyThung.Value }
+                    };
 
                     newpartofthungTPhams.Add(partofthungTPham);
 
@@ -403,14 +406,14 @@
                     // If not have --> Insert
 
                     ThungTPham thungTPham = new()
-                        {
-                            KHSXID = { Value = TargetKHSX.KHSXID.Value },
-                            SoLuong = { Value = firstPartofThungTP.SoLuong.Value },
-                            IDThung = { Value = firstPartofThungTP.IDThung.Value },
-                            SPID = { Value = TargetKHSX.SPID.Value },
-                            NgayDongThung = { Value = DateTime.Now.ToString(Common.FormatNoTime_yyyddMM) },
-                            MaQuanLyThung = { Value = firstPartofThungTP.MaQuanLyThung.Value }
-                        };
+                    {
+                        KHSXID = { Value = TargetKHSX.KHSXID.Value },
+                        SoLuong = { Value = firstPartofThungTP.SoLuong.Value },
+                        IDThung = { Value = firstPartofThungTP.IDThung.Value },
+                        SPID = { Value = TargetKHSX.SPID.Value },
+                        NgayDongThung = { Value = DateTime.Now.ToString(Common.FormatNoTime_yyyddMM) },
+                        MaQuanLyThung = { Value = firstPartofThungTP.MaQuanLyThung.Value }
+                    };
 
                     (int newttpID, error) = SQLServerServices.InsertThungTPham(thungTPham);
 
@@ -490,12 +493,12 @@
     private void ShowNotification(string message, NotificationSeverity notifytype, double time)
     {
         NotificationMessage notify = new NotificationMessage
-            {
-                Style = "position: fixed; top: 0; right: 0;",
-                Severity = notifytype,
-                Summary = message,
-                Duration = time
-            };
+        {
+            Style = "position: fixed; top: 0; right: 0;",
+            Severity = notifytype,
+            Summary = message,
+            Duration = time
+        };
 
         NotificationService.Notify(notify);
     }

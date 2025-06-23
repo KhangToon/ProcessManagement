@@ -61,9 +61,16 @@
                     </RadzenStack>
                     <RadzenStack Orientation="Orientation.Vertical" Gap="10px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: contain; width: 100%;">
                         <RadzenCard Variant="Variant.Flat" Style="height: contain; max-height: 500px; width: 100%; padding: 10px; padding-right: 0; overflow-y: scroll">
-                            <RadzenStack Style="width: contain; padding-right: 10px" Gap="5px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
-                                <RadzenCheckBox TValue="bool" Name="@($"checkbox_selectAll")" Change="@((args) => { ThungTPhams.Where(ttp => ttp.PNKTPID.Value == null).ToList().ForEach(ttp => ttp.IsSelectToPNK = args); })" />
-                                <RadzenLabel Text="Chọn tất cả" Style="font-size: 15px; font-weight: 500; cursor: pointer" Component="@($"checkbox_selectAll")" />
+                            <RadzenStack Style="width: contain; padding-right: 10px" Gap="5px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                <RadzenStack Gap="20px" Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                    <RadzenButton Visible="@(ThungTPhams.Any() && ThungTPhams.All(ttp => ttp.RefTTPID.Value != null))" Text="Xóa tất cả thùng gộp" Icon="delete"
+                                                  Click="@(async() => ThungTPhams.ForEach(async ttp => await OnDeleteThungTPham(ttp)))"
+                                                  ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Variant="Variant.Text" Shade="Shade.Darker" Style="border-radius: 5px; --rz-icon-size: 16px; color: red; font-weight: 600" />
+                                </RadzenStack>
+                                <RadzenStack Gap="20px" Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                    <RadzenCheckBox TValue="bool" Name="@($"checkbox_selectAll")" Change="@((args) => { ThungTPhams.Where(ttp => ttp.PNKTPID.Value == null).ToList().ForEach(ttp => ttp.IsSelectToPNK = args); })" />
+                                    <RadzenLabel Text="Chọn tất cả" Style="font-size: 15px; font-weight: 500; cursor: pointer" Component="@($"checkbox_selectAll")" />
+                                </RadzenStack>
                             </RadzenStack>
                             <RadzenStack Gap="10px" Style="height: contain; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                 <RadzenDataList Style="height: contain; width: 100%;" PagerPosition="PagerPosition.Top" WrapItems="true" AllowPaging="false" Data="@ThungTPhams" TItem="ThungTPham">
@@ -132,16 +139,22 @@
                                                                             <RadzenButton Visible=@(thungtpham.IsOddNumbered.Value != null) Icon="check" Text="@($"Đã đánh dấu thùng lẻ")" Style="font-weight: 600; background: rgba(229,245,233); font-size: 15px; color: darkgreen"
                                                                                           ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Variant="Variant.Text" Shade="Shade.Dark"></RadzenButton>
 
+                                                                            <RadzenButton Visible=@(thungtpham.IsOddNumbered.Value != null && thungtpham.IsHandledOddNumbered.Value == null) Icon="clear" Style="font-weight: 600; font-size: 15px; color: darkred"
+                                                                                          Click="@(() => OnRemoveDanhDauThungLe(thungtpham))"
+                                                                                          MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Xóa đánh dấu thùng lẻ", 100, 2000))"
+                                                                                          ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Lighter"></RadzenButton>
+
+                                                                            <RadzenButton Visible=@(thungtpham.IsOddNumbered.Value != null && thungtpham.IsHandledOddNumbered.Value != null) Icon="check" Text="@($"Đã gộp thùng lẻ")" Style="font-weight: 600; background: rgba(229,245,233); font-size: 15px; color: darkgreen"
+                                                                                          ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" Variant="Variant.Text" Shade="Shade.Dark"></RadzenButton>
+
+                                                                            <RadzenButton Visible=@(thungtpham.IsOddNumbered.Value != null && thungtpham.IsHandledOddNumbered.Value == null) Icon="warning" Text="@($"Chưa xử lý thùng lẻ")" Style="font-weight: 600; font-size: 15px; color: darkgoldenrod"
+                                                                                          ButtonStyle="ButtonStyle.Warning" Size="ButtonSize.Small" Variant="Variant.Text" Shade="Shade.Dark"></RadzenButton>
+    
                                                                             <RadzenButton Click="@(() => OnUpdateThungTPToOddNumbered(thungtpham))"
                                                                                           Visible=@(thungtpham.IsOddNumbered.Value == null && thungtpham.PartOfThungTPhams.All(pottp => pottp.RefPOTTPID.Value == null) && (ThungTPhams.IndexOf(thungtpham) + 1) == ThungTPhams.Count && IsAllcreatedTTP)
                                                                                           Icon="add" Text="@($"Đánh dấu thùng lẻ")" Style="font-weight: 500; color: red; font-size: 16px; min-width: 50px"
                                                                                           ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Variant="Variant.Text" Shade="Shade.Dark"></RadzenButton>
                                                                         </RadzenStack>
-                                                                    </RadzenStack>
-                                                                    <RadzenStack Gap="20px" Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                        <RadzenButton Visible="@(!thungtpham.DaNhapKho && ((ThungTPhams.IndexOf(thungtpham) + 1) == ThungTPhams.Count()))" Text="Xóa thùng" Icon="delete"
-                                                                                      Click="@(async() => await OnDeleteThungTPham(thungtpham))"
-                                                                                      ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Variant="Variant.Text" Shade="Shade.Darker" Style="border-radius: 5px; --rz-icon-size: 16px; color: red; font-weight: 600" />
                                                                     </RadzenStack>
                                                                 </RadzenStack>
 
@@ -178,8 +191,10 @@
                                                                                                       Click="@(() => OnOpenQR_ImageDialog(lotnvl.MaQuanLyLot.Value?.ToString() ?? string.Empty, "Mã quản lý Lot NVL"))" Icon="qr_code"
                                                                                                       ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat" Size="ButtonSize.Small" Shade="Shade.Lighter"
                                                                                                       Style="font-size: 15px; font-weight: 600; color: darkblue; height: contain;"></RadzenButton>
-                                                                                        <RadzenButton Visible=@(lotnvl.IsOddNumbered.Value != null) Text="@($"LOT lẻ")" Style="font-weight: 600; font-size: 15px; min-width: 50px"
+                                                                                        <RadzenButton Visible=@(lotnvl.IsOddNumbered.Value != null) Text="@($"Lot lẻ")" Style="font-weight: 500; font-size: 14px; min-width: 50px"
                                                                                                       ButtonStyle="ButtonStyle.Info" Size="ButtonSize.ExtraSmall" Variant="Variant.Flat" Shade="Shade.Default"></RadzenButton>
+                                                                                        <RadzenButton Visible=@(lotnvl.IsOddNumbered.Value == null && lotnvl.RefPOTTPID.Value != null) Text="@($"Lot gộp")" Style="font-weight: 500; font-size: 14px; min-width: 50px"
+                                                                                                      ButtonStyle="ButtonStyle.Success" Size="ButtonSize.ExtraSmall" Variant="Variant.Flat" Shade="Shade.Default"></RadzenButton>
                                                                                     </RadzenStack>
                                                                                     <RadzenStack Gap="10px" Style="width: 30%; height: contain; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                                                         <RadzenText Text="@($"{lotnvl.SoLuong.Value?.ToString()} PCS")" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Số lượng/Lot NVL", 100, 1000))"
@@ -356,6 +371,32 @@
         }
     }
 
+    private async Task OnRemoveDanhDauThungLe(ThungTPham thungTPham)
+    {
+        bool? confirm = await DialogService.Confirm($"<b>Xóa đánh dấu thùng lẻ?</b>", "Xác nhận", new ConfirmOptions() { OkButtonText = "OK", CancelButtonText = "Hủy", Style = "color: red;", ShowClose = false });
+
+        if (confirm.Value)
+        {
+            if (int.TryParse(thungTPham.IsOddNumbered.Value?.ToString(), out int ttpid) && ttpid > 0)
+            {
+                // Update RESET IsOddNumbered
+                SQLServerServices.UpdateIsOddNumberedThungTP(null, thungTPham.TTPID.Value);
+            }
+
+            // Delete partofTTP
+            foreach (var pottp in thungTPham.PartOfThungTPhams)
+            {
+                if (int.TryParse(pottp.IsOddNumbered.Value?.ToString(), out int pottpid) && pottpid > 0)
+                {
+                    // Update RESET IsOddNumbered
+                    SQLServerServices.UpdateIsOddNumberedPOTTP(null, pottp.POTTPID.Value);
+                }
+            }
+        }
+
+        await LoadDSachThungTPhams(TargetKHSX.KHSXID.Value);
+    }
+
     private async Task OnDeleteThungTPham(ThungTPham thungTPham)
     {
         // Check this is last thungTP ishandled odd-numbered
@@ -372,29 +413,27 @@
 
             if (confirm.Value)
             {
-                // Delete partofTTP
-                foreach (var pottp in thungTPham.PartOfThungTPhams)
-                {
-                    if (!Equals(pottp.RefPOTTPID.Value, 0))
-                    {
-                        // Update RESET RefPOTTPID
-                        SQLServerServices.UpdateIsHandleOddNumberedPOTTP(null, pottp.RefPOTTPID.Value);
-                    }
+                // Delete TTP
+                SQLServerServices.DeleteThungTP(thungTPham.TTPID.Value);
 
-                    // Delete
-                    SQLServerServices.DeletePartOfThungTPham(pottp.POTTPID.Value);
-                }
-
-                // Delete ThungTP
-
-                if (!Equals(thungTPham.RefTTPID.Value, 0))
+                if (int.TryParse(thungTPham.RefTTPID.Value?.ToString(), out int refttpid) && refttpid > 0)
                 {
                     // Update RESET RefTTPID
                     SQLServerServices.UpdateIsHandleOddNumberedThungTP(null, thungTPham.RefTTPID.Value);
                 }
 
-                // Delete
-                SQLServerServices.DeleteThungTP(thungTPham.TTPID.Value);
+                // Delete partofTTP
+                foreach (var pottp in thungTPham.PartOfThungTPhams)
+                {
+                    // Delete
+                    SQLServerServices.DeletePartOfThungTPham(pottp.POTTPID.Value);
+
+                    if (int.TryParse(pottp.RefPOTTPID.Value?.ToString(), out int refpottpid) && refpottpid > 0)
+                    {
+                        // Update RESET RefPOTTPID
+                        SQLServerServices.UpdateIsHandleOddNumberedPOTTP(null, pottp.RefPOTTPID.Value);
+                    }
+                }
             }
 
             await LoadDSachThungTPhams(TargetKHSX.KHSXID.Value);
