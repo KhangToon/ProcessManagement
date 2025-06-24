@@ -33,12 +33,12 @@
                 <RadzenStack Style="width: 80%;">
                     <RadzenTextBox class="custom-placeholder" Placeholder="@($" * quét mã quản lý, mã thùng")" Value="@scanQRvalue?.ToString()" Style="font-size: 12px; height: contain; border-width: 1px; color: black; font-weight: 500"
                                    @ref="reftxtScanInput"
-                                   @oninput="@(async(args) => { await SearchingKHSX(args.Value); })">
+                                   @oninput="@(async (args) => { await SearchingKHSX(args.Value); })">
                     </RadzenTextBox>
                 </RadzenStack>
                 <RadzenStack Style="width: 20%; height: 100%" Orientation="Orientation.Horizontal">
-                    <RadzenButton Click="@(async(args) => { await SearchingKHSX(scanQRvalue); })" Style="padding: 5px; width: contain; height: 100%; font-size: 12px" Icon="autorenew" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.ExtraSmall" Variant="Variant.Filled" />
-                    <RadzenButton @ref="refdefault" Click="(async() => { scanQRvalue = string.Empty; await reftxtScanInput.FocusAsync();})" Style="padding: 5px; width: contain; height: 100%; font-size: 12px" Icon="clear" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.ExtraSmall" Variant="Variant.Filled" />
+                    <RadzenButton Click="@(async (args) => { await SearchingKHSX(scanQRvalue); })" Style="padding: 5px; width: contain; height: 100%; font-size: 12px" Icon="autorenew" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.ExtraSmall" Variant="Variant.Filled" />
+                    <RadzenButton @ref="refdefault" Click="(async () => { scanQRvalue = string.Empty; await reftxtScanInput.FocusAsync(); })" Style="padding: 5px; width: contain; height: 100%; font-size: 12px" Icon="clear" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.ExtraSmall" Variant="Variant.Filled" />
                 </RadzenStack>
             }
         </RadzenStack>
@@ -358,7 +358,7 @@
                                 <RadzenPanel AllowCollapse="true" Collapsed="@(!cdoancolumn.isExpandColumn)" Style="width: 100%;">
                                     <HeaderTemplate>
                                         <RadzenRow Gap="0" Style="width: 100%; padding-right: 10px">
-                                            <RadzenColumn Size="12" SizeSM="12" @onclick="() => {cdoancolumn.isExpandColumn = !cdoancolumn.isExpandColumn;}">
+                                            <RadzenColumn Size="12" SizeSM="12" @onclick="() => { cdoancolumn.isExpandColumn = !cdoancolumn.isExpandColumn; }">
                                                 <RadzenStack Style="cursor: pointer; width: 100%;" Gap="0" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
                                                     <RadzenStack Style="width: 100%; height: contain" Gap="10px" Orientation=Orientation.Horizontal AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                                                         <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
@@ -429,7 +429,7 @@
                                                                 <RadzenText Text="OK" Style="font-size: 12px; font-weight: 600; height: contain; color: var(--rz-primary-darker)"></RadzenText>
                                                             </RadzenStack>
                                                             <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
-                                                                <RadzenText Text="@(((resultPerLOTKHSXes.Sum(lot => int.TryParse(lot.GetSLOK(cdoancolumn.NCID.Value, resultIndex)?.ToString(), out int sumok)? sumok : 0)).ToString()))" Style="color: darkgreen; font-weight: 600; font-size: 14px"></RadzenText>
+                                                                <RadzenText Text="@(((resultPerLOTKHSXes.Sum(lot => int.TryParse(lot.GetSLOK(cdoancolumn.NCID.Value, resultIndex)?.ToString(), out int sumok) ? sumok : 0)).ToString()))" Style="color: darkgreen; font-weight: 600; font-size: 14px"></RadzenText>
                                                             </RadzenStack>
                                                         </RadzenStack>
                                                         @{
@@ -627,6 +627,12 @@
 
                             // Get thung TP
                             TargetThungTPs = await LoadDSachThungTPhams_byMQLLOT(TargetMQLLotSearchByMQL.KHSXID.Value, TargetMQLLotSearchByMQL.MaQuanLyLot.Value);
+
+                            foreach (var ttp in TargetThungTPs)
+                            {
+                                ttp.SoLuong.Value = (ttp.PartOfThungTPhams.Where(pottp => pottp.MaQuanLyLot.Value?.ToString()?.Trim() == keysearch.Trim())
+                                .Sum(pottp => int.TryParse(pottp.SoLuong.Value?.ToString(), out int sl) ? sl : 0));
+                            }
                         }
                         else
                         {
@@ -732,12 +738,12 @@
             var groupedResults = thungTPhams.Where(ttp => ttp.IDThung.Value != null)
                                             .GroupBy(ttp => ttp.IDThung.Value)
                                             .Select(group => new ThungTPhamExtend
-                                                {
-                                                    IDThung = group.Key,
-                                                    ThungTPhams = group.ToList(),
-                                                    Total = group.ToList().Sum(ttp => int.TryParse(ttp.SoLuong.Value?.ToString(), out int sl) ? sl : 0),
-                                                    MaSanPham = SQLServerServices.GetMaSanphamByID(group.ToList().FirstOrDefault()?.SPID.Value),
-                                                }).ToList();
+                                            {
+                                                IDThung = group.Key,
+                                                ThungTPhams = group.ToList(),
+                                                Total = group.ToList().Sum(ttp => int.TryParse(ttp.SoLuong.Value?.ToString(), out int sl) ? sl : 0),
+                                                MaSanPham = SQLServerServices.GetMaSanphamByID(group.ToList().FirstOrDefault()?.SPID.Value),
+                                            }).ToList();
             if (groupedResults != null)
             {
                 foreach (var thung in groupedResults)
@@ -800,12 +806,12 @@
             var groupedResults = thungTPhams.Where(ttp => ttp.IDThung.Value != null)
                                             .GroupBy(ttp => ttp.IDThung.Value)
                                             .Select(group => new ThungTPhamExtend
-                                                {
-                                                    IDThung = group.Key,
-                                                    ThungTPhams = group.ToList(),
-                                                    Total = group.ToList().Sum(ttp => int.TryParse(ttp.SoLuong.Value?.ToString(), out int sl) ? sl : 0),
-                                                    MaSanPham = SQLServerServices.GetMaSanphamByID(group.ToList().FirstOrDefault()?.SPID.Value),
-                                                }).ToList();
+                                            {
+                                                IDThung = group.Key,
+                                                ThungTPhams = group.ToList(),
+                                                Total = group.ToList().Sum(ttp => int.TryParse(ttp.SoLuong.Value?.ToString(), out int sl) ? sl : 0),
+                                                MaSanPham = SQLServerServices.GetMaSanphamByID(group.ToList().FirstOrDefault()?.SPID.Value),
+                                            }).ToList();
             if (groupedResults != null)
             {
                 foreach (var thung in groupedResults)
@@ -838,12 +844,12 @@
             var groupedResults = thungTPhams.Where(ttp => ttp.IDThung.Value != null)
                                             .GroupBy(ttp => ttp.IDThung.Value)
                                             .Select(group => new ThungTPhamExtend
-                                                {
-                                                    IDThung = group.Key,
-                                                    ThungTPhams = group.ToList(),
-                                                    Total = group.ToList().Sum(ttp => int.TryParse(ttp.SoLuong.Value?.ToString(), out int sl) ? sl : 0),
-                                                    MaSanPham = SQLServerServices.GetMaSanphamByID(group.ToList().FirstOrDefault()?.SPID.Value),
-                                                }).ToList();
+                                            {
+                                                IDThung = group.Key,
+                                                ThungTPhams = group.ToList(),
+                                                Total = group.ToList().Sum(ttp => int.TryParse(ttp.SoLuong.Value?.ToString(), out int sl) ? sl : 0),
+                                                MaSanPham = SQLServerServices.GetMaSanphamByID(group.ToList().FirstOrDefault()?.SPID.Value),
+                                            }).ToList();
             if (groupedResults != null)
             {
                 foreach (var thung in groupedResults)

@@ -67,6 +67,33 @@
                                                   Click="@(async() => ThungTPhams.ForEach(async ttp => await OnDeleteThungTPham(ttp)))"
                                                   ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Variant="Variant.Text" Shade="Shade.Darker" Style="border-radius: 5px; --rz-icon-size: 16px; color: red; font-weight: 600" />
                                 </RadzenStack>
+
+                                <RadzenStack Gap="10px" Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                    <RadzenStack Style="width: contain; height: contain; padding-left: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                        <RadzenLabel Text="@($"Max Index:")" Style="font-size: 15px; font-weight: 500; color: black" />
+                                    </RadzenStack>
+                                    <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                        <RadzenLabel Text="@($"{TargetKHSX.DefaultMaxIndex.Value}")" Style="font-size: 15px; font-weight: 600; color: darkgreen" />
+                                    </RadzenStack>
+                                    <RadzenStack Style="width: contain; height: contain; padding-left: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                        <RadzenLabel Text="@($"Trọng lượng:")" Style="font-size: 15px; font-weight: 500; color: black" />
+                                    </RadzenStack>
+                                    <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                        <RadzenLabel Text="@($"{TargetKHSX.DefaultKG.Value}")" Style="font-size: 15px; font-weight: 600; color: darkgreen" />
+                                    </RadzenStack>
+                                    <RadzenStack Style="width: contain; height: contain; padding-left: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                        <RadzenLabel Text="@($"Ngày xuất hàng:")" Style="font-size: 15px; font-weight: 500; color: black" />
+                                    </RadzenStack>
+                                    <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                        <RadzenLabel Text="@($"{TargetKHSX.DefaultNXH.Value}")" Style="font-size: 15px; font-weight: 600; color: darkgreen" />
+                                    </RadzenStack>
+
+                                    <RadzenButton Visible="@(ThungTPhams.Any())" Icon="settings"
+                                                  MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Thay đổi thông tin", 100, 1000))"
+                                                  Click="@(async() => await OpenSetDefaultTTPQR_Infor())"
+                                                  ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Variant="Variant.Text" Shade="Shade.Darker" Style="border-radius: 5px; --rz-icon-size: 16px; font-weight: 500" />
+                                </RadzenStack>
+
                                 <RadzenStack Gap="20px" Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                     <RadzenCheckBox TValue="bool" Name="@($"checkbox_selectAll")" Change="@((args) => { ThungTPhams.Where(ttp => ttp.PNKTPID.Value == null).ToList().ForEach(ttp => ttp.IsSelectToPNK = args); })" />
                                     <RadzenLabel Text="Chọn tất cả" Style="font-size: 15px; font-weight: 500; cursor: pointer" Component="@($"checkbox_selectAll")" />
@@ -149,7 +176,7 @@
 
                                                                             <RadzenButton Visible=@(thungtpham.IsOddNumbered.Value != null && thungtpham.IsHandledOddNumbered.Value == null) Icon="warning" Text="@($"Chưa xử lý thùng lẻ")" Style="font-weight: 600; font-size: 15px; color: darkgoldenrod"
                                                                                           ButtonStyle="ButtonStyle.Warning" Size="ButtonSize.Small" Variant="Variant.Text" Shade="Shade.Dark"></RadzenButton>
-    
+
                                                                             <RadzenButton Click="@(() => OnUpdateThungTPToOddNumbered(thungtpham))"
                                                                                           Visible=@(thungtpham.IsOddNumbered.Value == null && thungtpham.PartOfThungTPhams.All(pottp => pottp.RefPOTTPID.Value == null) && (ThungTPhams.IndexOf(thungtpham) + 1) == ThungTPhams.Count && IsAllcreatedTTP)
                                                                                           Icon="add" Text="@($"Đánh dấu thùng lẻ")" Style="font-weight: 500; color: red; font-size: 16px; min-width: 50px"
@@ -324,6 +351,10 @@
     // Print MQLThungTP
     private async Task OnPrintMaQuanLyThung(ThungTPham thungTPham)
     {
+        thungTPham.DefaultKG = TargetKHSX.DefaultKG.Value;
+        thungTPham.DefaultNXH = TargetKHSX.DefaultNXH.Value;
+        thungTPham.DefaultMaxIndex = TargetKHSX.DefaultMaxIndex.Value;
+
         var file = await ExcelService.GenerateExcelData_MQLThungTP(thungTPham);
 
         if (file != null)
@@ -474,6 +505,35 @@
         var absoluteUrl = NavigationManager.ToAbsoluteUri(url).ToString();
 
         await JSRuntime.InvokeVoidAsync("openInNewTab", absoluteUrl);
+    }
+
+    private async Task OpenSetDefaultTTPQR_Infor()
+    {
+        var rs = await DialogService.OpenAsync<DialogAddDefault_Infor_TTPQR>(null, new() { { "TargetKHSX", TargetKHSX } },
+        new DialogOptions() { Width = "contain", Height = "contain", Resizable = false, Draggable = true, ShowTitle = false, CloseDialogOnEsc = false, ShowClose = false, Style = "background-color: while; border-radius: 0px; padding: 0px" });
+
+        if (rs != null)
+        {
+            if (rs is Dictionary<string, object?> results)
+            {
+                if (results.TryGetValue($"{TargetKHSX.DefaultKG.DBName}", out var kg))
+                {
+                    TargetKHSX.DefaultKG.Value = kg;
+                }
+
+                if (results.TryGetValue($"{TargetKHSX.DefaultNXH.DBName}", out var nxh))
+                {
+                    TargetKHSX.DefaultNXH.Value = nxh;
+                }
+
+                if (results.TryGetValue($"{TargetKHSX.DefaultMaxIndex.DBName}", out var mid))
+                {
+                    TargetKHSX.DefaultMaxIndex.Value = mid;
+                }
+            }
+        }
+
+        StateHasChanged();
     }
 
     private void ShowNotification(string message, NotificationSeverity notifytype, double time)

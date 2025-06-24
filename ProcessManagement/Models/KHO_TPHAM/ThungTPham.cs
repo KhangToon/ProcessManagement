@@ -39,6 +39,10 @@ namespace ProcessManagement.Models.KHO_TPHAM
         public const string PALLETKEY = "PALLET";
         public bool IsSelectToPNK { get; set; } = false; // Using in select TTP for create PNKTP
 
+        public object? DefaultKG { get; set; }
+        public object? DefaultNXH { get; set; }
+        public object? DefaultMaxIndex { get; set; }
+
         public static class DBName
         {
             public const string Table_ThungTPham = "KHOTP_ThungTPham";
@@ -92,7 +96,9 @@ namespace ProcessManagement.Models.KHO_TPHAM
             public const string TENSP = "TENSP";
             public const string MASP = "MASP";
             public const string SOLUONG = "SOLUONG";
+            public const string TRONGLUONG = "TRONGLUONG";
             public const string MQLTHUNG = "MQLTHUNG";
+            public const string NGAYXUATHANG = "NGAYXUATHANG";
             public const string IDThung = "IDThung";
 
             public static Dictionary<string, string> ColumnAddress = new()
@@ -100,7 +106,9 @@ namespace ProcessManagement.Models.KHO_TPHAM
                 { TENSP, "E" },
                 { MASP, "E" },
                 { SOLUONG, "E" },
+                { TRONGLUONG, "E" },
                 { MQLTHUNG, "G" },
+                { NGAYXUATHANG, "G" },
                 { IDThung, "F" }
             };
 
@@ -109,7 +117,9 @@ namespace ProcessManagement.Models.KHO_TPHAM
                 { TENSP, "5" },
                 { MASP, "7" },
                 { SOLUONG, "9" },
+                { TRONGLUONG, "12" },
                 { MQLTHUNG, "15" },
+                { NGAYXUATHANG, "9" },
                 { IDThung, "2" }
             };
         }

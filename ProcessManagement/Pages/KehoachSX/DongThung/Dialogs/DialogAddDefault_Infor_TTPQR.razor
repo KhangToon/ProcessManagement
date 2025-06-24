@@ -1,0 +1,109 @@
+﻿@using ProcessManagement.Commons
+@using ProcessManagement.Models
+@using ProcessManagement.Services.SQLServer
+@using Radzen
+@using Radzen.Blazor
+
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject SQLServerServices SQLServerServices
+
+
+<h3>Thay đổi thông tin mặc định thùng thành phẩm</h3>
+
+<RadzenTemplateForm TItem="TTPDefaultInforItem" Data="@modifiedKHSX" Submit="@UpdateAddress">
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <RadzenLabel Text="Tổng số thùng" Style="font-weight: 600" />
+            <RadzenNumeric @bind-Value="modifiedKHSX.DefaultMaxIndex" Min="1" TValue="int" Name="DefaultMaxIndex" class="w-100" />
+            <RadzenRequiredValidator Component="DefaultMaxIndex" Text="Is required" />
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <RadzenLabel Text="Trọng lượng" Style="font-weight: 600" />
+            <RadzenTextBox @bind-Value="modifiedKHSX.DefaultKG" Name="DefaultKG" class="w-100" />
+            <RadzenRequiredValidator Component="DefaultKG" Text="Is required" />
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <RadzenLabel Text="Ngày xuất hàng" Style="font-weight: 600" />
+            <RadzenTextBox @bind-Value="modifiedKHSX.DefaultNXH" Name="DefaultNXH" class="w-100" />
+            <RadzenRequiredValidator Component="DefaultNXH" Text="Is required" />
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <RadzenButton ButtonType="ButtonType.Submit" Text="Cập nhật" Icon="save" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat" />
+            <RadzenButton Style="margin-left: 10px" Text="Hủy" Icon="cancel" ButtonStyle="ButtonStyle.Secondary" Variant="Variant.Text" Click="@CloseDialog" />
+        </div>
+    </div>
+</RadzenTemplateForm>
+
+@code {
+    [Parameter]
+    public KHSX? TargetKHSX { get; set; }
+
+    private TTPDefaultInforItem modifiedKHSX = new();
+
+    protected override Task OnInitializedAsync()
+    {
+        if (TargetKHSX != null && TargetKHSX.KHSXID.Value != null)
+        {
+            modifiedKHSX.DefaultKG = TargetKHSX.DefaultKG.Value?.ToString() ?? string.Empty;
+            modifiedKHSX.DefaultNXH = TargetKHSX.DefaultNXH.Value?.ToString() ?? string.Empty;
+            modifiedKHSX.DefaultMaxIndex = int.TryParse(TargetKHSX.DefaultMaxIndex.Value?.ToString(), out int mindex) ? mindex : 1;
+        }
+
+        return base.OnInitializedAsync();
+    }
+
+    public class TTPDefaultInforItem
+    {
+        public string DefaultKG { get; set; } = string.Empty;
+        public string DefaultNXH { get; set; } = string.Empty;
+        public int DefaultMaxIndex { get; set; } = 1;
+    }
+
+    private async Task UpdateAddress()
+    {
+        if (TargetKHSX != null)
+        {
+            TargetKHSX.DefaultKG.Value = modifiedKHSX.DefaultKG;
+            TargetKHSX.DefaultNXH.Value = modifiedKHSX.DefaultNXH;
+            TargetKHSX.DefaultMaxIndex.Value = modifiedKHSX.DefaultMaxIndex;
+
+            // Call the service to update the address in the database
+            (int rs, string err) = SQLServerServices.UpdateKHSXProperty(TargetKHSX.KHSXID.Value, Common.DefaultKG, TargetKHSX.DefaultKG.Value);
+            (rs, err) = SQLServerServices.UpdateKHSXProperty(TargetKHSX.KHSXID.Value, Common.DefaultNXH, TargetKHSX.DefaultNXH.Value);
+            (rs, err) = SQLServerServices.UpdateKHSXProperty(TargetKHSX.KHSXID.Value, Common.DefaultMaxIndex, TargetKHSX.DefaultMaxIndex.Value);
+
+            await Task.Delay(1);
+
+            if (rs == 1)
+            {
+                NotificationService.Notify(NotificationSeverity.Success, "Success", $"Update successfully");
+
+                Dictionary<string, object?> keyValuePairs = new();
+                keyValuePairs.Add(Common.DefaultKG, TargetKHSX.DefaultKG.Value);
+                keyValuePairs.Add(Common.DefaultNXH, TargetKHSX.DefaultNXH.Value);
+                keyValuePairs.Add(Common.DefaultMaxIndex, TargetKHSX.DefaultMaxIndex.Value);
+
+                DialogService.Close(keyValuePairs);
+            }
+            else
+            {
+                NotificationService.Notify(NotificationSeverity.Error, "Error", $"Update failled: {err}");
+
+                DialogService.Close(null);
+            }
+        }
+    }
+
+    private void CloseDialog()
+    {
+        DialogService.Close(null);
+    }
+}

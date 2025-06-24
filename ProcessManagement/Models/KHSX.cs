@@ -31,6 +31,9 @@ namespace ProcessManagement.Models
         public Propertyy IsCollapsed { get; set; } = new() { DBName = Common.IsCollapsed, DisplayName = "IsCollapsed", Type = typeof(int), AlowDatabase = true };
         public Propertyy IsDoneKHSX { get; set; } = new() { DBName = Common.IsDoneKHSX, DisplayName = "IsDoneKHSX", Type = typeof(int), AlowDatabase = true };
         public Propertyy IsChartRunning { get; set; } = new() { DBName = Common.IsChartRunning, DisplayName = "IsChartRunning", Type = typeof(int), AlowDatabase = true };
+        public Propertyy DefaultKG { get; set; } = new() { DBName = Common.DefaultKG, DisplayName = "DefaultKG", Type = typeof(string), AlowDatabase = true };
+        public Propertyy DefaultNXH { get; set; } = new() { DBName = Common.DefaultNXH, DisplayName = "DefaultNXH", Type = typeof(string), AlowDatabase = true };
+        public Propertyy DefaultMaxIndex { get; set; } = new() { DBName = Common.DefaultMaxIndex, DisplayName = "DefaultMaxIndex", Type = typeof(int), AlowDatabase = true };
         public SanPham? TargetSanPham { get; set; }
         public NguyenVatLieu? TargetNVL { get; set; }
         public LoaiNVL? LoaiNVL { get; set; }

@@ -122,6 +122,9 @@ namespace ProcessManagement.Commons
         public const string SLperLotChan = "SL mỗi lot chẳn";
         public const string SLLotLe = "SL lot lẻ";
         public const string SLperLotLe = "SL mỗi lot lẻ";
+        public const string DefaultKG = "DefaultKG";
+        public const string DefaultNXH = "DefaultNXH";
+        public const string DefaultMaxIndex = "DefaultMaxIndex";
         //public const string PXKID = "PXKID";
 
         // Table KHSXpickNVL //

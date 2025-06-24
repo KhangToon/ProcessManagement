@@ -567,6 +567,28 @@ namespace ProcessManagement.Services.Excels
             };
             excelDatas.Add(soluongCell);
 
+            // TrongLuong
+            ExcelCell trongluongCell = new()
+            {
+                CellName = ThungTPham.ExcellAddress.TRONGLUONG,
+                Col = ThungTPham.ExcellAddress.ColumnAddress[ThungTPham.ExcellAddress.TRONGLUONG],
+                Row = ThungTPham.ExcellAddress.RowAddress[ThungTPham.ExcellAddress.TRONGLUONG],
+                ValueType = typeof(string),
+                CellValue = $"{thungTPham.DefaultKG}"
+            };
+            excelDatas.Add(trongluongCell);
+
+            // NgayXuatHang
+            ExcelCell nxhCell = new()
+            {
+                CellName = ThungTPham.ExcellAddress.NGAYXUATHANG,
+                Col = ThungTPham.ExcellAddress.ColumnAddress[ThungTPham.ExcellAddress.NGAYXUATHANG],
+                Row = ThungTPham.ExcellAddress.RowAddress[ThungTPham.ExcellAddress.NGAYXUATHANG],
+                ValueType = typeof(string),
+                CellValue = $"{thungTPham.DefaultNXH}"
+            };
+            excelDatas.Add(nxhCell);
+
             // MQLTHUNG
             ExcelCell MQLCell = new()
             {
@@ -585,7 +607,8 @@ namespace ProcessManagement.Services.Excels
                 Col = ThungTPham.ExcellAddress.ColumnAddress[ThungTPham.ExcellAddress.IDThung],
                 Row = ThungTPham.ExcellAddress.RowAddress[ThungTPham.ExcellAddress.IDThung],
                 ValueType = typeof(string),
-                CellValue = ConvertToCircleNumber($"{thungTPham.IDThung.Value}")
+                CellValue = $"{thungTPham.IDThung.Value}/{thungTPham.DefaultMaxIndex}"
+                //CellValue = ConvertToCircleNumber($"{thungTPham.IDThung.Value}")
             };
             excelDatas.Add(IDCell);
 
@@ -673,8 +696,8 @@ namespace ProcessManagement.Services.Excels
                     thungTPham.PartOfThungTPhams.Select(p =>
                     $"Lot: {p.MaQuanLyLot.Value} ({p.SoLuong.Value} PCS)").ToArray());
 
-            string qrcontent = $"Box {thungTPham.IDThung.Value}: {thungTPham.MaQuanLyThung.Value} ({thungTPham.SoLuong.Value} PCS)" +
-                               $"\n{lotDetails}";
+            string qrcontent = $"Box {thungTPham.IDThung.Value}/{thungTPham.DefaultMaxIndex}: {thungTPham.MaQuanLyThung.Value} ({thungTPham.SoLuong.Value} PCS)" +
+                               $"\n{lotDetails}" + $"\n{thungTPham.DefaultKG}   {thungTPham.DefaultNXH}";
 
             byte[] imageBytes = qrCodeServices.GenerateQRCodeImage(qrcontent);
 
@@ -704,7 +727,7 @@ namespace ProcessManagement.Services.Excels
 
             // Create and size the picture
             IPicture picture = drawing.CreatePicture(anchor, pictureIndex);
-            
+
             //picture.Resize(); // Resize the picture to fit within the cell
 
             using (FileStream writeStream = new FileStream(excelWritePath, FileMode.Create, FileAccess.Write))
