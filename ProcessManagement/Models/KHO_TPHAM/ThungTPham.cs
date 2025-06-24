@@ -42,6 +42,8 @@ namespace ProcessManagement.Models.KHO_TPHAM
         public object? DefaultKG { get; set; }
         public object? DefaultNXH { get; set; }
         public object? DefaultMaxIndex { get; set; }
+        public object? DefaultNVKT { get; set; }
+        public object? DefaultPNo { get; set; }
 
         public static class DBName
         {
@@ -99,6 +101,8 @@ namespace ProcessManagement.Models.KHO_TPHAM
             public const string TRONGLUONG = "TRONGLUONG";
             public const string MQLTHUNG = "MQLTHUNG";
             public const string NGAYXUATHANG = "NGAYXUATHANG";
+            public const string NHANVIENKIEMTRA = "NHANVIENKIEMTRA";
+            public const string PNo = "PNo";
             public const string IDThung = "IDThung";
 
             public static Dictionary<string, string> ColumnAddress = new()
@@ -109,6 +113,8 @@ namespace ProcessManagement.Models.KHO_TPHAM
                 { TRONGLUONG, "E" },
                 { MQLTHUNG, "G" },
                 { NGAYXUATHANG, "G" },
+                { NHANVIENKIEMTRA, "E" },
+                { PNo, "B" },
                 { IDThung, "F" }
             };
 
@@ -120,6 +126,8 @@ namespace ProcessManagement.Models.KHO_TPHAM
                 { TRONGLUONG, "12" },
                 { MQLTHUNG, "15" },
                 { NGAYXUATHANG, "9" },
+                { NHANVIENKIEMTRA, "14" },
+                { PNo, "16" },
                 { IDThung, "2" }
             };
         }

@@ -34,6 +34,9 @@ namespace ProcessManagement.Models
         public Propertyy DefaultKG { get; set; } = new() { DBName = Common.DefaultKG, DisplayName = "DefaultKG", Type = typeof(string), AlowDatabase = true };
         public Propertyy DefaultNXH { get; set; } = new() { DBName = Common.DefaultNXH, DisplayName = "DefaultNXH", Type = typeof(string), AlowDatabase = true };
         public Propertyy DefaultMaxIndex { get; set; } = new() { DBName = Common.DefaultMaxIndex, DisplayName = "DefaultMaxIndex", Type = typeof(int), AlowDatabase = true };
+        public Propertyy DefaultNVKT { get; set; } = new() { DBName = Common.DefaultNVKT, DisplayName = "DefaultNVKT", Type = typeof(string), AlowDatabase = true };
+        public Propertyy DefaultPNo { get; set; } = new() { DBName = Common.DefaultPNo, DisplayName = "DefaultPNo", Type = typeof(string), AlowDatabase = true };
+
         public SanPham? TargetSanPham { get; set; }
         public NguyenVatLieu? TargetNVL { get; set; }
         public LoaiNVL? LoaiNVL { get; set; }

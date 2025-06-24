@@ -125,6 +125,8 @@ namespace ProcessManagement.Commons
         public const string DefaultKG = "DefaultKG";
         public const string DefaultNXH = "DefaultNXH";
         public const string DefaultMaxIndex = "DefaultMaxIndex";
+        public const string DefaultNVKT = "DefaultNVKT";
+        public const string DefaultPNo = "DefaultPNo";
         //public const string PXKID = "PXKID";
 
         // Table KHSXpickNVL //

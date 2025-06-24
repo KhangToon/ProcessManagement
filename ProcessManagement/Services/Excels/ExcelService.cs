@@ -578,6 +578,28 @@ namespace ProcessManagement.Services.Excels
             };
             excelDatas.Add(trongluongCell);
 
+            // NhanVienKiemTra
+            ExcelCell nvkiemtraCell = new()
+            {
+                CellName = ThungTPham.ExcellAddress.NHANVIENKIEMTRA,
+                Col = ThungTPham.ExcellAddress.ColumnAddress[ThungTPham.ExcellAddress.NHANVIENKIEMTRA],
+                Row = ThungTPham.ExcellAddress.RowAddress[ThungTPham.ExcellAddress.NHANVIENKIEMTRA],
+                ValueType = typeof(string),
+                CellValue = $"{thungTPham.DefaultNVKT}"
+            };
+            excelDatas.Add(nvkiemtraCell);
+
+            // PNo
+            ExcelCell pNoCell = new()
+            {
+                CellName = ThungTPham.ExcellAddress.PNo,
+                Col = ThungTPham.ExcellAddress.ColumnAddress[ThungTPham.ExcellAddress.PNo],
+                Row = ThungTPham.ExcellAddress.RowAddress[ThungTPham.ExcellAddress.PNo],
+                ValueType = typeof(string),
+                CellValue = $"PNo: {thungTPham.DefaultPNo}"
+            };
+            excelDatas.Add(pNoCell);
+
             // NgayXuatHang
             ExcelCell nxhCell = new()
             {

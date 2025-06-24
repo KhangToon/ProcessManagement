@@ -68,30 +68,47 @@
                                                   ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Variant="Variant.Text" Shade="Shade.Darker" Style="border-radius: 5px; --rz-icon-size: 16px; color: red; font-weight: 600" />
                                 </RadzenStack>
 
-                                <RadzenStack Gap="10px" Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenStack Gap="5px" Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                    
                                     <RadzenStack Style="width: contain; height: contain; padding-left: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                        <RadzenLabel Text="@($"Max Index:")" Style="font-size: 15px; font-weight: 500; color: black" />
+                                        <RadzenLabel Text="@($"Max Index:")" Style="font-size: 14px; font-weight: 500; color: black" />
                                     </RadzenStack>
                                     <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                         <RadzenLabel Text="@($"{TargetKHSX.DefaultMaxIndex.Value}")" Style="font-size: 15px; font-weight: 600; color: darkgreen" />
                                     </RadzenStack>
+
                                     <RadzenStack Style="width: contain; height: contain; padding-left: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                        <RadzenLabel Text="@($"Trọng lượng:")" Style="font-size: 15px; font-weight: 500; color: black" />
+                                        <RadzenLabel Text="@($"Trọng lượng:")" Style="font-size: 14px; font-weight: 500; color: black" />
                                     </RadzenStack>
                                     <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                         <RadzenLabel Text="@($"{TargetKHSX.DefaultKG.Value}")" Style="font-size: 15px; font-weight: 600; color: darkgreen" />
                                     </RadzenStack>
+
                                     <RadzenStack Style="width: contain; height: contain; padding-left: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                        <RadzenLabel Text="@($"Ngày xuất hàng:")" Style="font-size: 15px; font-weight: 500; color: black" />
+                                        <RadzenLabel Text="@($"Nhân viên:")" Style="font-size: 14px; font-weight: 500; color: black" />
+                                    </RadzenStack>
+                                    <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                        <RadzenLabel Text="@($"{TargetKHSX.DefaultNVKT.Value}")" Style="font-size: 15px; font-weight: 600; color: darkgreen" />
+                                    </RadzenStack>
+
+                                    <RadzenStack Style="width: contain; height: contain; padding-left: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                        <RadzenLabel Text="@($"Ngày XH:")" Style="font-size: 14px; font-weight: 500; color: black" />
                                     </RadzenStack>
                                     <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                         <RadzenLabel Text="@($"{TargetKHSX.DefaultNXH.Value}")" Style="font-size: 15px; font-weight: 600; color: darkgreen" />
                                     </RadzenStack>
 
+                                    <RadzenStack Style="width: contain; height: contain; padding-left: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                        <RadzenLabel Text="@($"PNo:")" Style="font-size: 14px; font-weight: 500; color: black" />
+                                    </RadzenStack>
+                                    <RadzenStack Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                        <RadzenLabel Text="@($"{TargetKHSX.DefaultPNo.Value}")" Style="font-size: 15px; font-weight: 600; color: darkgreen" />
+                                    </RadzenStack>
+
                                     <RadzenButton Visible="@(ThungTPhams.Any())" Icon="settings"
                                                   MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Thay đổi thông tin", 100, 1000))"
                                                   Click="@(async() => await OpenSetDefaultTTPQR_Infor())"
-                                                  ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Variant="Variant.Text" Shade="Shade.Darker" Style="border-radius: 5px; --rz-icon-size: 16px; font-weight: 500" />
+                                                  ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Variant="Variant.Flat" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 17px; font-weight: 600" />
                                 </RadzenStack>
 
                                 <RadzenStack Gap="20px" Style="width: contain; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
@@ -354,6 +371,8 @@
         thungTPham.DefaultKG = TargetKHSX.DefaultKG.Value;
         thungTPham.DefaultNXH = TargetKHSX.DefaultNXH.Value;
         thungTPham.DefaultMaxIndex = TargetKHSX.DefaultMaxIndex.Value;
+        thungTPham.DefaultNVKT = TargetKHSX.DefaultNVKT.Value;
+        thungTPham.DefaultPNo = TargetKHSX.DefaultPNo.Value;
 
         var file = await ExcelService.GenerateExcelData_MQLThungTP(thungTPham);
 
