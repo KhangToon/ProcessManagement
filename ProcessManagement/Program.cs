@@ -71,7 +71,6 @@ builder.Services.AddHttpClient(Common.ServerAPI, client =>
 builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>()
     .CreateClient(Common.ServerAPI));
 
-
 // Add Radzen components
 builder.Services.AddRadzenComponents();
 // Add services to the container.

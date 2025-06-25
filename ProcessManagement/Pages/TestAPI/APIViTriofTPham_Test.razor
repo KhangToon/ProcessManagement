@@ -1,0 +1,29 @@
+﻿@using ProcessManagement.Models.KHO_TPHAM
+@inject ViTriofTPhamApiService ViTriofTPhamService
+
+@code {
+    List<ViTriofTPham>? vitriList;
+
+    protected override async Task OnInitializedAsync()
+    {
+        vitriList = await ViTriofTPhamService.GetListAsync();
+    }
+
+    async Task AddViTriofTPham(ViTriofTPham newItem)
+    {
+        var id = await ViTriofTPhamService.CreateAsync(newItem);
+        // handle result
+    }
+
+    async Task UpdateViTriofTPham(ViTriofTPham item)
+    {
+        var id = await ViTriofTPhamService.UpdateAsync(item);
+        // handle result
+    }
+
+    async Task DeleteViTriofTPham(object id)
+    {
+        var success = await ViTriofTPhamService.DeleteAsync(id);
+        // handle result
+    }
+}
