@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using ProcessManagement.Mappers;
 using ProcessManagement.Models.KHO_TPHAM;
 using ProcessManagement.Services.SQLServer;
 
@@ -13,7 +14,7 @@ public class ViTriofTPhamController : ControllerBase
         _sqlService = sqlService;
     }
 
-    [HttpGet] 
+    [HttpGet] // GET api/vitrioftpham
     public IActionResult GetList([FromQuery] bool isgetAll = false)
     {
         var (result, error) = _sqlService.GetListViTriofTPhams(new Dictionary<string, object?>(), isgetAll);
@@ -22,7 +23,20 @@ public class ViTriofTPhamController : ControllerBase
         return Ok(result);
     }
 
-    [HttpPost] 
+    [HttpGet]
+    [Route("mapper")] // GET api/vitrioftpham/mapper
+    public IActionResult GetListWithMapper([FromQuery] bool isgetAll = false)
+    {
+        var (result, error) = _sqlService.GetListViTriofTPhams(new Dictionary<string, object?>(), isgetAll);
+        if (!string.IsNullOrEmpty(error))
+            return BadRequest(error);
+
+        var mappedResult = result.Select(item => ViTriofTPhamMapper.ToMapper(item)).ToList();
+
+        return Ok(mappedResult);
+    }
+
+    [HttpPost]
     public IActionResult Create([FromBody] ViTriofTPham model)
     {
         var (id, error) = _sqlService.InsertViTriofTPham(model);
@@ -31,7 +45,7 @@ public class ViTriofTPhamController : ControllerBase
         return Ok(new { id });
     }
 
-    [HttpPut] 
+    [HttpPut]
     public IActionResult Update([FromBody] ViTriofTPham model)
     {
         var (id, error) = _sqlService.UpdateViTriofTPham(model);
@@ -40,7 +54,7 @@ public class ViTriofTPhamController : ControllerBase
         return Ok(new { id });
     }
 
-    [HttpDelete("{id}")] 
+    [HttpDelete("{id}")]
     public IActionResult Delete(object id)
     {
         var (success, error) = _sqlService.DeleteViTriofTPham(id);
