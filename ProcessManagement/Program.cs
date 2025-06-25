@@ -96,6 +96,17 @@ builder.Services.AddSingleton<QRCodeServices>();
 // Modbus services
 builder.Services.AddSingleton<ModbusServices>();
 
+// CRS (Cross-Origin Resource Sharing) - Configures access to the API from any origin
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -127,7 +138,8 @@ app.MapControllers(); // Map API controllers
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 
-
+// Enable CORS - configures access to the API from any origin
+app.UseCors();
 
 // Open browser after application starts
 app.Urls.Add(url); // enable khi deploy - disable khi use local  
