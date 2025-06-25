@@ -115,7 +115,7 @@ namespace ProcessManagement.Models.KHO_TPHAM
                 { NGAYXUATHANG, "G" },
                 { NHANVIENKIEMTRA, "E" },
                 { PNo, "B" },
-                { IDThung, "F" }
+                { IDThung, "E" }
             };
 
             public static Dictionary<string, string> RowAddress = new()
