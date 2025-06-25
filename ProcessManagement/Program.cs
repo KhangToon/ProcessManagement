@@ -96,6 +96,9 @@ builder.Services.AddSingleton<QRCodeServices>();
 // Modbus services
 builder.Services.AddSingleton<ModbusServices>();
 
+// Add ViTriofTPhamApiService
+builder.Services.AddScoped<ViTriofTPhamApiService>();
+
 // CRS (Cross-Origin Resource Sharing) - Configures access to the API from any origin
 builder.Services.AddCors(options =>
 {

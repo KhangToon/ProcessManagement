@@ -1,9 +1,13 @@
-﻿namespace ProcessManagement.Commons
+﻿using System.Text.Json.Serialization;
+
+namespace ProcessManagement.Commons
 {
     public class Propertyy
     {
         public string? DBName { get; set; }
         public object? Value { get; set; } = null;
+
+        [JsonIgnore] // Use for ignore when using with API convert
         public Type? Type { get; set; }
         public bool DispDatagrid { get; set; } = true;
         public bool AlowDatabase { get; set; } = false;
