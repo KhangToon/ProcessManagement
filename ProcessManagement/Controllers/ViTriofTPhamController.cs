@@ -23,6 +23,19 @@ public class ViTriofTPhamController : ControllerBase
         return Ok(result);
     }
 
+    [HttpGet("{id}")] // GET api/vitrioftpham/{id}
+    public IActionResult GetByID([FromRoute] object id)
+    {
+        if (id == null)
+            return BadRequest("ID cannot be null");
+        var result = _sqlService.GetViTriofTPhamById(id);
+
+        if (result == null)
+            return NotFound($"ViTriofTPham with ID {id} not found");
+
+        return Ok(result);
+    }
+
     [HttpGet]
     [Route("mapper")] // GET api/vitrioftpham/mapper
     public IActionResult GetListWithMapper([FromQuery] bool isgetAll = false)

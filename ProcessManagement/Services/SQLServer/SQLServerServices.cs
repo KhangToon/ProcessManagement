@@ -11146,6 +11146,198 @@ namespace ProcessManagement.Services.SQLServer
             }
             return (listViTriTPhams, errorMessage);
         }
+
+        public async Task<(int, string)> APIInsertViTriTPhamAsync(ViTriTPham vitrithpham)
+        {
+            int result = -1;
+
+            string errorMess = string.Empty;
+
+            if (vitrithpham == null) return (result, "Error: ViTriTPham is null");
+
+            List<Propertyy> properties = vitrithpham.GetPropertiesValues()
+                .Where(po => po.AlowDatabase == true && po.Value != null)
+                .ToList();
+
+            if (properties.Count == 0)
+            {
+                return (result, "Error: No valid properties to insert.");
+            }
+
+            using var connection = new SqlConnection(connectionString);
+            await connection.OpenAsync();
+            using var transaction = await connection.BeginTransactionAsync();
+
+            try
+            {
+                var command = connection.CreateCommand();
+
+                command.Transaction = (SqlTransaction)transaction;
+
+                string columns = string.Join(", ", properties.Select(p => $"[{p.DBName}]"));
+
+                string parameters = string.Join(", ", properties.Select(p => $"@{Regex.Replace(p.DBName ?? string.Empty, @"[^\w]+", "")}"));
+
+                command.CommandText = $@"INSERT INTO [{ViTriTPham.DBName.Table_ViTriTPham}] ({columns}) OUTPUT INSERTED.{ViTriTPham.DBName.VTTPID} VALUES ({parameters})";
+
+                foreach (var prop in properties)
+                {
+                    string parameterName = $"@{Regex.Replace(prop.DBName ?? string.Empty, @"[^\w]+", "")}";
+                    object? parameterValue = prop.Value ?? DBNull.Value;
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+
+                object? rs = await command.ExecuteScalarAsync();
+
+                if (rs != null && int.TryParse(rs.ToString(), out result) && result > 0)
+                {
+                    await transaction.CommitAsync();
+                }
+                else
+                {
+                    result = -1;
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMess = $"Error: {ex.Message}";
+                try
+                {
+                    await transaction.RollbackAsync();
+                }
+                catch (Exception rollbackEx)
+                {
+                    errorMess += $" | Rollback Error: {rollbackEx.Message}";
+                }
+                return (-1, errorMess);
+            }
+            return (result, errorMess);
+        }
+
+        // Get VTTP by ID
+        public async Task<(ViTriTPham, string)> APIGetViTriTPhamByIdAsync(object? vttpid)
+        {
+            ViTriTPham viTriTPham = new();
+            string errorMessage = string.Empty;
+            if (vttpid == null)
+            {
+                return (viTriTPham, "Error: ViTriTPham ID is null");
+            }
+
+            using var connection = new SqlConnection(connectionString);
+            await connection.OpenAsync();
+
+            var command = connection.CreateCommand();
+            command.CommandText = $"SELECT * FROM [{ViTriTPham.DBName.Table_ViTriTPham}] WHERE [{ViTriTPham.DBName.VTTPID}] = @VTTPID";
+            command.Parameters.AddWithValue("@VTTPID", vttpid);
+
+            using var reader = await command.ExecuteReaderAsync();
+
+            if (await reader.ReadAsync())
+            {
+                List<Propertyy> rowItems = viTriTPham.GetPropertiesValues();
+                foreach (var item in rowItems)
+                {
+                    string? columnName = item.DBName;
+                    if (!string.IsNullOrEmpty(columnName) && reader.GetOrdinal(columnName) != -1)
+                    {
+                        object columnValue = reader[columnName];
+                        item.Value = columnValue == DBNull.Value ? null : columnValue;
+                    }
+                }
+                _ = int.TryParse(viTriTPham.VTSucChua.Value?.ToString(), out int suchua) ? suchua : 0;
+                viTriTPham.SLConTrong = suchua - GetViTriTPhamSoLuongTrong(viTriTPham.VTTPID.Value).soluong;
+            }
+            else
+            {
+                errorMessage = "No ViTriTPham found with the specified ID.";
+            }
+            return (viTriTPham, errorMessage);
+        }
+
+        public async Task<(int, string)> APIUpdateViTriTPhamAsync(ViTriTPham vitrithpham)
+        {
+            int result = -1;
+            string errorMess = string.Empty;
+            // Check for null input
+            if (vitrithpham == null) return (result, "Error: is null");
+            List<Propertyy> properties = vitrithpham.GetPropertiesValues()
+                .Where(po => po.AlowDatabase == true && po.Value != null)
+                .ToList();
+            // Validate properties before proceeding
+            if (properties.Count == 0)
+            {
+                return (result, "Error: No valid properties to update.");
+            }
+            using var connection = new SqlConnection(connectionString);
+            await connection.OpenAsync();
+            using var transaction = await connection.BeginTransactionAsync(); // Start transaction
+            try
+            {
+                var command = connection.CreateCommand();
+                command.Transaction = (SqlTransaction)transaction; // Associate command with the transaction
+                string updateSet = string.Join(", ", properties.Select(p => $"[{p.DBName}] = @{Regex.Replace(p.DBName ?? string.Empty, @"[^\w]+", "")}"));
+                command.CommandText = $@"UPDATE [{ViTriTPham.DBName.Table_ViTriTPham}] SET {updateSet} WHERE [{ViTriTPham.DBName.VTTPID}] = '{vitrithpham.VTTPID.Value}'";
+                // Add parameters
+                foreach (var prop in properties)
+                {
+                    string parameterName = $"@{Regex.Replace(prop.DBName ?? string.Empty, @"[^\w]+", "")}";
+                    object? parameterValue = prop.Value ?? DBNull.Value;
+                    command.Parameters.AddWithValue(parameterName, parameterValue);
+                }
+                // Execute command
+                result = await command.ExecuteNonQueryAsync();
+                if (result > 0)
+                {
+                    // Successfully updated
+                    await transaction.CommitAsync(); // Commit the transaction
+                }
+                else
+                {
+                    result = -1; // Set to -1 if update was not successful
+                    errorMess = "No rows were updated. The specified may not exist.";
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMess = $"Error: {ex.Message}";
+                try
+                {
+                    await transaction.RollbackAsync(); // Rollback transaction in case of error
+                }
+                catch (Exception rollbackEx)
+                {
+                    errorMess += $" | Rollback Error: {rollbackEx.Message}";
+                }
+                return (-1, errorMess);
+            }
+            return (result, errorMess);
+        }
+
+        // Delete
+        public async Task<(bool, string)> APIDeleteViTriTPhamAsync(object? vttpid)
+        {
+            // Check for valid ID
+            if (vttpid == null)
+            {
+                return (false, "Error: ViTriTPham ID is null");
+            }
+            using var connection = new SqlConnection(connectionString);
+            await connection.OpenAsync();
+            string query = $"DELETE FROM [{ViTriTPham.DBName.Table_ViTriTPham}] WHERE [{ViTriTPham.DBName.VTTPID}] = @VTTPID";
+            using var command = new SqlCommand(query, connection);
+            command.Parameters.AddWithValue("@VTTPID", vttpid);
+            try
+            {
+                int rowsAffected = await command.ExecuteNonQueryAsync();
+                return (rowsAffected > 0, string.Empty); // Return true if a row was deleted
+            }
+            catch (Exception ex)
+            {
+                return (false, $"Error: {ex.Message}"); // Return false and the error message
+            }
+        }
+
         #endregion
 
         #region Table_KHO_ViTriofTPham
@@ -11349,6 +11541,21 @@ namespace ProcessManagement.Services.SQLServer
                 }
             }
             return (listViTriofTPhams, errorMessage);
+        }
+
+        public ViTriofTPham GetViTriofTPhamById(object? vtotpID)
+        {
+            ViTriofTPham viTriofTPham = new();
+            if (vtotpID == null)
+            {
+                return viTriofTPham;
+            }
+            var viTriofTPhams = GetListViTriofTPhams(new Dictionary<string, object?>() { { ViTriofTPham.DBName.VTofTPID, vtotpID } }).viTriofTPhams;
+            if (viTriofTPhams.Count > 0)
+            {
+                viTriofTPham = viTriofTPhams.FirstOrDefault() ?? new();
+            }
+            return viTriofTPham;
         }
 
         public object? GetLOTViTriofTPham(object? vtotpID)
