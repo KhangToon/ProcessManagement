@@ -89,6 +89,12 @@ builder.Services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStat
 
 // DB services
 builder.Services.AddSingleton<SQLServerServices>();
+
+// Memory Cache for SQLServerServicesV2
+builder.Services.AddMemoryCache();
+
+// SQLServerServicesV2 - Optimized version
+builder.Services.AddScoped<SQLServerServicesV2>();
 // Socket services
 builder.Services.AddSingleton<ServerSocketAsync>();
 // QRCreate services

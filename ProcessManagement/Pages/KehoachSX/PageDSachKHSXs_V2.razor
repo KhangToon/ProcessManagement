@@ -1,6 +1,6 @@
-﻿@page "/pagedskhsanxuats_v1"
+@page "/pagedskhsanxuats"
 @attribute [Authorize(Roles = "Admin")]
-@* this limited access into page *@
+@* V2 - Optimized version với SQLServerServicesV2, batch loading, async, và caching *@
 
 @using ProcessManagement.Commons
 @using ProcessManagement.Models
@@ -24,6 +24,7 @@
 @inject DialogService DialogService
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject SQLServerServices SQLServerServices
+@inject SQLServerServicesV2 SQLServerServicesV2
 @inject IJSRuntime JSRuntime
 
 <style>
@@ -31,6 +32,15 @@
         border-style: solid;
         border-width: 2px;
         border-color: green;
+    }
+    .optimized-badge {
+        background-color: #28a745;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 11px;
+        font-weight: 600;
+        margin-left: 5px;
     }
 </style>
 
@@ -43,6 +53,7 @@
                         <RadzenColumn SizeMD="7" Size="12">
                             <RadzenStack Style="height: 100%; width: 100%; border-radius: 10px; background-color: var(--rz-success-lighter); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                 <RadzenText Text="DANH SÁCH KẾ HOẠCH SẢN XUẤT" Style="color: green; font-weight: 600; font-size: 18px"></RadzenText>
+                                <span class="optimized-badge">V2 OPTIMIZED</span>
                             </RadzenStack>
                         </RadzenColumn>
                         <RadzenColumn SizeMD="5" Size="12">
@@ -56,7 +67,7 @@
                                         <RadzenMenuItem Text="@DSachModeSearchKHSX[4]" Click="@(async () => { modeSearchKHSX = 4; await ButtonReloadPress(); })" Icon="search"></RadzenMenuItem>
                                     </RadzenMenuItem>
                                 </RadzenMenu>
-                                <RadzenText Text="@($"{loadinngtime} ms")" Style="font-weight: 600; font-size: 12px"></RadzenText>
+                                <RadzenText Text="@($"Total: {loadinngtime}ms | Data: {dataLoadTime}ms | Render: {renderTime}ms")" Style="font-weight: 600; font-size: 11px"></RadzenText>
                             </RadzenStack>
                         </RadzenColumn>
                     </RadzenRow>
@@ -146,8 +157,7 @@
                                                 </Template>
                                                 <ChildContent>
                                                     <RadzenStack Visible="@(khsx.isCollapsed == false)">
-                                                        @*<BootstrapChart TargetKHSX="@khsx"></BootstrapChart>*@                                                
-                                                                                                                                                                                                                                                <ChartTracking TargetKHSX="@khsx"></ChartTracking>
+                                                        <ChartTracking TargetKHSX="@khsx"></ChartTracking>
                                                     </RadzenStack>
                                                 </ChildContent>
                                             </RadzenTabsItem>
@@ -258,15 +268,6 @@
                                                                 <RadzenText Visible="@(khsx.DSLOT_KHSXs.Count > 0)" Text="@($"{khsx.DSLOT_KHSXs.Count} (lot)")" Style="font-size: 16px; font-weight: bold; color: black "></RadzenText>
                                                             </RadzenStack>
 
-                                                            <RadzenStack Visible="false" Gap="0" Orientation="Orientation.Vertical" Style="height: 50%; width: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                                <RadzenText Text="Mã quản lý LOT" Style="font-size: 16px; font-weight: 500; color: darkgray "></RadzenText>
-                                                                @{
-                                                                    NguyenCongofKHSX? fistCongdoan = khsx?.DSachCongDoans.FirstOrDefault();
-                                                                }
-                                                                <RadzenText Visible="@(fistCongdoan != null)" Text="@($"{fistCongdoan?.DSachNVLCongDoans.FirstOrDefault()?.MaQuanLy.Value?.ToString() ?? "_"} --> {fistCongdoan?.DSachNVLCongDoans.LastOrDefault()?.MaQuanLy.Value ?? "_"}")"
-                                                                            Style="font-size: 16px; font-weight: bold; color: black "></RadzenText>
-                                                            </RadzenStack>
-
                                                             <RadzenStack Gap="0" Orientation="Orientation.Vertical" Style="height: 50%; width: contain;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                                                                 <RadzenText Text="@Common.NgayTao" Style="font-size: 16px; font-weight: 500; color: darkgray "></RadzenText>
                                                                 @if (khsx?.NgayTao.Value != null)
@@ -279,11 +280,6 @@
                                                                     <RadzenText Text="----" Style="font-size: 16px; font-weight: bold; color: black "></RadzenText>
                                                                 }
                                                             </RadzenStack>
-                                                        </RadzenStack>
-                                                        <RadzenStack Visible="false" Orientation="Orientation.Horizontal" Style="height: contain; width: 100%; padding: 10px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                                                            @{
-                                                                <RadzenText Text="Xem chi tiết KHSX" @onclick="@(() => OnOpenChitietKHSX(khsx))" TextAlign="TextAlign.Center" Style="font-size: 16px; font-weight: 500; color: Highlight; cursor: pointer "></RadzenText>
-                                                            }
                                                         </RadzenStack>
                                                     </RadzenStack>
                                                 </RadzenCard>
@@ -363,168 +359,153 @@
         await base.OnInitializedAsync();
     }
 
-    private (int, int, int) GetResultsKQGCperCDoanAllLots(object? cdid, object? khsxid)
+    // OPTIMIZED: Sử dụng SQLServerServicesV2 với batch loading
+    private async Task<(int, int, int)> GetResultsKQGCperCDoanAllLotsAsync(object? cdid, object? khsxid)
     {
-        int sumok = 0; int sumng = 0;
-
-        Dictionary<string, object?> parameters = new();
-
-        parameters.Add($"{KetQuaGC.KQGCDBName.NCID}", cdid);
-
-        parameters.Add($"{KetQuaGC.KQGCDBName.KHSXID}", khsxid);
-
-        (List<KetQuaGC> DSachKetQuaGCsBase, string resultMess) = SQLServerServices.GetListKetQuaGC(parameters, false);
-
-        sumok = DSachKetQuaGCsBase.Sum(kqgc => int.TryParse(kqgc.SLOK.Value?.ToString(), out int slok) ? slok : 0);
-        sumng = DSachKetQuaGCsBase.Sum(kqgc => int.TryParse(kqgc.SLNG.Value?.ToString(), out int slng) ? slng : 0);
-
-        return (sumok, sumng, (sumok + sumng));
+        return await SQLServerServicesV2.GetResultsKQGCperCDoanAllLotsAsync(cdid, khsxid);
     }
 
-    long loadinngtime;
+    long loadinngtime = 0;
+    long dataLoadTime = 0;
+    long renderTime = 0;
 
     private async Task OnGetListKHSXs()
     {
-        var stopwatch = Stopwatch.StartNew(); // Start the timer
+        var totalStopwatch = Stopwatch.StartNew(); // Total time
+        var dataStopwatch = Stopwatch.StartNew(); // Data loading time
 
         var dskhsxs = new ConcurrentBag<KHSX>(); // using for not missing item in await task
-        //var listkhsxids = SQLServerServices.GetlistKHSXid();
 
         List<KHSX> baseKHSXs = new(); // danh sach KHSX (chi cac truong mac dinh)
 
-        // Apply filtering
+        // STEP 1: Load base KHSX list
+        var step1Sw = Stopwatch.StartNew();
+        var result = await SQLServerServicesV2.GetListKHSXsByAnyParmeters_AsignColumnAsync(new(), new() { Common.KHSXID, Common.IsDoneKHSX, Common.IsAllowDisplay }, true);
+        baseKHSXs = result.kHSXes;
+        step1Sw.Stop();
+        System.Console.WriteLine($"[TIMING] Step 1 - Load base KHSX list: {step1Sw.ElapsedMilliseconds}ms ({baseKHSXs.Count} items)");
 
-        baseKHSXs = SQLServerServices.GetListKHSXsByAnyParmeters_AsignColumn(new(), new() { Common.KHSXID, Common.IsDoneKHSX, Common.IsAllowDisplay }, true).kHSXes;
-
+        // STEP 2: Apply filtering
+        var step2Sw = Stopwatch.StartNew();
         if (modeSearchKHSX == 0) // Tat ca
         {
-            //baseKHSXs = SQLServerServices.GetListKHSXsByAnyParmeters_AsignColumn(new(), new() { Common.KHSXID, Common.IsDoneKHSX, Common.IsAllowDisplay }, true).kHSXes;
+            // Keep all
         }
         else if (modeSearchKHSX == 1) // Duoc hien thi
         {
-            //baseKHSXs = SQLServerServices.GetListKHSXsByAnyParmeters(new() { { Common.IsAllowDisplay, 1 } }, false).kHSXes;
             baseKHSXs = baseKHSXs.Where(khsx => object.Equals(khsx.IsAllowDisplay.Value, 1)).ToList();
         }
         else if (modeSearchKHSX == 2) // Khong duoc hien thi
         {
-            //baseKHSXs = SQLServerServices.GetListKHSXsByAnyParmeters(new() { { Common.IsAllowDisplay, 0 } }, false).kHSXes;
             baseKHSXs = baseKHSXs.Where(khsx => object.Equals(khsx.IsAllowDisplay.Value, 0)).ToList();
         }
         else if (modeSearchKHSX == 3) // KHSX Done
         {
-            //baseKHSXs = SQLServerServices.GetListKHSXsByAnyParmeters(new() { { Common.IsDoneKHSX, 1 } }, false).kHSXes;
             baseKHSXs = baseKHSXs.Where(khsx => object.Equals(khsx.IsDoneKHSX.Value, 1)).ToList();
         }
         else if (modeSearchKHSX == 4) // KHSX Not Done
         {
-            //baseKHSXs = SQLServerServices.GetListKHSXsByAnyParmeters(new() { { Common.IsDoneKHSX, 0 } }, false).kHSXes;
             baseKHSXs = baseKHSXs.Where(khsx => object.Equals(khsx.IsDoneKHSX.Value, 0)).ToList();
         }
+        step2Sw.Stop();
+        System.Console.WriteLine($"[TIMING] Step 2 - Filter: {step2Sw.ElapsedMilliseconds}ms ({baseKHSXs.Count} items after filter)");
 
-        var tasks = new List<Task>();
-        var semaphore = new SemaphoreSlim(30); // Increase concurrency limit
+        // STEP 3: Load detailed KHSX data - OPTIMIZED: Batch load tất cả cùng lúc
+        var step3Sw = Stopwatch.StartNew();
+        
+        // Collect all KHSX IDs
+        var khsxIds = baseKHSXs
+            .Where(k => k.KHSXID.Value != null)
+            .Select(k => k.KHSXID.Value)
+            .Cast<object>()
+            .ToList();
 
-        foreach (var emptykhsx in baseKHSXs)
+        // OPTIMIZED: Batch load tất cả KHSX cùng lúc thay vì từng cái
+        var batchKHSXs = await SQLServerServicesV2.BatchLoadKHSXsWithRelatedDataAsync(khsxIds);
+
+        // Batch load PhieuXuatKho bosung cho tất cả KHSX
+        var step3aSw = Stopwatch.StartNew();
+        var pxkBoSungData = await SQLServerServicesV2.BatchLoadPhieuXuatKhosAsync(khsxIds, isPhieuBoSung: true);
+        step3aSw.Stop();
+        System.Console.WriteLine($"[TIMING] Step 3a - Load PhieuXuatKho bosung: {step3aSw.ElapsedMilliseconds}ms");
+
+        // Batch load KetQuaGC cho tất cả công đoạn
+        var step3bSw = Stopwatch.StartNew();
+        var allCongDoanPairs = batchKHSXs.Values
+            .SelectMany(khsx => khsx.DSachCongDoans
+                .Where(cd => cd.NCID.Value != null)
+                .Select(cd => (cd.NCID.Value, khsx.KHSXID.Value)))
+            .ToList();
+
+        System.Console.WriteLine($"[Page] About to call BatchGetResultsKQGCperCDoanAllLotsAsync with {allCongDoanPairs.Count} pairs");
+        System.Console.WriteLine($"[Page] SQLServerServicesV2 instance: {SQLServerServicesV2 != null}");
+        
+        var batchKQGCResults = await SQLServerServicesV2.BatchGetResultsKQGCperCDoanAllLotsAsync(allCongDoanPairs);
+        
+        System.Console.WriteLine($"[Page] BatchGetResultsKQGCperCDoanAllLotsAsync returned {batchKQGCResults.Count} results");
+        step3bSw.Stop();
+        System.Console.WriteLine($"[TIMING] Step 3b - Load KetQuaGC: {step3bSw.ElapsedMilliseconds}ms");
+
+        // Process each KHSX (calculate values, assign data)
+        var step3cSw = Stopwatch.StartNew();
+        foreach (var kvp in batchKHSXs)
         {
-            await semaphore.WaitAsync(); // Wait for an available slot
-            tasks.Add(Task.Run(async () =>
+            var kHSX = kvp.Value;
+
+            // Assign PhieuXuatKho bosung
+            if (pxkBoSungData.ContainsKey(kvp.Key))
             {
-                try
+                kHSX.ListPXKBoSung = pxkBoSungData[kvp.Key];
+                kHSX.SoluongBoSung = kHSX.ListPXKBoSung?.Sum(pxk => pxk.DSNVLofPXKs.Sum(nvl => int.TryParse(nvl.NVLXKSoLuongAll.Value?.ToString(), out int dm) ? dm : 0)) ?? 0;
+            }
+
+            // Calculate và assign KetQuaGC
+            NguyenCongofKHSX preCongDoan = new();
+            _ = int.TryParse(kHSX.DinhMuc.Value?.ToString(), out int dinhmuc) ? dinhmuc : 0;
+            dinhmuc += kHSX.SoluongBoSung;
+
+            foreach (var congdoan in kHSX.DSachCongDoans)
+            {
+                var key = (congdoan.NCID.Value, kHSX.KHSXID.Value);
+                var (sumok, sumng, totalokng) = batchKQGCResults.ContainsKey(key) 
+                    ? batchKQGCResults[key] 
+                    : (0, 0, 0);
+
+                congdoan.sumOKSubmited = sumok; 
+                congdoan.sumNGSubmited = sumng; 
+                congdoan.sumTotalSubmited = totalokng;
+
+                if (kHSX.DSachCongDoans.IndexOf(congdoan) == 0)
                 {
-                    if (int.TryParse(emptykhsx.KHSXID.Value?.ToString(), out int khsxid))
-                    {
-                        KHSX kHSX = await GetKHSX(khsxid);
-
-                        if (kHSX.KHSXID.Value != null)
-                        {
-                            // Get PhieuXuatKho bosung
-                            Dictionary<string, object?> pars = new Dictionary<string, object?>() { { Common.KHSXID, kHSX.KHSXID.Value } };
-
-                            pars.Add(Common.IsPhieuBoSungNVL, 1);
-
-                            kHSX.ListPXKBoSung = SQLServerServices.GetListPhieuXuatKhos(pars).phieuxuatkhos;
-
-                            kHSX.SoluongBoSung = kHSX.ListPXKBoSung?.Sum(pxk => pxk.DSNVLofPXKs.Sum(nvl => int.TryParse(nvl.NVLXKSoLuongAll.Value?.ToString(), out int dm) ? dm : 0)) ?? 0;
-
-
-                            NguyenCongofKHSX preCongDoan = new();
-
-                            _ = int.TryParse(kHSX.DinhMuc.Value?.ToString(), out int dinhmuc) ? dinhmuc : 0;
-
-                            // Them SL bo sung
-                            dinhmuc += kHSX.SoluongBoSung;
-
-                            foreach (var congdoan in kHSX.DSachCongDoans)
-                            {
-                                // Tinh so luong dasubmit moi cong doan cua KHSX
-                                (int sumok, int sumng, int totalokng) = GetResultsKQGCperCDoanAllLots(congdoan.NCID.Value, kHSX.KHSXID.Value);
-
-                                congdoan.sumOKSubmited = sumok; congdoan.sumNGSubmited = sumng; congdoan.sumTotalSubmited = totalokng;
-
-                                if (kHSX.DSachCongDoans.IndexOf(congdoan) == 0)
-                                {
-                                    congdoan.sLlimit = dinhmuc;
-                                }
-                                else
-                                {
-                                    congdoan.sLlimit = preCongDoan.sLlimit - preCongDoan.sumNGSubmited;
-                                }
-
-                                congdoan.IsDoneCongDoan = congdoan.sumTotalSubmited == congdoan.sLlimit;
-
-                                // // Update congdoan
-                                // congdoan.SumOKSubmited.Value = sumok; congdoan.SumNGSubmited.Value = sumng; congdoan.SumTotalSubmited.Value = totalokng;
-                                // congdoan.SLlimit.Value = congdoan.sLlimit;
-
-                                // (int updateresult, string error) = SQLServerServices.UpdateNguyenCongofKHSX(congdoan);
-
-                                // if (updateresult == -1)
-                                // {
-
-                                // }
-
-                                preCongDoan = congdoan;
-                            }
-
-                            // Update IsDoneKHSX if value is null
-                            // if (emptykhsx.IsDoneKHSX.Value == null || object.Equals(emptykhsx.IsDoneKHSX.Value, 0))
-                            // {
-                            //     bool isDoneKHSX = kHSX.DSachCongDoans.All(cd => cd.IsDoneCongDoan);
-
-                            //     (int updateresult, string error) = SQLServerServices.UpdateKHSXProperty(khsxid, Common.IsDoneKHSX, (isDoneKHSX) ? 1 : 0);
-
-                            //     if (updateresult == -1)
-                            //     {
-
-                            //     }
-                            // }
-
-                            bool isDoneKHSX = kHSX.DSachCongDoans.All(cd => cd.IsDoneCongDoan);
-
-                            (int updateresult, string error) = SQLServerServices.UpdateKHSXProperty(khsxid, Common.IsDoneKHSX, (isDoneKHSX) ? 1 : 0);
-
-                            if (updateresult == -1)
-                            {
-
-                            }
-
-                            dskhsxs.Add(kHSX);
-                        }
-                    }
+                    congdoan.sLlimit = dinhmuc;
                 }
-                catch (Exception)
+                else
                 {
-                    // Log or handle the exception, possibly with ex.Message
+                    congdoan.sLlimit = preCongDoan.sLlimit - preCongDoan.sumNGSubmited;
                 }
-                finally
-                {
-                    semaphore.Release(); // Release the slot
-                }
-            }));
+
+                congdoan.IsDoneCongDoan = congdoan.sumTotalSubmited == congdoan.sLlimit;
+                preCongDoan = congdoan;
+            }
+
+            bool isDoneKHSX = kHSX.DSachCongDoans.All(cd => cd.IsDoneCongDoan);
+
+            // Update IsDoneKHSX
+            if (int.TryParse(kHSX.KHSXID.Value?.ToString(), out int khsxid))
+            {
+                SQLServerServicesV2.UpdateKHSXProperty(khsxid, Common.IsDoneKHSX, (isDoneKHSX) ? 1 : 0);
+            }
+
+            dskhsxs.Add(kHSX);
         }
+        step3cSw.Stop();
+        System.Console.WriteLine($"[TIMING] Step 3c - Process KHSX data: {step3cSw.ElapsedMilliseconds}ms");
 
-        await Task.WhenAll(tasks);
+        step3Sw.Stop();
+        System.Console.WriteLine($"[TIMING] Step 3 - Load detailed KHSX data: {step3Sw.ElapsedMilliseconds}ms (batch, {batchKHSXs.Count} items)");
 
+        // STEP 4: Process results
+        var step4Sw = Stopwatch.StartNew();
         if (dskhsxs.Any())
         {
             DSKHSXs_base = dskhsxs
@@ -538,17 +519,31 @@
             DSKHSXs = DSKHSXs_base;
         }
         else { DSKHSXs = new(); }
+        step4Sw.Stop();
+        System.Console.WriteLine($"[TIMING] Step 4 - Process results: {step4Sw.ElapsedMilliseconds}ms");
 
-        stopwatch.Stop(); // Stop the timer
-        loadinngtime = stopwatch.ElapsedMilliseconds; // Get the elapsed time
-    }
+        dataStopwatch.Stop();
+        dataLoadTime = dataStopwatch.ElapsedMilliseconds;
 
-    private async Task<KHSX> GetKHSX(object? khsxid)
-    {
-        return await Task.Run(() =>
-        {
-            return SQLServerServices.GetKHSXbyIDRuduceTime(khsxid);
-        });
+        // STEP 5: Trigger render and measure
+        var renderSw = Stopwatch.StartNew();
+        StateHasChanged(); // Trigger render
+        await Task.Delay(1); // Give render a moment
+        renderSw.Stop();
+        renderTime = renderSw.ElapsedMilliseconds;
+
+        totalStopwatch.Stop();
+        loadinngtime = totalStopwatch.ElapsedMilliseconds;
+
+        System.Console.WriteLine($"[TIMING] ===== SUMMARY =====");
+        System.Console.WriteLine($"[TIMING] Step 1 (Base list): {step1Sw.ElapsedMilliseconds}ms");
+        System.Console.WriteLine($"[TIMING] Step 2 (Filter): {step2Sw.ElapsedMilliseconds}ms");
+        System.Console.WriteLine($"[TIMING] Step 3 (Detail load): {step3Sw.ElapsedMilliseconds}ms");
+        System.Console.WriteLine($"[TIMING] Step 4 (Process): {step4Sw.ElapsedMilliseconds}ms");
+        System.Console.WriteLine($"[TIMING] Data Loading Total: {dataLoadTime}ms");
+        System.Console.WriteLine($"[TIMING] Render Time: {renderTime}ms");
+        System.Console.WriteLine($"[TIMING] Total Time: {loadinngtime}ms");
+        System.Console.WriteLine($"[TIMING] ===================");
     }
 
     private string IsKHSXSelected(KHSX selectKHSX)
@@ -602,11 +597,11 @@
         {
             TargetMQLLot = null; DSKHSXs = new();
 
-            //var results = DSKHSXs_base.FindAll(nv => nv.MaLSX.Value?.ToString()?.IndexOf(keysearch, StringComparison.OrdinalIgnoreCase) >= 0);
             List<KHSX> results = new();
 
-            // Search by ma KHSX
-            results = new List<KHSX>() { { SQLServerServices.GetKHSXbyMaKHSXRuduceTime(keysearch) } };
+            // OPTIMIZED: Sử dụng async version từ SQLServerServicesV2
+            var khsxByMa = await SQLServerServicesV2.GetKHSXbyMaKHSXRuduceTimeAsync(keysearch);
+            results = new List<KHSX>() { khsxByMa };
 
             if (results.All(khsx => khsx.KHSXID.Value == null))
             {
@@ -623,7 +618,7 @@
 
                     pars.Add(Common.IsPhieuBoSungNVL, 1);
 
-                    kHSX.ListPXKBoSung = SQLServerServices.GetListPhieuXuatKhos(pars).phieuxuatkhos;
+                    kHSX.ListPXKBoSung = SQLServerServicesV2.GetListPhieuXuatKhos(pars).phieuxuatkhos;
 
                     kHSX.SoluongBoSung = kHSX.ListPXKBoSung?.Sum(pxk => pxk.DSNVLofPXKs.Sum(nvl => int.TryParse(nvl.NVLXKSoLuongAll.Value?.ToString(), out int dm) ? dm : 0)) ?? 0;
 
@@ -635,10 +630,20 @@
                     // Them SL bo sung
                     dinhmuc += kHSX.SoluongBoSung;
 
+                    // OPTIMIZED: Batch load tất cả KetQuaGC
+                    var congdoanPairs = kHSX.DSachCongDoans
+                        .Where(cd => cd.NCID.Value != null)
+                        .Select(cd => (cd.NCID.Value, kHSX.KHSXID.Value))
+                        .ToList();
+
+                    var batchResults = await SQLServerServicesV2.BatchGetResultsKQGCperCDoanAllLotsAsync(congdoanPairs);
+
                     foreach (var congdoan in kHSX.DSachCongDoans)
                     {
-                        // Tinh so luong dasubmit moi cong doan cua KHSX
-                        (int sumok, int sumng, int totalokng) = GetResultsKQGCperCDoanAllLots(congdoan.NCID.Value, kHSX.KHSXID.Value);
+                        var key = (congdoan.NCID.Value, kHSX.KHSXID.Value);
+                        var (sumok, sumng, totalokng) = batchResults.ContainsKey(key) 
+                            ? batchResults[key] 
+                            : (0, 0, 0);
 
                         congdoan.sumOKSubmited = sumok; congdoan.sumNGSubmited = sumng; congdoan.sumTotalSubmited = totalokng;
 
@@ -725,7 +730,8 @@
 
     private async Task OnAllowHienThiKHSXChanged(KHSX targetkhsx, bool allowhienthi)
     {
-        (int udresult, string uderror) = SQLServerServices.UpdateKHSXProperty(targetkhsx.KHSXID.Value, Common.IsAllowDisplay, allowhienthi ? 1 : 0);
+        // OPTIMIZED: Sử dụng V2 để có cache invalidation
+        (int udresult, string uderror) = SQLServerServicesV2.UpdateKHSXProperty(targetkhsx.KHSXID.Value, Common.IsAllowDisplay, allowhienthi ? 1 : 0);
 
         await ButtonReloadPress();
     }
@@ -734,13 +740,15 @@
     {
         targetkhsx.IsCollapsed.Value = targetkhsx.isCollapsed ? 1 : 0;
 
-        (int udresult, string uderror) = SQLServerServices.UpdateKHSXProperty(targetkhsx.KHSXID.Value, Common.IsCollapsed, targetkhsx.IsCollapsed.Value);
+        // OPTIMIZED: Sử dụng V2 để có cache invalidation
+        (int udresult, string uderror) = SQLServerServicesV2.UpdateKHSXProperty(targetkhsx.KHSXID.Value, Common.IsCollapsed, targetkhsx.IsCollapsed.Value);
 
 
         // Set stop while load chart KHSX
         if (targetkhsx.isCollapsed)
         {
-            (int updatesuccess, string error) = SQLServerServices.UpdateKHSXProperty(targetkhsx.KHSXID.Value, Common.IsChartRunning, 0);
+            // OPTIMIZED: Sử dụng V2 để có cache invalidation
+            (int updatesuccess, string error) = SQLServerServicesV2.UpdateKHSXProperty(targetkhsx.KHSXID.Value, Common.IsChartRunning, 0);
         }
     }
 
@@ -817,3 +825,4 @@
         TooltipService.Open(elementReference, content, options);
     }
 }
+
