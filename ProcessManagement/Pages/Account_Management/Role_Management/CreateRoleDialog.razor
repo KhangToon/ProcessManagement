@@ -1,33 +1,187 @@
-﻿@using Radzen
+﻿@using System.Linq
+@using ProcessManagement.Models.Authorization
+@using ProcessManagement.Services.Authorization
+@using Radzen
 @using Radzen.Blazor
 
 @inject DialogService DialogService
+@inject PermissionService PermissionService
+@inject NotificationService NotificationService
 
-<div class="container">
-    <div class="row mb-4">
-        <div class="col">
-            <RadzenTemplateForm TItem="string" Data="@roleName">
-                <div class="row mb-3">
-                    <div class="col">
-                        <RadzenLabel Text="Role Name" />
-                        <RadzenTextBox @bind-Value="@roleName" class="w-100" />
-                        <RadzenRequiredValidator Text="Role name is required" Component="roleName" />
-                    </div>
-                </div>
+<RadzenTemplateForm TItem="object">
+    <div style="display: flex; flex-direction: column; max-height: 80vh;">
+        @* Role Name Section *@
+        <div style="flex: 0 0 auto; padding: 20px; border-bottom: 1px solid #e0e0e0;">
+            <RadzenStack Gap="12px">
+                <RadzenLabel Text="Tên Role" Style="font-weight: bold;" />
+                <RadzenTextBox @bind-Value="@roleName" class="w-100" Placeholder="Nhập tên role" />
+                <RadzenRequiredValidator Text="Tên role là bắt buộc" Component="roleName" />
+            </RadzenStack>
+        </div>
 
-                <div class="row">
-                    <div class="col d-flex justify-content-end gap-2">
-                        <RadzenButton Text="Cancel" ButtonStyle="ButtonStyle.Light" Click="@Cancel" />
-                        <RadzenButton Text="Create" ButtonStyle="ButtonStyle.Primary" Click="@CreateRole" />
-                    </div>
-                </div>
-            </RadzenTemplateForm>
+        @* Permissions Section - Scrollable *@
+        <div style="flex: 1 1 auto; overflow-y: auto; padding: 20px; max-height: 500px;">
+            <RadzenStack Gap="12px">
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                    <RadzenLabel Text="Chọn quyền mặc định cho role" Style="font-weight: bold; font-size: 16px;" />
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="8px">
+                        <RadzenCheckBox Value="@IsAllSelected()" 
+                                       ValueChanged="@((bool value) => SelectAllPermissions(value))" />
+                        <RadzenLabel Text="Chọn tất cả" Style="font-size: 12px; color: #666;" />
+                    </RadzenStack>
+                </RadzenStack>
+
+                @foreach (var module in permissionsByModule)
+                {
+                    <RadzenCard>
+                        <RadzenStack Gap="10px">
+                            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="10px" JustifyContent="JustifyContent.SpaceBetween">
+                                <RadzenLabel Text="@module.Key" Style="font-weight: bold; font-size: 14px;" />
+                                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="8px">
+                                    <RadzenCheckBox Value="@IsAllSelectedInModule(module.Key)" 
+                                                   ValueChanged="@((bool value) => SelectAllInModule(module.Key, value))" />
+                                    <RadzenLabel Text="Chọn tất cả" Style="font-size: 12px; color: #666;" />
+                                </RadzenStack>
+                            </RadzenStack>
+                            
+                            <RadzenStack Gap="5px" Orientation="Orientation.Vertical">
+                                @foreach (var permission in module.Value)
+                                {
+                                    var permissionKey = permission;
+                                    var isChecked = selectedPermissions.Contains(permission);
+                                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="10px">
+                                        <RadzenCheckBox Value="@isChecked" 
+                                                       ValueChanged="@((bool value) => OnCheckboxChanged(permissionKey, value))" />
+                                        <RadzenLabel Text="@GetPermissionDisplayName(permission)" />
+                                    </RadzenStack>
+                                }
+                            </RadzenStack>
+                        </RadzenStack>
+                    </RadzenCard>
+                }
+            </RadzenStack>
+        </div>
+
+        @* Footer Buttons *@
+        <div style="flex: 0 0 auto; padding: 12px 20px; border-top: 1px solid #e0e0e0; background: white;">
+            <RadzenStack Orientation="Orientation.Horizontal" Gap="12px" JustifyContent="JustifyContent.End">
+                <RadzenButton Text="Hủy" 
+                             Icon="cancel" 
+                             ButtonStyle="ButtonStyle.Light" 
+                             Click="@Cancel" />
+                <RadzenButton Text="Tạo Role" 
+                             Icon="add" 
+                             ButtonStyle="ButtonStyle.Primary" 
+                             Click="@CreateRole" 
+                             Disabled="@(string.IsNullOrWhiteSpace(roleName))" />
+            </RadzenStack>
         </div>
     </div>
-</div>
+</RadzenTemplateForm>
 
 @code {
     private string roleName = string.Empty;
+    private Dictionary<string, List<string>> permissionsByModule = new();
+    private HashSet<string> selectedPermissions = new();
+
+    protected override void OnInitialized()
+    {
+        permissionsByModule = Permissions.GetAllPermissionsByModule();
+    }
+
+    private void OnCheckboxChanged(string permission, bool isChecked)
+    {
+        if (isChecked)
+        {
+            selectedPermissions.Add(permission);
+        }
+        else
+        {
+            selectedPermissions.Remove(permission);
+        }
+        StateHasChanged();
+    }
+
+    private bool IsAllSelected()
+    {
+        var allPermissions = Permissions.GetAllPermissions();
+        return allPermissions.All(p => selectedPermissions.Contains(p));
+    }
+
+    private bool IsAllSelectedInModule(string moduleKey)
+    {
+        if (!permissionsByModule.ContainsKey(moduleKey))
+            return false;
+        
+        var modulePermissions = permissionsByModule[moduleKey];
+        return modulePermissions.All(p => selectedPermissions.Contains(p));
+    }
+
+    private void SelectAllPermissions(bool selectAll)
+    {
+        var allPermissions = Permissions.GetAllPermissions();
+        
+        if (selectAll)
+        {
+            foreach (var permission in allPermissions)
+            {
+                selectedPermissions.Add(permission);
+            }
+        }
+        else
+        {
+            selectedPermissions.Clear();
+        }
+        
+        StateHasChanged();
+    }
+
+    private void SelectAllInModule(string moduleKey, bool selectAll)
+    {
+        if (!permissionsByModule.ContainsKey(moduleKey))
+            return;
+        
+        var modulePermissions = permissionsByModule[moduleKey];
+        
+        if (selectAll)
+        {
+            foreach (var permission in modulePermissions)
+            {
+                selectedPermissions.Add(permission);
+            }
+        }
+        else
+        {
+            foreach (var permission in modulePermissions)
+            {
+                selectedPermissions.Remove(permission);
+            }
+        }
+        
+        StateHasChanged();
+    }
+
+    private string GetPermissionDisplayName(string permission)
+    {
+        if (permission.Contains("View"))
+            return "Xem";
+        if (permission.Contains("Create"))
+            return "Tạo mới";
+        if (permission.Contains("Update"))
+            return "Cập nhật";
+        if (permission.Contains("Delete"))
+            return "Xóa";
+        if (permission.Contains("NhapKho"))
+            return "Nhập kho";
+        if (permission.Contains("XuatKho"))
+            return "Xuất kho";
+        if (permission.Contains("KiemKe"))
+            return "Kiểm kê";
+        if (permission.Contains("ManagePermissions"))
+            return "Quản lý quyền";
+        
+        return permission;
+    }
 
     void Cancel()
     {
@@ -38,7 +192,15 @@
     {
         if (!string.IsNullOrWhiteSpace(roleName))
         {
-            DialogService.Close(roleName);
+            var result = new CreateRoleRequest
+            {
+                RoleName = roleName,
+                Permissions = selectedPermissions.ToList()
+            };
+            DialogService.Close(result);
         }
     }
 }
+
+@using ProcessManagement.Pages.Account_Management.Role_Management.Models
+

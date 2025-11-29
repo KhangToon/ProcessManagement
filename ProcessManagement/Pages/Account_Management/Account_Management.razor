@@ -10,6 +10,7 @@
 @using ProcessManagement.Commons
 @using ProcessManagement.Pages.Account_Management.Role_Management
 @using ProcessManagement.Pages.Account_Management.User_Management
+@using ProcessManagement.Pages.Account_Management.Permission_Management
 @using Radzen
 @using Radzen.Blazor
 
@@ -17,22 +18,39 @@
 @inject NotificationService NotificationService
 @inject DialogService DialogService
 
-<h1>Account Management</h1>
+<div style="display: flex; justify-content: start; align-items: center; margin-bottom: 20px; gap: 20px">
+    <h1 style="margin: 0;">Account Management</h1>
+    <RadzenButton Text="Xem hướng dẫn" 
+                  Icon="help" 
+                  ButtonStyle="ButtonStyle.Info" 
+                  Variant="Variant.Text"
+                  Click="@OpenGuideDialog" />
+</div>
 
 <RadzenTabs>
     <Tabs>
-        <!-- User Management Tab -->
-        <RadzenTabsItem Text="User Management">
+        <!-- User Management Tab -->    
+        <RadzenTabsItem Text="Quản lý tài khoảng">
             <UserManagement></UserManagement>
         </RadzenTabsItem>
 
         <!-- Role Management Tab -->
-        <RadzenTabsItem Text="Role Management">
+        <RadzenTabsItem Text="Quản lý Roles">
             <RoleManagement></RoleManagement>
+        </RadzenTabsItem>
+
+        <!-- Permission Management Tab -->
+        <RadzenTabsItem Text="Quản lý quyền truy cập">
+            <PermissionManagement></PermissionManagement>
         </RadzenTabsItem>
     </Tabs>
 </RadzenTabs>
 
 @code {
-
+    private async Task OpenGuideDialog()
+    {
+        await DialogService.OpenAsync<AccountManagementGuide>("Hướng dẫn sử dụng",
+            new Dictionary<string, object>(),
+            new DialogOptions { Width = "90%", Height = "90%", Resizable = true, Draggable = true });
+    }
 }

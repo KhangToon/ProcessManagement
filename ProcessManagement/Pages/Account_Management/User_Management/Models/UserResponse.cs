@@ -8,6 +8,7 @@ namespace ProcessManagement.Pages.Account_Management.User_Management.Models
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
         public List<string> Roles { get; set; } = new();
+        public bool IsActive { get; set; } = true;
     }
 
     public class CreateUserRequest
@@ -17,6 +18,7 @@ namespace ProcessManagement.Pages.Account_Management.User_Management.Models
         public string Email { get; set; } = string.Empty;
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
+        public string RoleName { get; set; } = string.Empty;
     }
 
     public class UpdateUserRequest
@@ -24,5 +26,6 @@ namespace ProcessManagement.Pages.Account_Management.User_Management.Models
         public string Email { get; set; } = string.Empty;
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
+        public bool IsActive { get; set; } = true;
     }
 }

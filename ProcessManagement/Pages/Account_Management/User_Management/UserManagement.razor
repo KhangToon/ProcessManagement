@@ -5,20 +5,21 @@
 @using Microsoft.AspNetCore.Components
 @using ProcessManagement.Commons
 @using ProcessManagement.Pages.Account_Management.Password_Management
+@using ProcessManagement.Pages.Account_Management.User_Management
 @using ProcessManagement.Pages.Account_Management.User_Management.Models
+@using ProcessManagement.Services.Authorization
 @using Radzen
 @using Radzen.Blazor
 
 @inject IHttpClientFactory HttpClientFactory
 @inject NotificationService NotificationService
 @inject DialogService DialogService
+@inject PermissionService PermissionService
 
 <RadzenCard>
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3 class="m-0">Users</h3>
+        <h3 class="m-0">Danh sách tài khoảng</h3>
         <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
-            <RadzenButton Text="Reset Password" Icon="lock" ButtonStyle="ButtonStyle.Primary" Click="@OpenResetPasswordDialog" />
-
             <RadzenButton Text="Add User" Icon="add" ButtonStyle="ButtonStyle.Primary" Click="@OpenCreateUserDialog" />
         </RadzenStack>
     </div>
@@ -41,13 +42,35 @@
                     @string.Join(", ", user.Roles)
                 </Template>
             </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="UserResponse" Property="IsActive" Title="Trạng thái" Width="120px" TextAlign="TextAlign.Center">
+                <Template Context="user">
+                    <RadzenBadge Text="@(user.IsActive ? "Hoạt động" : "Tạm dừng")" 
+                               Variant="Variant.Filled" 
+                               BadgeStyle="@(user.IsActive ? BadgeStyle.Success : BadgeStyle.Warning)" />
+                </Template>
+            </RadzenDataGridColumn>
             <RadzenDataGridColumn TItem="UserResponse" Title="Actions" Width="200px" TextAlign="TextAlign.Center">
                 <Template Context="user">
-                    <RadzenStack Gap="10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                        <RadzenButton Style="font-weight: 600px" Icon="edit" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small"
-                                      Click="@(() => OpenEditUserDialog(user))" />
-                        <RadzenButton Style="font-weight: 600px" Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Shade=Shade.Lighter
-                                      Click="@(() => DeleteUser(user.Id))" />
+                    <RadzenStack Gap="6px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                        @{
+                            var isAdminUser = user.Email?.ToLower() == "admin@admin" || user.Username?.ToLower() == "admin";
+                        }
+                        <RadzenButton Icon="edit" 
+                                     ButtonStyle="ButtonStyle.Primary" 
+                                     Size="ButtonSize.Small"
+                                     Click="@(() => OpenEditUserDialog(user))"
+                                     Title="Chỉnh sửa thông tin" />
+                        <RadzenButton Icon="security" 
+                                     ButtonStyle="ButtonStyle.Info" 
+                                     Size="ButtonSize.Small"
+                                     Click="@(() => OpenManagePermissionsDialog(user.Id))"
+                                     Title="Quản lý quyền truy cập" />
+                        <RadzenButton Icon="delete" 
+                                     ButtonStyle="ButtonStyle.Danger" 
+                                     Size="ButtonSize.Small"
+                                     Click="@(() => DeleteUser(user.Id))"
+                                     Title="Xóa người dùng"
+                                     Disabled="@isAdminUser" />
                     </RadzenStack>
                 </Template>
             </RadzenDataGridColumn>
@@ -87,7 +110,7 @@
     {
         var result = await DialogService.OpenAsync<CreateUserDialog>("Create New User",
             new Dictionary<string, object>(),
-            new DialogOptions { Width = "500px", Height = "400px" });
+            new DialogOptions { Width = "500px", Height = "auto" });
 
         if (result != null)
         {
@@ -97,13 +120,25 @@
 
     private async Task OpenEditUserDialog(UserResponse user)
     {
-        var result = await DialogService.OpenAsync<EditUserDialog>("Edit User",
+        var result = await DialogService.OpenAsync<EditUserDialog>("Chỉnh sửa người dùng",
             new Dictionary<string, object> { { "User", user } },
-            new DialogOptions { Width = "500px", Height = "400px" });
+            new DialogOptions { Width = "900px", Height = "auto", Resizable = true, Draggable = true });
 
         if (result != null)
         {
             await LoadUsers();
+        }
+    }
+
+    private async Task OpenManagePermissionsDialog(string userId)
+    {
+        var result = await DialogService.OpenAsync<UserPermissionsDialog>("Quản lý quyền truy cập",
+            new Dictionary<string, object> { { "UserId", userId }, { "IsEditMode", false } },
+            new DialogOptions { Width = "700px", Height = "auto", Resizable = true, Draggable = true });
+
+        if (result != null && result == true)
+        {
+            // Permissions đã được cập nhật, có thể reload nếu cần
         }
     }
 
@@ -147,4 +182,12 @@
             await LoadUsers();
         }
     }
+
+    private async Task ShowUserPermissions(string userId)
+    {
+        var result = await DialogService.OpenAsync<UserPermissionsDialog>("Quyền truy cập của người dùng",
+            new Dictionary<string, object> { { "UserId", userId }, { "IsEditMode", false } },
+            new DialogOptions { Width = "700px", Height = "800px", Resizable = true, Draggable = true });
+    }
+
 }

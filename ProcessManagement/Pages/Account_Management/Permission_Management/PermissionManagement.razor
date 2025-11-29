@@ -1,0 +1,185 @@
+@using System.Linq
+@using ProcessManagement.Models.Authorization
+@using ProcessManagement.Data
+@using Microsoft.EntityFrameworkCore
+@using Radzen
+@using Radzen.Blazor
+
+@inject AppDbContext DbContext
+@inject NotificationService NotificationService
+@inject DialogService DialogService
+
+<RadzenCard>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="m-0">Quản lý Permissions</h3>
+        <RadzenButton Text="Thêm Module" Icon="add" ButtonStyle="ButtonStyle.Primary" Click="@(() => OpenAddModuleDialog())" />
+    </div>
+
+    @if (isLoading)
+    {
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="8px" JustifyContent="JustifyContent.Center" Style="padding: 20px;">
+            <RadzenProgressBarCircular ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+            <RadzenLabel Text="Đang tải..." />
+        </RadzenStack>
+    }
+    else
+    {
+        @foreach (var module in permissionsByModule)
+        {
+            <RadzenCard Style="margin-bottom: 20px;">
+                <RadzenStack Gap="12px">
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                        <RadzenLabel Text="@module.Key" Style="font-weight: bold; font-size: 18px;" />
+                        <RadzenButton Icon="add" 
+                                     Text="Thêm"
+                                     ButtonStyle="ButtonStyle.Info" 
+                                     Size="ButtonSize.Small"
+                                     Click="@(() => OpenAddPermissionDialog(module.Key))" />
+                    </RadzenStack>
+
+                    <RadzenDataGrid Data="@module.Value" TItem="Permission"
+                                    AllowSorting="true" 
+                                    AllowFiltering="false" 
+                                    AllowPaging="false"
+                                    Style="margin-top: 10px;">
+                        <Columns>
+                            <RadzenDataGridColumn TItem="Permission" Property="PermissionCode" Title="Permission Code" Width="200px" />
+                            <RadzenDataGridColumn TItem="Permission" Property="Action" Title="Action" Width="120px" />
+                            <RadzenDataGridColumn TItem="Permission" Property="DisplayName" Title="Tên hiển thị" Width="150px" />
+                            <RadzenDataGridColumn TItem="Permission" Property="Description" Title="Mô tả" />
+                            <RadzenDataGridColumn TItem="Permission" Property="IsActive" Title="Trạng thái" Width="120px" TextAlign="TextAlign.Center">
+                                <Template Context="permission">
+                                    <RadzenBadge Text="@(permission.IsActive ? "Hoạt động" : "Tạm dừng")" 
+                                               Variant="Variant.Filled" 
+                                               BadgeStyle="@(permission.IsActive ? BadgeStyle.Success : BadgeStyle.Warning)" />
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="Permission" Width="150px" Title="Actions" TextAlign="TextAlign.Center">
+                                <Template Context="permission">
+                                    <RadzenStack Gap="6px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                        <RadzenButton Icon="edit" 
+                                                     ButtonStyle="ButtonStyle.Primary" 
+                                                     Size="ButtonSize.Small"
+                                                     Click="@(() => OpenEditPermissionDialog(permission))"
+                                                     Title="Chỉnh sửa" />
+                                        <RadzenButton Icon="delete" 
+                                                     ButtonStyle="ButtonStyle.Danger" 
+                                                     Size="ButtonSize.Small" 
+                                                     Shade="Shade.Lighter"
+                                                     Click="@(() => DeletePermission(permission))"
+                                                     Title="Xóa" />
+                                    </RadzenStack>
+                                </Template>
+                            </RadzenDataGridColumn>
+                        </Columns>
+                    </RadzenDataGrid>
+                </RadzenStack>
+            </RadzenCard>
+        }
+    }
+</RadzenCard>
+
+@code {
+    private Dictionary<string, List<Permission>> permissionsByModule = new();
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPermissions();
+    }
+
+    private async Task LoadPermissions()
+    {
+        isLoading = true;
+        try
+        {
+            var allPermissions = await DbContext.Permissions
+                .OrderBy(p => p.Module)
+                .ThenBy(p => p.Action)
+                .ToListAsync();
+
+            permissionsByModule = allPermissions
+                .GroupBy(p => p.Module)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            // Đảm bảo tất cả modules từ Permissions.cs đều có trong dictionary
+            var defaultModules = Permissions.GetAllPermissionsByModule();
+            foreach (var module in defaultModules.Keys)
+            {
+                if (!permissionsByModule.ContainsKey(module))
+                {
+                    permissionsByModule[module] = new List<Permission>();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Lỗi", $"Không thể tải permissions: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task OpenAddModuleDialog()
+    {
+        // Mở dialog thêm permission với module rỗng, cho phép nhập module mới
+        var result = await DialogService.OpenAsync<AddEditPermissionDialog>("Thêm Module Mới",
+            new Dictionary<string, object> { { "Module", string.Empty }, { "IsEdit", false } },
+            new DialogOptions { Width = "600px", Height = "auto", Resizable = true, Draggable = true });
+
+        if (result != null && result == true)
+        {
+            await LoadPermissions();
+        }
+    }
+
+    private async Task OpenAddPermissionDialog(string? moduleName = null)
+    {
+        var result = await DialogService.OpenAsync<AddEditPermissionDialog>("Thêm Permission Mới",
+            new Dictionary<string, object> { { "Module", moduleName ?? string.Empty }, { "IsEdit", false } },
+            new DialogOptions { Width = "600px", Height = "auto", Resizable = true, Draggable = true });
+
+        if (result != null && result == true)
+        {
+            await LoadPermissions();
+        }
+    }
+
+    private async Task OpenEditPermissionDialog(Permission permission)
+    {
+        var result = await DialogService.OpenAsync<AddEditPermissionDialog>("Chỉnh sửa Permission",
+            new Dictionary<string, object> { { "Permission", permission }, { "IsEdit", true } },
+            new DialogOptions { Width = "600px", Height = "auto", Resizable = true, Draggable = true });
+
+        if (result != null && result == true)
+        {
+            await LoadPermissions();
+        }
+    }
+
+    private async Task DeletePermission(Permission permission)
+    {
+        var confirmed = await DialogService.Confirm($"Bạn có chắc chắn muốn xóa permission '{permission.PermissionCode}'?", "Xác nhận xóa",
+            new ConfirmOptions { OkButtonText = "Xóa", CancelButtonText = "Hủy" });
+
+        if (confirmed == true)
+        {
+            try
+            {
+                DbContext.Permissions.Remove(permission);
+                await DbContext.SaveChangesAsync();
+                
+                NotificationService.Notify(NotificationSeverity.Success, "Thành công", $"Đã xóa permission '{permission.PermissionCode}'");
+                await LoadPermissions();
+            }
+            catch (Exception ex)
+            {
+                NotificationService.Notify(NotificationSeverity.Error, "Lỗi", $"Không thể xóa permission: {ex.Message}");
+            }
+        }
+    }
+}
+

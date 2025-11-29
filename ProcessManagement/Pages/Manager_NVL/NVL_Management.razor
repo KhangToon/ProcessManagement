@@ -5,6 +5,7 @@
 @using ProcessManagement.Commons
 @using ProcessManagement.Models
 @using ProcessManagement.Models.KHO_NVL
+@using ProcessManagement.Models.Authorization
 @using ProcessManagement.Pages.Manager_NVL.EditViTriofNVL
 @using ProcessManagement.Pages.Manager_NVL.LoggingXNK
 @using ProcessManagement.Pages.Manager_NVL.TraKho
@@ -72,14 +73,20 @@
                                         <RadzenColumn SizeMD="4" Size="12">
                                             <RadzenStack Gap="10px" Style="height: 100%; width: 100%; padding-left: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
                                                 <!--Nhap kho button-->
-                                                <RadzenButton Click="OnOpenDialogNhapKho" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Tạo phiếu nhập kho", 100))" Icon="download" Text="@($"Nhập kho {((DSNvlNhapKho.Count > 0)? $"({DSNvlNhapKho.Count})" : string.Empty)}")" Size="ButtonSize.Small" ButtonStyle="@((DSNvlNhapKho.Count > 0)? ButtonStyle.Success : ButtonStyle.Primary)" Variant="Variant.Filled" Shade="Shade.Light"
-                                                              Style="height: contain; width: 30%; font-size: 14px;" />
+                                                <AuthorizedAction RequiredPermission="@Permissions.KhoNVL_NhapKho">
+                                                    <RadzenButton Click="OnOpenDialogNhapKho" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Tạo phiếu nhập kho", 100))" Icon="download" Text="@($"Nhập kho {((DSNvlNhapKho.Count > 0)? $"({DSNvlNhapKho.Count})" : string.Empty)}")" Size="ButtonSize.Small" ButtonStyle="@((DSNvlNhapKho.Count > 0)? ButtonStyle.Success : ButtonStyle.Primary)" Variant="Variant.Filled" Shade="Shade.Light"
+                                                                  Style="height: contain; width: 30%; font-size: 14px;" />
+                                                </AuthorizedAction>
                                                 <!--Xuat kho button-->
-                                                <RadzenButton Click="OnOpenDialogXuatKho" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Tạo phiếu xuất kho", 100))" Icon="upload" Text="@($"Xuất kho {((DSNvlXuatKho.Count > 0)? $"({DSNvlXuatKho.Count})" : string.Empty)}")" Size="ButtonSize.Small" ButtonStyle="@((DSNvlXuatKho.Count > 0)? ButtonStyle.Success : ButtonStyle.Primary)" Variant="Variant.Filled" Shade="Shade.Light"
-                                                              Style="height: contain; width: 30%; font-size: 14px;" />
+                                                <AuthorizedAction RequiredPermission="@Permissions.KhoNVL_XuatKho">
+                                                    <RadzenButton Click="OnOpenDialogXuatKho" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Tạo phiếu xuất kho", 100))" Icon="upload" Text="@($"Xuất kho {((DSNvlXuatKho.Count > 0)? $"({DSNvlXuatKho.Count})" : string.Empty)}")" Size="ButtonSize.Small" ButtonStyle="@((DSNvlXuatKho.Count > 0)? ButtonStyle.Success : ButtonStyle.Primary)" Variant="Variant.Filled" Shade="Shade.Light"
+                                                                  Style="height: contain; width: 30%; font-size: 14px;" />
+                                                </AuthorizedAction>
                                                 <!--Tra kho button-->
-                                                <RadzenButton Click="OnOpenDialogTraKho" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Tạo phiếu trả kho", 100))" Icon="undo" Text="@($"Trả kho {((DSNvlTraKho.Count > 0)? $"({DSNvlTraKho.Count})" : string.Empty)}")" Size="ButtonSize.Small" ButtonStyle="@((DSNvlTraKho.Count > 0)? ButtonStyle.Success : ButtonStyle.Primary)" Variant="Variant.Filled" Shade="Shade.Light"
-                                                              Style="height: contain; width: 30%; font-size: 14px;" />
+                                                <AuthorizedAction RequiredPermission="@Permissions.KhoNVL_XuatKho">
+                                                    <RadzenButton Click="OnOpenDialogTraKho" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Tạo phiếu trả kho", 100))" Icon="undo" Text="@($"Trả kho {((DSNvlTraKho.Count > 0)? $"({DSNvlTraKho.Count})" : string.Empty)}")" Size="ButtonSize.Small" ButtonStyle="@((DSNvlTraKho.Count > 0)? ButtonStyle.Success : ButtonStyle.Primary)" Variant="Variant.Filled" Shade="Shade.Light"
+                                                                  Style="height: contain; width: 30%; font-size: 14px;" />
+                                                </AuthorizedAction>
                                             </RadzenStack>
                                         </RadzenColumn>
                                     </RadzenRow>

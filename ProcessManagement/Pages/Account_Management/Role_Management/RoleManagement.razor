@@ -1,50 +1,37 @@
 ﻿@page "/role-management"
+@namespace ProcessManagement.Pages.Account_Management.Role_Management
 @attribute [Authorize(Roles = "Admin")]
 
 @using System.Net.Http.Json
 @using System.Text
 @using System.Text.Json
+@using System.Linq
 @using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.Authorization
 @using ProcessManagement.Commons
+@using ProcessManagement.Pages.Account_Management.Role_Management
 @using ProcessManagement.Pages.Account_Management.Role_Management.Models
+@using ProcessManagement.Pages.Account_Management.User_Management.Models
+@using ProcessManagement.Services.Authorization
 @using Radzen
 @using Radzen.Blazor
 
 @inject IHttpClientFactory HttpClientFactory
 @inject NotificationService NotificationService
 @inject DialogService DialogService
+@inject PermissionService PermissionService
 
 <div class="row mb-4">
     <div class="col">
         <RadzenCard>
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h3 class="m-0">Roles</h3>
+                <h3 class="m-0">Danh sách Roles</h3>
                 <div>
-                    <RadzenButton Text="Test API Connection" Icon="network_check" ButtonStyle="ButtonStyle.Info" Click="@TestApiConnection" class="me-2" />
-                    <RadzenButton Text="Add Role" Icon="add" ButtonStyle="ButtonStyle.Primary" Click="@OpenCreateRoleDialog" />
+                    <RadzenButton Text="Thêm Role" Icon="add" ButtonStyle="ButtonStyle.Primary" Click="@OpenCreateRoleDialog" />
                 </div>
             </div>
 
-            @if (apiError)
-            {
-                <div class="alert alert-danger">
-                    <h4>API Connection Error</h4>
-                    <p>Could not connect to the roles API. Please check your API configuration.</p>
-                    @if (!string.IsNullOrEmpty(lastErrorMessage))
-                    {
-                        <p><strong>Error details:</strong> @lastErrorMessage</p>
-                    }
-                    @if (!string.IsNullOrEmpty(lastResponsePreview))
-                    {
-                        <div>
-                            <strong>Response preview:</strong>
-                            <pre style="max-height: 200px; overflow-y: auto; background-color: #f8f9fa; padding: 10px;">@lastResponsePreview</pre>
-                        </div>
-                    }
-                </div>
-            }
 
             <RadzenDataGrid @ref="rolesGrid" Data="@roles" TItem="IdentityRole"
                             AllowSorting="true" AllowFiltering="false" AllowPaging="true" PageSize="10"
@@ -58,10 +45,31 @@
                     </RadzenDataGridColumn>
                     <RadzenDataGridColumn TItem="IdentityRole" Property="Name" Title="Role Name" TextAlign="TextAlign.Center" />
                     <RadzenDataGridColumn TItem="IdentityRole" Property="NormalizedName" Title="Normalized Name" TextAlign="TextAlign.Center" />
-                    <RadzenDataGridColumn TItem="IdentityRole" Width="150px" Title="Actions" TextAlign="TextAlign.Center">
-                        <Template Context="user">
-                            <RadzenButton Style="font-weight: 600px" Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Shade=Shade.Lighter
-                                          Click="@(() => DeleteRole(user.Name ?? string.Empty))" />
+                    <RadzenDataGridColumn TItem="IdentityRole" Width="180px" Title="Quyền mặc định" TextAlign="TextAlign.Center">
+                        <Template Context="role">
+                            <RadzenButton Icon="security" 
+                                         Text="Quyền"
+                                         ButtonStyle="ButtonStyle.Info" 
+                                         Size="ButtonSize.Small"
+                                         Click="@(() => OpenRolePermissionsDialog(role.Name ?? string.Empty))"
+                                         Title="Xem và điều chỉnh quyền mặc định cho role" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="IdentityRole" Width="200px" Title="Actions" TextAlign="TextAlign.Center">
+                        <Template Context="role">
+                            <RadzenStack Gap="6px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                <RadzenButton Icon="edit" 
+                                             ButtonStyle="ButtonStyle.Primary" 
+                                             Size="ButtonSize.Small"
+                                             Click="@(() => OpenEditRoleDialog(role.Name ?? string.Empty))"
+                                             Title="Chỉnh sửa role" />
+                                <RadzenButton Icon="delete" 
+                                             ButtonStyle="ButtonStyle.Danger" 
+                                             Size="ButtonSize.Small" 
+                                             Shade="Shade.Lighter"
+                                             Click="@(() => DeleteRole(role.Name ?? string.Empty))"
+                                             Title="Xóa role" />
+                            </RadzenStack>
                         </Template>
                     </RadzenDataGridColumn>
                 </Columns>
@@ -74,26 +82,58 @@
     <div class="col">
         <RadzenCard>
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h3 class="m-0">Assign Role to User</h3>
+                <h3 class="m-0">Gán Role cho User</h3>
             </div>
 
             <RadzenTemplateForm TItem="AssignRoleRequest" Data="@assignRoleModel" Submit="@(async() => await AssignRole())">
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <RadzenLabel Text="User ID" />
-                        <RadzenTextBox @bind-Value="@assignRoleModel.UserId" Name="UserId" class="w-100" />
-                        <RadzenRequiredValidator Component="UserId" Text="User ID is required" />
+                        <RadzenLabel Text="User" />
+                        <RadzenDropDown @bind-Value="@assignRoleModel.UserId" Data="@users"
+                                        ValueProperty="Id" 
+                                        Name="UserId" 
+                                        class="w-100"
+                                        Placeholder="Chọn user"
+                                        Change="@(async (object value) => await OnUserSelected(value))">
+                            <Template Context="user">
+                                <RadzenStack Gap="8px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween" Style="width: 100%;">
+                                    <span>@($"{user.Username} ({user.Email})")</span>
+                                    @if (user.Roles != null && user.Roles.Count > 0)
+                                    {
+                                        <RadzenBadge Text="@user.Roles[0]" Variant="Variant.Filled" BadgeStyle="BadgeStyle.Success" Style="font-size: 11px;" />
+                                    }
+                                    else
+                                    {
+                                        <RadzenBadge Text="Chưa có role" Variant="Variant.Filled" BadgeStyle="BadgeStyle.Warning" Style="font-size: 11px;" />
+                                    }
+                                </RadzenStack>
+                            </Template>
+                            <ValueTemplate Context="user">
+                                <RadzenStack Gap="8px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween" Style="width: 100%;">
+                                    <span>@($"{user.Username} ({user.Email})")</span>
+                                    @if (user.Roles != null && user.Roles.Count > 0)
+                                    {
+                                        <RadzenBadge Text="@user.Roles[0]" Variant="Variant.Filled" BadgeStyle="BadgeStyle.Success" Style="font-size: 11px;" />
+                                    }
+                                    else
+                                    {
+                                        <RadzenBadge Text="Chưa có role" Variant="Variant.Filled" BadgeStyle="BadgeStyle.Warning" Style="font-size: 11px;" />
+                                    }
+                                </RadzenStack>
+                            </ValueTemplate>
+                        </RadzenDropDown>
+                        <RadzenRequiredValidator Component="UserId" Text="User is required" />
                     </div>
                     <div class="col-md-6">
                         <RadzenLabel Text="Role" />
                         <RadzenDropDown @bind-Value="@assignRoleModel.RoleName" Data="@roles"
-                                        TextProperty="Name" ValueProperty="Name" Name="RoleName" class="w-100" />
+                                        TextProperty="Name" ValueProperty="Name" Name="RoleName" class="w-100" Placeholder="Chọn role" />
                         <RadzenRequiredValidator Component="RoleName" Text="Role is required" />
                     </div>
                 </div>
                 <div class="row">
                     <div class="col">
-                        <RadzenButton Visible=@(!string.IsNullOrEmpty(assignRoleModel.UserId) && !string.IsNullOrEmpty(assignRoleModel.RoleName)) ButtonType="ButtonType.Submit" Text="Assign Role" Icon="assignment_ind"
+                        <RadzenButton Visible=@(!string.IsNullOrEmpty(assignRoleModel.UserId) && !string.IsNullOrEmpty(assignRoleModel.RoleName)) ButtonType="ButtonType.Submit" Text="Gán Role" Icon="assignment_ind"
                                       ButtonStyle="ButtonStyle.Primary" />
                     </div>
                 </div>
@@ -104,83 +144,73 @@
 
 @code {
     private List<IdentityRole> roles = new List<IdentityRole>();
+    private List<UserResponse> users = new List<UserResponse>();
     private RadzenDataGrid<IdentityRole> rolesGrid = new();
     private bool isLoading = false;
-    private bool apiError = false;
     private int count = 0;
     private AssignRoleRequest assignRoleModel = new AssignRoleRequest();
-    private string lastErrorMessage = string.Empty;
-    private string lastResponsePreview = string.Empty;
+    private string currentUserRole = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
         await LoadRoles();
+        await LoadUsers();
     }
 
-    private async Task TestApiConnection()
+    private async Task LoadUsers()
     {
-        isLoading = true;
-        apiError = false;
-        lastErrorMessage = string.Empty;
-        lastResponsePreview = string.Empty;
-
         try
         {
             var client = HttpClientFactory.CreateClient(Common.ServerAPI);
+            users = await client.GetFromJsonAsync<List<UserResponse>>("api/user") ?? new();
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Error", $"Failed to load users: {ex.Message}");
+        }
+    }
 
-            // Log what URL we're actually calling
-            var baseAddress = client.BaseAddress ?? throw new InvalidOperationException("HttpClient BaseAddress is not set.");
-            var fullUrl = new Uri(baseAddress, "api/roles").ToString();
-            Console.WriteLine($"Testing API connection to: {fullUrl}");
+    private async Task OnUserSelected(object value)
+    {
+        if (value != null && value is string userId)
+        {
+            assignRoleModel.UserId = userId;
+            await LoadCurrentUserRole(userId);
+        }
+        else
+        {
+            currentUserRole = string.Empty;
+        }
+        StateHasChanged();
+    }
 
-            var response = await client.GetAsync("api/roles");
-            var rawContent = await response.Content.ReadAsStringAsync();
-
-            if (!response.IsSuccessStatusCode)
+    private async Task LoadCurrentUserRole(string userId)
+    {
+        try
+        {
+            var user = users.FirstOrDefault(u => u.Id == userId);
+            if (user != null && user.Roles != null && user.Roles.Any())
             {
-                apiError = true;
-                lastErrorMessage = $"Status code: {(int)response.StatusCode} ({response.StatusCode})";
-                lastResponsePreview = rawContent.Length > 500 ? rawContent.Substring(0, 500) + "..." : rawContent;
-
-                NotificationService.Notify(NotificationSeverity.Error, "API Test Failed",
-                    $"Failed to connect to API: {lastErrorMessage}", 2000);
-            }
-            else if (rawContent.StartsWith("<"))
-            {
-                apiError = true;
-                lastErrorMessage = "Received HTML instead of JSON";
-                lastResponsePreview = rawContent.Length > 500 ? rawContent.Substring(0, 500) + "..." : rawContent;
-
-                NotificationService.Notify(NotificationSeverity.Error, "API Test Failed",
-                    "Received HTML instead of JSON. Check the API endpoint configuration.");
+                currentUserRole = user.Roles.FirstOrDefault() ?? string.Empty;
+                // Tự động chọn role hiện tại trong dropdown
+                assignRoleModel.RoleName = currentUserRole;
             }
             else
             {
-                NotificationService.Notify(NotificationSeverity.Success, "API Test Successful",
-                    "Successfully connected to the roles API");
-                lastResponsePreview = rawContent.Length > 500 ? rawContent.Substring(0, 500) + "..." : rawContent;
+                currentUserRole = string.Empty;
+                assignRoleModel.RoleName = string.Empty;
             }
         }
         catch (Exception ex)
         {
-            apiError = true;
-            lastErrorMessage = ex.Message;
-            NotificationService.Notify(NotificationSeverity.Error, "API Test Failed",
-                $"Exception: {ex.Message}");
-        }
-        finally
-        {
-            isLoading = false;
-            StateHasChanged();
+            currentUserRole = string.Empty;
+            NotificationService.Notify(NotificationSeverity.Warning, "Cảnh báo", $"Không thể load role của user: {ex.Message}");
         }
     }
 
     private async Task LoadRoles()
     {
         isLoading = true;
-        apiError = false;
-        lastErrorMessage = string.Empty;
-        lastResponsePreview = string.Empty;
 
         try
         {
@@ -192,13 +222,7 @@
 
             if (!response.IsSuccessStatusCode)
             {
-                apiError = true;
-
-                lastErrorMessage = $"Status code: {(int)response.StatusCode} ({response.StatusCode})";
-
-                lastResponsePreview = rawContent.Length > 500 ? rawContent.Substring(0, 500) + "..." : rawContent;
-
-                NotificationService.Notify(NotificationSeverity.Error, "Error", $"API error: {lastErrorMessage}");
+                NotificationService.Notify(NotificationSeverity.Error, "Error", $"API error: Status code: {(int)response.StatusCode} ({response.StatusCode})");
             }
             else
             {
@@ -210,22 +234,12 @@
                 }
                 catch (JsonException jsonEx)
                 {
-                    apiError = true;
-
-                    lastErrorMessage = $"JSON deserialization error: {jsonEx.Message}";
-
-                    lastResponsePreview = rawContent.Length > 500 ? rawContent.Substring(0, 500) + "..." : rawContent;
-
                     NotificationService.Notify(NotificationSeverity.Error, "JSON Error", $"Could not parse JSON: {jsonEx.Message}");
                 }
             }
         }
         catch (Exception ex)
         {
-            apiError = true;
-
-            lastErrorMessage = ex.Message;
-
             NotificationService.Notify(NotificationSeverity.Error, "Error", $"Could not load roles: {ex.Message}");
         }
         finally
@@ -238,24 +252,108 @@
 
     private async Task OpenCreateRoleDialog()
     {
-        var result = await DialogService.OpenAsync<CreateRoleDialog>("Create New Role",
+        var result = await DialogService.OpenAsync<CreateRoleDialog>("Tạo Role Mới",
             new Dictionary<string, object>(),
-            new DialogOptions { Width = "500px", Height = "300px" });
+            new DialogOptions { Width = "700px", Height = "auto", Resizable = true, Draggable = true });
 
-        if (result != null)
+        if (result is CreateRoleRequest request)
         {
-            await CreateRole(result.ToString());
+            await CreateRole(request.RoleName, request.Permissions);
         }
     }
 
-    private async Task CreateRole(string roleName)
+    private async Task OpenRolePermissionsDialog(string roleName)
+    {
+        if (string.IsNullOrEmpty(roleName))
+        {
+            NotificationService.Notify(NotificationSeverity.Warning, "Cảnh báo", "Tên role không hợp lệ");
+            return;
+        }
+
+        var result = await DialogService.OpenAsync<RolePermissionsDialog>("Quản lý quyền mặc định cho role",
+            new Dictionary<string, object> { { "RoleName", roleName }, { "IsEditMode", false } },
+            new DialogOptions { Width = "700px", Height = "auto", Resizable = true, Draggable = true });
+
+        if (result != null && result == true)
+        {
+            // Permissions đã được cập nhật
+        }
+    }
+
+    private async Task OpenEditRoleDialog(string roleName)
+    {
+        if (string.IsNullOrEmpty(roleName))
+        {
+            NotificationService.Notify(NotificationSeverity.Warning, "Cảnh báo", "Tên role không hợp lệ");
+            return;
+        }
+
+        var result = await DialogService.OpenAsync<EditRoleDialog>("Chỉnh sửa Role",
+            new Dictionary<string, object> { { "CurrentRoleName", roleName } },
+            new DialogOptions { Width = "500px", Height = "300px" });
+
+        if (result is string newRoleName)
+        {
+            if (!string.IsNullOrEmpty(newRoleName))
+            {
+                await UpdateRole(roleName, newRoleName);
+            }
+        }
+    }
+
+    private async Task UpdateRole(string oldRoleName, string newRoleName)
+    {
+        if (string.IsNullOrEmpty(oldRoleName) || string.IsNullOrEmpty(newRoleName))
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Lỗi", "Tên role không được để trống");
+            return;
+        }
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient(Common.ServerAPI);
+
+            var jsonContent = JsonSerializer.Serialize(newRoleName);
+            var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+            // URL encode role name để tránh lỗi với ký tự đặc biệt
+            var encodedRoleName = Uri.EscapeDataString(oldRoleName);
+            var response = await client.PutAsync($"api/roles/{encodedRoleName}", content);
+
+            var rawContent = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                NotificationService.Notify(NotificationSeverity.Success, "Thành công",
+                    $"Role '{oldRoleName}' đã được đổi tên thành '{newRoleName}'");
+
+                await LoadRoles();
+            }
+            else
+            {
+                var preview = rawContent.Length > 200 ? rawContent.Substring(0, 200) + "..." : rawContent;
+
+                NotificationService.Notify(NotificationSeverity.Error, "Lỗi",
+                    $"Không thể cập nhật role: Status {(int)response.StatusCode} - {response.StatusCode}");
+
+                NotificationService.Notify(NotificationSeverity.Error, "Chi tiết", preview);
+            }
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Lỗi",
+                $"Không thể cập nhật role: {ex.Message}");
+        }
+    }
+
+    private async Task CreateRole(string roleName, List<string> permissions)
     {
         try
         {
             var client = HttpClientFactory.CreateClient(Common.ServerAPI);
 
-            // Fix: Properly format JSON string with double quotes
-            var jsonContent = JsonSerializer.Serialize(roleName);
+            var request = new { RoleName = roleName, Permissions = permissions ?? new List<string>() };
+            var jsonContent = JsonSerializer.Serialize(request);
 
             var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
@@ -265,8 +363,8 @@
 
             if (response.IsSuccessStatusCode)
             {
-                NotificationService.Notify(NotificationSeverity.Success, "Success",
-                    $"Role '{roleName}' created successfully");
+                NotificationService.Notify(NotificationSeverity.Success, "Thành công",
+                    $"Role '{roleName}' đã được tạo thành công");
 
                 await LoadRoles();
             }
@@ -274,16 +372,16 @@
             {
                 var preview = rawContent.Length > 200 ? rawContent.Substring(0, 200) + "..." : rawContent;
 
-                NotificationService.Notify(NotificationSeverity.Error, "Error",
-                    $"Failed to create role: Status {(int)response.StatusCode} - {response.StatusCode}");
+                NotificationService.Notify(NotificationSeverity.Error, "Lỗi",
+                    $"Không thể tạo role: Status {(int)response.StatusCode} - {response.StatusCode}");
 
-                NotificationService.Notify(NotificationSeverity.Error, "Response Content", preview);
+                NotificationService.Notify(NotificationSeverity.Error, "Chi tiết", preview);
             }
         }
         catch (Exception ex)
         {
-            NotificationService.Notify(NotificationSeverity.Error, "Error",
-                $"Failed to create role: {ex.Message}");
+            NotificationService.Notify(NotificationSeverity.Error, "Lỗi",
+                $"Không thể tạo role: {ex.Message}");
         }
     }
 
@@ -347,10 +445,21 @@
 
             if (response.IsSuccessStatusCode)
             {
-                NotificationService.Notify(NotificationSeverity.Success, "Success",
-                    "Role assigned successfully");
+                NotificationService.Notify(NotificationSeverity.Success, "Thành công",
+                    "Role đã được gán thành công");
 
-                assignRoleModel = new AssignRoleRequest(); // Clear the form
+                // Reload users để cập nhật role
+                await LoadUsers();
+                
+                // Reload role hiện tại của user
+                if (!string.IsNullOrEmpty(assignRoleModel.UserId))
+                {
+                    await LoadCurrentUserRole(assignRoleModel.UserId);
+                }
+
+                // Clear form
+                assignRoleModel = new AssignRoleRequest();
+                currentUserRole = string.Empty;
             }
             else
             {

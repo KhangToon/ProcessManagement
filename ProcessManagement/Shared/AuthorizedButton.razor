@@ -1,0 +1,99 @@
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
+@using ProcessManagement.Models
+@using ProcessManagement.Services.Authorization
+@using ProcessManagement.Models.Authorization
+@using System.Security.Claims
+@using Radzen
+@using Radzen.Blazor
+
+@inject ButtonRoleService ButtonRoleService
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject NavigationManager NavigationManager
+@inject AdminPermissionModeService AdminPermissionModeService
+
+<AuthorizedAction ButtonId="@ButtonId" RequiredPermission="@RequiredPermission" RequiredRole="@RequiredRole">
+    <div @oncontextmenu="@(async (e) => await OnRightClick(e))" 
+         @oncontextmenu:preventDefault="@isAdjustMode"
+         style="@(isAdjustMode ? "position: relative;" : "")">
+        @if (isAdjustMode)
+        {
+            <RadzenBadge Text="🔧" 
+                        Style="position: absolute; top: -5px; right: -5px; z-index: 1000; cursor: pointer; background: #ff9800; padding: 2px 5px; border-radius: 50%; font-size: 10px;"
+                        @onclick="@(async () => await OpenSetRoleDialog())" />
+        }
+        @ChildContent
+    </div>
+</AuthorizedAction>
+
+@code {
+    [Parameter] public string? ButtonId { get; set; }
+    [Parameter] public string? RequiredPermission { get; set; }
+    [Parameter] public string? RequiredRole { get; set; }
+    [Parameter] public string? ButtonText { get; set; } // Text hiển thị của button (để admin dễ nhận biết)
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    
+    [CascadingParameter] private Task<AuthenticationState>? AuthenticationStateTask { get; set; }
+    
+    private bool isAdminUser = false;
+    private bool isAdjustMode => isAdminUser && AdminPermissionModeService.IsEnabled;
+
+    private ClaimsPrincipal? currentUser;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (AuthenticationStateTask != null)
+        {
+            var authState = await AuthenticationStateTask;
+            currentUser = authState?.User;
+            isAdminUser = currentUser != null && currentUser.IsInRole("Admin");
+        }
+
+        AdminPermissionModeService.OnModeChanged += OnAdminModeChanged;
+
+        await base.OnInitializedAsync();
+    }
+
+    private void OnAdminModeChanged()
+    {
+        // Chỉ cần refresh UI khi chế độ thay đổi
+        InvokeAsync(StateHasChanged);
+    }
+
+    private async Task OnRightClick(Microsoft.AspNetCore.Components.Web.MouseEventArgs e)
+    {
+        if (isAdjustMode && !string.IsNullOrEmpty(ButtonId))
+        {
+            await OpenSetRoleDialog();
+        }
+    }
+
+    private async Task OpenSetRoleDialog()
+    {
+        if (string.IsNullOrEmpty(ButtonId))
+        {
+            NotificationService.Notify(NotificationSeverity.Warning, "Cảnh báo", "ButtonId không được để trống");
+            return;
+        }
+
+        var currentPath = NavigationManager.Uri;
+        var pagePath = new Uri(currentPath).PathAndQuery;
+        var displayText = !string.IsNullOrEmpty(ButtonText) ? ButtonText : ButtonId ?? "Unknown Button";
+
+        await DialogService.OpenAsync<SetButtonRoleDialog>("Gán Role cho Button",
+            new Dictionary<string, object> 
+            { 
+                { "ButtonId", ButtonId },
+                { "PagePath", pagePath },
+                { "ButtonText", displayText }
+            },
+            new DialogOptions { Width = "500px", Height = "auto", Resizable = true, Draggable = true });
+    }
+
+    public void Dispose()
+    {
+        AdminPermissionModeService.OnModeChanged -= OnAdminModeChanged;
+    }
+}
+

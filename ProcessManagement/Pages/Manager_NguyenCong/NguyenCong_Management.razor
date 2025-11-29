@@ -5,6 +5,7 @@
 @using ProcessManagement.Commons
 @using ProcessManagement.Models
 @using ProcessManagement.Models.KHSXs
+@using ProcessManagement.Models.Authorization
 @using ProcessManagement.Pages.Manager_NguyenCong.Dialogs
 @using ProcessManagement.Services.QRCodes
 @using ProcessManagement.Services.SQLServer
@@ -102,8 +103,10 @@
                                     </RadzenStack>
                                     <!--Button them san pham moi-->
                                     <RadzenStack Style="height: 100%; width: contain; padding-left: 10px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                        <RadzenButton Click="OnThemMoiNguyenCong" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Thêm công đoạn mới"))" Icon="add" Text="Thêm công đoạn mới" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
-                                                      Style="height: contain; width: contain; font-size: 14px;" />
+                                        <AuthorizedAction RequiredPermission="@Permissions.NguyenCong_Create">
+                                            <RadzenButton Click="OnThemMoiNguyenCong" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Thêm công đoạn mới"))" Icon="add" Text="Thêm công đoạn mới" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
+                                                          Style="height: contain; width: contain; font-size: 14px;" />
+                                        </AuthorizedAction>
                                     </RadzenStack>
                                 </RadzenStack>
 
@@ -174,8 +177,10 @@
                                                         <span style="font-weight: 600; font-size: 15px; color: white"></span>
                                                     </HeaderTemplate>
                                                     <Template Context="nv">
-                                                        <RadzenButton Click="@(async () => await OnSetHideNguyenCong(nv))" Style="width: contain; height: contain;"
-                                                                      Icon="delete" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Dark" Size="ButtonSize.Small" Variant="Variant.Flat" />
+                                                        <AuthorizedAction RequiredPermission="@Permissions.NguyenCong_Delete">
+                                                            <RadzenButton Click="@(async () => await OnSetHideNguyenCong(nv))" Style="width: contain; height: contain;"
+                                                                          Icon="delete" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Dark" Size="ButtonSize.Small" Variant="Variant.Flat" />
+                                                        </AuthorizedAction>
                                                     </Template>
                                                 </RadzenDataGridColumn>
                                             }
@@ -331,11 +336,13 @@
                                                 </RadzenCard>
                                                 <RadzenStack Visible="(SelectedNguyenCong.NCID.Value != null)" Gap="10px" Style="height: 5%; width: 100%; padding-top: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                                                     <RadzenStack Gap="10px" Style="height: contain; width: contain; padding: 0px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                                                        <RadzenButton Style="width: contain; min-width: 120px; height: contain;" Click="@(() => EnableEditNVDetail())"
-                                                                      Icon="@((isEditNguyenCongDetail)? "clear" : "edit")" Text="@((isEditNguyenCongDetail)? "Hủy" : "Chỉnh sửa")" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" />
-                                                        <RadzenButton Visible="@(isEditNguyenCongDetail)" Style="width: contain; height: contain;"
-                                                                      Icon="check" Text="Lưu thay đổi" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Size="ButtonSize.Small" Variant="Variant.Flat"
-                                                                      Click=@(async () => await OnSaveChangeEditNguyenCong(SelectedNguyenCong)) />
+                                                        <AuthorizedAction RequiredPermission="@Permissions.NguyenCong_Update">
+                                                            <RadzenButton Style="width: contain; min-width: 120px; height: contain;" Click="@(() => EnableEditNVDetail())"
+                                                                          Icon="@((isEditNguyenCongDetail)? "clear" : "edit")" Text="@((isEditNguyenCongDetail)? "Hủy" : "Chỉnh sửa")" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" />
+                                                            <RadzenButton Visible="@(isEditNguyenCongDetail)" Style="width: contain; height: contain;"
+                                                                          Icon="check" Text="Lưu thay đổi" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Size="ButtonSize.Small" Variant="Variant.Flat"
+                                                                          Click=@(async () => await OnSaveChangeEditNguyenCong(SelectedNguyenCong)) />
+                                                        </AuthorizedAction>
                                                     </RadzenStack>
                                                 </RadzenStack>
                                             </RadzenStack>

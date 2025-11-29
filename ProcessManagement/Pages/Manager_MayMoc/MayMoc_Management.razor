@@ -5,6 +5,7 @@
 @using ProcessManagement.Commons
 @using ProcessManagement.Models
 @using ProcessManagement.Models.MAYMOC
+@using ProcessManagement.Models.Authorization
 @using ProcessManagement.Pages.Manager_MayMoc.Dialogs
 @using ProcessManagement.Services.QRCodes
 @using ProcessManagement.Services.SQLServer
@@ -76,8 +77,10 @@
                             </RadzenStack>
                             <!--Button them may moc moi-->
                             <RadzenStack Style="height: 100%; width: contain; padding-left: 10px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                <RadzenButton Click="OnThemMoiMayMoc" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Thêm máy móc mới"))" Icon="add" Text="Thêm máy móc mới" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
-                                              Style="height: contain; width: contain; font-size: 14px;" />
+                                <AuthorizedAction RequiredPermission="@Permissions.MayMoc_Create">
+                                    <RadzenButton Click="OnThemMoiMayMoc" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Thêm máy móc mới"))" Icon="add" Text="Thêm máy móc mới" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
+                                                  Style="height: contain; width: contain; font-size: 14px;" />
+                                </AuthorizedAction>
                             </RadzenStack>
                         </RadzenStack>
                         <RadzenStack Visible="@(DSachMayMocs?.Count == 0)" Gap="20px" Style="height: contain; width: 100%; background-color: var(--rz-primary-lighter); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
@@ -350,10 +353,14 @@
                                                             }
                                                         </RadzenStack>
                                                         <RadzenStack Visible="@isEditMayMocDetail" Gap="5" Style="width: 15%; height: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                            <RadzenButton Click="@(() => OpendialogRenameThongTinMM(mmdetail))" Icon="edit" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Đổi tên trường thông tin"))"
-                                                                          ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 18px;" />
-                                                            <RadzenButton Click="@(() => OpendialogDeleteThongTinMM(mmdetail))" Icon="delete" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Xóa trường thông tin"))"
-                                                                          ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 18px;" />
+                                                            <AuthorizedAction RequiredPermission="@Permissions.MayMoc_Update">
+                                                                <RadzenButton Click="@(() => OpendialogRenameThongTinMM(mmdetail))" Icon="edit" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Đổi tên trường thông tin"))"
+                                                                              ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 18px;" />
+                                                            </AuthorizedAction>
+                                                            <AuthorizedAction RequiredPermission="@Permissions.MayMoc_Delete">
+                                                                <RadzenButton Click="@(() => OpendialogDeleteThongTinMM(mmdetail))" Icon="delete" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Xóa trường thông tin"))"
+                                                                              ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 18px;" />
+                                                            </AuthorizedAction>
                                                         </RadzenStack>
                                                     </RadzenStack>
                                                 }
@@ -363,20 +370,26 @@
                                 </RadzenCard>
                                 <RadzenStack Visible="(SelectedMayMoc.MMID.Value != null)" Gap="10px" Style="height: 5%; width: 100%; padding-top: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                                     <RadzenStack Gap="10px" Style="height: contain; width: contain; padding: 0px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                        <RadzenButton Visible="@(!isEditMayMocDetail)" Style="width: contain; height: contain;" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Thêm thông tin khác cho máy móc"))"
-                                                      Icon="add" Text="Thông tin khác" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat"
-                                                      Click="@(() => OnOpenDialogAddNewMMDetail())" />
-                                        <RadzenButton Visible="@(isEditMayMocDetail)" Style="width: contain; height: contain;"
-                                                      Icon="check" Text="Lưu thay đổi" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Size="ButtonSize.Small" Variant="Variant.Flat"
-                                                      Click=@(() => OnUpdateThongTinMayMoc(SelectedMayMoc))
-                                                      BusyText="Saving ..." IsBusy=@isSavingMMdetails />
-                                        <RadzenButton Style="width: contain; min-width: 120px; height: contain;" Click="@(() => EnableEditMMDetail())"
-                                                      Icon="@((isEditMayMocDetail)? "clear" : "edit")" Text="@((isEditMayMocDetail)? "Hủy" : "Chỉnh sửa")" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" />
+                                        <AuthorizedAction RequiredPermission="@Permissions.MayMoc_Create">
+                                            <RadzenButton Visible="@(!isEditMayMocDetail)" Style="width: contain; height: contain;" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Thêm thông tin khác cho máy móc"))"
+                                                          Icon="add" Text="Thông tin khác" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat"
+                                                          Click="@(() => OnOpenDialogAddNewMMDetail())" />
+                                        </AuthorizedAction>
+                                        <AuthorizedAction RequiredPermission="@Permissions.MayMoc_Update">
+                                            <RadzenButton Visible="@(isEditMayMocDetail)" Style="width: contain; height: contain;"
+                                                          Icon="check" Text="Lưu thay đổi" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Size="ButtonSize.Small" Variant="Variant.Flat"
+                                                          Click=@(() => OnUpdateThongTinMayMoc(SelectedMayMoc))
+                                                          BusyText="Saving ..." IsBusy=@isSavingMMdetails />
+                                            <RadzenButton Style="width: contain; min-width: 120px; height: contain;" Click="@(() => EnableEditMMDetail())"
+                                                          Icon="@((isEditMayMocDetail)? "clear" : "edit")" Text="@((isEditMayMocDetail)? "Hủy" : "Chỉnh sửa")" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" />
+                                        </AuthorizedAction>
                                     </RadzenStack>
                                     <RadzenStack Gap="10px" Style="height: contain; width: contain; padding: 0px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                        <RadzenButton Visible="@(isEditMayMocDetail)" Style="width: contain; height: contain; background-color: darkred"
-                                                      Icon="delete" Text="Xóa máy" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Size="ButtonSize.Small" Variant="Variant.Flat"
-                                                      Click=@(() => OnDeleteMayMoc(SelectedMayMoc)) />
+                                        <AuthorizedAction RequiredPermission="@Permissions.MayMoc_Delete">
+                                            <RadzenButton Visible="@(isEditMayMocDetail)" Style="width: contain; height: contain; background-color: darkred"
+                                                          Icon="delete" Text="Xóa máy" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Size="ButtonSize.Small" Variant="Variant.Flat"
+                                                          Click=@(() => OnDeleteMayMoc(SelectedMayMoc)) />
+                                        </AuthorizedAction>
                                     </RadzenStack>
                                 </RadzenStack>
                             </RadzenStack>

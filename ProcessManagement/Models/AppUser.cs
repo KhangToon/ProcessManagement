@@ -10,5 +10,7 @@ namespace ProcessManagement.Models
         public string Address { get; set; } = string.Empty;
 
         public DateTime CreatedAt { get; set; }
+        
+        public bool IsActive { get; set; } = true; // Trạng thái hoạt động của tài khoản
     }
 }
