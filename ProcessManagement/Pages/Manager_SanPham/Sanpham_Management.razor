@@ -1,13 +1,15 @@
 ﻿@page "/spmanagementv2"
-@attribute [Authorize(Roles = "Admin, User")]
+@attribute [Authorize] // Chỉ cần đăng nhập, permission check sẽ làm trong AuthorizedPage
 @* this limited access into page *@
 
 @using ProcessManagement.Commons
 @using ProcessManagement.Models
 @using ProcessManagement.Models.SANPHAM
+@using ProcessManagement.Models.Authorization
 @using ProcessManagement.Pages.Manager_SanPham.Dialogs
 @using ProcessManagement.Services.QRCodes
 @using ProcessManagement.Services.SQLServer
+@using ProcessManagement.Shared
 @using Radzen.Blazor
 @using Radzen
 
@@ -19,7 +21,13 @@
 @inject SQLServerServices SQLServerServices
 @inject QRCodeServices QRCodeServices
 @inject IJSRuntime JSRuntime
+@inject ProcessManagement.Services.Authorization.AdminPermissionModeService AdminPermissionModeService
+@inject ProcessManagement.Services.Authorization.ButtonRoleService ButtonRoleService
+@inject NavigationManager NavigationManager
 
+@implements IDisposable
+
+<AuthorizedPage RequiredPermission="@Permissions.SanPham_View">
 <style>
     .custom-placeholder::placeholder {
         color: #888888;
@@ -73,8 +81,10 @@
                             </RadzenStack>
                             <!--Button add new product-->
                             <RadzenStack Style="height: 100%; width: contain; padding-left: 10px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                <RadzenButton Click="OnThemMoiSanPham" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Thêm sản phẩm mới"))" Icon="add" Text="Thêm sản phẩm mới" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
-                                              Style="height: contain; width: contain; font-size: 14px;" />
+                                <AuthorizedButton ButtonId="SanPham_Create_Button" ButtonText="Thêm sản phẩm mới">
+                                    <RadzenButton Click="OnThemMoiSanPham" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Thêm sản phẩm mới"))" Icon="add" Text="Thêm sản phẩm mới" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
+                                                  Style="height: contain; width: contain; font-size: 14px;" />
+                                </AuthorizedButton>
                             </RadzenStack>
                         </RadzenStack>
                         <RadzenStack Visible="@(DSachSanPhams?.Count == 0)" Gap="20px" Style="height: contain; width: 100%; background-color: var(--rz-primary-lighter); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
@@ -149,7 +159,9 @@
                                                 <span style="font-weight: bold; font-size: 16px; color: white">THÊM NGUYÊN LIỆU</span>
                                             </HeaderTemplate>
                                             <Template Context="sp">
-                                                <RadzenButton Click="@(() => OnOpenDialogAddNVL(sp))" Icon="add" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Size="ButtonSize.Small" Variant="Variant.Filled" Text="Thêm/Sửa"></RadzenButton>
+                                                <AuthorizedButton ButtonId="SanPham_AddNVL_Button" ButtonText="Thêm/Sửa nguyên liệu">
+                                                    <RadzenButton Click="@(() => OnOpenDialogAddNVL(sp))" Icon="add" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Size="ButtonSize.Small" Variant="Variant.Filled" Text="Thêm/Sửa"></RadzenButton>
+                                                </AuthorizedButton>
                                             </Template>
                                         </RadzenDataGridColumn>
 
@@ -408,10 +420,14 @@
                                                             }
                                                         </RadzenStack>
                                                         <RadzenStack Visible="@isEditSanPhamDetail" Gap="5" Style="width: 15%; height: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                            <RadzenButton Click="@(() => OpendialogRenameThongTinSP(spdetail))" Icon="edit" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Đổi tên trường thông tin"))"
-                                                                          ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 18px;" />
-                                                            <RadzenButton Click="@(() => OpendialogDeleteThongTinSP(spdetail))" Icon="delete" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Xóa trường thông tin"))"
-                                                                          ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 18px;" />
+                                                            <AuthorizedButton ButtonId="SanPham_RenameThongTin_Button" ButtonText="Đổi tên trường thông tin">
+                                                                <RadzenButton Click="@(() => OpendialogRenameThongTinSP(spdetail))" Icon="edit" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Đổi tên trường thông tin"))"
+                                                                              ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 18px;" />
+                                                            </AuthorizedButton>
+                                                            <AuthorizedButton ButtonId="SanPham_DeleteThongTin_Button" ButtonText="Xóa trường thông tin">
+                                                                <RadzenButton Click="@(() => OpendialogDeleteThongTinSP(spdetail))" Icon="delete" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Xóa trường thông tin"))"
+                                                                              ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 18px;" />
+                                                            </AuthorizedButton>
                                                         </RadzenStack>
                                                     </RadzenStack>
                                                 }
@@ -422,20 +438,26 @@
 
                                 <RadzenStack Visible="(SelectedSanPham.SP_SPID.Value != null)" Gap="10px" Style="height: 5%; width: 100%; padding-top: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                                     <RadzenStack Gap="10px" Style="height: contain; width: contain; padding: 0px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                        <RadzenButton Visible="@(!isEditSanPhamDetail)" Style="width: contain; height: contain;" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Thêm thông tin khác cho sản phẩm"))"
-                                                      Icon="add" Text="Thông tin khác" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat"
-                                                      Click="@(() => OnOpenDialogAddNewSPDetail())" />
-                                        <RadzenButton Visible="@(isEditSanPhamDetail)" Style="width: contain; height: contain;"
-                                                      Icon="check" Text="Lưu thay đổi" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Size="ButtonSize.Small" Variant="Variant.Flat"
-                                                      Click=@(() => OnUpdateThongTinSanPham(SelectedSanPham))
-                                                      BusyText="Saving ..." IsBusy=@isSavingSPdetails />
-                                        <RadzenButton Style="width: contain; min-width: 120px; height: contain;" Click="@(() => EnableEditSPDetail())"
-                                                      Icon="@((isEditSanPhamDetail)? "clear" : "edit")" Text="@((isEditSanPhamDetail)? "Hủy" : "Chỉnh sửa")" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" />
+                                        <AuthorizedButton ButtonId="SanPham_AddThongTinKhac_Button" ButtonText="Thông tin khác">
+                                            <RadzenButton Visible="@(!isEditSanPhamDetail)" Style="width: contain; height: contain;" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Thêm thông tin khác cho sản phẩm"))"
+                                                          Icon="add" Text="Thông tin khác" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat"
+                                                          Click="@(() => OnOpenDialogAddNewSPDetail())" />
+                                        </AuthorizedButton>
+                                        <AuthorizedButton ButtonId="SanPham_Update_Button" ButtonText="Lưu thay đổi / Chỉnh sửa">
+                                            <RadzenButton Visible="@(isEditSanPhamDetail)" Style="width: contain; height: contain;"
+                                                          Icon="check" Text="Lưu thay đổi" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Size="ButtonSize.Small" Variant="Variant.Flat"
+                                                          Click=@(() => OnUpdateThongTinSanPham(SelectedSanPham))
+                                                          BusyText="Saving ..." IsBusy=@isSavingSPdetails />
+                                            <RadzenButton Style="width: contain; min-width: 120px; height: contain;" Click="@(() => EnableEditSPDetail())"
+                                                          Icon="@((isEditSanPhamDetail)? "clear" : "edit")" Text="@((isEditSanPhamDetail)? "Hủy" : "Chỉnh sửa")" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" />
+                                        </AuthorizedButton>
                                     </RadzenStack>
                                     <RadzenStack Gap="10px" Style="height: contain; width: contain; padding: 0px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                        <RadzenButton Visible="@(isEditSanPhamDetail)" Style="width: contain; height: contain; background-color: darkred"
-                                                      Icon="delete" Text="Xóa sản phẩm" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Size="ButtonSize.Small" Variant="Variant.Flat"
-                                                      Click=@(() => OnDeleteSanPham(SelectedSanPham)) />
+                                        <AuthorizedButton ButtonId="SanPham_Delete_Button" ButtonText="Xóa sản phẩm">
+                                            <RadzenButton Visible="@(isEditSanPhamDetail)" Style="width: contain; height: contain; background-color: darkred"
+                                                          Icon="delete" Text="Xóa sản phẩm" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Size="ButtonSize.Small" Variant="Variant.Flat"
+                                                          Click=@(() => OnDeleteSanPham(SelectedSanPham)) />
+                                        </AuthorizedButton>
                                     </RadzenStack>
                                 </RadzenStack>
                             </RadzenStack>
@@ -446,7 +468,7 @@
         </RadzenCard>
     </RadzenColumn>
 </RadzenRow>
-
+</AuthorizedPage>
 
 @code {
     private List<SanPham> DSachSanPhamsBase = new();
@@ -461,14 +483,82 @@
     private bool isEditSanPhamDetail = false;
     private bool isSavingSPdetails = false;
 
+    // Danh sách tất cả ButtonIds trên trang này (dùng để bulk load)
+    private readonly List<string> _pageButtonIds = new()
+    {
+        "SanPham_Create_Button",
+        "SanPham_AddNVL_Button",
+        "SanPham_RenameThongTin_Button",
+        "SanPham_DeleteThongTin_Button",
+        "SanPham_AddThongTinKhac_Button",
+        "SanPham_Update_Button",
+        "SanPham_Delete_Button"
+    };
+
     protected override async Task OnInitializedAsync()
     {
+        // Subscribe AdminPermissionModeService để preload khi mode enabled
+        AdminPermissionModeService.OnModeChanged += OnAdminModeChanged;
+
         // Load ds san pham base/ hien thi
         await LoadAllDanhsachSanPhamBase();
 
         ReSelectCurrentSanPham(Common.SelectedSanPhamid); // re-selected
 
+        // Nếu Admin mode đã enabled, preload ngay
+        if (AdminPermissionModeService.IsEnabled)
+        {
+            await PreloadButtonRolesAsync();
+        }
+
         await base.OnInitializedAsync();
+    }
+
+    public void Dispose()
+    {
+        // Unsubscribe event khi component dispose
+        AdminPermissionModeService.OnModeChanged -= OnAdminModeChanged;
+    }
+
+    /// <summary>
+    /// Callback khi Admin bật/tắt chế độ điều chỉnh phân quyền
+    /// </summary>
+    private async void OnAdminModeChanged()
+    {
+        // Chỉ preload khi mode được bật
+        if (AdminPermissionModeService.IsEnabled)
+        {
+            await PreloadButtonRolesAsync();
+        }
+    }
+
+    /// <summary>
+    /// Preload tất cả ButtonRoles của trang này (chỉ khi Admin mode enabled)
+    /// </summary>
+    private async Task PreloadButtonRolesAsync()
+    {
+        try
+        {
+            // Kiểm tra user có phải Admin không
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var user = authState?.User;
+
+            if (user == null || !user.Identity?.IsAuthenticated == true || !user.IsInRole("Admin"))
+            {
+                return; // Chỉ Admin mới cần preload
+            }
+
+            // Lấy pagePath hiện tại
+            var currentUri = NavigationManager.Uri;
+            var pagePath = new Uri(currentUri).PathAndQuery;
+
+            // Bulk load tất cả ButtonRoles của trang
+            await ButtonRoleService.BulkLoadButtonRolesAsync(pagePath, _pageButtonIds);
+        }
+        catch
+        {
+            // Ignore errors - không ảnh hưởng đến chức năng chính
+        }
     }
 
     // Them moi san pham

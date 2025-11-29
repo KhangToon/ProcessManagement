@@ -1,0 +1,107 @@
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
+@using ProcessManagement.Models
+@using ProcessManagement.Services.Authorization
+
+@if (IsAuthorized)
+{
+    @ChildContent
+}
+
+@code {
+    [Parameter] public string? RequiredPermission { get; set; }
+    [Parameter] public string? RequiredRole { get; set; }
+    [Parameter] public string? ButtonId { get; set; } // ID của button để map với role trong DB
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    
+    [CascadingParameter] private Task<AuthenticationState>? AuthenticationStateTask { get; set; }
+    [Inject] private PermissionService? PermissionService { get; set; }
+    [Inject] private UserManager<AppUser>? UserManager { get; set; }
+    [Inject] private ButtonRoleService? ButtonRoleService { get; set; }
+    [Inject] private NavigationManager? NavigationManager { get; set; }
+
+    private bool IsAuthorized { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CheckAuthorization();
+        await base.OnInitializedAsync();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await CheckAuthorization();
+        await base.OnParametersSetAsync();
+    }
+
+    private async Task CheckAuthorization()
+    {
+        if (AuthenticationStateTask != null)
+        {
+            var authState = await AuthenticationStateTask;
+            var user = authState?.User;
+
+            if (user != null && user.Identity?.IsAuthenticated == true)
+            {
+                var userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+                // Nếu không có yêu cầu gì, cho phép
+                if (string.IsNullOrEmpty(RequiredPermission) && string.IsNullOrEmpty(RequiredRole) && string.IsNullOrEmpty(ButtonId))
+                {
+                    IsAuthorized = true;
+                }
+                // Kiểm tra ButtonId trước (mới - check role từ DB, dùng cache theo PagePath)
+                else if (!string.IsNullOrEmpty(ButtonId) && ButtonRoleService != null && NavigationManager != null)
+                {
+                    // Lấy path hiện tại của trang (không kèm domain)
+                    var currentUri = NavigationManager.Uri;
+                    var pagePath = new Uri(currentUri).PathAndQuery;
+
+                    // Lấy toàn bộ mapping ButtonId → Roles cho trang này (có cache trong service)
+                    var pageRoles = await ButtonRoleService.GetButtonRolesByPageAsync(pagePath);
+
+                    pageRoles.TryGetValue(ButtonId, out var requiredRoles);
+
+                    if (requiredRoles != null && requiredRoles.Any())
+                    {
+                        // Button có roles được gán → check user có role nào không
+                        if (user.IsInRole("Admin"))
+                        {
+                            // Admin luôn có tất cả
+                            IsAuthorized = true;
+                        }
+                        else
+                        {
+                            // Chỉ hiển thị nếu user có ít nhất 1 trong các roles được gán cho button
+                            IsAuthorized = requiredRoles.Any(role => user.IsInRole(role));
+                        }
+                    }
+                    else
+                    {
+                        // Button chưa có role nào được set → CHỈ Admin mới thấy (an toàn mặc định)
+                        // Admin có thể chuột phải vào button để set role
+                        IsAuthorized = user.IsInRole("Admin");
+                    }
+                }
+                // Kiểm tra Role trước
+                else if (!string.IsNullOrEmpty(RequiredRole))
+                {
+                    IsAuthorized = user.IsInRole(RequiredRole) || user.IsInRole("Admin");
+                }
+                // Kiểm tra Permission
+                else if (!string.IsNullOrEmpty(RequiredPermission) && !string.IsNullOrEmpty(userId) && PermissionService != null)
+                {
+                    // Admin luôn có tất cả permissions
+                    if (user.IsInRole("Admin"))
+                    {
+                        IsAuthorized = true;
+                    }
+                    else
+                    {
+                        IsAuthorized = await PermissionService.HasPermissionAsync(userId, RequiredPermission);
+                    }
+                }
+            }
+        }
+    }
+}

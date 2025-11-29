@@ -1,0 +1,142 @@
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Identity
+@using ProcessManagement.Models
+@using Radzen
+@using Radzen.Blazor
+
+@inject UserManager<AppUser> UserManager
+@inject ProcessManagement.Services.Authorization.AdminPermissionModeService AdminPermissionModeService
+@inject DialogService DialogService
+
+<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="10px" Style="height: 100%; position: relative;">
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="6px" Style="height: 100%; align-items: center;">
+        <RadzenStack Orientation="Orientation.Horizontal"
+                     AlignItems="AlignItems.Center"
+                     Gap="6px"
+                     Style="padding: 4px 10px; background-color: rgba(28, 49, 90, 0.1); border-radius: 4px; height: 28px; display: flex; align-items: center; cursor: pointer;"
+                     @onclick="@OnUserInfoClicked">
+            <RadzenIcon Icon="account_circle" Style="font-size: 18px; color: rgba(28, 49, 90); line-height: 1;" />
+            <RadzenText Text="@DisplayName" Style="color: rgba(28, 49, 90); font-weight: 500; font-size: 14px; line-height: 1; margin: 0;" />
+        </RadzenStack>
+        
+        @if (UserRoles.Any())
+        {
+            @foreach (var role in UserRoles)
+            {
+                <RadzenBadge Text="@role" 
+                            Variant="Variant.Filled" 
+                            BadgeStyle="BadgeStyle.Info"
+                            Style="font-size: 11px; padding: 4px 8px; height: 24px; display: flex; align-items: center; line-height: 1;" />
+            }
+        }
+        else
+        {
+            <RadzenBadge Text="No Role" 
+                        Variant="Variant.Filled" 
+                        BadgeStyle="BadgeStyle.Warning"
+                        Style="font-size: 11px; padding: 4px 8px; height: 24px; display: flex; align-items: center; line-height: 1;" />
+        }
+    </RadzenStack>
+
+    @if (IsAdmin && showAdminMenu)
+    {
+        <RadzenCard Style="position: absolute; top: 32px; right: 80px; z-index: 2000; padding: 8px 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.2);">
+            <RadzenStack Gap="8px">
+                <RadzenText Text="Chức năng Admin" Style="font-weight: 600; font-size: 13px;" />
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="6px">
+                    <RadzenSwitch TValue="bool"
+                                  Value="@isAdjustMode"
+                                  ValueChanged="@OnAdjustModeChanged" />
+                    <RadzenText Text="Bật chế độ điều chỉnh phân quyền" Style="font-size: 12px;" />
+                </RadzenStack>
+                <span @onclick="@OpenGuideDialog" 
+                      @onclick:preventDefault
+                      @onclick:stopPropagation
+                      Style="font-size: 11px; color: #1976d2; text-decoration: underline; cursor: pointer; padding-left: 30px;">
+                    Xem hướng dẫn
+                </span>
+            </RadzenStack>
+        </RadzenCard>
+    }
+    
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Style="height: 100%;">
+        <form method="post" action="Identity/Account/Logout" style="margin: 0; height: 100%; display: flex; align-items: center;">
+            <RadzenButton Text="Log out" 
+                         Icon="logout" 
+                         ButtonStyle="ButtonStyle.Light" 
+                         Variant="Variant.Text"
+                         Size="ButtonSize.Small"
+                         ButtonType="ButtonType.Submit"
+                         Style="color: rgba(28, 49, 90); height: 28px; padding: 0 8px; line-height: 1;" />
+        </form>
+    </RadzenStack>
+</RadzenStack>
+
+@code {
+    [Parameter] public ClaimsPrincipal? User { get; set; }
+
+    private string DisplayName { get; set; } = string.Empty;
+    private List<string> UserRoles { get; set; } = new();
+    private bool IsAdmin => UserRoles.Contains("Admin");
+
+    private bool showAdminMenu = false;
+    private bool isAdjustMode = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (User != null && User.Identity?.IsAuthenticated == true)
+        {
+            // Lấy roles
+            UserRoles = User.Claims
+                .Where(c => c.Type == ClaimTypes.Role)
+                .Select(c => c.Value)
+                .ToList();
+
+            // Lấy thông tin user đầy đủ
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!string.IsNullOrEmpty(userId))
+            {
+                var appUser = await UserManager.FindByIdAsync(userId);
+                if (appUser != null && !string.IsNullOrEmpty(appUser.FirstName))
+                {
+                    DisplayName = $"{appUser.FirstName} {appUser.LastName}".Trim();
+                }
+                else
+                {
+                    DisplayName = User.Identity?.Name ?? "User";
+                }
+            }
+            else
+            {
+                DisplayName = User.Identity?.Name ?? "User";
+            }
+
+            // Trạng thái ban đầu của chế độ điều chỉnh phân quyền
+            isAdjustMode = AdminPermissionModeService.IsEnabled;
+        }
+    }
+
+    private void OnUserInfoClicked()
+    {
+        if (!IsAdmin)
+        {
+            return;
+        }
+
+        showAdminMenu = !showAdminMenu;
+    }
+
+    private void OnAdjustModeChanged(bool value)
+    {
+        isAdjustMode = value;
+        AdminPermissionModeService.SetEnabled(value);
+    }
+
+    private async Task OpenGuideDialog()
+    {
+        await DialogService.OpenAsync<ButtonRoleGuideDialog>("Hướng dẫn gán Role cho Button",
+            new Dictionary<string, object>(),
+            new DialogOptions { Width = "80%", Height = "85%", Resizable = true, Draggable = true });
+    }
+}
+

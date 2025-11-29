@@ -1,0 +1,104 @@
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
+@using ProcessManagement.Models
+@using ProcessManagement.Services.Authorization
+@using Radzen
+@using Radzen.Blazor
+
+@inject PermissionService PermissionService
+@inject NavigationManager NavigationManager
+@inject NotificationService NotificationService
+
+@if (IsAuthorized)
+{
+    @ChildContent
+}
+else if (IsChecking)
+{
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Gap="12px" Style="height: 100vh; width: 100vw;">
+        <RadzenProgressBarCircular ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+        <RadzenLabel Text="Đang kiểm tra quyền truy cập..." />
+    </RadzenStack>
+}
+else
+{
+    <RadzenCard Style="margin: 20px; padding: 20px;">
+        <RadzenStack Gap="16px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+            <RadzenIcon Icon="lock" Style="font-size: 64px; color: #f44336;" />
+            <RadzenText TextStyle="TextStyle.H4">Không có quyền truy cập</RadzenText>
+            <RadzenText Style="text-align: center; color: #666;">
+                Bạn không có quyền truy cập vào trang này.
+                @if (!string.IsNullOrEmpty(RequiredPermission))
+                {
+                    <text><br />Yêu cầu permission: <strong>@RequiredPermission</strong></text>
+                }
+                @if (!string.IsNullOrEmpty(RequiredRole))
+                {
+                    <text><br />Yêu cầu role: <strong>@RequiredRole</strong></text>
+                }
+            </RadzenText>
+            <RadzenButton Text="Quay lại trang chủ" 
+                         Icon="home" 
+                         ButtonStyle="ButtonStyle.Primary"
+                         Click="@(() => NavigationManager.NavigateTo("/"))" />
+        </RadzenStack>
+    </RadzenCard>
+}
+
+@code {
+    [Parameter] public string? RequiredPermission { get; set; }
+    [Parameter] public string? RequiredRole { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    
+    [CascadingParameter] private Task<AuthenticationState>? AuthenticationStateTask { get; set; }
+    
+    private bool IsAuthorized { get; set; } = false;
+    private bool IsChecking { get; set; } = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        IsChecking = true;
+        IsAuthorized = false;
+
+        if (AuthenticationStateTask != null)
+        {
+            var authState = await AuthenticationStateTask;
+            var user = authState?.User;
+
+            if (user != null && user.Identity?.IsAuthenticated == true)
+            {
+                var userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+                // Admin luôn có quyền truy cập
+                if (user.IsInRole("Admin"))
+                {
+                    IsAuthorized = true;
+                }
+                // Kiểm tra Role
+                else if (!string.IsNullOrEmpty(RequiredRole))
+                {
+                    IsAuthorized = user.IsInRole(RequiredRole);
+                }
+                // Kiểm tra Permission
+                else if (!string.IsNullOrEmpty(RequiredPermission) && !string.IsNullOrEmpty(userId))
+                {
+                    IsAuthorized = await PermissionService.HasPermissionAsync(userId, RequiredPermission);
+                }
+                // Nếu không có yêu cầu gì, cho phép (backward compatible)
+                else
+                {
+                    IsAuthorized = true;
+                }
+            }
+            else
+            {
+                // Chưa đăng nhập
+                IsAuthorized = false;
+            }
+        }
+
+        IsChecking = false;
+        StateHasChanged();
+    }
+}
+

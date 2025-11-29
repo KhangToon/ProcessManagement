@@ -1,11 +1,20 @@
-﻿@using ProcessManagement.Commons
+﻿@using System.Linq
+@using ProcessManagement.Commons
 @using ProcessManagement.Pages.Account_Management.User_Management.Models
+@using ProcessManagement.Services.Authorization
+@using ProcessManagement.Models.Authorization
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using ProcessManagement.Models
 @using Radzen
 @using Radzen.Blazor
 
 @inject IHttpClientFactory HttpClientFactory
 @inject NotificationService NotificationService
 @inject DialogService DialogService
+@inject PermissionService PermissionService
+@inject UserManager<AppUser> UserManager
+@inject RoleManager<IdentityRole> RoleManager
 
 <RadzenTemplateForm TItem="CreateUserRequest" Data="@newUser" Submit="@CreateUser">
     <div class="row mb-3">
@@ -33,30 +42,133 @@
     <div class="row mb-3">
         <div class="col-md-6">
             <RadzenLabel Text="Password" />
-            <RadzenPassword @bind-Value="newUser.Password" Name="Password" class="w-100" />
+            <RadzenStack Orientation="Orientation.Horizontal" Gap="5px" AlignItems="AlignItems.Center">
+                <RadzenTextBox @bind-Value="newUser.Password" 
+                             Name="Password" 
+                             class="w-100" 
+                             Style="flex: 1;"
+                             InputType="@(showPassword ? "text" : "password")" />
+                <RadzenButton Icon="@(showPassword ? "visibility_off" : "visibility")" 
+                             ButtonStyle="ButtonStyle.Secondary" 
+                             Size="ButtonSize.Small"
+                             Click="@TogglePasswordVisibility"
+                             Title="@(showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu")" />
+            </RadzenStack>
             <RadzenRequiredValidator Component="Password" Text="Password is required" />
+        </div>
+        <div class="col-md-6">
+            <RadzenLabel Text="Confirm Password" />
+            <RadzenStack Orientation="Orientation.Horizontal" Gap="5px" AlignItems="AlignItems.Center">
+                <RadzenTextBox @bind-Value="confirmPassword" 
+                             Name="ConfirmPassword" 
+                             class="w-100" 
+                             Style="flex: 1;"
+                             InputType="@(showConfirmPassword ? "text" : "password")" />
+                <RadzenButton Icon="@(showConfirmPassword ? "visibility_off" : "visibility")" 
+                             ButtonStyle="ButtonStyle.Secondary" 
+                             Size="ButtonSize.Small"
+                             Click="@ToggleConfirmPasswordVisibility"
+                             Title="@(showConfirmPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu")" />
+            </RadzenStack>
+            <RadzenCompareValidator Component="ConfirmPassword"
+                                   Value="newUser.Password"
+                                   Text="Passwords do not match" />
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <RadzenLabel Text="Role" />
+            <RadzenStack Orientation="Orientation.Horizontal" Gap="8px" AlignItems="AlignItems.Center">
+                <RadzenDropDown @bind-Value="@newUser.RoleName" 
+                               Data="@roles"
+                               TextProperty="Name" 
+                               ValueProperty="Name" 
+                               Name="RoleName" 
+                               class="w-100" 
+                               Placeholder="Chọn role (tùy chọn)"
+                               Style="flex: 1;" />
+                @if (!string.IsNullOrEmpty(newUser.RoleName))
+                {
+                    <RadzenButton Icon="visibility" 
+                                 ButtonStyle="ButtonStyle.Info" 
+                                 Size="ButtonSize.Small"
+                                 Click="@(() => ShowRolePermissions(newUser.RoleName))"
+                                 Title="Xem quyền của role này" />
+                }
+            </RadzenStack>
         </div>
     </div>
     <div class="row">
-        <div class="col">
-            <RadzenButton ButtonType="ButtonType.Submit" Text="Create" Icon="save" ButtonStyle="ButtonStyle.Primary" />
-            <RadzenButton Text="Cancel" Icon="cancel" ButtonStyle="ButtonStyle.Secondary" Click="@CloseDialog" />
+        <div class="col" Style="display: flex; gap: 10px; justify-content: flex-end;">
+            <RadzenButton ButtonType="ButtonType.Submit" Text="Create" Icon="save" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Dark" Size="ButtonSize.Small" />
+            <RadzenButton Text="Cancel" Icon="cancel" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat" Shade="Shade.Lighter" Click="@CloseDialog" />
         </div>
     </div>
 </RadzenTemplateForm>
 
 @code {  
-   private CreateUserRequest newUser = new();  
+   private CreateUserRequest newUser = new();
+   private string confirmPassword = string.Empty;
+   private bool showPassword = false;
+   private bool showConfirmPassword = false;
+   private List<IdentityRole> roles = new();
+
+   protected override async Task OnInitializedAsync()
+   {
+       await LoadRoles();
+   }
+
+   private async Task LoadRoles()
+   {
+       try
+       {
+           roles = (await RoleManager.Roles.ToListAsync()).ToList();
+       }
+       catch (Exception ex)
+       {
+           NotificationService.Notify(NotificationSeverity.Error, "Lỗi", $"Không thể tải danh sách roles: {ex.Message}");
+       }
+   }
+
+   private async Task ShowRolePermissions(string roleName)
+   {
+       if (string.IsNullOrEmpty(roleName))
+       {
+           NotificationService.Notify(NotificationSeverity.Warning, "Cảnh báo", "Vui lòng chọn role trước");
+           return;
+       }
+
+       await DialogService.OpenAsync<ViewRolePermissionsDialog>("Quyền của Role",
+           new Dictionary<string, object> { { "RoleName", roleName } },
+           new DialogOptions { Width = "600px", Height = "auto", Resizable = true, Draggable = true });
+   }
+
+   private void TogglePasswordVisibility()
+   {
+       showPassword = !showPassword;
+   }
+
+   private void ToggleConfirmPasswordVisibility()
+   {
+       showConfirmPassword = !showConfirmPassword;
+   }  
 
    private async Task CreateUser()  
-   {  
+   {
+       // Validate confirm password
+       if (newUser.Password != confirmPassword)
+       {
+           NotificationService.Notify(NotificationSeverity.Error, "Lỗi", "Mật khẩu không khớp");
+           return;
+       }
+
        try  
        {  
            var client = HttpClientFactory.CreateClient(Common.ServerAPI);  
            var response = await client.PostAsJsonAsync("api/user", newUser);  
 
            if (response.IsSuccessStatusCode)  
-           {  
+           {
                await DialogService.Alert($"<strong>User created successfully</strong>", "<strong><span style='color: green'>Success!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true });  
                DialogService.Close(true);  
            }  

@@ -5,6 +5,7 @@
 @using ProcessManagement.Commons
 @using ProcessManagement.Models
 @using ProcessManagement.Models.NHANVIEN
+@using ProcessManagement.Models.Authorization
 @using ProcessManagement.Pages.Manager_NhanVien.Dialogs
 @using ProcessManagement.Services.QRCodes
 @using ProcessManagement.Services.SQLServer
@@ -89,8 +90,10 @@
                                 </RadzenStack>
                                 <!--Button them nhan vien moi-->
                                 <RadzenStack Style="height: 100%; width: contain; padding-left: 10px; border-left: var(--rz-grid-cell-border);" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                    <RadzenButton Click="OnThemMoiNhanVien" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Thêm nhân viên mới"))" Icon="add" Text="Thêm nhân viên mới" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
-                                                  Style="height: contain; width: contain; font-size: 14px;" />
+                                    <AuthorizedAction RequiredPermission="@Permissions.NhanVien_Create">
+                                        <RadzenButton Click="OnThemMoiNhanVien" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Thêm nhân viên mới"))" Icon="add" Text="Thêm nhân viên mới" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Filled" Shade="Shade.Lighter"
+                                                      Style="height: contain; width: contain; font-size: 14px;" />
+                                    </AuthorizedAction>
                                 </RadzenStack>
                             </RadzenStack>
 
@@ -372,10 +375,14 @@
                                                             }
                                                         </RadzenStack>
                                                         <RadzenStack Visible="@isEditNhanVienDetail" Gap="5" Style="width: 15%; height: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                                            <RadzenButton Click="@(() => OpendialogRenameThongTinNV(nvdetail))" Icon="edit" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Đổi tên trường thông tin"))"
-                                                                          ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 18px;" />
-                                                            <RadzenButton Click="@(() => OpendialogDeleteThongTinNV(nvdetail))" Icon="delete" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Xóa trường thông tin"))"
-                                                                          ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 18px;" />
+                                                            <AuthorizedAction RequiredPermission="@Permissions.NhanVien_Update">
+                                                                <RadzenButton Click="@(() => OpendialogRenameThongTinNV(nvdetail))" Icon="edit" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Đổi tên trường thông tin"))"
+                                                                              ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 18px;" />
+                                                            </AuthorizedAction>
+                                                            <AuthorizedAction RequiredPermission="@Permissions.NhanVien_Delete">
+                                                                <RadzenButton Click="@(() => OpendialogDeleteThongTinNV(nvdetail))" Icon="delete" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Xóa trường thông tin"))"
+                                                                              ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small" Shade="Shade.Lighter" Style="border-radius: 5px; --rz-icon-size: 18px;" />
+                                                            </AuthorizedAction>
                                                         </RadzenStack>
                                                     </RadzenStack>
                                                 }
@@ -385,20 +392,26 @@
                                 </RadzenCard>
                                 <RadzenStack Visible="(SelectedNhanVien.NVID.Value != null)" Gap="10px" Style="height: 5%; width: 100%; padding-top: 10px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
                                     <RadzenStack Gap="10px" Style="height: contain; width: contain; padding: 0px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                        <RadzenButton Visible="@(!isEditNhanVienDetail)" Style="width: contain; height: contain;" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Thêm thông tin khác cho nhân viên"))"
-                                                      Icon="add" Text="Thông tin khác" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat"
-                                                      Click="@(() => OnOpenDialogAddNewNVDetail())" />
-                                        <RadzenButton Visible="@(isEditNhanVienDetail)" Style="width: contain; height: contain;"
-                                                      Icon="check" Text="Lưu thay đổi" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Size="ButtonSize.Small" Variant="Variant.Flat"
-                                                      Click=@(() => OnUpdateThongTinNhanVien(SelectedNhanVien))
-                                                      BusyText="Saving ..." IsBusy=@isSavingNVdetails />
-                                        <RadzenButton Style="width: contain; min-width: 120px; height: contain;" Click="@(() => EnableEditNVDetail())"
-                                                      Icon="@((isEditNhanVienDetail)? "clear" : "edit")" Text="@((isEditNhanVienDetail)? "Hủy" : "Chỉnh sửa")" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" />
+                                        <AuthorizedAction RequiredPermission="@Permissions.NhanVien_Create">
+                                            <RadzenButton Visible="@(!isEditNhanVienDetail)" Style="width: contain; height: contain;" MouseEnter="@(args => ShowToolTip(args, TooltipPosition.Bottom, "Thêm thông tin khác cho nhân viên"))"
+                                                          Icon="add" Text="Thông tin khác" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat"
+                                                          Click="@(() => OnOpenDialogAddNewNVDetail())" />
+                                        </AuthorizedAction>
+                                        <AuthorizedAction RequiredPermission="@Permissions.NhanVien_Update">
+                                            <RadzenButton Visible="@(isEditNhanVienDetail)" Style="width: contain; height: contain;"
+                                                          Icon="check" Text="Lưu thay đổi" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Size="ButtonSize.Small" Variant="Variant.Flat"
+                                                          Click=@(() => OnUpdateThongTinNhanVien(SelectedNhanVien))
+                                                          BusyText="Saving ..." IsBusy=@isSavingNVdetails />
+                                            <RadzenButton Style="width: contain; min-width: 120px; height: contain;" Click="@(() => EnableEditNVDetail())"
+                                                          Icon="@((isEditNhanVienDetail)? "clear" : "edit")" Text="@((isEditNhanVienDetail)? "Hủy" : "Chỉnh sửa")" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Lighter" Size="ButtonSize.Small" Variant="Variant.Flat" />
+                                        </AuthorizedAction>
                                     </RadzenStack>
                                     <RadzenStack Gap="10px" Style="height: contain; width: contain; padding: 0px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                        <RadzenButton Visible="@(isEditNhanVienDetail)" Style="width: contain; height: contain; background-color: darkred"
-                                                      Icon="delete" Text="Xóa nhân viên" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Size="ButtonSize.Small" Variant="Variant.Flat"
-                                                      Click=@(() => OnDeleteNhanVien(SelectedNhanVien)) />
+                                        <AuthorizedAction RequiredPermission="@Permissions.NhanVien_Delete">
+                                            <RadzenButton Visible="@(isEditNhanVienDetail)" Style="width: contain; height: contain; background-color: darkred"
+                                                          Icon="delete" Text="Xóa nhân viên" ButtonStyle="ButtonStyle.Primary" Shade="Shade.Darker" Size="ButtonSize.Small" Variant="Variant.Flat"
+                                                          Click=@(() => OnDeleteNhanVien(SelectedNhanVien)) />
+                                        </AuthorizedAction>
                                     </RadzenStack>
                                 </RadzenStack>
                             </RadzenStack>

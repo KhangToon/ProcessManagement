@@ -4,21 +4,12 @@
 
 <AuthorizeView>
     <Authorized>
-        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-            <RadzenStack Visible=@(context.User.Claims.Where(c => c.Type == ClaimTypes.Role)
-                         .Select(c => c.Value)
-                         .ToList().FirstOrDefault() == "Admin")>
-                <a href="Identity/Account/Manage">@context.User.Identity?.Name</a>
-            </RadzenStack>
-            <RadzenStack>
-                <form method="post" action="Identity/Account/Logout">
-                    <button type="submit" class="nav-link btn btn-link">Log out</button>
-                </form>
-            </RadzenStack>
-        </RadzenStack>
+        <UserInfoDisplay User="@context.User" />
     </Authorized>
     <NotAuthorized>
-        <a href="Identity/Account/Register">Register</a>
-        <a href="Identity/Account/Login">Login</a>
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="12px">
+            <RadzenLink Path="Identity/Account/Register" Text="Register" />
+            <RadzenLink Path="Identity/Account/Login" Text="Login" />
+        </RadzenStack>
     </NotAuthorized>
 </AuthorizeView>

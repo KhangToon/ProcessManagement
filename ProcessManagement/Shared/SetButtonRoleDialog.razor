@@ -1,0 +1,178 @@
+@using Microsoft.AspNetCore.Identity
+@using ProcessManagement.Models
+@using ProcessManagement.Services.Authorization
+@using Radzen
+@using Radzen.Blazor
+@using Microsoft.EntityFrameworkCore
+@using ProcessManagement.Data
+
+@inject ButtonRoleService ButtonRoleService
+@inject RoleManager<IdentityRole> RoleManager
+@inject NotificationService NotificationService
+@inject DialogService DialogService
+
+<RadzenTemplateForm TItem="object">
+    <RadzenStack Gap="16px">
+        <RadzenStack Gap="12px">
+            <RadzenLabel Text="Button ID" Style="font-weight: bold;" />
+            <RadzenTextBox Value="@ButtonId" class="w-100" Disabled="true" />
+        </RadzenStack>
+
+        <RadzenStack Gap="12px">
+            <RadzenLabel Text="Trang" Style="font-weight: bold;" />
+            <RadzenTextBox Value="@PagePath" class="w-100" Disabled="true" />
+        </RadzenStack>
+
+        <RadzenStack Gap="12px">
+            <RadzenLabel Text="Tên Button" Style="font-weight: bold;" />
+            <RadzenTextBox Value="@ButtonText" class="w-100" Disabled="true" />
+        </RadzenStack>
+
+        <RadzenStack Gap="12px">
+            <RadzenLabel Text="Chọn Roles cho button này" Style="font-weight: bold;" />
+            <RadzenDropDown @bind-Value="selectedRoles" 
+                           Data="@availableRoles" 
+                           TextProperty="Name" 
+                           ValueProperty="Name" 
+                           Multiple="true"
+                           AllowFiltering="true"
+                           FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                           FilterOperator="StringFilterOperator.Contains"
+                           AllowClear="true"
+                           Change="@OnRolesChanged"
+                           class="w-100" 
+                           Placeholder="Chọn roles" />
+            <RadzenLabel Text="Button sẽ chỉ hiển thị cho users có ít nhất 1 trong các roles được chọn" 
+                        Style="font-size: 12px; color: #666; font-style: italic;" />
+            <RadzenLabel Text="Lưu ý: Role 'Admin' luôn được gán mặc định và không thể bỏ chọn." 
+                        Style="font-size: 11px; color: #999; font-style: italic;" />
+        </RadzenStack>
+
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="12px" JustifyContent="JustifyContent.End" Style="margin-top: 20px;">
+            <RadzenButton Text="Hủy" 
+                         Icon="cancel" 
+                         ButtonStyle="ButtonStyle.Light" 
+                         Click="@Cancel" />
+            <RadzenButton Text="Lưu" 
+                         Icon="save" 
+                         ButtonType="ButtonType.Submit"
+                         ButtonStyle="ButtonStyle.Primary"
+                         Click="@Save" />
+        </RadzenStack>
+    </RadzenStack>
+</RadzenTemplateForm>
+
+@code {
+    [Parameter] public string ButtonId { get; set; } = string.Empty;
+    [Parameter] public string PagePath { get; set; } = string.Empty;
+    [Parameter] public string ButtonText { get; set; } = string.Empty;
+
+    private List<IdentityRole> availableRoles = new();
+    private List<string> selectedRoles = new();
+    private bool isLoading = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadRoles();
+        await LoadCurrentButtonRoles();
+    }
+
+    private async Task LoadRoles()
+    {
+        try
+        {
+            availableRoles = (await RoleManager.Roles.ToListAsync()).ToList();
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Lỗi", $"Không thể tải danh sách roles: {ex.Message}");
+        }
+    }
+
+    private async Task LoadCurrentButtonRoles()
+    {
+        if (string.IsNullOrEmpty(ButtonId))
+            return;
+
+        try
+        {
+            var currentRoles = await ButtonRoleService.GetRolesForButtonAsync(ButtonId);
+            selectedRoles = currentRoles ?? new List<string>();
+
+            // Đảm bảo luôn có role Admin
+            if (!selectedRoles.Contains("Admin"))
+            {
+                selectedRoles.Add("Admin");
+            }
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(NotificationSeverity.Warning, "Cảnh báo", $"Không thể tải roles hiện tại: {ex.Message}");
+        }
+    }
+
+    private void OnRolesChanged(object value)
+    {
+        // Radzen trả về IEnumerable<object> hoặc IEnumerable<string> tùy cấu hình
+        if (value is IEnumerable<string> rolesString)
+        {
+            selectedRoles = rolesString.ToList();
+        }
+        else if (value is IEnumerable<object> rolesObj)
+        {
+            selectedRoles = rolesObj.Select(r => r?.ToString() ?? string.Empty)
+                                    .Where(r => !string.IsNullOrWhiteSpace(r))
+                                    .ToList();
+        }
+
+        // Luôn đảm bảo Admin được chọn
+        if (!selectedRoles.Contains("Admin"))
+        {
+            selectedRoles.Add("Admin");
+        }
+    }
+
+    private async Task Save()
+    {
+        if (string.IsNullOrEmpty(ButtonId))
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Lỗi", "ButtonId không được để trống");
+            return;
+        }
+
+        isLoading = true;
+        try
+        {
+            // Đảm bảo luôn gán role Admin, không cho phép bỏ
+            if (!selectedRoles.Contains("Admin"))
+            {
+                selectedRoles.Add("Admin");
+            }
+
+            var success = await ButtonRoleService.AssignRolesToButtonAsync(ButtonId, PagePath, ButtonText, selectedRoles);
+            if (success)
+            {
+                NotificationService.Notify(NotificationSeverity.Success, "Thành công", "Đã lưu roles cho button");
+                DialogService.Close(true);
+            }
+            else
+            {
+                NotificationService.Notify(NotificationSeverity.Error, "Lỗi", "Không thể lưu roles cho button");
+            }
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Lỗi", $"Đã xảy ra lỗi: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void Cancel()
+    {
+        DialogService.Close(false);
+    }
+}
+

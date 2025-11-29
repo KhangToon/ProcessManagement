@@ -1,0 +1,308 @@
+@using ProcessManagement.Models.Authorization
+@using ProcessManagement.Data
+@using Microsoft.EntityFrameworkCore
+@using Radzen
+@using Radzen.Blazor
+
+@inject AppDbContext DbContext
+@inject NotificationService NotificationService
+@inject DialogService DialogService
+
+<RadzenTemplateForm TItem="Permission" Data="@permission" Submit="@SavePermission">
+    <RadzenStack Gap="16px">
+        <RadzenStack Gap="12px">
+            <RadzenLabel Text="Module" />
+            <RadzenTextBox @bind-Value="@permission.Module" 
+                          class="w-100" 
+                          Placeholder="Nhập tên module (VD: Kế hoạch sản xuất, Kho nguyên vật liệu, ...)"
+                          Name="Module"
+                          Disabled="@isEdit"
+                          Change="@OnModuleChanged" />
+            <RadzenRequiredValidator Component="Module" Text="Module là bắt buộc" />
+            @if (availableModules.Any() && !string.IsNullOrWhiteSpace(permission.Module) && !availableModules.Contains(permission.Module))
+            {
+                string moduleList = string.Join(", ", availableModules.Take(5));
+                <RadzenLabel Text="@moduleList" Style="font-size: 11px; color: #666; font-style: italic;" />
+            }
+        </RadzenStack>
+
+        <RadzenStack Gap="12px">
+            <RadzenLabel Text="Action" />
+            <RadzenTextBox @bind-Value="@permission.Action" 
+                          class="w-100" 
+                          Placeholder="VD: Create, View, Update, Delete, NhapKho, XuatKho, KiemKe, ... (tùy ý)"
+                          Name="Action"
+                          Disabled="@isEdit"
+                          Change="@OnActionChanged" />
+            <RadzenRequiredValidator Component="Action" Text="Action là bắt buộc" />
+            @if (isEdit)
+            {
+                <RadzenLabel Text="(Action không thể thay đổi khi chỉnh sửa)" Style="font-size: 11px; color: #999;" />
+            }
+            @if (!string.IsNullOrWhiteSpace(actionValidationError))
+            {
+                <RadzenLabel Text="@actionValidationError" Style="font-size: 12px; color: #f44336;" />
+            }
+        </RadzenStack>
+
+        <RadzenStack Gap="12px">
+            <RadzenLabel Text="Permission Code" />
+            <RadzenTextBox @bind-Value="@permission.PermissionCode" 
+                          class="w-100" 
+                          Placeholder="VD: KHSX.Create (tự động tạo nếu để trống)"
+                          Disabled="true" />
+            <RadzenLabel Text="Format: [Module].[Action]" Style="font-size: 12px; color: #666;" />
+        </RadzenStack>
+
+        <RadzenStack Gap="12px">
+            <RadzenLabel Text="Tên hiển thị" />
+            <RadzenTextBox @bind-Value="@permission.DisplayName" 
+                          class="w-100" 
+                          Placeholder="VD: Tạo mới, Xem, Cập nhật" />
+        </RadzenStack>
+
+        <RadzenStack Gap="12px">
+            <RadzenLabel Text="Mô tả" />
+            <RadzenTextArea @bind-Value="@permission.Description" 
+                           class="w-100" 
+                           Rows="3"
+                           Placeholder="Mô tả chi tiết về permission này" />
+        </RadzenStack>
+
+        <RadzenStack Gap="12px">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="8px">
+                <RadzenCheckBox @bind-Value="@permission.IsActive" />
+                <RadzenLabel Text="Hoạt động" />
+            </RadzenStack>
+        </RadzenStack>
+
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="12px" JustifyContent="JustifyContent.End" Style="margin-top: 20px;">
+            <RadzenButton Text="Hủy" 
+                         Icon="cancel" 
+                         ButtonStyle="ButtonStyle.Light" 
+                         Click="@Cancel" />
+            <RadzenButton Text="@(isEdit ? "Cập nhật" : "Tạo")" 
+                         Icon="@(isEdit ? "save" : "add")" 
+                         ButtonType="ButtonType.Submit"
+                         ButtonStyle="ButtonStyle.Primary" />
+        </RadzenStack>
+    </RadzenStack>
+</RadzenTemplateForm>
+
+@code {
+    [Parameter] public Permission? Permission { get; set; }
+    [Parameter] public string Module { get; set; } = string.Empty;
+    [Parameter] public bool IsEdit { get; set; } = false;
+
+    private Permission permission = new();
+    private bool isEdit = false;
+    private List<string> availableModules = new();
+    private string actionValidationError = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isEdit = IsEdit;
+        
+        // Load modules từ database và từ Permissions.cs
+        var dbModules = await DbContext.Permissions
+            .Select(p => p.Module)
+            .Distinct()
+            .ToListAsync();
+        
+        var defaultModules = Permissions.GetAllPermissionsByModule().Keys.ToList();
+        availableModules = dbModules.Union(defaultModules).Distinct().OrderBy(m => m).ToList();
+
+        if (isEdit && Permission != null)
+        {
+            permission = new Permission
+            {
+                Id = Permission.Id,
+                PermissionCode = Permission.PermissionCode,
+                Module = Permission.Module,
+                Action = Permission.Action,
+                DisplayName = Permission.DisplayName,
+                Description = Permission.Description,
+                IsActive = Permission.IsActive,
+                CreatedAt = Permission.CreatedAt,
+                UpdatedAt = Permission.UpdatedAt
+            };
+        }
+        else
+        {
+            permission = new Permission
+            {
+                Module = Module,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            };
+        }
+    }
+
+    private void OnModuleChanged(object? value = null)
+    {
+        // Tự động tạo PermissionCode khi Module thay đổi
+        UpdatePermissionCode();
+        ValidateAction();
+    }
+
+    private async Task OnActionChanged(object? value = null)
+    {
+        // Tự động cập nhật PermissionCode khi Action thay đổi
+        UpdatePermissionCode();
+        await ValidateActionAsync();
+    }
+
+    private void UpdatePermissionCode()
+    {
+        if (!string.IsNullOrWhiteSpace(permission.Module) && !string.IsNullOrWhiteSpace(permission.Action))
+        {
+            var moduleCode = GetModuleCode(permission.Module);
+            permission.PermissionCode = $"{moduleCode}.{permission.Action}";
+            StateHasChanged();
+        }
+    }
+
+    private void ValidateAction()
+    {
+        actionValidationError = string.Empty;
+    }
+
+    private async Task ValidateActionAsync()
+    {
+        actionValidationError = string.Empty;
+        
+        if (string.IsNullOrWhiteSpace(permission.Module) || string.IsNullOrWhiteSpace(permission.Action))
+        {
+            return;
+        }
+
+        try
+        {
+            // Kiểm tra Action có trùng trong cùng module không
+            var existingPermission = await DbContext.Permissions
+                .FirstOrDefaultAsync(p => 
+                    p.Module == permission.Module && 
+                    p.Action == permission.Action &&
+                    (!isEdit || p.Id != permission.Id));
+
+            if (existingPermission != null)
+            {
+                actionValidationError = $"Action '{permission.Action}' đã tồn tại trong module '{permission.Module}'";
+            }
+        }
+        catch (Exception ex)
+        {
+            // Ignore validation errors during typing
+        }
+        
+        StateHasChanged();
+    }
+
+    private string GetModuleCode(string moduleName)
+    {
+        // Map module name to code
+        return moduleName switch
+        {
+            "Kế hoạch sản xuất" => "KHSX",
+            "Kho nguyên vật liệu" => "KhoNVL",
+            "Sản phẩm" => "SanPham",
+            "Máy móc - Thiết bị" => "MayMoc",
+            "Nhân viên" => "NhanVien",
+            "Kho thành phẩm" => "KhoThanhPham",
+            "Công đoạn" => "NguyenCong",
+            "Quản lý tài khoản" => "Users",
+            "Đóng thùng" => "DongThung",
+            _ => moduleName.Replace(" ", "")
+        };
+    }
+
+    private async Task SavePermission()
+    {
+        // Validate required fields
+        if (string.IsNullOrWhiteSpace(permission.Module))
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Lỗi", "Vui lòng chọn Module");
+            return;
+        }
+
+        // Chỉ validate Action khi tạo mới (không validate khi edit vì Action đã bị disable)
+        if (!isEdit)
+        {
+            if (string.IsNullOrWhiteSpace(permission.Action))
+            {
+                NotificationService.Notify(NotificationSeverity.Error, "Lỗi", "Vui lòng nhập Action");
+                return;
+            }
+
+            // Validate Action không trùng trong cùng module
+            await ValidateActionAsync();
+            if (!string.IsNullOrWhiteSpace(actionValidationError))
+            {
+                NotificationService.Notify(NotificationSeverity.Error, "Lỗi", actionValidationError);
+                return;
+            }
+        }
+
+        try
+        {
+            // Tự động tạo PermissionCode nếu chưa có
+            if (string.IsNullOrWhiteSpace(permission.PermissionCode))
+            {
+                var moduleCode = GetModuleCode(permission.Module);
+                permission.PermissionCode = $"{moduleCode}.{permission.Action}";
+            }
+
+            if (isEdit)
+            {
+                // Tìm entity hiện có trong database
+                var existingPermission = await DbContext.Permissions.FindAsync(permission.Id);
+                if (existingPermission != null)
+                {
+                    // Khi edit, chỉ cho phép cập nhật DisplayName, Description, và IsActive
+                    // Module, Action, và PermissionCode không thể thay đổi (đã bị disable)
+                    existingPermission.DisplayName = permission.DisplayName;
+                    existingPermission.Description = permission.Description;
+                    existingPermission.IsActive = permission.IsActive;
+                    existingPermission.UpdatedAt = DateTime.UtcNow;
+                }
+                else
+                {
+                    NotificationService.Notify(NotificationSeverity.Error, "Lỗi", "Không tìm thấy permission cần cập nhật");
+                    return;
+                }
+            }
+            else
+            {
+                // Kiểm tra duplicate PermissionCode (chỉ khi tạo mới)
+                var exists = await DbContext.Permissions
+                    .AnyAsync(p => p.PermissionCode == permission.PermissionCode);
+                
+                if (exists)
+                {
+                    NotificationService.Notify(NotificationSeverity.Error, "Lỗi", $"Permission code '{permission.PermissionCode}' đã tồn tại");
+                    return;
+                }
+
+                permission.CreatedAt = DateTime.UtcNow;
+                await DbContext.Permissions.AddAsync(permission);
+            }
+
+            await DbContext.SaveChangesAsync();
+            
+            NotificationService.Notify(NotificationSeverity.Success, "Thành công", 
+                $"Đã {(isEdit ? "cập nhật" : "tạo")} permission thành công");
+            
+            DialogService.Close(true);
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Lỗi", $"Không thể lưu permission: {ex.Message}");
+        }
+    }
+
+    private void Cancel()
+    {
+        DialogService.Close();
+    }
+}
+

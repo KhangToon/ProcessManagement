@@ -1,0 +1,167 @@
+@using Microsoft.AspNetCore.Identity
+@using ProcessManagement.Commons
+@using ProcessManagement.Pages.Account_Management.Role_Management.Models
+@using ProcessManagement.Pages.Account_Management.User_Management.Models
+@using Radzen
+@using Radzen.Blazor
+@using System.Linq
+
+@inject IHttpClientFactory HttpClientFactory
+@inject NotificationService NotificationService
+@inject DialogService DialogService
+
+<RadzenTemplateForm TItem="UserResponse" Data="@user" Submit="@UpdateUser">
+    <RadzenStack Gap="20px">
+        <RadzenStack Gap="8px">
+            <RadzenLabel Text="Chỉnh sửa thông tin người dùng" Style="font-size: 18px; font-weight: 600; color: #1976d2;" />
+            <RadzenLabel Text="@($"Người dùng: {user.Username}")" Style="font-size: 14px; color: #666;" />
+        </RadzenStack>
+
+        <RadzenStack Gap="16px">
+            <RadzenStack Gap="8px">
+                <RadzenLabel Text="Username" Style="font-weight: 500;" />
+                <RadzenTextBox @bind-Value="user.Username" Name="Username" class="w-100" Disabled="true" />
+                <RadzenLabel Text="(Username không thể thay đổi)" Style="font-size: 11px; color: #999;" />
+            </RadzenStack>
+
+            <RadzenStack Gap="8px">
+                <RadzenLabel Text="Email" Style="font-weight: 500;" />
+                <RadzenTextBox @bind-Value="user.Email" Name="Email" class="w-100" />
+            </RadzenStack>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <RadzenStack Gap="8px">
+                        <RadzenLabel Text="First Name" Style="font-weight: 500;" />
+                        <RadzenTextBox @bind-Value="user.FirstName" Name="FirstName" class="w-100" />
+                    </RadzenStack>
+                </div>
+                <div class="col-md-6">
+                    <RadzenStack Gap="8px">
+                        <RadzenLabel Text="Last Name" Style="font-weight: 500;" />
+                        <RadzenTextBox @bind-Value="user.LastName" Name="LastName" class="w-100" />
+                    </RadzenStack>
+                </div>
+            </div>
+
+            <RadzenStack Gap="8px">
+                <RadzenLabel Text="Roles" Style="font-weight: 500;" />
+                <RadzenDropDown @bind-Value="selectedRoles" Data="@availableRoles" Multiple="true"
+                                Name="Roles" class="w-100" />
+                @if (selectedRoles.Any())
+                {
+                    <RadzenStack Gap="5px" Orientation="Orientation.Horizontal" Style="flex-wrap: wrap; margin-top: 8px;">
+                        @foreach (var role in selectedRoles)
+                        {
+                            <RadzenBadge Text="@role" Variant="Variant.Filled" BadgeStyle="BadgeStyle.Info" />
+                        }
+                    </RadzenStack>
+                }
+            </RadzenStack>
+        </RadzenStack>
+
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="12px" JustifyContent="JustifyContent.End" Style="margin-top: 8px;">
+            <RadzenButton Text="Hủy" 
+                         Icon="cancel" 
+                         ButtonStyle="ButtonStyle.Light" 
+                         Click="@CloseDialog" />
+            <RadzenButton ButtonType="ButtonType.Submit" 
+                         Text="Cập nhật" 
+                         Icon="save" 
+                         ButtonStyle="ButtonStyle.Primary" />
+        </RadzenStack>
+    </RadzenStack>
+</RadzenTemplateForm>
+
+@code {
+    [Parameter] public UserResponse User { get; set; } = new();
+    private UserResponse user = new();
+    private List<string> availableRoles = new();
+    private List<string> selectedRoles = new();
+    private List<string> rolesToRemove = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        user = new UserResponse
+        {
+            Id = User.Id,
+            Username = User.Username,
+            Email = User.Email,
+            FirstName = User.FirstName,
+            LastName = User.LastName,
+            Roles = User.Roles
+        };
+
+        selectedRoles = user.Roles.ToList();
+
+        // Fetch available roles from the API
+        var client = HttpClientFactory.CreateClient(Common.ServerAPI);
+        var rolesResponse = await client.GetFromJsonAsync<List<IdentityRole>>("api/roles") ?? new();
+        availableRoles = rolesResponse.Select(role => role.Name).Where(name => name != null).Cast<string>().ToList();
+    }
+
+    private async Task UpdateUser()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient(Common.ServerAPI);
+
+            // Determine roles to remove
+            rolesToRemove = user.Roles.Except(selectedRoles).ToList();
+
+            // Update user details
+            var userUpdateResponse = await client.PutAsJsonAsync($"api/user/{user.Id}", user);
+
+            if (!userUpdateResponse.IsSuccessStatusCode)
+            {
+                var error = await userUpdateResponse.Content.ReadAsStringAsync();
+                NotificationService.Notify(NotificationSeverity.Error, "Lỗi", $"Không thể cập nhật thông tin: {error}");
+                return;
+            }
+
+            // Update user roles
+            var roleUpdateResponse = await client.PostAsJsonAsync($"api/roles/assign-list", new AssignRolesRequest
+            {
+                UserId = user.Id,
+                RoleNames = selectedRoles
+            });
+
+            if (!roleUpdateResponse.IsSuccessStatusCode)
+            {
+                var error = await roleUpdateResponse.Content.ReadAsStringAsync();
+                NotificationService.Notify(NotificationSeverity.Error, "Lỗi", $"Không thể cập nhật roles: {error}");
+                return;
+            }
+
+            // Remove unselected roles
+            if (rolesToRemove.Any())
+            {
+                var removeRolesResponse = await client.PostAsJsonAsync($"api/roles/remove-list", new AssignRolesRequest
+                {
+                    UserId = user.Id,
+                    RoleNames = rolesToRemove
+                });
+
+                if (!removeRolesResponse.IsSuccessStatusCode)
+                {
+                    var error = await removeRolesResponse.Content.ReadAsStringAsync();
+                    NotificationService.Notify(NotificationSeverity.Error, "Lỗi", $"Không thể xóa roles: {error}");
+                    return;
+                }
+            }
+
+            NotificationService.Notify(NotificationSeverity.Success, "Thành công", "Đã cập nhật thông tin người dùng");
+            DialogService.Close(true);
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Lỗi", $"Đã xảy ra lỗi: {ex.Message}");
+        }
+    }
+
+    private void CloseDialog()
+    {
+        DialogService.Close(false);
+    }
+}
+

@@ -17,6 +17,7 @@ using System.Net.NetworkInformation;
 using System.Diagnostics;
 using ProcessManagement.Commons;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using ProcessManagement.Services.Authorization;
 
 var localIP = PortFinder.GetLocalIPAddress();
 IPAddress localIPAddress = IPAddress.Parse(localIP);
@@ -30,10 +31,20 @@ var builder = WebApplication.CreateBuilder(args);
 // Identity config
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
-    var connectionString = builder.Configuration.GetConnectionString("DBConnectionString") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found."); ;
+    var connectionString = builder.Configuration.GetConnectionString("DBConnectionString")
+        ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
     options.UseSqlServer(connectionString);
 });
+// Factory để tạo DbContext riêng cho các service nền (ví dụ ButtonRoleService)
+// Đặt lifetime = Scoped để không vi phạm quy tắc DI (singleton dùng scoped service)
+builder.Services.AddDbContextFactory<AppDbContext>(options =>
+{
+    var connectionString = builder.Configuration.GetConnectionString("DBConnectionString")
+        ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
+    options.UseSqlServer(connectionString);
+}, ServiceLifetime.Scoped);
 
 // Identity config (auto create after scaffold) // using when use default identity
 builder.Services.AddDefaultIdentity<AppUser>(options => options.SignIn.RequireConfirmedAccount = false)
@@ -98,6 +109,16 @@ builder.Services.AddSingleton<ModbusServices>();
 
 // Add ViTriofTPhamApiService
 builder.Services.AddScoped<ViTriofTPhamApiService>();
+
+// Permission Service
+builder.Services.AddScoped<PermissionService>();
+// Button Role Service
+builder.Services.AddScoped<ButtonRoleService>();
+// Admin permission adjust mode (global toggle)
+builder.Services.AddSingleton<AdminPermissionModeService>();
+
+// Password Encryption Service
+builder.Services.AddSingleton<ProcessManagement.Services.PasswordEncryptionService>();
 
 // CRS (Cross-Origin Resource Sharing) - Configures access to the API from any origin
 builder.Services.AddCors(options =>

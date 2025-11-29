@@ -2,139 +2,590 @@
 @using ProcessManagement.Commons
 @using ProcessManagement.Pages.Account_Management.Role_Management.Models
 @using ProcessManagement.Pages.Account_Management.User_Management.Models
+@using ProcessManagement.Models
 @using Radzen
 @using Radzen.Blazor
+@using System.Linq
 
 @inject IHttpClientFactory HttpClientFactory
 @inject NotificationService NotificationService
 @inject DialogService DialogService
+@inject UserManager<AppUser> UserManager
 
-<RadzenTemplateForm TItem="UserResponse" Data="@user" Submit="@UpdateUser">
-    <div class="row mb-3">
-        <div class="col-md-6">
-            <RadzenLabel Text="Username" />
-            <RadzenTextBox @bind-Value="user.Username" Name="Username" class="w-100" Disabled="true" />
-        </div>
-        <div class="col-md-6">
-            <RadzenLabel Text="Email" />
-            <RadzenTextBox @bind-Value="user.Email" Name="Email" class="w-100" />
-        </div>
-    </div>
-    <div class="row mb-3">
-        <div class="col-md-6">
-            <RadzenLabel Text="First Name" />
-            <RadzenTextBox @bind-Value="user.FirstName" Name="FirstName" class="w-100" />
-        </div>
-        <div class="col-md-6">
-            <RadzenLabel Text="Last Name" />
-            <RadzenTextBox @bind-Value="user.LastName" Name="LastName" class="w-100" />
-        </div>
-    </div>
-    <div class="row mb-3">
-        <div class="col-md-12">
-            <RadzenLabel Text="Roles" />
-            <RadzenDropDown @bind-Value="selectedRoles" Data="@availableRoles" Multiple="true"
-                            Name="Roles" class="w-100" />
-        </div>
-    </div>
-    <div class="row">
-        <div class="col">
-            <RadzenButton ButtonType="ButtonType.Submit" Text="Update" Icon="save" ButtonStyle="ButtonStyle.Primary" />
-            <RadzenButton Text="Cancel" Icon="cancel" ButtonStyle="ButtonStyle.Secondary" Click="@CloseDialog" />
-        </div>
-    </div>
+<RadzenTemplateForm TItem="object">
+    <RadzenStack Gap="24px">
+        @* Layout ngang: Thông tin User và Mật khẩu cạnh nhau *@
+        <RadzenRow Gap="16px">
+            @* Cột trái: Thông tin User *@
+            <RadzenColumn SizeMD="6" Size="12">
+                <RadzenCard Style="height: 100%;">
+            <RadzenStack Gap="16px">
+                <RadzenStack Orientation="Orientation.Horizontal" Gap="12px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                    <RadzenLabel Text="Thông tin người dùng" Style="font-size: 16px; font-weight: 600;" />
+                    <RadzenButton Text="Nhập lại" 
+                                 Icon="refresh" 
+                                 ButtonStyle="ButtonStyle.Light" 
+                                 Size="ButtonSize.Small"
+                                 Click="@ResetUserInfo"
+                                 Disabled="@isLoading"
+                                 Title="Khôi phục về giá trị ban đầu" />
+                </RadzenStack>
+
+                <RadzenStack Gap="12px">
+                    <RadzenStack Gap="8px">
+                        <RadzenLabel Text="Username" Style="font-weight: 500;" />
+                        <RadzenTextBox Value="@user.Username" 
+                                     Name="Username" 
+                                     class="w-100" 
+                                     Disabled="true" />
+                        <RadzenLabel Text="(Username không thể thay đổi)" Style="font-size: 11px; color: #999;" />
+                    </RadzenStack>
+
+                    <RadzenStack Gap="8px">
+                        <RadzenLabel Text="Email" Style="font-weight: 500;" />
+                        <RadzenTextBox Value="@user.Email" 
+                                     ValueChanged="@((string value) => { user.Email = value; TrackChanges(); })" 
+                                     Name="Email" 
+                                     class="w-100"
+                                     Disabled="@isAdminAccount" />
+                    </RadzenStack>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <RadzenStack Gap="4px">
+                                <RadzenLabel Text="First Name" Style="font-weight: 500;" />
+                                <RadzenTextBox Value="@user.FirstName" 
+                                             ValueChanged="@((string value) => { user.FirstName = value; TrackChanges(); })" 
+                                             Name="FirstName" 
+                                             class="w-100"
+                                             Disabled="@isAdminAccount" />
+                            </RadzenStack>
+                        </div>
+                        <div class="col-md-6">
+                            <RadzenStack Gap="4px">
+                                <RadzenLabel Text="Last Name" Style="font-weight: 500;" />
+                                <RadzenTextBox Value="@user.LastName" 
+                                             ValueChanged="@((string value) => { user.LastName = value; TrackChanges(); })" 
+                                             Name="LastName" 
+                                             class="w-100"
+                                             Disabled="@isAdminAccount" />
+                            </RadzenStack>
+                        </div>
+                    </div>
+
+                    <RadzenStack Gap="8px">
+                        <RadzenLabel Text="Role" Style="font-weight: 500;" />
+                        <RadzenStack Orientation="Orientation.Horizontal" Gap="8px" AlignItems="AlignItems.Center">
+                            <RadzenDropDown @bind-Value="selectedRole" 
+                                           Data="@availableRoles" 
+                                           Name="Role" 
+                                           class="w-100"
+                                           Placeholder="Chọn role (tùy chọn)"
+                                           Disabled="@isAdminAccount"
+                                           Change="@((object value) => TrackChanges())" />
+                            @if (!string.IsNullOrEmpty(selectedRole))
+                            {
+                                <RadzenBadge Text="@selectedRole" Variant="Variant.Filled" BadgeStyle="BadgeStyle.Info" />
+                            }
+                            else
+                            {
+                                <RadzenBadge Text="Chưa có role" Variant="Variant.Filled" BadgeStyle="BadgeStyle.Warning" />
+                            }
+                        </RadzenStack>
+                    </RadzenStack>
+
+                    <RadzenStack Gap="8px">
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="8px">
+                            <RadzenCheckBox @bind-Value="user.IsActive" 
+                                           Disabled="@isAdminAccount"
+                                           Change="@((bool value) => TrackChanges())" />
+                            <RadzenLabel Text="Tài khoản hoạt động" Style="font-weight: 500;" />
+                        </RadzenStack>
+                        @if (isAdminAccount)
+                        {
+                            <RadzenLabel Text="(Tài khoản admin@admin không thể thay đổi trạng thái)" Style="font-size: 11px; color: #999;" />
+                        }
+                    </RadzenStack>
+                </RadzenStack>
+            </RadzenStack>
+                </RadzenCard>
+            </RadzenColumn>
+
+            @* Cột phải: Mật khẩu *@
+            <RadzenColumn SizeMD="6" Size="12">
+                <RadzenCard Style="height: 100%;">
+            <RadzenStack Gap="16px">
+                <RadzenStack Orientation="Orientation.Horizontal" Gap="12px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                    <RadzenLabel Text="Mật khẩu" Style="font-size: 16px; font-weight: 600;" />
+                    <RadzenStack Orientation="Orientation.Horizontal" Gap="8px">
+                        <RadzenButton Text="@(isViewCurrentPassword ? "Ẩn mật khẩu" : "Xem mật khẩu")" 
+                                     Icon="@(isViewCurrentPassword ? "visibility_off" : "visibility")" 
+                                     ButtonStyle="ButtonStyle.Success" 
+                                     Size="ButtonSize.Small"
+                                     Click="@ToggleViewPassword"
+                                     Disabled="@isLoading" />
+                        <RadzenButton Text="@(isEditPassword ? "Hủy đổi mật khẩu" : "Chỉnh sửa mật khẩu")" 
+                                     Icon="@(isEditPassword ? "cancel" : "lock")" 
+                                     ButtonStyle="@(isEditPassword ? ButtonStyle.Light : ButtonStyle.Primary)" 
+                                     Size="ButtonSize.Small"
+                                     Click="@ToggleEditPassword"
+                                     Disabled="@isLoading" />
+                    </RadzenStack>
+                </RadzenStack>
+
+                @if (isViewCurrentPassword && !string.IsNullOrEmpty(currentPassword))
+                {
+                    <RadzenCard Style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); border: 2px solid #2196F3; border-radius: 8px; padding: 16px;">
+                        <RadzenStack Gap="8px">
+                            <RadzenStack Orientation="Orientation.Horizontal" Gap="8px" AlignItems="AlignItems.Center">
+                                <RadzenIcon Icon="lock" Style="color: #1976d2; font-size: 20px;" />
+                                <RadzenLabel Text="Mật khẩu hiện tại:" Style="font-weight: 600; color: #1976d2;" />
+                            </RadzenStack>
+                            <RadzenLabel Text="@currentPassword" 
+                                         Style="font-family: 'Courier New', monospace; font-size: 20px; color: #1976d2; font-weight: bold; padding: 12px; background: white; border-radius: 6px; text-align: center; letter-spacing: 3px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" />
+                        </RadzenStack>
+                    </RadzenCard>
+                }
+
+                @if (isEditPassword)
+                {
+                    <RadzenStack Gap="16px">
+                        <RadzenStack Gap="8px">
+                            <RadzenLabel Text="Mật khẩu mới" Style="font-weight: 500;" />
+                            <RadzenStack Orientation="Orientation.Horizontal" Gap="8px" AlignItems="AlignItems.Center">
+                                <RadzenTextBox Value="@changePasswordModel.NewPassword" 
+                                             ValueChanged="@((string value) => { changePasswordModel.NewPassword = value; TrackChanges(); OnPasswordInput(new ChangeEventArgs { Value = value }); })" 
+                                             Name="NewPassword" 
+                                             class="w-100" 
+                                             Placeholder="Nhập mật khẩu mới (tối thiểu 6 ký tự)"
+                                             InputType="@(showPassword ? "text" : "password")"
+                                             Style="flex: 1;" />
+                                <RadzenButton Icon="@(showPassword ? "visibility_off" : "visibility")" 
+                                             ButtonStyle="ButtonStyle.Light" 
+                                             Size="ButtonSize.Small"
+                                             Click="@TogglePasswordVisibility"
+                                             Title="@(showPassword ? "Ẩn" : "Hiện")" />
+                            </RadzenStack>
+                            
+                            @* Hiển thị password rules *@
+                            <RadzenStack Gap="4px" Style="padding-left: 8px;">
+                                <RadzenLabel Text="Yêu cầu mật khẩu:" Style="font-size: 12px; font-weight: 600; color: #666;" />
+                                <RadzenStack Gap="2px" Style="padding-left: 16px;">
+                                    <RadzenLabel Text="✓ Tối thiểu 6 ký tự" 
+                                                 Style="@($"font-size: 11px; color: {(passwordRules.MinLength ? "#4caf50" : "#999")}")" />
+                                </RadzenStack>
+                            </RadzenStack>
+                        </RadzenStack>
+
+                        <RadzenStack Gap="8px">
+                            <RadzenLabel Text="Xác nhận mật khẩu" Style="font-weight: 500;" />
+                            <RadzenStack Orientation="Orientation.Horizontal" Gap="8px" AlignItems="AlignItems.Center">
+                                <RadzenTextBox Value="@changePasswordModel.ConfirmPassword" 
+                                             ValueChanged="@((string value) => { changePasswordModel.ConfirmPassword = value; TrackChanges(); })" 
+                                             Name="ConfirmPassword" 
+                                             class="w-100" 
+                                             Placeholder="Nhập lại mật khẩu"
+                                             InputType="@(showConfirmPassword ? "text" : "password")"
+                                             Style="flex: 1;" />
+                                <RadzenButton Icon="@(showConfirmPassword ? "visibility_off" : "visibility")" 
+                                             ButtonStyle="ButtonStyle.Light" 
+                                             Size="ButtonSize.Small"
+                                             Click="@ToggleConfirmPasswordVisibility"
+                                             Title="@(showConfirmPassword ? "Ẩn" : "Hiện")" />
+                            </RadzenStack>
+                            <RadzenCompareValidator Component="ConfirmPassword"
+                                                   Value="changePasswordModel.NewPassword"
+                                                   Text="Mật khẩu không khớp" />
+                        </RadzenStack>
+                    </RadzenStack>
+                }
+                else if (!isViewCurrentPassword)
+                {
+                    <RadzenCard Style="background: #f5f5f5; padding: 16px; border-radius: 4px;">
+                        <RadzenLabel Text="Nhấn 'Xem mật khẩu' để xem mật khẩu hiện tại hoặc 'Chỉnh sửa mật khẩu' để thay đổi." 
+                                     Style="color: #666; font-size: 13px;" />
+                    </RadzenCard>
+                }
+            </RadzenStack>
+                </RadzenCard>
+            </RadzenColumn>
+        </RadzenRow>
+
+        @* Nút Actions *@
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="12px" JustifyContent="JustifyContent.End" Style="margin-top: 8px;">
+            <RadzenButton Text="Hủy" 
+                         Icon="cancel" 
+                         ButtonStyle="ButtonStyle.Light" 
+                         Click="@CloseDialog"
+                         Disabled="@isLoading" />
+            <RadzenButton Text="Lưu" 
+                         Icon="save" 
+                         ButtonStyle="ButtonStyle.Primary" 
+                         Click="@SaveAllChanges"
+                         Disabled="@(isLoading || !hasChanges)" />
+        </RadzenStack>
+    </RadzenStack>
 </RadzenTemplateForm>
 
 @code {
     [Parameter] public UserResponse User { get; set; } = new();
+    
+    // User Info
     private UserResponse user = new();
+    private UserResponse originalUser = new(); // Lưu bản gốc để so sánh
     private List<string> availableRoles = new();
-    private List<string> selectedRoles = new();
-    private List<string> rolesToRemove = new();
+    private string selectedRole = string.Empty;
+    private string originalSelectedRole = string.Empty; // Lưu role gốc để so sánh
+    private bool isEditUserInfo = false;
+    private bool isAdminAccount = false; // Kiểm tra xem có phải admin@admin không
+    
+    // Password
+    private ChangePasswordModel changePasswordModel = new();
+    private bool showPassword = false;
+    private bool showConfirmPassword = false;
+    private bool isLoading = false;
+    private bool isViewCurrentPassword = false;
+    private bool isEditPassword = false;
+    private string currentPassword = string.Empty;
+    
+    // Password rules validation
+    private PasswordRules passwordRules = new();
+    private const int MIN_PASSWORD_LENGTH = 6;
+    
+    // Track changes
+    private bool hasChanges = false;
+    
+    private bool IsPasswordValid => 
+        !string.IsNullOrEmpty(changePasswordModel.NewPassword) && 
+        changePasswordModel.NewPassword.Length >= MIN_PASSWORD_LENGTH &&
+        changePasswordModel.NewPassword == changePasswordModel.ConfirmPassword;
 
     protected override async Task OnInitializedAsync()
     {
-        user = new UserResponse
-        {
-            Id = User.Id,
-            Username = User.Username,
-            Email = User.Email,
-            FirstName = User.FirstName,
-            LastName = User.LastName,
-            Roles = User.Roles
-        };
-
-        selectedRoles = user.Roles;
-
         // Fetch available roles from the API
-        var client = HttpClientFactory.CreateClient(Common.ServerAPI);
-
-        var rolesResponse = await client.GetFromJsonAsync<List<IdentityRole>>("api/roles") ?? new();
-
-        availableRoles = rolesResponse.Select(role => role.Name).Where(name => name != null).Cast<string>().ToList();
-    }
-
-    private async Task UpdateUser()
-    {
         try
         {
             var client = HttpClientFactory.CreateClient(Common.ServerAPI);
-
-            // Determine roles to remove
-            rolesToRemove = user.Roles.Except(selectedRoles).ToList();
-
-            // Update user details
-            var userUpdateResponse = await client.PutAsJsonAsync($"api/user/{user.Id}", user);
-
-            if (!userUpdateResponse.IsSuccessStatusCode)
-            {
-                var error = await userUpdateResponse.Content.ReadAsStringAsync();
-                await DialogService.Alert($"<strong>Failed to update user: {error}</strong>", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true, Width = "contain" });
-                return;
-            }
-
-            // Update user roles
-            var roleUpdateResponse = await client.PostAsJsonAsync($"api/roles/assign-list", new AssignRolesRequest
-            {
-                UserId = user.Id,
-                RoleNames = selectedRoles
-            });
-
-            if (!roleUpdateResponse.IsSuccessStatusCode)
-            {
-                var error = await roleUpdateResponse.Content.ReadAsStringAsync();
-                await DialogService.Alert($"<strong>Failed to update roles: {error}</strong>", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true, Width = "contain" });
-                return;
-            }
-
-            // Remove unselected roles
-            if (rolesToRemove.Any())
-            {
-                var removeRolesResponse = await client.PostAsJsonAsync($"api/roles/remove-list", new AssignRolesRequest
-                {
-                    UserId = user.Id,
-                    RoleNames = rolesToRemove
-                });
-
-                if (!removeRolesResponse.IsSuccessStatusCode)
-                {
-                    var error = await removeRolesResponse.Content.ReadAsStringAsync();
-                    await DialogService.Alert($"<strong>Failed to remove roles: {error}</strong>", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true, Width = "contain" });
-                    return;
-                }
-            }
-
-            await DialogService.Alert("<strong>User updated successfully</strong>", "<strong><span style='color: green'>Success!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true, Width = "contain" });
-            DialogService.Close(true);
+            var rolesResponse = await client.GetFromJsonAsync<List<IdentityRole>>("api/roles") ?? new();
+            availableRoles = rolesResponse.Select(role => role.Name).Where(name => name != null).Cast<string>().ToList();
         }
         catch (Exception ex)
         {
-            await DialogService.Alert($"<strong>Failed to update user: {ex.Message}</strong>", "<strong><span style='color: red'>Error!</span></strong>", new AlertOptions() { OkButtonText = "OK", ShowClose = true, Width = "contain" });
+            NotificationService.Notify(NotificationSeverity.Warning, "Cảnh báo", $"Không thể tải danh sách roles: {ex.Message}");
+            availableRoles = new List<string>();
+        }
+        
+        await base.OnInitializedAsync();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // Initialize user info - copy từ parameter
+        if (User != null && !string.IsNullOrEmpty(User.Id))
+        {
+            user = new UserResponse
+            {
+                Id = User.Id ?? string.Empty,
+                Username = User.Username ?? string.Empty,
+                Email = User.Email ?? string.Empty,
+                FirstName = User.FirstName ?? string.Empty,
+                LastName = User.LastName ?? string.Empty,
+                Roles = User.Roles != null ? new List<string>(User.Roles) : new List<string>(),
+                IsActive = User.IsActive
+            };
+
+            // Lấy role đầu tiên (single role model)
+            selectedRole = user.Roles.FirstOrDefault() ?? string.Empty;
+            
+            // Kiểm tra xem có phải admin@admin không
+            isAdminAccount = user.Email?.ToLower() == "admin@admin" || user.Username?.ToLower() == "admin";
+            
+            // Lưu bản gốc để so sánh
+            originalUser = new UserResponse
+            {
+                Id = user.Id,
+                Username = user.Username,
+                Email = user.Email,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Roles = new List<string>(user.Roles),
+                IsActive = user.IsActive
+            };
+            originalSelectedRole = selectedRole;
+        }
+        else
+        {
+            user = new UserResponse();
+            selectedRole = string.Empty;
+            originalUser = new UserResponse();
+            originalSelectedRole = string.Empty;
+            isAdminAccount = false;
+        }
+        
+        // Reset edit modes
+        isEditUserInfo = false;
+        isEditPassword = false;
+        hasChanges = false;
+        changePasswordModel = new ChangePasswordModel();
+        
+        await base.OnParametersSetAsync();
+        StateHasChanged();
+    }
+
+    private void TrackChanges()
+    {
+        // Check user info changes (Email, FirstName, LastName luôn có thể edit)
+        bool userInfoChanged = 
+            user.Email != originalUser.Email ||
+            user.FirstName != originalUser.FirstName ||
+            user.LastName != originalUser.LastName ||
+            selectedRole != originalSelectedRole ||
+            user.IsActive != originalUser.IsActive;
+        
+        // Check password changes
+        bool passwordChanged = isEditPassword && 
+            !string.IsNullOrEmpty(changePasswordModel.NewPassword) &&
+            IsPasswordValid;
+        
+        hasChanges = userInfoChanged || passwordChanged;
+        StateHasChanged();
+    }
+
+    private void OnPasswordInput(ChangeEventArgs e)
+    {
+        var password = e.Value?.ToString() ?? string.Empty;
+        passwordRules.MinLength = password.Length >= MIN_PASSWORD_LENGTH;
+        TrackChanges();
+    }
+
+    private void TogglePasswordVisibility()
+    {
+        showPassword = !showPassword;
+    }
+
+    private void ToggleConfirmPasswordVisibility()
+    {
+        showConfirmPassword = !showConfirmPassword;
+    }
+
+    private async Task ToggleViewPassword()
+    {
+        // Nếu đang hiện thì ẩn đi
+        if (isViewCurrentPassword)
+        {
+            isViewCurrentPassword = false;
+            currentPassword = string.Empty;
+            StateHasChanged();
+            return;
+        }
+
+        // Nếu chưa hiện thì load và hiện
+        if (string.IsNullOrEmpty(user.Id))
+            return;
+
+        isLoading = true;
+        try
+        {
+            var client = HttpClientFactory.CreateClient(Common.ServerAPI);
+            var response = await client.GetAsync($"api/user/{user.Id}/get-password");
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<PasswordResponse>();
+                if (result != null && !string.IsNullOrEmpty(result.Password))
+                {
+                    currentPassword = result.Password;
+                    isViewCurrentPassword = true;
+                }
+                else
+                {
+                    NotificationService.Notify(NotificationSeverity.Warning, "Thông báo", "Chưa có mật khẩu được lưu trong hệ thống.");
+                }
+            }
+            else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                NotificationService.Notify(NotificationSeverity.Warning, "Thông báo", "Chưa có mật khẩu được lưu. Vui lòng đổi mật khẩu để lưu vào hệ thống.");
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                NotificationService.Notify(NotificationSeverity.Error, "Lỗi", $"Không thể lấy mật khẩu: {error}");
+            }
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Lỗi", $"Đã xảy ra lỗi: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void ToggleEditPassword()
+    {
+        // Nếu đang edit thì tắt và reset form
+        if (isEditPassword)
+        {
+            isEditPassword = false;
+            changePasswordModel = new ChangePasswordModel();
+            showPassword = false;
+            showConfirmPassword = false;
+            passwordRules = new PasswordRules();
+            TrackChanges();
+        }
+        else
+        {
+            // Nếu chưa edit thì bật
+            isEditPassword = true;
+            TrackChanges();
+        }
+        StateHasChanged();
+    }
+
+    private async Task SaveAllChanges()
+    {
+        isLoading = true;
+        try
+        {
+            var client = HttpClientFactory.CreateClient(Common.ServerAPI);
+            var hasErrors = false;
+
+            // Lưu thông tin user nếu có thay đổi
+            if (
+                user.Email != originalUser.Email ||
+                user.FirstName != originalUser.FirstName ||
+                user.LastName != originalUser.LastName ||
+                user.IsActive != originalUser.IsActive
+            )
+            {
+                // Update user details (bao gồm IsActive)
+                var updateRequest = new UpdateUserRequest
+                {
+                    Email = user.Email,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    IsActive = user.IsActive
+                };
+                var userUpdateResponse = await client.PutAsJsonAsync($"api/user/{user.Id}", updateRequest);
+                if (!userUpdateResponse.IsSuccessStatusCode)
+                {
+                    var error = await userUpdateResponse.Content.ReadAsStringAsync();
+                    NotificationService.Notify(NotificationSeverity.Error, "Lỗi", $"Không thể cập nhật thông tin: {error}");
+                    hasErrors = true;
+                }
+            }
+
+            // Update role nếu có thay đổi
+            if (selectedRole != originalSelectedRole)
+            {
+                if (string.IsNullOrEmpty(selectedRole))
+                {
+                    // Xóa role hiện tại
+                    var currentRoles = originalUser.Roles;
+                    if (currentRoles.Any())
+                    {
+                        var removeRolesResponse = await client.PostAsJsonAsync($"api/roles/remove-list", new AssignRolesRequest
+                        {
+                            UserId = user.Id,
+                            RoleNames = currentRoles
+                        });
+
+                        if (!removeRolesResponse.IsSuccessStatusCode)
+                        {
+                            var error = await removeRolesResponse.Content.ReadAsStringAsync();
+                            NotificationService.Notify(NotificationSeverity.Error, "Lỗi", $"Không thể xóa role: {error}");
+                            hasErrors = true;
+                        }
+                    }
+                }
+                else
+                {
+                    // Gán role mới (single role model)
+                    var roleUpdateResponse = await client.PostAsJsonAsync($"api/roles/assign", new AssignRoleRequest
+                    {
+                        UserId = user.Id,
+                        RoleName = selectedRole
+                    });
+
+                    if (!roleUpdateResponse.IsSuccessStatusCode)
+                    {
+                        var error = await roleUpdateResponse.Content.ReadAsStringAsync();
+                        NotificationService.Notify(NotificationSeverity.Error, "Lỗi", $"Không thể cập nhật role: {error}");
+                        hasErrors = true;
+                    }
+                }
+            }
+
+            // Lưu mật khẩu nếu có thay đổi
+            if (isEditPassword && !string.IsNullOrEmpty(changePasswordModel.NewPassword) && IsPasswordValid)
+            {
+                var response = await client.PostAsJsonAsync($"api/user/{user.Id}/change-password", 
+                    new { NewPassword = changePasswordModel.NewPassword });
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    NotificationService.Notify(NotificationSeverity.Error, "Lỗi", $"Không thể đổi mật khẩu: {error}");
+                    hasErrors = true;
+                }
+            }
+
+            if (!hasErrors)
+            {
+                NotificationService.Notify(NotificationSeverity.Success, "Thành công", "Đã lưu tất cả thay đổi");
+                DialogService.Close(true);
+            }
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Lỗi", $"Đã xảy ra lỗi: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
         }
     }
 
     private void CloseDialog()
     {
         DialogService.Close(false);
+    }
+
+    private void ResetUserInfo()
+    {
+        // Reset về giá trị ban đầu
+        user.Email = originalUser.Email;
+        user.FirstName = originalUser.FirstName;
+        user.LastName = originalUser.LastName;
+        user.IsActive = originalUser.IsActive;
+        selectedRole = originalSelectedRole;
+        
+        // Reset edit mode cho roles
+        isEditUserInfo = false;
+        
+        // Reset changes tracking
+        TrackChanges();
+        StateHasChanged();
+        
+        NotificationService.Notify(NotificationSeverity.Info, "Thông báo", "Đã khôi phục về giá trị ban đầu");
+    }
+
+    public class ChangePasswordModel
+    {
+        public string NewPassword { get; set; } = string.Empty;
+        public string ConfirmPassword { get; set; } = string.Empty;
+    }
+
+    public class PasswordResponse
+    {
+        public string Password { get; set; } = string.Empty;
+        public DateTime LastUpdated { get; set; }
+    }
+
+    public class PasswordRules
+    {
+        public bool MinLength { get; set; } = false;
     }
 }

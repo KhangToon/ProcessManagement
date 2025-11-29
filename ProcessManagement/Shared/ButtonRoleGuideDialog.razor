@@ -1,0 +1,131 @@
+@using Radzen
+@using Radzen.Blazor
+
+@inject DialogService DialogService
+
+<RadzenTemplateForm TItem="object">
+    <div style="display: flex; flex-direction: column; max-height: 90vh; overflow: hidden;">
+        @* HEADER *@
+        <div style="flex: 0 0 auto; padding: 20px; border-bottom: 2px solid #1976d2; background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="12px">
+                    <RadzenIcon Icon="help" Style="font-size: 32px; color: white;" />
+                    <RadzenLabel Text="Hướng dẫn: Gán Role cho Button" Style="font-size: 24px; font-weight: bold; color: white;" />
+                </RadzenStack>
+                <RadzenButton Icon="close" 
+                             ButtonStyle="ButtonStyle.Light" 
+                             Variant="Variant.Flat"
+                             Click="@CloseDialog"
+                             Style="color: white; border-color: white;" />
+            </RadzenStack>
+        </div>
+
+        @* BODY: Scrollable content *@
+        <div style="flex: 1 1 auto; overflow-y: auto; padding: 20px;">
+            <RadzenStack Gap="20px">
+                @* Giới thiệu *@
+                <RadzenCard>
+                    <RadzenStack Gap="12px">
+                        <RadzenText TextStyle="TextStyle.H3" Text="📌 Tổng quan" Style="color: #1976d2; font-weight: bold;" />
+                        <RadzenText Text="Chức năng này cho phép Admin gán quyền truy cập cho từng button trên trang web. Khi gán role cho một button, chỉ những user có role đó mới thấy và sử dụng được button đó." 
+                                   Style="font-size: 14px; line-height: 1.6;" />
+                    </RadzenStack>
+                </RadzenCard>
+
+                @* Bước 1: Bật chế độ *@
+                <RadzenCard>
+                    <RadzenStack Gap="12px">
+                        <RadzenText TextStyle="TextStyle.H4" Text="Bước 1: Bật chế độ điều chỉnh phân quyền" Style="color: #1976d2; font-weight: bold;" />
+                        <RadzenStack Gap="8px" Style="padding-left: 20px;">
+                            <RadzenText Text="1. Click vào tên account của bạn (ví dụ: 'Admin 001') trên header" Style="font-size: 14px; line-height: 1.6;" />
+                            <RadzenText Text="2. Một dropdown menu sẽ hiện ra với switch 'Bật chế độ điều chỉnh phân quyền'" Style="font-size: 14px; line-height: 1.6;" />
+                            <RadzenText Text="3. Bật switch này lên" Style="font-size: 14px; line-height: 1.6;" />
+                            <RadzenText Text="4. Sau khi bật, các button trên trang sẽ hiện icon 🔧 màu cam ở góc trên bên phải" Style="font-size: 14px; line-height: 1.6; font-weight: 600; color: #ff9800;" />
+                        </RadzenStack>
+                    </RadzenStack>
+                </RadzenCard>
+
+                @* Bước 2: Gán role *@
+                <RadzenCard>
+                    <RadzenStack Gap="12px">
+                        <RadzenText TextStyle="TextStyle.H4" Text="Bước 2: Gán Role cho Button" Style="color: #1976d2; font-weight: bold;" />
+                        <RadzenStack Gap="8px" Style="padding-left: 20px;">
+                            <RadzenText Text="Có 2 cách để mở dialog gán role:" Style="font-size: 14px; line-height: 1.6; font-weight: 600;" />
+                            <RadzenText Text="• Cách 1: Click vào icon 🔧 trên button" Style="font-size: 14px; line-height: 1.6; padding-left: 10px;" />
+                            <RadzenText Text="• Cách 2: Chuột phải vào button" Style="font-size: 14px; line-height: 1.6; padding-left: 10px;" />
+                            <RadzenText Text="Dialog 'Gán Role cho Button' sẽ hiện ra với các thông tin:" Style="font-size: 14px; line-height: 1.6; margin-top: 8px;" />
+                            <RadzenStack Gap="4px" Style="padding-left: 20px;">
+                                <RadzenText Text="• Button ID: Mã định danh của button (ví dụ: SanPham_Create_Button)" Style="font-size: 14px; line-height: 1.6;" />
+                                <RadzenText Text="• Trang: Đường dẫn trang hiện tại" Style="font-size: 14px; line-height: 1.6;" />
+                                <RadzenText Text="• Tên Button: Tên hiển thị của button" Style="font-size: 14px; line-height: 1.6;" />
+                                <RadzenText Text="• Chọn Roles: Dropdown để chọn các role được phép sử dụng button này" Style="font-size: 14px; line-height: 1.6;" />
+                            </RadzenStack>
+                        </RadzenStack>
+                    </RadzenStack>
+                </RadzenCard>
+
+                @* Bước 3: Chọn roles *@
+                <RadzenCard>
+                    <RadzenStack Gap="12px">
+                        <RadzenText TextStyle="TextStyle.H4" Text="Bước 3: Chọn Roles và Lưu" Style="color: #1976d2; font-weight: bold;" />
+                        <RadzenStack Gap="8px" Style="padding-left: 20px;">
+                            <RadzenText Text="1. Trong dropdown 'Chọn Roles', chọn một hoặc nhiều role mà bạn muốn cho phép sử dụng button này" Style="font-size: 14px; line-height: 1.6;" />
+                            <RadzenText Text="2. Bạn có thể search role bằng cách gõ vào ô dropdown" Style="font-size: 14px; line-height: 1.6;" />
+                            <RadzenText Text="3. Lưu ý: Role 'Admin' luôn được gán mặc định và không thể bỏ chọn" Style="font-size: 14px; line-height: 1.6; font-weight: 600; color: #d32f2f;" />
+                            <RadzenText Text="4. Click nút 'Lưu' để hoàn tất" Style="font-size: 14px; line-height: 1.6;" />
+                            <RadzenText Text="5. Sau khi lưu, chỉ những user có ít nhất 1 trong các role được chọn mới thấy button đó" Style="font-size: 14px; line-height: 1.6; font-weight: 600; color: #388e3c;" />
+                        </RadzenStack>
+                    </RadzenStack>
+                </RadzenCard>
+
+                @* Lưu ý *@
+                <RadzenCard Style="background-color: #fff3cd; border-left: 4px solid #ffc107;">
+                    <RadzenStack Gap="12px">
+                        <RadzenText TextStyle="TextStyle.H4" Text="⚠️ Lưu ý quan trọng" Style="color: #856404; font-weight: bold;" />
+                        <RadzenStack Gap="8px" Style="padding-left: 20px;">
+                            <RadzenText Text="• Nếu một button chưa được gán role nào, chỉ Admin mới thấy button đó (mặc định an toàn)" Style="font-size: 14px; line-height: 1.6;" />
+                            <RadzenText Text="• Các button cùng ButtonId (ví dụ: nhiều button 'Thêm/Sửa' trong DataGrid) sẽ dùng chung cấu hình phân quyền" Style="font-size: 14px; line-height: 1.6;" />
+                            <RadzenText Text="• Khi xóa hoặc đổi tên một role, hệ thống sẽ tự động cập nhật các button đang sử dụng role đó" Style="font-size: 14px; line-height: 1.6;" />
+                            <RadzenText Text="• Chỉ Admin mới có thể bật chế độ điều chỉnh phân quyền và gán role cho button" Style="font-size: 14px; line-height: 1.6; font-weight: 600;" />
+                        </RadzenStack>
+                    </RadzenStack>
+                </RadzenCard>
+
+                @* Ví dụ *@
+                <RadzenCard>
+                    <RadzenStack Gap="12px">
+                        <RadzenText TextStyle="TextStyle.H4" Text="💡 Ví dụ" Style="color: #1976d2; font-weight: bold;" />
+                        <RadzenStack Gap="8px" Style="padding-left: 20px;">
+                            <RadzenText Text="Bạn muốn chỉ role 'User' và 'Manager' mới thấy button 'Thêm sản phẩm mới':" Style="font-size: 14px; line-height: 1.6;" />
+                            <RadzenStack Gap="4px" Style="padding-left: 20px;">
+                                <RadzenText Text="1. Bật chế độ điều chỉnh phân quyền" Style="font-size: 14px; line-height: 1.6;" />
+                                <RadzenText Text="2. Click icon 🔧 trên button 'Thêm sản phẩm mới'" Style="font-size: 14px; line-height: 1.6;" />
+                                <RadzenText Text="3. Trong dropdown, chọn 'User' và 'Manager' (Admin đã tự động được chọn)" Style="font-size: 14px; line-height: 1.6;" />
+                                <RadzenText Text="4. Click 'Lưu'" Style="font-size: 14px; line-height: 1.6;" />
+                                <RadzenText Text="5. Bây giờ chỉ user có role 'User', 'Manager', hoặc 'Admin' mới thấy button này" Style="font-size: 14px; line-height: 1.6; font-weight: 600; color: #388e3c;" />
+                            </RadzenStack>
+                        </RadzenStack>
+                    </RadzenStack>
+                </RadzenCard>
+            </RadzenStack>
+        </div>
+
+        @* FOOTER *@
+        <div style="flex: 0 0 auto; padding: 15px 20px; border-top: 1px solid #e0e0e0; background-color: #f5f5f5;">
+            <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End">
+                <RadzenButton Text="Đóng" 
+                             Icon="close" 
+                             ButtonStyle="ButtonStyle.Primary"
+                             Click="@CloseDialog" />
+            </RadzenStack>
+        </div>
+    </div>
+</RadzenTemplateForm>
+
+@code {
+    private void CloseDialog()
+    {
+        DialogService.Close(true);
+    }
+}
+

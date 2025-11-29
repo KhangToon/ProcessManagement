@@ -1,0 +1,448 @@
+@using Microsoft.AspNetCore.Identity
+@using ProcessManagement.Models
+@using ProcessManagement.Models.Authorization
+@using ProcessManagement.Services.Authorization
+@using Radzen
+@using Radzen.Blazor
+
+@inject PermissionService PermissionService
+@inject UserManager<AppUser> UserManager
+@inject NotificationService NotificationService
+@inject DialogService DialogService
+
+<RadzenTemplateForm TItem="object">
+    <div style="display: flex; flex-direction: column;">
+        @* HEADER: Thông tin user + các nút chức năng *@
+        <div style="flex: 0 0 auto; padding: 20px; border-bottom: 1px solid #e0e0e0; background: white;">
+            <RadzenStack Gap="16px">
+                @* Title và Action Buttons *@
+                <RadzenStack Orientation="Orientation.Horizontal" Gap="12px" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                    <RadzenLabel Text="@(isEditMode ? "Quản lý quyền truy cập cho người dùng" : "Quyền truy cập của người dùng")" Style="font-size: 18px; font-weight: bold;" />
+                    <RadzenStack Orientation="Orientation.Horizontal" Gap="8px">
+                        @if (isEditMode && hasChanges)
+                        {
+                            <RadzenButton Text="Nhập lại" 
+                                         Icon="refresh" 
+                                         ButtonStyle="ButtonStyle.Light" 
+                                         Size="ButtonSize.Small"
+                                         Click="@ResetPermissions"
+                                         Disabled="@isLoading"
+                                         Title="Khôi phục về giá trị ban đầu" />
+                        }
+                        <RadzenButton Text="@(isEditMode ? "Hủy chỉnh sửa" : "Điều chỉnh")" 
+                                     Icon="@(isEditMode ? "cancel" : "edit")" 
+                                     ButtonStyle="@(isEditMode ? ButtonStyle.Light : ButtonStyle.Primary)" 
+                                     Size="ButtonSize.Small"
+                                     Click="@ToggleEditMode"
+                                     Disabled="@isLoading" />
+                    </RadzenStack>
+                </RadzenStack>
+                
+                @* User Info *@
+                <RadzenStack Orientation="Orientation.Horizontal" Gap="8px" AlignItems="AlignItems.Center">
+                    <RadzenLabel Text="Người dùng:" Style="font-size: 14px; color: #666;" />
+                    <RadzenLabel Text="@(user?.UserName ?? "N/A")" Style="font-weight: bold; font-size: 16px; color: #1976d2;" />
+                </RadzenStack>
+                
+                @* User Roles *@
+                @if (userRoles != null && userRoles.Any())
+                {
+                    <RadzenStack Orientation="Orientation.Horizontal" Gap="8px" AlignItems="AlignItems.Center" Style="flex-wrap: wrap;">
+                        <RadzenLabel Text="Roles:" Style="font-size: 14px; color: #666;" />
+                        @foreach (var role in userRoles)
+                        {
+                            <RadzenBadge Text="@role" Variant="Variant.Filled" BadgeStyle="BadgeStyle.Success" />
+                        }
+                    </RadzenStack>
+                }
+                
+                @* Description *@
+                <RadzenLabel Text="@(isEditMode ? "Chọn các quyền truy cập:" : "Danh sách quyền truy cập:")" Style="font-size: 14px; color: #666;" />
+            </RadzenStack>
+        </div>
+
+        @* BODY: List roles/permissions - scrollable với height cố định 500px *@
+        <div style="height: 500px; overflow-y: auto; overflow-x: hidden; padding: 20px;">
+            <RadzenStack Gap="10px">
+                @* Checkbox chọn tất cả *@
+                @if (isEditMode)
+                {
+                    <RadzenCard Style="background: #f5f5f5; border: 1px solid #e0e0e0;">
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="10px">
+                            <RadzenCheckBox Value="@IsAllSelected()" 
+                                           ValueChanged="@((bool value) => SelectAllPermissions(value))" />
+                            <RadzenLabel Text="Chọn tất cả" Style="font-weight: bold; font-size: 14px;" />
+                        </RadzenStack>
+                    </RadzenCard>
+                }
+
+                @foreach (var module in permissionsByModule)
+                {
+                    <RadzenCard>
+                        <RadzenStack Gap="10px">
+                            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="10px" JustifyContent="JustifyContent.SpaceBetween">
+                                <RadzenLabel Text="@module.Key" Style="font-weight: bold; font-size: 16px;" />
+                                @if (isEditMode)
+                                {
+                                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="8px">
+                                        <RadzenCheckBox Value="@IsAllSelectedInModule(module.Key)" 
+                                                       ValueChanged="@((bool value) => SelectAllInModule(module.Key, value))" />
+                                        <RadzenLabel Text="Chọn tất cả" Style="font-size: 12px; color: #666;" />
+                                    </RadzenStack>
+                                }
+                            </RadzenStack>
+                            
+                            <RadzenStack Gap="5px" Orientation="Orientation.Vertical">
+                                @foreach (var permission in module.Value)
+                                {
+                                    var permissionKey = permission;
+                                    var isChecked = permissionCheckboxes.ContainsKey(permissionKey) ? permissionCheckboxes[permissionKey] : selectedPermissions.Contains(permission);
+                                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="10px">
+                                        @if (isEditMode)
+                                        {
+                                            <RadzenCheckBox Value="@isChecked" 
+                                                           ValueChanged="@((bool value) => OnCheckboxChanged(permissionKey, value))" />
+                                        }
+                                        else
+                                        {
+                                            <RadzenIcon Icon="@(isChecked ? "check_circle" : "cancel")" 
+                                                       Style="@($"color: {(isChecked ? "green" : "lightgray")}; font-size: 20px;")" />
+                                        }
+                                        <RadzenLabel Text="@GetPermissionDisplayName(permission)" 
+                                                   Style="@(!isEditMode && !isChecked ? "color: lightgray;" : "")" />
+                                    </RadzenStack>
+                                }
+                            </RadzenStack>
+                        </RadzenStack>
+                    </RadzenCard>
+                }
+            </RadzenStack>
+        </div>
+        
+        @* FOOTER: Các nút confirm *@
+        <div style="flex: 0 0 auto; background: white; padding: 12px 20px; border-top: 1px solid #e0e0e0;">
+            <RadzenStack Orientation="Orientation.Horizontal" Gap="12px" JustifyContent="JustifyContent.End">
+                @if (isEditMode)
+                {
+                    <RadzenButton Text="Hủy" 
+                                 Icon="cancel" 
+                                 ButtonStyle="ButtonStyle.Light" 
+                                 Click="@ExitEditMode" 
+                                 Disabled="@isLoading" />
+                    <RadzenButton Text="Lưu" 
+                                 Icon="save" 
+                                 ButtonStyle="ButtonStyle.Primary" 
+                                 Click="@OnSave" 
+                                 Disabled="@(isLoading || !hasChanges)" />
+                }
+                else
+                {
+                    <RadzenButton Text="Đóng" 
+                                 Icon="cancel" 
+                                 ButtonStyle="ButtonStyle.Light" 
+                                 Click="@OnCancel" />
+                }
+            </RadzenStack>
+        </div>
+    </div>
+</RadzenTemplateForm>
+
+@code {
+    [Parameter] public string UserId { get; set; } = string.Empty;
+    [Parameter] public bool IsEditMode { get; set; } = false; // Mặc định là view mode
+    
+    private AppUser? user;
+    private List<string> userRoles = new(); // Roles của user
+    private Dictionary<string, List<string>> permissionsByModule = new();
+    private HashSet<string> selectedPermissions = new();
+    private HashSet<string> originalPermissions = new(); // Lưu permissions gốc để so sánh
+    private Dictionary<string, bool> permissionCheckboxes = new();
+    private bool isLoading = false;
+    private bool isEditMode = false; // Internal edit mode state
+    private bool hasChanges = false; // Track changes
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPermissions();
+        await base.OnInitializedAsync();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // Reload khi UserId thay đổi
+        if (!string.IsNullOrEmpty(UserId))
+        {
+            await LoadPermissions();
+        }
+        await base.OnParametersSetAsync();
+    }
+
+    private async Task LoadPermissions()
+    {
+        // Set edit mode từ parameter
+        isEditMode = IsEditMode;
+        
+        if (!string.IsNullOrEmpty(UserId))
+        {
+            user = await UserManager.FindByIdAsync(UserId);
+            
+            // Lấy roles của user
+            if (user != null)
+            {
+                var roles = await UserManager.GetRolesAsync(user);
+                userRoles = roles.ToList();
+            }
+            
+            // Lấy permissions hiện có của user từ database
+            var userPermissions = await PermissionService.GetUserPermissionsAsync(UserId);
+            selectedPermissions = userPermissions.ToHashSet();
+            originalPermissions = new HashSet<string>(selectedPermissions); // Lưu bản gốc
+            
+            // Initialize checkboxes với permissions hiện có
+            permissionCheckboxes.Clear();
+            foreach (var permission in selectedPermissions)
+            {
+                permissionCheckboxes[permission] = true;
+            }
+            
+            // Reset changes tracking
+            hasChanges = false;
+        }
+
+        // Load tất cả permissions theo module
+        permissionsByModule = Permissions.GetAllPermissionsByModule();
+    }
+
+    private void OnCheckboxChanged(string permission, bool isChecked)
+    {
+        // Update checkbox state
+        permissionCheckboxes[permission] = isChecked;
+        
+        // Update selected permissions
+        if (isChecked)
+        {
+            selectedPermissions.Add(permission);
+        }
+        else
+        {
+            selectedPermissions.Remove(permission);
+        }
+        
+        // Check for changes
+        CheckForChanges();
+        StateHasChanged();
+    }
+    
+    private void CheckForChanges()
+    {
+        // So sánh selectedPermissions với originalPermissions
+        hasChanges = !selectedPermissions.SetEquals(originalPermissions);
+    }
+    
+    private void ToggleEditMode()
+    {
+        if (isEditMode)
+        {
+            // Nếu đang edit thì tắt và reset về giá trị ban đầu
+            ExitEditMode();
+        }
+        else
+        {
+            // Nếu chưa edit thì bật edit mode
+            isEditMode = true;
+        }
+        StateHasChanged();
+    }
+    
+    private void ExitEditMode()
+    {
+        // Reset về trạng thái ban đầu
+        selectedPermissions = new HashSet<string>(originalPermissions);
+        permissionCheckboxes.Clear();
+        foreach (var permission in selectedPermissions)
+        {
+            permissionCheckboxes[permission] = true;
+        }
+        hasChanges = false;
+        isEditMode = false;
+        StateHasChanged();
+    }
+
+    private void ResetPermissions()
+    {
+        // Reset về giá trị ban đầu
+        selectedPermissions = new HashSet<string>(originalPermissions);
+        permissionCheckboxes.Clear();
+        foreach (var permission in selectedPermissions)
+        {
+            permissionCheckboxes[permission] = true;
+        }
+        hasChanges = false;
+        StateHasChanged();
+        NotificationService.Notify(NotificationSeverity.Info, "Thông báo", "Đã khôi phục về giá trị ban đầu");
+    }
+
+    private async Task OnSave()
+    {
+        if (string.IsNullOrEmpty(UserId))
+            return;
+        
+        if (!hasChanges)
+        {
+            NotificationService.Notify(NotificationSeverity.Info, "Thông báo", "Không có thay đổi để lưu");
+            return;
+        }
+
+        isLoading = true;
+        try
+        {
+            var result = await PermissionService.AssignPermissionsAsync(UserId, selectedPermissions.ToList());
+            
+            if (result)
+            {
+                // Reload permissions từ database để đảm bảo đồng bộ
+                var updatedPermissions = await PermissionService.GetUserPermissionsAsync(UserId);
+                selectedPermissions = updatedPermissions.ToHashSet();
+                originalPermissions = new HashSet<string>(selectedPermissions);
+                
+                // Cập nhật checkboxes
+                permissionCheckboxes.Clear();
+                foreach (var permission in selectedPermissions)
+                {
+                    permissionCheckboxes[permission] = true;
+                }
+                
+                hasChanges = false;
+                NotificationService.Notify(NotificationSeverity.Success, "Thành công", "Đã cập nhật quyền truy cập cho người dùng");
+                // Chuyển về view mode sau khi lưu
+                isEditMode = false;
+                StateHasChanged();
+                
+                // Đóng dialog và trả về true để báo đã lưu thành công
+                DialogService.Close(true);
+            }
+            else
+            {
+                NotificationService.Notify(NotificationSeverity.Error, "Lỗi", "Không thể cập nhật quyền truy cập");
+            }
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Lỗi", $"Đã xảy ra lỗi: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void OnCancel()
+    {
+        DialogService.Close(false);
+    }
+
+    private string GetPermissionDisplayName(string permission)
+    {
+        // Chuyển đổi permission thành tên hiển thị dễ hiểu
+        // VD: "KHSX.View" -> "Xem"
+        if (permission.Contains("View"))
+            return "Xem";
+        if (permission.Contains("Create"))
+            return "Tạo mới";
+        if (permission.Contains("Update"))
+            return "Cập nhật";
+        if (permission.Contains("Delete"))
+            return "Xóa";
+        if (permission.Contains("NhapKho"))
+            return "Nhập kho";
+        if (permission.Contains("XuatKho"))
+            return "Xuất kho";
+        if (permission.Contains("KiemKe"))
+            return "Kiểm kê";
+        if (permission.Contains("ManagePermissions"))
+            return "Quản lý quyền";
+        
+        return permission;
+    }
+
+    private bool IsAllSelected()
+    {
+        // Kiểm tra xem tất cả permissions đã được chọn chưa
+        var allPermissions = Permissions.GetAllPermissions();
+        return allPermissions.All(p => selectedPermissions.Contains(p));
+    }
+
+    private bool IsAllSelectedInModule(string moduleKey)
+    {
+        // Kiểm tra xem tất cả permissions trong module đã được chọn chưa
+        if (!permissionsByModule.ContainsKey(moduleKey))
+            return false;
+        
+        var modulePermissions = permissionsByModule[moduleKey];
+        return modulePermissions.All(p => selectedPermissions.Contains(p));
+    }
+
+    private void SelectAllPermissions(bool selectAll)
+    {
+        var allPermissions = Permissions.GetAllPermissions();
+        
+        if (selectAll)
+        {
+            // Chọn tất cả
+            foreach (var permission in allPermissions)
+            {
+                if (!selectedPermissions.Contains(permission))
+                {
+                    selectedPermissions.Add(permission);
+                    permissionCheckboxes[permission] = true;
+                }
+            }
+        }
+        else
+        {
+            // Bỏ chọn tất cả
+            foreach (var permission in allPermissions)
+            {
+                selectedPermissions.Remove(permission);
+                permissionCheckboxes[permission] = false;
+            }
+        }
+        
+        CheckForChanges();
+        StateHasChanged();
+    }
+
+    private void SelectAllInModule(string moduleKey, bool selectAll)
+    {
+        if (!permissionsByModule.ContainsKey(moduleKey))
+            return;
+        
+        var modulePermissions = permissionsByModule[moduleKey];
+        
+        if (selectAll)
+        {
+            // Chọn tất cả trong module
+            foreach (var permission in modulePermissions)
+            {
+                if (!selectedPermissions.Contains(permission))
+                {
+                    selectedPermissions.Add(permission);
+                    permissionCheckboxes[permission] = true;
+                }
+            }
+        }
+        else
+        {
+            // Bỏ chọn tất cả trong module
+            foreach (var permission in modulePermissions)
+            {
+                selectedPermissions.Remove(permission);
+                permissionCheckboxes[permission] = false;
+            }
+        }
+        
+        CheckForChanges();
+        StateHasChanged();
+    }
+}
+
