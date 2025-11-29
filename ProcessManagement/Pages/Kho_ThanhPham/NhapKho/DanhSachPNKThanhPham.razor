@@ -120,7 +120,7 @@
 @code {
     [Parameter]
     [SupplyParameterFromQuery(Name = "pnktpid")]
-    public object? PNKTPID { get; set; }
+    public int? PNKTPID { get; set; }
 
     private List<PhieuNhapKhoTPham> DSPhieuNKs = new();
     private PhieuNhapKhoTPham SelectedPNK = new();
@@ -130,7 +130,7 @@
     {
         await LoadDSachPhieuNhapKhoTPham();
 
-        if (PNKTPID != null && !object.Equals(PNKTPID, 0))
+        if (PNKTPID != null && PNKTPID != 0)
         {
             Common.SelectedPNKTPID = PNKTPID;
 
@@ -161,7 +161,6 @@
     {
         if (Common.SelectedPNKTPID != null)
         {
-            object v = Common.SelectedPNKTPID;
             SelectedPNK = DSPhieuNKs.FirstOrDefault(pnk => pnk.PNKTPID.Value?.ToString() == Common.SelectedPNKTPID.ToString()) ?? new();
 
             if (SelectedPNK.PNKTPID.Value == null)

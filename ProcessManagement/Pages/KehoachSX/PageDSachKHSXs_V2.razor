@@ -13,6 +13,7 @@
 @using ProcessManagement.Pages.KehoachSX.QLCongDoan
 @using ProcessManagement.Pages.KehoachSX.TienDos
 @using ProcessManagement.Services.SQLServer
+@using ProcessManagement.Services
 @using Radzen.Blazor
 @using Radzen
 @using System.Collections.Concurrent
@@ -51,9 +52,15 @@
                 <RadzenColumn SizeMD="4" Size="12">
                     <RadzenRow Style="height: 100%; width: 100%;">
                         <RadzenColumn SizeMD="7" Size="12">
-                            <RadzenStack Style="height: 100%; width: 100%; border-radius: 10px; background-color: var(--rz-success-lighter); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                                <RadzenText Text="DANH SÁCH KẾ HOẠCH SẢN XUẤT" Style="color: green; font-weight: 600; font-size: 18px"></RadzenText>
-                                <span class="optimized-badge">V2 OPTIMIZED</span>
+                            <RadzenStack Style="height: 100%; width: 100%;" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Gap="5px">
+                                <RadzenStack Style="height: 100%; width: 100%; border-radius: 10px; background-color: var(--rz-success-lighter); padding: 10px;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                    <RadzenText Text="DANH SÁCH KẾ HOẠCH SẢN XUẤT" Style="color: green; font-weight: 600; font-size: 18px"></RadzenText>
+                                </RadzenStack>
+                                <RadzenStack Gap="8px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                                    <RadzenBadge BadgeStyle="BadgeStyle.Primary" Variant="Variant.Flat" Size="BadgeSize.Small" Text="@($"Total: {loadinngtime}ms")" Style="color: var(--rz-primary); font-weight: 600; background-color: var(--rz-primary-lighter);"></RadzenBadge>
+                                    <RadzenBadge BadgeStyle="BadgeStyle.Primary" Variant="Variant.Flat" Size="BadgeSize.Small" Text="@($"Data: {dataLoadTime}ms")" Style="color: var(--rz-primary); font-weight: 600; background-color: var(--rz-primary-lighter);"></RadzenBadge>
+                                    <RadzenBadge BadgeStyle="BadgeStyle.Primary" Variant="Variant.Flat" Size="BadgeSize.Small" Text="@($"Render: {renderTime}ms")" Style="color: var(--rz-primary); font-weight: 600; background-color: var(--rz-primary-lighter);"></RadzenBadge>
+                                </RadzenStack>
                             </RadzenStack>
                         </RadzenColumn>
                         <RadzenColumn SizeMD="5" Size="12">
@@ -67,14 +74,13 @@
                                         <RadzenMenuItem Text="@DSachModeSearchKHSX[4]" Click="@(async () => { modeSearchKHSX = 4; await ButtonReloadPress(); })" Icon="search"></RadzenMenuItem>
                                     </RadzenMenuItem>
                                 </RadzenMenu>
-                                <RadzenText Text="@($"Total: {loadinngtime}ms | Data: {dataLoadTime}ms | Render: {renderTime}ms")" Style="font-weight: 600; font-size: 11px"></RadzenText>
                             </RadzenStack>
                         </RadzenColumn>
                     </RadzenRow>
                 </RadzenColumn>
                 <RadzenColumn SizeMD="5" Size="12">
                     <RadzenStack Gap="15px" Style="height: 100%; width: 100%;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                        <RadzenText Text="@($"{DSKHSXs.Count}")" Style="font-weight: 600; font-size: 12px"></RadzenText>
+                        <RadzenBadge BadgeStyle="BadgeStyle.Primary" Variant="Variant.Flat" Size="BadgeSize.Small" Text="@($"KHSX: {DSKHSXs.Count}")" Style="color: var(--rz-primary); font-weight: 600; background-color: var(--rz-primary-lighter);"></RadzenBadge>
                         <RadzenButton Style="border-radius: 20px;" IsBusy="@reloadpage" Click="@(async () => await ButtonReloadPress())" Icon="autorenew" ButtonStyle="ButtonStyle.Primary" />
                         <RadzenTextBox @oninput="@((args) => SearchingKHSX(args?.Value))" Placeholder="Nhập mã kế hoạch sản xuất, mã quản lý lot hoặc mã thùng để truy xuất" Style="border-radius: 20px; padding-left: 20px; border-width: 2px; border-color: var(--rz-primary-light); width: 80% "></RadzenTextBox>
                     </RadzenStack>
@@ -360,10 +366,10 @@
     }
 
     // OPTIMIZED: Sử dụng SQLServerServicesV2 với batch loading
-    private async Task<(int, int, int)> GetResultsKQGCperCDoanAllLotsAsync(object? cdid, object? khsxid)
-    {
-        return await SQLServerServicesV2.GetResultsKQGCperCDoanAllLotsAsync(cdid, khsxid);
-    }
+    // private async Task<(int, int, int)> GetResultsKQGCperCDoanAllLotsAsync(object? cdid, object? khsxid)
+    // {
+    //     return await SQLServerServicesV2.GetResultsKQGCperCDoanAllLotsAsync(cdid, khsxid);
+    // }
 
     long loadinngtime = 0;
     long dataLoadTime = 0;
@@ -511,6 +517,12 @@
             DSKHSXs_base = dskhsxs
                 .OrderByDescending(khsx => int.TryParse(khsx.KHSXID.Value?.ToString(), out int index) ? index : 0)
                 .ToList();
+
+            // OPTIMIZED: Mặc định đóng tất cả chart khi load danh sách KHSX
+            foreach (var khsx in DSKHSXs_base)
+            {
+                khsx.isCollapsed = true;
+            }
 
             SelectedKHSX = selectKHSXID != null
                 ? DSKHSXs.FirstOrDefault(x => object.Equals(x.KHSXID.Value, selectKHSXID)) ?? new KHSX()
@@ -824,5 +836,6 @@
 
         TooltipService.Open(elementReference, content, options);
     }
+
 }
 

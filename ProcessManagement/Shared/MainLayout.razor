@@ -11,6 +11,7 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject ServerSocketAsync ServerSocketAsync
 @inject TooltipService TooltipService
+@inject ILogger<MainLayout> Logger
 
 <RadzenLayout Style="height: contain; width: 100%;">
     <RadzenHeader Style="height: 5%; align-items: center;">
@@ -25,7 +26,8 @@
                         <RadzenStack Visible = "false" Style="width: 40%" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                             <RadzenLabel Visible=@(UserRoles?.FirstOrDefault() == "Admin") Text="AU VIET SYSTEM CO., LTD" Style="color: rgba(28, 49, 90); font-size: 20px " />
                         </RadzenStack>
-                        <RadzenStack Style="width: 30%" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                        <RadzenStack Style="width: 30%" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="10px" Orientation="Orientation.Horizontal">
+                            <span style="background-color: #28a745; color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600;">V2 OPTIMIZED</span>
                             <LoginDisplay />
                         </RadzenStack>
                     </RadzenStack>
@@ -35,7 +37,30 @@
     </RadzenHeader>
     <NavigatorMenu visibleSideBar="visibleSideBar" sidebarExpanded="sidebarExpanded" />
     <RadzenBody Style="height: 100%; width: 100%; overflow: scroll; padding-bottom: 0; padding-right: 0px">
-        @Body
+        <ErrorBoundary @ref="_eb">
+            <ChildContent>
+                @Body
+            </ChildContent>
+            <ErrorContent Context="ex">
+                @{
+                    Logger.LogError(ex, "UI rendering error in MainLayout");
+                }
+                <div style="padding:10px">
+                    <RadzenAlert Severity="AlertSeverity.Error" Style="margin-bottom:10px">
+                        <ChildContent>
+                            <b>Error:</b> @ex.Message
+                        </ChildContent>
+                    </RadzenAlert>
+                    <RadzenStack Gap="10px" Orientation="Orientation.Horizontal">
+                        <RadzenButton Text="Retry" Click="(() => _eb?.Recover())" ButtonStyle="ButtonStyle.Primary" />
+                    </RadzenStack>
+                    <details style="margin-top:10px">
+                        <summary>Details (stack trace)</summary>
+                        <pre style="white-space:pre-wrap; word-break:break-word;">@ex.ToString()</pre>
+                    </details>
+                </div>
+            </ErrorContent>
+        </ErrorBoundary>
     </RadzenBody>
 </RadzenLayout>
 
@@ -48,6 +73,7 @@
 {
     private bool visibleSideBar = true;
     private bool sidebarExpanded = true;
+    private ErrorBoundary? _eb;
 
     private List<string>? UserRoles;
 

@@ -17,6 +17,9 @@ using System.Net.NetworkInformation;
 using System.Diagnostics;
 using ProcessManagement.Commons;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using ProcessManagement.Services;
+using Microsoft.AspNetCore.Components.Server.Circuits;
+using ProcessManagement.Services.Logging;
 
 var localIP = PortFinder.GetLocalIPAddress();
 IPAddress localIPAddress = IPAddress.Parse(localIP);
@@ -95,6 +98,7 @@ builder.Services.AddMemoryCache();
 
 // SQLServerServicesV2 - Optimized version
 builder.Services.AddScoped<SQLServerServicesV2>();
+builder.Services.AddSingleton<ChartLoggingService>();
 // Socket services
 builder.Services.AddSingleton<ServerSocketAsync>();
 // QRCreate services
@@ -104,6 +108,9 @@ builder.Services.AddSingleton<ModbusServices>();
 
 // Add ViTriofTPhamApiService
 builder.Services.AddScoped<ViTriofTPhamApiService>();
+
+// Circuit logging
+builder.Services.AddSingleton<CircuitHandler, LoggingCircuitHandler>();
 
 // CRS (Cross-Origin Resource Sharing) - Configures access to the API from any origin
 builder.Services.AddCors(options =>
@@ -162,6 +169,22 @@ app.Lifetime.ApplicationStarted.Register(() =>  // enable khi deploy - disable k
     Process.Start(psi);
 });
 ///////////
+
+// Global exception hooks
+var globalLogger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("GlobalExceptions");
+AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
+{
+    if (args.ExceptionObject is Exception ex)
+    {
+        globalLogger.LogError(ex, "Unhandled domain exception");
+    }
+};
+
+TaskScheduler.UnobservedTaskException += (sender, args) =>
+{
+    globalLogger.LogError(args.Exception, "Unobserved task exception");
+    args.SetObserved();
+};
 
 
 app.Run();

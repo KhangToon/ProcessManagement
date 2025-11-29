@@ -30,8 +30,7 @@ namespace ProcessManagement.Services.SQLServer
             if (configuration != null)
             {
                 connectionString = configuration.GetConnectionString("DBConnectionString") 
-                                ?? configuration["ConnectionStrings:DBConnectionString"]
-                                ?? configuration["ConnectionStrings:DBConnectionstring"]; // Fallback for compatibility
+                                ?? configuration["ConnectionStrings:DBConnectionString"]; 
             }
             else
             {
@@ -164,16 +163,61 @@ namespace ProcessManagement.Services.SQLServer
             }
 
             using var reader = await command.ExecuteReaderAsync();
-            var allPXKs = PropertyMapper.MapEntitiesFromReader(reader, () => new PhieuXuatKho());
+            var allPXKs = PropertyMapper.MapEntitiesFromReader(reader, () => new PhieuXuatKho()).ToList();
 
-            // Load related DSNVLofPXKs cho mỗi PXK (có thể batch load sau)
+            // FIX: Load DSNVLofPXKs cho mỗi PXK (giống V1 GetListPhieuXuatKhos line 5245)
+            // Collect all PXKIDs để batch load DSNVLofPXKs
+            var allPxkIds = allPXKs
+                .Where(pxk => pxk.PXKID.Value != null)
+                .Select(pxk => pxk.PXKID.Value)
+                .Distinct()
+                .ToList();
+
+            // Batch load DSNVLofPXKs cho tất cả PXK
+            Dictionary<object, List<NVLofPhieuXuatKho>> nvlOfPxksData = new();
+            if (allPxkIds.Any())
+            {
+                using var nvlConnection = new SqlConnection(connectionString);
+                await nvlConnection.OpenAsync();
+                
+                var nvlCommand = QueryBuilder.BuildInQuery(
+                    nvlConnection,
+                    Common.Table_NVLofPhieuXuatKho,
+                    Common.PXKID,
+                    allPxkIds.Cast<object>().ToList());
+
+                using var nvlReader = await nvlCommand.ExecuteReaderAsync();
+                var allNVLofPXKs = PropertyMapper.MapEntitiesFromReader(nvlReader, () => new NVLofPhieuXuatKho());
+
+                foreach (var nvl in allNVLofPXKs)
+                {
+                    if (nvl.PXKID.Value != null)
+                    {
+                        if (!nvlOfPxksData.ContainsKey(nvl.PXKID.Value))
+                        {
+                            nvlOfPxksData[nvl.PXKID.Value] = new List<NVLofPhieuXuatKho>();
+                        }
+                        nvlOfPxksData[nvl.PXKID.Value].Add(nvl);
+                    }
+                }
+            }
+
+            // Assign DSNVLofPXKs và group by KHSXID
             foreach (var pxk in allPXKs)
             {
                 var khsxId = pxk.KHSXID.Value;
                 if (khsxId != null && result.ContainsKey(khsxId))
                 {
-                    // TODO: Batch load DSNVLofPXKs nếu cần
-                    // Tạm thời để empty list, có thể gọi original service hoặc batch load riêng
+                    // Assign DSNVLofPXKs
+                    if (pxk.PXKID.Value != null && nvlOfPxksData.ContainsKey(pxk.PXKID.Value))
+                    {
+                        pxk.DSNVLofPXKs = nvlOfPxksData[pxk.PXKID.Value];
+                    }
+                    else
+                    {
+                        pxk.DSNVLofPXKs = new List<NVLofPhieuXuatKho>();
+                    }
+                    
                     result[khsxId].Add(pxk);
                 }
             }
@@ -360,6 +404,49 @@ namespace ProcessManagement.Services.SQLServer
                 {
                     lotkhsx.TargetNVL = await Task.Run(() => _originalService.GetMaNguyenVatLieuByID(lotkhsx.NVLID.Value));
                 }
+            }
+
+            // FIX: Load PXK/PNK status, flags (giống V1 GetKHSXbyMaKHSXRuduceTime line 526-555)
+            // Get trang thai xuat kho NVL
+            var colIsDonePXK = await Task.Run(() => 
+                _originalService.GetPXK_AnyColValuebyAnyParameters(
+                    new Dictionary<string, object?>() { { Common.KHSXID, khsx.KHSXID.Value } }, 
+                    Common.IsDonePXK).columnValues.FirstOrDefault());
+            
+            if (int.TryParse(colIsDonePXK?.ToString(), out int ispxkdone))
+            {
+                khsx.isDonePXK = ispxkdone == 1;
+            }
+
+            // Get PNKID
+            var colpnkid = await Task.Run(() => 
+                _originalService.GetPXK_AnyColValuebyAnyParameters(
+                    new Dictionary<string, object?>() { { Common.PXKID, khsx.PXKID.Value } }, 
+                    Common.PNKID).columnValues.FirstOrDefault());
+            
+            if (int.TryParse(colpnkid?.ToString(), out int pnkid))
+            {
+                var colIsReturnedNVL = await Task.Run(() => 
+                    _originalService.GetPNK_AnyColValuebyAnyParameters(
+                        new Dictionary<string, object?>() { { Common.PNKID, pnkid } }, 
+                        Common.IsDonePNK).columnValues.FirstOrDefault());
+                
+                if (int.TryParse(colIsReturnedNVL?.ToString(), out int isPNKdone))
+                {
+                    khsx.isReturnedNVL = isPNKdone == 1;
+                }
+            }
+
+            // Get collapsed KHSX
+            if (int.TryParse(khsx.IsCollapsed.Value?.ToString(), out int isCollapsed))
+            {
+                khsx.isCollapsed = isCollapsed == 1;
+            }
+
+            // Get ischartrunning KHSX
+            if (int.TryParse(khsx.IsChartRunning.Value?.ToString(), out int isChartRunning))
+            {
+                khsx.isChartRunning = isChartRunning == 1;
             }
 
             // Cache result
@@ -1249,13 +1336,10 @@ namespace ProcessManagement.Services.SQLServer
             BatchGetResultsKQGCperCDoanAllLotsAsync(
                 List<(object? cdid, object? khsxid)> pairs)
         {
-            System.Console.WriteLine($"[SQLServerServicesV2] BatchGetResultsKQGCperCDoanAllLotsAsync CALLED with {pairs.Count} pairs");
-            
             var result = new Dictionary<(object?, object?), (int, int, int)>();
 
             if (!pairs.Any())
             {
-                System.Console.WriteLine($"[SQLServerServicesV2] BatchGetResultsKQGCperCDoanAllLotsAsync - No pairs, returning empty");
                 return result;
             }
 
@@ -1267,27 +1351,20 @@ namespace ProcessManagement.Services.SQLServer
 
             try
             {
-                System.Console.WriteLine($"[KQGC AGGREGATION] Starting - ConnectionString: {(!string.IsNullOrEmpty(connectionString) ? "OK" : "NULL")}");
-                
                 if (string.IsNullOrEmpty(connectionString))
                 {
-                    System.Console.WriteLine($"[KQGC AGGREGATION] ERROR - ConnectionString is NULL!");
                     return result;
                 }
 
                 using var connection = new SqlConnection(connectionString);
                 await connection.OpenAsync();
-                System.Console.WriteLine($"[KQGC AGGREGATION] Database connection opened");
 
                 // Extract unique IDs
                 var ncIds = pairs.Select(p => p.cdid).Where(id => id != null).Distinct().ToList();
                 var khsxIds = pairs.Select(p => p.khsxid).Where(id => id != null).Distinct().ToList();
 
-                System.Console.WriteLine($"[KQGC AGGREGATION] Extracted - NCIDs: {ncIds.Count}, KHSXIDs: {khsxIds.Count}");
-
                 if (!ncIds.Any() || !khsxIds.Any())
                 {
-                    System.Console.WriteLine($"[KQGC AGGREGATION] EARLY RETURN - Empty NCIDs or KHSXIDs!");
                     return result;
                 }
 
@@ -1330,21 +1407,11 @@ namespace ProcessManagement.Services.SQLServer
                       AND [{khsxidCol}] IN ({string.Join(", ", khsxParams)})
                     GROUP BY [{ncidCol}], [{khsxidCol}]";
 
-                System.Console.WriteLine($"[KQGC AGGREGATION] Query: {command.CommandText.Substring(0, Math.Min(200, command.CommandText.Length))}...");
-                System.Console.WriteLine($"[KQGC AGGREGATION] Pairs: {pairs.Count}, Unique NCIDs: {ncIds.Count}, Unique KHSXIDs: {khsxIds.Count}");
-
-                var querySw = System.Diagnostics.Stopwatch.StartNew();
                 using var reader = await command.ExecuteReaderAsync();
-                querySw.Stop();
-                System.Console.WriteLine($"[KQGC AGGREGATION] Query execution: {querySw.ElapsedMilliseconds}ms");
-
-                var readSw = System.Diagnostics.Stopwatch.StartNew();
-                int rowCount = 0;
                 int matchedCount = 0;
                 
                 while (await reader.ReadAsync())
                 {
-                    rowCount++;
                     var ncid = reader["NCID"];
                     var khsxid = reader["KHSXID"];
                     
@@ -1362,19 +1429,10 @@ namespace ProcessManagement.Services.SQLServer
                         result[matchingKey] = (sumok, sumng, total);
                         matchedCount++;
                     }
-                    else
-                    {
-                        // Log warning nếu không match được (có thể do type mismatch)
-                        System.Console.WriteLine($"[KQGC AGGREGATION] Warning: No matching key for NCID={ncid}, KHSXID={khsxid}");
-                    }
                 }
-                readSw.Stop();
-                System.Console.WriteLine($"[KQGC AGGREGATION] Read {rowCount} grouped rows, matched {matchedCount}/{pairs.Count} pairs in {readSw.ElapsedMilliseconds}ms (instead of 43k+ rows)");
             }
             catch (Exception ex)
             {
-                System.Console.WriteLine($"[KQGC AGGREGATION] ERROR: {ex.Message}");
-                System.Console.WriteLine($"[KQGC AGGREGATION] StackTrace: {ex.StackTrace}");
                 // Return default values for all pairs on error
                 foreach (var pair in pairs)
                 {

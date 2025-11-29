@@ -122,7 +122,7 @@
 @code {
     [Parameter]
     [SupplyParameterFromQuery(Name = "pxktpid")]
-    public object? PXKTPID { get; set; }
+    public int? PXKTPID { get; set; }
 
     private List<PhieuXuatKhoTPham> DSPhieuXKs = new();
     private PhieuXuatKhoTPham SelectedPXK = new();
@@ -132,7 +132,7 @@
     {
         await LoadDSachPhieuXuatKhoTPham();
 
-        if (PXKTPID != null && !object.Equals(PXKTPID, 0))
+        if (PXKTPID != null && PXKTPID != 0)
         {
             Common.SelectedPXKTPID = PXKTPID;
 
@@ -162,7 +162,6 @@
     {
         if (Common.SelectedPXKTPID != null)
         {
-            object v = Common.SelectedPXKTPID;
             SelectedPXK = DSPhieuXKs.FirstOrDefault(pnk => pnk.PXKTPID.Value?.ToString() == Common.SelectedPXKTPID.ToString()) ?? new();
 
             if (SelectedPXK.PXKTPID.Value == null)

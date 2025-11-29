@@ -1,6 +1,7 @@
 ﻿@page "/charttracking_"
 @attribute [Authorize(Roles = "Admin, User")]
 @* this limited access into page *@
+@implements IDisposable
 
 @using ProcessManagement.Commons
 @using ProcessManagement.Models.KHO_NVL
@@ -14,6 +15,7 @@
 @using ProcessManagement.Pages.Manager_NguyenCong.Dialogs
 @using ProcessManagement.Pages.Manager_SanPham.Dialogs
 @using ProcessManagement.Services.SQLServer
+@using ProcessManagement.Services
 @using Radzen.Blazor
 @using Radzen
 @using ProcessManagement.Models
@@ -21,8 +23,10 @@
 @inject DialogService DialogService
 @inject NotificationService NotificationService
 @inject SQLServerServices SQLServerServices
+@inject SQLServerServicesV2 SQLServerServicesV2
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
+@inject ChartLoggingService ChartLoggingService
 
 <RadzenStack Gap="0" Style="width: 100%; height: contain; background-color: white" Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
     <RadzenRow Style="width: 100%; height: contain;">
@@ -33,6 +37,18 @@
                         <strong>Tiến độ sản xuất</strong>
                         <span>@($"(updated at: {updatedTime})")</span>
                     </RadzenLabel>
+
+                    <!-- Performance Summary - Inline với tiêu đề -->
+                    <RadzenStack Gap="4px" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="margin-left: 8px;">
+                        <span style="@GetPerformanceStyle(lastQueryTime, 500)">Query: @(lastQueryTime)ms</span>
+                        <span style="color: #666; margin: 0 2px;">|</span>
+                        <span style="@GetPerformanceStyle(lastTotalTime, 1000)">Total: @(lastTotalTime)ms</span>
+                        @if (lastLoopTime > 1100)
+                        {
+                            <span style="color: #666; margin: 0 2px;">|</span>
+                            <span style="color: orange; font-weight: 600;">⚠️ Loop: @(lastLoopTime)ms</span>
+                        }
+                    </RadzenStack>
 
                     <RadzenButton Visible=@(!chartIsrunning) Icon="warning" Text="Stopped"
                                   Style="font-size: 15px; border-radius: 5px; width: contain; color: red" Shade="Shade.Light" Variant="Variant.Text" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small"></RadzenButton>
@@ -53,22 +69,23 @@
                                   Style="font-size: 16px; border-radius: 5px; width: contain;" Shade="Shade.Dark" Variant="Variant.Flat" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small"></RadzenButton>
 
                 </RadzenStack>
-                <RadzenStack Style="width: 100%; height: contain;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                <RadzenStack Style="width: 100%; height: contain; position: relative;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                     <RadzenChart Style="min-height: 500px; width: 100%">
                         <RadzenColumnSeries Fill="green" Data="@OKdatas" CategoryProperty="Property" Title="OK" LineType="LineType.Dashed" ValueProperty="Value">
 
                             <TooltipTemplate Context="data">
-                                <RadzenStack Gap="5px" Style="height: contain" Orientation="Orientation.Vertical" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
-                                    <RadzenLabel Text="OK" Style="font-weight: 600; color: darkgreen"></RadzenLabel>
-                                    <RadzenStack Gap="10px" Style="width: 100%" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                        <RadzenLabel Text="Công đoạn: "></RadzenLabel>
-                                        <RadzenLabel Text="@data.Property" Style="font-weight: 600; color: black"></RadzenLabel>
-                                    </RadzenStack>
-                                    <RadzenStack Gap="10px" Style="width: 100%" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                        <RadzenLabel Text="Tiến độ: "></RadzenLabel>
-                                        <RadzenLabel Text="@($"{data.Value} (pcs)")" Style="font-weight: 600; color: darkgreen"></RadzenLabel>
-                                    </RadzenStack>
-                                </RadzenStack>
+                                @* OPTIMIZED: Đơn giản hóa tooltip để giảm lag khi hover - dùng HTML trực tiếp thay vì nhiều RadzenStack *@
+                                <div style="padding: 8px; line-height: 1.5;">
+                                    <div style="font-weight: 600; color: darkgreen; margin-bottom: 4px;">OK</div>
+                                    <div style="font-size: 13px;">
+                                        <span>Công đoạn: </span>
+                                        <strong style="color: black;">@data.Property</strong>
+                                    </div>
+                                    <div style="font-size: 13px;">
+                                        <span>Tiến độ: </span>
+                                        <strong style="color: darkgreen;">@($"{data.Value} (pcs)")</strong>
+                                    </div>
+                                </div>
                             </TooltipTemplate>
                             <ChildContent>
                                 <RadzenSeriesDataLabels Visible="true" />
@@ -124,17 +141,18 @@
                     <RadzenChart Style="min-height: 100px; width: 100%">
                         <RadzenColumnSeries Fill="red" Data="@NGdatas" CategoryProperty="Property" Title="NG" ValueProperty="Value">
                             <TooltipTemplate Context="data">
-                                <RadzenStack Gap="5px" Style="height: contain" Orientation="Orientation.Vertical" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center">
-                                    <RadzenLabel Text="NG" Style="font-weight: 600; color: red"></RadzenLabel>
-                                    <RadzenStack Gap="10px" Style="width: 100%" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                        <RadzenLabel Text="Công đoạn: "></RadzenLabel>
-                                        <RadzenLabel Text="@data.Property" Style="font-weight: 600; color: black"></RadzenLabel>
-                                    </RadzenStack>
-                                    <RadzenStack Gap="10px" Style="width: 100%" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start">
-                                        <RadzenLabel Text="Số lượng lỗi: "></RadzenLabel>
-                                        <RadzenLabel Text="@($"{data.Value} (pcs)")" Style="font-weight: 600; color: red"></RadzenLabel>
-                                    </RadzenStack>
-                                </RadzenStack>
+                                @* OPTIMIZED: Đơn giản hóa tooltip để giảm lag khi hover - dùng HTML trực tiếp thay vì nhiều RadzenStack *@
+                                <div style="padding: 8px; line-height: 1.5;">
+                                    <div style="font-weight: 600; color: red; margin-bottom: 4px;">NG</div>
+                                    <div style="font-size: 13px;">
+                                        <span>Công đoạn: </span>
+                                        <strong style="color: black;">@data.Property</strong>
+                                    </div>
+                                    <div style="font-size: 13px;">
+                                        <span>Số lượng lỗi: </span>
+                                        <strong style="color: red;">@($"{data.Value} (pcs)")</strong>
+                                    </div>
+                                </div>
                             </TooltipTemplate>
                             <ChildContent>
                                 <RadzenSeriesDataLabels Visible="true" />
@@ -201,7 +219,6 @@
     [Parameter]
     public KHSX TargetKHSX { get; set; } = new();
 
-    private List<KetQuaGC> DSachKetQuaGCs = new();
     private bool isLoadingKQGCs = false;
 
     public List<ChartItem> OKdatas { get; set; } = new();
@@ -224,53 +241,308 @@
     private DateTime updatedTime;
 
     private bool chartIsrunning = false;
+    
+    // Performance tracking
+    private DateTime lastStateChangeTime = DateTime.MinValue;
+    private const int MIN_STATE_CHANGE_INTERVAL_MS = 500; // Throttle StateHasChanged - tối thiểu 500ms giữa các lần update UI
+    
+    // Data refresh interval - tần suất load data mới để check thay đổi
+    private const int DATA_REFRESH_INTERVAL_MS = 1000; // Mỗi 1 giây query data mới (có thể điều chỉnh: 500ms, 2000ms, 3000ms, v.v.)
+    
+    // Performance summary for UI
+    private long lastQueryTime = 0;
+    private long lastTotalTime = 0;
+    private long lastLoopTime = 0;
+    
+    // Change detection - lưu data cũ để so sánh
+    private List<ChartItem> previousOKdatas = new();
+    private List<ChartItem> previousNGdatas = new();
+    private bool hasDataChanged = false;
+    
+    private string GetPerformanceStyle(long timeMs, long thresholdMs)
+    {
+        return $"color: {(timeMs > thresholdMs ? "orange" : "lightgreen")}; font-weight: 600;";
+    }
+    
+    // OPTIMIZED: So sánh data để chỉ render khi có thay đổi
+    private bool HasDataChanged(List<ChartItem> newOKdatas, List<ChartItem> newNGdatas)
+    {
+        // Kiểm tra số lượng item
+        if (previousOKdatas.Count != newOKdatas.Count || previousNGdatas.Count != newNGdatas.Count)
+        {
+            return true;
+        }
+        
+        // So sánh từng item - chỉ kiểm tra Value (số lượng) vì Property (tên công đoạn) ít khi thay đổi
+        for (int i = 0; i < newOKdatas.Count; i++)
+        {
+            if (previousOKdatas.Count <= i || previousOKdatas[i].Value != newOKdatas[i].Value)
+            {
+                return true;
+            }
+        }
+        
+        for (int i = 0; i < newNGdatas.Count; i++)
+        {
+            if (previousNGdatas.Count <= i || previousNGdatas[i].Value != newNGdatas[i].Value)
+            {
+                return true;
+            }
+        }
+        
+        return false;
+    }
 
     protected override async Task OnInitializedAsync()
     {
-        if (KHSXID > 0)
+        var initSw = System.Diagnostics.Stopwatch.StartNew();
+        
+        // OPTIMIZED: Chỉ reload nếu không có data từ parameter (trường hợp mở trong tab mới qua URL)
+        if (TargetKHSX?.KHSXID.Value == null && KHSXID > 0)
         {
-            TargetKHSX = SQLServerServices.GetKHSXbyID(KHSXID); TargetKHSX.isCollapsed = false;
+            var loadSw = System.Diagnostics.Stopwatch.StartNew();
+            TargetKHSX = SQLServerServices.GetKHSXbyID(KHSXID);
+            loadSw.Stop();
         }
 
+        if (TargetKHSX?.KHSXID.Value != null)
+        {
+            TargetKHSX.isCollapsed = false;
+        }
+
+        initSw.Stop();
+        
         await base.OnInitializedAsync();
     }
 
     private bool isFirtLoad_ofchart = false;
+    private bool forceRender = false; // Flag để force render khi cần
+    
+    // OPTIMIZED: CancellationToken để cancel while loop khi component dispose
+    private CancellationTokenSource? chartCancellationTokenSource;
+    private bool isDisposed = false;
+    
+    // OPTIMIZED: Leader Election - chỉ 1 chart query data cho mỗi KHSX
+    private bool isMasterChart = false; // true = chart này query data, false = chỉ monitor
+    
+    // OPTIMIZED: Override ShouldRender để control rendering tốt hơn
+    protected override bool ShouldRender()
+    {
+        // Render khi:
+        // 1. Lần đầu load
+        // 2. Data thay đổi (số lượng) → render toàn bộ chart
+        // 3. Force render (ví dụ khi start/stop chart hoặc update timestamp)
+        if (isFirtLoad_ofchart || hasDataChanged || forceRender)
+        {
+            // Nếu chỉ force render để update timestamp (không có data change), 
+            // Blazor sẽ chỉ update phần thay đổi (timestamp) nhờ diffing algorithm
+            forceRender = false; // Reset flag sau khi render
+            return true;
+        }
+        return false;
+    }
 
+    private bool previousIsCollapsed = true; // Track previous state để detect change
+    
+    // OPTIMIZED: Detect khi TargetKHSX.isCollapsed thay đổi từ parent component
+    protected override async Task OnParametersSetAsync()
+    {
+        if (TargetKHSX != null && !isFirtLoad_ofchart)
+        {
+            var currentIsCollapsed = TargetKHSX.isCollapsed == true;
+            
+            // Detect change từ collapsed → expanded (mở lại)
+            if (previousIsCollapsed == true && currentIsCollapsed == false && !chartIsrunning)
+            {
+                var khsxId = TargetKHSX.KHSXID.Value?.ToString() ?? "Unknown";
+                System.Console.WriteLine($"[CHART] KHSX expanded - resuming chart - KHSXID: {khsxId}");
+                
+                // Restart chart khi mở lại - Try acquire lock để trở thành Master
+                if (TargetKHSX.KHSXID.Value != null)
+                {
+                    chartCancellationTokenSource?.Cancel();
+                    chartCancellationTokenSource?.Dispose();
+                    chartCancellationTokenSource = new CancellationTokenSource();
+                    
+                    // Try acquire lock
+                    var checkRunning = SQLServerServices.GetAnyColValuebyAnyParameters_KHSX(
+                        new Dictionary<string, object?>() { { Common.KHSXID, TargetKHSX.KHSXID.Value } }, 
+                        Common.IsChartRunning).columnValues.FirstOrDefault();
+                    
+                    if (object.Equals(checkRunning, 0))
+                    {
+                        // Try become Master
+                        (int updatesuccess, string error) = SQLServerServices.UpdateKHSXProperty(TargetKHSX.KHSXID.Value, Common.IsChartRunning, 1);
+                        if (updatesuccess == 1)
+                        {
+                            isMasterChart = true;
+                            chartIsrunning = true;
+                            System.Console.WriteLine($"[CHART] Resumed as MASTER - KHSXID: {TargetKHSX.KHSXID.Value}");
+                            await StartRecordChart(chartCancellationTokenSource.Token);
+                        }
+                    }
+                    else
+                    {
+                        // Become Follower
+                        isMasterChart = false;
+                        chartIsrunning = true;
+                        System.Console.WriteLine($"[CHART] Resumed as FOLLOWER - KHSXID: {TargetKHSX.KHSXID.Value}");
+                        await StartRecordChartFollower(chartCancellationTokenSource.Token);
+                    }
+                }
+            }
+            
+            // Detect change từ expanded → collapsed (đóng lại)
+            if (previousIsCollapsed == false && currentIsCollapsed == true && chartIsrunning)
+            {
+                var khsxId = TargetKHSX.KHSXID.Value?.ToString() ?? "Unknown";
+                System.Console.WriteLine($"[CHART] KHSX collapsed - stopping chart - KHSXID: {khsxId}");
+                
+                // Stop chart khi đóng
+                if (TargetKHSX.KHSXID.Value != null)
+                {
+                    chartCancellationTokenSource?.Cancel();
+                    chartIsrunning = false;
+                    
+                    try
+                    {
+                        SQLServerServices.UpdateKHSXProperty(TargetKHSX.KHSXID.Value, Common.IsChartRunning, 0);
+                        System.Console.WriteLine($"[CHART] Chart stopped on collapse - KHSXID: {khsxId}");
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Console.WriteLine($"[CHART] Error stopping chart on collapse - KHSXID: {khsxId}, Error: {ex.Message}");
+                    }
+                }
+            }
+            
+            previousIsCollapsed = currentIsCollapsed;
+        }
+        
+        await base.OnParametersSetAsync();
+    }
+    
     protected async override void OnAfterRender(bool firstRender)
     {
+        
         // Stop when is collapsed
         if (firstRender)
         {
             isFirtLoad_ofchart = true;
+            previousIsCollapsed = TargetKHSX?.isCollapsed == true;
 
             if (TargetKHSX.KHSXID.Value != null && TargetKHSX.isCollapsed == false)
             {
+                var initSw = System.Diagnostics.Stopwatch.StartNew();
+                var khsxIdStr = TargetKHSX.KHSXID.Value.ToString();
+                
                 // Reset all running chart of this KHSX
+                var resetSw = System.Diagnostics.Stopwatch.StartNew();
                 (int updatesuccess, string error) = SQLServerServices.UpdateKHSXProperty(TargetKHSX.KHSXID.Value, Common.IsChartRunning, 0);
+                resetSw.Stop();
 
                 chartIsrunning = false;
 
-                await Task.Delay(1500);
+                // OPTIMIZED: Bỏ delay để chart chạy ngay khi mở tab
+                // await Task.Delay(1500);
 
                 if (updatesuccess == 1)
                 {
-                    var isKHSXchartRunning = SQLServerServices.GetAnyColValuebyAnyParameters_KHSX(new Dictionary<string, object?>() { { Common.KHSXID, TargetKHSX.KHSXID.Value } }, Common.IsChartRunning).columnValues.FirstOrDefault();
+                    var checkSw = System.Diagnostics.Stopwatch.StartNew();
+                    var isKHSXchartRunning = SQLServerServices.GetAnyColValuebyAnyParameters_KHSX(
+                        new Dictionary<string, object?>() { { Common.KHSXID, TargetKHSX.KHSXID.Value } }, 
+                        Common.IsChartRunning).columnValues.FirstOrDefault();
+                    checkSw.Stop();
 
                     if (object.Equals(isKHSXchartRunning, 0))
                     {
-                        // Restart
+                        // OPTIMIZED: Try acquire lock - trở thành Master chart
+                        var restartSw = System.Diagnostics.Stopwatch.StartNew();
                         (updatesuccess, error) = SQLServerServices.UpdateKHSXProperty(TargetKHSX.KHSXID.Value, Common.IsChartRunning, 1);
+                        restartSw.Stop();
 
                         if (updatesuccess == 1)
                         {
-                            chartIsrunning = true;
+                            // Double check - verify lock acquired successfully (tránh race condition)
+                            var verifySw = System.Diagnostics.Stopwatch.StartNew();
+                            var verifyRunning = SQLServerServices.GetAnyColValuebyAnyParameters_KHSX(
+                                new Dictionary<string, object?>() { { Common.KHSXID, TargetKHSX.KHSXID.Value } }, 
+                                Common.IsChartRunning).columnValues.FirstOrDefault();
+                            verifySw.Stop();
+                            
+                            if (object.Equals(verifyRunning, 1))
+                            {
+                                // Lock acquired - this is Master chart
+                                isMasterChart = true;
+                                chartIsrunning = true;
+                                isFirtLoad_ofchart = false;
 
+                                initSw.Stop();
+                                
+                                // Register chart với service
+                                var maLSX = TargetKHSX?.MaLSX.Value?.ToString() ?? "Unknown";
+                                ChartLoggingService.RegisterChart(khsxIdStr, maLSX, true);
+                                
+                                chartCancellationTokenSource = new CancellationTokenSource();
+                                await StartRecordChart(chartCancellationTokenSource.Token);
+                            }
+                            else
+                            {
+                                // Lock acquired by another chart - this is Follower chart
+                                isMasterChart = false;
+                                chartIsrunning = true;
+                                isFirtLoad_ofchart = false;
+
+                                initSw.Stop();
+                                
+                                // Register chart với service
+                                var maLSX = TargetKHSX?.MaLSX.Value?.ToString() ?? "Unknown";
+                                ChartLoggingService.RegisterChart(khsxIdStr, maLSX, false);
+                                
+                                // Follower chart - chỉ monitor, không query data
+                                chartCancellationTokenSource = new CancellationTokenSource();
+                                await StartRecordChartFollower(chartCancellationTokenSource.Token);
+                            }
+                        }
+                        else
+                        {
+                            // Failed to acquire lock - có thể đã có chart khác đang chạy
+                            isMasterChart = false;
+                            chartIsrunning = true;
                             isFirtLoad_ofchart = false;
 
-                            await StartRecordChart();
+                            initSw.Stop();
+                            
+                            // Register chart với service
+                            var maLSX = TargetKHSX?.MaLSX.Value?.ToString() ?? "Unknown";
+                            ChartLoggingService.RegisterChart(khsxIdStr, maLSX, false);
+                            
+                            // Follower chart - chỉ monitor
+                            chartCancellationTokenSource = new CancellationTokenSource();
+                            await StartRecordChartFollower(chartCancellationTokenSource.Token);
                         }
                     }
+                    else
+                    {
+                        // Already running - this is Follower chart
+                        isMasterChart = false;
+                        chartIsrunning = true;
+                        isFirtLoad_ofchart = false;
+
+                        initSw.Stop();
+                        
+                        // Register chart với service
+                        var maLSX = TargetKHSX?.MaLSX.Value?.ToString() ?? "Unknown";
+                        ChartLoggingService.RegisterChart(khsxIdStr, maLSX, false);
+                        
+                        // Follower chart - chỉ monitor
+                        chartCancellationTokenSource = new CancellationTokenSource();
+                        await StartRecordChartFollower(chartCancellationTokenSource.Token);
+                    }
+                }
+                else
+                {
+                    initSw.Stop();
                 }
             }
         }
@@ -278,26 +550,70 @@
         await base.OnAfterRenderAsync(firstRender);
     }
 
-    private async Task StartRecordChart()
+    private async Task StartRecordChart(CancellationToken cancellationToken)
     {
         Common.IndexOFwhile++;
 
         int index = Common.IndexOFwhile;
+        var khsxId = TargetKHSX?.KHSXID.Value?.ToString() ?? "Unknown";
 
-        // ShowNotification($"Chart is running {index}", NotificationSeverity.Success, 1000);
-
-        while (true)
+        // OPTIMIZED: Stagger initial delay để tránh tất cả charts update cùng lúc
+        var staggerDelay = index % 5 * 200; // Spread updates across 1 second (0-800ms)
+        if (staggerDelay > 0 && !cancellationToken.IsCancellationRequested)
         {
-            var isKHSXchartRunning = SQLServerServices.GetAnyColValuebyAnyParameters_KHSX(new Dictionary<string, object?>() { { Common.KHSXID, TargetKHSX.KHSXID.Value } }, Common.IsChartRunning).columnValues.FirstOrDefault();
+            try
+            {
+                await Task.Delay(staggerDelay, cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
+        }
+
+        int consecutiveSlowLoops = 0;
+        
+        while (!cancellationToken.IsCancellationRequested && !isDisposed)
+        {
+            var loopSw = System.Diagnostics.Stopwatch.StartNew();
+            
+            // OPTIMIZED: Check isCollapsed trước - dừng ngay nếu KHSX bị đóng
+            if (TargetKHSX?.isCollapsed == true)
+            {
+                chartIsrunning = false;
+                ChartLoggingService.UnregisterChart(khsxId);
+                
+                // Update database để đảm bảo chart stopped
+                if (TargetKHSX?.KHSXID.Value != null)
+                {
+                    try
+                    {
+                        SQLServerServices.UpdateKHSXProperty(TargetKHSX.KHSXID.Value, Common.IsChartRunning, 0);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Silently handle error
+                    }
+                }
+                
+                forceRender = true;
+                StateHasChanged();
+                break;
+            }
+            
+            // OPTIMIZED: Cache status check để tránh query không cần thiết
+            var statusCheckSw = System.Diagnostics.Stopwatch.StartNew();
+            var isKHSXchartRunning = SQLServerServices.GetAnyColValuebyAnyParameters_KHSX(
+                new Dictionary<string, object?>() { { Common.KHSXID, TargetKHSX.KHSXID.Value } }, 
+                Common.IsChartRunning).columnValues.FirstOrDefault();
+            statusCheckSw.Stop();
 
             if (object.Equals(isKHSXchartRunning, 0))
             {
-                // ShowNotification($"Chart has stopped {index}", NotificationSeverity.Error, 1000);
-
                 chartIsrunning = false;
-
+                ChartLoggingService.UnregisterChart(khsxId);
+                forceRender = true; // Force render để update status button
                 StateHasChanged();
-
                 break;
             }
             else
@@ -305,17 +621,222 @@
                 chartIsrunning = true;
             }
 
-            if (!isLoadingKQGCs)
+            // OPTIMIZED: Master chart query data, Follower chart chỉ monitor
+            if (isMasterChart && !isLoadingKQGCs)
             {
+                var dataLoadSw = System.Diagnostics.Stopwatch.StartNew();
                 await GetChartDatas(TargetKHSX.KHSXID.Value);
+                dataLoadSw.Stop();
 
+                // OPTIMIZED: Luôn update thời gian mỗi giây để hiển thị trong UI
                 updatedTime = DateTime.Now;
 
-                StateHasChanged();
+                // OPTIMIZED: Chỉ update chart data khi số lượng thực sự thay đổi
+                if (hasDataChanged)
+                {
+                    // OPTIMIZED: Throttle StateHasChanged để tránh update UI quá thường xuyên
+                    var now = DateTime.Now;
+                    if ((now - lastStateChangeTime).TotalMilliseconds >= MIN_STATE_CHANGE_INTERVAL_MS)
+                    {
+                        var stateChangeSw = System.Diagnostics.Stopwatch.StartNew();
+                        StateHasChanged();
+                        stateChangeSw.Stop();
+                        lastStateChangeTime = now;
+                    }
+                }
+                else
+                {
+                    // Không có thay đổi data nhưng vẫn cần update UI để hiển thị thời gian mới
+                    // Chỉ update phần timestamp, không render lại chart (ShouldRender sẽ handle)
+                    var now = DateTime.Now;
+                    if ((now - lastStateChangeTime).TotalMilliseconds >= MIN_STATE_CHANGE_INTERVAL_MS)
+                    {
+                        // Chỉ update phần nhỏ (timestamp) để không tốn performance
+                        forceRender = true; // Force render để update timestamp
+                        StateHasChanged();
+                        lastStateChangeTime = now;
+                    }
+                }
             }
 
-            await Task.Delay(1000);
+            loopSw.Stop();
+            lastLoopTime = loopSw.ElapsedMilliseconds;
+            
+            // OPTIMIZED: Update thông tin chart vào service sau mỗi loop (chỉ Master chart query data)
+            if (isMasterChart)
+            {
+                ChartLoggingService.UpdateChartInfo(khsxId, lastQueryTime, lastTotalTime, lastLoopTime);
+            }
+            
+            // Track consecutive slow loops
+            if (loopSw.ElapsedMilliseconds > 1100)
+            {
+                consecutiveSlowLoops++;
+                
+                // OPTIMIZED: Nếu nhiều lần slow liên tiếp, tăng delay để giảm tải
+                if (consecutiveSlowLoops >= 3)
+                {
+                    var adaptiveDelay = DATA_REFRESH_INTERVAL_MS * 2; // Tăng gấp đôi khi slow
+                    try
+                    {
+                        await Task.Delay(adaptiveDelay, cancellationToken);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        break;
+                    }
+                    consecutiveSlowLoops = 0; // Reset counter
+                }
+                else
+                {
+                    try
+                    {
+                        await Task.Delay(DATA_REFRESH_INTERVAL_MS, cancellationToken);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                consecutiveSlowLoops = 0; // Reset counter on normal loop
+                try
+                {
+                    await Task.Delay(DATA_REFRESH_INTERVAL_MS, cancellationToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
+            }
         }
+        
+        ChartLoggingService.UnregisterChart(khsxId);
+    }
+    
+    // OPTIMIZED: Follower chart - chỉ monitor UI, không query data (tránh duplicate queries)
+    private async Task StartRecordChartFollower(CancellationToken cancellationToken)
+    {
+        var khsxId = TargetKHSX?.KHSXID.Value?.ToString() ?? "Unknown";
+        
+        // Load initial data một lần
+        await GetChartDatas(TargetKHSX.KHSXID.Value);
+        
+        while (!cancellationToken.IsCancellationRequested && !isDisposed)
+        {
+            // Check isCollapsed
+            if (TargetKHSX?.isCollapsed == true)
+            {
+                chartIsrunning = false;
+                ChartLoggingService.UnregisterChart(khsxId);
+                break;
+            }
+            
+            // OPTIMIZED: Follower check nếu Master đã stop - nếu có thể thì trở thành Master mới
+            var isKHSXchartRunning = SQLServerServices.GetAnyColValuebyAnyParameters_KHSX(
+                new Dictionary<string, object?>() { { Common.KHSXID, TargetKHSX.KHSXID.Value } }, 
+                Common.IsChartRunning).columnValues.FirstOrDefault();
+            
+            if (object.Equals(isKHSXchartRunning, 0))
+            {
+                // Master stopped - try become Master
+                (int updatesuccess, string error) = SQLServerServices.UpdateKHSXProperty(TargetKHSX.KHSXID.Value, Common.IsChartRunning, 1);
+                if (updatesuccess == 1)
+                {
+                    // Verify lock acquired
+                    var verifyRunning = SQLServerServices.GetAnyColValuebyAnyParameters_KHSX(
+                        new Dictionary<string, object?>() { { Common.KHSXID, TargetKHSX.KHSXID.Value } }, 
+                        Common.IsChartRunning).columnValues.FirstOrDefault();
+                    
+                    if (object.Equals(verifyRunning, 1))
+                    {
+                        // Promoted to Master!
+                        isMasterChart = true;
+                        
+                        // Update registration
+                        var maLSX = TargetKHSX?.MaLSX.Value?.ToString() ?? "Unknown";
+                        ChartLoggingService.RegisterChart(khsxId, maLSX, true);
+                        
+                        // Switch to Master loop
+                        chartCancellationTokenSource?.Cancel();
+                        chartCancellationTokenSource?.Dispose();
+                        chartCancellationTokenSource = new CancellationTokenSource();
+                        await StartRecordChart(chartCancellationTokenSource.Token);
+                        return; // Exit Follower loop
+                    }
+                }
+                
+                // Failed to become Master - stop
+                chartIsrunning = false;
+                ChartLoggingService.UnregisterChart(khsxId);
+                break;
+            }
+            
+            // OPTIMIZED: Follower chỉ update UI mỗi 3 giây (thay vì 1 giây) để giảm load
+            // Chỉ query data khi có thay đổi detected từ master (hoặc khi cần refresh UI)
+            updatedTime = DateTime.Now;
+            
+            var now = DateTime.Now;
+            if ((now - lastStateChangeTime).TotalMilliseconds >= 3000) // 3 giây cho follower
+            {
+                // Refresh data từ database (master đã update)
+                await GetChartDatas(TargetKHSX.KHSXID.Value);
+                ChartLoggingService.UpdateChartInfo(khsxId, lastQueryTime, lastTotalTime, 3000); // Loop time ~ 3s cho follower
+                
+                if (hasDataChanged)
+                {
+                    forceRender = true;
+                    StateHasChanged();
+                    lastStateChangeTime = now;
+                }
+            }
+            
+            try
+            {
+                await Task.Delay(3000, cancellationToken); // 3 giây cho follower
+            }
+            catch (OperationCanceledException)
+            {
+                break;
+            }
+        }
+        
+        ChartLoggingService.UnregisterChart(khsxId);
+    }
+    
+    // OPTIMIZED: Dispose để cleanup khi component bị destroy
+    public void Dispose()
+    {
+        if (isDisposed) return;
+        
+        isDisposed = true;
+        var khsxId = TargetKHSX?.KHSXID.Value?.ToString() ?? "Unknown";
+        
+        // Cancel while loop
+        if (chartCancellationTokenSource != null && !chartCancellationTokenSource.IsCancellationRequested)
+        {
+            chartCancellationTokenSource.Cancel();
+            
+            // OPTIMIZED: Chỉ Master chart release lock khi dispose
+            // Follower chart không release lock (vì không sở hữu lock)
+            if (isMasterChart && TargetKHSX?.KHSXID.Value != null)
+            {
+                try
+                {
+                    SQLServerServices.UpdateKHSXProperty(TargetKHSX.KHSXID.Value, Common.IsChartRunning, 0);
+                }
+                catch (Exception ex)
+                {
+                    // Silently handle error
+                }
+            }
+        }
+        
+        ChartLoggingService.UnregisterChart(khsxId);
+        chartCancellationTokenSource?.Dispose();
+        chartCancellationTokenSource = null;
     }
 
     private async Task UpdateChartRunningStatus(object value)
@@ -328,7 +849,10 @@
 
             if (object.Equals(value, 1))
             {
-                await StartRecordChart();
+                chartCancellationTokenSource?.Cancel(); // Cancel old loop if exists
+                chartCancellationTokenSource?.Dispose();
+                chartCancellationTokenSource = new CancellationTokenSource();
+                await StartRecordChart(chartCancellationTokenSource.Token);
             }
         }
     }
@@ -386,82 +910,94 @@
 
     private async Task GetChartDatas(object? khsxid = null)
     {
-        List<NguyenCongofKHSX> nguyencongs = new();
-
-        if (khsxid != null && !object.Equals(khsxid, 0))
+        var totalSw = System.Diagnostics.Stopwatch.StartNew();
+        var khsxIdStr = TargetKHSX?.KHSXID.Value?.ToString() ?? khsxid?.ToString() ?? "Unknown";
+        
+        try
         {
-            nguyencongs = SQLServerServices.GetlistCongdoans(khsxid, false);
-        }
+            // OPTIMIZED: Sử dụng DSachCongDoans từ TargetKHSX (đã được batch load)
+            var getCongDoansSw = System.Diagnostics.Stopwatch.StartNew();
+            List<NguyenCongofKHSX> nguyencongs = TargetKHSX?.DSachCongDoans ?? new();
+            getCongDoansSw.Stop();
 
-        DSachKetQuaGCs = await LoadAllDanhsachKQGCBase();
-
-        var groupedByNCID = DSachKetQuaGCs.GroupBy(k => k.NCID.Value)
-                                           .Select(g => new
-                                           {
-                                               NCID = g.Key,
-                                               TenCongDoan = SQLServerServices.GetNguyenCongByID(g.Key),
-                                               Items = g.ToList(),
-                                               SumOK = g.Sum(rs => int.TryParse(rs.SLOK.Value?.ToString(), out int ok) ? ok : 0),
-                                               SumNG = g.Sum(rs => int.TryParse(rs.SLNG.Value?.ToString(), out int ng) ? ng : 0)
-                                           });
-
-        OKdatas = new(); NGdatas = new();
-
-        foreach (var ncong in nguyencongs)
-        {
-            string tennc = ncong.TenCongDoan.Value?.ToString()?.Trim() ?? string.Empty;
-
-            if (!string.IsNullOrEmpty(tennc))
+            // Fallback: Chỉ load nếu không có data từ parameter (trường hợp mở trong tab mới)
+            if (!nguyencongs.Any() && khsxid != null && !object.Equals(khsxid, 0))
             {
-                var targetcdoan = groupedByNCID.FirstOrDefault(nc => nc.TenCongDoan.Trim() == tennc);
-
-                if (targetcdoan != null)
-                {
-                    OKdatas.Add(new ChartItem() { Property = targetcdoan.TenCongDoan, Value = targetcdoan.SumOK });
-                    NGdatas.Add(new ChartItem() { Property = targetcdoan.TenCongDoan, Value = targetcdoan.SumNG });
-                }
-                else
-                {
-                    OKdatas.Add(new ChartItem() { Property = tennc, Value = 0 });
-                    NGdatas.Add(new ChartItem() { Property = tennc, Value = 0 });
-                }
+                var fallbackSw = System.Diagnostics.Stopwatch.StartNew();
+                nguyencongs = SQLServerServices.GetlistCongdoans(khsxid, false);
+                fallbackSw.Stop();
             }
+
+            if (!nguyencongs.Any() || TargetKHSX?.KHSXID.Value == null)
+            {
+                OKdatas = new();
+                NGdatas = new();
+                return;
+            }
+
+            // OPTIMIZED: Dùng batch aggregation method từ V2 - SQL aggregation thay vì load tất cả rows
+            var preparePairsSw = System.Diagnostics.Stopwatch.StartNew();
+            var congDoanPairs = nguyencongs
+                .Where(cd => cd.NCID.Value != null)
+                .Select(cd => (cd.NCID.Value, TargetKHSX.KHSXID.Value))
+                .ToList();
+            preparePairsSw.Stop();
+
+            // OPTIMIZED: Chỉ 1 query với SQL aggregation - trả về vài grouped rows thay vì 43k+ rows!
+            var batchQuerySw = System.Diagnostics.Stopwatch.StartNew();
+            var batchResults = await SQLServerServicesV2.BatchGetResultsKQGCperCDoanAllLotsAsync(congDoanPairs);
+            batchQuerySw.Stop();
+
+            var buildDataSw = System.Diagnostics.Stopwatch.StartNew();
+            var newOKdatas = new List<ChartItem>();
+            var newNGdatas = new List<ChartItem>();
+
+            // OPTIMIZED: Match bằng NCID thay vì string comparison - chính xác và nhanh hơn
+            foreach (var ncong in nguyencongs)
+            {
+                var key = (ncong.NCID.Value, TargetKHSX.KHSXID.Value);
+                var (sumok, sumng, _) = batchResults.ContainsKey(key)
+                    ? batchResults[key]
+                    : (0, 0, 0);
+
+                // Sử dụng TenCongDoan từ ncong (đã có sẵn từ batch load)
+                string tennc = ncong.TenCongDoan.Value?.ToString()?.Trim() 
+                    ?? $"Công đoạn {nguyencongs.IndexOf(ncong) + 1}";
+
+                newOKdatas.Add(new ChartItem() { Property = tennc, Value = sumok });
+                newNGdatas.Add(new ChartItem() { Property = tennc, Value = sumng });
+            }
+            buildDataSw.Stop();
+            
+            // OPTIMIZED: Change detection - chỉ update data khi có thay đổi
+            hasDataChanged = HasDataChanged(newOKdatas, newNGdatas);
+            
+            if (hasDataChanged)
+            {
+                OKdatas = newOKdatas;
+                NGdatas = newNGdatas;
+                // Lưu bản copy để so sánh lần sau
+                previousOKdatas = newOKdatas.Select(item => new ChartItem { Property = item.Property, Value = item.Value }).ToList();
+                previousNGdatas = newNGdatas.Select(item => new ChartItem { Property = item.Property, Value = item.Value }).ToList();
+            }
+            
+            totalSw.Stop();
+            
+            // Update performance summary for UI
+            lastQueryTime = batchQuerySw.ElapsedMilliseconds;
+            lastTotalTime = totalSw.ElapsedMilliseconds;
+            
+        }
+        catch (Exception ex)
+        {
+            totalSw.Stop();
+            OKdatas = new();
+            NGdatas = new();
         }
     }
 
-    // Load all danh sach KQGC base
-    private async Task<List<KetQuaGC>> LoadAllDanhsachKQGCBase()
-    {
-        return await Task.Run(() =>
-        {
-            List<KetQuaGC> ketQuaGCs = new();
-
-            if (isLoadingKQGCs == false)
-            {
-                isLoadingKQGCs = true;
-
-                Dictionary<string, object?> parameters = new();
-
-                parameters.Add($"{KetQuaGC.KQGCDBName.KHSXID}", TargetKHSX.KHSXID.Value);
-
-                (var kqgcs, string resultMess) = SQLServerServices.GetListKetQuaGC(parameters, false);
-
-                foreach (var ketQuaGC in kqgcs)
-                {
-                    if (DateTime.TryParse(ketQuaGC.SubMitDay.Value?.ToString(), out DateTime submitday))
-                    {
-                        ketQuaGC.SubMitDay.Value = submitday.Date.ToShortDateString();
-                    }
-                }
-
-                ketQuaGCs = kqgcs; // gan cho ds hien thi
-
-                isLoadingKQGCs = false;
-            }
-
-            return ketQuaGCs;
-        });
-    }
+    // REMOVED: Không cần load tất cả KQGC rows nữa - đã dùng SQL aggregation trong GetChartDatas()
+    // Method này đã được tối ưu và tích hợp vào GetChartDatas() với BatchGetResultsKQGCperCDoanAllLotsAsync
 
     private async Task OpenChartTracking()
     {
